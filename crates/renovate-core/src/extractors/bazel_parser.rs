@@ -610,14 +610,14 @@ pub fn update_code(input: &str, path: &[PathKey], replacement: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "returns input for invalid" — modules/manager/bazel/common.spec.ts line 5
+    // Ported: "returns input for invalid" — lib/modules/manager/bazel/common.spec.ts line 5
     #[test]
     fn update_code_returns_input_for_invalid() {
         let input = "!@#";
         assert_eq!(update_code(input, &[PathKey::Index(0)], "foobar"), input);
     }
 
-    // Ported: "replaces whole rule" — modules/manager/bazel/common.spec.ts line 11
+    // Ported: "replaces whole rule" — lib/modules/manager/bazel/common.spec.ts line 11
     #[test]
     fn update_code_replaces_whole_rule() {
         let input = r#"git_repository(name = "foo")"#;
@@ -625,7 +625,7 @@ mod tests {
         assert_eq!(output, "abcde");
     }
 
-    // Ported: "replaces rule key" — modules/manager/bazel/common.spec.ts line 17
+    // Ported: "replaces rule key" — lib/modules/manager/bazel/common.spec.ts line 17
     #[test]
     fn update_code_replaces_rule_key() {
         let input = r#"git_repository(name = "foo")"#;
@@ -637,7 +637,7 @@ mod tests {
         assert_eq!(output, r#"git_repository(name = "bar")"#);
     }
 
-    // Ported: "returns input on wrong index" — modules/manager/bazel/common.spec.ts line 23
+    // Ported: "returns input on wrong index" — lib/modules/manager/bazel/common.spec.ts line 23
     #[test]
     fn update_code_wrong_index() {
         let input = r#"git_repository(name = "foo")"#;
@@ -649,7 +649,7 @@ mod tests {
         assert_eq!(output, input);
     }
 
-    // Ported: "returns input on wrong key" — modules/manager/bazel/common.spec.ts line 29
+    // Ported: "returns input on wrong key" — lib/modules/manager/bazel/common.spec.ts line 29
     #[test]
     fn update_code_wrong_key() {
         let input = r#"git_repository(name = "foo")"#;
@@ -661,7 +661,7 @@ mod tests {
         assert_eq!(output, input);
     }
 
-    // Ported: "replaces array values" — modules/manager/bazel/common.spec.ts line 35
+    // Ported: "replaces array values" — lib/modules/manager/bazel/common.spec.ts line 35
     #[test]
     fn update_code_replaces_array_value() {
         let input = r#"git_repository(name = "foo", deps = ["bar", "baz", "qux"])"#;
@@ -680,7 +680,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates using function" — modules/manager/bazel/common.spec.ts line 43
+    // Ported: "updates using function" — lib/modules/manager/bazel/common.spec.ts line 43
     // Note: Rust doesn't support function values the same way; tested as uppercase replacement
     #[test]
     fn update_code_updater_function_equivalent() {
@@ -699,7 +699,7 @@ mod tests {
     }
 }
 
-// Ported: "parses rules input" — modules/manager/bazel/parser.spec.ts line 6
+// Ported: "parses rules input" — lib/modules/manager/bazel/parser.spec.ts line 6
 #[test]
 fn parse_rules_input_basic() {
     let input = "go_repository(name = \"foo\")\nmaybe(go_repository, name = \"bar\", deps = [\"baz\", \"qux\"])\n_go_repository(name = \"quux\")\nmaybe(_go_repository, name = \"corge\", deps = [\"grault\", \"garply\"])\n";
@@ -738,7 +738,7 @@ fn parse_rules_input_basic() {
     assert_eq!(res[3].children["rule"].value(), "_go_repository");
 }
 
-// Ported: "parses multiple archives" — modules/manager/bazel/parser.spec.ts line 81
+// Ported: "parses multiple archives" — lib/modules/manager/bazel/parser.spec.ts line 81
 #[test]
 fn parse_multiple_archives() {
     let input = concat!(
@@ -787,7 +787,7 @@ fn parse_multiple_archives() {
     }
 }
 
-// Ported: "parses http_archive" — modules/manager/bazel/parser.spec.ts line 156
+// Ported: "parses http_archive" — lib/modules/manager/bazel/parser.spec.ts line 156
 #[test]
 fn parse_http_archive() {
     let input = concat!(
@@ -811,7 +811,7 @@ fn parse_http_archive() {
     );
 }
 
-// Ported: "parses http_archive with prefixes and multiple urls" — modules/manager/bazel/parser.spec.ts line 195
+// Ported: "parses http_archive with prefixes and multiple urls" — lib/modules/manager/bazel/parser.spec.ts line 195
 #[test]
 fn parse_http_archive_multiple_urls() {
     let input = concat!(
@@ -853,7 +853,7 @@ fn parse_http_archive_multiple_urls() {
     }
 }
 
-// Ported: "parses Maven" — modules/manager/bazel/parser.spec.ts line 254
+// Ported: "parses Maven" — lib/modules/manager/bazel/parser.spec.ts line 254
 #[test]
 fn parse_maven() {
     let input = concat!(

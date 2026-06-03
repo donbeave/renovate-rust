@@ -763,7 +763,7 @@ mod tests {
 
     // ── [tool.poetry.dependencies] ────────────────────────────────────────────
 
-    // Ported: "extracts multiple dependencies" — poetry/extract.spec.ts line 51
+    // Ported: "extracts multiple dependencies" — lib/modules/manager/poetry/extract.spec.ts line 51
     #[test]
     fn extracts_string_deps() {
         let content = r#"
@@ -794,7 +794,7 @@ boto3 = "*"
         );
     }
 
-    // Ported: "extracts multiple dependencies (with dep = {version = \"1.2.3\"} case)" — poetry/extract.spec.ts line 60
+    // Ported: "extracts multiple dependencies (with dep = {version = \"1.2.3\"} case)" — lib/modules/manager/poetry/extract.spec.ts line 60
     #[test]
     fn extracts_table_deps() {
         let content = r#"
@@ -811,7 +811,7 @@ mypackage = {version = "^1.0", extras = ["security"]}
         assert_eq!(mypackage.current_value, "^1.0");
     }
 
-    // Ported: "skips git dependencies" — poetry/extract.spec.ts line 363
+    // Ported: "skips git dependencies" — lib/modules/manager/poetry/extract.spec.ts line 363
     #[test]
     fn git_source_skipped() {
         let content = r#"
@@ -822,7 +822,7 @@ mylib = {git = "https://github.com/example/mylib.git"}
         assert_eq!(deps[0].skip_reason, Some(PoetrySkipReason::GitSource));
     }
 
-    // Ported: "skips path dependencies" — poetry/extract.spec.ts line 388
+    // Ported: "skips path dependencies" — lib/modules/manager/poetry/extract.spec.ts line 388
     #[test]
     fn path_source_skipped() {
         let content = r#"
@@ -846,7 +846,7 @@ mypkg = {url = "https://example.com/mypkg-1.0.tar.gz"}
 
     // ── [tool.poetry.dev-dependencies] ───────────────────────────────────────
 
-    // Ported: "extracts mixed versioning types" — poetry/extract.spec.ts line 118
+    // Ported: "extracts mixed versioning types" — lib/modules/manager/poetry/extract.spec.ts line 118
     #[test]
     fn extracts_dev_dependencies() {
         let content = r#"
@@ -868,7 +868,7 @@ black = "^23.0"
 
     // ── [tool.poetry.group.*.dependencies] ───────────────────────────────────
 
-    // Ported: "extracts dependencies from dependency groups" — poetry/extract.spec.ts line 160
+    // Ported: "extracts dependencies from dependency groups" — lib/modules/manager/poetry/extract.spec.ts line 160
     #[test]
     fn extracts_group_dependencies() {
         let content = r#"
@@ -894,7 +894,7 @@ ruff = "^0.1.0"
 
     // ── Name normalization ────────────────────────────────────────────────────
 
-    // Ported: "extracts mixed versioning types" — manager/poetry/extract.spec.ts line 118
+    // Ported: "extracts mixed versioning types" — lib/modules/manager/poetry/extract.spec.ts line 118
     #[test]
     fn name_normalized_per_pep503() {
         let content = r#"
@@ -907,7 +907,7 @@ Typing_Extensions = "^4.0"
         assert!(deps.iter().any(|d| d.name == "typing-extensions"));
     }
 
-    // Ported: "does not include registry url for dependency python" — poetry/extract.spec.ts line 413
+    // Ported: "does not include registry url for dependency python" — lib/modules/manager/poetry/extract.spec.ts line 413
     #[test]
     fn python_dependency_has_no_registry_urls() {
         let content = r#"
@@ -929,7 +929,7 @@ priority = "explicit"
         assert_eq!(python.source_name, None);
     }
 
-    // Ported: "can parse empty registries" — poetry/extract.spec.ts line 436
+    // Ported: "can parse empty registries" — lib/modules/manager/poetry/extract.spec.ts line 436
     #[test]
     fn empty_registry_list_returns_no_registry_urls() {
         let content = r#"
@@ -945,7 +945,7 @@ dep0 = "0.0.0"
         assert!(package_file.registry_urls.is_empty());
     }
 
-    // Ported: "can parse missing registries" — poetry/extract.spec.ts line 441
+    // Ported: "can parse missing registries" — lib/modules/manager/poetry/extract.spec.ts line 441
     #[test]
     fn missing_registry_list_returns_no_registry_urls() {
         let content = r#"
@@ -960,7 +960,7 @@ dep0 = "0.0.0"
         assert!(package_file.registry_urls.is_empty());
     }
 
-    // Ported: "extracts registries" — poetry/extract.spec.ts line 446
+    // Ported: "extracts registries" — lib/modules/manager/poetry/extract.spec.ts line 446
     #[test]
     fn extracts_registry_urls() {
         let content = r#"
@@ -986,7 +986,7 @@ url = "https://bar.baz/+simple/"
         );
     }
 
-    // Ported: "dedupes registries" — poetry/extract.spec.ts line 455
+    // Ported: "dedupes registries" — lib/modules/manager/poetry/extract.spec.ts line 455
     #[test]
     fn dedupes_registry_urls() {
         let content = r#"
@@ -1014,7 +1014,7 @@ name = "baz"
         );
     }
 
-    // Ported: "source with priority=\"default\" and implicit PyPI priority=\"primary\"" — poetry/extract.spec.ts line 463
+    // Ported: "source with priority=\"default\" and implicit PyPI priority=\"primary\"" — lib/modules/manager/poetry/extract.spec.ts line 463
     #[test]
     fn source_default_with_implicit_pypi_primary() {
         let content = r#"
@@ -1039,7 +1039,7 @@ name = "PyPI"
         );
     }
 
-    // Ported: "source with implicit priority and PyPI with priority=\"explicit\"" — poetry/extract.spec.ts line 483
+    // Ported: "source with implicit priority and PyPI with priority=\"explicit\"" — lib/modules/manager/poetry/extract.spec.ts line 483
     #[test]
     fn source_with_explicit_pypi_suppresses_implicit_pypi_url() {
         let content = r#"
@@ -1061,7 +1061,7 @@ priority = "explicit"
         );
     }
 
-    // Ported: "supports dependencies with explicit source" — poetry/extract.spec.ts line 500
+    // Ported: "supports dependencies with explicit source" — lib/modules/manager/poetry/extract.spec.ts line 500
     #[test]
     fn dependencies_with_explicit_source_get_registry_urls() {
         let content = r#"
@@ -1110,7 +1110,7 @@ priority = "explicit"
         );
     }
 
-    // Ported: "parses package file with template" — poetry/extract.spec.ts line 535
+    // Ported: "parses package file with template" — lib/modules/manager/poetry/extract.spec.ts line 535
     #[test]
     fn parses_package_file_with_template_lines() {
         let content = r#"
@@ -1135,7 +1135,7 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "extract dependencies from the project section" — poetry/extract.spec.ts line 555
+    // Ported: "extract dependencies from the project section" — lib/modules/manager/poetry/extract.spec.ts line 555
     #[test]
     fn extracts_poetry_v2_project_section_dependencies() {
         let content = r#"
@@ -1176,7 +1176,7 @@ build-backend = "poetry.core.masonry.api"
         assert_eq!(python_decouple.group_name.as_deref(), Some("decouple"));
     }
 
-    // Ported: "extracts dependencies from pep735 dependency-groups" — poetry/extract.spec.ts line 616
+    // Ported: "extracts dependencies from pep735 dependency-groups" — lib/modules/manager/poetry/extract.spec.ts line 616
     #[test]
     fn extracts_pep735_dependency_groups() {
         let content = r#"
@@ -1206,7 +1206,7 @@ all = [{include-group = "typing"}, {include-group = "coverage"}, "click==8.1.7"]
             && dep.group_name.as_deref() == Some("all")));
     }
 
-    // Ported: "enriches pep621/pep735 dependencies with poetry managerData" — poetry/extract.spec.ts line 663
+    // Ported: "enriches pep621/pep735 dependencies with poetry managerData" — lib/modules/manager/poetry/extract.spec.ts line 663
     #[test]
     fn pep621_and_pep735_deps_are_enriched_from_poetry_metadata() {
         let content = r#"
@@ -1296,7 +1296,7 @@ url = "https://example.com/artifactory/api/pypi/pypi/simple"
 
     // ── Fixture: pyproject.1.toml ─────────────────────────────────────────────
 
-    // Ported: "extracts multiple dependencies" — poetry/extract.spec.ts line 51
+    // Ported: "extracts multiple dependencies" — lib/modules/manager/poetry/extract.spec.ts line 51
     #[test]
     fn poetry_fixture_1() {
         let content = r#"
@@ -1333,7 +1333,7 @@ dev_dep2 = "Invalid version."
 
     // ── [build-system].requires ──────────────────────────────────────────────
 
-    // Ported: "extracts build-system.requires dependencies" — poetry/extract.spec.ts line 77
+    // Ported: "extracts build-system.requires dependencies" — lib/modules/manager/poetry/extract.spec.ts line 77
     #[test]
     fn extracts_build_system_requires() {
         let content = r#"
@@ -1369,7 +1369,7 @@ abc = "^5.5"
         assert_eq!(regular[0].name, "abc");
     }
 
-    // Ported: "handles multiple constraint dependencies" — poetry/extract.spec.ts line 71
+    // Ported: "handles multiple constraint dependencies" — lib/modules/manager/poetry/extract.spec.ts line 71
     #[test]
     fn multiple_constraint_dependency_is_skipped() {
         let content = r#"
@@ -1410,7 +1410,7 @@ requires = ["poetry>=1.1.2", "setuptools", "poetry-dynamic-versioning"]
         }));
     }
 
-    // Ported: "resolves lockedVersions from the lockfile" — poetry/extract.spec.ts line 197
+    // Ported: "resolves lockedVersions from the lockfile" — lib/modules/manager/poetry/extract.spec.ts line 197
     #[test]
     fn lockfile_versions_are_applied() {
         let content = r#"
@@ -1443,7 +1443,7 @@ version = "1.20.7"
         assert_eq!(python.locked_version, None);
     }
 
-    // Ported: "can parse TOML v1 heterogeneous arrays" — poetry/extract.spec.ts line 112
+    // Ported: "can parse TOML v1 heterogeneous arrays" — lib/modules/manager/poetry/extract.spec.ts line 112
     #[test]
     fn toml_v1_heterogeneous_arrays_are_tolerated() {
         let content = r#"
@@ -1481,7 +1481,7 @@ dep2 = "^0.6.0"
 
     // ── Empty / no poetry section ─────────────────────────────────────────────
 
-    // Ported: "returns null for parsed file without poetry section" — poetry/extract.spec.ts line 47
+    // Ported: "returns null for parsed file without poetry section" — lib/modules/manager/poetry/extract.spec.ts line 47
     #[test]
     fn no_poetry_section_returns_empty() {
         let content = "[project]\nname = \"myapp\"\n";
@@ -1489,7 +1489,7 @@ dep2 = "^0.6.0"
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for empty" — poetry/extract.spec.ts line 43
+    // Ported: "returns null for empty" — lib/modules/manager/poetry/extract.spec.ts line 43
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract_ok("");
@@ -1499,7 +1499,7 @@ dep2 = "^0.6.0"
         assert!(result.is_err() || result.unwrap().is_empty());
     }
 
-    // Ported: "handles case with no dependencies" — poetry/extract.spec.ts line 66
+    // Ported: "handles case with no dependencies" — lib/modules/manager/poetry/extract.spec.ts line 66
     #[test]
     fn poetry_section_with_no_deps_returns_empty() {
         let content = r#"
@@ -1511,7 +1511,7 @@ version = "1.0.0"
         assert!(deps.is_empty());
     }
 
-    // Ported: "skips git dependencies with version" — poetry/extract.spec.ts line 375
+    // Ported: "skips git dependencies with version" — lib/modules/manager/poetry/extract.spec.ts line 375
     #[test]
     fn git_dep_with_version_shows_version() {
         let content = r#"[tool.poetry.dependencies]
@@ -1525,10 +1525,10 @@ werkzeug = ">=0.14"
         assert_eq!(flask.skip_reason, Some(PoetrySkipReason::GitSource));
     }
 
-    // Ported: "parses git dependencies long commit hashes on http urls" — poetry/extract.spec.ts line 209
-    // Ported: "parses git dependencies short commit hashes on http urls" — poetry/extract.spec.ts line 234
-    // Ported: "parses git dependencies long commit hashes on ssh urls" — poetry/extract.spec.ts line 259
-    // Ported: "parses git dependencies long commit hashes on http urls with branch marker" — poetry/extract.spec.ts line 284
+    // Ported: "parses git dependencies long commit hashes on http urls" — lib/modules/manager/poetry/extract.spec.ts line 209
+    // Ported: "parses git dependencies short commit hashes on http urls" — lib/modules/manager/poetry/extract.spec.ts line 234
+    // Ported: "parses git dependencies long commit hashes on ssh urls" — lib/modules/manager/poetry/extract.spec.ts line 259
+    // Ported: "parses git dependencies long commit hashes on http urls with branch marker" — lib/modules/manager/poetry/extract.spec.ts line 284
     #[test]
     fn git_dependencies_with_revisions_are_extracted() {
         let content = r#"[tool.poetry.dependencies]
@@ -1578,9 +1578,9 @@ dep = "^2.0"
         assert_eq!(dep.current_value, "^2.0");
     }
 
-    // Ported: "parses github dependencies tags on ssh urls" — poetry/extract.spec.ts line 310
-    // Ported: "parses github dependencies tags on http urls" — poetry/extract.spec.ts line 325
-    // Ported: "parses git dependencies with tags that are not on GitHub" — poetry/extract.spec.ts line 340
+    // Ported: "parses github dependencies tags on ssh urls" — lib/modules/manager/poetry/extract.spec.ts line 310
+    // Ported: "parses github dependencies tags on http urls" — lib/modules/manager/poetry/extract.spec.ts line 325
+    // Ported: "parses git dependencies with tags that are not on GitHub" — lib/modules/manager/poetry/extract.spec.ts line 340
     #[test]
     fn git_dependencies_with_tags_are_extracted() {
         let content = r#"[tool.poetry.dependencies]
@@ -1619,7 +1619,7 @@ werkzeug = ">=0.14"
         assert_eq!(deps.len(), 5);
     }
 
-    // Ported: "skips path dependencies with version" — poetry/extract.spec.ts line 400
+    // Ported: "skips path dependencies with version" — lib/modules/manager/poetry/extract.spec.ts line 400
     #[test]
     fn path_dep_with_version_shows_version() {
         let content = r#"[tool.poetry.dependencies]
@@ -1635,7 +1635,7 @@ werkzeug = ">=0.14"
 
     const LOCK_CONTENT: &str = include_str!("../../tests/fixtures/poetry/pyproject.11.toml.lock");
 
-    // Ported: "detects already updated" — modules/manager/poetry/update-locked.spec.ts line 11
+    // Ported: "detects already updated" — lib/modules/manager/poetry/update-locked.spec.ts line 11
     #[test]
     fn poetry_update_locked_detects_already_updated() {
         let result =
@@ -1643,7 +1643,7 @@ werkzeug = ">=0.14"
         assert_eq!(result.as_str(), "already-updated");
     }
 
-    // Ported: "returns unsupported" — modules/manager/poetry/update-locked.spec.ts line 23
+    // Ported: "returns unsupported" — lib/modules/manager/poetry/update-locked.spec.ts line 23
     #[test]
     fn poetry_update_locked_returns_unsupported() {
         let result =
@@ -1651,7 +1651,7 @@ werkzeug = ">=0.14"
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported for mising locked content" — modules/manager/poetry/update-locked.spec.ts line 35
+    // Ported: "returns unsupported for mising locked content" — lib/modules/manager/poetry/update-locked.spec.ts line 35
     #[test]
     fn poetry_update_locked_unsupported_for_missing_content() {
         let result = update_locked_poetry_dependency(Some("urllib3"), Some("1.26.4"), None);

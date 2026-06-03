@@ -164,7 +164,7 @@ pub fn is_single_version(version: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isVersion(\"$version\") === $expected" — versioning/loose/index.spec.ts line 4
+    // Ported: "isVersion(\"$version\") === $expected" — lib/modules/versioning/loose/index.spec.ts line 4
     #[test]
     fn is_version_matches_renovate_loose_spec() {
         let cases = [("1.1", true), ("1.3.RC2", true), ("2.1-rc2", true)];
@@ -173,7 +173,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/loose/index.spec.ts line 13
+    // Ported: "isValid(\"$version\") === $expected" — lib/modules/versioning/loose/index.spec.ts line 13
     #[test]
     fn is_valid_matches_renovate_loose_spec() {
         let cases = [
@@ -205,7 +205,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals(\"$a\", \"$b\") === $expected" — versioning/loose/index.spec.ts line 41
+    // Ported: "equals(\"$a\", \"$b\") === $expected" — lib/modules/versioning/loose/index.spec.ts line 41
     #[test]
     fn equals_matches_renovate_loose_spec() {
         let cases = [
@@ -220,7 +220,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/loose/index.spec.ts line 52
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — lib/modules/versioning/loose/index.spec.ts line 52
     #[test]
     fn is_greater_than_matches_renovate_loose_spec() {
         let cases = [
@@ -256,13 +256,13 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible(\"$version\") === $expected" — versioning/loose/index.spec.ts line 72
+    // Ported: "isCompatible(\"$version\") === $expected" — lib/modules/versioning/loose/index.spec.ts line 72
     #[test]
     fn is_compatible_matches_renovate_loose_spec() {
         assert!(is_compatible("1.2.0"));
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/loose/index.spec.ts line 79
+    // Ported: "isSingleVersion(\"$version\") === $expected" — lib/modules/versioning/loose/index.spec.ts line 79
     #[test]
     fn is_single_version_matches_renovate_loose_spec() {
         assert!(is_single_version("1.2.0"));

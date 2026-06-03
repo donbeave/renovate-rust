@@ -1604,7 +1604,7 @@ mod tests {
 
     // ── trim_maven_xml — modules/datasource/maven/schema.spec.ts ──
 
-    // Ported: "trims release metadata to the fields used by Renovate" — modules/datasource/maven/schema.spec.ts line 6
+    // Ported: "trims release metadata to the fields used by Renovate" — lib/modules/datasource/maven/schema.spec.ts line 6
     #[test]
     fn trims_release_metadata() {
         let input = r#"<?xml version="1.0" encoding="UTF-8"?>
@@ -1647,7 +1647,7 @@ mod tests {
         assert_eq!(trim_maven_xml(input), expected);
     }
 
-    // Ported: "trims snapshot metadata to the fields used by Renovate" — modules/datasource/maven/schema.spec.ts line 30
+    // Ported: "trims snapshot metadata to the fields used by Renovate" — lib/modules/datasource/maven/schema.spec.ts line 30
     #[test]
     fn trims_snapshot_metadata() {
         let input = r#"<?xml version="1.0" encoding="UTF-8"?><metadata>
@@ -1674,7 +1674,7 @@ mod tests {
         assert_eq!(trim_maven_xml(input), expected);
     }
 
-    // Ported: "trims pom files to the fields used by Renovate" — modules/datasource/maven/schema.spec.ts line 47
+    // Ported: "trims pom files to the fields used by Renovate" — lib/modules/datasource/maven/schema.spec.ts line 47
     #[test]
     fn trims_pom_files() {
         let input = r#"<project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -1727,7 +1727,7 @@ mod tests {
         assert_eq!(trim_maven_xml(input), expected);
     }
 
-    // Ported: "preserves empty relocation tags" — modules/datasource/maven/schema.spec.ts line 99
+    // Ported: "preserves empty relocation tags" — lib/modules/datasource/maven/schema.spec.ts line 99
     #[test]
     fn preserves_empty_relocation_tags() {
         let input = r#"<project>
@@ -1746,35 +1746,35 @@ mod tests {
         assert_eq!(trim_maven_xml(input), expected);
     }
 
-    // Ported: "passes through unknown XML unchanged" — modules/datasource/maven/schema.spec.ts line 120
+    // Ported: "passes through unknown XML unchanged" — lib/modules/datasource/maven/schema.spec.ts line 120
     #[test]
     fn passes_through_unknown_xml() {
         let input = "<root><value>test</value></root>";
         assert_eq!(trim_maven_xml(input), input);
     }
 
-    // Ported: "passes through prefixed pom XML unchanged" — modules/datasource/maven/schema.spec.ts line 125
+    // Ported: "passes through prefixed pom XML unchanged" — lib/modules/datasource/maven/schema.spec.ts line 125
     #[test]
     fn passes_through_prefixed_pom_xml() {
         let input = r#"<m:project xmlns:m="http://maven.apache.org/POM/4.0.0"><m:url>https://package.example.org/about</m:url></m:project>"#;
         assert_eq!(trim_maven_xml(input), input);
     }
 
-    // Ported: "passes through pom XML when no retained fields are present" — modules/datasource/maven/schema.spec.ts line 131
+    // Ported: "passes through pom XML when no retained fields are present" — lib/modules/datasource/maven/schema.spec.ts line 131
     #[test]
     fn passes_through_pom_when_no_retained_fields() {
         let input = "<project><artifactId>package</artifactId></project>";
         assert_eq!(trim_maven_xml(input), input);
     }
 
-    // Ported: "passes through metadata XML when no retained fields are present" — modules/datasource/maven/schema.spec.ts line 136
+    // Ported: "passes through metadata XML when no retained fields are present" — lib/modules/datasource/maven/schema.spec.ts line 136
     #[test]
     fn passes_through_metadata_when_no_retained_fields() {
         let input = "<metadata><groupId>org.example</groupId></metadata>";
         assert_eq!(trim_maven_xml(input), input);
     }
 
-    // Ported: "passes through invalid XML unchanged" — modules/datasource/maven/schema.spec.ts line 141
+    // Ported: "passes through invalid XML unchanged" — lib/modules/datasource/maven/schema.spec.ts line 141
     #[test]
     fn passes_through_invalid_xml() {
         let input = "<project>";
@@ -1815,7 +1815,7 @@ mod tests {
         assert!(dep_name.split_once(':').is_none());
     }
 
-    // Ported: "%s => %s" — modules/datasource/maven/common.spec.ts line 5
+    // Ported: "%s => %s" — lib/modules/datasource/maven/common.spec.ts line 5
     #[test]
     fn is_maven_central_host_based_matching() {
         assert!(is_maven_central("https://repo.maven.apache.org/maven2"));
@@ -1828,7 +1828,7 @@ mod tests {
         assert!(!is_maven_central("https://some-artifactory.local/maven2"));
     }
 
-    // Ported: "returns releases" — modules/datasource/maven/index.spec.ts line 190
+    // Ported: "returns releases" — lib/modules/datasource/maven/index.spec.ts line 190
     #[tokio::test]
     async fn fetch_releases_returns_versions() {
         let server = MockServer::start().await;
@@ -1857,7 +1857,7 @@ mod tests {
         assert_eq!(releases.releases, vec!["1.0.0", "1.1.0", "2.0.0"]);
     }
 
-    // Ported: "returns null when metadata is not found" — modules/datasource/maven/index.spec.ts line 123
+    // Ported: "returns null when metadata is not found" — lib/modules/datasource/maven/index.spec.ts line 123
     #[tokio::test]
     async fn fetch_releases_404_returns_none() {
         let server = MockServer::start().await;
@@ -1874,7 +1874,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "ignores unsupported protocols" — modules/datasource/maven/index.spec.ts line 334
+    // Ported: "ignores unsupported protocols" — lib/modules/datasource/maven/index.spec.ts line 334
     #[tokio::test]
     async fn fetch_releases_unsupported_protocol_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -1888,7 +1888,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "skips registry with invalid XML" — modules/datasource/maven/index.spec.ts line 363
+    // Ported: "skips registry with invalid XML" — lib/modules/datasource/maven/index.spec.ts line 363
     #[tokio::test]
     async fn fetch_releases_invalid_xml_returns_none() {
         let server = MockServer::start().await;
@@ -1914,7 +1914,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "falls back to next registry url" — modules/datasource/maven/index.spec.ts line 273
+    // Ported: "falls back to next registry url" — lib/modules/datasource/maven/index.spec.ts line 273
     #[tokio::test]
     async fn fetch_releases_falls_back_to_next_registry() {
         let server1 = MockServer::start().await;
@@ -1952,7 +1952,7 @@ mod tests {
         assert_eq!(result.unwrap().releases, vec!["1.0.0"]);
     }
 
-    // Ported: "merges releases from multiple registries" — modules/datasource/maven/index.spec.ts line 304
+    // Ported: "merges releases from multiple registries" — lib/modules/datasource/maven/index.spec.ts line 304
     #[tokio::test]
     async fn fetch_releases_merges_from_multiple_registries() {
         let server1 = MockServer::start().await;
@@ -2004,7 +2004,7 @@ mod tests {
         assert_eq!(releases.len(), 3);
     }
 
-    // Ported: "returns releases when only snapshot" — modules/datasource/maven/index.spec.ts line 198
+    // Ported: "returns releases when only snapshot" — lib/modules/datasource/maven/index.spec.ts line 198
     #[tokio::test]
     async fn fetch_releases_snapshot_only() {
         let server = MockServer::start().await;
@@ -2043,7 +2043,7 @@ mod tests {
         assert_eq!(r.tags.get("release"), Some(&"1.0.3-SNAPSHOT".to_owned()));
     }
 
-    // Ported: "handles invalid snapshot" — modules/datasource/maven/index.spec.ts line 229
+    // Ported: "handles invalid snapshot" — lib/modules/datasource/maven/index.spec.ts line 229
     #[tokio::test]
     async fn fetch_releases_invalid_snapshot_returns_none() {
         let server = MockServer::start().await;
@@ -2076,7 +2076,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns releases from custom repository" — modules/datasource/maven/index.spec.ts line 265
+    // Ported: "returns releases from custom repository" — lib/modules/datasource/maven/index.spec.ts line 265
     #[tokio::test]
     async fn fetch_releases_from_custom_repository() {
         let server = MockServer::start().await;
@@ -2102,7 +2102,7 @@ mod tests {
         assert_eq!(result.unwrap().releases, vec!["1.0.0", "1.1.0"]);
     }
 
-    // Ported: "skips registry with invalid metadata structure" — modules/datasource/maven/index.spec.ts line 347
+    // Ported: "skips registry with invalid metadata structure" — lib/modules/datasource/maven/index.spec.ts line 347
     #[tokio::test]
     async fn fetch_releases_invalid_metadata_structure_returns_none() {
         let server = MockServer::start().await;
@@ -2122,7 +2122,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles optional slash at the end of registry url" — modules/datasource/maven/index.spec.ts line 379
+    // Ported: "handles optional slash at the end of registry url" — lib/modules/datasource/maven/index.spec.ts line 379
     #[tokio::test]
     async fn fetch_releases_handles_trailing_slash() {
         let server = MockServer::start().await;
@@ -2148,7 +2148,7 @@ mod tests {
         assert_eq!(result.unwrap().releases, vec!["1.0.0"]);
     }
 
-    // Ported: "returns null for 404" — modules/datasource/maven/index.spec.ts line 795
+    // Ported: "returns null for 404" — lib/modules/datasource/maven/index.spec.ts line 795
     #[tokio::test]
     async fn fetch_releases_404_on_pom_returns_none() {
         let server = MockServer::start().await;
@@ -2181,7 +2181,7 @@ mod tests {
         assert_eq!(result.unwrap().releases, vec!["1.0.0"]);
     }
 
-    // Ported: "returns null for invalid registryUrls" — modules/datasource/maven/index.spec.ts line 389
+    // Ported: "returns null for invalid registryUrls" — lib/modules/datasource/maven/index.spec.ts line 389
     #[tokio::test]
     async fn fetch_releases_invalid_registry_url_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -2189,7 +2189,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "with only groupId present" — modules/datasource/maven/index.spec.ts line 408
+    // Ported: "with only groupId present" — lib/modules/datasource/maven/index.spec.ts line 408
     #[test]
     fn parse_pom_info_only_group_id() {
         let xml = r#"<project>
@@ -2200,7 +2200,7 @@ mod tests {
         assert_eq!(info.source_url, None);
     }
 
-    // Ported: "with only artifactId present" — modules/datasource/maven/index.spec.ts line 428
+    // Ported: "with only artifactId present" — lib/modules/datasource/maven/index.spec.ts line 428
     #[test]
     fn parse_pom_info_only_artifact_id() {
         let xml = r#"<project>
@@ -2211,7 +2211,7 @@ mod tests {
         assert_eq!(info.source_url, None);
     }
 
-    // Ported: "should get homepage and source from own pom" — modules/datasource/maven/index.spec.ts line 736
+    // Ported: "should get homepage and source from own pom" — lib/modules/datasource/maven/index.spec.ts line 736
     #[test]
     fn parse_pom_info_homepage_and_source_from_own_pom() {
         let xml = r#"<project>
@@ -2228,7 +2228,7 @@ mod tests {
         );
     }
 
-    // Ported: "should be able to detect git@github.com/child-scm as valid sourceUrl" — modules/datasource/maven/index.spec.ts line 765
+    // Ported: "should be able to detect git@github.com/child-scm as valid sourceUrl" — lib/modules/datasource/maven/index.spec.ts line 765
     #[test]
     fn process_scm_url_git_at_github_slash() {
         assert_eq!(
@@ -2237,7 +2237,7 @@ mod tests {
         );
     }
 
-    // Ported: "should be able to detect git://@github.com/child-scm as valid sourceUrl" — modules/datasource/maven/index.spec.ts line 779
+    // Ported: "should be able to detect git://@github.com/child-scm as valid sourceUrl" — lib/modules/datasource/maven/index.spec.ts line 779
     #[test]
     fn process_scm_url_git_protocol() {
         assert_eq!(
@@ -2271,7 +2271,7 @@ mod tests {
         assert!(parse_all_versions(xml).is_none());
     }
 
-    // Ported: "with all elments present" — modules/datasource/maven/index.spec.ts line 448
+    // Ported: "with all elments present" — lib/modules/datasource/maven/index.spec.ts line 448
     #[test]
     fn parse_pom_info_extracts_homepage_and_source_url() {
         let xml = r#"<project>
@@ -2297,7 +2297,7 @@ mod tests {
         assert_eq!(info.homepage, None);
     }
 
-    // Ported: "supports scm.url values prefixed with "scm:"" — modules/datasource/maven/index.spec.ts line 398
+    // Ported: "supports scm.url values prefixed with "scm:"" — lib/modules/datasource/maven/index.spec.ts line 398
     #[test]
     fn process_scm_url_strips_scm_prefix() {
         assert_eq!(
@@ -2306,7 +2306,7 @@ mod tests {
         );
     }
 
-    // Ported: "should be able to detect git@github.com:child-scm as valid sourceUrl" — modules/datasource/maven/index.spec.ts line 751
+    // Ported: "should be able to detect git@github.com:child-scm as valid sourceUrl" — lib/modules/datasource/maven/index.spec.ts line 751
     #[test]
     fn process_scm_url_converts_git_at_github() {
         assert_eq!(
@@ -2353,7 +2353,7 @@ mod tests {
         assert!(summary.update_available);
     }
 
-    // Ported: "when using primary registry URL" — modules/datasource/maven/index.spec.ts line 136
+    // Ported: "when using primary registry URL" — lib/modules/datasource/maven/index.spec.ts line 136
     #[tokio::test]
     async fn gradle_plugin_group_id_on_central_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -2367,7 +2367,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "when using mirror URL" — modules/datasource/maven/index.spec.ts line 145
+    // Ported: "when using mirror URL" — lib/modules/datasource/maven/index.spec.ts line 145
     #[tokio::test]
     async fn gradle_plugin_group_id_on_mirror_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -2381,7 +2381,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "when using primary registry URL" — modules/datasource/maven/index.spec.ts line 156
+    // Ported: "when using primary registry URL" — lib/modules/datasource/maven/index.spec.ts line 156
     #[tokio::test]
     async fn gradle_plugin_artifact_id_on_central_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -2395,7 +2395,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "when using mirror URL" — modules/datasource/maven/index.spec.ts line 165
+    // Ported: "when using mirror URL" — lib/modules/datasource/maven/index.spec.ts line 165
     #[tokio::test]
     async fn gradle_plugin_artifact_id_on_mirror_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -2409,7 +2409,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "fetches Gradle plugins from non-Maven-Central registries" — modules/datasource/maven/index.spec.ts line 176
+    // Ported: "fetches Gradle plugins from non-Maven-Central registries" — lib/modules/datasource/maven/index.spec.ts line 176
     #[tokio::test]
     async fn gradle_plugin_from_custom_registry() {
         let server = MockServer::start().await;
@@ -2448,7 +2448,7 @@ mod tests {
         assert!(result.is_some());
     }
 
-    // Ported: "should get source and homepage from parent" — modules/datasource/maven/index.spec.ts line 635
+    // Ported: "should get source and homepage from parent" — lib/modules/datasource/maven/index.spec.ts line 635
     #[tokio::test]
     async fn parent_pom_provides_source_and_homepage() {
         let server = MockServer::start().await;
@@ -2517,7 +2517,7 @@ mod tests {
         );
     }
 
-    // Ported: "should deal with missing parent fields" — modules/datasource/maven/index.spec.ts line 651
+    // Ported: "should deal with missing parent fields" — lib/modules/datasource/maven/index.spec.ts line 651
     #[tokio::test]
     async fn parent_pom_empty_parent_returns_no_source_or_homepage() {
         let server = MockServer::start().await;
@@ -2559,7 +2559,7 @@ mod tests {
         assert_eq!(r.homepage, None);
     }
 
-    // Ported: "should deal with circular hierarchy" — modules/datasource/maven/index.spec.ts line 669
+    // Ported: "should deal with circular hierarchy" — lib/modules/datasource/maven/index.spec.ts line 669
     #[tokio::test]
     async fn parent_pom_circular_hierarchy_stops_at_limit() {
         let server = MockServer::start().await;
@@ -2626,7 +2626,7 @@ mod tests {
         );
     }
 
-    // Ported: "should get source from own pom and homepage from parent" — modules/datasource/maven/index.spec.ts line 704
+    // Ported: "should get source from own pom and homepage from parent" — lib/modules/datasource/maven/index.spec.ts line 704
     #[tokio::test]
     async fn parent_pom_source_from_own_homepage_from_parent() {
         let server = MockServer::start().await;
@@ -2692,7 +2692,7 @@ mod tests {
         );
     }
 
-    // Ported: "should get homepage from own pom and source from parent" — modules/datasource/maven/index.spec.ts line 720
+    // Ported: "should get homepage from own pom and source from parent" — lib/modules/datasource/maven/index.spec.ts line 720
     #[tokio::test]
     async fn parent_pom_homepage_from_own_source_from_parent() {
         let server = MockServer::start().await;
@@ -2758,7 +2758,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for 404" — modules/datasource/maven/index.spec.ts line 795
+    // Ported: "returns null for 404" — lib/modules/datasource/maven/index.spec.ts line 795
     #[tokio::test]
     async fn postprocess_release_404_returns_none() {
         let server = MockServer::start().await;
@@ -2773,7 +2773,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns original value for unknown error" — modules/datasource/maven/index.spec.ts line 806
+    // Ported: "returns original value for unknown error" — lib/modules/datasource/maven/index.spec.ts line 806
     #[tokio::test]
     async fn postprocess_release_unknown_error_returns_original() {
         let server = MockServer::start().await;
@@ -2789,7 +2789,7 @@ mod tests {
         assert_eq!(result.unwrap().version, "1.2.3");
     }
 
-    // Ported: "returns original value for 200 response" — modules/datasource/maven/index.spec.ts line 821
+    // Ported: "returns original value for 200 response" — lib/modules/datasource/maven/index.spec.ts line 821
     #[tokio::test]
     async fn postprocess_release_200_returns_original() {
         let server = MockServer::start().await;
@@ -2807,7 +2807,7 @@ mod tests {
         assert_eq!(r.release_timestamp, None);
     }
 
-    // Ported: "returns original value for invalid configs" — modules/datasource/maven/index.spec.ts line 845
+    // Ported: "returns original value for invalid configs" — lib/modules/datasource/maven/index.spec.ts line 845
     #[tokio::test]
     async fn postprocess_release_invalid_config_returns_original() {
         let http = HttpClient::new().unwrap();
@@ -2821,7 +2821,7 @@ mod tests {
         assert_eq!(result.unwrap().version, "1.2.3");
     }
 
-    // Ported: "adds releaseTimestamp" — modules/datasource/maven/index.spec.ts line 861
+    // Ported: "adds releaseTimestamp" — lib/modules/datasource/maven/index.spec.ts line 861
     #[tokio::test]
     async fn postprocess_release_adds_release_timestamp() {
         let server = MockServer::start().await;
@@ -2846,7 +2846,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns original value for 200 response with versionOrig" — modules/datasource/maven/index.spec.ts line 833
+    // Ported: "returns original value for 200 response with versionOrig" — lib/modules/datasource/maven/index.spec.ts line 833
     #[tokio::test]
     async fn postprocess_release_200_with_version_orig_returns_original() {
         let server = MockServer::start().await;
@@ -2865,7 +2865,7 @@ mod tests {
         assert_eq!(r.release_timestamp, None);
     }
 
-    // Ported: "returns error for unsupported protocols" — modules/datasource/maven/util.spec.ts line 53
+    // Ported: "returns error for unsupported protocols" — lib/modules/datasource/maven/util.spec.ts line 53
     #[tokio::test]
     async fn download_maven_xml_unsupported_protocol() {
         let http = HttpClient::new().unwrap();
@@ -2873,7 +2873,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::UnsupportedProtocol));
     }
 
-    // Ported: "returns error for xml parse error" — modules/datasource/maven/util.spec.ts line 64
+    // Ported: "returns error for xml parse error" — lib/modules/datasource/maven/util.spec.ts line 64
     #[tokio::test]
     async fn download_maven_xml_parse_error() {
         let server = MockServer::start().await;
@@ -2888,7 +2888,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::XmlParseError));
     }
 
-    // Ported: "returns the downloaded text body" — modules/datasource/maven/util.spec.ts line 85
+    // Ported: "returns the downloaded text body" — lib/modules/datasource/maven/util.spec.ts line 85
     #[tokio::test]
     async fn download_http_content_returns_text() {
         let server = MockServer::start().await;
@@ -2903,7 +2903,7 @@ mod tests {
         assert_eq!(result, Ok("pom text".to_owned()));
     }
 
-    // Ported: "returns error for non-S3 URLs" — modules/datasource/maven/util.spec.ts line 102
+    // Ported: "returns error for non-S3 URLs" — lib/modules/datasource/maven/util.spec.ts line 102
     #[test]
     fn download_s3_protocol_non_s3_url() {
         let rt = tokio::runtime::Runtime::new().unwrap();
@@ -2983,7 +2983,7 @@ mod tests {
 </metadata>"#
     }
 
-    // Ported: "returns releases" — modules/datasource/maven/s3.spec.ts line 43
+    // Ported: "returns releases" — lib/modules/datasource/maven/s3.spec.ts line 43
     #[tokio::test]
     async fn s3_returns_releases() {
         let client = MockS3Client::new().with_response(
@@ -3006,7 +3006,7 @@ mod tests {
         assert!(result.unwrap().contains("1.0.2"));
     }
 
-    // Ported: "returns null on auth error" — modules/datasource/maven/s3.spec.ts line 78
+    // Ported: "returns null on auth error" — lib/modules/datasource/maven/s3.spec.ts line 78
     #[tokio::test]
     async fn s3_returns_null_on_auth_error() {
         let client = MockS3Client::new().with_response(
@@ -3024,7 +3024,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::HostError));
     }
 
-    // Ported: "returns null for incorrect region" — modules/datasource/maven/s3.spec.ts line 105
+    // Ported: "returns null for incorrect region" — lib/modules/datasource/maven/s3.spec.ts line 105
     #[tokio::test]
     async fn s3_returns_null_for_incorrect_region() {
         let client = MockS3Client::new().with_response(
@@ -3042,7 +3042,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::HostError));
     }
 
-    // Ported: "returns null for NoSuchKey error" — modules/datasource/maven/s3.spec.ts line 125
+    // Ported: "returns null for NoSuchKey error" — lib/modules/datasource/maven/s3.spec.ts line 125
     #[tokio::test]
     async fn s3_returns_null_for_nosuchkey_error() {
         let client = MockS3Client::new().with_response(
@@ -3060,7 +3060,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::NotFound));
     }
 
-    // Ported: "returns null for NotFound error" — modules/datasource/maven/s3.spec.ts line 145
+    // Ported: "returns null for NotFound error" — lib/modules/datasource/maven/s3.spec.ts line 145
     #[tokio::test]
     async fn s3_returns_null_for_notfound_error() {
         let client = MockS3Client::new().with_response(
@@ -3078,7 +3078,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::NotFound));
     }
 
-    // Ported: "returns null for Deleted marker" — modules/datasource/maven/s3.spec.ts line 165
+    // Ported: "returns null for Deleted marker" — lib/modules/datasource/maven/s3.spec.ts line 165
     #[tokio::test]
     async fn s3_returns_null_for_deleted_marker() {
         let client = MockS3Client::new().with_response(
@@ -3100,7 +3100,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::NotFound));
     }
 
-    // Ported: "returns null for unknown error" — modules/datasource/maven/s3.spec.ts line 178
+    // Ported: "returns null for unknown error" — lib/modules/datasource/maven/s3.spec.ts line 178
     #[tokio::test]
     async fn s3_returns_null_for_unknown_error() {
         let client = MockS3Client::new().with_response(
@@ -3118,7 +3118,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::HostError));
     }
 
-    // Ported: "returns null for unexpected response type" — modules/datasource/maven/s3.spec.ts line 199
+    // Ported: "returns null for unexpected response type" — lib/modules/datasource/maven/s3.spec.ts line 199
     #[tokio::test]
     async fn s3_returns_null_for_unexpected_response_type() {
         let client = MockS3Client::new().with_response(
@@ -3142,7 +3142,7 @@ mod tests {
 
     // ── S3 postprocess tests — modules/datasource/maven/index.spec.ts ──
 
-    // Ported: "checks package" — modules/datasource/maven/index.spec.ts line 892
+    // Ported: "checks package" — lib/modules/datasource/maven/index.spec.ts line 892
     #[tokio::test]
     async fn s3_checks_package() {
         let client = MockS3Client::new().with_response(
@@ -3160,7 +3160,7 @@ mod tests {
         assert_eq!(result, Ok("foo".to_owned()));
     }
 
-    // Ported: "supports timestamp" — modules/datasource/maven/index.spec.ts line 910
+    // Ported: "supports timestamp" — lib/modules/datasource/maven/index.spec.ts line 910
     #[tokio::test]
     async fn s3_supports_timestamp() {
         let client = MockS3Client::new().with_response(
@@ -3178,7 +3178,7 @@ mod tests {
         assert_eq!(result, Ok("foo".to_owned()));
     }
 
-    // Ported: "returns null for deleted object" — modules/datasource/maven/index.spec.ts line 934
+    // Ported: "returns null for deleted object" — lib/modules/datasource/maven/index.spec.ts line 934
     #[tokio::test]
     async fn s3_returns_null_for_deleted_object() {
         let client = MockS3Client::new().with_response(
@@ -3196,7 +3196,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::NotFound));
     }
 
-    // Ported: "returns null for NotFound response" — modules/datasource/maven/index.spec.ts line 952
+    // Ported: "returns null for NotFound response" — lib/modules/datasource/maven/index.spec.ts line 952
     #[tokio::test]
     async fn s3_returns_null_for_notfound_response() {
         let client = MockS3Client::new().with_response(
@@ -3210,7 +3210,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::NotFound));
     }
 
-    // Ported: "returns null for NoSuchKey response" — modules/datasource/maven/index.spec.ts line 970
+    // Ported: "returns null for NoSuchKey response" — lib/modules/datasource/maven/index.spec.ts line 970
     #[tokio::test]
     async fn s3_returns_null_for_nosuchkey_response() {
         let client = MockS3Client::new().with_response(
@@ -3224,7 +3224,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::NotFound));
     }
 
-    // Ported: "returns original value for any other error" — modules/datasource/maven/index.spec.ts line 988
+    // Ported: "returns original value for any other error" — lib/modules/datasource/maven/index.spec.ts line 988
     #[tokio::test]
     async fn s3_returns_original_value_for_any_other_error() {
         let client = MockS3Client::new().with_response(
@@ -3238,7 +3238,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::HostError));
     }
 
-    // Ported: "throws EXTERNAL_HOST_ERROR for 50x" — modules/datasource/maven/index.spec.ts line 325
+    // Ported: "throws EXTERNAL_HOST_ERROR for 50x" — lib/modules/datasource/maven/index.spec.ts line 325
     #[tokio::test]
     async fn fetch_releases_50x_throws_external_host_error() {
         let server = MockServer::start().await;
@@ -3259,7 +3259,7 @@ mod tests {
         assert!(matches!(result, Err(MavenError::ExternalHostError)));
     }
 
-    // Ported: "returns empty for host error" — modules/datasource/maven/util.spec.ts line 179
+    // Ported: "returns empty for host error" — lib/modules/datasource/maven/util.spec.ts line 179
     #[test]
     fn classify_host_error_timeout() {
         assert_eq!(
@@ -3268,7 +3268,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty for temporary error" — modules/datasource/maven/util.spec.ts line 190
+    // Ported: "returns empty for temporary error" — lib/modules/datasource/maven/util.spec.ts line 190
     #[test]
     fn classify_temporary_error_connreset() {
         assert_eq!(
@@ -3277,7 +3277,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws ExternalHostError for 429 status without redis cache" — modules/datasource/maven/util.spec.ts line 237
+    // Ported: "throws ExternalHostError for 429 status without redis cache" — lib/modules/datasource/maven/util.spec.ts line 237
     #[test]
     fn external_host_error_for_maven_central_429() {
         let err = maybe_external_host_error(
@@ -3287,7 +3287,7 @@ mod tests {
         assert_eq!(err, MavenFetchError::ExternalHostError);
     }
 
-    // Ported: "throws ExternalHostError for non-429 temporary error on maven central" — modules/datasource/maven/util.spec.ts line 258
+    // Ported: "throws ExternalHostError for non-429 temporary error on maven central" — lib/modules/datasource/maven/util.spec.ts line 258
     #[test]
     fn external_host_error_for_maven_central_connreset() {
         let err = maybe_external_host_error(
@@ -3297,7 +3297,7 @@ mod tests {
         assert_eq!(err, MavenFetchError::ExternalHostError);
     }
 
-    // Ported: "returns empty for connection error" — modules/datasource/maven/util.spec.ts line 273
+    // Ported: "returns empty for connection error" — lib/modules/datasource/maven/util.spec.ts line 273
     #[test]
     fn classify_connection_error_connrefused() {
         assert_eq!(
@@ -3306,7 +3306,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty for unsupported error" — modules/datasource/maven/util.spec.ts line 284
+    // Ported: "returns empty for unsupported error" — lib/modules/datasource/maven/util.spec.ts line 284
     #[test]
     fn classify_unsupported_host_error() {
         assert_eq!(
@@ -3315,7 +3315,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty for HOST_DISABLED error" — modules/datasource/maven/util.spec.ts line 168
+    // Ported: "returns empty for HOST_DISABLED error" — lib/modules/datasource/maven/util.spec.ts line 168
     #[test]
     fn classify_host_disabled_error() {
         assert_eq!(
@@ -3352,7 +3352,7 @@ mod tests {
         assert_eq!(result, Err(MavenFetchError::TemporaryError));
     }
 
-    // Ported: "caches 404 for maven-metadata.xml URLs" — modules/datasource/maven/util.spec.ts line 302
+    // Ported: "caches 404 for maven-metadata.xml URLs" — lib/modules/datasource/maven/util.spec.ts line 302
     #[tokio::test]
     async fn download_http_protocol_caches_404_for_metadata() {
         metadata_cache_clear();
@@ -3370,7 +3370,7 @@ mod tests {
         assert!(metadata_cache_get(&metadata_url));
     }
 
-    // Ported: "does not cache 404 for non-metadata URLs" — modules/datasource/maven/util.spec.ts line 328
+    // Ported: "does not cache 404 for non-metadata URLs" — lib/modules/datasource/maven/util.spec.ts line 328
     #[tokio::test]
     async fn download_http_protocol_does_not_cache_404_for_non_metadata() {
         metadata_cache_clear();
@@ -3387,7 +3387,7 @@ mod tests {
         assert!(!metadata_cache_get(&server.uri()));
     }
 
-    // Ported: "returns cached not-found without making HTTP request" — modules/datasource/maven/util.spec.ts line 344
+    // Ported: "returns cached not-found without making HTTP request" — lib/modules/datasource/maven/util.spec.ts line 344
     #[tokio::test]
     async fn download_http_protocol_returns_cached_not_found() {
         metadata_cache_clear();

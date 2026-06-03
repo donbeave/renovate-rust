@@ -188,7 +188,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "returns tags from bitbucket cloud" — bitbucket-tags/index.spec.ts line 9
+    // Ported: "returns tags from bitbucket cloud" — lib/modules/datasource/bitbucket-tags/index.spec.ts line 9
     #[tokio::test]
     async fn returns_tags_from_bitbucket_cloud() {
         // Note: the Bitbucket HTTP client always uses api.bitbucket.org regardless
@@ -229,7 +229,7 @@ mod tests {
         assert_eq!(releases[2].version, "v1.1.1");
     }
 
-    // Ported: "returns commits from bitbucket cloud" — bitbucket-tags/index.spec.ts line 43
+    // Ported: "returns commits from bitbucket cloud" — lib/modules/datasource/bitbucket-tags/index.spec.ts line 43
     #[tokio::test]
     async fn returns_commits_from_bitbucket_cloud() {
         let repo_body = serde_json::json!({
@@ -277,7 +277,7 @@ mod tests {
         assert_eq!(hash.as_deref(), Some("123"));
     }
 
-    // Ported: "returns commits from bitbucket cloud" (no commits) — bitbucket-tags/index.spec.ts line 85
+    // Ported: "returns commits from bitbucket cloud" (no commits) — lib/modules/datasource/bitbucket-tags/index.spec.ts line 85
     #[tokio::test]
     async fn returns_null_when_no_commits() {
         let paged: PagedCommits = serde_json::from_value(serde_json::json!({
@@ -290,7 +290,7 @@ mod tests {
         assert_eq!(hash, None);
     }
 
-    // Ported: "returns tags commit hash from bitbucket cloud" — bitbucket-tags/index.spec.ts line 112
+    // Ported: "returns tags commit hash from bitbucket cloud" — lib/modules/datasource/bitbucket-tags/index.spec.ts line 112
     #[tokio::test]
     async fn returns_tags_commit_hash() {
         let server = MockServer::start().await;
@@ -315,7 +315,7 @@ mod tests {
         assert_eq!(hash.as_deref(), Some("123"));
     }
 
-    // Ported: "returns null for missing hash" — bitbucket-tags/index.spec.ts line 136
+    // Ported: "returns null for missing hash" — lib/modules/datasource/bitbucket-tags/index.spec.ts line 136
     #[tokio::test]
     async fn returns_null_for_missing_hash() {
         let server = MockServer::start().await;

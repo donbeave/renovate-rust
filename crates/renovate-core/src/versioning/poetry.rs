@@ -938,7 +938,7 @@ mod tests {
 
     // ── equals ───────────────────────────────────────────────────────────────
 
-    // Ported: "equals("$a", "$b") === $expected" — poetry/index.spec.ts line 5
+    // Ported: "equals("$a", "$b") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 5
     #[test]
     fn equals_basic() {
         assert!(equals("1", "1"));
@@ -959,7 +959,7 @@ mod tests {
 
     // ── getMajor/getMinor/getPatch ────────────────────────────────────────────
 
-    // Ported: "getMajor, getMinor, getPatch for "$version"" — poetry/index.spec.ts line 28
+    // Ported: "getMajor, getMinor, getPatch for "$version"" — lib/modules/versioning/poetry/index.spec.ts line 28
     #[test]
     fn get_version_parts() {
         assert_eq!(get_major("1"), Some(1));
@@ -982,7 +982,7 @@ mod tests {
 
     // ── isGreaterThan ────────────────────────────────────────────────────────
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — poetry/index.spec.ts line 47
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 47
     #[test]
     fn is_greater_than_cases() {
         assert!(is_greater_than("2", "1"));
@@ -999,7 +999,7 @@ mod tests {
 
     // ── isStable ─────────────────────────────────────────────────────────────
 
-    // Ported: "isStable("$version") === $expected" — poetry/index.spec.ts line 82
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 82
     #[test]
     fn is_stable_cases() {
         assert!(is_stable("1"));
@@ -1012,7 +1012,7 @@ mod tests {
 
     // ── isVersion ───────────────────────────────────────────────────────────
 
-    // Ported: "isVersion("$version") === $expected" — poetry/index.spec.ts line 95
+    // Ported: "isVersion("$version") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 95
     #[test]
     fn is_version_cases() {
         assert!(is_version("1.2.3a0"));
@@ -1025,7 +1025,7 @@ mod tests {
 
     // ── isValid ─────────────────────────────────────────────────────────────
 
-    // Ported: "isValid("$version") === $expected" — poetry/index.spec.ts line 107
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 107
     #[test]
     fn is_valid_cases() {
         assert!(!is_valid(""));
@@ -1054,7 +1054,7 @@ mod tests {
 
     // ── isSingleVersion ─────────────────────────────────────────────────────
 
-    // Ported: "isSingleVersion("$version") === $expected" — poetry/index.spec.ts line 134
+    // Ported: "isSingleVersion("$version") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 134
     #[test]
     fn is_single_version_cases() {
         assert!(is_single_version("1.2.3"));
@@ -1066,7 +1066,7 @@ mod tests {
 
     // ── matches ─────────────────────────────────────────────────────────────
 
-    // Ported: "matches("$version", "$range") === "$expected"" — poetry/index.spec.ts line 145
+    // Ported: "matches("$version", "$range") === "$expected"" — lib/modules/versioning/poetry/index.spec.ts line 145
     #[test]
     fn matches_cases() {
         assert!(matches("4.2.0", "4.2, >= 3.0, < 5.0.0"));
@@ -1086,7 +1086,7 @@ mod tests {
 
     // ── isLessThanRange ──────────────────────────────────────────────────────
 
-    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — poetry/index.spec.ts line 167
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — lib/modules/versioning/poetry/index.spec.ts line 167
     #[test]
     fn is_less_than_range_cases() {
         assert!(is_less_than_range("0.9.0", ">= 1.0.0 <= 2.0.0"));
@@ -1095,7 +1095,7 @@ mod tests {
 
     // ── minSatisfyingVersion ─────────────────────────────────────────────────
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — poetry/index.spec.ts line 178
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 178
     #[test]
     fn min_satisfying_version_cases() {
         let v1 = &["0.4.0", "0.5.0", "4.2.0", "4.3.0", "5.0.0"];
@@ -1131,7 +1131,7 @@ mod tests {
 
     // ── getSatisfyingVersion ─────────────────────────────────────────────────
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — poetry/index.spec.ts line 194
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 194
     #[test]
     fn get_satisfying_version_cases() {
         let v1 = &["4.2.1", "0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"];
@@ -1158,7 +1158,7 @@ mod tests {
 
     // ── subset ───────────────────────────────────────────────────────────────
 
-    // Ported: "subset("$a", "$b") === $expected" — poetry/index.spec.ts line 287
+    // Ported: "subset("$a", "$b") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 287
     #[test]
     fn subset_cases() {
         assert_eq!(subset("1.0.0", "1.0.0"), Some(true));
@@ -1179,7 +1179,7 @@ mod tests {
 
     // ── getNewValue ──────────────────────────────────────────────────────────
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — poetry/index.spec.ts line 207
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/poetry/index.spec.ts line 207
     #[test]
     fn get_new_value_cases() {
         let cases: &[(&str, &str, &str, &str, &str)] = &[
@@ -1210,7 +1210,7 @@ mod tests {
 
     // ── sortVersions ────────────────────────────────────────────────────────
 
-    // Ported: "sortVersions("$a", "$b") === $expected" — poetry/index.spec.ts line 269
+    // Ported: "sortVersions("$a", "$b") === $expected" — lib/modules/versioning/poetry/index.spec.ts line 269
     #[test]
     fn sort_versions_cases() {
         assert_eq!(sort_versions("2", "1"), 1);

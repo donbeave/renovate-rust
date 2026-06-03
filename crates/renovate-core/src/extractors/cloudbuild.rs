@@ -99,7 +99,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines" — lib/modules/manager/cloudbuild/extract.spec.ts line 10
     #[test]
     fn extracts_step_names() {
         let content = r#"
@@ -122,7 +122,7 @@ steps:
         );
     }
 
-    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines" — lib/modules/manager/cloudbuild/extract.spec.ts line 10
     #[test]
     fn variable_reference_classified() {
         let content = "steps:\n  - name: '$_BUILDER_IMAGE'\n";
@@ -132,7 +132,7 @@ steps:
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines" — lib/modules/manager/cloudbuild/extract.spec.ts line 10
     #[test]
     fn ignores_non_steps_sections() {
         let content = r#"
@@ -148,13 +148,13 @@ steps:
         assert_eq!(deps[0].image, "node");
     }
 
-    // Ported: "returns null for empty" — cloudbuild/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/cloudbuild/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines" — lib/modules/manager/cloudbuild/extract.spec.ts line 10
     #[test]
     fn inline_name_in_list_item() {
         let content = "steps:\n  - name: ubuntu:22.04\n";
@@ -177,7 +177,7 @@ options:
   machineType: 'N1_HIGHCPU_8'
 ";
 
-    // Ported: "extracts multiple image lines" — cloudbuild/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines" — lib/modules/manager/cloudbuild/extract.spec.ts line 10
     #[test]
     fn extracts_three_step_images() {
         let deps = extract(CLOUDBUILD_FIXTURE);

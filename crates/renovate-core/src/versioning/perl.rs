@@ -178,7 +178,7 @@ pub fn is_greater_than(a: &str, b: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/perl/index.spec.ts line 4
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/perl/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_perl_spec() {
         let cases = [
@@ -208,7 +208,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$input\") === $expected" — versioning/perl/index.spec.ts line 31
+    // Ported: "isStable(\"$input\") === $expected" — lib/modules/versioning/perl/index.spec.ts line 31
     #[test]
     fn is_stable_matches_renovate_perl_spec() {
         let cases = [
@@ -225,7 +225,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/perl/index.spec.ts line 44
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/perl/index.spec.ts line 44
     #[test]
     fn equals_matches_renovate_perl_spec() {
         let cases = [
@@ -243,7 +243,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/perl/index.spec.ts line 58
+    // Ported: "isGreaterThan($a, $b) === $expected" — lib/modules/versioning/perl/index.spec.ts line 58
     #[test]
     fn is_greater_than_matches_renovate_perl_spec() {
         let cases = [

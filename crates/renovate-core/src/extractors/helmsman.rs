@@ -276,7 +276,7 @@ apps:
     version: "1.0.0"
 "#;
 
-    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
+    // Ported: "extract deps" — lib/modules/manager/helmsman/extract.spec.ts line 29
     #[test]
     fn extracts_helm_deps() {
         let deps = extract(SAMPLE);
@@ -292,7 +292,7 @@ apps:
             && d.registry_url == "https://charts.bitnami.com/bitnami"));
     }
 
-    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
+    // Ported: "extract deps" — lib/modules/manager/helmsman/extract.spec.ts line 29
     #[test]
     fn skips_missing_version() {
         let deps = extract(SAMPLE);
@@ -302,7 +302,7 @@ apps:
         );
     }
 
-    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
+    // Ported: "extract deps" — lib/modules/manager/helmsman/extract.spec.ts line 29
     #[test]
     fn skips_unknown_repo() {
         let deps = extract(SAMPLE);
@@ -314,19 +314,19 @@ apps:
         assert!(no_repo.iter().any(|d| d.dep_name == "unknown-repo"));
     }
 
-    // Ported: "returns null if empty" — helmsman/extract.spec.ts line 9
+    // Ported: "returns null if empty" — lib/modules/manager/helmsman/extract.spec.ts line 9
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null if apps not defined" — helmsman/extract.spec.ts line 23
+    // Ported: "returns null if apps not defined" — lib/modules/manager/helmsman/extract.spec.ts line 23
     #[test]
     fn invalid_yaml_returns_empty() {
         assert!(extract("incorrect").is_empty());
     }
 
-    // Ported: "returns null if extracting non helmsman yaml file" — helmsman/extract.spec.ts line 16
+    // Ported: "returns null if extracting non helmsman yaml file" — lib/modules/manager/helmsman/extract.spec.ts line 16
     #[test]
     fn app_with_no_chart_or_version_has_skip_reason() {
         // TS: parses empty.yaml via full YAML → app value is null → createDep returns null → null result.
@@ -342,7 +342,7 @@ apps:
         );
     }
 
-    // Ported: "extract deps" — helmsman/extract.spec.ts line 29
+    // Ported: "extract deps" — lib/modules/manager/helmsman/extract.spec.ts line 29
     #[test]
     fn extract_deps_validhelmsfile() {
         // Full validHelmsfile.yaml fixture: 11 apps, 5 with skip reasons.

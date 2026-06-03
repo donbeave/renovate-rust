@@ -51,14 +51,14 @@ impl MemCache {
 mod tests {
     use super::*;
 
-    // Ported: "returns undefined if not init" — util/cache/memory/index.spec.ts line 4
+    // Ported: "returns undefined if not init" — lib/util/cache/memory/index.spec.ts line 4
     #[test]
     fn mem_cache_returns_none_when_not_initialized() {
         let cache = MemCache::new();
         assert_eq!(cache.get("key1"), None);
     }
 
-    // Ported: "sets and gets repo cache" — util/cache/memory/index.spec.ts line 8
+    // Ported: "sets and gets repo cache" — lib/util/cache/memory/index.spec.ts line 8
     #[test]
     fn mem_cache_sets_and_gets_value() {
         let mut cache = MemCache::new();
@@ -67,7 +67,7 @@ mod tests {
         assert_eq!(cache.get("key2"), Some(&Value::String("value".to_owned())));
     }
 
-    // Ported: "resets" — util/cache/memory/index.spec.ts line 14
+    // Ported: "resets" — lib/util/cache/memory/index.spec.ts line 14
     #[test]
     fn mem_cache_reset_clears_values() {
         let mut cache = MemCache::new();
@@ -77,7 +77,7 @@ mod tests {
         assert_eq!(cache.get("key3"), None);
     }
 
-    // Ported: "does nothing if no matching keys exist" — util/cache/memory/index.spec.ts line 26
+    // Ported: "does nothing if no matching keys exist" — lib/util/cache/memory/index.spec.ts line 26
     #[test]
     fn clean_datasource_keys_noop_for_non_matching() {
         let mut cache = MemCache::new();
@@ -95,7 +95,7 @@ mod tests {
         );
     }
 
-    // Ported: "removes keys that start with datasource-mem:pkg-fetch:" — util/cache/memory/index.spec.ts line 34
+    // Ported: "removes keys that start with datasource-mem:pkg-fetch:" — lib/util/cache/memory/index.spec.ts line 34
     #[test]
     fn clean_datasource_keys_removes_pkg_fetch_prefix() {
         let mut cache = MemCache::new();
@@ -113,7 +113,7 @@ mod tests {
         );
     }
 
-    // Ported: "removes keys that start with datasource-releases" — util/cache/memory/index.spec.ts line 42
+    // Ported: "removes keys that start with datasource-releases" — lib/util/cache/memory/index.spec.ts line 42
     #[test]
     fn clean_datasource_keys_removes_releases_prefix() {
         let mut cache = MemCache::new();
@@ -131,7 +131,7 @@ mod tests {
         );
     }
 
-    // Ported: "removes all matching keys while keeping others" — util/cache/memory/index.spec.ts line 50
+    // Ported: "removes all matching keys while keeping others" — lib/util/cache/memory/index.spec.ts line 50
     #[test]
     fn clean_datasource_keys_removes_all_matching_keeps_others() {
         let mut cache = MemCache::new();

@@ -1850,7 +1850,7 @@ pub fn extract_with_registry_aliases(
 mod tests {
     use super::*;
 
-    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
+    // Ported: "extracts providers" — lib/modules/manager/terraform/extract.spec.ts line 463
     #[test]
     fn required_providers_block_form() {
         let content = r#"
@@ -1888,7 +1888,7 @@ terraform {
         assert_eq!(k8s.current_value, ">= 2.0.0");
     }
 
-    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
+    // Ported: "extracts providers" — lib/modules/manager/terraform/extract.spec.ts line 463
     #[test]
     fn required_providers_inline_string_form() {
         let content = r#"
@@ -1904,7 +1904,7 @@ terraform {
         assert_eq!(deps[0].current_value, ">= 4.0.0");
     }
 
-    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
+    // Ported: "extracts  modules" — lib/modules/manager/terraform/extract.spec.ts line 54
     #[test]
     fn module_with_version() {
         let content = r#"
@@ -1924,7 +1924,7 @@ module "vpc" {
         assert!(modules[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
+    // Ported: "extracts  modules" — lib/modules/manager/terraform/extract.spec.ts line 54
     #[test]
     fn module_without_version_skipped() {
         let content = r#"
@@ -1940,7 +1940,7 @@ module "vpc" {
         );
     }
 
-    // Ported: "returns dep with skipReason local" — terraform/extract.spec.ts line 756
+    // Ported: "returns dep with skipReason local" — lib/modules/manager/terraform/extract.spec.ts line 756
     #[test]
     fn module_with_local_path_skipped() {
         let content = r#"
@@ -1956,7 +1956,7 @@ module "local" {
         );
     }
 
-    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
+    // Ported: "extracts  modules" — lib/modules/manager/terraform/extract.spec.ts line 54
     #[test]
     fn module_with_git_source_skipped() {
         let content = r#"
@@ -1972,7 +1972,7 @@ module "git_module" {
         );
     }
 
-    // Ported: "extracts bitbucket modules" — terraform/extract.spec.ts line 221
+    // Ported: "extracts bitbucket modules" — lib/modules/manager/terraform/extract.spec.ts line 221
     #[test]
     fn bitbucket_module_sources_are_extracted() {
         let content = r#"
@@ -2035,7 +2035,7 @@ module "bitbucket_subfolder" {
             && d.package_name.as_deref() == Some("hashicorp/example")));
     }
 
-    // Ported: "extracts azureDevOps modules" — terraform/extract.spec.ts line 306
+    // Ported: "extracts azureDevOps modules" — lib/modules/manager/terraform/extract.spec.ts line 306
     #[test]
     fn azure_devops_module_sources_are_extracted() {
         let content = r#"
@@ -2064,7 +2064,7 @@ module "gittags_subdir" {
         );
     }
 
-    // Ported: "resolves OCI registry aliases" — terraform/extract.spec.ts line 338
+    // Ported: "resolves OCI registry aliases" — lib/modules/manager/terraform/extract.spec.ts line 338
     #[test]
     fn oci_module_registry_alias_is_applied() {
         let content = r#"
@@ -2085,7 +2085,7 @@ module "aliased_oci" {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles invalid OCI source URL" — terraform/extract.spec.ts line 358
+    // Ported: "handles invalid OCI source URL" — lib/modules/manager/terraform/extract.spec.ts line 358
     #[test]
     fn invalid_oci_module_source_has_skip_reason() {
         let content = r#"
@@ -2100,7 +2100,7 @@ module "bad_oci" {
         assert_eq!(deps[0].skip_reason, Some(TerraformSkipReason::InvalidUrl));
     }
 
-    // Ported: "extracts OCI modules and providers" — terraform/extract.spec.ts line 374
+    // Ported: "extracts OCI modules and providers" — lib/modules/manager/terraform/extract.spec.ts line 374
     #[test]
     fn oci_modules_and_required_providers_are_extracted() {
         let content = r#"
@@ -2184,7 +2184,7 @@ terraform {
         );
     }
 
-    // Ported: "extracts docker resources" — terraform/extract.spec.ts line 579
+    // Ported: "extracts docker resources" — lib/modules/manager/terraform/extract.spec.ts line 579
     #[test]
     fn docker_resources_are_extracted() {
         let content = r#"
@@ -2280,7 +2280,7 @@ resource "not_supported_resource" "foo" {
         }));
     }
 
-    // Ported: "extract helm releases" — terraform/extract.spec.ts line 776
+    // Ported: "extract helm releases" — lib/modules/manager/terraform/extract.spec.ts line 776
     #[test]
     fn helm_releases_are_extracted() {
         let content = r#"
@@ -2388,7 +2388,7 @@ resource "helm_release" "proxy_oci_repo" {
         }));
     }
 
-    // Ported: "extracts kubernetes resources" — terraform/extract.spec.ts line 655
+    // Ported: "extracts kubernetes resources" — lib/modules/manager/terraform/extract.spec.ts line 655
     #[test]
     fn kubernetes_resources_are_extracted() {
         let content = r#"
@@ -2660,7 +2660,7 @@ resource "kubernetes_stateful_set_v1" "prometheus" {
         }));
     }
 
-    // Ported: "extracts  modules" — terraform/extract.spec.ts line 54
+    // Ported: "extracts  modules" — lib/modules/manager/terraform/extract.spec.ts line 54
     #[test]
     fn mixed_providers_and_modules() {
         let content = r#"
@@ -2709,7 +2709,7 @@ module "local_mod" {
         assert_eq!(local.skip_reason, Some(TerraformSkipReason::ExternalSource));
     }
 
-    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
+    // Ported: "extracts providers" — lib/modules/manager/terraform/extract.spec.ts line 463
     #[test]
     fn comments_ignored() {
         let content = r#"
@@ -2729,13 +2729,13 @@ terraform {
         assert_eq!(deps[0].name, "hashicorp/aws");
     }
 
-    // Ported: "returns null for empty" — terraform/extract.spec.ts line 39
+    // Ported: "returns null for empty" — lib/modules/manager/terraform/extract.spec.ts line 39
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts providers" — terraform/extract.spec.ts line 463
+    // Ported: "extracts providers" — lib/modules/manager/terraform/extract.spec.ts line 463
     #[test]
     fn provider_without_source_uses_name() {
         let content = r#"
@@ -2753,7 +2753,7 @@ terraform {
         assert_eq!(deps[0].current_value, "~> 3.0");
     }
 
-    // Ported: "update lockfile constraints with range strategy update-lockfile" — terraform/extract.spec.ts line 845
+    // Ported: "update lockfile constraints with range strategy update-lockfile" — lib/modules/manager/terraform/extract.spec.ts line 845
     #[test]
     fn provider_lockfile_versions_are_applied() {
         let content = r#"
@@ -2810,7 +2810,7 @@ provider "https://terraform.example.com/example/kubernetes" {
         assert_eq!(kubernetes.locked_version.as_deref(), Some("1.5.0"));
     }
 
-    // Ported: "returns dep with skipReason local" — terraform/extract.spec.ts line 756
+    // Ported: "returns dep with skipReason local" — lib/modules/manager/terraform/extract.spec.ts line 756
     #[test]
     fn local_module_has_skip_reason() {
         let content = "module \"relative\" {\n  source = \"../fe\"\n}\n";
@@ -2819,7 +2819,7 @@ provider "https://terraform.example.com/example/kubernetes" {
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "returns null with only not added resources" — terraform/extract.spec.ts line 767
+    // Ported: "returns null with only not added resources" — lib/modules/manager/terraform/extract.spec.ts line 767
     #[test]
     fn resource_block_not_extracted() {
         let content = "resource \"test_resource\" \"relative\" {\n  source = \"../fe\"\n}\n";
@@ -2827,7 +2827,7 @@ provider "https://terraform.example.com/example/kubernetes" {
         assert!(deps.is_empty());
     }
 
-    // Ported: "return null if invalid HCL file" — terraform/extract.spec.ts line 933
+    // Ported: "return null if invalid HCL file" — lib/modules/manager/terraform/extract.spec.ts line 933
     #[test]
     fn invalid_hcl_returns_empty() {
         let content = "resource my provider\n";
@@ -2835,7 +2835,7 @@ provider "https://terraform.example.com/example/kubernetes" {
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for no deps" — terraform/extract.spec.ts line 43
+    // Ported: "returns null for no deps" — lib/modules/manager/terraform/extract.spec.ts line 43
     #[test]
     fn data_block_not_extracted() {
         let content = r#"data "sops_file" "secrets" {
@@ -2845,7 +2845,7 @@ provider "https://terraform.example.com/example/kubernetes" {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "test terraform block with only requirement_terraform_version" — terraform/extract.spec.ts line 884
+    // Ported: "test terraform block with only requirement_terraform_version" — lib/modules/manager/terraform/extract.spec.ts line 884
     #[test]
     fn required_version_extracted_as_hashicorp_terraform() {
         let content = "terraform {\n  required_version = \"1.0.0\"\n}\n";
@@ -2857,7 +2857,7 @@ provider "https://terraform.example.com/example/kubernetes" {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts terraform_version for tfe_workspace and ignores missing terraform_version keys" — terraform/extract.spec.ts line 904
+    // Ported: "extracts terraform_version for tfe_workspace and ignores missing terraform_version keys" — lib/modules/manager/terraform/extract.spec.ts line 904
     #[test]
     fn tfe_workspace_terraform_versions_are_extracted() {
         let content = r#"
@@ -2934,13 +2934,13 @@ resource "tfe_workspace" "workspace_with_block" {
         "kubernetes_cron_job_v1",
     ];
 
-    // Ported: "return empty array if no resource is found" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 7
+    // Ported: "return empty array if no resource is found" — lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 7
     #[test]
     fn generic_docker_extractor_empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "return resource and datasource types" — modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 12
+    // Ported: "return resource and datasource types" — lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts line 12
     #[test]
     fn generic_docker_extractor_check_list_contains_expected_types() {
         let check_list: Vec<String> = GENERIC_IMAGE_DATASOURCE_TYPES
@@ -2953,13 +2953,13 @@ resource "tfe_workspace" "workspace_with_block" {
         assert!(check_list.contains(&format!("\"{}\"", GENERIC_IMAGE_RESOURCE_TYPES[0])));
     }
 
-    // Ported: "returns null for empty" — modules/manager/terraform/lockfile/util.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/terraform/lockfile/util.spec.ts line 6
     #[test]
     fn extract_locks_returns_none_for_no_provider_blocks() {
         assert!(extract_terraform_locks("nothing here").is_none());
     }
 
-    // Ported: "extracts" — modules/manager/terraform/lockfile/util.spec.ts line 11
+    // Ported: "extracts" — lib/modules/manager/terraform/lockfile/util.spec.ts line 11
     #[test]
     fn extract_locks_extracts_providers() {
         let content = r#"provider "registry.terraform.io/hashicorp/aws" {
@@ -3018,7 +3018,7 @@ provider "registry.terraform.io/hashicorp/random" {
 }
 "#;
 
-    // Ported: "detects already updated" — modules/manager/terraform/lockfile/update-locked.spec.ts line 35
+    // Ported: "detects already updated" — lib/modules/manager/terraform/lockfile/update-locked.spec.ts line 35
     #[test]
     fn terraform_update_locked_detects_already_updated() {
         let result = update_locked_terraform_dependency(
@@ -3029,14 +3029,14 @@ provider "registry.terraform.io/hashicorp/random" {
         assert_eq!(result.as_str(), "already-updated");
     }
 
-    // Ported: "returns unsupported if dependency is undefined" — modules/manager/terraform/lockfile/update-locked.spec.ts line 47
+    // Ported: "returns unsupported if dependency is undefined" — lib/modules/manager/terraform/lockfile/update-locked.spec.ts line 47
     #[test]
     fn terraform_update_locked_unsupported_no_dep_name() {
         let result = update_locked_terraform_dependency(None, Some("3.1.0"), Some(TERRAFORM_LOCK));
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported if lockfileContent is undefined" — modules/manager/terraform/lockfile/update-locked.spec.ts line 59
+    // Ported: "returns unsupported if lockfileContent is undefined" — lib/modules/manager/terraform/lockfile/update-locked.spec.ts line 59
     #[test]
     fn terraform_update_locked_unsupported_no_lock_content() {
         let result =
@@ -3044,7 +3044,7 @@ provider "registry.terraform.io/hashicorp/random" {
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported" — modules/manager/terraform/lockfile/update-locked.spec.ts line 70
+    // Ported: "returns unsupported" — lib/modules/manager/terraform/lockfile/update-locked.spec.ts line 70
     #[test]
     fn terraform_update_locked_unsupported_version_not_found() {
         let result = update_locked_terraform_dependency(
@@ -3055,7 +3055,7 @@ provider "registry.terraform.io/hashicorp/random" {
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns update-failed for errors" — modules/manager/terraform/lockfile/update-locked.spec.ts line 82
+    // Ported: "returns update-failed for errors" — lib/modules/manager/terraform/lockfile/update-locked.spec.ts line 82
     #[test]
     fn terraform_update_locked_update_failed_on_invalid_content() {
         // TS test mocks extractLocks to throw; Rust uses invalid content that fails parse.
@@ -3072,7 +3072,7 @@ provider "registry.terraform.io/hashicorp/random" {
         ));
     }
 
-    // Ported: "return null if no provider returned" — terraform/extractors/others/providers.spec.ts line 6
+    // Ported: "return null if no provider returned" — lib/modules/manager/terraform/extractors/others/providers.spec.ts line 6
     #[test]
     fn providers_extract_empty_content_returns_no_deps() {
         let deps = extract("");
@@ -3083,7 +3083,7 @@ provider "registry.terraform.io/hashicorp/random" {
         );
     }
 
-    // Ported: "return empty array if no resource is found" — terraform/extractors/resources/helm-release.spec.ts line 6
+    // Ported: "return empty array if no resource is found" — lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts line 6
     #[test]
     fn helm_release_extract_empty_content_returns_no_deps() {
         let deps = extract("");
@@ -3094,7 +3094,7 @@ provider "registry.terraform.io/hashicorp/random" {
         );
     }
 
-    // Ported: "return empty array if no resource is found" — terraform/extractors/resources/terraform-workspaces.spec.ts line 6
+    // Ported: "return empty array if no resource is found" — lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts line 6
     #[test]
     fn terraform_workspace_extract_empty_content_returns_no_deps() {
         let deps = extract("");
@@ -3105,7 +3105,7 @@ provider "registry.terraform.io/hashicorp/random" {
         );
     }
 
-    // Ported: "return empty array if no terraform block is found" — terraform/extractors/terraform-block/terraform-version.spec.ts line 6
+    // Ported: "return empty array if no terraform block is found" — lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts line 6
     #[test]
     fn terraform_version_extract_empty_content_returns_no_deps() {
         let deps = extract("");
@@ -3116,7 +3116,7 @@ provider "registry.terraform.io/hashicorp/random" {
         );
     }
 
-    // Ported: "return empty array if no terraform block is found" — terraform/extractors/terraform-block/required-provider.spec.ts line 8
+    // Ported: "return empty array if no terraform block is found" — lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts line 8
     #[test]
     fn required_provider_extract_empty_content_returns_no_deps() {
         let deps = extract("");
@@ -3127,7 +3127,7 @@ provider "registry.terraform.io/hashicorp/random" {
         );
     }
 
-    // Ported: "return empty array if no required_providers block is found" — terraform/extractors/terraform-block/required-provider.spec.ts line 13
+    // Ported: "return empty array if no required_providers block is found" — lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts line 13
     #[test]
     fn required_provider_extract_terraform_block_without_required_providers_returns_empty() {
         let content = "terraform {\n}\n";
@@ -3139,7 +3139,7 @@ provider "registry.terraform.io/hashicorp/random" {
         );
     }
 
-    // Ported: "extract provider with version and registry url" — terraform/extractors/terraform-block/required-provider.spec.ts line 18
+    // Ported: "extract provider with version and registry url" — lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts line 18
     #[test]
     fn required_provider_extract_with_version_and_registry_url() {
         let content = r#"
@@ -3216,14 +3216,14 @@ provider "registry.opentofu.org/carlpett/sops" {
 
     // ── terraform/extractors/others/modules.spec.ts ───────────────────────────
 
-    // Ported: "return empty array if no module is found" — terraform/extractors/others/modules.spec.ts line 13
+    // Ported: "return empty array if no module is found" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 13
     #[test]
     fn modules_extract_empty_content_returns_no_module_deps() {
         let deps = extract("");
         assert!(!deps.iter().any(|d| d.dep_type == TerraformDepType::Module));
     }
 
-    // Ported: "should split project and tag from source" — terraform/extractors/others/modules.spec.ts line 19
+    // Ported: "should split project and tag from source" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 19
     #[test]
     fn github_ref_match_re_splits_project_and_tag() {
         let m1 = GITHUB_REF_MATCH_RE
@@ -3245,7 +3245,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m3["tag"], "v1.0.0");
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 43
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 43
     #[test]
     fn github_ref_match_re_parses_alphanumeric_repo_names() {
         let m = GITHUB_REF_MATCH_RE
@@ -3255,7 +3255,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "v1.0.0");
     }
 
-    // Ported: "should split project and tag from source" — terraform/extractors/others/modules.spec.ts line 55
+    // Ported: "should split project and tag from source" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 55
     #[test]
     fn git_tags_ref_match_re_splits_project_and_tag() {
         let cases = [
@@ -3288,7 +3288,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&colon["tag"], "v1.0.0");
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 108
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 108
     #[test]
     fn git_tags_ref_match_re_parses_alphanumeric_repo_names() {
         let cases_project = [
@@ -3330,7 +3330,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         }
     }
 
-    // Ported: "should split workspace, project and tag from source" — terraform/extractors/others/modules.spec.ts line 156
+    // Ported: "should split workspace, project and tag from source" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 156
     #[test]
     fn bitbucket_ref_match_re_splits_workspace_project_and_tag() {
         let cases = [
@@ -3351,7 +3351,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         }
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 224
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 224
     #[test]
     fn bitbucket_ref_match_re_parses_alphanumeric_repo_names() {
         let m = BITBUCKET_REF_MATCH_RE
@@ -3362,7 +3362,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "v1.0.0");
     }
 
-    // Ported: "should split organization, project, repository and tag from source url" — terraform/extractors/others/modules.spec.ts line 238
+    // Ported: "should split organization, project, repository and tag from source url" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 238
     #[test]
     fn azure_devops_ssh_ref_match_re_splits_fields() {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
@@ -3379,7 +3379,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "1.0.0");
     }
 
-    // Ported: "should split organization, project, repository and tag from source url with git prefix" — terraform/extractors/others/modules.spec.ts line 253
+    // Ported: "should split organization, project, repository and tag from source url with git prefix" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 253
     #[test]
     fn azure_devops_ssh_ref_match_re_with_git_prefix() {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
@@ -3396,7 +3396,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "1.0.0");
     }
 
-    // Ported: "should split organization, project, repository and tag from source url with subfolder" — terraform/extractors/others/modules.spec.ts line 268
+    // Ported: "should split organization, project, repository and tag from source url with subfolder" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 268
     #[test]
     fn azure_devops_ssh_ref_match_re_with_subfolder() {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
@@ -3409,7 +3409,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "1.0.0");
     }
 
-    // Ported: "should split organization, project, repository and tag from source url with depth argument" — terraform/extractors/others/modules.spec.ts line 283
+    // Ported: "should split organization, project, repository and tag from source url with depth argument" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 283
     #[test]
     fn azure_devops_ssh_ref_match_re_with_depth() {
         let depth = AZURE_DEVOPS_SSH_REF_MATCH_RE
@@ -3425,7 +3425,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&depth2["tag"], "1.0.0");
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — terraform/extractors/others/modules.spec.ts line 309
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 309
     #[test]
     fn azure_devops_ssh_ref_match_re_parses_alphanumeric_names() {
         let m = AZURE_DEVOPS_SSH_REF_MATCH_RE
@@ -3438,7 +3438,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(&m["tag"], "v1.0.0");
     }
 
-    // Ported: "should extact hostname from source url" — terraform/extractors/others/modules.spec.ts line 326
+    // Ported: "should extact hostname from source url" — lib/modules/manager/terraform/extractors/others/modules.spec.ts line 326
     #[test]
     fn hostname_match_re_extracts_hostname() {
         let m1 = HOSTNAME_MATCH_RE
@@ -3464,7 +3464,7 @@ provider "registry.opentofu.org/carlpett/sops" {
 
     // ── get_new_constraint (lockfile/index.spec.ts) ───────────────────────────
 
-    // Ported: "correctly calculate new constraint on pinning" — terraform/lockfile/index.spec.ts line 1217
+    // Ported: "correctly calculate new constraint on pinning" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1217
     #[test]
     fn get_new_constraint_pins_to_exact_version() {
         assert_eq!(
@@ -3480,7 +3480,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         );
     }
 
-    // Ported: "update constraint with multiple elements" — terraform/lockfile/index.spec.ts line 1230
+    // Ported: "update constraint with multiple elements" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1230
     #[test]
     fn get_new_constraint_updates_multi_element_constraint() {
         assert_eq!(
@@ -3496,7 +3496,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         );
     }
 
-    // Ported: "update constraint when current version is matched multiple times" — terraform/lockfile/index.spec.ts line 1243
+    // Ported: "update constraint when current version is matched multiple times" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1243
     #[test]
     fn get_new_constraint_updates_first_match_only() {
         assert_eq!(
@@ -3512,7 +3512,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         );
     }
 
-    // Ported: "update constraint when current version is in a complicated constraint" — terraform/lockfile/index.spec.ts line 1256
+    // Ported: "update constraint when current version is in a complicated constraint" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1256
     #[test]
     fn get_new_constraint_updates_in_complicated_constraint() {
         assert_eq!(
@@ -3528,7 +3528,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         );
     }
 
-    // Ported: "create constraint with full version" — terraform/lockfile/index.spec.ts line 1269
+    // Ported: "create constraint with full version" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1269
     #[test]
     fn get_new_constraint_creates_full_version_constraint() {
         assert_eq!(
@@ -3545,7 +3545,7 @@ provider "registry.opentofu.org/carlpett/sops" {
     }
 
     // Additional unit tests covering the preserve-constraint and replace-currentVersion branches
-    // Ported: "preserves constraints when current value and new value are same" — terraform/lockfile/index.spec.ts line 1037
+    // Ported: "preserves constraints when current value and new value are same" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1037
     #[test]
     fn get_new_constraint_preserves_when_same() {
         assert_eq!(
@@ -3561,7 +3561,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         );
     }
 
-    // Ported: "replaces current value to new version within a constraint" — terraform/lockfile/index.spec.ts line 1097
+    // Ported: "replaces current value to new version within a constraint" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1097
     #[test]
     fn get_new_constraint_replaces_current_value() {
         assert_eq!(
@@ -3577,7 +3577,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         );
     }
 
-    // Ported: "replaces current version to new version within a constraint" — terraform/lockfile/index.spec.ts line 1157
+    // Ported: "replaces current version to new version within a constraint" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1157
     #[test]
     fn get_new_constraint_replaces_current_version() {
         assert_eq!(
@@ -3595,7 +3595,7 @@ provider "registry.opentofu.org/carlpett/sops" {
 
     // ── update_terraform_artifacts (lockfile/index.spec.ts) ───────────────────
 
-    // Ported: "returns null if no .terraform.lock.hcl found" — terraform/lockfile/index.spec.ts line 56
+    // Ported: "returns null if no .terraform.lock.hcl found" — lib/modules/manager/terraform/lockfile/index.spec.ts line 56
     #[tokio::test]
     async fn update_artifacts_returns_null_if_no_lockfile() {
         let dir = tempfile::tempdir().unwrap();
@@ -3613,7 +3613,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if .terraform.lock.hcl is empty" — terraform/lockfile/index.spec.ts line 67
+    // Ported: "returns null if .terraform.lock.hcl is empty" — lib/modules/manager/terraform/lockfile/index.spec.ts line 67
     #[tokio::test]
     async fn update_artifacts_returns_null_if_lockfile_empty() {
         let dir = tempfile::tempdir().unwrap();
@@ -3632,7 +3632,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if .terraform.lock.hcl is invalid" — terraform/lockfile/index.spec.ts line 81
+    // Ported: "returns null if .terraform.lock.hcl is invalid" — lib/modules/manager/terraform/lockfile/index.spec.ts line 81
     #[tokio::test]
     async fn update_artifacts_returns_null_if_lockfile_invalid() {
         let dir = tempfile::tempdir().unwrap();
@@ -3651,7 +3651,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns artifact error" — terraform/lockfile/index.spec.ts line 36
+    // Ported: "returns artifact error" — lib/modules/manager/terraform/lockfile/index.spec.ts line 36
     #[tokio::test]
     async fn update_artifacts_returns_artifact_error_on_read_failure() {
         let dir = tempfile::tempdir().unwrap();
@@ -3671,7 +3671,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(results[0].artifact_error.is_some());
     }
 
-    // Ported: "do not update dependency with depType module" — terraform/lockfile/index.spec.ts line 289
+    // Ported: "do not update dependency with depType module" — lib/modules/manager/terraform/lockfile/index.spec.ts line 289
     #[tokio::test]
     async fn update_artifacts_skips_module_deps() {
         let dir = tempfile::tempdir().unwrap();
@@ -3701,7 +3701,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "does not update dependency with exact constraint during lockfile update" — terraform/lockfile/index.spec.ts line 209
+    // Ported: "does not update dependency with exact constraint during lockfile update" — lib/modules/manager/terraform/lockfile/index.spec.ts line 209
     #[tokio::test]
     async fn update_artifacts_skips_lockfile_update_when_constraint_not_satisfied() {
         let dir = tempfile::tempdir().unwrap();
@@ -3735,7 +3735,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "does not update dependency with exact constraint within multiple during lockfile update" — terraform/lockfile/index.spec.ts line 249
+    // Ported: "does not update dependency with exact constraint within multiple during lockfile update" — lib/modules/manager/terraform/lockfile/index.spec.ts line 249
     #[tokio::test]
     async fn update_artifacts_skips_multiple_lockfile_updates_when_constraint_not_satisfied() {
         let dir = tempfile::tempdir().unwrap();
@@ -3782,7 +3782,7 @@ provider "registry.opentofu.org/carlpett/sops" {
 
     // ── TerraformProviderHash (lockfile/hash.spec.ts) ─────────────────────────
 
-    // Ported: "returns null if getBuilds returns null" — terraform/lockfile/hash.spec.ts line 43
+    // Ported: "returns null if getBuilds returns null" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 43
     #[tokio::test]
     async fn hash_returns_error_when_get_builds_fails() {
         let result =
@@ -3791,7 +3791,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.is_err());
     }
 
-    // Ported: "return null if requesting a version which is not available" — terraform/lockfile/hash.spec.ts line 58
+    // Ported: "return null if requesting a version which is not available" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 58
     #[tokio::test]
     async fn hash_returns_error_when_version_unavailable() {
         let result = TerraformProviderHash::create_hashes(
@@ -3803,7 +3803,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.is_err());
     }
 
-    // Ported: "backend index throws error" — terraform/lockfile/hash.spec.ts line 72
+    // Ported: "backend index throws error" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 72
     #[tokio::test]
     async fn hash_returns_error_on_backend_failure() {
         let result = TerraformProviderHash::create_hashes(
@@ -3815,7 +3815,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(result.unwrap(), None);
     }
 
-    // Ported: "returns null for no builds" — terraform/lockfile/hash.spec.ts line 86
+    // Ported: "returns null for no builds" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 86
     #[tokio::test]
     async fn hash_returns_none_for_no_builds() {
         let result = TerraformProviderHash::create_hashes(
@@ -3827,7 +3827,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(result.unwrap(), None);
     }
 
-    // Ported: "full walkthrough" — terraform/lockfile/hash.spec.ts line 128
+    // Ported: "full walkthrough" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 128
     #[tokio::test]
     async fn hash_returns_stub_hashes_for_known_input() {
         let result = TerraformProviderHash::create_hashes(
@@ -3840,7 +3840,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(hashes, vec!["h1:stubhash-hashicorp/aws-3.0.0"]);
     }
 
-    // Ported: "fail to create hashes" — terraform/lockfile/hash.spec.ts line 99
+    // Ported: "fail to create hashes" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 99
     #[tokio::test]
     async fn hash_returns_none_when_hash_creation_fails() {
         let result = TerraformProviderHash::create_hashes(
@@ -3852,7 +3852,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(result.unwrap(), None);
     }
 
-    // Ported: "full walkthrough on terraform cloud" — terraform/lockfile/hash.spec.ts line 162
+    // Ported: "full walkthrough on terraform cloud" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 162
     #[tokio::test]
     async fn hash_returns_stub_hashes_for_terraform_cloud() {
         let result = TerraformProviderHash::create_hashes(
@@ -3865,7 +3865,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(hashes, vec!["h1:stubhash-hashicorp/google-4.84.0"]);
     }
 
-    // Ported: "full walkthrough with different shasum per build" — terraform/lockfile/hash.spec.ts line 227
+    // Ported: "full walkthrough with different shasum per build" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 227
     #[tokio::test]
     async fn hash_returns_stub_hashes_for_different_shasum() {
         let result = TerraformProviderHash::create_hashes(
@@ -3878,7 +3878,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(hashes, vec!["h1:stubhash-gravitational/teleport-14.3.1"]);
     }
 
-    // Ported: "full walkthrough without ziphashes available" — terraform/lockfile/hash.spec.ts line 332
+    // Ported: "full walkthrough without ziphashes available" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 332
     #[tokio::test]
     async fn hash_returns_stub_hashes_without_ziphashes() {
         let result = TerraformProviderHash::create_hashes(
@@ -3891,7 +3891,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(hashes, vec!["h1:stubhash-hashicorp/azurerm-2.56.0"]);
     }
 
-    // Ported: "does not add any ziphashes when the shasums endpoint fails`" — terraform/lockfile/hash.spec.ts line 385
+    // Ported: "does not add any ziphashes when the shasums endpoint fails`" — lib/modules/manager/terraform/lockfile/hash.spec.ts line 385
     #[tokio::test]
     async fn hash_returns_stub_hashes_when_shasums_endpoint_fails() {
         let result = TerraformProviderHash::create_hashes(
@@ -3904,7 +3904,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert_eq!(hashes, vec!["h1:stubhash-hashicorp/azurerm-2.56.0"]);
     }
 
-    // Ported: "return null if hashing fails" — terraform/lockfile/index.spec.ts line 933
+    // Ported: "return null if hashing fails" — lib/modules/manager/terraform/lockfile/index.spec.ts line 933
     #[tokio::test]
     async fn update_artifacts_returns_null_when_hashing_fails() {
         let dir = tempfile::tempdir().unwrap();
@@ -3936,7 +3936,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "update single dependency with exact constraint and depType provider" — terraform/lockfile/index.spec.ts line 95
+    // Ported: "update single dependency with exact constraint and depType provider" — lib/modules/manager/terraform/lockfile/index.spec.ts line 95
     #[tokio::test]
     async fn update_artifacts_updates_single_provider_dep() {
         let dir = tempfile::tempdir().unwrap();
@@ -3969,7 +3969,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(results[0].file.is_some());
     }
 
-    // Ported: "update single dependency with exact constraint and and depType required_provider" — terraform/lockfile/index.spec.ts line 151
+    // Ported: "update single dependency with exact constraint and and depType required_provider" — lib/modules/manager/terraform/lockfile/index.spec.ts line 151
     #[tokio::test]
     async fn update_artifacts_updates_single_required_provider_dep() {
         let dir = tempfile::tempdir().unwrap();
@@ -4002,7 +4002,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(results[0].file.is_some());
     }
 
-    // Ported: "update single dependency with range constraint and minor update from private registry" — terraform/lockfile/index.spec.ts line 307
+    // Ported: "update single dependency with range constraint and minor update from private registry" — lib/modules/manager/terraform/lockfile/index.spec.ts line 307
     #[tokio::test]
     async fn update_artifacts_updates_provider_from_private_registry() {
         let dir = tempfile::tempdir().unwrap();
@@ -4037,7 +4037,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(results[0].file.is_some());
     }
 
-    // Ported: "update single dependency with range constraint and major update" — terraform/lockfile/index.spec.ts line 366
+    // Ported: "update single dependency with range constraint and major update" — lib/modules/manager/terraform/lockfile/index.spec.ts line 366
     #[tokio::test]
     async fn update_artifacts_updates_provider_with_major_update() {
         let dir = tempfile::tempdir().unwrap();
@@ -4071,7 +4071,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         assert!(results[0].file.is_some());
     }
 
-    // Ported: "update single dependency in subfolder" — terraform/lockfile/index.spec.ts line 424
+    // Ported: "update single dependency in subfolder" — lib/modules/manager/terraform/lockfile/index.spec.ts line 424
     #[tokio::test]
     async fn update_artifacts_updates_provider_in_subfolder() {
         let dir = tempfile::tempdir().unwrap();
@@ -4110,7 +4110,7 @@ provider "registry.opentofu.org/carlpett/sops" {
         );
     }
 
-    // Ported: "update multiple dependencies which are not ordered" — terraform/lockfile/index.spec.ts line 484
+    // Ported: "update multiple dependencies which are not ordered" — lib/modules/manager/terraform/lockfile/index.spec.ts line 484
     #[tokio::test]
     async fn update_artifacts_updates_multiple_unordered_providers() {
         let dir = tempfile::tempdir().unwrap();
@@ -4195,7 +4195,7 @@ provider "registry.terraform.io/telmate/proxmox" {
         assert!(results[0].file.is_some());
     }
 
-    // Ported: "return null if experimental flag is not set" — terraform/lockfile/index.spec.ts line 1023
+    // Ported: "return null if experimental flag is not set" — lib/modules/manager/terraform/lockfile/index.spec.ts line 1023
     #[tokio::test]
     async fn update_artifacts_returns_null_when_lockfile_maintenance_without_lockfile() {
         let dir = tempfile::tempdir().unwrap();
@@ -4213,7 +4213,7 @@ provider "registry.terraform.io/telmate/proxmox" {
 
     // ── update_all_locks (lockfile/index.spec.ts) ─────────────────────────────
 
-    // Ported: "do full lock file maintenance" — terraform/lockfile/index.spec.ts line 621
+    // Ported: "do full lock file maintenance" — lib/modules/manager/terraform/lockfile/index.spec.ts line 621
     #[tokio::test]
     async fn update_all_locks_updates_all_providers() {
         let lockfile = r#"provider "registry.terraform.io/hashicorp/aws" {
@@ -4277,7 +4277,7 @@ provider "registry.terraform.io/hashicorp/random" {
         assert_eq!(updates[1].new_version, "2.2.2");
     }
 
-    // Ported: "do full lock file maintenance without necessary changes" — terraform/lockfile/index.spec.ts line 873
+    // Ported: "do full lock file maintenance without necessary changes" — lib/modules/manager/terraform/lockfile/index.spec.ts line 873
     #[tokio::test]
     async fn update_all_locks_returns_empty_when_no_updates_needed() {
         let lockfile = r#"provider "registry.terraform.io/hashicorp/aws" {
@@ -4298,7 +4298,7 @@ provider "registry.terraform.io/hashicorp/random" {
         assert!(updates.is_empty());
     }
 
-    // Ported: "do full lock file maintenance with lockfile in subfolder" — terraform/lockfile/index.spec.ts line 757
+    // Ported: "do full lock file maintenance with lockfile in subfolder" — lib/modules/manager/terraform/lockfile/index.spec.ts line 757
     #[tokio::test]
     async fn update_all_locks_handles_subfolder_lockfile() {
         let lockfile = r#"provider "registry.terraform.io/hashicorp/aws" {

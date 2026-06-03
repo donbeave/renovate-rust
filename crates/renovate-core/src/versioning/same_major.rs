@@ -44,13 +44,13 @@ pub fn is_less_than_range(version: &str, range: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "should return true" — same-major/index.spec.ts line 5
+    // Ported: "should return true" — lib/modules/versioning/same-major/index.spec.ts line 5
     #[test]
     fn is_greater_than_true_matches_renovate_same_major_index_spec() {
         assert!(is_greater_than("4.0.0", "3.0.0"));
     }
 
-    // Ported: "should return false" — same-major/index.spec.ts line 9
+    // Ported: "should return false" — lib/modules/versioning/same-major/index.spec.ts line 9
     #[test]
     fn is_greater_than_false_matches_renovate_same_major_index_spec() {
         assert!(!is_greater_than("2.0.2", "3.1.0"));
@@ -59,20 +59,20 @@ mod tests {
         assert!(!is_greater_than("a", "3.0.0")); // invalid
     }
 
-    // Ported: "should return true when version has same major" — same-major/index.spec.ts line 18
+    // Ported: "should return true when version has same major" — lib/modules/versioning/same-major/index.spec.ts line 18
     #[test]
     fn matches_true_matches_renovate_same_major_index_spec() {
         assert!(matches("1.0.1", "1.0.0"));
         assert!(matches("1.0.0", "1.0.0"));
     }
 
-    // Ported: "should return false when version has different major" — same-major/index.spec.ts line 23
+    // Ported: "should return false when version has different major" — lib/modules/versioning/same-major/index.spec.ts line 23
     #[test]
     fn matches_diff_major_matches_renovate_same_major_index_spec() {
         assert!(!matches("2.0.1", "1.0.0"));
     }
 
-    // Ported: "should return false when version is out of range" — same-major/index.spec.ts line 27
+    // Ported: "should return false when version is out of range" — lib/modules/versioning/same-major/index.spec.ts line 27
     #[test]
     fn matches_out_of_range_matches_renovate_same_major_index_spec() {
         assert!(!matches("1.2.3", "1.2.4"));
@@ -80,13 +80,13 @@ mod tests {
         assert!(!matches("3.2.4", "1.2.4"));
     }
 
-    // Ported: "should return false when version is invalid" — same-major/index.spec.ts line 33
+    // Ported: "should return false when version is invalid" — lib/modules/versioning/same-major/index.spec.ts line 33
     #[test]
     fn matches_invalid_matches_renovate_same_major_index_spec() {
         assert!(!matches("1.0.0", "xxx"));
     }
 
-    // Ported: "should return max satisfying version in range" — same-major/index.spec.ts line 39
+    // Ported: "should return max satisfying version in range" — lib/modules/versioning/same-major/index.spec.ts line 39
     #[test]
     fn get_satisfying_version_matches_renovate_same_major_index_spec() {
         assert_eq!(
@@ -95,7 +95,7 @@ mod tests {
         );
     }
 
-    // Ported: "should return min satisfying version in range" — same-major/index.spec.ts line 50
+    // Ported: "should return min satisfying version in range" — lib/modules/versioning/same-major/index.spec.ts line 50
     #[test]
     fn min_satisfying_version_matches_renovate_same_major_index_spec() {
         assert_eq!(
@@ -104,13 +104,13 @@ mod tests {
         );
     }
 
-    // Ported: "should return true" — same-major/index.spec.ts line 61
+    // Ported: "should return true" — lib/modules/versioning/same-major/index.spec.ts line 61
     #[test]
     fn is_less_than_range_true_matches_renovate_same_major_index_spec() {
         assert!(is_less_than_range("2.0.2", "3.0.0"));
     }
 
-    // Ported: "should return false" — same-major/index.spec.ts line 65
+    // Ported: "should return false" — lib/modules/versioning/same-major/index.spec.ts line 65
     #[test]
     fn is_less_than_range_false_matches_renovate_same_major_index_spec() {
         assert!(!is_less_than_range("4.0.0", "3.0.0"));

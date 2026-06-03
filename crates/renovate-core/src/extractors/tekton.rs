@@ -110,7 +110,7 @@ pub fn extract_annotation_deps(content: &str) -> Vec<TektonAnnotationDep> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts deps from a file" — tekton/extract.spec.ts line 6
+    // Ported: "extracts deps from a file" — lib/modules/manager/tekton/extract.spec.ts line 6
     #[test]
     fn extracts_step_images() {
         let content = r#"
@@ -146,7 +146,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts deps from a file" — manager/tekton/extract.spec.ts line 6
+    // Ported: "extracts deps from a file" — lib/modules/manager/tekton/extract.spec.ts line 6
     #[test]
     fn extracts_gcr_images_without_skip() {
         // TypeScript extractor does not skip non-Docker-Hub registries.
@@ -163,7 +163,7 @@ spec:
         assert_eq!(deps[0].image_name, "gcr.io/google-containers/busybox");
     }
 
-    // Ported: "extracts deps from a file in annotations" — tekton/extract.spec.ts line 15
+    // Ported: "extracts deps from a file in annotations" — lib/modules/manager/tekton/extract.spec.ts line 15
     #[test]
     fn extracts_annotation_task_and_pipeline_refs() {
         let content = r#"
@@ -214,19 +214,19 @@ metadata:
         assert_eq!(deps[9].current_value, "v0.0.25");
     }
 
-    // Ported: "ignores file without any deps" — tekton/extract.spec.ts line 96
+    // Ported: "ignores file without any deps" — lib/modules/manager/tekton/extract.spec.ts line 96
     #[test]
     fn ignores_file_without_deps() {
         assert!(extract("foo: bar").is_empty());
     }
 
-    // Ported: "ignores empty file" — tekton/extract.spec.ts line 112
+    // Ported: "ignores empty file" — lib/modules/manager/tekton/extract.spec.ts line 112
     #[test]
     fn ignores_empty_file() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "ignores invalid YAML" — tekton/extract.spec.ts line 100
+    // Ported: "ignores invalid YAML" — lib/modules/manager/tekton/extract.spec.ts line 100
     //
     // Content `bundle: registry.com/repo` looks like a stray bundle key
     // outside any tekton resource. Rust extractor walks the YAML

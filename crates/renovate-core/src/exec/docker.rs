@@ -115,7 +115,7 @@ pub async fn remove_docker_container(_image: &str, prefix: &str) -> Result<(), E
 mod tests {
     use super::*;
 
-    // Ported: "returns executable command" — util/exec/docker/index.spec.ts line 160
+    // Ported: "returns executable command" — lib/util/exec/docker/index.spec.ts line 160
     #[test]
     fn sidecar_container_name_default() {
         let config = DockerConfig {
@@ -125,7 +125,7 @@ mod tests {
         assert_eq!(config.sidecar_container_name(), "renovate_sidecar");
     }
 
-    // Ported: "returns executable command" — util/exec/docker/index.spec.ts line 160
+    // Ported: "returns executable command" — lib/util/exec/docker/index.spec.ts line 160
     #[test]
     fn sidecar_container_name_custom() {
         let config = DockerConfig {
@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(config.sidecar_container_name(), "custom_sidecar");
     }
 
-    // Ported: "returns executable command" — util/exec/docker/index.spec.ts line 160
+    // Ported: "returns executable command" — lib/util/exec/docker/index.spec.ts line 160
     #[tokio::test]
     async fn generate_docker_command_basic() {
         let docker_options = DockerOptions::default();
@@ -168,7 +168,7 @@ mod tests {
         assert!(result.contains("/tmp/cache"));
     }
 
-    // Ported: "handles volumes" — util/exec/docker/index.spec.ts line 231
+    // Ported: "handles volumes" — lib/util/exec/docker/index.spec.ts line 231
     #[tokio::test]
     async fn generate_docker_command_with_volumes() {
         let docker_options = DockerOptions {
@@ -195,7 +195,7 @@ mod tests {
         assert!(result.contains("-v \"/host/path:/container/path\""));
     }
 
-    // Ported: "returns executable command" — util/exec/docker/index.spec.ts line 160
+    // Ported: "returns executable command" — lib/util/exec/docker/index.spec.ts line 160
     #[tokio::test]
     async fn generate_docker_command_with_pre_commands_and_installs() {
         let docker_options = DockerOptions::default();
@@ -224,7 +224,7 @@ mod tests {
         assert!(inner.starts_with("install-tool node 18 && echo prep && npm test"));
     }
 
-    // Ported: "adds custom containerbaseDir to volumes" — util/exec/docker/index.spec.ts line 255
+    // Ported: "adds custom containerbaseDir to volumes" — lib/util/exec/docker/index.spec.ts line 255
     #[tokio::test]
     async fn generate_docker_command_adds_custom_containerbase_dir() {
         let docker_options = DockerOptions::default();
@@ -251,7 +251,7 @@ mod tests {
         assert!(result.contains("-v \"/tmp/containerbase\":\"/tmp/containerbase\""));
     }
 
-    // Ported: "adds dedupes default containerbaseDir in volumes" — util/exec/docker/index.spec.ts line 281
+    // Ported: "adds dedupes default containerbaseDir in volumes" — lib/util/exec/docker/index.spec.ts line 281
     #[tokio::test]
     async fn generate_docker_command_dedupes_containerbase_dir() {
         let docker_options = DockerOptions::default();
@@ -279,7 +279,7 @@ mod tests {
         assert!(!result.contains("/tmp/cache/containerbase"));
     }
 
-    // Ported: "add multiple docker cli option" — util/exec/docker/index.spec.ts line 307
+    // Ported: "add multiple docker cli option" — lib/util/exec/docker/index.spec.ts line 307
     #[tokio::test]
     async fn generate_docker_command_adds_cli_options() {
         let docker_options = DockerOptions::default();
@@ -304,7 +304,7 @@ mod tests {
         assert!(result.contains("--memory=4g --cpus=.5"));
     }
 
-    // Ported: "gracefully handles container list error" — util/exec/docker/index.spec.ts line 47
+    // Ported: "gracefully handles container list error" — lib/util/exec/docker/index.spec.ts line 47
     #[tokio::test]
     async fn remove_docker_container_graceful_on_error() {
         // This should not panic even if docker is not available.
@@ -312,21 +312,21 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "gracefully handles container removal error" — util/exec/docker/index.spec.ts line 52
+    // Ported: "gracefully handles container removal error" — lib/util/exec/docker/index.spec.ts line 52
     #[tokio::test]
     async fn remove_docker_container_graceful_on_removal_error() {
         let result = remove_docker_container("img", "prefix_").await;
         assert!(result.is_ok());
     }
 
-    // Ported: "gracefully handles empty container list" — util/exec/docker/index.spec.ts line 57
+    // Ported: "gracefully handles empty container list" — lib/util/exec/docker/index.spec.ts line 57
     #[tokio::test]
     async fn remove_docker_container_graceful_on_empty() {
         let result = remove_docker_container("img", "renovate_").await;
         assert!(result.is_ok());
     }
 
-    // Ported: "runs Docker commands for container removal" — util/exec/docker/index.spec.ts line 62
+    // Ported: "runs Docker commands for container removal" — lib/util/exec/docker/index.spec.ts line 62
     #[test]
     fn remove_docker_container_builds_correct_command() {
         // The function is async but we can verify the container name logic.
@@ -334,7 +334,7 @@ mod tests {
         assert_eq!(name, "foo_sidecar");
     }
 
-    // Ported: "handles volumes" — util/exec/docker/index.spec.ts line 231
+    // Ported: "handles volumes" — lib/util/exec/docker/index.spec.ts line 231
     #[tokio::test]
     async fn generate_docker_command_simple_volume_without_colon() {
         let docker_options = DockerOptions {
@@ -361,7 +361,7 @@ mod tests {
         assert!(result.contains("-v \"/tmp/foo\":\"/tmp/foo\""));
     }
 
-    // Ported: "returns executable command" — util/exec/docker/index.spec.ts line 160
+    // Ported: "returns executable command" — lib/util/exec/docker/index.spec.ts line 160
     #[tokio::test]
     async fn generate_docker_command_with_user() {
         let docker_options = DockerOptions::default();
@@ -386,7 +386,7 @@ mod tests {
         assert!(result.contains("--user=some-user"));
     }
 
-    // Ported: "short-circuits in non-Docker environment" — util/exec/docker/index.spec.ts line 80
+    // Ported: "short-circuits in non-Docker environment" — lib/util/exec/docker/index.spec.ts line 80
     #[tokio::test]
     async fn remove_docker_container_short_circuits_gracefully() {
         // Our simplified remove_docker_container always attempts docker rm -f
@@ -395,7 +395,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "handles unknown error" — util/exec/docker/index.spec.ts line 108
+    // Ported: "handles unknown error" — lib/util/exec/docker/index.spec.ts line 108
     #[tokio::test]
     async fn remove_docker_container_handles_unknown_error() {
         let result = remove_docker_container("img", "test_").await;

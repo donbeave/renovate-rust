@@ -99,7 +99,7 @@ pub fn check_compression_supported(compression: &str) -> Result<DebCompression, 
 mod tests {
     use super::*;
 
-    // Ported: "constructs URLs correctly from registry URL with suite" — datasource/deb/url.spec.ts line 11
+    // Ported: "constructs URLs correctly from registry URL with suite" — lib/modules/datasource/deb/url.spec.ts line 11
     #[test]
     fn construct_component_urls_with_suite() {
         let registry_url =
@@ -114,7 +114,7 @@ mod tests {
         );
     }
 
-    // Ported: "constructs URLs correctly from registry URL with deprecated release" — datasource/deb/url.spec.ts line 22
+    // Ported: "constructs URLs correctly from registry URL with deprecated release" — lib/modules/datasource/deb/url.spec.ts line 22
     #[test]
     fn construct_component_urls_with_release() {
         let registry_url = "https://deb.debian.org/debian?release=bullseye&components=main,contrib&binaryArch=amd64";
@@ -128,7 +128,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses the checksum for the specified package" — datasource/deb/checksum.spec.ts line 27
+    // Ported: "parses the checksum for the specified package" — lib/modules/datasource/deb/checksum.spec.ts line 27
     #[test]
     fn parse_checksums_finds_sha256() {
         let in_release = concat!(
@@ -147,7 +147,7 @@ mod tests {
         );
     }
 
-    // Ported: "computes the checksum of a file" — datasource/deb/checksum.spec.ts line 47
+    // Ported: "computes the checksum of a file" — lib/modules/datasource/deb/checksum.spec.ts line 47
     #[test]
     fn compute_file_checksum_returns_sha256() {
         use sha2::{Digest, Sha256};
@@ -160,7 +160,7 @@ mod tests {
         );
     }
 
-    // Ported: "should fail if there is an error in the stream" — datasource/deb/checksum.spec.ts line 56
+    // Ported: "should fail if there is an error in the stream" — lib/modules/datasource/deb/checksum.spec.ts line 56
     // Not-applicable: Node.js stream error behavior; Rust uses Result<_, _> for IO errors.
     // The equivalent is that `std::fs::read` returns Err when file doesn't exist.
     #[test]
@@ -169,7 +169,7 @@ mod tests {
         assert!(result.is_err(), "reading missing file should fail");
     }
 
-    // Ported: "should throw error for unsupported compression" — datasource/deb/utils.spec.ts line 29
+    // Ported: "should throw error for unsupported compression" — lib/modules/datasource/deb/utils.spec.ts line 29
     #[test]
     fn extract_rejects_unsupported_compression() {
         let result = check_compression_supported("xz");
@@ -181,7 +181,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty array for invalid registry URL" — datasource/deb/url.spec.ts line 41
+    // Ported: "returns empty array for invalid registry URL" — lib/modules/datasource/deb/url.spec.ts line 41
     // TypeScript returns [] for invalid URLs; Rust returns Err for the same condition.
     #[test]
     fn construct_component_urls_invalid_url() {
@@ -189,7 +189,7 @@ mod tests {
         assert!(result.is_err(), "invalid URL should return error");
     }
 
-    // Ported: "throws an error if required parameters are missing" — datasource/deb/url.spec.ts line 33
+    // Ported: "throws an error if required parameters are missing" — lib/modules/datasource/deb/url.spec.ts line 33
     #[test]
     fn construct_component_urls_missing_params() {
         let registry_url = "https://deb.debian.org/debian?components=main,contrib";

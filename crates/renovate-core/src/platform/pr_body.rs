@@ -203,20 +203,20 @@ mod tests {
     const PR_BODY: &str = include_str!("../../tests/fixtures/platform/pr-body.txt");
     const ISSUE_BODY: &str = include_str!("../../tests/fixtures/platform/issue-body.txt");
 
-    // Ported: "removes all checkbox formatting" — modules/platform/utils/read-only-issue-body.spec.ts line 8
+    // Ported: "removes all checkbox formatting" — lib/modules/platform/utils/read-only-issue-body.spec.ts line 8
     #[test]
     fn read_only_removes_checkbox_formatting() {
         assert!(!read_only_issue_body(ISSUE_BODY).contains("[ ] <!--"));
     }
 
-    // Ported: "removes all checkbox-related instructions" — modules/platform/utils/read-only-issue-body.spec.ts line 14
+    // Ported: "removes all checkbox-related instructions" — lib/modules/platform/utils/read-only-issue-body.spec.ts line 14
     #[test]
     fn read_only_removes_checkbox_instructions() {
         let result = read_only_issue_body(ISSUE_BODY);
         assert!(!result.to_lowercase().contains("click on a checkbox below"));
     }
 
-    // Ported: "removes all approval-all-pending-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 20
+    // Ported: "removes all approval-all-pending-prs" — lib/modules/platform/utils/read-only-issue-body.spec.ts line 20
     #[test]
     fn read_only_removes_approve_all_pending_prs() {
         assert!(
@@ -224,13 +224,13 @@ mod tests {
         );
     }
 
-    // Ported: "removes the create-all-rate-limited-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 26
+    // Ported: "removes the create-all-rate-limited-prs" — lib/modules/platform/utils/read-only-issue-body.spec.ts line 26
     #[test]
     fn read_only_removes_create_all_rate_limited_prs() {
         assert!(!read_only_issue_body(ISSUE_BODY).contains("Create all rate-limited PRs at once"));
     }
 
-    // Ported: "removes create-config-migration-pr" — modules/platform/utils/read-only-issue-body.spec.ts line 33
+    // Ported: "removes create-config-migration-pr" — lib/modules/platform/utils/read-only-issue-body.spec.ts line 33
     #[test]
     fn read_only_removes_create_config_migration_pr() {
         assert!(
@@ -238,7 +238,7 @@ mod tests {
         );
     }
 
-    // Ported: "removes the create-all-awaiting-schedule-prs" — modules/platform/utils/read-only-issue-body.spec.ts line 40
+    // Ported: "removes the create-all-awaiting-schedule-prs" — lib/modules/platform/utils/read-only-issue-body.spec.ts line 40
     #[test]
     fn read_only_removes_create_all_awaiting_schedule_prs() {
         assert!(
@@ -246,7 +246,7 @@ mod tests {
         );
     }
 
-    // Ported: "truncates to 1000" — modules/platform/utils/pr-body.spec.ts line 9
+    // Ported: "truncates to 1000" — lib/modules/platform/utils/pr-body.spec.ts line 9
     #[test]
     fn smart_truncate_to_1000() {
         let body = smart_truncate(PR_BODY, 1000);
@@ -254,14 +254,14 @@ mod tests {
         assert!(char_count(&body) <= 1000);
     }
 
-    // Ported: "truncates to 300 not smart" — modules/platform/utils/pr-body.spec.ts line 18
+    // Ported: "truncates to 300 not smart" — lib/modules/platform/utils/pr-body.spec.ts line 18
     #[test]
     fn smart_truncate_to_300_not_smart() {
         let body = smart_truncate(PR_BODY, 300);
         assert_eq!(char_count(&body), 300);
     }
 
-    // Ported: "includes truncation notice at end of truncated content (when "not smart")" — modules/platform/utils/pr-body.spec.ts line 27
+    // Ported: "includes truncation notice at end of truncated content (when "not smart")" — lib/modules/platform/utils/pr-body.spec.ts line 27
     #[test]
     fn smart_truncate_notice_at_end_not_smart() {
         let body = smart_truncate(PR_BODY, 300);
@@ -269,7 +269,7 @@ mod tests {
         assert_eq!(char_count(&body), 300);
     }
 
-    // Ported: "includes truncation notice before Configuration section (when "smart")" — modules/platform/utils/pr-body.spec.ts line 33
+    // Ported: "includes truncation notice before Configuration section (when "smart")" — lib/modules/platform/utils/pr-body.spec.ts line 33
     #[test]
     fn smart_truncate_notice_before_configuration_smart() {
         let body = smart_truncate(PR_BODY, 3000);
@@ -281,7 +281,7 @@ mod tests {
         assert!(notice_pos < config_pos);
     }
 
-    // Ported: "truncates content without release notes structure when notice fits" — modules/platform/utils/pr-body.spec.ts line 43
+    // Ported: "truncates content without release notes structure when notice fits" — lib/modules/platform/utils/pr-body.spec.ts line 43
     #[test]
     fn smart_truncate_no_release_notes_structure_notice_fits() {
         let body = smart_truncate(&"x".repeat(500), 200);
@@ -289,7 +289,7 @@ mod tests {
         assert!(body.contains("PR body was truncated to here"));
     }
 
-    // Ported: "truncates to below notice length with release notes structure" — modules/platform/utils/pr-body.spec.ts line 49
+    // Ported: "truncates to below notice length with release notes structure" — lib/modules/platform/utils/pr-body.spec.ts line 49
     #[test]
     fn smart_truncate_below_notice_length() {
         let body = smart_truncate(PR_BODY, 50);
@@ -297,14 +297,14 @@ mod tests {
         assert!(!body.contains("PR body was truncated to here"));
     }
 
-    // Ported: "truncates to 10" — modules/platform/utils/pr-body.spec.ts line 55
+    // Ported: "truncates to 10" — lib/modules/platform/utils/pr-body.spec.ts line 55
     #[test]
     fn smart_truncate_to_10() {
         let body = smart_truncate("Lorem ipsum dolor sit amet", 10);
         assert_eq!(body, "> \u{2139}\u{FE0F} **Not");
     }
 
-    // Ported: "does not truncate" — modules/platform/utils/pr-body.spec.ts line 63
+    // Ported: "does not truncate" — lib/modules/platform/utils/pr-body.spec.ts line 63
     #[test]
     fn smart_truncate_no_truncation() {
         assert_eq!(smart_truncate(PR_BODY, 60000), PR_BODY);
@@ -312,7 +312,7 @@ mod tests {
 
     const EMPTY_SHA256: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
-    // Ported: "returns hash for empty inputs" — modules/platform/pr-body.spec.ts line 6
+    // Ported: "returns hash for empty inputs" — lib/modules/platform/pr-body.spec.ts line 6
     #[test]
     fn pr_body_struct_empty_inputs() {
         assert_eq!(get_pr_body_struct(None).hash, EMPTY_SHA256);
@@ -332,7 +332,7 @@ mod tests {
         );
     }
 
-    // Ported: "checks if we reach warning" — modules/platform/pr-body.spec.ts line 29
+    // Ported: "checks if we reach warning" — lib/modules/platform/pr-body.spec.ts line 29
     #[test]
     fn pr_body_struct_invalid_debug() {
         let body = "something \n<!--renovate-debug:some-wrong-data-ABCDEFGHIJKLMNOP-->";
@@ -344,7 +344,7 @@ mod tests {
         assert_eq!(s.debug_data, None);
     }
 
-    // Ported: "hashes ignoring debug info" — modules/platform/pr-body.spec.ts line 39
+    // Ported: "hashes ignoring debug info" — lib/modules/platform/pr-body.spec.ts line 39
     #[test]
     fn pr_body_hash_ignores_debug() {
         assert_eq!(
@@ -353,7 +353,7 @@ mod tests {
         );
     }
 
-    // Ported: "hashes ignoring reviewable section" — modules/platform/pr-body.spec.ts line 45
+    // Ported: "hashes ignoring reviewable section" — lib/modules/platform/pr-body.spec.ts line 45
     #[test]
     fn pr_body_hash_ignores_reviewable() {
         assert_eq!(
@@ -362,34 +362,34 @@ mod tests {
         );
     }
 
-    // Ported: "hashes an undefined body" — modules/platform/pr-body.spec.ts line 51
+    // Ported: "hashes an undefined body" — lib/modules/platform/pr-body.spec.ts line 51
     #[test]
     fn pr_body_hash_undefined() {
         assert_eq!(hash_body(None), EMPTY_SHA256);
     }
 
-    // Ported: "returns rebaseRequested=true flag" — modules/platform/pr-body.spec.ts line 58
+    // Ported: "returns rebaseRequested=true flag" — lib/modules/platform/pr-body.spec.ts line 58
     #[test]
     fn pr_body_rebase_true() {
         let s = get_pr_body_struct(Some("- [x] <!-- rebase-check -->"));
         assert_eq!(s.rebase_requested, Some(true));
     }
 
-    // Ported: "returns rebaseRequested=false flag" — modules/platform/pr-body.spec.ts line 67
+    // Ported: "returns rebaseRequested=false flag" — lib/modules/platform/pr-body.spec.ts line 67
     #[test]
     fn pr_body_rebase_false() {
         let s = get_pr_body_struct(Some("- [ ] <!-- rebase-check -->"));
         assert_eq!(s.rebase_requested, Some(false));
     }
 
-    // Ported: "returns rebaseRequested=undefined flag" — modules/platform/pr-body.spec.ts line 76
+    // Ported: "returns rebaseRequested=undefined flag" — lib/modules/platform/pr-body.spec.ts line 76
     #[test]
     fn pr_body_rebase_none() {
         let s = get_pr_body_struct(Some("-  <!-- rebase-check -->"));
         assert_eq!(s.rebase_requested, None);
     }
 
-    // Ported: "returns raw config hash" — modules/platform/pr-body.spec.ts line 84
+    // Ported: "returns raw config hash" — lib/modules/platform/pr-body.spec.ts line 84
     #[test]
     fn pr_body_raw_config_hash() {
         use sha2::{Digest, Sha256};
@@ -404,7 +404,7 @@ mod tests {
         assert_eq!(s.raw_config_hash.as_deref(), Some(raw_config_hash.as_str()));
     }
 
-    // Ported: "strips reviewable section" — modules/platform/pr-body.spec.ts line 95
+    // Ported: "strips reviewable section" — lib/modules/platform/pr-body.spec.ts line 95
     #[test]
     fn pr_body_strips_reviewable() {
         let with_r = get_pr_body_struct(Some("foo<!-- Reviewable:start -->bar"));

@@ -1550,7 +1550,7 @@ mod tests {
         extract(content).expect("parse should succeed")
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn simple_package_reference() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk">
@@ -1569,7 +1569,7 @@ mod tests {
         assert!(json.skip_reason.is_none());
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn update_attribute_extracted() {
         let content = r#"<Project>
@@ -1583,7 +1583,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "4.5.0");
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn version_override_attribute_wins() {
         let content = r#"<Project>
@@ -1595,7 +1595,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "13.0.3");
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn version_child_element() {
         let content = r#"<Project>
@@ -1610,7 +1610,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "2.4.0");
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn property_ref_skipped() {
         let content = r#"<Project>
@@ -1622,7 +1622,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NuGetSkipReason::PropertyRef));
     }
 
-    // Ported: "does not fail on package file without version" — nuget/extract.spec.ts line 79
+    // Ported: "does not fail on package file without version" — lib/modules/manager/nuget/extract.spec.ts line 79
     #[test]
     fn no_version_skipped() {
         let content = r#"<Project>
@@ -1634,7 +1634,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NuGetSkipReason::NoVersion));
     }
 
-    // Ported: "extracts package version dependency" — nuget/extract.spec.ts line 61
+    // Ported: "extracts package version dependency" — lib/modules/manager/nuget/extract.spec.ts line 61
     #[test]
     fn package_version_dependency_extracted() {
         let content = r#"<Project>
@@ -1650,7 +1650,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts package file version" — nuget/extract.spec.ts line 70
+    // Ported: "extracts package file version" — lib/modules/manager/nuget/extract.spec.ts line 70
     #[test]
     fn package_file_version_and_lock_file_extracted() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk.Web">
@@ -1674,7 +1674,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn exact_nuget_range_normalized() {
         let content = r#"<Project>
@@ -1687,7 +1687,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn minimum_only_range_normalized() {
         let content = r#"<Project>
@@ -1703,7 +1703,7 @@ mod tests {
         }
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn upper_bound_range_skipped() {
         let content = r#"<Project>
@@ -1719,7 +1719,7 @@ mod tests {
         }
     }
 
-    // Ported: "extracts all dependencies from global packages file" — nuget/extract.spec.ts line 226
+    // Ported: "extracts all dependencies from global packages file" — lib/modules/manager/nuget/extract.spec.ts line 226
     #[test]
     fn global_and_cli_tool_references() {
         let content = r#"<Project>
@@ -1741,33 +1741,33 @@ mod tests {
         );
     }
 
-    // Ported: "does not fail on package file without version" — nuget/extract.spec.ts line 79
+    // Ported: "does not fail on package file without version" — lib/modules/manager/nuget/extract.spec.ts line 79
     #[test]
     fn empty_project_returns_empty() {
         let deps = extract_ok(r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup/></Project>"#);
         assert!(deps.is_empty());
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn normalize_plain_version() {
         assert_eq!(normalize_version("1.2.3"), ("1.2.3".to_owned(), None));
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn normalize_exact_range() {
         assert_eq!(normalize_version("[1.2.3]"), ("1.2.3".to_owned(), None));
     }
 
-    // Ported: "extracts all dependencies" — nuget/extract.spec.ts line 86
+    // Ported: "extracts all dependencies" — lib/modules/manager/nuget/extract.spec.ts line 86
     #[test]
     fn normalize_minimum_ranges() {
         assert_eq!(normalize_version("[1.2.3,]"), ("1.2.3".to_owned(), None));
         assert_eq!(normalize_version("[1.2.3,)"), ("1.2.3".to_owned(), None));
     }
 
-    // Ported: "extracts dependency with lower-case Version attribute" — nuget/extract.spec.ts line 212
+    // Ported: "extracts dependency with lower-case Version attribute" — lib/modules/manager/nuget/extract.spec.ts line 212
     #[test]
     fn lowercase_version_attribute_extracted() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk">
@@ -1782,7 +1782,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts msbuild sdk from the Sdk attr of Project element" — nuget/extract.spec.ts line 94
+    // Ported: "extracts msbuild sdk from the Sdk attr of Project element" — lib/modules/manager/nuget/extract.spec.ts line 94
     #[test]
     fn msbuild_sdk_from_project_attr() {
         let content = r#"<Project Sdk="Microsoft.Build.NoTargets/3.4.0">
@@ -1798,7 +1798,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "does not extract msbuild sdk from the Sdk attr of Project element if version is missing" — nuget/extract.spec.ts line 117
+    // Ported: "does not extract msbuild sdk from the Sdk attr of Project element if version is missing" — lib/modules/manager/nuget/extract.spec.ts line 117
     #[test]
     fn msbuild_sdk_missing_version_from_project_attr() {
         let content = r#"<Project Sdk="Microsoft.Build.NoTargets">
@@ -1810,7 +1810,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "extracts msbuild sdk from the Sdk element" — nuget/extract.spec.ts line 132
+    // Ported: "extracts msbuild sdk from the Sdk element" — lib/modules/manager/nuget/extract.spec.ts line 132
     #[test]
     fn msbuild_sdk_from_sdk_element() {
         let content = r#"<Project>
@@ -1826,7 +1826,7 @@ mod tests {
         assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
     }
 
-    // Ported: "extracts msbuild sdk from the Import element" — nuget/extract.spec.ts line 172
+    // Ported: "extracts msbuild sdk from the Import element" — lib/modules/manager/nuget/extract.spec.ts line 172
     #[test]
     fn msbuild_sdk_from_import_element() {
         let content = r#"<Project>
@@ -1842,7 +1842,7 @@ mod tests {
         assert_eq!(deps[0].dep_type, NuGetDepType::MsbuildSdk);
     }
 
-    // Ported: "returns null for invalid csproj" — nuget/extract.spec.ts line 28
+    // Ported: "returns null for invalid csproj" — lib/modules/manager/nuget/extract.spec.ts line 28
     #[test]
     fn invalid_xml_returns_error_or_empty() {
         // quick-xml may be lenient; check either error or no useful deps extracted
@@ -1850,7 +1850,7 @@ mod tests {
         assert!(result.is_err() || result.unwrap().is_empty());
     }
 
-    // Ported: "returns null if not xml" — nuget/extract.spec.ts line 43
+    // Ported: "returns null if not xml" — lib/modules/manager/nuget/extract.spec.ts line 43
     #[test]
     fn non_xml_content_returns_empty_or_error() {
         let content = "org.apache.curator:* =4.3.0\norg.apache.hadoop:*=3.1.4\n";
@@ -1860,7 +1860,7 @@ mod tests {
         assert!(result.is_err() || result.unwrap().is_empty());
     }
 
-    // Ported: "does not extract msbuild sdk from the Sdk element if version is missing" — nuget/extract.spec.ts line 156
+    // Ported: "does not extract msbuild sdk from the Sdk element if version is missing" — lib/modules/manager/nuget/extract.spec.ts line 156
     #[test]
     fn msbuild_sdk_element_without_version_is_skipped() {
         let content = r#"<Project>
@@ -1873,7 +1873,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "does not extract msbuild sdk from the Import element if version is missing" — nuget/extract.spec.ts line 196
+    // Ported: "does not extract msbuild sdk from the Import element if version is missing" — lib/modules/manager/nuget/extract.spec.ts line 196
     #[test]
     fn msbuild_import_element_without_version_is_skipped() {
         let content = r#"<Project>
@@ -1886,7 +1886,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "extracts ContainerBaseImage" — nuget/extract.spec.ts line 234
+    // Ported: "extracts ContainerBaseImage" — lib/modules/manager/nuget/extract.spec.ts line 234
     #[test]
     fn extracts_container_base_image() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk.Worker">
@@ -1903,7 +1903,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts ContainerBaseImage with pinned digest" — nuget/extract.spec.ts line 260
+    // Ported: "extracts ContainerBaseImage with pinned digest" — lib/modules/manager/nuget/extract.spec.ts line 260
     #[test]
     fn extracts_container_base_image_with_digest() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk.Worker">
@@ -1946,7 +1946,7 @@ mod tests {
         config
     }
 
-    // Ported: "considers NuGet.config" — nuget/extract.spec.ts line 289
+    // Ported: "considers NuGet.config" — lib/modules/manager/nuget/extract.spec.ts line 289
     #[test]
     fn project_file_considers_nuget_config() {
         let config = nuget_config_with_sources(&[
@@ -1978,7 +1978,7 @@ mod tests {
         assert_eq!(package_file.package_file_version.as_deref(), Some("0.1.0"));
     }
 
-    // Ported: "considers lower-case nuget.config" — nuget/extract.spec.ts line 309
+    // Ported: "considers lower-case nuget.config" — lib/modules/manager/nuget/extract.spec.ts line 309
     #[test]
     fn project_file_considers_lowercase_nuget_config() {
         let config = nuget_config_with_sources(&[
@@ -2012,7 +2012,7 @@ mod tests {
         );
     }
 
-    // Ported: "considers pascal-case NuGet.Config" — nuget/extract.spec.ts line 330
+    // Ported: "considers pascal-case NuGet.Config" — lib/modules/manager/nuget/extract.spec.ts line 330
     #[test]
     fn project_file_considers_pascal_case_nuget_config() {
         let config = nuget_config_with_sources(&[
@@ -2046,7 +2046,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles malformed NuGet.config" — nuget/extract.spec.ts line 351
+    // Ported: "handles malformed NuGet.config" — lib/modules/manager/nuget/extract.spec.ts line 351
     #[test]
     fn project_file_ignores_malformed_nuget_config() {
         let files = [
@@ -2070,7 +2070,7 @@ mod tests {
         assert!(package_file.deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "handles NuGet.config without package sources" — nuget/extract.spec.ts line 368
+    // Ported: "handles NuGet.config without package sources" — lib/modules/manager/nuget/extract.spec.ts line 368
     #[test]
     fn project_file_ignores_nuget_config_without_package_sources() {
         let files = [
@@ -2094,7 +2094,7 @@ mod tests {
         assert!(package_file.deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "handles NuGet.config with whitespaces in package source keys" — nuget/extract.spec.ts line 385
+    // Ported: "handles NuGet.config with whitespaces in package source keys" — lib/modules/manager/nuget/extract.spec.ts line 385
     #[test]
     fn project_file_handles_whitespace_package_source_keys() {
         let project = r#"<Project>
@@ -2130,7 +2130,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignores local feed in NuGet.config" — nuget/extract.spec.ts line 404
+    // Ported: "ignores local feed in NuGet.config" — lib/modules/manager/nuget/extract.spec.ts line 404
     #[test]
     fn project_file_ignores_local_feed_in_nuget_config() {
         let config =
@@ -2159,7 +2159,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts registry URLs independently" — nuget/extract.spec.ts line 422
+    // Ported: "extracts registry URLs independently" — lib/modules/manager/nuget/extract.spec.ts line 422
     #[test]
     fn project_files_extract_registry_urls_independently() {
         let one_config = nuget_config_with_sources(&["https://api.nuget.org/v3/index.json"]);
@@ -2209,7 +2209,7 @@ mod tests {
         );
     }
 
-    // Ported: "works" — nuget/extract.spec.ts line 521
+    // Ported: "works" — lib/modules/manager/nuget/extract.spec.ts line 521
     #[test]
     fn dotnet_tools_manifest_extracts_tools() {
         let content = r#"{
@@ -2230,7 +2230,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "with-config" — nuget/extract.spec.ts line 537
+    // Ported: "with-config" — lib/modules/manager/nuget/extract.spec.ts line 537
     #[test]
     fn dotnet_tools_manifest_applies_parent_nuget_config() {
         let content = r#"{
@@ -2266,7 +2266,7 @@ mod tests {
         );
     }
 
-    // Ported: "wrong version" — nuget/extract.spec.ts line 561
+    // Ported: "wrong version" — lib/modules/manager/nuget/extract.spec.ts line 561
     #[test]
     fn dotnet_tools_manifest_wrong_version_returns_empty() {
         let deps = extract_dotnet_tools(
@@ -2275,21 +2275,21 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for no deps" — nuget/extract.spec.ts line 571
+    // Ported: "returns null for no deps" — lib/modules/manager/nuget/extract.spec.ts line 571
     #[test]
     fn dotnet_tools_manifest_without_tools_returns_empty() {
         let deps = extract_dotnet_tools(r#"{"version": 1}"#);
         assert!(deps.is_empty());
     }
 
-    // Ported: "does not throw" — nuget/extract.spec.ts line 577
+    // Ported: "does not throw" — lib/modules/manager/nuget/extract.spec.ts line 577
     #[test]
     fn dotnet_tools_manifest_malformed_returns_empty() {
         let deps = extract_dotnet_tools("{{");
         assert!(deps.is_empty());
     }
 
-    // Ported: "reads sdk and package directives" — nuget/extract.spec.ts line 583
+    // Ported: "reads sdk and package directives" — lib/modules/manager/nuget/extract.spec.ts line 583
     #[test]
     fn single_csharp_file_reads_sdk_and_package_directives() {
         let content = r#"
@@ -2310,7 +2310,7 @@ mod tests {
         assert_eq!(deps[1].dep_type.as_renovate_str(), "nuget");
     }
 
-    // Ported: "calls applyRegistries to honor nuget.config files if present" — nuget/extract.spec.ts line 615
+    // Ported: "calls applyRegistries to honor nuget.config files if present" — lib/modules/manager/nuget/extract.spec.ts line 615
     #[test]
     fn single_csharp_file_applies_nuget_config_registries() {
         let content = r#"
@@ -2337,7 +2337,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(deps[1].registry_urls, vec!["https://contoso.com/packages/"]);
     }
 
-    // Ported: "extracts msbuild-sdks from global.json" — nuget/extract.spec.ts line 461
+    // Ported: "extracts msbuild-sdks from global.json" — lib/modules/manager/nuget/extract.spec.ts line 461
     #[test]
     fn global_json_extracts_dotnet_sdk_and_msbuild_sdks() {
         let content = r#"{
@@ -2361,7 +2361,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(extracted.deps[1].dep_type, NuGetDepType::MsbuildSdk);
     }
 
-    // Ported: "extracts dotnet-sdk from global.json" — nuget/extract.spec.ts line 483
+    // Ported: "extracts dotnet-sdk from global.json" — lib/modules/manager/nuget/extract.spec.ts line 483
     #[test]
     fn global_json_extracts_dotnet_sdk_only() {
         let content = r#"{
@@ -2378,13 +2378,13 @@ Console.WriteLine("Hello World!");
         assert_eq!(extracted.deps[0].dep_type, NuGetDepType::DotnetSdk);
     }
 
-    // Ported: "handles malformed global.json" — nuget/extract.spec.ts line 501
+    // Ported: "handles malformed global.json" — lib/modules/manager/nuget/extract.spec.ts line 501
     #[test]
     fn global_json_malformed_returns_none() {
         assert!(extract_global_json("{{").is_none());
     }
 
-    // Ported: "handles not-a-nuget global.json" — nuget/extract.spec.ts line 509
+    // Ported: "handles not-a-nuget global.json" — lib/modules/manager/nuget/extract.spec.ts line 509
     #[test]
     fn global_json_without_nuget_content_returns_none() {
         assert!(extract_global_json(r#"{"sdk": {"rollForward": "latestMajor"}}"#).is_none());
@@ -2398,14 +2398,14 @@ Console.WriteLine("Hello World!");
     const ISSUE23526_INITIAL: &str = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>4.9.0</Version></PropertyGroup></Project>"#;
     const ISSUE23526_EXPECTED: &str = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><Version>4.10.0</Version></PropertyGroup></Project>"#;
 
-    // Ported: "bumps csproj version" — modules/manager/nuget/update.spec.ts line 17
+    // Ported: "bumps csproj version" — lib/modules/manager/nuget/update.spec.ts line 17
     #[test]
     fn nuget_bumps_csproj_version() {
         let result = bump_package_version(SIMPLE_CONTENT, "0.0.1", "patch");
         assert!(result.contains("<Version>0.0.2</Version>"));
     }
 
-    // Ported: "does not bump version twice" — modules/manager/nuget/update.spec.ts line 28
+    // Ported: "does not bump version twice" — lib/modules/manager/nuget/update.spec.ts line 28
     #[test]
     fn nuget_does_not_bump_twice() {
         let bumped = bump_package_version(SIMPLE_CONTENT, "0.0.1", "patch");
@@ -2413,7 +2413,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(bumped, bumped2);
     }
 
-    // Ported: "issue 23526 does not bump version incorrectly" — modules/manager/nuget/update.spec.ts line 43
+    // Ported: "issue 23526 does not bump version incorrectly" — lib/modules/manager/nuget/update.spec.ts line 43
     #[test]
     fn nuget_issue_23526_minor_bump() {
         let bumped = bump_package_version(ISSUE23526_INITIAL, "4.9.0", "minor");
@@ -2421,7 +2421,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(bumped2, ISSUE23526_EXPECTED);
     }
 
-    // Ported: "does not bump version if version is not a semantic version" — modules/manager/nuget/update.spec.ts line 58
+    // Ported: "does not bump version if version is not a semantic version" — lib/modules/manager/nuget/update.spec.ts line 58
     #[test]
     fn nuget_does_not_bump_non_semver() {
         let result = bump_package_version(MINIMUM_CONTENT, "1", "patch");
@@ -2429,14 +2429,14 @@ Console.WriteLine("Hello World!");
         assert!(!result.contains("<Version>2</Version>"));
     }
 
-    // Ported: "does not bump version if extract found no version" — modules/manager/nuget/update.spec.ts line 69
+    // Ported: "does not bump version if extract found no version" — lib/modules/manager/nuget/update.spec.ts line 69
     #[test]
     fn nuget_does_not_bump_empty_current_value() {
         let result = bump_package_version(MINIMUM_CONTENT, "", "patch");
         assert_eq!(result, MINIMUM_CONTENT);
     }
 
-    // Ported: "does not bump version if csproj has no version" — modules/manager/nuget/update.spec.ts line 75
+    // Ported: "does not bump version if csproj has no version" — lib/modules/manager/nuget/update.spec.ts line 75
     #[test]
     fn nuget_does_not_bump_when_no_version_tag() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>"#;
@@ -2444,21 +2444,21 @@ Console.WriteLine("Hello World!");
         assert_eq!(result, content);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/nuget/update.spec.ts line 87
+    // Ported: "returns content if bumping errors" — lib/modules/manager/nuget/update.spec.ts line 87
     #[test]
     fn nuget_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(SIMPLE_CONTENT, "0.0.1", "not_a_bump_type");
         assert_eq!(result, SIMPLE_CONTENT);
     }
 
-    // Ported: "bumps csproj version with prerelease semver level" — modules/manager/nuget/update.spec.ts line 96
+    // Ported: "bumps csproj version with prerelease semver level" — lib/modules/manager/nuget/update.spec.ts line 96
     #[test]
     fn nuget_bumps_prerelease_version() {
         let result = bump_package_version(PRERELEASE_CONTENT, "1.0.0-1", "prerelease");
         assert!(result.contains("<Version>1.0.0-2</Version>"));
     }
 
-    // Ported: "bumps csproj version prefix" — modules/manager/nuget/update.spec.ts line 107
+    // Ported: "bumps csproj version prefix" — lib/modules/manager/nuget/update.spec.ts line 107
     #[test]
     fn nuget_bumps_version_prefix() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>"#;
@@ -2468,7 +2468,7 @@ Console.WriteLine("Hello World!");
 
     // ── createNuGetConfigXml ─────────────────────────────────────────────────
 
-    // Ported: "returns xml with registries" — manager/nuget/config-formatter.spec.ts line 12
+    // Ported: "returns xml with registries" — lib/modules/manager/nuget/config-formatter.spec.ts line 12
     #[test]
     fn nuget_config_xml_basic_registries() {
         crate::util::host_rules::clear();
@@ -2498,7 +2498,7 @@ Console.WriteLine("Hello World!");
         assert!(!xml.contains("packageSourceMapping"));
     }
 
-    // Ported: "strips protocol version from feed url" — manager/nuget/config-formatter.spec.ts line 181
+    // Ported: "strips protocol version from feed url" — lib/modules/manager/nuget/config-formatter.spec.ts line 181
     #[test]
     fn nuget_config_xml_strips_protocol_version_from_hash() {
         crate::util::host_rules::clear();
@@ -2511,7 +2511,7 @@ Console.WriteLine("Hello World!");
         assert!(!xml.contains("#protocolVersion"));
     }
 
-    // Ported: "skips duplicate registry URLs" — manager/nuget/config-formatter.spec.ts line 265
+    // Ported: "skips duplicate registry URLs" — lib/modules/manager/nuget/config-formatter.spec.ts line 265
     #[test]
     fn nuget_config_xml_skips_duplicates() {
         crate::util::host_rules::clear();
@@ -2537,7 +2537,7 @@ Console.WriteLine("Hello World!");
         assert!(xml.contains(r#"key="Package source 1""#));
     }
 
-    // Ported: "includes packageSourceMapping when defined" — manager/nuget/config-formatter.spec.ts line 202
+    // Ported: "includes packageSourceMapping when defined" — lib/modules/manager/nuget/config-formatter.spec.ts line 202
     #[test]
     fn nuget_config_xml_package_source_mapping() {
         crate::util::host_rules::clear();
@@ -2564,7 +2564,7 @@ Console.WriteLine("Hello World!");
         assert!(xml.contains(r#"<package pattern="MySpecialPackage" />"#));
     }
 
-    // Ported: "excludes packageSourceMapping when undefined" — manager/nuget/config-formatter.spec.ts line 245
+    // Ported: "excludes packageSourceMapping when undefined" — lib/modules/manager/nuget/config-formatter.spec.ts line 245
     #[test]
     fn nuget_config_xml_no_package_source_mapping() {
         crate::util::host_rules::clear();
@@ -2576,7 +2576,7 @@ Console.WriteLine("Hello World!");
         assert!(!xml.contains("packageSourceMapping"));
     }
 
-    // Ported: "returns xml with authenticated registries" — manager/nuget/config-formatter.spec.ts line 58
+    // Ported: "returns xml with authenticated registries" — lib/modules/manager/nuget/config-formatter.spec.ts line 58
     #[test]
     fn nuget_config_xml_with_credentials() {
         crate::util::host_rules::clear();
@@ -2599,7 +2599,7 @@ Console.WriteLine("Hello World!");
         assert!(xml.contains(r#"<add key="ValidAuthenticationTypes" value="basic" />"#));
     }
 
-    // Ported: "escapes registry credential names containing special characters" — manager/nuget/config-formatter.spec.ts line 138
+    // Ported: "escapes registry credential names containing special characters" — lib/modules/manager/nuget/config-formatter.spec.ts line 138
     #[test]
     fn nuget_config_xml_escapes_special_chars_in_names() {
         crate::util::host_rules::clear();
@@ -2642,7 +2642,7 @@ Console.WriteLine("Hello World!");
 
     // ── nuget/util.spec.ts ───────────────────────────────────────────────────
 
-    // Ported: "finds the version in a later property group" — nuget/util.spec.ts line 17
+    // Ported: "finds the version in a later property group" — lib/modules/manager/nuget/util.spec.ts line 17
     #[test]
     fn find_version_in_later_property_group() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup><PropertyGroup><Version>0.0.2</Version></PropertyGroup></Project>"#;
@@ -2650,7 +2650,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(version, Some("0.0.2".to_owned()));
     }
 
-    // Ported: "picks version over versionprefix" — nuget/util.spec.ts line 28
+    // Ported: "picks version over versionprefix" — lib/modules/manager/nuget/util.spec.ts line 28
     #[test]
     fn find_version_prefers_version_over_versionprefix() {
         let content = r#"<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>0.0.5</VersionPrefix></PropertyGroup><PropertyGroup><Version>0.0.2</Version></PropertyGroup></Project>"#;
@@ -2658,7 +2658,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(version, Some("0.0.2".to_owned()));
     }
 
-    // Ported: "reads nuget config file" — nuget/util.spec.ts line 41
+    // Ported: "reads nuget config file" — lib/modules/manager/nuget/util.spec.ts line 41
     #[test]
     fn get_configured_registries_reads_nuget_config() {
         let config = r#"<configuration><packageSources><clear/><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/><add key="contoso.com" value="https://contoso.com/packages/"/></packageSources></configuration>"#;
@@ -2668,7 +2668,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(registries[1].url, "https://contoso.com/packages/");
     }
 
-    // Ported: "deduplicates registries" — nuget/util.spec.ts line 78
+    // Ported: "deduplicates registries" — lib/modules/manager/nuget/util.spec.ts line 78
     #[test]
     fn get_configured_registries_deduplicates() {
         let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3"/></packageSources></configuration>"#;
@@ -2680,7 +2680,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "reads nuget config file with default registry" — nuget/util.spec.ts line 99
+    // Ported: "reads nuget config file with default registry" — lib/modules/manager/nuget/util.spec.ts line 99
     #[test]
     fn get_configured_registries_with_default_registry() {
         let config = r#"<configuration><packageSources><add key="contoso.com" value="https://contoso.com/packages/"/></packageSources><disabledPackageSources/></configuration>"#;
@@ -2690,7 +2690,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(registries[1].name.as_deref(), Some("contoso.com"));
     }
 
-    // Ported: "reads nuget config file with default registry disabled and added sources" — nuget/util.spec.ts line 134
+    // Ported: "reads nuget config file with default registry disabled and added sources" — lib/modules/manager/nuget/util.spec.ts line 134
     #[test]
     fn get_configured_registries_default_disabled_with_added_sources() {
         let config = r#"<configuration><packageSources><clear/><add key="contoso" value="https://contoso.com/packages/"/></packageSources><disabledPackageSources><add key="nuget.org"/></disabledPackageSources></configuration>"#;
@@ -2699,7 +2699,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(registries[0].url, "https://contoso.com/packages/");
     }
 
-    // Ported: "reads nuget config file with default registry disabled given default registry added" — nuget/util.spec.ts line 157
+    // Ported: "reads nuget config file with default registry disabled given default registry added" — lib/modules/manager/nuget/util.spec.ts line 157
     #[test]
     fn get_configured_registries_default_disabled_given_default_added() {
         let config = r#"<configuration><packageSources><clear/><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources><add key="nuget.org"/></disabledPackageSources></configuration>"#;
@@ -2708,7 +2708,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(registries[0].url, "https://api.nuget.org/v3/index.json");
     }
 
-    // Ported: "reads nuget config file with unknown disabled source" — nuget/util.spec.ts line 181
+    // Ported: "reads nuget config file with unknown disabled source" — lib/modules/manager/nuget/util.spec.ts line 181
     #[test]
     fn get_configured_registries_unknown_disabled_source() {
         let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources><add key="unknown"/></disabledPackageSources></configuration>"#;
@@ -2716,7 +2716,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(registries.len(), 2); // default + nuget.org
     }
 
-    // Ported: "reads nuget config file with disabled source with value false" — nuget/util.spec.ts line 208
+    // Ported: "reads nuget config file with disabled source with value false" — lib/modules/manager/nuget/util.spec.ts line 208
     #[test]
     fn get_configured_registries_disabled_source_with_value_false() {
         let config = r#"<configuration><packageSources><add key="nuget.org" value="https://api.nuget.org/v3/index.json"/></packageSources><disabledPackageSources><add key="nuget.org" value="false"/></disabledPackageSources></configuration>"#;
@@ -2724,7 +2724,7 @@ Console.WriteLine("Hello World!");
         assert_eq!(registries.len(), 2);
     }
 
-    // Ported: "reads nuget config file without packageSources and ignores disabledPackageSources" — nuget/util.spec.ts line 237
+    // Ported: "reads nuget config file without packageSources and ignores disabledPackageSources" — lib/modules/manager/nuget/util.spec.ts line 237
     #[test]
     fn get_configured_registries_no_package_sources() {
         let config = r#"<configuration><disabledPackageSources><add key="nuget.org"/></disabledPackageSources></configuration>"#;
@@ -2732,7 +2732,7 @@ Console.WriteLine("Hello World!");
         assert!(registries.is_empty());
     }
 
-    // Ported: "applies registry to package name via source mapping" — nuget/util.spec.ts line 254
+    // Ported: "applies registry to package name via source mapping" — lib/modules/manager/nuget/util.spec.ts line 254
     #[test]
     fn apply_registries_with_source_mapping() {
         let mut dep = NuGetPackageDependency {
@@ -2751,7 +2751,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "applies registry to package name case insensitive" — nuget/util.spec.ts line 323
+    // Ported: "applies registry to package name case insensitive" — lib/modules/manager/nuget/util.spec.ts line 323
     #[test]
     fn apply_registries_case_insensitive() {
         let mut dep = NuGetPackageDependency {
@@ -2770,7 +2770,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "applies all registries to package name" — nuget/util.spec.ts line 343
+    // Ported: "applies all registries to package name" — lib/modules/manager/nuget/util.spec.ts line 343
     #[test]
     fn apply_registries_all_matching() {
         let mut dep = NuGetPackageDependency {
@@ -2799,7 +2799,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "applies nothing" — nuget/util.spec.ts line 371
+    // Ported: "applies nothing" — lib/modules/manager/nuget/util.spec.ts line 371
     #[test]
     fn apply_registries_no_match() {
         let mut dep = NuGetPackageDependency {
@@ -2810,25 +2810,25 @@ Console.WriteLine("Hello World!");
         assert!(dep.registry_urls.is_none());
     }
 
-    // Ported: "not found" — nuget/util.spec.ts line 386
+    // Ported: "not found" — lib/modules/manager/nuget/util.spec.ts line 386
     #[test]
     fn find_global_json_not_found() {
         assert!(extract_global_json("{}").is_none());
     }
 
-    // Ported: "no content" — nuget/util.spec.ts line 392
+    // Ported: "no content" — lib/modules/manager/nuget/util.spec.ts line 392
     #[test]
     fn find_global_json_no_content() {
         assert!(extract_global_json("").is_none());
     }
 
-    // Ported: "fails to parse" — nuget/util.spec.ts line 398
+    // Ported: "fails to parse" — lib/modules/manager/nuget/util.spec.ts line 398
     #[test]
     fn find_global_json_fails_to_parse() {
         assert!(extract_global_json("{{").is_none());
     }
 
-    // Ported: "parses" — nuget/util.spec.ts line 405
+    // Ported: "parses" — lib/modules/manager/nuget/util.spec.ts line 405
     #[test]
     fn find_global_json_parses() {
         let content = r#"{"sdk": {"version": "5.0.302", "rollForward": "latestMajor"}, "msbuild-sdks": {"My.Custom.Sdk": "5.0.0"}}"#;
@@ -2839,7 +2839,7 @@ Console.WriteLine("Hello World!");
 
     // ── package-tree tests ──────────────────────────────────────────────────
 
-    // Ported: "returns self for single project" — manager/nuget/package-tree.spec.ts line 32
+    // Ported: "returns self for single project" — lib/modules/manager/nuget/package-tree.spec.ts line 32
     #[test]
     fn package_tree_returns_self_for_single_project() {
         let mut files = std::collections::HashMap::new();
@@ -2861,7 +2861,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns self for two projects with no references" — manager/nuget/package-tree.spec.ts line 45
+    // Ported: "returns self for two projects with no references" — lib/modules/manager/nuget/package-tree.spec.ts line 45
     #[test]
     fn package_tree_returns_self_for_two_projects_no_references() {
         let mut files = std::collections::HashMap::new();
@@ -2890,7 +2890,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns projects for two projects with one reference" — manager/nuget/package-tree.spec.ts line 60
+    // Ported: "returns projects for two projects with one reference" — lib/modules/manager/nuget/package-tree.spec.ts line 60
     #[test]
     fn package_tree_returns_projects_for_two_with_one_reference() {
         let mut files = std::collections::HashMap::new();
@@ -2915,7 +2915,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns project for two projects with one reference and central versions" — manager/nuget/package-tree.spec.ts line 77
+    // Ported: "returns project for two projects with one reference and central versions" — lib/modules/manager/nuget/package-tree.spec.ts line 77
     #[test]
     fn package_tree_returns_projects_with_central_versions() {
         let mut files = std::collections::HashMap::new();
@@ -2945,7 +2945,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns projects for two projects with one reference and Directory.Build.props" — manager/nuget/package-tree.spec.ts line 99
+    // Ported: "returns projects for two projects with one reference and Directory.Build.props" — lib/modules/manager/nuget/package-tree.spec.ts line 99
     #[test]
     fn package_tree_returns_projects_with_directory_build_props() {
         let mut files = std::collections::HashMap::new();
@@ -2975,7 +2975,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns only projects under nested Directory.Build.props directory" — manager/nuget/package-tree.spec.ts line 121
+    // Ported: "returns only projects under nested Directory.Build.props directory" — lib/modules/manager/nuget/package-tree.spec.ts line 121
     #[test]
     fn package_tree_returns_only_projects_under_nested_props() {
         let mut files = std::collections::HashMap::new();
@@ -3002,7 +3002,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns project for two projects with one reference and global.json" — manager/nuget/package-tree.spec.ts line 143
+    // Ported: "returns project for two projects with one reference and global.json" — lib/modules/manager/nuget/package-tree.spec.ts line 143
     #[test]
     fn package_tree_returns_projects_with_global_json() {
         let mut files = std::collections::HashMap::new();
@@ -3027,7 +3027,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns projects for three projects with two linear references" — manager/nuget/package-tree.spec.ts line 163
+    // Ported: "returns projects for three projects with two linear references" — lib/modules/manager/nuget/package-tree.spec.ts line 163
     #[test]
     fn package_tree_returns_projects_three_linear() {
         let mut files = std::collections::HashMap::new();
@@ -3095,7 +3095,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "returns projects for three projects with two tree-like references" — manager/nuget/package-tree.spec.ts line 197
+    // Ported: "returns projects for three projects with two tree-like references" — lib/modules/manager/nuget/package-tree.spec.ts line 197
     #[test]
     fn package_tree_returns_projects_three_treelike() {
         let mut files = std::collections::HashMap::new();
@@ -3157,7 +3157,7 @@ Console.WriteLine("Hello World!");
         );
     }
 
-    // Ported: "throws error on circular reference" — manager/nuget/package-tree.spec.ts line 229
+    // Ported: "throws error on circular reference" — lib/modules/manager/nuget/package-tree.spec.ts line 229
     #[test]
     fn package_tree_throws_on_circular_reference() {
         let mut files = std::collections::HashMap::new();
@@ -3170,7 +3170,7 @@ Console.WriteLine("Hello World!");
         assert!(result.unwrap_err().contains("Circular reference"));
     }
 
-    // Ported: "skips on invalid xml file" — manager/nuget/package-tree.spec.ts line 245
+    // Ported: "skips on invalid xml file" — lib/modules/manager/nuget/package-tree.spec.ts line 245
     #[test]
     fn package_tree_skips_invalid_xml() {
         let mut files = std::collections::HashMap::new();

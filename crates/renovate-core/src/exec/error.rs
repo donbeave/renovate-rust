@@ -112,7 +112,7 @@ mod tests {
         assert!(err.source.is_some());
     }
 
-    // Ported: "throws if an error occurs" — util/exec/common.spec.ts line 241
+    // Ported: "throws if an error occurs" — lib/util/exec/common.spec.ts line 241
     #[test]
     fn exec_error_contains_cmd_and_message() {
         let err = ExecError::new("command failed", "ls -l");
@@ -120,7 +120,7 @@ mod tests {
         assert_eq!(err.cmd, "ls -l");
     }
 
-    // Ported: "throws if an error occurs, when using CommandWithOptions" — util/exec/common.spec.ts line 214
+    // Ported: "throws if an error occurs, when using CommandWithOptions" — lib/util/exec/common.spec.ts line 214
     #[test]
     fn exec_error_with_full_output() {
         let err = ExecError::new("failed", "cmd").with_output(
@@ -133,7 +133,7 @@ mod tests {
         assert_eq!(err.exit_code, Some(1));
     }
 
-    // Ported: "process terminated with SIGTERM" — util/exec/common.spec.ts line 618
+    // Ported: "process terminated with SIGTERM" — lib/util/exec/common.spec.ts line 618
     #[test]
     fn exec_error_display_truncates_long_stderr() {
         let long_stderr = "x".repeat(500);

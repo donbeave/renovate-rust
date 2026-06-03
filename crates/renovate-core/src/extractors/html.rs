@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "4.17.21");
     }
 
-    // Ported: "extractPackageFile" — html/extract.spec.ts line 8
+    // Ported: "extractPackageFile" — lib/modules/manager/html/extract.spec.ts line 8
     #[test]
     fn extracts_from_sample_html_fixture() {
         // Inlined from html/__fixtures__/sample.html — 10 cdnjs deps, unpkg URLs ignored.
@@ -204,7 +204,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null" — html/extract.spec.ts line 29
+    // Ported: "returns null" — lib/modules/manager/html/extract.spec.ts line 29
     #[test]
     fn nothing_html_returns_empty() {
         // No cdnjs URLs → returns null/empty

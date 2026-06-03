@@ -380,7 +380,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "isVersion("$input") === $expected" — versioning/conda/index.spec.ts line 4
+    // Ported: "isVersion("$input") === $expected" — lib/modules/versioning/conda/index.spec.ts line 4
     #[test]
     fn is_version_matches_renovate_conda_index_spec() {
         let cases = [
@@ -405,7 +405,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/conda/index.spec.ts line 26
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/conda/index.spec.ts line 26
     #[test]
     fn is_valid_matches_renovate_conda_index_spec() {
         let cases = [
@@ -429,7 +429,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable("$input") === $expected" — versioning/conda/index.spec.ts line 47
+    // Ported: "isStable("$input") === $expected" — lib/modules/versioning/conda/index.spec.ts line 47
     #[test]
     fn is_stable_matches_renovate_conda_index_spec() {
         let cases = [
@@ -443,7 +443,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals("$a", "$b") === $expected" — versioning/conda/index.spec.ts line 57
+    // Ported: "equals("$a", "$b") === $expected" — lib/modules/versioning/conda/index.spec.ts line 57
     #[test]
     fn equals_matches_renovate_conda_index_spec() {
         let cases = [
@@ -459,7 +459,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$a", "$b") === $expected" — versioning/conda/index.spec.ts line 69
+    // Ported: "matches("$a", "$b") === $expected" — lib/modules/versioning/conda/index.spec.ts line 69
     #[test]
     fn matches_matches_renovate_conda_index_spec() {
         let cases = [
@@ -476,7 +476,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor("$a") === $expected" — versioning/conda/index.spec.ts line 82
+    // Ported: "getMajor("$a") === $expected" — lib/modules/versioning/conda/index.spec.ts line 82
     #[test]
     fn get_major_matches_renovate_conda_index_spec() {
         let cases: &[(&str, Option<u64>)] = &[
@@ -491,7 +491,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMinor($a) === $expected" — versioning/conda/index.spec.ts line 93
+    // Ported: "getMinor($a) === $expected" — lib/modules/versioning/conda/index.spec.ts line 93
     #[test]
     fn get_minor_matches_renovate_conda_index_spec() {
         let cases: &[(&str, Option<u64>)] = &[
@@ -507,7 +507,7 @@ mod tests {
         }
     }
 
-    // Ported: "getPatch("$a") === $expected" — versioning/conda/index.spec.ts line 105
+    // Ported: "getPatch("$a") === $expected" — lib/modules/versioning/conda/index.spec.ts line 105
     #[test]
     fn get_patch_matches_renovate_conda_index_spec() {
         let cases: &[(&str, Option<u64>)] = &[
@@ -522,7 +522,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion("$version") === $isSingle" — versioning/conda/index.spec.ts line 116
+    // Ported: "isSingleVersion("$version") === $isSingle" — lib/modules/versioning/conda/index.spec.ts line 116
     #[test]
     fn is_single_version_matches_renovate_conda_index_spec() {
         let cases = [
@@ -544,13 +544,13 @@ mod tests {
         }
     }
 
-    // Ported: "always compatible" — versioning/conda/index.spec.ts line 131
+    // Ported: "always compatible" — lib/modules/versioning/conda/index.spec.ts line 131
     #[test]
     fn always_compatible_matches_renovate_conda_index_spec() {
         assert!(is_compatible("a", "b"));
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/conda/index.spec.ts line 146
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/conda/index.spec.ts line 146
     #[test]
     fn get_satisfying_version_matches_renovate_conda_index_spec() {
         let versions = &[
@@ -566,7 +566,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/conda/index.spec.ts line 157
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/conda/index.spec.ts line 157
     #[test]
     fn min_satisfying_version_matches_renovate_conda_index_spec() {
         let versions = &[
@@ -582,7 +582,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan("$a", "$b") === $result" — versioning/conda/index.spec.ts line 168
+    // Ported: "isGreaterThan("$a", "$b") === $result" — lib/modules/versioning/conda/index.spec.ts line 168
     #[test]
     fn is_greater_than_matches_renovate_conda_index_spec() {
         let cases = [("1.2.1", "1.2.0", true), ("1!1.0.0", "3.1.2", true)];
@@ -595,13 +595,13 @@ mod tests {
         }
     }
 
-    // Ported: "returns a pinned value" — versioning/conda/index.spec.ts line 176
+    // Ported: "returns a pinned value" — lib/modules/versioning/conda/index.spec.ts line 176
     #[test]
     fn get_pinned_value_matches_renovate_conda_index_spec() {
         assert_eq!(get_pinned_value("1.2.3"), "==1.2.3");
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion) === $expected" — versioning/conda/index.spec.ts line 180
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion) === $expected" — lib/modules/versioning/conda/index.spec.ts line 180
     #[test]
     fn get_new_value_matches_renovate_conda_index_spec() {
         let cases: &[(&str, &str, &str, &str, Option<&str>)] = &[

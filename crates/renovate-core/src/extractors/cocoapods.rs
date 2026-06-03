@@ -339,7 +339,7 @@ end
         assert!(extract("source 'https://cdn.cocoapods.org/'\n").is_empty());
     }
 
-    // Ported: "extracts from simple file" — cocoapods/extract.spec.ts line 13
+    // Ported: "extracts from simple file" — lib/modules/manager/cocoapods/extract.spec.ts line 13
     #[test]
     fn simple_podfile_fixture() {
         let content = r#"source 'https://github.com/Artsy/Specs.git'
@@ -391,7 +391,7 @@ pod 'm', :git => 'git@example.com:baz/baz.git', :tag => '1.0.0'
         );
     }
 
-    // Ported: "extracts from complex file" — cocoapods/extract.spec.ts line 42
+    // Ported: "extracts from complex file" — lib/modules/manager/cocoapods/extract.spec.ts line 42
     #[test]
     fn complex_podfile_fixture() {
         // Mirrors Podfile.complex fixture with 29 versioned pods + 4 unversioned.

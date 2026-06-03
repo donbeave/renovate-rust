@@ -189,7 +189,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/bazel/__fixtures__/metadata-with-yanked-versions.json"
     );
 
-    // Ported: "throws for error" — datasource/bazel/index.spec.ts line 26
+    // Ported: "throws for error" — lib/modules/datasource/bazel/index.spec.ts line 26
     #[tokio::test]
     async fn throws_for_network_error() {
         // Use an unreachable address to simulate a network error.
@@ -198,7 +198,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for 404" — datasource/bazel/index.spec.ts line 33
+    // Ported: "returns null for 404" — lib/modules/datasource/bazel/index.spec.ts line 33
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -215,7 +215,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty result" — datasource/bazel/index.spec.ts line 38
+    // Ported: "returns null for empty result" — lib/modules/datasource/bazel/index.spec.ts line 38
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -232,7 +232,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty 200 OK" — datasource/bazel/index.spec.ts line 43
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/bazel/index.spec.ts line 43
     #[tokio::test]
     async fn returns_null_for_empty_versions() {
         let server = MockServer::start().await;
@@ -252,7 +252,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — datasource/bazel/index.spec.ts line 51
+    // Ported: "throws for 5xx" — lib/modules/datasource/bazel/index.spec.ts line 51
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -267,7 +267,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "metadata without yanked versions" — datasource/bazel/index.spec.ts line 58
+    // Ported: "metadata without yanked versions" — lib/modules/datasource/bazel/index.spec.ts line 58
     #[tokio::test]
     async fn metadata_without_yanked_versions() {
         let server = MockServer::start().await;
@@ -296,7 +296,7 @@ mod tests {
         );
     }
 
-    // Ported: "metadata with yanked versions" — datasource/bazel/index.spec.ts line 77
+    // Ported: "metadata with yanked versions" — lib/modules/datasource/bazel/index.spec.ts line 77
     #[tokio::test]
     async fn metadata_with_yanked_versions() {
         let server = MockServer::start().await;
@@ -322,7 +322,7 @@ mod tests {
         assert!(result.source_url.is_none());
     }
 
-    // Ported: "should handle local file correctly" — datasource/bazel/index.spec.ts line 106
+    // Ported: "should handle local file correctly" — lib/modules/datasource/bazel/index.spec.ts line 106
     #[tokio::test]
     async fn local_file_handles_correctly() {
         let dir = tempfile::tempdir().unwrap();
@@ -361,7 +361,7 @@ mod tests {
         );
     }
 
-    // Ported: "should return null for invalid file path" — datasource/bazel/index.spec.ts line 135
+    // Ported: "should return null for invalid file path" — lib/modules/datasource/bazel/index.spec.ts line 135
     #[tokio::test]
     async fn local_file_returns_null_for_invalid_path() {
         let http = HttpClient::new().unwrap();
@@ -371,7 +371,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return null for empty file content" — datasource/bazel/index.spec.ts line 146
+    // Ported: "should return null for empty file content" — lib/modules/datasource/bazel/index.spec.ts line 146
     #[tokio::test]
     async fn local_file_returns_null_for_empty_content() {
         let dir = tempfile::tempdir().unwrap();
@@ -389,7 +389,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "parses metadata" — datasource/bazel/schema.spec.ts line 6
+    // Ported: "parses metadata" — lib/modules/datasource/bazel/schema.spec.ts line 6
     #[test]
     fn parses_bazel_metadata_schema() {
         let json = r#"{

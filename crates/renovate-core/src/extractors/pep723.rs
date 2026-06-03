@@ -252,7 +252,7 @@ fn normalize_name(name: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
+    // Ported: "should extract dependencies" — lib/modules/manager/pep723/extract.spec.ts line 10
     #[test]
     fn extracts_script_block_with_version() {
         let content = r#"#!/usr/bin/env python3
@@ -297,7 +297,7 @@ import requests
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
+    // Ported: "should extract dependencies" — lib/modules/manager/pep723/extract.spec.ts line 10
     #[test]
     fn handles_direct_reference() {
         let content = r#"# /// script
@@ -309,7 +309,7 @@ import requests
         assert_eq!(deps[0].skip_reason, Some(Pep723SkipReason::DirectReference));
     }
 
-    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
+    // Ported: "should extract dependencies" — lib/modules/manager/pep723/extract.spec.ts line 10
     #[test]
     fn normalizes_package_name() {
         let content = r#"# /// script
@@ -321,7 +321,7 @@ import requests
         assert_eq!(deps[0].name, "flask-utils");
     }
 
-    // Ported: "should extract dependencies" — manager/pep723/extract.spec.ts line 10
+    // Ported: "should extract dependencies" — lib/modules/manager/pep723/extract.spec.ts line 10
     #[test]
     fn extracts_pinned_version() {
         let content = r#"# /// script
@@ -334,7 +334,7 @@ import requests
         assert_eq!(deps[0].current_value, "==1.26.0");
     }
 
-    // Ported: "should extract dependencies" — modules/manager/pep723/utils.spec.ts line 6
+    // Ported: "should extract dependencies" — lib/modules/manager/pep723/utils.spec.ts line 6
     #[test]
     fn pep723_extract_should_extract_dependencies() {
         let content = "# /// script\n# requires-python = \">=3.11\"\n# dependencies = [\n#   \"requests==2.32.3\",\n#   \"rich>=13.8.0\",\n# ]\n# ///\n";
@@ -349,7 +349,7 @@ import requests
         assert!(result.deps[1].current_version.is_none());
     }
 
-    // Ported: "should skip invalid dependencies" — modules/manager/pep723/utils.spec.ts line 42
+    // Ported: "should skip invalid dependencies" — lib/modules/manager/pep723/utils.spec.ts line 42
     #[test]
     fn pep723_extract_should_skip_invalid_dependencies() {
         let content = "# /// script\n# requires-python = \"==3.11\"\n# dependencies = [\n#   \"requests==2.32.3\",\n#   \"==1.2.3\",\n# ]\n# ///\n";
@@ -359,21 +359,21 @@ import requests
         assert_eq!(result.deps[0].dep_name, "requests");
     }
 
-    // Ported: "should return null on missing dependencies" — modules/manager/pep723/utils.spec.ts line 71
+    // Ported: "should return null on missing dependencies" — lib/modules/manager/pep723/utils.spec.ts line 71
     #[test]
     fn pep723_extract_returns_none_on_missing_dependencies() {
         let content = "# /// script\n# requires-python = \">=3.11\"\n# ///\n";
         assert!(extract_pep723(content).is_none());
     }
 
-    // Ported: "should return null on invalid TOML" — modules/manager/pep723/utils.spec.ts line 84
+    // Ported: "should return null on invalid TOML" — lib/modules/manager/pep723/utils.spec.ts line 84
     #[test]
     fn pep723_extract_returns_none_on_invalid_toml() {
         let content = "# /// script\n# requires-python\n# dependencies = [\n#   \"requests==2.32.3\",\n# ]\n# ///\n";
         assert!(extract_pep723(content).is_none());
     }
 
-    // Ported: "should return null if there is no PEP 723 metadata" — modules/manager/pep723/utils.spec.ts line 101
+    // Ported: "should return null if there is no PEP 723 metadata" — lib/modules/manager/pep723/utils.spec.ts line 101
     #[test]
     fn pep723_extract_returns_none_if_no_metadata_block() {
         let content = "if True:\n    print(\"requires-python>=3.11\")\n";

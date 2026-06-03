@@ -724,7 +724,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns diff files" — modules/platform/bitbucket-server/index.spec.ts line 2507
+    // Ported: "returns diff files" — lib/modules/platform/bitbucket-server/index.spec.ts line 2507
     #[test]
     fn massage_markdown_returns_diff_files() {
         let input = "<details><summary>foo</summary>bar</details>text<details>";
@@ -736,7 +736,7 @@ mod tests {
         assert!(!result.contains("<summary>"));
     }
 
-    // Ported: "sanitizes HTML comments in the body" — modules/platform/bitbucket-server/index.spec.ts line 2515
+    // Ported: "sanitizes HTML comments in the body" — lib/modules/platform/bitbucket-server/index.spec.ts line 2515
     #[test]
     fn massage_markdown_sanitizes_html_comments() {
         let input = "---\n\n- [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox\n- [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href=\"/some/link\">Update renovate/renovate to 16.1.2</a>\n\n---\n<!---->\nEmpty comment.\n<!-- This is another comment -->\nFollowed by some information.\n<!-- followed by some more comments -->";
@@ -747,7 +747,7 @@ mod tests {
         assert!(result.contains("Followed by some information."));
     }
 
-    // Ported: "resizes mend.io merge confidence badges" — modules/platform/bitbucket-server/index.spec.ts line 2530
+    // Ported: "resizes mend.io merge confidence badges" — lib/modules/platform/bitbucket-server/index.spec.ts line 2530
     #[test]
     fn massage_markdown_resizes_mend_badges() {
         let badge_url = "https://developer.mend.io/api/mc/badges/age/npm/yargs/18.0.0?slim=true";

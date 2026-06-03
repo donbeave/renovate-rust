@@ -87,7 +87,7 @@ pub fn is_breaking(current_version: &str, new_version: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isValid("$version") === $expected" — versioning/python/index.spec.ts line 4
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/python/index.spec.ts line 4
     #[test]
     fn is_valid_cases() {
         assert!(is_valid("17.04.00"));
@@ -110,7 +110,7 @@ mod tests {
         assert!(!is_valid("https://github.com/renovatebot/renovate.git"));
     }
 
-    // Ported: "matches("$version", "$range") === "$expected"" — versioning/python/index.spec.ts line 28
+    // Ported: "matches("$version", "$range") === "$expected"" — lib/modules/versioning/python/index.spec.ts line 28
     #[test]
     fn matches_cases() {
         assert!(matches("4.2.0", "4.2, >= 3.0, < 5.0.0"));
@@ -132,7 +132,7 @@ mod tests {
         assert!(!matches("1.4.6", "== 1.4.5"));
     }
 
-    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — versioning/python/index.spec.ts line 54
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — lib/modules/versioning/python/index.spec.ts line 54
     #[test]
     fn is_less_than_range_cases() {
         assert!(is_less_than_range("0.9.0", ">= 1.0.0 <= 2.0.0"));
@@ -140,7 +140,7 @@ mod tests {
         assert!(!is_less_than_range("1.9.0", "== 2.7.*"));
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/python/index.spec.ts line 66
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/python/index.spec.ts line 66
     #[test]
     fn min_satisfying_version_cases() {
         assert_eq!(
@@ -177,7 +177,7 @@ mod tests {
         );
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/python/index.spec.ts line 83
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/python/index.spec.ts line 83
     #[test]
     fn get_satisfying_version_cases() {
         assert_eq!(
@@ -205,7 +205,7 @@ mod tests {
         );
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/python/index.spec.ts line 97
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/python/index.spec.ts line 97
     // Delegates entirely to poetry::get_new_value; same cases as poetry spec.
     #[test]
     #[allow(clippy::type_complexity)]
@@ -226,7 +226,7 @@ mod tests {
         }
     }
 
-    // Ported: "subset("$a", "$b") === $expected" — versioning/python/index.spec.ts line 160
+    // Ported: "subset("$a", "$b") === $expected" — lib/modules/versioning/python/index.spec.ts line 160
     #[test]
     fn subset_cases() {
         assert_eq!(subset("1.0.0", "1.0.0"), Some(true));
@@ -247,7 +247,7 @@ mod tests {
         assert_eq!(subset("1.2.3foo", "~1.1.0"), None);
     }
 
-    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — versioning/python/index.spec.ts line 182
+    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — lib/modules/versioning/python/index.spec.ts line 182
     #[test]
     fn is_breaking_cases() {
         assert!(is_breaking("3.7", "3.8"));

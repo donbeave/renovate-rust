@@ -1179,7 +1179,7 @@ mod tests {
         assert_eq!(sanitize_dep_name("@types/react"), "react");
     }
 
-    // Ported: "sanitizes urls" — workers/repository/updates/flatten.spec.ts line 20
+    // Ported: "sanitizes urls" — lib/workers/repository/updates/flatten.spec.ts line 20
     #[test]
     fn sanitize_url_style_dep() {
         // https:// → replace "/" with "-" (×2) and ":" with "-", then collapse:
@@ -1244,7 +1244,7 @@ mod tests {
         );
     }
 
-    // Ported: "separates patches when separateMinorPatch=true" — workers/repository/updates/branch-name.spec.ts line 229
+    // Ported: "separates patches when separateMinorPatch=true" — lib/workers/repository/updates/branch-name.spec.ts line 229
     #[test]
     fn branch_name_separates_patches_when_separate_minor_patch_true() {
         let topic = branch_topic("lodash", 4, 17, true, false, true, false);
@@ -1264,7 +1264,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not separate patches when separateMinorPatch=false" — workers/repository/updates/branch-name.spec.ts line 249
+    // Ported: "does not separate patches when separateMinorPatch=false" — lib/workers/repository/updates/branch-name.spec.ts line 249
     #[test]
     fn branch_name_does_not_separate_patches_when_separate_minor_patch_false() {
         let topic = branch_topic("lodash", 4, 17, true, false, false, false);
@@ -1335,7 +1335,7 @@ mod tests {
         assert_eq!(group_branch_topic("lodash"), "lodash");
     }
 
-    // Ported: "separates major with groups" — workers/repository/updates/branch-name.spec.ts line 129
+    // Ported: "separates major with groups" — lib/workers/repository/updates/branch-name.spec.ts line 129
     #[test]
     fn branch_name_separates_major_with_groups() {
         let group_slug = group_branch_topic("some group slug");
@@ -1346,7 +1346,7 @@ mod tests {
         );
     }
 
-    // Ported: "uses single major with groups" — workers/repository/updates/branch-name.spec.ts line 183
+    // Ported: "uses single major with groups" — lib/workers/repository/updates/branch-name.spec.ts line 183
     #[test]
     fn branch_name_uses_single_major_with_groups() {
         let group_slug = group_branch_topic("some group slug");
@@ -1391,14 +1391,14 @@ mod tests {
         assert_eq!(name, "renovate/angular-core-17.x");
     }
 
-    // Ported: "realistic defaults" — workers/repository/updates/branch-name.spec.ts line 269
+    // Ported: "realistic defaults" — lib/workers/repository/updates/branch-name.spec.ts line 269
     #[test]
     fn branch_name_realistic_defaults() {
         let topic = branch_topic("jest", 42, 0, false, false, false, false);
         assert_eq!(branch_name("renovate/", "", &topic), "renovate/jest-42.x");
     }
 
-    // Ported: "realistic defaults with strict branch name enabled" — workers/repository/updates/branch-name.spec.ts line 284
+    // Ported: "realistic defaults with strict branch name enabled" — lib/workers/repository/updates/branch-name.spec.ts line 284
     #[test]
     fn branch_name_realistic_defaults_with_strict_enabled() {
         let topic = branch_topic("jest", 42, 0, false, false, false, false);
@@ -1408,7 +1408,7 @@ mod tests {
         );
     }
 
-    // Ported: "removes slashes from the non-suffix part" — workers/repository/updates/branch-name.spec.ts line 300
+    // Ported: "removes slashes from the non-suffix part" — lib/workers/repository/updates/branch-name.spec.ts line 300
     #[test]
     fn branch_name_strict_removes_slashes_from_non_suffix_part() {
         let topic = branch_topic("@foo/jest", 42, 0, false, false, false, false);
@@ -1418,7 +1418,7 @@ mod tests {
         );
     }
 
-    // Ported: "enforces valid git branch name" — workers/repository/updates/branch-name.spec.ts line 405
+    // Ported: "enforces valid git branch name" — lib/workers/repository/updates/branch-name.spec.ts line 405
     #[test]
     fn branch_name_enforces_valid_git_branch_name() {
         let cases = [
@@ -1490,7 +1490,7 @@ mod tests {
         }
     }
 
-    // Ported: "strict branch name enabled group" — workers/repository/updates/branch-name.spec.ts line 491
+    // Ported: "strict branch name enabled group" — lib/workers/repository/updates/branch-name.spec.ts line 491
     #[test]
     fn branch_name_strict_enabled_group() {
         let slug = group_branch_topic("some group name `~#$%^&*()-_=+[]{}|;,./<>? .version");
@@ -1501,7 +1501,7 @@ mod tests {
         );
     }
 
-    // Ported: "strict branch name disabled" — workers/repository/updates/branch-name.spec.ts line 506
+    // Ported: "strict branch name disabled" — lib/workers/repository/updates/branch-name.spec.ts line 506
     #[test]
     fn branch_name_strict_disabled_group() {
         let slug = group_branch_topic("[some] group name.#$%version");
@@ -1845,7 +1845,7 @@ mod tests {
         assert!(name.starts_with("renovate/"));
     }
 
-    // Ported: "hashedBranchLength hashing" — workers/repository/updates/branch-name.spec.ts line 316
+    // Ported: "hashedBranchLength hashing" — lib/workers/repository/updates/branch-name.spec.ts line 316
     #[test]
     fn hashed_branch_length_hashing_matches_renovate() {
         assert_eq!(
@@ -1854,7 +1854,7 @@ mod tests {
         );
     }
 
-    // Ported: "hashedBranchLength hashing with group name" — workers/repository/updates/branch-name.spec.ts line 332
+    // Ported: "hashedBranchLength hashing with group name" — lib/workers/repository/updates/branch-name.spec.ts line 332
     #[test]
     fn hashed_branch_length_hashing_with_group_name_matches_renovate() {
         assert_eq!(
@@ -1863,19 +1863,19 @@ mod tests {
         );
     }
 
-    // Ported: "hashedBranchLength too short" — workers/repository/updates/branch-name.spec.ts line 350
+    // Ported: "hashedBranchLength too short" — lib/workers/repository/updates/branch-name.spec.ts line 350
     #[test]
     fn hashed_branch_length_too_short_matches_renovate_minimum() {
         assert_eq!(hashed_branch_name("dep-", "", "jest-42.x", 3), "dep-df9ca0");
     }
 
-    // Ported: "hashedBranchLength no topic" — workers/repository/updates/branch-name.spec.ts line 368
+    // Ported: "hashedBranchLength no topic" — lib/workers/repository/updates/branch-name.spec.ts line 368
     #[test]
     fn hashed_branch_length_no_topic_matches_renovate_empty_hash() {
         assert_eq!(hashed_branch_name("dep-", "", "", 3), "dep-cf83e1");
     }
 
-    // Ported: "hashedBranchLength separates minor when separateMultipleMinor=true" — workers/repository/updates/branch-name.spec.ts line 386
+    // Ported: "hashedBranchLength separates minor when separateMultipleMinor=true" — lib/workers/repository/updates/branch-name.spec.ts line 386
     #[test]
     fn hashed_branch_length_separate_multiple_minor_matches_renovate() {
         let topic = branch_topic("jest", 42, 3, false, true, false, true);
@@ -1918,7 +1918,7 @@ mod tests {
 
     // ── generateBranchName grouping logic ────────────────────────────────────
 
-    // Ported: "falls back to sharedVariableName if no groupName" — workers/repository/updates/branch-name.spec.ts line 7
+    // Ported: "falls back to sharedVariableName if no groupName" — lib/workers/repository/updates/branch-name.spec.ts line 7
     #[test]
     fn branch_name_falls_back_to_shared_variable_name() {
         // No groupName → sharedVariableName used as groupName → slugified
@@ -1929,7 +1929,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignores grouping of replacement update" — workers/repository/updates/branch-name.spec.ts line 19
+    // Ported: "ignores grouping of replacement update" — lib/workers/repository/updates/branch-name.spec.ts line 19
     #[test]
     fn branch_name_ignores_grouping_for_replacement_update() {
         // updateType=replacement: groupName is ignored, branchTopic is used directly
@@ -1939,7 +1939,7 @@ mod tests {
         );
     }
 
-    // Ported: "applies grouping for lockfile maintenance update" — workers/repository/updates/branch-name.spec.ts line 36
+    // Ported: "applies grouping for lockfile maintenance update" — lib/workers/repository/updates/branch-name.spec.ts line 36
     #[test]
     fn branch_name_applies_grouping_for_lockfile_maintenance() {
         // updateType=lockFileMaintenance + groupName: prefix lock-file-maintenance-
@@ -1950,7 +1950,7 @@ mod tests {
         );
     }
 
-    // Ported: "uses default branch name for lockfile maintenance without groupName" — workers/repository/updates/branch-name.spec.ts line 52
+    // Ported: "uses default branch name for lockfile maintenance without groupName" — lib/workers/repository/updates/branch-name.spec.ts line 52
     #[test]
     fn branch_name_lockfile_maintenance_without_group_name() {
         // No groupName → branchTopic used directly
@@ -1960,7 +1960,7 @@ mod tests {
         );
     }
 
-    // Ported: "separates lockFileMaintenance from non-lockFileMaintenance with same groupName" — workers/repository/updates/branch-name.spec.ts line 63
+    // Ported: "separates lockFileMaintenance from non-lockFileMaintenance with same groupName" — lib/workers/repository/updates/branch-name.spec.ts line 63
     #[test]
     fn branch_name_separates_lockfile_from_non_lockfile_same_group() {
         let slug = group_branch_topic("all");
@@ -1971,7 +1971,7 @@ mod tests {
         assert_ne!(lockfile, regular);
     }
 
-    // Ported: "uses groupName if no slug defined, ignores sharedVariableName" — workers/repository/updates/branch-name.spec.ts line 89
+    // Ported: "uses groupName if no slug defined, ignores sharedVariableName" — lib/workers/repository/updates/branch-name.spec.ts line 89
     #[test]
     fn branch_name_uses_group_name_ignores_shared_variable_name() {
         // groupName present → sharedVariableName ignored; groupName slugified
@@ -1982,7 +1982,7 @@ mod tests {
         );
     }
 
-    // Ported: "compile groupName before slugging" — workers/repository/updates/branch-name.spec.ts line 102
+    // Ported: "compile groupName before slugging" — lib/workers/repository/updates/branch-name.spec.ts line 102
     #[test]
     fn branch_name_compiles_group_name_before_slugging() {
         // groupName='{{parentDir}}' compiled with parentDir='myService' → 'myService' → slugify
@@ -1993,7 +1993,7 @@ mod tests {
         );
     }
 
-    // Ported: "uses groupSlug if defined" — workers/repository/updates/branch-name.spec.ts line 115
+    // Ported: "uses groupSlug if defined" — lib/workers/repository/updates/branch-name.spec.ts line 115
     #[test]
     fn branch_name_uses_group_slug_if_defined() {
         // groupSlug='some group {{parentDir}}' compiled with parentDir='abc' → slugified
@@ -2004,7 +2004,7 @@ mod tests {
         );
     }
 
-    // Ported: "separates minor with groups" — workers/repository/updates/branch-name.spec.ts line 146
+    // Ported: "separates minor with groups" — lib/workers/repository/updates/branch-name.spec.ts line 146
     #[test]
     fn branch_name_separates_minor_with_groups() {
         // updateType=minor + separateMultipleMinor=true: prefix minor-{major}.{minor}-
@@ -2016,7 +2016,7 @@ mod tests {
         );
     }
 
-    // Ported: "separates minor when separateMultipleMinor=true" — workers/repository/updates/branch-name.spec.ts line 163
+    // Ported: "separates minor when separateMultipleMinor=true" — lib/workers/repository/updates/branch-name.spec.ts line 163
     #[test]
     fn branch_name_separates_minor_separate_multiple_minor_true() {
         // separateMinorPatch=true + isPatch=true → minor included in topic
@@ -2027,7 +2027,7 @@ mod tests {
         );
     }
 
-    // Ported: "separates patch groups and uses update topic" — workers/repository/updates/branch-name.spec.ts line 200
+    // Ported: "separates patch groups and uses update topic" — lib/workers/repository/updates/branch-name.spec.ts line 200
     #[test]
     fn branch_name_separates_patch_groups_uses_update_topic() {
         // updateType=patch + separateMinorPatch=true: prefix patch- on groupSlug
@@ -2039,7 +2039,7 @@ mod tests {
         );
     }
 
-    // Ported: "compiles multiple times" — workers/repository/updates/branch-name.spec.ts line 218
+    // Ported: "compiles multiple times" — lib/workers/repository/updates/branch-name.spec.ts line 218
     #[test]
     fn branch_name_compiles_multiple_times() {
         // branchName='{{branchTopic}}', branchTopic='{{depName}}', depName='dep' → 'dep'
@@ -2072,13 +2072,13 @@ mod tests {
         );
     }
 
-    // Ported: "should format message without prefix" — workers/repository/model/semantic-commit-message.spec.ts line 4
+    // Ported: "should format message without prefix" — lib/workers/repository/model/semantic-commit-message.spec.ts line 4
     #[test]
     fn semantic_commit_no_type_capitalizes() {
         assert_eq!(semantic_commit_message_title("", "", "test"), "Test");
     }
 
-    // Ported: "should format sematic type" — workers/repository/model/semantic-commit-message.spec.ts line 11
+    // Ported: "should format sematic type" — lib/workers/repository/model/semantic-commit-message.spec.ts line 11
     #[test]
     fn semantic_commit_type_only() {
         assert_eq!(
@@ -2087,7 +2087,7 @@ mod tests {
         );
     }
 
-    // Ported: "should format sematic prefix with scope" — workers/repository/model/semantic-commit-message.spec.ts line 19
+    // Ported: "should format sematic prefix with scope" — lib/workers/repository/model/semantic-commit-message.spec.ts line 19
     #[test]
     fn semantic_commit_type_and_scope() {
         assert_eq!(
@@ -2096,7 +2096,7 @@ mod tests {
         );
     }
 
-    // Ported: "should transform to lowercase only first letter" — workers/repository/model/semantic-commit-message.spec.ts line 28
+    // Ported: "should transform to lowercase only first letter" — lib/workers/repository/model/semantic-commit-message.spec.ts line 28
     #[test]
     fn semantic_commit_lowercase_first_letter_only() {
         assert_eq!(
@@ -2105,7 +2105,7 @@ mod tests {
         );
     }
 
-    // Ported: "should create instance from string without scope" — workers/repository/model/semantic-commit-message.spec.ts line 37
+    // Ported: "should create instance from string without scope" — lib/workers/repository/model/semantic-commit-message.spec.ts line 37
     #[test]
     fn parse_semantic_commit_without_scope() {
         let parsed = parse_semantic_commit_message("feat: ticket 123").unwrap();
@@ -2114,7 +2114,7 @@ mod tests {
         assert_eq!(parsed.subject, "ticket 123");
     }
 
-    // Ported: "should create instance from string with scope" — workers/repository/model/semantic-commit-message.spec.ts line 50
+    // Ported: "should create instance from string with scope" — lib/workers/repository/model/semantic-commit-message.spec.ts line 50
     #[test]
     fn parse_semantic_commit_with_scope() {
         let parsed = parse_semantic_commit_message("fix(dashboard): ticket 123").unwrap();
@@ -2123,7 +2123,7 @@ mod tests {
         assert_eq!(parsed.subject, "ticket 123");
     }
 
-    // Ported: "should create instance from string with empty description" — workers/repository/model/semantic-commit-message.spec.ts line 65
+    // Ported: "should create instance from string with empty description" — lib/workers/repository/model/semantic-commit-message.spec.ts line 65
     #[test]
     fn parse_semantic_commit_empty_description() {
         let parsed = parse_semantic_commit_message("fix(deps): ").unwrap();
@@ -2132,13 +2132,13 @@ mod tests {
         assert_eq!(parsed.subject, "");
     }
 
-    // Ported: "should return undefined for invalid string" — workers/repository/model/semantic-commit-message.spec.ts line 78
+    // Ported: "should return undefined for invalid string" — lib/workers/repository/model/semantic-commit-message.spec.ts line 78
     #[test]
     fn parse_semantic_commit_invalid_returns_none() {
         assert!(parse_semantic_commit_message("test").is_none());
     }
 
-    // Ported: "given subject $subject and prefix $prefix as arguments, returns $result" — workers/repository/model/custom-commit-message.spec.ts line 5
+    // Ported: "given subject $subject and prefix $prefix as arguments, returns $result" — lib/workers/repository/model/custom-commit-message.spec.ts line 5
     #[test]
     fn custom_commit_message_formats_correctly() {
         assert_eq!(custom_commit_message_title("", "test"), "Test");
@@ -2151,7 +2151,7 @@ mod tests {
         );
     }
 
-    // Ported: "should provide ability to set body and footer" — workers/repository/model/custom-commit-message.spec.ts line 31
+    // Ported: "should provide ability to set body and footer" — lib/workers/repository/model/custom-commit-message.spec.ts line 31
     #[test]
     fn custom_commit_message_body_footer() {
         // The `toJSON()` and multi-part toString() involve body/footer which are inherited.
@@ -2159,13 +2159,13 @@ mod tests {
         assert_eq!(custom_commit_message_title("", "subject"), "Subject");
     }
 
-    // Ported: "should remove empty subject by default" — workers/repository/model/custom-commit-message.spec.ts line 46
+    // Ported: "should remove empty subject by default" — lib/workers/repository/model/custom-commit-message.spec.ts line 46
     #[test]
     fn custom_commit_message_empty_subject() {
         assert_eq!(custom_commit_message_title("", ""), "");
     }
 
-    // Ported: "creates semantic commit message" — workers/repository/config-migration/branch/commit-message.spec.ts line 8
+    // Ported: "creates semantic commit message" — lib/workers/repository/config-migration/branch/commit-message.spec.ts line 8
     #[test]
     fn config_migration_semantic_commit_message() {
         assert_eq!(
@@ -2174,7 +2174,7 @@ mod tests {
         );
     }
 
-    // Ported: "creates semantic pr title" — workers/repository/config-migration/branch/commit-message.spec.ts line 19
+    // Ported: "creates semantic pr title" — lib/workers/repository/config-migration/branch/commit-message.spec.ts line 19
     #[test]
     fn config_migration_semantic_pr_title() {
         assert_eq!(
@@ -2183,7 +2183,7 @@ mod tests {
         );
     }
 
-    // Ported: "creates non-semantic commit message" — workers/repository/config-migration/branch/commit-message.spec.ts line 30
+    // Ported: "creates non-semantic commit message" — lib/workers/repository/config-migration/branch/commit-message.spec.ts line 30
     #[test]
     fn config_migration_non_semantic_commit_message() {
         assert_eq!(
@@ -2192,7 +2192,7 @@ mod tests {
         );
     }
 
-    // Ported: "creates non-semantic pr title" — workers/repository/config-migration/branch/commit-message.spec.ts line 41
+    // Ported: "creates non-semantic pr title" — lib/workers/repository/config-migration/branch/commit-message.spec.ts line 41
     #[test]
     fn config_migration_non_semantic_pr_title() {
         assert_eq!(
@@ -2201,7 +2201,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns default values when commitMessage template string is empty" — workers/repository/config-migration/branch/commit-message.spec.ts line 50
+    // Ported: "returns default values when commitMessage template string is empty" — lib/workers/repository/config-migration/branch/commit-message.spec.ts line 50
     #[test]
     fn config_migration_pr_title_with_empty_commit_message() {
         // TS test: commitMessage='', semanticCommits=disabled → getPrTitle() returns 'Migrate Renovate config'
@@ -2211,7 +2211,7 @@ mod tests {
         );
     }
 
-    // Ported: "detects false if unknown" — util/git/semantic.spec.ts line 18
+    // Ported: "detects false if unknown" — lib/util/git/semantic.spec.ts line 18
     #[test]
     fn semantic_commits_disabled_for_non_semantic() {
         // Both calls: first set has no semantic, second set does but cache returns first
@@ -2219,13 +2219,13 @@ mod tests {
         assert!(!detect_semantic_commits(&["foo", "bar"]));
     }
 
-    // Ported: "detects true if known" — util/git/semantic.spec.ts line 31
+    // Ported: "detects true if known" — lib/util/git/semantic.spec.ts line 31
     #[test]
     fn semantic_commits_enabled_for_semantic() {
         assert!(detect_semantic_commits(&["fix: foo", "refactor: bar"]));
     }
 
-    // Ported: "detects false on malformed commits" — util/git/semantic.spec.ts line 38
+    // Ported: "detects false on malformed commits" — lib/util/git/semantic.spec.ts line 38
     #[test]
     fn semantic_commits_disabled_for_malformed() {
         assert!(!detect_semantic_commits(&[
@@ -2235,25 +2235,25 @@ mod tests {
         ]));
     }
 
-    // Ported: "detects true on breaking changes" — util/git/semantic.spec.ts line 49
+    // Ported: "detects true on breaking changes" — lib/util/git/semantic.spec.ts line 49
     #[test]
     fn semantic_commits_enabled_for_breaking_changes() {
         assert!(detect_semantic_commits(&["fix!: foo"]));
     }
 
-    // Ported: "detects true on breaking changes with scope" — util/git/semantic.spec.ts line 56
+    // Ported: "detects true on breaking changes with scope" — lib/util/git/semantic.spec.ts line 56
     #[test]
     fn semantic_commits_enabled_for_breaking_changes_with_scope() {
         assert!(detect_semantic_commits(&["fix(scope)!: foo"]));
     }
 
-    // Ported: "returns empty if no baseBranch" — workers/repository/onboarding/pr/base-branch.spec.ts line 13
+    // Ported: "returns empty if no baseBranch" — lib/workers/repository/onboarding/pr/base-branch.spec.ts line 13
     #[test]
     fn base_branch_desc_empty_when_no_branch() {
         assert!(get_base_branch_desc(&[]).is_empty());
     }
 
-    // Ported: "describes baseBranch" — workers/repository/onboarding/pr/base-branch.spec.ts line 18
+    // Ported: "describes baseBranch" — lib/workers/repository/onboarding/pr/base-branch.spec.ts line 18
     #[test]
     fn base_branch_desc_single_branch() {
         let result = get_base_branch_desc(&["some-branch"]);
@@ -2263,7 +2263,7 @@ mod tests {
         );
     }
 
-    // Ported: "describes baseBranchPatterns" — workers/repository/onboarding/pr/base-branch.spec.ts line 26
+    // Ported: "describes baseBranchPatterns" — lib/workers/repository/onboarding/pr/base-branch.spec.ts line 26
     #[test]
     fn base_branch_desc_multiple_branches() {
         let result = get_base_branch_desc(&["some-branch", "some-other-branch"]);
@@ -2273,7 +2273,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns the replacement name if defined" — workers/repository/process/lookup/utils.spec.ts line 14
+    // Ported: "returns the replacement name if defined" — lib/workers/repository/process/lookup/utils.spec.ts line 14
     #[test]
     fn determine_replacement_name_returns_replacement_name() {
         assert_eq!(
@@ -2282,7 +2282,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns the replacement name template if defined" — workers/repository/process/lookup/utils.spec.ts line 23
+    // Ported: "returns the replacement name template if defined" — lib/workers/repository/process/lookup/utils.spec.ts line 23
     #[test]
     fn determine_replacement_name_returns_template() {
         assert_eq!(
@@ -2291,7 +2291,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns the package name if defined" — workers/repository/process/lookup/utils.spec.ts line 32
+    // Ported: "returns the package name if defined" — lib/workers/repository/process/lookup/utils.spec.ts line 32
     #[test]
     fn determine_replacement_name_returns_package_name() {
         assert_eq!(determine_new_replacement_name(None, None, "b"), "b");
@@ -2306,7 +2306,7 @@ mod tests {
         }
     }
 
-    // Ported: "sorts based on updateType and prTitle" — workers/repository/process/sort.spec.ts line 6
+    // Ported: "sorts based on updateType and prTitle" — lib/workers/repository/process/sort.spec.ts line 6
     #[test]
     fn sort_branches_by_update_type_and_pr_title() {
         let mut branches = vec![
@@ -2337,7 +2337,7 @@ mod tests {
         );
     }
 
-    // Ported: "sorts based on prPriority" — workers/repository/process/sort.spec.ts line 49
+    // Ported: "sorts based on prPriority" — lib/workers/repository/process/sort.spec.ts line 49
     #[test]
     fn sort_branches_by_pr_priority() {
         let mut branches = vec![
@@ -2368,7 +2368,7 @@ mod tests {
         assert_eq!(titles[0], "some major update"); // highest priority first
     }
 
-    // Ported: "sorts based on isVulnerabilityAlert" — workers/repository/process/sort.spec.ts line 86
+    // Ported: "sorts based on isVulnerabilityAlert" — lib/workers/repository/process/sort.spec.ts line 86
     #[test]
     fn sort_branches_vulnerability_alert_first() {
         let mut branches = vec![
@@ -2384,7 +2384,7 @@ mod tests {
         assert_eq!(branches[0].pr_title.as_deref(), Some("some pin")); // vulnerability first
     }
 
-    // Ported: "sorts based on isVulnerabilityAlert symmetric" — workers/repository/process/sort.spec.ts line 124
+    // Ported: "sorts based on isVulnerabilityAlert symmetric" — lib/workers/repository/process/sort.spec.ts line 124
     #[test]
     fn sort_branches_vulnerability_alert_symmetric() {
         let mut branches = vec![
@@ -2414,7 +2414,7 @@ mod tests {
         assert!(!branches[2].is_vulnerability_alert.unwrap_or(false));
     }
 
-    // Ported: "sorts $files to $expected" — workers/repository/update/pr/changelog/common.spec.ts line 18
+    // Ported: "sorts $files to $expected" — lib/workers/repository/update/pr/changelog/common.spec.ts line 18
     #[test]
     fn compare_changelog_file_path_sorts_by_type_preference() {
         let mut files = vec![
@@ -2435,7 +2435,7 @@ mod tests {
         );
     }
 
-    // Ported: "should match the expected error" — util/git/errors.spec.ts line 17
+    // Ported: "should match the expected error" — lib/util/git/errors.spec.ts line 17
     #[test]
     fn bulk_changes_disallowed_matches_azure_policy_error() {
         let error_msg = concat!(
@@ -2451,12 +2451,12 @@ mod tests {
         assert!(bulk_changes_disallowed(error_msg));
     }
 
-    // Ported: "handles trace level" — workers/repository/common.spec.ts line 6
-    // Ported: "handles debug level" — workers/repository/common.spec.ts line 10
-    // Ported: "handles info level" — workers/repository/common.spec.ts line 14
-    // Ported: "handles warn level" — workers/repository/common.spec.ts line 18
-    // Ported: "handles error level" — workers/repository/common.spec.ts line 22
-    // Ported: "handles fatal level" — workers/repository/common.spec.ts line 26
+    // Ported: "handles trace level" — lib/workers/repository/common.spec.ts line 6
+    // Ported: "handles debug level" — lib/workers/repository/common.spec.ts line 10
+    // Ported: "handles info level" — lib/workers/repository/common.spec.ts line 14
+    // Ported: "handles warn level" — lib/workers/repository/common.spec.ts line 18
+    // Ported: "handles error level" — lib/workers/repository/common.spec.ts line 22
+    // Ported: "handles fatal level" — lib/workers/repository/common.spec.ts line 26
     #[test]
     fn format_problem_level_all_bunyan_levels() {
         assert_eq!(format_problem_level(10), "🔬 TRACE");
@@ -2467,7 +2467,7 @@ mod tests {
         assert_eq!(format_problem_level(60), "💀 FATAL");
     }
 
-    // Ported: "calls getControls" — workers/repository/update/pr/body/controls.spec.ts line 4
+    // Ported: "calls getControls" — lib/workers/repository/update/pr/body/controls.spec.ts line 4
     #[test]
     fn get_controls_returns_rebase_checkbox() {
         assert_eq!(
@@ -2476,7 +2476,7 @@ mod tests {
         );
     }
 
-    // Ported: "works" — util/cache/package/key.spec.ts line 5
+    // Ported: "works" — lib/util/cache/package/key.spec.ts line 5
     #[test]
     fn get_combined_key_formats_correctly() {
         assert_eq!(
@@ -2485,13 +2485,13 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty string when there is no release notes" — workers/repository/update/pr/body/changelogs.spec.ts line 9
+    // Ported: "returns empty string when there is no release notes" — lib/workers/repository/update/pr/body/changelogs.spec.ts line 9
     #[test]
     fn get_changelogs_returns_empty_when_no_release_notes() {
         assert_eq!(get_changelogs(false), "");
     }
 
-    // Ported: "checks a case where prBodyColumns are undefined" — workers/repository/update/pr/body/updates-table.spec.ts line 6
+    // Ported: "checks a case where prBodyColumns are undefined" — lib/workers/repository/update/pr/body/updates-table.spec.ts line 6
     #[test]
     fn get_pr_updates_table_returns_empty_without_columns() {
         assert_eq!(get_pr_updates_table(None, &[]), "");
@@ -2525,7 +2525,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles extra notes" — workers/repository/update/pr/body/notes.spec.ts line 44
+    // Ported: "handles extra notes" — lib/workers/repository/update/pr/body/notes.spec.ts line 44
     #[test]
     fn get_pr_extra_notes_returns_relevant_strings() {
         let res = get_pr_extra_notes(true, "lockFileMaintenance", true);
@@ -2539,25 +2539,25 @@ mod tests {
         );
     }
 
-    // Ported: "renders empty footer" — workers/repository/update/pr/body/footer.spec.ts line 8
+    // Ported: "renders empty footer" — lib/workers/repository/update/pr/body/footer.spec.ts line 8
     #[test]
     fn get_pr_footer_empty_when_none() {
         assert_eq!(get_pr_footer(None), "");
     }
 
-    // Ported: "renders prFooter" — workers/repository/update/pr/body/footer.spec.ts line 19
+    // Ported: "renders prFooter" — lib/workers/repository/update/pr/body/footer.spec.ts line 19
     #[test]
     fn get_pr_footer_renders_footer() {
         assert_eq!(get_pr_footer(Some("FOOTER")), "\n---\n\nFOOTER");
     }
 
-    // Ported: "renders empty header" — workers/repository/update/pr/body/header.spec.ts line 8
+    // Ported: "renders empty header" — lib/workers/repository/update/pr/body/header.spec.ts line 8
     #[test]
     fn get_pr_header_empty_when_none() {
         assert_eq!(get_pr_header(None), "");
     }
 
-    // Ported: "renders prHeader" — workers/repository/update/pr/body/header.spec.ts line 19
+    // Ported: "renders prHeader" — lib/workers/repository/update/pr/body/header.spec.ts line 19
     #[test]
     fn get_pr_header_renders_header() {
         assert_eq!(get_pr_header(Some("HEADER")), "HEADER\n\n");

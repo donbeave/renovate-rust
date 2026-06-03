@@ -103,25 +103,25 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "getMajor()" — versioning/bazel-module/index.spec.ts line 5
+    // Ported: "getMajor()" — lib/modules/versioning/bazel-module/index.spec.ts line 5
     #[test]
     fn bzlmod_get_major() {
         assert_eq!(get_major("1.2.3"), Some(1));
     }
 
-    // Ported: "getMinor()" — versioning/bazel-module/index.spec.ts line 9
+    // Ported: "getMinor()" — lib/modules/versioning/bazel-module/index.spec.ts line 9
     #[test]
     fn bzlmod_get_minor() {
         assert_eq!(get_minor("1.2.3"), Some(2));
     }
 
-    // Ported: "getPatch()" — versioning/bazel-module/index.spec.ts line 13
+    // Ported: "getPatch()" — lib/modules/versioning/bazel-module/index.spec.ts line 13
     #[test]
     fn bzlmod_get_patch() {
         assert_eq!(get_patch("1.2.3"), Some(3));
     }
 
-    // Ported: "equals($a, $b)" — versioning/bazel-module/index.spec.ts line 17
+    // Ported: "equals($a, $b)" — lib/modules/versioning/bazel-module/index.spec.ts line 17
     #[test]
     fn bzlmod_equals() {
         assert!(equals("1.2.3", "1.2.3"));
@@ -131,7 +131,7 @@ mod tests {
         assert!(!matches_range("1.2.3", "1.2.4"));
     }
 
-    // Ported: "isGreaterThan($a, $b)" — versioning/bazel-module/index.spec.ts line 27
+    // Ported: "isGreaterThan($a, $b)" — lib/modules/versioning/bazel-module/index.spec.ts line 27
     #[test]
     fn bzlmod_is_greater_than() {
         assert!(is_greater_than("1.2.4", "1.2.3"));
@@ -139,7 +139,7 @@ mod tests {
         assert!(!is_greater_than("1.2.2", "1.2.3"));
     }
 
-    // Ported: "isLessThanRange($a, $b)" — versioning/bazel-module/index.spec.ts line 36
+    // Ported: "isLessThanRange($a, $b)" — lib/modules/versioning/bazel-module/index.spec.ts line 36
     #[test]
     fn bzlmod_is_less_than_range() {
         assert!(!is_less_than_range("1.2.4", "1.2.3"));
@@ -147,7 +147,7 @@ mod tests {
         assert!(is_less_than_range("1.2.2", "1.2.3"));
     }
 
-    // Ported: "getSatisfyingVersion(vers, rng)" — versioning/bazel-module/index.spec.ts line 45
+    // Ported: "getSatisfyingVersion(vers, rng)" — lib/modules/versioning/bazel-module/index.spec.ts line 45
     #[test]
     fn bzlmod_get_satisfying_version() {
         assert_eq!(get_satisfying_version(&[], "1.2.3"), None);
@@ -166,7 +166,7 @@ mod tests {
         );
     }
 
-    // Ported: "sortVersions($a, $b)" — versioning/bazel-module/index.spec.ts line 56
+    // Ported: "sortVersions($a, $b)" — lib/modules/versioning/bazel-module/index.spec.ts line 56
     #[test]
     fn bzlmod_sort_versions() {
         assert_eq!(sort_versions("1.2.3", "1.2.3"), 0);
@@ -174,7 +174,7 @@ mod tests {
         assert_eq!(sort_versions("1.2.4", "1.2.3"), 1);
     }
 
-    // Ported: "isStable" — versioning/bazel-module/index.spec.ts line 65
+    // Ported: "isStable" — lib/modules/versioning/bazel-module/index.spec.ts line 65
     #[test]
     fn bzlmod_is_stable() {
         assert!(is_stable("1.2.3"));
@@ -182,7 +182,7 @@ mod tests {
         assert!(is_stable("1.2.3+build"));
     }
 
-    // Ported: "isValid($a)" — versioning/bazel-module/index.spec.ts line 74
+    // Ported: "isValid($a)" — lib/modules/versioning/bazel-module/index.spec.ts line 74
     #[test]
     fn bzlmod_is_valid() {
         assert!(is_valid("1.2.3"));
@@ -196,7 +196,7 @@ mod tests {
         assert!(!is_version("-abc"));
     }
 
-    // Ported: "isVersion($a)" — versioning/bazel-module/index.spec.ts line 90
+    // Ported: "isVersion($a)" — lib/modules/versioning/bazel-module/index.spec.ts line 90
     #[test]
     fn bzlmod_is_version_null() {
         // null/undefined handled by Option in Rust
@@ -204,7 +204,7 @@ mod tests {
         assert!(!is_version("-abc"));
     }
 
-    // Ported: "getNewValue()" — versioning/bazel-module/index.spec.ts line 100
+    // Ported: "getNewValue()" — lib/modules/versioning/bazel-module/index.spec.ts line 100
     #[test]
     fn bzlmod_get_new_value() {
         assert_eq!(get_new_value("1.0.0", None, "1.0.1"), "1.0.1");

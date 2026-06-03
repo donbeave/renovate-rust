@@ -80,7 +80,7 @@ mod tests {
             .collect()
     }
 
-    // Ported: "returns default environment variables" — util/exec/env.spec.ts line 35
+    // Ported: "returns default environment variables" — lib/util/exec/env.spec.ts line 35
     #[test]
     fn get_child_process_env_basic() {
         let env = make_env(&[
@@ -94,7 +94,7 @@ mod tests {
         assert!(!result.contains_key("SECRET"));
     }
 
-    // Ported: "returns custom environment variables if passed and defined" — util/exec/env.spec.ts line 62
+    // Ported: "returns custom environment variables if passed and defined" — lib/util/exec/env.spec.ts line 62
     #[test]
     fn get_child_process_env_custom_vars() {
         let env = make_env(&[("HOME", "/home"), ("MY_TOKEN", "abc")]);
@@ -102,7 +102,7 @@ mod tests {
         assert_eq!(result.get("MY_TOKEN").unwrap(), "abc");
     }
 
-    // Ported: "returns process.env if trustlevel set to high" — util/exec/env.spec.ts line 79
+    // Ported: "returns process.env if trustlevel set to high" — lib/util/exec/env.spec.ts line 79
     #[test]
     fn get_child_process_env_expose_all() {
         let env = make_env(&[("HOME", "/home"), ("SECRET", "123")]);
@@ -110,7 +110,7 @@ mod tests {
         assert_eq!(result.get("SECRET").unwrap(), "123");
     }
 
-    // Ported: "returns environment variable only if defined" — util/exec/env.spec.ts line 57
+    // Ported: "returns environment variable only if defined" — lib/util/exec/env.spec.ts line 57
     #[test]
     fn get_child_process_env_only_if_defined() {
         let env = make_env(&[("HOME", "/home")]);

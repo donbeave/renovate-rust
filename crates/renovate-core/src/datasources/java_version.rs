@@ -204,7 +204,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "throws for error" — java-version/index.spec.ts line 16
+    // Ported: "throws for error" — lib/modules/datasource/java-version/index.spec.ts line 16
     #[tokio::test]
     async fn throws_for_network_error() {
         let server = MockServer::start().await;
@@ -221,7 +221,7 @@ mod tests {
         assert!(result.is_err(), "5xx should propagate as Err");
     }
 
-    // Ported: "returns null for 404" — java-version/index.spec.ts line 29
+    // Ported: "returns null for 404" — lib/modules/datasource/java-version/index.spec.ts line 29
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -235,7 +235,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty result" — java-version/index.spec.ts line 39
+    // Ported: "returns null for empty result" — lib/modules/datasource/java-version/index.spec.ts line 39
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -249,7 +249,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty 200 OK" — java-version/index.spec.ts line 49
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/java-version/index.spec.ts line 49
     #[tokio::test]
     async fn returns_null_for_empty_versions() {
         let server = MockServer::start().await;
@@ -265,7 +265,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — java-version/index.spec.ts line 62
+    // Ported: "throws for 5xx" — lib/modules/datasource/java-version/index.spec.ts line 62
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -279,7 +279,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "processes real data" — java-version/index.spec.ts line 72
+    // Ported: "processes real data" — lib/modules/datasource/java-version/index.spec.ts line 72
     #[tokio::test]
     async fn processes_real_data() {
         let fixture = include_str!(
@@ -300,7 +300,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "16.0.2+7");
     }
 
-    // Ported: "processes real data (jre)" — java-version/index.spec.ts line 85
+    // Ported: "processes real data (jre)" — lib/modules/datasource/java-version/index.spec.ts line 85
     #[tokio::test]
     async fn processes_real_data_jre() {
         let fixture = include_str!(
@@ -320,7 +320,7 @@ mod tests {
         assert_eq!(result.releases.len(), 2);
     }
 
-    // Ported: "processes real data (jre,windows,x64)" — java-version/index.spec.ts line 98
+    // Ported: "processes real data (jre,windows,x64)" — lib/modules/datasource/java-version/index.spec.ts line 98
     #[tokio::test]
     async fn processes_real_data_jre_windows_x64() {
         let config = parse_package("java-jre?os=windows&architecture=x64");
@@ -329,7 +329,7 @@ mod tests {
         assert_eq!(config.architecture.as_deref(), Some("x64"));
     }
 
-    // Ported: "pages" — java-version/index.spec.ts line 110
+    // Ported: "pages" — lib/modules/datasource/java-version/index.spec.ts line 110
     #[tokio::test]
     async fn pages_multiple_pages() {
         let versions: Vec<serde_json::Value> = (1..=50)
@@ -359,7 +359,7 @@ mod tests {
         assert_eq!(result.releases.len(), 50);
     }
 
-    // Ported: "processes real data (jre,system)" — java-version/index.spec.ts line 128
+    // Ported: "processes real data (jre,system)" — lib/modules/datasource/java-version/index.spec.ts line 128
     #[tokio::test]
     async fn processes_real_data_jre_system() {
         // system=true should pick up OS/arch from the runtime environment.
@@ -371,7 +371,7 @@ mod tests {
         let _ = config.os;
     }
 
-    // Ported: "no os and architecture" — datasource/java-version/common.spec.ts line 10
+    // Ported: "no os and architecture" — lib/modules/datasource/java-version/common.spec.ts line 10
     #[test]
     fn no_os_and_architecture() {
         let c = parse_package("java-jre");
@@ -380,7 +380,7 @@ mod tests {
         assert_eq!(c.architecture, None);
     }
 
-    // Ported: "logs for unsupported os and architecture" — datasource/java-version/common.spec.ts line 74
+    // Ported: "logs for unsupported os and architecture" — lib/modules/datasource/java-version/common.spec.ts line 74
     #[test]
     fn unsupported_os_and_architecture_returns_none() {
         // system=true with an unrecognized platform → os and architecture stay None.

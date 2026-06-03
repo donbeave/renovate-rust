@@ -207,7 +207,7 @@ mod tests {
         all
     }
 
-    // Ported: "returns null for non-dotnet package" — dotnet-version/index.spec.ts line 18
+    // Ported: "returns null for non-dotnet package" — lib/modules/datasource/dotnet-version/index.spec.ts line 18
     #[test]
     fn unsupported_package_returns_none() {
         let pkg = "non-dotnet";
@@ -227,7 +227,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns real data for sdk" — dotnet-version/index.spec.ts line 108
+    // Ported: "returns real data for sdk" — lib/modules/datasource/dotnet-version/index.spec.ts line 108
     #[test]
     fn returns_real_data_for_sdk() {
         let channels: Vec<ChannelReleases> = [
@@ -271,7 +271,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns real data for runtime" — dotnet-version/index.spec.ts line 159
+    // Ported: "returns real data for runtime" — lib/modules/datasource/dotnet-version/index.spec.ts line 159
     #[test]
     fn returns_real_data_for_runtime() {
         let channels: Vec<ChannelReleases> = [

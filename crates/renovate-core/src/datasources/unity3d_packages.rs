@@ -167,7 +167,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "package with no versions" — unity3d-packages/index.spec.ts line 6
+    // Ported: "package with no versions" — lib/modules/datasource/unity3d-packages/index.spec.ts line 6
     #[tokio::test]
     async fn package_with_no_versions() {
         let server = MockServer::start().await;
@@ -189,7 +189,7 @@ mod tests {
         assert!(result.releases.is_empty());
     }
 
-    // Ported: "package with no documentationUrl" — unity3d-packages/index.spec.ts line 31
+    // Ported: "package with no documentationUrl" — lib/modules/datasource/unity3d-packages/index.spec.ts line 31
     #[tokio::test]
     async fn package_with_no_documentation_url() {
         let server = MockServer::start().await;
@@ -223,7 +223,7 @@ mod tests {
         assert_eq!(result.registry_url, server.uri().trim_end_matches('/'));
     }
 
-    // Ported: "package from a custom registry" — unity3d-packages/index.spec.ts line 70
+    // Ported: "package from a custom registry" — lib/modules/datasource/unity3d-packages/index.spec.ts line 70
     #[tokio::test]
     async fn package_from_custom_registry() {
         let server = MockServer::start().await;
@@ -256,7 +256,7 @@ mod tests {
         );
     }
 
-    // Ported: "package with changelog content and url" — unity3d-packages/index.spec.ts line 112
+    // Ported: "package with changelog content and url" — lib/modules/datasource/unity3d-packages/index.spec.ts line 112
     #[tokio::test]
     async fn package_with_changelog_content_and_url() {
         // TypeScript test uses DEFAULT_REGISTRY_URL (https://packages.unity.com).
@@ -378,7 +378,7 @@ mod tests {
         );
     }
 
-    // Ported: "package with repository" — unity3d-packages/index.spec.ts line 200
+    // Ported: "package with repository" — lib/modules/datasource/unity3d-packages/index.spec.ts line 200
     #[tokio::test]
     async fn package_with_repository() {
         let server = MockServer::start().await;

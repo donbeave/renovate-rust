@@ -49,7 +49,7 @@ pub fn extract_package_file(content: &str) -> Vec<CdnUrlDep> {
 mod tests {
     use super::*;
 
-    // Ported: "extractPackageFile" — cdnurl/extract.spec.ts line 5
+    // Ported: "extractPackageFile" — lib/modules/manager/cdnurl/extract.spec.ts line 5
     #[test]
     fn extract_package_file_sample() {
         let content = include_str!("../../tests/fixtures/cdnurl/sample.txt");

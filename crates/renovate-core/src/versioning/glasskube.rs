@@ -90,7 +90,7 @@ pub fn is_greater_than(a: &str, b: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isStable(\"$version\") === $expected" — versioning/glasskube/index.spec.ts line 6
+    // Ported: "isStable(\"$version\") === $expected" — lib/modules/versioning/glasskube/index.spec.ts line 6
     #[test]
     fn is_stable_matches_renovate_glasskube_spec() {
         let cases = [
@@ -104,7 +104,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/glasskube/index.spec.ts line 16
+    // Ported: "isValid(\"$version\") === $expected" — lib/modules/versioning/glasskube/index.spec.ts line 16
     #[test]
     fn is_valid_matches_renovate_glasskube_spec() {
         let cases = [
@@ -122,7 +122,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — versioning/glasskube/index.spec.ts line 30
+    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — lib/modules/versioning/glasskube/index.spec.ts line 30
     #[test]
     fn get_components_matches_renovate_glasskube_spec() {
         let cases = [
@@ -137,7 +137,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — versioning/glasskube/index.spec.ts line 44
+    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — lib/modules/versioning/glasskube/index.spec.ts line 44
     #[test]
     fn is_greater_than_matches_renovate_glasskube_spec() {
         let cases = [

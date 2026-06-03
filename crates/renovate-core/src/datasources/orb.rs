@@ -260,7 +260,7 @@ mod tests {
         }
     }"#;
 
-    // Ported: "returns null for empty result" — datasource/orb/index.spec.ts line 32
+    // Ported: "returns null for empty result" — lib/modules/datasource/orb/index.spec.ts line 32
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -281,7 +281,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for missing orb" — datasource/orb/index.spec.ts line 42
+    // Ported: "returns null for missing orb" — lib/modules/datasource/orb/index.spec.ts line 42
     #[tokio::test]
     async fn returns_null_for_missing_orb() {
         let server = MockServer::start().await;
@@ -302,7 +302,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for 404" — datasource/orb/index.spec.ts line 55
+    // Ported: "returns null for 404" — lib/modules/datasource/orb/index.spec.ts line 55
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -323,7 +323,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for unknown error" — datasource/orb/index.spec.ts line 65
+    // Ported: "returns null for unknown error" — lib/modules/datasource/orb/index.spec.ts line 65
     #[tokio::test]
     async fn returns_null_for_unknown_error() {
         let http = HttpClient::new().unwrap();
@@ -337,7 +337,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — datasource/orb/index.spec.ts line 75
+    // Ported: "processes real data" — lib/modules/datasource/orb/index.spec.ts line 75
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -381,7 +381,7 @@ mod tests {
         assert!(!result.is_private);
     }
 
-    // Ported: "processes homeUrl" — datasource/orb/index.spec.ts line 85
+    // Ported: "processes homeUrl" — lib/modules/datasource/orb/index.spec.ts line 85
     #[tokio::test]
     async fn processes_home_url() {
         let server = MockServer::start().await;
@@ -405,7 +405,7 @@ mod tests {
         assert_eq!(result.homepage.as_deref(), Some("https://google.com"));
     }
 
-    // Ported: "supports other registries" — datasource/orb/index.spec.ts line 96
+    // Ported: "supports other registries" — lib/modules/datasource/orb/index.spec.ts line 96
     #[tokio::test]
     async fn supports_other_registries() {
         let server = MockServer::start().await;

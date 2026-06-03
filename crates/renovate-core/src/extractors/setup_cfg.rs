@@ -205,7 +205,7 @@ docs =
     sphinx>=4.0
 "#;
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn extracts_install_requires() {
         let deps = extract(SAMPLE);
@@ -223,7 +223,7 @@ docs =
         assert_eq!(click.current_value, "==8.0.0");
     }
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn extracts_setup_requires() {
         let deps = extract(SAMPLE);
@@ -233,7 +233,7 @@ docs =
         assert_eq!(setup[0].current_value, ">=45");
     }
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn extracts_tests_require() {
         let deps = extract(SAMPLE);
@@ -247,7 +247,7 @@ docs =
         assert_eq!(coverage.skip_reason, Some(SetupCfgSkipReason::NoVersion));
     }
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn extracts_extras_require() {
         let deps = extract(SAMPLE);
@@ -257,7 +257,7 @@ docs =
         assert!(extra.iter().any(|d| d.name == "sphinx"));
     }
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn skips_git_source() {
         let content =
@@ -267,7 +267,7 @@ docs =
         assert_eq!(deps[0].skip_reason, Some(SetupCfgSkipReason::GitSource));
     }
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn normalizes_package_name() {
         let content = "[options]\ninstall_requires =\n    My_Package>=1.0\n";
@@ -275,7 +275,7 @@ docs =
         assert_eq!(deps[0].name, "my-package");
     }
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn strips_env_markers() {
         let content = "[options]\ninstall_requires =\n    tomli>=1.0; python_version < '3.11'\n";
@@ -284,7 +284,7 @@ docs =
         assert_eq!(deps[0].current_value, ">=1.0");
     }
 
-    // Ported: "extracts dependencies" — manager/setup-cfg/extract.spec.ts line 10
+    // Ported: "extracts dependencies" — lib/modules/manager/setup-cfg/extract.spec.ts line 10
     #[test]
     fn ignores_unrelated_sections() {
         let content = "[tool:pytest]\npython_files = test_*.py\n";
@@ -292,7 +292,7 @@ docs =
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for empty" — manager/setup-cfg/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/setup-cfg/extract.spec.ts line 6
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());

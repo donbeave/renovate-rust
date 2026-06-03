@@ -138,7 +138,7 @@ pub fn extract(content: &str) -> DevContainerDeps {
 mod tests {
     use super::*;
 
-    // Ported: "returns image dep when only the image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 174
+    // Ported: "returns image dep when only the image property is defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 174
     #[test]
     fn extracts_image() {
         let content = r#"{"image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04"}"#;
@@ -151,7 +151,7 @@ mod tests {
         assert_eq!(deps.docker_deps[0].tag.as_deref(), Some("ubuntu-22.04"));
     }
 
-    // Ported: "returns null when the features property is not defined and the image property is null in dev container JSON file" — devcontainer/extract.spec.ts line 296
+    // Ported: "returns null when the features property is not defined and the image property is null in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 296
     #[test]
     fn no_image_returns_empty() {
         let content = r#"{"name": "Dev Container"}"#;
@@ -159,7 +159,7 @@ mod tests {
         assert!(deps.docker_deps.is_empty());
     }
 
-    // Ported: "returns null when the dev container JSON file contents are malformed" — devcontainer/extract.spec.ts line 22
+    // Ported: "returns null when the dev container JSON file contents are malformed" — lib/modules/manager/devcontainer/extract.spec.ts line 22
     #[test]
     fn invalid_json_returns_empty() {
         let deps = extract("not json");
@@ -167,7 +167,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
-    // Ported: "returns feature image deps when only the features property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 72
+    // Ported: "returns feature image deps when only the features property is defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 72
     #[test]
     fn extracts_node_feature_and_version() {
         let content = r#"{
@@ -195,7 +195,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses known tool versions" — devcontainer/extract.spec.ts line 372
+    // Ported: "parses known tool versions" — lib/modules/manager/devcontainer/extract.spec.ts line 372
     #[test]
     fn extracts_go_feature_and_version() {
         let content = r#"{
@@ -209,7 +209,7 @@ mod tests {
         assert_eq!(deps.version_deps[0].current_value, "1.21");
     }
 
-    // Ported: "returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file" — devcontainer/extract.spec.ts line 333
+    // Ported: "returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 333
     #[test]
     fn feature_without_version_skipped_from_version_deps() {
         let content = r#"{
@@ -222,7 +222,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
-    // Ported: "returns image and feature image deps when both image and features properties are defined in dev container JSON file" — devcontainer/extract.spec.ts line 124
+    // Ported: "returns image and feature image deps when both image and features properties are defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 124
     #[test]
     fn image_and_feature_combined() {
         let content = r#"{
@@ -236,7 +236,7 @@ mod tests {
         assert_eq!(deps.version_deps.len(), 1);
     }
 
-    // Ported: "returns null when no image or features properties are defined in dev container JSON file" — devcontainer/extract.spec.ts line 263
+    // Ported: "returns null when no image or features properties are defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 263
     #[test]
     fn empty_object_returns_empty() {
         let deps = extract("{}");
@@ -244,7 +244,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
-    // Ported: "returns null when the features property is null and no image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 278
+    // Ported: "returns null when the features property is null and no image property is defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 278
     #[test]
     fn null_features_value_returns_empty() {
         let content = r#"{"features": null}"#;
@@ -252,7 +252,7 @@ mod tests {
         assert!(deps.docker_deps.is_empty());
     }
 
-    // Ported: "returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file" — devcontainer/extract.spec.ts line 333
+    // Ported: "returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 333
     #[test]
     fn local_feature_path_excluded_from_version_deps() {
         // Local features (./localfeature) are Docker-classified but produce no version dep.
@@ -262,7 +262,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
-    // Ported: "returns null when the dev container JSON file is empty" — devcontainer/extract.spec.ts line 10
+    // Ported: "returns null when the dev container JSON file is empty" — lib/modules/manager/devcontainer/extract.spec.ts line 10
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract("");
@@ -270,7 +270,7 @@ mod tests {
         assert!(deps.docker_deps.is_empty());
     }
 
-    // Ported: "returns null when both the image and features properties are null" — devcontainer/extract.spec.ts line 314
+    // Ported: "returns null when both the image and features properties are null" — lib/modules/manager/devcontainer/extract.spec.ts line 314
     #[test]
     fn both_null_returns_empty() {
         let content = r#"{"image": null, "features": null}"#;
@@ -279,7 +279,7 @@ mod tests {
         assert!(deps.docker_deps.is_empty());
     }
 
-    // Ported: "tests if JSONC can be parsed" — devcontainer/extract.spec.ts line 34
+    // Ported: "tests if JSONC can be parsed" — lib/modules/manager/devcontainer/extract.spec.ts line 34
     #[test]
     fn jsonc_with_comments_and_trailing_commas() {
         let content = r#"{
@@ -297,7 +297,7 @@ mod tests {
         assert_eq!(deps.docker_deps[0].tag.as_deref(), Some("1.2.3"));
     }
 
-    // Ported: "returns null when the only feature property is malformed and no image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 207
+    // Ported: "returns null when the only feature property is malformed and no image property is defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 207
     #[test]
     fn malformed_feature_key_returns_empty() {
         // "malformedFeature" has no registry or version → classified as local dep → no docker dep
@@ -307,7 +307,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
-    // Ported: "returns null when the features property is malformed and no image property is defined in dev container JSON file" — devcontainer/extract.spec.ts line 227
+    // Ported: "returns null when the features property is malformed and no image property is defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 227
     #[test]
     fn features_as_string_returns_empty() {
         let content = r#"{"features": "devcontainer.registry.renovate.com/test:1.2.3"}"#;
@@ -316,7 +316,7 @@ mod tests {
         assert!(deps.version_deps.is_empty());
     }
 
-    // Ported: "returns null when the image property is malformed and no features are defined in dev container JSON file" — devcontainer/extract.spec.ts line 245
+    // Ported: "returns null when the image property is malformed and no features are defined in dev container JSON file" — lib/modules/manager/devcontainer/extract.spec.ts line 245
     #[test]
     fn typo_in_image_key_returns_empty() {
         // "image:" (with colon) is not the "image" key → no image dep

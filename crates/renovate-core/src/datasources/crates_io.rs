@@ -722,7 +722,7 @@ mod tests {
         assert_eq!(index_path("Serde"), "se/rd/serde");
     }
 
-    // Ported: "returns correct suffixes" — datasource/crate/index.spec.ts line 98
+    // Ported: "returns correct suffixes" — lib/modules/datasource/crate/index.spec.ts line 98
     #[test]
     fn index_path_returns_correct_suffixes() {
         assert_eq!(index_path("a"), "1/a");
@@ -927,7 +927,7 @@ mod tests {
             .await;
     }
 
-    // Ported: "returns null for missing registry url" — datasource/crate/index.spec.ts line 148
+    // Ported: "returns null for missing registry url" — lib/modules/datasource/crate/index.spec.ts line 148
     #[tokio::test]
     async fn returns_null_for_missing_registry_url() {
         let server = MockServer::start().await;
@@ -943,14 +943,14 @@ mod tests {
         assert!(matches!(result, Ok(None)));
     }
 
-    // Ported: "returns null for invalid registry url" — datasource/crate/index.spec.ts line 163
+    // Ported: "returns null for invalid registry url" — lib/modules/datasource/crate/index.spec.ts line 163
     #[test]
     fn returns_null_for_invalid_registry_url() {
         assert!(parse_registry_url("3").is_none());
         assert!(parse_registry_url("ftp://example.com").is_none());
     }
 
-    // Ported: "returns null for empty result" — datasource/crate/index.spec.ts line 173
+    // Ported: "returns null for empty result" — lib/modules/datasource/crate/index.spec.ts line 173
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -966,7 +966,7 @@ mod tests {
         assert!(matches!(result, Ok(None)));
     }
 
-    // Ported: "returns null for missing fields" — datasource/crate/index.spec.ts line 189
+    // Ported: "returns null for missing fields" — lib/modules/datasource/crate/index.spec.ts line 189
     #[tokio::test]
     async fn returns_null_for_missing_fields() {
         let server = MockServer::start().await;
@@ -982,7 +982,7 @@ mod tests {
         assert!(matches!(result, Ok(None)));
     }
 
-    // Ported: "returns null for empty list" — datasource/crate/index.spec.ts line 205
+    // Ported: "returns null for empty list" — lib/modules/datasource/crate/index.spec.ts line 205
     #[tokio::test]
     async fn returns_null_for_empty_list() {
         let server = MockServer::start().await;
@@ -998,7 +998,7 @@ mod tests {
         assert!(matches!(result, Ok(None)));
     }
 
-    // Ported: "returns null for 404" — datasource/crate/index.spec.ts line 221
+    // Ported: "returns null for 404" — lib/modules/datasource/crate/index.spec.ts line 221
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -1014,7 +1014,7 @@ mod tests {
         assert!(matches!(result, Ok(None)));
     }
 
-    // Ported: "throws for 5xx" — datasource/crate/index.spec.ts line 235
+    // Ported: "throws for 5xx" — lib/modules/datasource/crate/index.spec.ts line 235
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -1030,7 +1030,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for unknown error" — datasource/crate/index.spec.ts line 249
+    // Ported: "returns null for unknown error" — lib/modules/datasource/crate/index.spec.ts line 249
     #[tokio::test]
     async fn returns_null_for_unknown_error() {
         // No mock for /so/me/some_crate → wiremock 404 → Ok(None)
@@ -1042,7 +1042,7 @@ mod tests {
         assert!(matches!(result, Ok(None)));
     }
 
-    // Ported: "processes real data: libc" — datasource/crate/index.spec.ts line 263
+    // Ported: "processes real data: libc" — lib/modules/datasource/crate/index.spec.ts line 263
     #[tokio::test]
     async fn processes_real_data_libc() {
         let libc_index = include_str!("testdata/crate/libc");
@@ -1106,7 +1106,7 @@ mod tests {
         assert!(result.homepage.is_none());
     }
 
-    // Ported: "processes real data: amethyst" — datasource/crate/index.spec.ts line 281
+    // Ported: "processes real data: amethyst" — lib/modules/datasource/crate/index.spec.ts line 281
     #[tokio::test]
     async fn processes_real_data_amethyst() {
         let amethyst_index = include_str!("testdata/crate/amethyst");
@@ -1152,7 +1152,7 @@ mod tests {
         assert_eq!(result.homepage.as_deref(), Some("https://amethyst.rs/"));
     }
 
-    // Ported: "uses cached registry config for subsequent packages" — datasource/crate/index.spec.ts line 299
+    // Ported: "uses cached registry config for subsequent packages" — lib/modules/datasource/crate/index.spec.ts line 299
     #[tokio::test]
     async fn uses_cached_registry_config_for_subsequent_packages() {
         let libc_index = include_str!("testdata/crate/libc");
@@ -1196,7 +1196,7 @@ mod tests {
 
     // ── Registry flavor / is_sparse / is_allowed tests ──────────────────────
 
-    // Ported: "does not clone for sparse registries" — datasource/crate/index.spec.ts line 466
+    // Ported: "does not clone for sparse registries" — lib/modules/datasource/crate/index.spec.ts line 466
     #[test]
     fn is_sparse_registry_detects_sparse_prefix() {
         assert!(is_sparse_registry("sparse+https://index.crates.io/"));
@@ -1231,7 +1231,7 @@ mod tests {
         );
     }
 
-    // Ported: "refuses to clone if allowCustomCrateRegistries is not true" — datasource/crate/index.spec.ts line 329
+    // Ported: "refuses to clone if allowCustomCrateRegistries is not true" — lib/modules/datasource/crate/index.spec.ts line 329
     #[test]
     fn refuses_non_crates_io_without_allow_custom() {
         let url = "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git";
@@ -1267,7 +1267,7 @@ mod tests {
         );
     }
 
-    // Ported: "clones cloudsmith private registry" — datasource/crate/index.spec.ts line 342
+    // Ported: "clones cloudsmith private registry" — lib/modules/datasource/crate/index.spec.ts line 342
     #[test]
     fn dependency_url_cloudsmith() {
         let url = "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git";
@@ -1286,7 +1286,7 @@ mod tests {
         );
     }
 
-    // Ported: "clones other private registry" — datasource/crate/index.spec.ts line 374
+    // Ported: "clones other private registry" — lib/modules/datasource/crate/index.spec.ts line 374
     #[test]
     fn allows_github_registry_with_allow_custom() {
         let url = "https://github.com/mcorbin/testregistry";
@@ -1295,7 +1295,7 @@ mod tests {
         assert_eq!(registry_flavor(url), RegistryFlavor::Other);
     }
 
-    // Ported: "clones other private registry with explicit gitTimeout" — datasource/crate/index.spec.ts line 357
+    // Ported: "clones other private registry with explicit gitTimeout" — lib/modules/datasource/crate/index.spec.ts line 357
     #[test]
     fn allows_github_registry_with_timeout() {
         let url = "https://github.com/mcorbin/testregistry";
@@ -1305,7 +1305,7 @@ mod tests {
         assert_eq!(registry_flavor(url), RegistryFlavor::Other);
     }
 
-    // Ported: "returns null when git clone fails" — datasource/crate/index.spec.ts line 446
+    // Ported: "returns null when git clone fails" — lib/modules/datasource/crate/index.spec.ts line 446
     #[tokio::test]
     async fn returns_null_for_non_sparse_unavailable() {
         // A non-sparse, non-crates.io registry would need git clone.
@@ -1322,7 +1322,7 @@ mod tests {
 
     // ── postprocess_release_timestamp (ported from datasource/crate/index.spec.ts) ──
 
-    // Ported: "no-op for registries without cached config" — datasource/crate/index.spec.ts line 569
+    // Ported: "no-op for registries without cached config" — lib/modules/datasource/crate/index.spec.ts line 569
     #[tokio::test]
     async fn postprocess_no_op_for_missing_config() {
         let http = HttpClient::new().unwrap();
@@ -1331,7 +1331,7 @@ mod tests {
         assert!(ts.is_none());
     }
 
-    // Ported: "no-op when registryUrl is null" — datasource/crate/index.spec.ts line 583
+    // Ported: "no-op when registryUrl is null" — lib/modules/datasource/crate/index.spec.ts line 583
     #[tokio::test]
     async fn postprocess_no_op_when_registry_url_is_null() {
         let http = HttpClient::new().unwrap();
@@ -1339,7 +1339,7 @@ mod tests {
         assert!(ts.is_none());
     }
 
-    // Ported: "no-op for release with timestamp" — datasource/crate/index.spec.ts line 597
+    // Ported: "no-op for release with timestamp" — lib/modules/datasource/crate/index.spec.ts line 597
     #[test]
     fn postprocess_no_op_for_release_with_timestamp() {
         // The caller is responsible for checking existing timestamp before
@@ -1350,7 +1350,7 @@ mod tests {
         assert!(existing_ts.is_some());
     }
 
-    // Ported: "fetches releaseTimestamp" — datasource/crate/index.spec.ts line 614
+    // Ported: "fetches releaseTimestamp" — lib/modules/datasource/crate/index.spec.ts line 614
     #[tokio::test]
     async fn postprocess_fetches_release_timestamp() {
         let server = MockServer::start().await;

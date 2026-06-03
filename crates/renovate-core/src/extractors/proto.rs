@@ -176,26 +176,26 @@ mod tests {
         deps.iter().find(|d| d.dep_name == name)
     }
 
-    // Ported: "returns null for empty content" — proto/extract.spec.ts line 10
+    // Ported: "returns null for empty content" — lib/modules/manager/proto/extract.spec.ts line 10
     #[test]
     fn returns_null_for_empty_content() {
         assert!(extract_package_file("").is_none());
     }
 
-    // Ported: "returns null for invalid TOML" — proto/extract.spec.ts line 14
+    // Ported: "returns null for invalid TOML" — lib/modules/manager/proto/extract.spec.ts line 14
     #[test]
     fn returns_null_for_invalid_toml() {
         assert!(extract_package_file("{{invalid").is_none());
     }
 
-    // Ported: "returns null when only config sections exist" — proto/extract.spec.ts line 18
+    // Ported: "returns null when only config sections exist" — lib/modules/manager/proto/extract.spec.ts line 18
     #[test]
     fn returns_null_when_only_config_sections() {
         let content = "[settings]\nauto-install = true\n\n[env]\nDEBUG = \"*\"\n";
         assert!(extract_package_file(content).is_none());
     }
 
-    // Ported: "extracts a single tool version" — proto/extract.spec.ts line 29
+    // Ported: "extracts a single tool version" — lib/modules/manager/proto/extract.spec.ts line 29
     #[test]
     fn extracts_single_tool_version() {
         let deps = extract_package_file("node = \"22.14.0\"\n").unwrap();
@@ -206,7 +206,7 @@ mod tests {
         assert!(node.skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple tool versions" — proto/extract.spec.ts line 46
+    // Ported: "extracts multiple tool versions" — lib/modules/manager/proto/extract.spec.ts line 46
     #[test]
     fn extracts_multiple_tool_versions() {
         let content = "node = \"22.14.0\"\nbun = \"1.2.2\"\nnpm = \"11.6.2\"\n";
@@ -220,7 +220,7 @@ mod tests {
         assert_eq!(npm.datasource, Some("npm"));
     }
 
-    // Ported: "skips non-version sections" — proto/extract.spec.ts line 76
+    // Ported: "skips non-version sections" — lib/modules/manager/proto/extract.spec.ts line 76
     #[test]
     fn skips_non_version_sections() {
         let content =
@@ -230,7 +230,7 @@ mod tests {
         assert_eq!(deps[0].dep_name, "node");
     }
 
-    // Ported: "handles proto self-versioning" — proto/extract.spec.ts line 105
+    // Ported: "handles proto self-versioning" — lib/modules/manager/proto/extract.spec.ts line 105
     #[test]
     fn handles_proto_self_versioning() {
         let deps = extract_package_file("proto = \"0.56.0\"\n").unwrap();
@@ -239,7 +239,7 @@ mod tests {
         assert_eq!(proto.package_name, Some("moonrepo/proto"));
     }
 
-    // Ported: "handles moon tool" — proto/extract.spec.ts line 122
+    // Ported: "handles moon tool" — lib/modules/manager/proto/extract.spec.ts line 122
     #[test]
     fn handles_moon_tool() {
         let deps = extract_package_file("moon = \"1.30.0\"\n").unwrap();
@@ -248,7 +248,7 @@ mod tests {
         assert_eq!(moon.package_name, Some("moonrepo/moon"));
     }
 
-    // Ported: "handles uv tool" — proto/extract.spec.ts line 139
+    // Ported: "handles uv tool" — lib/modules/manager/proto/extract.spec.ts line 139
     #[test]
     fn handles_uv_tool() {
         let deps = extract_package_file("uv = \"0.6.0\"\n").unwrap();
@@ -257,7 +257,7 @@ mod tests {
         assert_eq!(uv.package_name, Some("astral-sh/uv"));
     }
 
-    // Ported: "marks unknown tools as unsupported-datasource" — proto/extract.spec.ts line 156
+    // Ported: "marks unknown tools as unsupported-datasource" — lib/modules/manager/proto/extract.spec.ts line 156
     #[test]
     fn marks_unknown_tools_as_unsupported_datasource() {
         let deps = extract_package_file("unknown-tool = \"1.0.0\"\n").unwrap();
@@ -266,7 +266,7 @@ mod tests {
         assert_eq!(dep.skip_reason, Some("unsupported-datasource"));
     }
 
-    // Ported: "skips alias values like latest" — proto/extract.spec.ts line 172
+    // Ported: "skips alias values like latest" — lib/modules/manager/proto/extract.spec.ts line 172
     #[test]
     fn skips_alias_values_like_latest() {
         let deps = extract_package_file("node = \"latest\"\n").unwrap();
@@ -276,7 +276,7 @@ mod tests {
         assert_eq!(dep.skip_reason, Some("unsupported-version"));
     }
 
-    // Ported: "skips alias value stable" — proto/extract.spec.ts line 188
+    // Ported: "skips alias value stable" — lib/modules/manager/proto/extract.spec.ts line 188
     #[test]
     fn skips_alias_value_stable() {
         let deps = extract_package_file("rust = \"stable\"\n").unwrap();
@@ -284,7 +284,7 @@ mod tests {
         assert_eq!(dep.skip_reason, Some("unsupported-version"));
     }
 
-    // Ported: "handles partial versions" — proto/extract.spec.ts line 204
+    // Ported: "handles partial versions" — lib/modules/manager/proto/extract.spec.ts line 204
     #[test]
     fn handles_partial_versions() {
         let deps = extract_package_file("go = \"~1.22\"\n").unwrap();
@@ -294,7 +294,7 @@ mod tests {
         assert_eq!(go.package_name, Some("golang/go"));
     }
 
-    // Ported: "extracts all supported tools from fixture" — proto/extract.spec.ts line 221
+    // Ported: "extracts all supported tools from fixture" — lib/modules/manager/proto/extract.spec.ts line 221
     #[test]
     fn extracts_all_supported_tools_from_fixture() {
         let content = "node = \"22.14.0\"\nbun = \"1.2.2\"\nnpm = \"11.6.2\"\ngo = \"~1.22\"\nproto = \"0.56.0\"\n\n[settings]\nauto-install = true\n\n[env]\nDEBUG = \"*\"\n";
@@ -307,7 +307,7 @@ mod tests {
         assert!(dep_by_name(&deps, "proto").is_some());
     }
 
-    // Ported: "extracts all supported built-in tools" — proto/extract.spec.ts line 278
+    // Ported: "extracts all supported built-in tools" — lib/modules/manager/proto/extract.spec.ts line 278
     #[test]
     fn extracts_all_supported_builtin_tools() {
         let content = "bun = \"1.2.2\"\ndeno = \"2.0.0\"\ngo = \"1.22.0\"\nmoon = \"1.30.0\"\nnode = \"22.14.0\"\nnpm = \"11.6.2\"\npnpm = \"9.0.0\"\nyarn = \"4.0.0\"\npython = \"3.12.0\"\nruby = \"3.3.0\"\nrust = \"1.80.0\"\nproto = \"0.56.0\"\ngh = \"2.60.0\"\npoetry = \"1.8.0\"\nuv = \"0.6.0\"\n";

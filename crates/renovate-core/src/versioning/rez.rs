@@ -740,7 +740,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "equals("$version", "$equal") === $expected" — versioning/rez/index.spec.ts line 5
+    // Ported: "equals("$version", "$equal") === $expected" — lib/modules/versioning/rez/index.spec.ts line 5
     #[test]
     fn equals_table() {
         let cases = [
@@ -761,7 +761,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor("$version") === $expected" — versioning/rez/index.spec.ts line 21
+    // Ported: "getMajor("$version") === $expected" — lib/modules/versioning/rez/index.spec.ts line 21
     #[test]
     fn get_major_table() {
         let cases = [("1", 1i64), ("1.9", 1), ("1.9.0", 1)];
@@ -770,7 +770,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMinor("$version") === $expected" — versioning/rez/index.spec.ts line 30
+    // Ported: "getMinor("$version") === $expected" — lib/modules/versioning/rez/index.spec.ts line 30
     #[test]
     fn get_minor_table() {
         let cases = [("1", 0i64), ("1.9", 9), ("1.9.0", 9)];
@@ -779,7 +779,7 @@ mod tests {
         }
     }
 
-    // Ported: "getPatch("$version") === $expected" — versioning/rez/index.spec.ts line 39
+    // Ported: "getPatch("$version") === $expected" — lib/modules/versioning/rez/index.spec.ts line 39
     #[test]
     fn get_patch_table() {
         let cases = [("1", 0i64), ("1.9", 0), ("1.9.0", 0), ("1.9.4", 4)];
@@ -788,7 +788,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan("$version", "$other") === $expected" — versioning/rez/index.spec.ts line 49
+    // Ported: "isGreaterThan("$version", "$other") === $expected" — lib/modules/versioning/rez/index.spec.ts line 49
     #[test]
     fn is_greater_than_table() {
         let cases = [
@@ -811,7 +811,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/rez/index.spec.ts line 67
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/rez/index.spec.ts line 67
     #[test]
     fn is_stable_table() {
         let cases = [
@@ -826,7 +826,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/rez/index.spec.ts line 78
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/rez/index.spec.ts line 78
     #[test]
     fn is_valid_table() {
         let cases = [
@@ -851,7 +851,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion("$input") === $expected" — versioning/rez/index.spec.ts line 100
+    // Ported: "isVersion("$input") === $expected" — lib/modules/versioning/rez/index.spec.ts line 100
     #[test]
     fn is_version_table() {
         let cases = [("1.2.3", true)];
@@ -860,7 +860,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion("$input") === $expected" — versioning/rez/index.spec.ts line 108
+    // Ported: "isSingleVersion("$input") === $expected" — lib/modules/versioning/rez/index.spec.ts line 108
     #[test]
     fn is_single_version_table() {
         let cases = [
@@ -878,7 +878,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/rez/index.spec.ts line 119
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/rez/index.spec.ts line 119
     #[test]
     fn min_satisfying_version_table() {
         let cases: &[(&[&str], &str, &str)] = &[
@@ -903,7 +903,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/rez/index.spec.ts line 135
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/rez/index.spec.ts line 135
     #[test]
     fn get_satisfying_version_table() {
         let cases: &[(&[&str], &str, &str)] =
@@ -917,7 +917,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange($version, "$range") === $expected" — versioning/rez/index.spec.ts line 145
+    // Ported: "isLessThanRange($version, "$range") === $expected" — lib/modules/versioning/rez/index.spec.ts line 145
     #[test]
     fn is_less_than_range_table() {
         let cases = [
@@ -935,7 +935,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches($version, "$range") === $expected" — versioning/rez/index.spec.ts line 158
+    // Ported: "matches($version, "$range") === $expected" — lib/modules/versioning/rez/index.spec.ts line 158
     #[test]
     fn matches_range_table() {
         let cases = [
@@ -960,7 +960,7 @@ mod tests {
         }
     }
 
-    // Ported: "rez.sortVersions("$a", "$b") === semver.sortVersions("$a", "$b")" — versioning/rez/index.spec.ts line 178
+    // Ported: "rez.sortVersions("$a", "$b") === semver.sortVersions("$a", "$b")" — lib/modules/versioning/rez/index.spec.ts line 178
     #[test]
     fn sort_versions_table() {
         let cases = [
@@ -983,7 +983,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/rez/index.spec.ts line 193
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — lib/modules/versioning/rez/index.spec.ts line 193
     #[test]
     fn get_new_value_table() {
         let cases: &[(&str, &str, &str, &str, Option<&str>)] = &[
@@ -1561,7 +1561,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible("$version") === $expected" — versioning/rez/index.spec.ts line 443
+    // Ported: "isCompatible("$version") === $expected" — lib/modules/versioning/rez/index.spec.ts line 443
     #[test]
     fn is_compatible_table() {
         let cases = [("1.2.0", true)];

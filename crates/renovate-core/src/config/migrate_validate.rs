@@ -2837,25 +2837,25 @@ mod tests {
             .to_owned()
     }
 
-    // Ported: "ignores encrypted in root" — config/validation-helpers/utils.spec.ts line 5
+    // Ported: "ignores encrypted in root" — lib/config/validation-helpers/utils.spec.ts line 5
     #[test]
     fn validation_helper_get_parent_name_ignores_encrypted_in_root() {
         assert_eq!(get_parent_name("encrypted"), "");
     }
 
-    // Ported: "handles array types" — config/validation-helpers/utils.spec.ts line 9
+    // Ported: "handles array types" — lib/config/validation-helpers/utils.spec.ts line 9
     #[test]
     fn validation_helper_get_parent_name_handles_array_types() {
         assert_eq!(get_parent_name("hostRules[1]"), "hostRules");
     }
 
-    // Ported: "handles encrypted within array types" — config/validation-helpers/utils.spec.ts line 13
+    // Ported: "handles encrypted within array types" — lib/config/validation-helpers/utils.spec.ts line 13
     #[test]
     fn validation_helper_get_parent_name_handles_encrypted_within_array_types() {
         assert_eq!(get_parent_name("hostRules[0].encrypted"), "hostRules");
     }
 
-    // Ported: "returns custom deprecation warnings for %s" — config/validation.spec.ts line 10
+    // Ported: "returns custom deprecation warnings for %s" — lib/config/validation.spec.ts line 10
     #[test]
     fn validate_config_returns_custom_deprecation_warnings() {
         for option in ["branchName", "commitMessage", "prTitle"] {
@@ -2872,7 +2872,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns the deprecationMsg for `dnsCache` as a warning" — config/validation.spec.ts line 26
+    // Ported: "returns the deprecationMsg for `dnsCache` as a warning" — lib/config/validation.spec.ts line 26
     #[test]
     fn validate_config_warns_for_dns_cache_deprecation() {
         let result =
@@ -2887,7 +2887,7 @@ mod tests {
         );
     }
 
-    // Ported: "allow enabled field in vulnerabilityAlerts" — config/validation.spec.ts line 47
+    // Ported: "allow enabled field in vulnerabilityAlerts" — lib/config/validation.spec.ts line 47
     #[test]
     fn validate_config_allows_vulnerability_alerts_enabled() {
         let result =
@@ -2896,7 +2896,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "catches global options in repo config" — config/validation.spec.ts line 61
+    // Ported: "catches global options in repo config" — lib/config/validation.spec.ts line 61
     #[test]
     fn validate_config_warns_for_global_options_in_repo_config() {
         let result = validate_config_for_source(
@@ -2924,7 +2924,7 @@ mod tests {
         );
     }
 
-    // Ported: "catches global options in inherit config" — config/validation.spec.ts line 86
+    // Ported: "catches global options in inherit config" — lib/config/validation.spec.ts line 86
     #[test]
     fn validate_config_warns_for_global_options_in_inherit_config() {
         let result = validate_config_for_source(
@@ -2934,7 +2934,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 2);
     }
 
-    // Ported: "only warns for actual globals in repo config" — config/validation.spec.ts line 107
+    // Ported: "only warns for actual globals in repo config" — lib/config/validation.spec.ts line 107
     #[test]
     fn validate_config_ignores_host_rule_credentials() {
         let result = validate_config_for_source(
@@ -2944,14 +2944,14 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "does not warn for valid inheritConfig" — config/validation.spec.ts line 124
+    // Ported: "does not warn for valid inheritConfig" — lib/config/validation.spec.ts line 124
     #[test]
     fn validate_config_allows_inherited_onboarding() {
         let result = validate_config_for_source("inherit", &json!({"onboarding": false}));
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "does not warn for valid platformConfig" — config/validation.spec.ts line 135
+    // Ported: "does not warn for valid platformConfig" — lib/config/validation.spec.ts line 135
     #[test]
     fn validate_config_allows_auto_platform_config() {
         let result = validate_config_for_source("repo", &json!({"platformConfig": "auto"}));
@@ -2959,14 +2959,14 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "warns for invalid platformConfig" — config/validation.spec.ts line 147
+    // Ported: "warns for invalid platformConfig" — lib/config/validation.spec.ts line 147
     #[test]
     fn validate_config_errors_for_invalid_platform_config() {
         let result = validate_config_for_source("repo", &json!({"platformConfig": "invalid"}));
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "catches invalid templates" — config/validation.spec.ts line 156
+    // Ported: "catches invalid templates" — lib/config/validation.spec.ts line 156
     #[test]
     fn validate_config_catches_invalid_templates() {
         let result =
@@ -2974,7 +2974,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "catches invalid jsonata expressions" — config/validation.spec.ts line 178
+    // Ported: "catches invalid jsonata expressions" — lib/config/validation.spec.ts line 178
     #[test]
     fn validate_config_catches_invalid_jsonata_expressions() {
         let result = validate_config_for_source(
@@ -2995,7 +2995,7 @@ mod tests {
         );
     }
 
-    // Ported: "accepts templates referencing runtime-only fields" — config/validation.spec.ts line 165
+    // Ported: "accepts templates referencing runtime-only fields" — lib/config/validation.spec.ts line 165
     #[test]
     fn validate_config_accepts_templates_referencing_runtime_only_fields() {
         let result = validate_config_for_source(
@@ -3010,7 +3010,7 @@ mod tests {
         assert_eq!(result.errors.len(), 0);
     }
 
-    // Ported: "skips preset syntax validation for templates" — config/validation.spec.ts line 1472
+    // Ported: "skips preset syntax validation for templates" — lib/config/validation.spec.ts line 1472
     #[test]
     fn validate_config_skips_preset_syntax_validation_for_templates() {
         let result = validate_config_for_source(
@@ -3023,7 +3023,7 @@ mod tests {
         assert_eq!(result.errors.len(), 0);
     }
 
-    // Ported: "errors when using an invalid cache namespace" — config/validation.spec.ts line 2706
+    // Ported: "errors when using an invalid cache namespace" — lib/config/validation.spec.ts line 2706
     #[test]
     fn validate_config_errors_for_invalid_cache_namespace() {
         let result = validate_config_for_source(
@@ -3050,7 +3050,7 @@ mod tests {
         );
     }
 
-    // Ported: "allows a valid cache namespace" — config/validation.spec.ts line 2729
+    // Ported: "allows a valid cache namespace" — lib/config/validation.spec.ts line 2729
     #[test]
     fn validate_config_allows_valid_cache_namespace() {
         let result = validate_config_for_source(
@@ -3065,7 +3065,7 @@ mod tests {
         assert_eq!(result.errors.len(), 0);
     }
 
-    // Ported: "catches invalid allowedVersions regex" — config/validation.spec.ts line 192
+    // Ported: "catches invalid allowedVersions regex" — lib/config/validation.spec.ts line 192
     #[test]
     fn validate_config_catches_invalid_allowed_versions_regex() {
         let result = validate_config_for_source(
@@ -3083,7 +3083,7 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
-    // Ported: "catches invalid matchCurrentValue" — config/validation.spec.ts line 222
+    // Ported: "catches invalid matchCurrentValue" — lib/config/validation.spec.ts line 222
     #[test]
     fn validate_config_catches_invalid_match_current_value_regex() {
         let result = validate_config_for_source(
@@ -3101,7 +3101,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "catches invalid matchNewValue" — config/validation.spec.ts line 256
+    // Ported: "catches invalid matchNewValue" — lib/config/validation.spec.ts line 256
     #[test]
     fn validate_config_catches_invalid_match_new_value_regex() {
         let result = validate_config_for_source(
@@ -3119,7 +3119,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "validates matchBaseBranches" — config/validation.spec.ts line 290
+    // Ported: "validates matchBaseBranches" — lib/config/validation.spec.ts line 290
     #[test]
     fn validate_config_validates_match_base_branches() {
         let result = validate_config_for_source(
@@ -3133,7 +3133,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "catches invalid matchBaseBranches when baseBranchPatterns is not defined" — config/validation.spec.ts line 308
+    // Ported: "catches invalid matchBaseBranches when baseBranchPatterns is not defined" — lib/config/validation.spec.ts line 308
     #[test]
     fn validate_config_warns_for_match_base_branches_without_base_branch_patterns() {
         let result = validate_config_for_source(
@@ -3144,7 +3144,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "returns error when baseBranchPatterns is not defined" — config/validation-helpers/match-base-branches.spec.ts line 4
+    // Ported: "returns error when baseBranchPatterns is not defined" — lib/config/validation-helpers/match-base-branches.spec.ts line 4
     #[test]
     fn validation_helper_match_base_branches_requires_base_branch_patterns() {
         let rule = json!({"matchBaseBranches": ["develop"], "addLabels": ["develop"]});
@@ -3159,7 +3159,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty array for valid configuration" — config/validation-helpers/match-base-branches.spec.ts line 18
+    // Ported: "returns empty array for valid configuration" — lib/config/validation-helpers/match-base-branches.spec.ts line 18
     #[test]
     fn validation_helper_match_base_branches_accepts_base_branch_patterns() {
         let rule = json!({"matchBaseBranches": ["develop"], "addLabels": ["develop"]});
@@ -3168,7 +3168,7 @@ mod tests {
         assert!(errors.is_empty());
     }
 
-    // Ported: "catches invalid matchCurrentVersion regex" — config/validation.spec.ts line 325
+    // Ported: "catches invalid matchCurrentVersion regex" — lib/config/validation.spec.ts line 325
     #[test]
     fn validate_config_catches_invalid_match_current_version_regex() {
         let result = validate_config_for_source(
@@ -3186,7 +3186,7 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
-    // Ported: "catches invalid customDatasources content" — config/validation.spec.ts line 360
+    // Ported: "catches invalid customDatasources content" — lib/config/validation.spec.ts line 360
     #[test]
     fn validate_config_catches_invalid_custom_datasources_content() {
         let result = validate_config_for_source(
@@ -3225,7 +3225,7 @@ mod tests {
         ));
     }
 
-    // Ported: "validates invalid statusCheckNames" — config/validation.spec.ts line 397
+    // Ported: "validates invalid statusCheckNames" — lib/config/validation.spec.ts line 397
     #[test]
     fn validate_config_validates_invalid_status_check_names() {
         let result = validate_config_for_source(
@@ -3245,7 +3245,7 @@ mod tests {
         assert!(messages.contains(&"Invalid `statusCheckNames.statusCheckNames.randomKey` configuration: key is not allowed."));
     }
 
-    // Ported: "catches invalid customDatasources record type" — config/validation.spec.ts line 421
+    // Ported: "catches invalid customDatasources record type" — lib/config/validation.spec.ts line 421
     #[test]
     fn validate_config_catches_invalid_custom_datasources_record_type() {
         let result =
@@ -3258,7 +3258,7 @@ mod tests {
         );
     }
 
-    // Ported: "catches invalid baseBranchPatterns regex" — config/validation.spec.ts line 436
+    // Ported: "catches invalid baseBranchPatterns regex" — lib/config/validation.spec.ts line 436
     #[test]
     fn validate_config_catches_invalid_base_branch_patterns_regex() {
         let result = validate_config_for_source(
@@ -3274,7 +3274,7 @@ mod tests {
         );
     }
 
-    // Ported: "included managers of the wrong type" — config/validation.spec.ts line 479
+    // Ported: "included managers of the wrong type" — lib/config/validation.spec.ts line 479
     #[test]
     fn validate_config_errors_for_match_managers_wrong_type() {
         let result = validate_config_for_source(
@@ -3288,7 +3288,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates enabled managers for %s" — config/validation.spec.ts line 497
+    // Ported: "validates enabled managers for %s" — lib/config/validation.spec.ts line 497
     #[test]
     fn validate_config_allows_empty_configuration() {
         let result = validate_config_for_source("repo", &json!({}));
@@ -3296,7 +3296,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors if included not supported enabled managers for %s" — config/validation.spec.ts line 516
+    // Ported: "errors if included not supported enabled managers for %s" — lib/config/validation.spec.ts line 516
     #[test]
     fn validate_config_errors_for_unsupported_enabled_managers() {
         for config in [
@@ -3310,7 +3310,7 @@ mod tests {
         }
     }
 
-    // Ported: "errors for unsafe managerFilePatterns" — config/validation.spec.ts line 621
+    // Ported: "errors for unsafe managerFilePatterns" — lib/config/validation.spec.ts line 621
     #[test]
     fn validate_config_errors_for_unsafe_manager_file_patterns() {
         let result = validate_config_for_source(
@@ -3324,7 +3324,7 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
-    // Ported: "validates regEx for each managerFilePatterns of format regex" — config/validation.spec.ts line 640
+    // Ported: "validates regEx for each managerFilePatterns of format regex" — lib/config/validation.spec.ts line 640
     #[test]
     fn validate_config_validates_custom_manager_file_pattern_regex() {
         let result = validate_config_for_source(
@@ -3343,7 +3343,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "errors if customManager has empty managerFilePatterns" — config/validation.spec.ts line 662
+    // Ported: "errors if customManager has empty managerFilePatterns" — lib/config/validation.spec.ts line 662
     #[test]
     fn validate_config_errors_for_empty_custom_manager_file_patterns() {
         let result = validate_config_for_source(
@@ -3357,7 +3357,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if no customManager customType" — config/validation.spec.ts line 688
+    // Ported: "errors if no customManager customType" — lib/config/validation.spec.ts line 688
     #[test]
     fn validate_config_errors_for_missing_custom_manager_type() {
         let result = validate_config_for_source(
@@ -3378,7 +3378,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if invalid customManager customType" — config/validation.spec.ts line 716
+    // Ported: "errors if invalid customManager customType" — lib/config/validation.spec.ts line 716
     #[test]
     fn validate_config_errors_for_invalid_custom_manager_type() {
         let result = validate_config_for_source(
@@ -3400,7 +3400,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if empty customManager matchStrings" — config/validation.spec.ts line 745
+    // Ported: "errors if empty customManager matchStrings" — lib/config/validation.spec.ts line 745
     #[test]
     fn validate_config_errors_for_empty_custom_manager_match_strings() {
         let result = validate_config_for_source(
@@ -3430,7 +3430,7 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
-    // Ported: "validates regEx for each matchStrings" — config/validation.spec.ts line 806
+    // Ported: "validates regEx for each matchStrings" — lib/config/validation.spec.ts line 806
     #[test]
     fn validate_config_validates_custom_manager_match_string_regex() {
         let result = validate_config_for_source(
@@ -3450,7 +3450,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "error if no fileFormat in custom JSONata manager" — config/validation.spec.ts line 828
+    // Ported: "error if no fileFormat in custom JSONata manager" — lib/config/validation.spec.ts line 828
     #[test]
     fn validate_config_errors_for_jsonata_manager_missing_file_format() {
         let result = validate_config_for_source(
@@ -3470,7 +3470,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates JSONata query for each matchStrings" — config/validation.spec.ts line 854
+    // Ported: "validates JSONata query for each matchStrings" — lib/config/validation.spec.ts line 854
     #[test]
     fn validate_config_validates_jsonata_manager_queries() {
         let result = validate_config_for_source(
@@ -3494,7 +3494,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates all possible regex manager options" — config/validation.spec.ts line 884
+    // Ported: "validates all possible regex manager options" — lib/config/validation.spec.ts line 884
     #[test]
     fn validate_config_validates_all_regex_custom_manager_options() {
         let result = validate_config_for_source(
@@ -3511,7 +3511,7 @@ mod tests {
         assert_eq!(result.errors.len(), 4);
     }
 
-    // Ported: "passes if customManager fields are present" — config/validation.spec.ts line 903
+    // Ported: "passes if customManager fields are present" — lib/config/validation.spec.ts line 903
     #[test]
     fn validate_config_allows_valid_custom_managers() {
         let result = validate_config_for_source(
@@ -3541,7 +3541,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors if extra customManager fields are present" — config/validation.spec.ts line 935
+    // Ported: "errors if extra customManager fields are present" — lib/config/validation.spec.ts line 935
     #[test]
     fn validate_config_errors_for_extra_custom_manager_fields() {
         let result = validate_config_for_source(
@@ -3562,7 +3562,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "errors if customManager fields are missing" — config/validation.spec.ts line 958
+    // Ported: "errors if customManager fields are missing" — lib/config/validation.spec.ts line 958
     #[test]
     fn validate_config_errors_for_missing_regex_custom_manager_fields() {
         let result = validate_config_for_source(
@@ -3581,7 +3581,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "errors if customManager fields are missing: JSONataManager" — config/validation.spec.ts line 980
+    // Ported: "errors if customManager fields are missing: JSONataManager" — lib/config/validation.spec.ts line 980
     #[test]
     fn validate_config_errors_for_missing_jsonata_custom_manager_fields() {
         let result = validate_config_for_source(
@@ -3606,7 +3606,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignore keys" — config/validation.spec.ts line 1013
+    // Ported: "ignore keys" — lib/config/validation.spec.ts line 1013
     #[test]
     fn validate_config_ignores_schema_key() {
         let result = validate_config_for_source("repo", &json!({"$schema": "renovate.json"}));
@@ -3614,7 +3614,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "validates timezone preset" — config/validation.spec.ts line 1026
+    // Ported: "validates timezone preset" — lib/config/validation.spec.ts line 1026
     #[test]
     fn validate_config_allows_timezone_presets() {
         let result = validate_config_for_source(
@@ -3625,7 +3625,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "can contain a valid tool name for Containerbase" — config/validation.spec.ts line 1040
+    // Ported: "can contain a valid tool name for Containerbase" — lib/config/validation.spec.ts line 1040
     #[test]
     fn validate_config_allows_containerbase_constraint_tool() {
         let result =
@@ -3634,7 +3634,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "can contain a constraint for a non-Containerbase tool" — config/validation.spec.ts line 1055
+    // Ported: "can contain a constraint for a non-Containerbase tool" — lib/config/validation.spec.ts line 1055
     #[test]
     fn validate_config_allows_non_containerbase_constraint_tool() {
         let result =
@@ -3643,7 +3643,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "warns if an unsupported constraint is specified" — config/validation.spec.ts line 1070
+    // Ported: "warns if an unsupported constraint is specified" — lib/config/validation.spec.ts line 1070
     #[test]
     fn validate_config_warns_for_unsupported_constraint() {
         let result =
@@ -3658,7 +3658,7 @@ mod tests {
         );
     }
 
-    // Ported: "warns if a constraint is not valid" — config/validation.spec.ts line 1092
+    // Ported: "warns if a constraint is not valid" — lib/config/validation.spec.ts line 1092
     #[test]
     fn validate_config_warns_for_invalid_constraint_value() {
         let result =
@@ -3673,7 +3673,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if constraints is a malformed object" — config/validation.spec.ts line 1113
+    // Ported: "errors if constraints is a malformed object" — lib/config/validation.spec.ts line 1113
     #[test]
     fn validate_config_errors_for_malformed_constraints_object() {
         let result =
@@ -3688,7 +3688,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if constraints is a malformed array" — config/validation.spec.ts line 1133
+    // Ported: "errors if constraints is a malformed array" — lib/config/validation.spec.ts line 1133
     #[test]
     fn validate_config_errors_for_malformed_constraints_array() {
         let result = validate_config_for_source("repo", &json!({"constraints": [1, 2, 3]}));
@@ -3702,7 +3702,7 @@ mod tests {
         );
     }
 
-    // Ported: "cannot contain a valid tool name for Containerbase" — config/validation.spec.ts line 1155
+    // Ported: "cannot contain a valid tool name for Containerbase" — lib/config/validation.spec.ts line 1155
     #[test]
     fn validate_config_errors_for_containerbase_tool_constraints_versioning() {
         let result = validate_config_for_source(
@@ -3719,7 +3719,7 @@ mod tests {
         );
     }
 
-    // Ported: "can contain a constraint for a non-Containerbase tool" — config/validation.spec.ts line 1177
+    // Ported: "can contain a constraint for a non-Containerbase tool" — lib/config/validation.spec.ts line 1177
     #[test]
     fn validate_config_allows_non_containerbase_constraints_versioning() {
         let result = validate_config_for_source(
@@ -3730,7 +3730,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "cannot contain an additional constraint name with an invalid versioning scheme" — config/validation.spec.ts line 1192
+    // Ported: "cannot contain an additional constraint name with an invalid versioning scheme" — lib/config/validation.spec.ts line 1192
     #[test]
     fn validate_config_errors_for_invalid_constraints_versioning_scheme() {
         let result = validate_config_for_source(
@@ -3747,7 +3747,7 @@ mod tests {
         );
     }
 
-    // Ported: "can contain an additional constraint name with a regex versioning scheme" — config/validation.spec.ts line 1213
+    // Ported: "can contain an additional constraint name with a regex versioning scheme" — lib/config/validation.spec.ts line 1213
     #[test]
     fn validate_config_allows_regex_constraints_versioning_scheme() {
         let result = validate_config_for_source(
@@ -3758,7 +3758,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "cannot contain an unsupported constraint" — config/validation.spec.ts line 1229
+    // Ported: "cannot contain an unsupported constraint" — lib/config/validation.spec.ts line 1229
     #[test]
     fn validate_config_errors_for_unknown_constraints_versioning_name() {
         let result = validate_config_for_source(
@@ -3775,7 +3775,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if constraintsVersioning is a malformed object" — config/validation.spec.ts line 1251
+    // Ported: "errors if constraintsVersioning is a malformed object" — lib/config/validation.spec.ts line 1251
     #[test]
     fn validate_config_errors_for_malformed_constraints_versioning_object() {
         let result = validate_config_for_source(
@@ -3792,7 +3792,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if constraintsVersioning is a malformed array" — config/validation.spec.ts line 1273
+    // Ported: "errors if constraintsVersioning is a malformed array" — lib/config/validation.spec.ts line 1273
     #[test]
     fn validate_config_errors_for_malformed_constraints_versioning_array() {
         let result =
@@ -3807,7 +3807,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates object with ignored children" — config/validation.spec.ts line 1294
+    // Ported: "validates object with ignored children" — lib/config/validation.spec.ts line 1294
     #[test]
     fn validate_config_allows_object_with_ignored_children() {
         let result = validate_config_for_source("repo", &json!({"prBodyDefinitions": {}}));
@@ -3815,7 +3815,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "validates valid registryAlias objects" — config/validation.spec.ts line 1307
+    // Ported: "validates valid registryAlias objects" — lib/config/validation.spec.ts line 1307
     #[test]
     fn validate_config_allows_valid_registry_aliases() {
         let result = validate_config_for_source(
@@ -3831,7 +3831,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors if registryAliases depth is more than 1" — config/validation.spec.ts line 1322
+    // Ported: "errors if registryAliases depth is more than 1" — lib/config/validation.spec.ts line 1322
     #[test]
     fn validate_config_errors_for_nested_registry_aliases() {
         let result = validate_config_for_source(
@@ -3847,7 +3847,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if registryAliases have invalid value" — config/validation.spec.ts line 1344
+    // Ported: "errors if registryAliases have invalid value" — lib/config/validation.spec.ts line 1344
     #[test]
     fn validate_config_errors_for_invalid_registry_alias_value() {
         let result = validate_config_for_source(
@@ -3863,7 +3863,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if managerFilePatterns has wrong parent" — config/validation.spec.ts line 1365
+    // Ported: "errors if managerFilePatterns has wrong parent" — lib/config/validation.spec.ts line 1365
     #[test]
     fn validate_config_warns_for_wrong_manager_file_patterns_parent() {
         let result = validate_config_for_source(
@@ -3887,7 +3887,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 2);
     }
 
-    // Ported: "errors if manager objects are nested" — config/validation.spec.ts line 1408
+    // Ported: "errors if manager objects are nested" — lib/config/validation.spec.ts line 1408
     #[test]
     fn validate_config_errors_for_nested_manager_objects() {
         let result = validate_config_for_source(
@@ -3898,7 +3898,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "warns if hostType has the wrong parent" — config/validation.spec.ts line 1428
+    // Ported: "warns if hostType has the wrong parent" — lib/config/validation.spec.ts line 1428
     #[test]
     fn validate_config_warns_for_host_type_wrong_parent() {
         let result = validate_config_for_source("repo", &json!({"hostType": "npm"}));
@@ -3906,7 +3906,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "validates preset values" — config/validation.spec.ts line 1442
+    // Ported: "validates preset values" — lib/config/validation.spec.ts line 1442
     #[test]
     fn validate_config_errors_for_non_string_preset_values() {
         let result = validate_config_for_source("repo", &json!({"extends": ["foo", "bar", 42]}));
@@ -3914,7 +3914,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "errors on invalid preset syntax" — config/validation.spec.ts line 1455
+    // Ported: "errors on invalid preset syntax" — lib/config/validation.spec.ts line 1455
     #[test]
     fn validate_config_errors_for_invalid_preset_syntax() {
         let result = validate_config_for_source(
@@ -3925,7 +3925,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "warns if only selectors in packageRules" — config/validation.spec.ts line 1485
+    // Ported: "warns if only selectors in packageRules" — lib/config/validation.spec.ts line 1485
     #[test]
     fn validate_config_warns_for_selector_only_package_rules() {
         let result = validate_config_for_source(
@@ -3936,7 +3936,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "errors if invalid combinations in packageRules" — config/validation.spec.ts line 1499
+    // Ported: "errors if invalid combinations in packageRules" — lib/config/validation.spec.ts line 1499
     #[test]
     fn validate_config_errors_for_invalid_package_rule_combinations() {
         let result = validate_config_for_source(
@@ -3947,7 +3947,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "warns when registryUrls is set at the top level of repo config" — config/validation.spec.ts line 1518
+    // Ported: "warns when registryUrls is set at the top level of repo config" — lib/config/validation.spec.ts line 1518
     #[test]
     fn validate_config_warns_for_top_level_registry_urls() {
         let result = validate_config_for_source(
@@ -3964,7 +3964,7 @@ mod tests {
         );
     }
 
-    // Ported: "warns when defaultRegistryUrls is set at the top level of repo config" — config/validation.spec.ts line 1533
+    // Ported: "warns when defaultRegistryUrls is set at the top level of repo config" — lib/config/validation.spec.ts line 1533
     #[test]
     fn validate_config_warns_for_top_level_default_registry_urls() {
         let result = validate_config_for_source(
@@ -3981,7 +3981,7 @@ mod tests {
         );
     }
 
-    // Ported: "warns on nested group packageRules" — config/validation.spec.ts line 1548
+    // Ported: "warns on nested group packageRules" — lib/config/validation.spec.ts line 1548
     #[test]
     fn validate_config_warns_on_nested_group_package_rules() {
         let result = validate_config_for_source(
@@ -3995,7 +3995,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "does not error on use of `global:` presets in `globalExtends`" — config/validation.spec.ts line 1567
+    // Ported: "does not error on use of `global:` presets in `globalExtends`" — lib/config/validation.spec.ts line 1567
     #[test]
     fn validate_config_allows_global_presets_in_global_extends() {
         let result =
@@ -4004,7 +4004,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "does not error on use of `global:` presets in global `extends`" — config/validation.spec.ts line 1580
+    // Ported: "does not error on use of `global:` presets in global `extends`" — lib/config/validation.spec.ts line 1580
     #[test]
     fn validate_config_allows_global_presets_in_global_extends_field() {
         let result = validate_config_for_source("global", &json!({"extends": ["global:safeEnv"]}));
@@ -4012,7 +4012,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors on use of `global:` presets in inherit `extends`" — config/validation.spec.ts line 1593
+    // Ported: "errors on use of `global:` presets in inherit `extends`" — lib/config/validation.spec.ts line 1593
     #[test]
     fn validate_config_errors_for_global_presets_in_inherit_extends() {
         let result = validate_config_for_source("inherit", &json!({"extends": ["global:safeEnv"]}));
@@ -4020,7 +4020,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors on use of `global:` presets in repo `extends`" — config/validation.spec.ts line 1606
+    // Ported: "errors on use of `global:` presets in repo `extends`" — lib/config/validation.spec.ts line 1606
     #[test]
     fn validate_config_errors_for_global_presets_in_repo_extends() {
         let result = validate_config_for_source("repo", &json!({"extends": ["global:safeEnv"]}));
@@ -4028,7 +4028,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "warns if customEnvVariables are found in repo config" — config/validation.spec.ts line 1620
+    // Ported: "warns if customEnvVariables are found in repo config" — lib/config/validation.spec.ts line 1620
     #[test]
     fn validate_config_warns_for_custom_env_variables_in_repo_config() {
         let result = validate_config_for_source(
@@ -4044,7 +4044,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if schedule is cron and has no * minutes" — config/validation.spec.ts line 1639
+    // Ported: "errors if schedule is cron and has no * minutes" — lib/config/validation.spec.ts line 1639
     #[test]
     fn validate_config_errors_for_cron_schedule_without_wildcard_minutes() {
         let result = validate_config_for_source("repo", &json!({"schedule": ["30 5 * * *"]}));
@@ -4057,7 +4057,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if invalid matchHost values in hostRules" — config/validation.spec.ts line 1657
+    // Ported: "errors if invalid matchHost values in hostRules" — lib/config/validation.spec.ts line 1657
     #[test]
     fn validate_config_errors_for_invalid_host_rule_match_host_values() {
         let result = validate_config_for_source(
@@ -4083,7 +4083,7 @@ mod tests {
         assert!(messages.contains(&"hostRules matchHost `://` is not a valid URL."));
     }
 
-    // Ported: "errors if forbidden header in hostRules" — config/validation.spec.ts line 1699
+    // Ported: "errors if forbidden header in hostRules" — lib/config/validation.spec.ts line 1699
     #[test]
     fn validate_config_errors_for_forbidden_host_rule_header() {
         let result = validate_config_for_source(
@@ -4104,7 +4104,7 @@ mod tests {
         );
     }
 
-    // Ported: "errors if headers values are not string" — config/validation.spec.ts line 1727
+    // Ported: "errors if headers values are not string" — lib/config/validation.spec.ts line 1727
     #[test]
     fn validate_config_errors_for_non_string_host_rule_header_values() {
         let result = validate_config_for_source(
@@ -4123,7 +4123,7 @@ mod tests {
         );
     }
 
-    // Ported: "catches invalid variable name in env config option" — config/validation.spec.ts line 1781
+    // Ported: "catches invalid variable name in env config option" — lib/config/validation.spec.ts line 1781
     #[test]
     fn validate_config_catches_invalid_env_variable_name_and_value() {
         let result = validate_config_for_source(
@@ -4144,7 +4144,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "catches env config option if configured inside a parent" — config/validation.spec.ts line 1809
+    // Ported: "catches env config option if configured inside a parent" — lib/config/validation.spec.ts line 1809
     #[test]
     fn validate_config_catches_nested_env_config() {
         let result = validate_config_for_source(
@@ -4164,7 +4164,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "catches when * or ** is combined with others patterns in a regexOrGlob option" — config/validation.spec.ts line 1846
+    // Ported: "catches when * or ** is combined with others patterns in a regexOrGlob option" — lib/config/validation.spec.ts line 1846
     #[test]
     fn validate_config_catches_match_all_combined_with_other_patterns() {
         let result = validate_config_for_source(
@@ -4180,7 +4180,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "should error for multiple match alls" — config/validation-helpers/regex-glob-matchers.spec.ts line 4
+    // Ported: "should error for multiple match alls" — lib/config/validation-helpers/regex-glob-matchers.spec.ts line 4
     #[test]
     fn validation_helper_regex_glob_matchers_rejects_multiple_match_alls() {
         let errors =
@@ -4188,7 +4188,7 @@ mod tests {
         assert_eq!(errors.len(), 1);
     }
 
-    // Ported: "should error for invalid regex" — config/validation-helpers/regex-glob-matchers.spec.ts line 12
+    // Ported: "should error for invalid regex" — lib/config/validation-helpers/regex-glob-matchers.spec.ts line 12
     #[test]
     fn validation_helper_regex_glob_matchers_rejects_invalid_regex() {
         let errors = validate_regex_glob_matchers(
@@ -4198,7 +4198,7 @@ mod tests {
         assert_eq!(errors.len(), 2);
     }
 
-    // Ported: "should error for non-strings" — config/validation-helpers/regex-glob-matchers.spec.ts line 20
+    // Ported: "should error for non-strings" — lib/config/validation-helpers/regex-glob-matchers.spec.ts line 20
     #[test]
     fn validation_helper_regex_glob_matchers_rejects_non_strings() {
         let errors = validate_regex_glob_matchers(&json!(["*", 2]), "hostRules[0].allowedHeaders");
@@ -4211,7 +4211,7 @@ mod tests {
         );
     }
 
-    // Ported: "catches when negative number is used for integer type" — config/validation.spec.ts line 1874
+    // Ported: "catches when negative number is used for integer type" — lib/config/validation.spec.ts line 1874
     #[test]
     fn validate_config_catches_negative_integer_options() {
         let result = validate_config_for_source("repo", &json!({"azureWorkItemId": -2}));
@@ -4223,7 +4223,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates prPriority" — config/validation.spec.ts line 1888
+    // Ported: "validates prPriority" — lib/config/validation.spec.ts line 1888
     #[test]
     fn validate_config_allows_negative_pr_priority() {
         let result = validate_config_for_source(
@@ -4239,7 +4239,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors if no bumpVersion filePattern is provided" — config/validation.spec.ts line 1909
+    // Ported: "errors if no bumpVersion filePattern is provided" — lib/config/validation.spec.ts line 1909
     #[test]
     fn validate_config_errors_for_bump_version_without_file_patterns() {
         let result = validate_config_for_source(
@@ -4262,7 +4262,7 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
-    // Ported: "errors if no matchStrings are provided for bumpVersion" — config/validation.spec.ts line 1935
+    // Ported: "errors if no matchStrings are provided for bumpVersion" — lib/config/validation.spec.ts line 1935
     #[test]
     fn validate_config_errors_for_bump_version_without_match_strings() {
         let result = validate_config_for_source(
@@ -4279,7 +4279,7 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
-    // Ported: "allow bumpVersion" — config/validation.spec.ts line 1959
+    // Ported: "allow bumpVersion" — lib/config/validation.spec.ts line 1959
     #[test]
     fn validate_config_matches_upstream_bump_version_allow_case() {
         let result = validate_config_for_source(
@@ -4296,7 +4296,7 @@ mod tests {
         assert_eq!(result.errors.len(), 2);
     }
 
-    // Ported: "returns errors for invalid options" — config/validation.spec.ts line 1985
+    // Ported: "returns errors for invalid options" — lib/config/validation.spec.ts line 1985
     #[test]
     fn validate_config_global_errors_for_invalid_options() {
         let result = validate_config_for_source(
@@ -4312,7 +4312,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates hostRules.headers" — config/validation.spec.ts line 2007
+    // Ported: "validates hostRules.headers" — lib/config/validation.spec.ts line 2007
     #[test]
     fn validate_config_global_validates_host_rule_headers() {
         let result = validate_config_for_source(
@@ -4329,7 +4329,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors if hostRules.headers is defined but allowedHeaders is not" — config/validation.spec.ts line 2027
+    // Ported: "errors if hostRules.headers is defined but allowedHeaders is not" — lib/config/validation.spec.ts line 2027
     #[test]
     fn validate_config_global_errors_for_headers_without_allowed_headers() {
         let result = validate_config_for_source(
@@ -4347,7 +4347,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates env" — config/validation.spec.ts line 2051
+    // Ported: "validates env" — lib/config/validation.spec.ts line 2051
     #[test]
     fn validate_config_global_validates_env() {
         let result = validate_config_for_source(
@@ -4358,7 +4358,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "handles prefixed onboardingConfigFileName" — config/validation.spec.ts line 2066
+    // Ported: "handles prefixed onboardingConfigFileName" — lib/config/validation.spec.ts line 2066
     #[test]
     fn validate_config_global_allows_prefixed_onboarding_config_file_name() {
         let result = validate_config_for_source(
@@ -4369,7 +4369,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "allows unique onboardingConfigFileName if it is set in configFileNames" — config/validation.spec.ts line 2080
+    // Ported: "allows unique onboardingConfigFileName if it is set in configFileNames" — lib/config/validation.spec.ts line 2080
     #[test]
     fn validate_config_global_allows_unique_onboarding_config_file_name_in_config_file_names() {
         let result = validate_config_for_source(
@@ -4383,7 +4383,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "errors if env object is defined but allowedEnv is empty or undefined" — config/validation.spec.ts line 2093
+    // Ported: "errors if env object is defined but allowedEnv is empty or undefined" — lib/config/validation.spec.ts line 2093
     #[test]
     fn validate_config_global_errors_for_env_without_allowed_env() {
         let result =
@@ -4394,7 +4394,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates env against the allowedEnv regex" — config/validation.spec.ts line 2112
+    // Ported: "validates env against the allowedEnv regex" — lib/config/validation.spec.ts line 2112
     #[test]
     fn validate_config_global_validates_env_against_allowed_env_regex() {
         let result = validate_config_for_source(
@@ -4405,7 +4405,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "validates options with different type but defaultValue=null" — config/validation.spec.ts line 2127
+    // Ported: "validates options with different type but defaultValue=null" — lib/config/validation.spec.ts line 2127
     #[test]
     fn validate_config_allows_default_null_options() {
         let result = validate_config_for_source(
@@ -4436,7 +4436,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "binarySource=docker is deprecated" — config/validation.spec.ts line 2163
+    // Ported: "binarySource=docker is deprecated" — lib/config/validation.spec.ts line 2163
     #[test]
     fn validate_config_global_warns_for_deprecated_docker_binary_source() {
         let result = validate_config_for_source("global", &json!({"binarySource": "docker"}));
@@ -4449,7 +4449,7 @@ mod tests {
         );
     }
 
-    // Ported: "binarySource" — config/validation.spec.ts line 2180
+    // Ported: "binarySource" — lib/config/validation.spec.ts line 2180
     #[test]
     fn validate_config_global_warns_for_invalid_binary_source() {
         let result = validate_config_for_source("global", &json!({"binarySource": "invalid"}));
@@ -4461,7 +4461,7 @@ mod tests {
         );
     }
 
-    // Ported: "binarySource" — config/validation.spec.ts line 2180
+    // Ported: "binarySource" — lib/config/validation.spec.ts line 2180
     #[test]
     fn validate_config_global_string_options_binary_source() {
         let result = validate_config_for_source("global", &json!({"binarySource": "invalid"}));
@@ -4473,7 +4473,7 @@ mod tests {
         );
     }
 
-    // Ported: "baseDir" — config/validation.spec.ts line 2215
+    // Ported: "baseDir" — lib/config/validation.spec.ts line 2215
     #[test]
     fn validate_config_global_string_options_base_dir() {
         let result = validate_config_for_source("global", &json!({"baseDir": false}));
@@ -4483,7 +4483,7 @@ mod tests {
         );
     }
 
-    // Ported: "requireConfig" — config/validation.spec.ts line 2231
+    // Ported: "requireConfig" — lib/config/validation.spec.ts line 2231
     #[test]
     fn validate_config_global_string_options_require_config() {
         let result = validate_config_for_source("global", &json!({"requireConfig": "invalid"}));
@@ -4495,7 +4495,7 @@ mod tests {
         );
     }
 
-    // Ported: "dryRun" — config/validation.spec.ts line 2248
+    // Ported: "dryRun" — lib/config/validation.spec.ts line 2248
     #[test]
     fn validate_config_global_string_options_dry_run() {
         let result = validate_config_for_source("global", &json!({"dryRun": "invalid"}));
@@ -4507,7 +4507,7 @@ mod tests {
         );
     }
 
-    // Ported: "repositoryCache" — config/validation.spec.ts line 2265
+    // Ported: "repositoryCache" — lib/config/validation.spec.ts line 2265
     #[test]
     fn validate_config_global_string_options_repository_cache() {
         let result = validate_config_for_source("global", &json!({"repositoryCache": "invalid"}));
@@ -4519,7 +4519,7 @@ mod tests {
         );
     }
 
-    // Ported: "onboardingConfigFileName" — config/validation.spec.ts line 2282
+    // Ported: "onboardingConfigFileName" — lib/config/validation.spec.ts line 2282
     #[test]
     fn validate_config_global_string_options_onboarding_config_file_name() {
         let result =
@@ -4533,7 +4533,7 @@ mod tests {
         );
     }
 
-    // Ported: "onboardingConfig" — config/validation.spec.ts line 2298
+    // Ported: "onboardingConfig" — lib/config/validation.spec.ts line 2298
     #[test]
     fn validate_config_global_string_options_onboarding_config() {
         let result = validate_config_for_source(
@@ -4549,7 +4549,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 2);
     }
 
-    // Ported: "force" — config/validation.spec.ts line 2325
+    // Ported: "force" — lib/config/validation.spec.ts line 2325
     #[test]
     fn validate_config_global_string_options_force() {
         let result = validate_config_for_source(
@@ -4566,7 +4566,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "gitUrl" — config/validation.spec.ts line 2350
+    // Ported: "gitUrl" — lib/config/validation.spec.ts line 2350
     #[test]
     fn validate_config_global_string_options_git_url() {
         let result = validate_config_for_source("global", &json!({"gitUrl": "invalid"}));
@@ -4578,7 +4578,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates boolean type options" — config/validation.spec.ts line 2369
+    // Ported: "validates boolean type options" — lib/config/validation.spec.ts line 2369
     #[test]
     fn validate_config_global_validates_boolean_type_options() {
         let result = validate_config_for_source(
@@ -4588,7 +4588,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "validates integer type options" — config/validation.spec.ts line 2389
+    // Ported: "validates integer type options" — lib/config/validation.spec.ts line 2389
     #[test]
     fn validate_config_global_validates_integer_type_options() {
         let result = validate_config_for_source(
@@ -4598,7 +4598,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "validates array type options" — config/validation.spec.ts line 2409
+    // Ported: "validates array type options" — lib/config/validation.spec.ts line 2409
     #[test]
     fn validate_config_global_validates_array_type_options() {
         let result = validate_config_for_source(
@@ -4613,7 +4613,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 3);
     }
 
-    // Ported: "validates object type options" — config/validation.spec.ts line 2440
+    // Ported: "validates object type options" — lib/config/validation.spec.ts line 2440
     #[test]
     fn validate_config_global_validates_object_type_options() {
         let result = validate_config_for_source(
@@ -4631,7 +4631,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 2);
     }
 
-    // Ported: "warns if negative number is used for integer type" — config/validation.spec.ts line 2470
+    // Ported: "warns if negative number is used for integer type" — lib/config/validation.spec.ts line 2470
     #[test]
     fn validate_config_global_warns_for_negative_integer_options() {
         let result = validate_config_for_source("global", &json!({"prCommitsPerRunLimit": -2}));
@@ -4643,7 +4643,7 @@ mod tests {
         );
     }
 
-    // Ported: "warns on invalid customEnvVariables objects" — config/validation.spec.ts line 2487
+    // Ported: "warns on invalid customEnvVariables objects" — lib/config/validation.spec.ts line 2487
     #[test]
     fn validate_config_global_warns_for_invalid_custom_env_variables() {
         let result = validate_config_for_source(
@@ -4656,7 +4656,7 @@ mod tests {
         );
     }
 
-    // Ported: "validates valid customEnvVariables objects" — config/validation.spec.ts line 2508
+    // Ported: "validates valid customEnvVariables objects" — lib/config/validation.spec.ts line 2508
     #[test]
     fn validate_config_global_allows_valid_custom_env_variables() {
         let result = validate_config_for_source(
@@ -4667,7 +4667,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "validates options with different type but defaultValue=null" — config/validation.spec.ts line 2523
+    // Ported: "validates options with different type but defaultValue=null" — lib/config/validation.spec.ts line 2523
     #[test]
     fn validate_config_global_allows_default_null_options() {
         let result = validate_config_for_source(
@@ -4687,7 +4687,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "fails for missing reportPath if reportType is \"s3\"" — config/validation.spec.ts line 2543
+    // Ported: "fails for missing reportPath if reportType is \"s3\"" — lib/config/validation.spec.ts line 2543
     #[test]
     fn validate_config_global_errors_for_missing_s3_report_path() {
         let result = validate_config_for_source("global", &json!({"reportType": "s3"}));
@@ -4695,7 +4695,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "validates reportPath if reportType is \"s3\"" — config/validation.spec.ts line 2555
+    // Ported: "validates reportPath if reportType is \"s3\"" — lib/config/validation.spec.ts line 2555
     #[test]
     fn validate_config_global_allows_s3_report_path() {
         let result = validate_config_for_source(
@@ -4706,7 +4706,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "fails for missing reportPath if reportType is \"file\"" — config/validation.spec.ts line 2568
+    // Ported: "fails for missing reportPath if reportType is \"file\"" — lib/config/validation.spec.ts line 2568
     #[test]
     fn validate_config_global_errors_for_missing_file_report_path() {
         let result = validate_config_for_source("global", &json!({"reportType": "file"}));
@@ -4714,7 +4714,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "validates reportPath if reportType is \"file\"" — config/validation.spec.ts line 2580
+    // Ported: "validates reportPath if reportType is \"file\"" — lib/config/validation.spec.ts line 2580
     #[test]
     fn validate_config_global_allows_file_report_path() {
         let result = validate_config_for_source(
@@ -4725,7 +4725,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "warns when registryUrls is set at the top level of global config" — config/validation.spec.ts line 2593
+    // Ported: "warns when registryUrls is set at the top level of global config" — lib/config/validation.spec.ts line 2593
     #[test]
     fn validate_config_global_warns_for_top_level_registry_urls() {
         let result = validate_config_for_source(
@@ -4736,7 +4736,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "warns when defaultRegistryUrls is set at the top level of global config" — config/validation.spec.ts line 2608
+    // Ported: "warns when defaultRegistryUrls is set at the top level of global config" — lib/config/validation.spec.ts line 2608
     #[test]
     fn validate_config_global_warns_for_top_level_default_registry_urls() {
         let result = validate_config_for_source(
@@ -4747,7 +4747,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 1);
     }
 
-    // Ported: "validates postUpgradeTasks.installTools tool names" — config/validation.spec.ts line 2623
+    // Ported: "validates postUpgradeTasks.installTools tool names" — lib/config/validation.spec.ts line 2623
     #[test]
     fn validate_config_global_validates_post_upgrade_install_tools() {
         let result = validate_config_for_source(
@@ -4758,7 +4758,7 @@ mod tests {
         assert!(result.warnings.is_empty());
     }
 
-    // Ported: "rejects invalid postUpgradeTasks.installTools tool names" — config/validation.spec.ts line 2641
+    // Ported: "rejects invalid postUpgradeTasks.installTools tool names" — lib/config/validation.spec.ts line 2641
     #[test]
     fn validate_config_global_rejects_invalid_post_upgrade_install_tools() {
         let result = validate_config_for_source(
@@ -4774,7 +4774,7 @@ mod tests {
         );
     }
 
-    // Ported: "catches when * or ** is combined with others patterns in a regexOrGlob option" — config/validation.spec.ts line 2665
+    // Ported: "catches when * or ** is combined with others patterns in a regexOrGlob option" — lib/config/validation.spec.ts line 2665
     #[test]
     fn validate_config_global_catches_match_all_combined_with_other_patterns() {
         let result = validate_config_for_source(
@@ -4790,7 +4790,7 @@ mod tests {
         assert_eq!(result.warnings.len(), 2);
     }
 
-    // Ported: "returns nested errors" — config/validation.spec.ts line 449
+    // Ported: "returns nested errors" — lib/config/validation.spec.ts line 449
     #[test]
     fn validate_config_returns_nested_errors() {
         let result = validate_config_for_source(
@@ -4815,7 +4815,7 @@ mod tests {
         assert_eq!(result.errors.len(), 4);
     }
 
-    // Ported: "errors for all types" — config/validation.spec.ts line 536
+    // Ported: "errors for all types" — lib/config/validation.spec.ts line 536
     #[test]
     fn validate_config_errors_for_all_types() {
         let result = validate_config_for_source(
@@ -4847,7 +4847,7 @@ mod tests {
         assert_eq!(result.errors.len(), 12);
     }
 
-    // Ported: "selectors outside packageRules array trigger errors" — config/validation.spec.ts line 571
+    // Ported: "selectors outside packageRules array trigger errors" — lib/config/validation.spec.ts line 571
     #[test]
     fn validate_config_errors_for_selectors_outside_package_rules() {
         let result = validate_config_for_source(
@@ -4874,7 +4874,7 @@ mod tests {
         assert_eq!(result.errors.len(), 4);
     }
 
-    // Ported: "ignore packageRule nesting validation for presets" — config/validation.spec.ts line 601
+    // Ported: "ignore packageRule nesting validation for presets" — lib/config/validation.spec.ts line 601
     #[test]
     fn validate_config_ignores_package_rule_nesting_for_presets() {
         let result = validate_config_for_source(
@@ -4893,7 +4893,7 @@ mod tests {
         assert!(result.errors.is_empty());
     }
 
-    // Ported: "errors if no customManager managerFilePatterns" — config/validation.spec.ts line 787
+    // Ported: "errors if no customManager managerFilePatterns" — lib/config/validation.spec.ts line 787
     #[test]
     fn validate_config_errors_for_custom_manager_without_manager_file_patterns() {
         let result = validate_config_for_source(
@@ -4910,7 +4910,7 @@ mod tests {
         assert_eq!(result.errors.len(), 1);
     }
 
-    // Ported: "errors if hostRules.headers is defined but allowedHeaders is not" — config/validation.spec.ts line 2027
+    // Ported: "errors if hostRules.headers is defined but allowedHeaders is not" — lib/config/validation.spec.ts line 2027
     #[test]
     fn validate_config_errors_for_headers_without_allowed_headers() {
         let result = validate_config_for_source(
@@ -4929,7 +4929,7 @@ mod tests {
         );
     }
 
-    // Ported: "massages config" — workers/global/config/parse/util.spec.ts line 5
+    // Ported: "massages config" — lib/workers/global/config/parse/util.spec.ts line 5
     #[test]
     fn migrate_and_validate_massages_description_string_to_array() {
         let result = migrate_and_validate(
@@ -4949,7 +4949,7 @@ mod tests {
         assert_eq!(result["warnings"], json!([]));
     }
 
-    // Ported: "handles empty" — config/migrate-validate.spec.ts line 14
+    // Ported: "handles empty" — lib/config/migrate-validate.spec.ts line 14
     #[test]
     fn migrate_and_validate_handles_empty() {
         assert_eq!(
@@ -4958,7 +4958,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles migration" — config/migrate-validate.spec.ts line 22
+    // Ported: "handles migration" — lib/config/migrate-validate.spec.ts line 22
     #[test]
     fn migrate_and_validate_handles_migration() {
         assert_eq!(
@@ -4967,7 +4967,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate patch" — config/migrations/custom/automerge-migration.spec.ts line 15
+    // Ported: "should migrate patch" — lib/config/migrations/custom/automerge-migration.spec.ts line 15
     #[test]
     fn automerge_patch_sets_nested_update_type_configs() {
         let result = migrate_config(&json!({"automerge": "patch"}));
@@ -4977,7 +4977,7 @@ mod tests {
         assert_eq!(result["major"]["automerge"], json!(false));
     }
 
-    // Ported: "should migrate minor" — config/migrations/custom/automerge-migration.spec.ts line 34
+    // Ported: "should migrate minor" — lib/config/migrations/custom/automerge-migration.spec.ts line 34
     #[test]
     fn automerge_minor_sets_nested_update_type_configs() {
         let result = migrate_config(&json!({"automerge": "minor"}));
@@ -4986,7 +4986,7 @@ mod tests {
         assert_eq!(result["major"]["automerge"], json!(false));
     }
 
-    // Ported: "should migrate value to object" — config/migrations/custom/automerge-major-migration.spec.ts line 4
+    // Ported: "should migrate value to object" — lib/config/migrations/custom/automerge-major-migration.spec.ts line 4
     #[test]
     fn automerge_major_migrates_to_major_object() {
         let result = migrate_config(&json!({"automergeMajor": "some-value"}));
@@ -4994,7 +4994,7 @@ mod tests {
         assert_eq!(result["major"]["automerge"], json!(true));
     }
 
-    // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-major-migration.spec.ts line 17
+    // Ported: "should migrate value to object and concat with existing minor object" — lib/config/migrations/custom/automerge-major-migration.spec.ts line 17
     #[test]
     fn automerge_major_merges_with_existing_major_object() {
         let result = migrate_config(
@@ -5005,7 +5005,7 @@ mod tests {
         assert_eq!(result["major"]["matchFileNames"], json!(["test"]));
     }
 
-    // Ported: "should ignore non object minor value" — config/migrations/custom/automerge-major-migration.spec.ts line 34
+    // Ported: "should ignore non object minor value" — lib/config/migrations/custom/automerge-major-migration.spec.ts line 34
     #[test]
     fn automerge_major_replaces_null_major_with_object() {
         let result = migrate_config(&json!({"automergeMajor": "some-value", "major": null}));
@@ -5013,7 +5013,7 @@ mod tests {
         assert_eq!(result["major"]["automerge"], json!(true));
     }
 
-    // Ported: "should migrate value to object" — config/migrations/custom/automerge-minor-migration.spec.ts line 4
+    // Ported: "should migrate value to object" — lib/config/migrations/custom/automerge-minor-migration.spec.ts line 4
     #[test]
     fn automerge_minor_migrates_to_minor_object() {
         let result = migrate_config(&json!({"automergeMinor": "some-value"}));
@@ -5021,7 +5021,7 @@ mod tests {
         assert_eq!(result["minor"]["automerge"], json!(true));
     }
 
-    // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-minor-migration.spec.ts line 17
+    // Ported: "should migrate value to object and concat with existing minor object" — lib/config/migrations/custom/automerge-minor-migration.spec.ts line 17
     #[test]
     fn automerge_minor_merges_with_existing_minor_object() {
         let result = migrate_config(
@@ -5032,7 +5032,7 @@ mod tests {
         assert_eq!(result["minor"]["matchFileNames"], json!(["test"]));
     }
 
-    // Ported: "should ignore non object minor value" — config/migrations/custom/automerge-minor-migration.spec.ts line 34
+    // Ported: "should ignore non object minor value" — lib/config/migrations/custom/automerge-minor-migration.spec.ts line 34
     #[test]
     fn automerge_minor_replaces_null_minor_with_object() {
         let result = migrate_config(&json!({"automergeMinor": "some-value", "minor": null}));
@@ -5040,7 +5040,7 @@ mod tests {
         assert_eq!(result["minor"]["automerge"], json!(true));
     }
 
-    // Ported: "should migrate value to object" — config/migrations/custom/automerge-patch-migration.spec.ts line 4
+    // Ported: "should migrate value to object" — lib/config/migrations/custom/automerge-patch-migration.spec.ts line 4
     #[test]
     fn automerge_patch_legacy_migrates_to_patch_object() {
         let result = migrate_config(&json!({"automergePatch": "some-value"}));
@@ -5048,7 +5048,7 @@ mod tests {
         assert_eq!(result["patch"]["automerge"], json!(true));
     }
 
-    // Ported: "should migrate value to object and concat with existing minor object" — config/migrations/custom/automerge-patch-migration.spec.ts line 17
+    // Ported: "should migrate value to object and concat with existing minor object" — lib/config/migrations/custom/automerge-patch-migration.spec.ts line 17
     #[test]
     fn automerge_patch_merges_with_existing_patch_object() {
         let result = migrate_config(
@@ -5059,7 +5059,7 @@ mod tests {
         assert_eq!(result["patch"]["matchFileNames"], json!(["test"]));
     }
 
-    // Ported: "should ignore non object minor value" — config/migrations/custom/automerge-patch-migration.spec.ts line 34
+    // Ported: "should ignore non object minor value" — lib/config/migrations/custom/automerge-patch-migration.spec.ts line 34
     #[test]
     fn automerge_patch_replaces_null_patch_with_object() {
         let result = migrate_config(&json!({"automergePatch": "some-value", "patch": null}));
@@ -5067,7 +5067,7 @@ mod tests {
         assert_eq!(result["patch"]["automerge"], json!(true));
     }
 
-    // Ported: "should migrate string like \"branch-\" to \"branch\"" — config/migrations/custom/automerge-type-migration.spec.ts line 4
+    // Ported: "should migrate string like \"branch-\" to \"branch\"" — lib/config/migrations/custom/automerge-type-migration.spec.ts line 4
     #[test]
     fn automerge_type_branch_prefix_migrates_to_branch() {
         assert_eq!(
@@ -5076,7 +5076,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate another string value" — config/migrations/custom/automerge-type-migration.spec.ts line 15
+    // Ported: "should not migrate another string value" — lib/config/migrations/custom/automerge-type-migration.spec.ts line 15
     #[test]
     fn automerge_type_non_branch_prefix_unchanged() {
         assert_eq!(
@@ -5085,7 +5085,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate non string value" — config/migrations/custom/automerge-type-migration.spec.ts line 27
+    // Ported: "should not migrate non string value" — lib/config/migrations/custom/automerge-type-migration.spec.ts line 27
     #[test]
     fn automerge_type_non_string_unchanged() {
         assert_eq!(
@@ -5094,7 +5094,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate \"auto\" to \"global\"" — config/migrations/custom/binary-source-migration.spec.ts line 4
+    // Ported: "should migrate \"auto\" to \"global\"" — lib/config/migrations/custom/binary-source-migration.spec.ts line 4
     #[test]
     fn binary_source_auto_migrates_to_global() {
         assert_eq!(
@@ -5103,7 +5103,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates preset strings to array" — config/migrations/custom/extends-migration.spec.ts line 5
+    // Ported: "migrates preset strings to array" — lib/config/migrations/custom/extends-migration.spec.ts line 5
     #[test]
     fn extends_string_migrates_to_array_and_normalizes_js_app() {
         assert_eq!(
@@ -5116,7 +5116,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates presets array" — config/migrations/custom/extends-migration.spec.ts line 25
+    // Ported: "migrates presets array" — lib/config/migrations/custom/extends-migration.spec.ts line 25
     #[test]
     fn extends_array_normalizes_presets_in_place() {
         assert_eq!(
@@ -5125,7 +5125,7 @@ mod tests {
         );
     }
 
-    // Ported: "should remove non string values" — config/migrations/custom/extends-migration.spec.ts line 36
+    // Ported: "should remove non string values" — lib/config/migrations/custom/extends-migration.spec.ts line 36
     #[test]
     fn extends_array_removes_non_string_values() {
         assert_eq!(
@@ -5134,7 +5134,7 @@ mod tests {
         );
     }
 
-    // Ported: "should remove removed presets" — config/migrations/custom/extends-migration.spec.ts line 47
+    // Ported: "should remove removed presets" — lib/config/migrations/custom/extends-migration.spec.ts line 47
     #[test]
     fn extends_array_removes_deleted_presets() {
         assert_eq!(
@@ -5143,7 +5143,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrate merge confidence config preset to internal preset" — config/migrations/custom/extends-migration.spec.ts line 76
+    // Ported: "migrate merge confidence config preset to internal preset" — lib/config/migrations/custom/extends-migration.spec.ts line 76
     #[test]
     fn extends_merge_confidence_preset_migrates_to_internal_preset() {
         assert_eq!(
@@ -5152,7 +5152,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates every friday" — config/migrations/custom/schedule-migration.spec.ts line 4
+    // Ported: "migrates every friday" — lib/config/migrations/custom/schedule-migration.spec.ts line 4
     #[test]
     fn schedule_every_friday_migrates_to_on_friday() {
         assert_eq!(
@@ -5161,7 +5161,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not migrate every weekday" — config/migrations/custom/schedule-migration.spec.ts line 15
+    // Ported: "does not migrate every weekday" — lib/config/migrations/custom/schedule-migration.spec.ts line 15
     #[test]
     fn schedule_every_weekday_is_unchanged() {
         assert_eq!(
@@ -5170,7 +5170,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not migrate multi days" — config/migrations/custom/schedule-migration.spec.ts line 27
+    // Ported: "does not migrate multi days" — lib/config/migrations/custom/schedule-migration.spec.ts line 27
     #[test]
     fn schedule_multi_days_is_unchanged() {
         assert_eq!(
@@ -5179,7 +5179,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not migrate hour range" — config/migrations/custom/schedule-migration.spec.ts line 39
+    // Ported: "does not migrate hour range" — lib/config/migrations/custom/schedule-migration.spec.ts line 39
     #[test]
     fn schedule_hour_range_is_unchanged() {
         assert_eq!(
@@ -5188,7 +5188,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not migrate invalid range" — config/migrations/custom/schedule-migration.spec.ts line 51
+    // Ported: "does not migrate invalid range" — lib/config/migrations/custom/schedule-migration.spec.ts line 51
     #[test]
     fn schedule_invalid_range_is_unchanged() {
         assert_eq!(
@@ -5197,7 +5197,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true to \"enabled\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 4
+    // Ported: "should migrate true to \"enabled\"" — lib/config/migrations/custom/semantic-commits-migration.spec.ts line 4
     #[test]
     fn semantic_commits_true_migrates_to_enabled() {
         assert_eq!(
@@ -5206,7 +5206,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false to \"disabled\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 13
+    // Ported: "should migrate false to \"disabled\"" — lib/config/migrations/custom/semantic-commits-migration.spec.ts line 13
     #[test]
     fn semantic_commits_false_migrates_to_disabled() {
         assert_eq!(
@@ -5215,7 +5215,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate null to \"auto\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 22
+    // Ported: "should migrate null to \"auto\"" — lib/config/migrations/custom/semantic-commits-migration.spec.ts line 22
     #[test]
     fn semantic_commits_null_migrates_to_auto() {
         assert_eq!(
@@ -5224,7 +5224,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate random string to \"auto\"" — config/migrations/custom/semantic-commits-migration.spec.ts line 31
+    // Ported: "should migrate random string to \"auto\"" — lib/config/migrations/custom/semantic-commits-migration.spec.ts line 31
     #[test]
     fn semantic_commits_random_string_migrates_to_auto() {
         assert_eq!(
@@ -5233,7 +5233,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate valid enabled config" — config/migrations/custom/semantic-commits-migration.spec.ts line 40
+    // Ported: "should not migrate valid enabled config" — lib/config/migrations/custom/semantic-commits-migration.spec.ts line 40
     #[test]
     fn semantic_commits_enabled_is_unchanged() {
         assert_eq!(
@@ -5242,7 +5242,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate valid disabled config" — config/migrations/custom/semantic-commits-migration.spec.ts line 50
+    // Ported: "should not migrate valid disabled config" — lib/config/migrations/custom/semantic-commits-migration.spec.ts line 50
     #[test]
     fn semantic_commits_disabled_is_unchanged() {
         assert_eq!(
@@ -5251,7 +5251,7 @@ mod tests {
         );
     }
 
-    // Ported: "should work" — config/migrations/custom/semantic-prefix-migration.spec.ts line 4
+    // Ported: "should work" — lib/config/migrations/custom/semantic-prefix-migration.spec.ts line 4
     #[test]
     fn semantic_prefix_migrates_type_and_scope() {
         assert_eq!(
@@ -5260,13 +5260,13 @@ mod tests {
         );
     }
 
-    // Ported: "should remove non-string values" — config/migrations/custom/semantic-prefix-migration.spec.ts line 13
+    // Ported: "should remove non-string values" — lib/config/migrations/custom/semantic-prefix-migration.spec.ts line 13
     #[test]
     fn semantic_prefix_non_string_is_removed() {
         assert_eq!(migrate_config(&json!({"semanticPrefix": true})), json!({}));
     }
 
-    // Ported: "should migrate prefix with no-scope to null" — config/migrations/custom/semantic-prefix-migration.spec.ts line 22
+    // Ported: "should migrate prefix with no-scope to null" — lib/config/migrations/custom/semantic-prefix-migration.spec.ts line 22
     #[test]
     fn semantic_prefix_without_scope_migrates_scope_to_null() {
         assert_eq!(
@@ -5275,7 +5275,7 @@ mod tests {
         );
     }
 
-    // Ported: "works for random string" — config/migrations/custom/semantic-prefix-migration.spec.ts line 31
+    // Ported: "works for random string" — lib/config/migrations/custom/semantic-prefix-migration.spec.ts line 31
     #[test]
     fn semantic_prefix_random_string_migrates_type_with_null_scope() {
         assert_eq!(
@@ -5284,7 +5284,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate non undefined gitLabAutomerge" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 4
+    // Ported: "should migrate non undefined gitLabAutomerge" — lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 4
     #[test]
     fn git_lab_automerge_migrates_to_platform_automerge() {
         assert_eq!(
@@ -5293,7 +5293,7 @@ mod tests {
         );
     }
 
-    // Ported: "should override platformAutomerge when gitLabAutomerge defined" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 24
+    // Ported: "should override platformAutomerge when gitLabAutomerge defined" — lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 24
     #[test]
     fn git_lab_automerge_overrides_platform_automerge() {
         assert_eq!(
@@ -5302,7 +5302,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate non undefined azureAutoComplete" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 36
+    // Ported: "should migrate non undefined azureAutoComplete" — lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 36
     #[test]
     fn azure_auto_complete_migrates_to_platform_automerge() {
         assert_eq!(
@@ -5311,7 +5311,7 @@ mod tests {
         );
     }
 
-    // Ported: "should override platformAutomerge when azureAutoComplete defined" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 56
+    // Ported: "should override platformAutomerge when azureAutoComplete defined" — lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 56
     #[test]
     fn azure_auto_complete_overrides_platform_automerge() {
         assert_eq!(
@@ -5320,7 +5320,7 @@ mod tests {
         );
     }
 
-    // Ported: "should just remove undefined gitLabAutomerge" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 15
+    // Ported: "should just remove undefined gitLabAutomerge" — lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 15
     #[test]
     fn git_lab_automerge_null_removed_without_setting_platform_automerge() {
         let result = migrate_config(&json!({"gitLabAutomerge": null}));
@@ -5328,7 +5328,7 @@ mod tests {
         assert!(result.get("gitLabAutomerge").is_none());
     }
 
-    // Ported: "should just remove undefined azureAutoComplete" — config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 47
+    // Ported: "should just remove undefined azureAutoComplete" — lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts line 47
     #[test]
     fn azure_auto_complete_null_removed_without_setting_platform_automerge() {
         let result = migrate_config(&json!({"azureAutoComplete": null}));
@@ -5336,7 +5336,7 @@ mod tests {
         assert!(result.get("azureAutoComplete").is_none());
     }
 
-    // Ported: "should migrate object" — config/migrations/custom/compatibility-migration.spec.ts line 4
+    // Ported: "should migrate object" — lib/config/migrations/custom/compatibility-migration.spec.ts line 4
     #[test]
     fn compatibility_object_migrates_to_constraints() {
         assert_eq!(
@@ -5345,13 +5345,13 @@ mod tests {
         );
     }
 
-    // Ported: "should just remove property when compatibility is not an object" — config/migrations/custom/compatibility-migration.spec.ts line 19
+    // Ported: "should just remove property when compatibility is not an object" — lib/config/migrations/custom/compatibility-migration.spec.ts line 19
     #[test]
     fn compatibility_non_object_is_removed() {
         assert_eq!(migrate_config(&json!({"compatibility": "test"})), json!({}));
     }
 
-    // Ported: "should migrate true to empty array" — config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 4
+    // Ported: "should migrate true to empty array" — lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 4
     #[test]
     fn composer_ignore_platform_reqs_true_migrates_to_empty_array() {
         assert_eq!(
@@ -5360,7 +5360,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false to null" — config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 15
+    // Ported: "should migrate false to null" — lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 15
     #[test]
     fn composer_ignore_platform_reqs_false_migrates_to_null() {
         assert_eq!(
@@ -5369,7 +5369,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not change array value" — config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 26
+    // Ported: "should not change array value" — lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts line 26
     #[test]
     fn composer_ignore_platform_reqs_array_is_unchanged() {
         assert_eq!(
@@ -5378,7 +5378,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates" — config/migrations/custom/custom-managers-migration.spec.ts line 6
+    // Ported: "migrates" — lib/config/migrations/custom/custom-managers-migration.spec.ts line 6
     #[test]
     fn custom_managers_missing_custom_type_migrates_to_regex() {
         assert_eq!(
@@ -5420,7 +5420,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate adoptium-java" — config/migrations/custom/datasource-migration.spec.ts line 4
+    // Ported: "should migrate adoptium-java" — lib/config/migrations/custom/datasource-migration.spec.ts line 4
     #[test]
     fn datasource_adoptium_java_migrates_to_java_version() {
         assert_eq!(
@@ -5429,7 +5429,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate donet" — config/migrations/custom/datasource-migration.spec.ts line 15
+    // Ported: "should migrate donet" — lib/config/migrations/custom/datasource-migration.spec.ts line 15
     #[test]
     fn datasource_dotnet_migrates_to_dotnet_version() {
         assert_eq!(
@@ -5438,7 +5438,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate node" — config/migrations/custom/datasource-migration.spec.ts line 26
+    // Ported: "should migrate node" — lib/config/migrations/custom/datasource-migration.spec.ts line 26
     #[test]
     fn datasource_node_migrates_to_node_version() {
         assert_eq!(
@@ -5447,7 +5447,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates" — config/migrations/custom/enabled-managers-migration.spec.ts line 4
+    // Ported: "migrates" — lib/config/migrations/custom/enabled-managers-migration.spec.ts line 4
     #[test]
     fn enabled_managers_legacy_names_migrate() {
         assert_eq!(
@@ -5474,7 +5474,7 @@ mod tests {
         );
     }
 
-    // Ported: "should only add depTypes to packageRules" — config/migrations/custom/dep-types-migration.spec.ts line 4
+    // Ported: "should only add depTypes to packageRules" — lib/config/migrations/custom/dep-types-migration.spec.ts line 4
     #[test]
     fn dep_types_migration_adds_package_rules() {
         assert_eq!(
@@ -5523,7 +5523,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates" — config/migrations/custom/fetch-release-notes-migration.spec.ts line 4
+    // Ported: "migrates" — lib/config/migrations/custom/fetch-release-notes-migration.spec.ts line 4
     #[test]
     fn fetch_release_notes_migrates_to_fetch_change_logs() {
         assert_eq!(
@@ -5548,7 +5548,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates fileMatch of type string" — config/migrations/custom/file-match-migration.spec.ts line 4
+    // Ported: "migrates fileMatch of type string" — lib/config/migrations/custom/file-match-migration.spec.ts line 4
     #[test]
     fn file_match_string_migrates_to_manager_file_patterns() {
         assert_eq!(
@@ -5557,7 +5557,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates fileMatch of type array" — config/migrations/custom/file-match-migration.spec.ts line 15
+    // Ported: "migrates fileMatch of type array" — lib/config/migrations/custom/file-match-migration.spec.ts line 15
     #[test]
     fn file_match_array_migrates_to_manager_file_patterns() {
         assert_eq!(
@@ -5566,7 +5566,7 @@ mod tests {
         );
     }
 
-    // Ported: "concats fileMatch to managerFilePatterns" — config/migrations/custom/file-match-migration.spec.ts line 26
+    // Ported: "concats fileMatch to managerFilePatterns" — lib/config/migrations/custom/file-match-migration.spec.ts line 26
     #[test]
     fn file_match_appends_to_existing_manager_file_patterns() {
         assert_eq!(
@@ -5577,7 +5577,7 @@ mod tests {
         );
     }
 
-    // Ported: "does nothing if fileMatch not defined" — config/migrations/custom/file-match-migration.spec.ts line 38
+    // Ported: "does nothing if fileMatch not defined" — lib/config/migrations/custom/file-match-migration.spec.ts line 38
     #[test]
     fn missing_file_match_leaves_manager_file_patterns_unchanged() {
         assert_eq!(
@@ -5586,7 +5586,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate properly" — config/migrations/custom/match-datasources-migration.spec.ts line 4
+    // Ported: "should migrate properly" — lib/config/migrations/custom/match-datasources-migration.spec.ts line 4
     #[test]
     fn match_datasources_legacy_names_migrate() {
         assert_eq!(
@@ -5597,7 +5597,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates old custom manager syntax to new one" — config/migrations/custom/match-managers-migration.spec.ts line 4
+    // Ported: "migrates old custom manager syntax to new one" — lib/config/migrations/custom/match-managers-migration.spec.ts line 4
     #[test]
     fn match_managers_legacy_names_migrate() {
         assert_eq!(
@@ -5622,13 +5622,13 @@ mod tests {
         );
     }
 
-    // Ported: "only migrates when necessary" — config/migrations/custom/match-managers-migration.spec.ts line 28
+    // Ported: "only migrates when necessary" — lib/config/migrations/custom/match-managers-migration.spec.ts line 28
     #[test]
     fn match_managers_missing_is_unchanged() {
         assert_eq!(migrate_config(&json!({})), json!({}));
     }
 
-    // Ported: "should migrate properly" — config/migrations/custom/match-strings-migration.spec.ts line 4
+    // Ported: "should migrate properly" — lib/config/migrations/custom/match-strings-migration.spec.ts line 4
     #[test]
     fn match_strings_lookup_name_migrates_to_package_name() {
         assert_eq!(
@@ -5645,7 +5645,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate value to array" — config/migrations/custom/package-name-migration.spec.ts line 4
+    // Ported: "should migrate value to array" — lib/config/migrations/custom/package-name-migration.spec.ts line 4
     #[test]
     fn package_name_migrates_to_package_names() {
         assert_eq!(
@@ -5654,7 +5654,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate value to array" — config/migrations/custom/package-pattern-migration.spec.ts line 4
+    // Ported: "should migrate value to array" — lib/config/migrations/custom/package-pattern-migration.spec.ts line 4
     #[test]
     fn package_pattern_migrates_to_package_patterns() {
         assert_eq!(
@@ -5663,7 +5663,7 @@ mod tests {
         );
     }
 
-    // Ported: "should preserve config order" — config/migrations/custom/package-rules-migration.spec.ts line 6
+    // Ported: "should preserve config order" — lib/config/migrations/custom/package-rules-migration.spec.ts line 6
     #[test]
     fn package_rules_migration_preserves_key_order() {
         let migrated = migrate_config(&json!({
@@ -5704,7 +5704,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate nested packageRules" — config/migrations/custom/package-rules-migration.spec.ts line 35
+    // Ported: "should not migrate nested packageRules" — lib/config/migrations/custom/package-rules-migration.spec.ts line 35
     #[test]
     fn package_rules_renames_top_level_paths_without_nested_package_rules() {
         assert_eq!(
@@ -5723,7 +5723,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate languages to categories" — config/migrations/custom/package-rules-migration.spec.ts line 60
+    // Ported: "should migrate languages to categories" — lib/config/migrations/custom/package-rules-migration.spec.ts line 60
     #[test]
     fn package_rules_languages_migrate_to_categories() {
         assert_eq!(
@@ -5742,7 +5742,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate single match rule" — config/migrations/custom/package-rules-migration.spec.ts line 89
+    // Ported: "should migrate single match rule" — lib/config/migrations/custom/package-rules-migration.spec.ts line 89
     #[test]
     fn package_rules_single_match_language_migrates_to_category() {
         assert_eq!(
@@ -5751,7 +5751,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate excludePackageNames to matchPackageNames" — config/migrations/custom/package-rules-migration.spec.ts line 110
+    // Ported: "should migrate excludePackageNames to matchPackageNames" — lib/config/migrations/custom/package-rules-migration.spec.ts line 110
     #[test]
     fn package_rules_exclude_package_names_merge_into_match_package_names() {
         assert_eq!(
@@ -5769,7 +5769,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate matchPackagePatterns to matchPackageNames" — config/migrations/custom/package-rules-migration.spec.ts line 140
+    // Ported: "should migrate matchPackagePatterns to matchPackageNames" — lib/config/migrations/custom/package-rules-migration.spec.ts line 140
     #[test]
     fn package_rules_match_package_patterns_merge_into_match_package_names() {
         assert_eq!(
@@ -5788,7 +5788,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate all match/exclude when value is of type string" — config/migrations/custom/package-rules-migration.spec.ts line 178
+    // Ported: "should migrate all match/exclude when value is of type string" — lib/config/migrations/custom/package-rules-migration.spec.ts line 178
     #[test]
     fn package_rules_string_matchers_merge_into_match_names() {
         assert_eq!(
@@ -5831,7 +5831,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate all match/exclude at once" — config/migrations/custom/package-rules-migration.spec.ts line 223
+    // Ported: "should migrate all match/exclude at once" — lib/config/migrations/custom/package-rules-migration.spec.ts line 223
     #[test]
     fn package_rules_array_matchers_merge_into_match_names() {
         assert_eq!(
@@ -5882,7 +5882,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate to package rules" — config/migrations/custom/packages-migration.spec.ts line 4
+    // Ported: "should migrate to package rules" — lib/config/migrations/custom/packages-migration.spec.ts line 4
     #[test]
     fn packages_migrates_to_package_rules() {
         assert_eq!(
@@ -5891,7 +5891,7 @@ mod tests {
         );
     }
 
-    // Ported: "should concat with existing package rules" — config/migrations/custom/packages-migration.spec.ts line 15
+    // Ported: "should concat with existing package rules" — lib/config/migrations/custom/packages-migration.spec.ts line 15
     #[test]
     fn packages_appends_to_existing_package_rules() {
         assert_eq!(
@@ -5903,7 +5903,7 @@ mod tests {
         );
     }
 
-    // Ported: "should ignore non array value" — config/migrations/custom/packages-migration.spec.ts line 27
+    // Ported: "should ignore non array value" — lib/config/migrations/custom/packages-migration.spec.ts line 27
     #[test]
     fn packages_non_array_is_removed() {
         assert_eq!(
@@ -5915,7 +5915,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate to packageRules" — config/migrations/custom/path-rules-migration.spec.ts line 4
+    // Ported: "should migrate to packageRules" — lib/config/migrations/custom/path-rules-migration.spec.ts line 4
     // Note: in the full pipeline, `paths` is further renamed to `matchFileNames` by PackageRulesMigration.
     #[test]
     fn path_rules_migrate_to_package_rules() {
@@ -5925,7 +5925,7 @@ mod tests {
         );
     }
 
-    // Ported: "should rewrite packageRules when it is not array" — config/migrations/custom/path-rules-migration.spec.ts line 25
+    // Ported: "should rewrite packageRules when it is not array" — lib/config/migrations/custom/path-rules-migration.spec.ts line 25
     #[test]
     fn path_rules_rewrite_non_array_package_rules() {
         assert_eq!(
@@ -5937,13 +5937,13 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate non array value" — config/migrations/custom/path-rules-migration.spec.ts line 47
+    // Ported: "should not migrate non array value" — lib/config/migrations/custom/path-rules-migration.spec.ts line 47
     #[test]
     fn path_rules_non_array_is_removed() {
         assert_eq!(migrate_config(&json!({"pathRules": "test"})), json!({}));
     }
 
-    // Ported: "should concat with existing package rules" — config/migrations/custom/path-rules-migration.spec.ts line 56
+    // Ported: "should concat with existing package rules" — lib/config/migrations/custom/path-rules-migration.spec.ts line 56
     #[test]
     fn path_rules_append_to_existing_package_rules() {
         assert_eq!(
@@ -5960,7 +5960,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate value to array" — config/migrations/custom/package-files-migration.spec.ts line 4
+    // Ported: "should migrate value to array" — lib/config/migrations/custom/package-files-migration.spec.ts line 4
     // Note: paths → matchFileNames via PackageRulesMigration in full pipeline.
     #[test]
     fn package_files_object_migrates_to_include_paths_and_package_rules() {
@@ -5973,7 +5973,7 @@ mod tests {
         assert_eq!(rules[0]["matchFileNames"], json!(["package.json"]));
     }
 
-    // Ported: "should handle multiple packageFile" — config/migrations/custom/package-files-migration.spec.ts line 21
+    // Ported: "should handle multiple packageFile" — lib/config/migrations/custom/package-files-migration.spec.ts line 21
     #[test]
     fn package_files_nested_array_migrates_to_include_paths() {
         assert_eq!(
@@ -5982,7 +5982,7 @@ mod tests {
         );
     }
 
-    // Ported: "should still work for wrong config" — config/migrations/custom/package-files-migration.spec.ts line 32
+    // Ported: "should still work for wrong config" — lib/config/migrations/custom/package-files-migration.spec.ts line 32
     // Note: paths → matchFileNames via PackageRulesMigration in full pipeline.
     #[test]
     fn package_files_appends_to_existing_package_rules() {
@@ -6000,7 +6000,7 @@ mod tests {
         assert_eq!(rules[1]["matchFileNames"], json!(["package.json"]));
     }
 
-    // Ported: "should work for non-object packageFiles" — config/migrations/custom/package-files-migration.spec.ts line 56
+    // Ported: "should work for non-object packageFiles" — lib/config/migrations/custom/package-files-migration.spec.ts line 56
     #[test]
     fn package_files_string_migrates_to_include_paths() {
         assert_eq!(
@@ -6009,7 +6009,7 @@ mod tests {
         );
     }
 
-    // Ported: "should work for nested rules" — config/migrations/custom/package-files-migration.spec.ts line 67
+    // Ported: "should work for nested rules" — lib/config/migrations/custom/package-files-migration.spec.ts line 67
     #[test]
     fn package_files_preserves_nested_rules() {
         // Note: paths → matchFileNames via PackageRulesMigration in full pipeline.
@@ -6028,7 +6028,7 @@ mod tests {
         assert_eq!(rules[0]["matchFileNames"], json!(["package.json"]));
     }
 
-    // Ported: "no change for empty packageFiles" — config/migrations/custom/package-files-migration.spec.ts line 99
+    // Ported: "no change for empty packageFiles" — lib/config/migrations/custom/package-files-migration.spec.ts line 99
     #[test]
     fn package_files_empty_is_removed_without_other_changes() {
         assert_eq!(
@@ -6044,7 +6044,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true" — config/migrations/custom/pin-versions-migration.spec.ts line 4
+    // Ported: "should migrate true" — lib/config/migrations/custom/pin-versions-migration.spec.ts line 4
     #[test]
     fn pin_versions_true_migrates_to_pin_range_strategy() {
         assert_eq!(
@@ -6053,7 +6053,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false" — config/migrations/custom/pin-versions-migration.spec.ts line 15
+    // Ported: "should migrate false" — lib/config/migrations/custom/pin-versions-migration.spec.ts line 15
     #[test]
     fn pin_versions_false_migrates_to_replace_range_strategy() {
         assert_eq!(
@@ -6062,7 +6062,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate" — config/migrations/custom/separate-major-release-migration.spec.ts line 4
+    // Ported: "should migrate" — lib/config/migrations/custom/separate-major-release-migration.spec.ts line 4
     #[test]
     fn separate_major_releases_migrates_to_separate_major_minor() {
         assert_eq!(
@@ -6071,7 +6071,7 @@ mod tests {
         );
     }
 
-    // Ported: "should remove if separateMajorReleases exists" — config/migrations/custom/separate-multiple-major-migration.spec.ts line 4
+    // Ported: "should remove if separateMajorReleases exists" — lib/config/migrations/custom/separate-multiple-major-migration.spec.ts line 4
     #[test]
     fn separate_multiple_major_removed_when_separate_major_releases_exists() {
         assert_eq!(
@@ -6080,7 +6080,7 @@ mod tests {
         );
     }
 
-    // Ported: "should skip if separateMajorReleases does not exist" — config/migrations/custom/separate-multiple-major-migration.spec.ts line 16
+    // Ported: "should skip if separateMajorReleases does not exist" — lib/config/migrations/custom/separate-multiple-major-migration.spec.ts line 16
     #[test]
     fn separate_multiple_major_is_unchanged_without_separate_major_releases() {
         assert_eq!(
@@ -6089,7 +6089,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates" — config/migrations/custom/stability-days-migration.spec.ts line 4
+    // Ported: "migrates" — lib/config/migrations/custom/stability-days-migration.spec.ts line 4
     #[test]
     fn stability_days_migrates_to_minimum_release_age() {
         assert_eq!(
@@ -6106,7 +6106,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate array" — config/migrations/custom/host-rules-migration.spec.ts line 5
+    // Ported: "should migrate array" — lib/config/migrations/custom/host-rules-migration.spec.ts line 5
     #[test]
     fn host_rules_legacy_fields_migrate() {
         assert_eq!(
@@ -6144,7 +6144,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws when multiple hosts are present" — config/migrations/custom/host-rules-migration.spec.ts line 68
+    // Ported: "throws when multiple hosts are present" — lib/config/migrations/custom/host-rules-migration.spec.ts line 68
     #[test]
     fn host_rules_throws_when_multiple_hosts_have_different_values() {
         let result = migrate_and_validate(
@@ -6169,7 +6169,7 @@ mod tests {
         );
     }
 
-    // Ported: "should remomve prEditNotification from array" — config/migrations/custom/suppress-notifications-migration.spec.ts line 4
+    // Ported: "should remomve prEditNotification from array" — lib/config/migrations/custom/suppress-notifications-migration.spec.ts line 4
     #[test]
     fn suppress_notifications_removes_pr_edit_notification() {
         assert_eq!(
@@ -6178,7 +6178,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate array without prEditNotification" — config/migrations/custom/suppress-notifications-migration.spec.ts line 15
+    // Ported: "should not migrate array without prEditNotification" — lib/config/migrations/custom/suppress-notifications-migration.spec.ts line 15
     #[test]
     fn suppress_notifications_without_pr_edit_notification_is_unchanged() {
         assert_eq!(
@@ -6187,7 +6187,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate empty array" — config/migrations/custom/suppress-notifications-migration.spec.ts line 27
+    // Ported: "should not migrate empty array" — lib/config/migrations/custom/suppress-notifications-migration.spec.ts line 27
     #[test]
     fn suppress_notifications_empty_is_unchanged() {
         assert_eq!(
@@ -6196,7 +6196,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle hight level" — config/migrations/custom/trust-level-migration.spec.ts line 4
+    // Ported: "should handle hight level" — lib/config/migrations/custom/trust-level-migration.spec.ts line 4
     #[test]
     fn trust_level_high_sets_trust_options() {
         assert_eq!(
@@ -6209,7 +6209,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not rewrite provided properties" — config/migrations/custom/trust-level-migration.spec.ts line 17
+    // Ported: "should not rewrite provided properties" — lib/config/migrations/custom/trust-level-migration.spec.ts line 17
     #[test]
     fn trust_level_high_preserves_existing_trust_options() {
         assert_eq!(
@@ -6227,7 +6227,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true" — config/migrations/custom/unpublish-safe-migration.spec.ts line 4
+    // Ported: "should migrate true" — lib/config/migrations/custom/unpublish-safe-migration.spec.ts line 4
     #[test]
     fn unpublish_safe_true_injects_security_preset() {
         assert_eq!(
@@ -6236,7 +6236,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true and handle extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 15
+    // Ported: "should migrate true and handle extends field" — lib/config/migrations/custom/unpublish-safe-migration.spec.ts line 15
     #[test]
     fn unpublish_safe_true_handles_string_extends() {
         assert_eq!(
@@ -6245,7 +6245,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true and handle empty extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 27
+    // Ported: "should migrate true and handle empty extends field" — lib/config/migrations/custom/unpublish-safe-migration.spec.ts line 27
     #[test]
     fn unpublish_safe_true_handles_empty_extends() {
         assert_eq!(
@@ -6254,7 +6254,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true and save order of items inside extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 39
+    // Ported: "should migrate true and save order of items inside extends field" — lib/config/migrations/custom/unpublish-safe-migration.spec.ts line 39
     #[test]
     fn unpublish_safe_true_rewrites_supported_extends_in_place() {
         assert_eq!(
@@ -6277,7 +6277,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false and save order of items inside extends field" — config/migrations/custom/unpublish-safe-migration.spec.ts line 71
+    // Ported: "should migrate false and save order of items inside extends field" — lib/config/migrations/custom/unpublish-safe-migration.spec.ts line 71
     #[test]
     fn unpublish_safe_false_is_removed_and_preserves_extends() {
         assert_eq!(
@@ -6286,7 +6286,7 @@ mod tests {
         );
     }
 
-    // Ported: "prevent duplicates" — config/migrations/custom/unpublish-safe-migration.spec.ts line 83
+    // Ported: "prevent duplicates" — lib/config/migrations/custom/unpublish-safe-migration.spec.ts line 83
     #[test]
     fn unpublish_safe_true_does_not_duplicate_security_preset() {
         assert_eq!(
@@ -6297,7 +6297,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate npm:unpublishSafe" — config/migrations/custom/unpublish-safe-migration.spec.ts line 95
+    // Ported: "should not migrate npm:unpublishSafe" — lib/config/migrations/custom/unpublish-safe-migration.spec.ts line 95
     #[test]
     fn unpublish_safe_absent_leaves_npm_unpublish_safe_extends() {
         assert_eq!(
@@ -6306,7 +6306,7 @@ mod tests {
         );
     }
 
-    // Ported: "should add postUpdateOptions option when true" — config/migrations/custom/go-mod-tidy-migration.spec.ts line 4
+    // Ported: "should add postUpdateOptions option when true" — lib/config/migrations/custom/go-mod-tidy-migration.spec.ts line 4
     #[test]
     fn gomod_tidy_true_appends_post_update_option() {
         assert_eq!(
@@ -6315,7 +6315,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle case when postUpdateOptions is not defined" — config/migrations/custom/go-mod-tidy-migration.spec.ts line 16
+    // Ported: "should handle case when postUpdateOptions is not defined" — lib/config/migrations/custom/go-mod-tidy-migration.spec.ts line 16
     #[test]
     fn gomod_tidy_true_initializes_post_update_options() {
         assert_eq!(
@@ -6324,13 +6324,13 @@ mod tests {
         );
     }
 
-    // Ported: "should only remove when false" — config/migrations/custom/go-mod-tidy-migration.spec.ts line 27
+    // Ported: "should only remove when false" — lib/config/migrations/custom/go-mod-tidy-migration.spec.ts line 27
     #[test]
     fn gomod_tidy_false_is_removed() {
         assert_eq!(migrate_config(&json!({"gomodTidy": false})), json!({}));
     }
 
-    // Ported: "should migrate to ignorePaths" — config/migrations/custom/ignore-node-modules-migration.spec.ts line 4
+    // Ported: "should migrate to ignorePaths" — lib/config/migrations/custom/ignore-node-modules-migration.spec.ts line 4
     #[test]
     fn ignore_node_modules_true_migrates_to_ignore_paths() {
         assert_eq!(
@@ -6339,7 +6339,7 @@ mod tests {
         );
     }
 
-    // Ported: "should init npmrc field" — config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 4
+    // Ported: "should init npmrc field" — lib/config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 4
     #[test]
     fn ignore_npmrc_file_initializes_npmrc() {
         assert_eq!(
@@ -6348,7 +6348,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not change npmrc field if it represents string value" — config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 15
+    // Ported: "should not change npmrc field if it represents string value" — lib/config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 15
     #[test]
     fn ignore_npmrc_file_preserves_string_npmrc() {
         assert_eq!(
@@ -6357,7 +6357,7 @@ mod tests {
         );
     }
 
-    // Ported: "should change npmrc field if it not represents string value" — config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 27
+    // Ported: "should change npmrc field if it not represents string value" — lib/config/migrations/custom/ignore-npmrc-file-migration.spec.ts line 27
     #[test]
     fn ignore_npmrc_file_replaces_non_string_npmrc() {
         assert_eq!(
@@ -6366,7 +6366,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true" — config/migrations/custom/include-forks-migration.spec.ts line 4
+    // Ported: "should migrate true" — lib/config/migrations/custom/include-forks-migration.spec.ts line 4
     #[test]
     fn include_forks_true_migrates_to_enabled_fork_processing() {
         assert_eq!(
@@ -6375,7 +6375,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false" — config/migrations/custom/include-forks-migration.spec.ts line 15
+    // Ported: "should migrate false" — lib/config/migrations/custom/include-forks-migration.spec.ts line 15
     #[test]
     fn include_forks_false_migrates_to_disabled_fork_processing() {
         assert_eq!(
@@ -6384,13 +6384,13 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate non boolean value" — config/migrations/custom/include-forks-migration.spec.ts line 26
+    // Ported: "should not migrate non boolean value" — lib/config/migrations/custom/include-forks-migration.spec.ts line 26
     #[test]
     fn include_forks_non_boolean_is_removed() {
         assert_eq!(migrate_config(&json!({"includeForks": "test"})), json!({}));
     }
 
-    // Ported: "should migrate node to travis" — config/migrations/custom/node-migration.spec.ts line 4
+    // Ported: "should migrate node to travis" — lib/config/migrations/custom/node-migration.spec.ts line 4
     #[test]
     fn node_enabled_migrates_to_travis_enabled() {
         assert_eq!(
@@ -6399,7 +6399,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not delete node in case it has more than one property" — config/migrations/custom/node-migration.spec.ts line 15
+    // Ported: "should not delete node in case it has more than one property" — lib/config/migrations/custom/node-migration.spec.ts line 15
     #[test]
     fn node_enabled_migration_preserves_other_node_options() {
         assert_eq!(
@@ -6408,7 +6408,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate properly" — config/migrations/custom/post-update-options-migration.spec.ts line 4
+    // Ported: "should migrate properly" — lib/config/migrations/custom/post-update-options-migration.spec.ts line 4
     #[test]
     fn post_update_options_removes_gomod_no_massage() {
         assert_eq!(
@@ -6417,7 +6417,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true" — config/migrations/custom/renovate-fork-migration.spec.ts line 4
+    // Ported: "should migrate true" — lib/config/migrations/custom/renovate-fork-migration.spec.ts line 4
     #[test]
     fn renovate_fork_true_migrates_to_enabled_fork_processing() {
         assert_eq!(
@@ -6426,7 +6426,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false" — config/migrations/custom/renovate-fork-migration.spec.ts line 15
+    // Ported: "should migrate false" — lib/config/migrations/custom/renovate-fork-migration.spec.ts line 15
     #[test]
     fn renovate_fork_false_migrates_to_disabled_fork_processing() {
         assert_eq!(
@@ -6435,13 +6435,13 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate non boolean value" — config/migrations/custom/renovate-fork-migration.spec.ts line 26
+    // Ported: "should not migrate non boolean value" — lib/config/migrations/custom/renovate-fork-migration.spec.ts line 26
     #[test]
     fn renovate_fork_non_boolean_is_removed() {
         assert_eq!(migrate_config(&json!({"renovateFork": "test"})), json!({}));
     }
 
-    // Ported: "should migrate value to array" — config/migrations/custom/base-branch-migration.spec.ts line 4
+    // Ported: "should migrate value to array" — lib/config/migrations/custom/base-branch-migration.spec.ts line 4
     #[test]
     fn base_branch_string_migrates_to_patterns() {
         assert_eq!(
@@ -6450,7 +6450,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate array" — config/migrations/custom/base-branch-migration.spec.ts line 15
+    // Ported: "should migrate array" — lib/config/migrations/custom/base-branch-migration.spec.ts line 15
     #[test]
     fn base_branch_array_migrates_to_patterns() {
         assert_eq!(
@@ -6459,7 +6459,7 @@ mod tests {
         );
     }
 
-    // Ported: "should push to existing bassBranchPatterns" — config/migrations/custom/base-branch-migration.spec.ts line 26
+    // Ported: "should push to existing bassBranchPatterns" — lib/config/migrations/custom/base-branch-migration.spec.ts line 26
     #[test]
     fn base_branch_migration_appends_existing_patterns() {
         assert_eq!(
@@ -6468,7 +6468,7 @@ mod tests {
         );
     }
 
-    // Ported: "should replace pattern" — config/migrations/custom/branch-name-migration.spec.ts line 4
+    // Ported: "should replace pattern" — lib/config/migrations/custom/branch-name-migration.spec.ts line 4
     #[test]
     fn branch_name_manager_branch_prefix_migrates_to_additional_branch_prefix() {
         assert_eq!(
@@ -6477,7 +6477,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not replace another string" — config/migrations/custom/branch-name-migration.spec.ts line 15
+    // Ported: "should not replace another string" — lib/config/migrations/custom/branch-name-migration.spec.ts line 15
     #[test]
     fn branch_name_without_manager_branch_prefix_is_unchanged() {
         assert_eq!(
@@ -6486,7 +6486,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not replace non string value" — config/migrations/custom/branch-name-migration.spec.ts line 27
+    // Ported: "should not replace non string value" — lib/config/migrations/custom/branch-name-migration.spec.ts line 27
     #[test]
     fn branch_name_non_string_is_unchanged() {
         assert_eq!(
@@ -6495,7 +6495,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate template" — config/migrations/custom/branch-prefix-migration.spec.ts line 4
+    // Ported: "should migrate template" — lib/config/migrations/custom/branch-prefix-migration.spec.ts line 4
     #[test]
     fn branch_prefix_parent_dir_template_migrates_to_additional_prefix() {
         assert_eq!(
@@ -6504,7 +6504,7 @@ mod tests {
         );
     }
 
-    // Ported: "should ignore string without template" — config/migrations/custom/branch-prefix-migration.spec.ts line 16
+    // Ported: "should ignore string without template" — lib/config/migrations/custom/branch-prefix-migration.spec.ts line 16
     #[test]
     fn branch_prefix_without_parent_dir_template_is_unchanged() {
         assert_eq!(
@@ -6513,7 +6513,7 @@ mod tests {
         );
     }
 
-    // Ported: "should ignore non string without template" — config/migrations/custom/branch-prefix-migration.spec.ts line 28
+    // Ported: "should ignore non string without template" — lib/config/migrations/custom/branch-prefix-migration.spec.ts line 28
     #[test]
     fn branch_prefix_non_string_is_unchanged() {
         assert_eq!(
@@ -6522,7 +6522,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true" — config/migrations/custom/recreate-closed-migration.spec.ts line 4
+    // Ported: "should migrate true" — lib/config/migrations/custom/recreate-closed-migration.spec.ts line 4
     #[test]
     fn recreate_closed_true_migrates_to_always() {
         assert_eq!(
@@ -6531,7 +6531,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false" — config/migrations/custom/recreate-closed-migration.spec.ts line 15
+    // Ported: "should migrate false" — lib/config/migrations/custom/recreate-closed-migration.spec.ts line 15
     #[test]
     fn recreate_closed_false_migrates_to_auto() {
         assert_eq!(
@@ -6540,7 +6540,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate requireConfig=true to requireConfig=required" — config/migrations/custom/require-config-migration.spec.ts line 5
+    // Ported: "should migrate requireConfig=true to requireConfig=required" — lib/config/migrations/custom/require-config-migration.spec.ts line 5
     #[test]
     fn require_config_true_string_migrates_to_required() {
         assert_eq!(
@@ -6549,7 +6549,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate requireConfig=false to requireConfig=optional" — config/migrations/custom/require-config-migration.spec.ts line 16
+    // Ported: "should migrate requireConfig=false to requireConfig=optional" — lib/config/migrations/custom/require-config-migration.spec.ts line 16
     #[test]
     fn require_config_false_string_migrates_to_optional() {
         assert_eq!(
@@ -6558,7 +6558,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate true" — config/migrations/custom/rebase-stale-prs-migration.spec.ts line 4
+    // Ported: "should migrate true" — lib/config/migrations/custom/rebase-stale-prs-migration.spec.ts line 4
     #[test]
     fn rebase_stale_prs_true_migrates_to_behind_base_branch() {
         assert_eq!(
@@ -6567,7 +6567,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false" — config/migrations/custom/rebase-stale-prs-migration.spec.ts line 15
+    // Ported: "should migrate false" — lib/config/migrations/custom/rebase-stale-prs-migration.spec.ts line 15
     #[test]
     fn rebase_stale_prs_false_migrates_to_conflicted() {
         assert_eq!(
@@ -6576,7 +6576,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate null" — config/migrations/custom/rebase-stale-prs-migration.spec.ts line 26
+    // Ported: "should migrate null" — lib/config/migrations/custom/rebase-stale-prs-migration.spec.ts line 26
     #[test]
     fn rebase_stale_prs_null_migrates_to_auto() {
         assert_eq!(
@@ -6585,7 +6585,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate false" — config/migrations/custom/rebase-conflicted-prs-migration.spec.ts line 4
+    // Ported: "should migrate false" — lib/config/migrations/custom/rebase-conflicted-prs-migration.spec.ts line 4
     #[test]
     fn rebase_conflicted_prs_false_migrates_to_never() {
         assert_eq!(
@@ -6594,7 +6594,7 @@ mod tests {
         );
     }
 
-    // Ported: "should replace false value" — config/migrations/custom/update-lock-files-migration.spec.ts line 4
+    // Ported: "should replace false value" — lib/config/migrations/custom/update-lock-files-migration.spec.ts line 4
     #[test]
     fn update_lock_files_false_migrates_to_skip_artifacts_update() {
         assert_eq!(
@@ -6603,13 +6603,13 @@ mod tests {
         );
     }
 
-    // Ported: "should not replace true value" — config/migrations/custom/update-lock-files-migration.spec.ts line 15
+    // Ported: "should not replace true value" — lib/config/migrations/custom/update-lock-files-migration.spec.ts line 15
     #[test]
     fn update_lock_files_true_is_removed() {
         assert_eq!(migrate_config(&json!({"updateLockFiles": true})), json!({}));
     }
 
-    // Ported: "should not replace skipArtifactsUpdate" — config/migrations/custom/update-lock-files-migration.spec.ts line 24
+    // Ported: "should not replace skipArtifactsUpdate" — lib/config/migrations/custom/update-lock-files-migration.spec.ts line 24
     #[test]
     fn update_lock_files_false_preserves_existing_skip_artifacts_update() {
         assert_eq!(
@@ -6618,7 +6618,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate upgradeInRange=true to rangeStrategy=\"bump\"" — config/migrations/custom/upgrade-in-range-migration.spec.ts line 4
+    // Ported: "should migrate upgradeInRange=true to rangeStrategy=\"bump\"" — lib/config/migrations/custom/upgrade-in-range-migration.spec.ts line 4
     #[test]
     fn upgrade_in_range_true_migrates_to_range_strategy_bump() {
         assert_eq!(
@@ -6627,13 +6627,13 @@ mod tests {
         );
     }
 
-    // Ported: "should just remove property when upgradeInRange not equals to true" — config/migrations/custom/upgrade-in-range-migration.spec.ts line 15
+    // Ported: "should just remove property when upgradeInRange not equals to true" — lib/config/migrations/custom/upgrade-in-range-migration.spec.ts line 15
     #[test]
     fn upgrade_in_range_false_is_removed() {
         assert_eq!(migrate_config(&json!({"upgradeInRange": false})), json!({}));
     }
 
-    // Ported: "should migrate versionStrategy=\"widen\" to rangeStrategy=\"widen\"" — config/migrations/custom/version-strategy-migration.spec.ts line 4
+    // Ported: "should migrate versionStrategy=\"widen\" to rangeStrategy=\"widen\"" — lib/config/migrations/custom/version-strategy-migration.spec.ts line 4
     #[test]
     fn version_strategy_widen_migrates_to_range_strategy_widen() {
         assert_eq!(
@@ -6642,7 +6642,7 @@ mod tests {
         );
     }
 
-    // Ported: "should just remove property when versionStrategy not equals to \"widen\"" — config/migrations/custom/version-strategy-migration.spec.ts line 15
+    // Ported: "should just remove property when versionStrategy not equals to \"widen\"" — lib/config/migrations/custom/version-strategy-migration.spec.ts line 15
     #[test]
     fn version_strategy_other_is_removed() {
         assert_eq!(
@@ -6651,7 +6651,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate platformCommit=true to platformCommit=enabled" — config/migrations/custom/platform-commit-migration.spec.ts line 4
+    // Ported: "should migrate platformCommit=true to platformCommit=enabled" — lib/config/migrations/custom/platform-commit-migration.spec.ts line 4
     #[test]
     fn platform_commit_true_migrates_to_enabled() {
         assert_eq!(
@@ -6660,7 +6660,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate platformCommit=false to platformCommit=disabled" — config/migrations/custom/platform-commit-migration.spec.ts line 15
+    // Ported: "should migrate platformCommit=false to platformCommit=disabled" — lib/config/migrations/custom/platform-commit-migration.spec.ts line 15
     #[test]
     fn platform_commit_false_migrates_to_disabled() {
         assert_eq!(
@@ -6669,7 +6669,7 @@ mod tests {
         );
     }
 
-    // Ported: "should not migrate platformCommit=auto" — config/migrations/custom/platform-commit-migration.spec.ts line 26
+    // Ported: "should not migrate platformCommit=auto" — lib/config/migrations/custom/platform-commit-migration.spec.ts line 26
     #[test]
     fn platform_commit_auto_is_unchanged() {
         assert_eq!(
@@ -6678,7 +6678,7 @@ mod tests {
         );
     }
 
-    // Ported: "should migrate requiredStatusChecks=null to ignoreTests=true" — config/migrations/custom/required-status-checks-migration.spec.ts line 4
+    // Ported: "should migrate requiredStatusChecks=null to ignoreTests=true" — lib/config/migrations/custom/required-status-checks-migration.spec.ts line 4
     #[test]
     fn required_status_checks_null_migrates_to_ignore_tests() {
         assert_eq!(
@@ -6687,14 +6687,14 @@ mod tests {
         );
     }
 
-    // Ported: "handles invalid" — config/migrate-validate.spec.ts line 32
+    // Ported: "handles invalid" — lib/config/migrate-validate.spec.ts line 32
     #[test]
     fn migrate_and_validate_handles_invalid() {
         let result = migrate_and_validate(&json!({}), &json!({"foo": "none"}));
         assert_eq!(result["errors"].as_array().expect("errors").len(), 1);
     }
 
-    // Ported: "isOnboarded" — config/migrate-validate.spec.ts line 40
+    // Ported: "isOnboarded" — lib/config/migrate-validate.spec.ts line 40
     #[test]
     fn migrate_and_validate_omits_warnings_when_onboarded() {
         let result = migrate_and_validate(&json!({"repoIsOnboarded": true}), &json!({}));
@@ -6718,7 +6718,7 @@ mod tests {
             .collect()
     }
 
-    // Ported: "migrates gradle-lite" — config/migration.spec.ts line 731
+    // Ported: "migrates gradle-lite" — lib/config/migration.spec.ts line 731
     #[test]
     fn migrates_gradle_lite() {
         let result = migrate_config(&json!({
@@ -6746,7 +6746,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates subconfig" — config/migration.spec.ts line 308
+    // Ported: "migrates subconfig" — lib/config/migration.spec.ts line 308
     #[test]
     fn migrates_subconfig() {
         let result = migrate_config(&json!({
@@ -6764,7 +6764,7 @@ mod tests {
         assert_eq!(rules[0]["respectLatest"], json!(false));
     }
 
-    // Ported: "migrates more packageFiles" — config/migration.spec.ts line 360
+    // Ported: "migrates more packageFiles" — lib/config/migration.spec.ts line 360
     #[test]
     fn migrates_more_package_files() {
         let result = migrate_config(&json!({
@@ -6783,7 +6783,7 @@ mod tests {
         assert_eq!(rules.len(), 2);
     }
 
-    // Ported: "migrates pip-compile" — config/migration.spec.ts line 696
+    // Ported: "migrates pip-compile" — lib/config/migration.spec.ts line 696
     #[test]
     fn migrates_pip_compile() {
         let result = migrate_config(&json!({
@@ -6818,7 +6818,7 @@ mod tests {
         assert_eq!(patterns.len(), 7);
     }
 
-    // Ported: "overrides existing automerge setting" — config/migration.spec.ts line 279
+    // Ported: "overrides existing automerge setting" — lib/config/migration.spec.ts line 279
     #[test]
     fn overrides_existing_automerge_setting() {
         let result = migrate_config(&json!({
@@ -6838,7 +6838,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates packageFiles" — config/migration.spec.ts line 334
+    // Ported: "migrates packageFiles" — lib/config/migration.spec.ts line 334
     #[test]
     fn migrates_package_files() {
         let result = migrate_config(&json!({
@@ -6866,7 +6866,7 @@ mod tests {
         assert_eq!(rule1["rangeStrategy"], "pin");
     }
 
-    // Ported: "removes invalid configs" — config/migration.spec.ts line 389
+    // Ported: "removes invalid configs" — lib/config/migration.spec.ts line 389
     // Note: undefined values in TS (pinVersions, exposeEnv, etc.) are represented as absent
     // in Rust JSON; ignoreNodeModules:false replaces ignoreNodeModules:undefined to trigger
     // the ignorePaths:[] migration.
@@ -6897,7 +6897,7 @@ mod tests {
         );
     }
 
-    // Ported: "should remove deprecated properties" — config/migrations/migrations-service.spec.ts line 9
+    // Ported: "should remove deprecated properties" — lib/config/migrations/migrations-service.spec.ts line 9
     #[test]
     fn migrations_service_removes_deprecated_properties() {
         let removed = [
@@ -6927,7 +6927,7 @@ mod tests {
         }
     }
 
-    // Ported: "should rename renamed properties" — config/migrations/migrations-service.spec.ts line 23
+    // Ported: "should rename renamed properties" — lib/config/migrations/migrations-service.spec.ts line 23
     #[test]
     fn migrations_service_renames_properties() {
         let renames: &[(&str, &str)] = &[
@@ -6962,7 +6962,7 @@ mod tests {
         }
     }
 
-    // Ported: "should save original order of properties" — config/migrations/migrations-service.spec.ts line 42
+    // Ported: "should save original order of properties" — lib/config/migrations/migrations-service.spec.ts line 42
     // Note: Rust preserves alphabetical-table order (not input-key order); the renamed
     // keys are checked by content rather than strict ordering.
     #[test]
@@ -6992,7 +6992,7 @@ mod tests {
         assert!(keys.contains(&"excludePackageNames"));
     }
 
-    // Ported: "there should be a single migration per property name" — config/migrations/migrations-service.spec.ts line 89
+    // Ported: "there should be a single migration per property name" — lib/config/migrations/migrations-service.spec.ts line 89
     #[test]
     fn migrations_service_no_duplicate_property_names() {
         // These are the same lists used in migrate_config. Verify no duplicates and no overlap.

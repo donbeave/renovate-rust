@@ -416,7 +416,7 @@ fn build_source(
 mod tests {
     use super::*;
 
-    // Ported: "extracts remote package with url and from" — xcodegen/extract.spec.ts line 71
+    // Ported: "extracts remote package with url and from" — lib/modules/manager/xcodegen/extract.spec.ts line 71
     #[test]
     fn extracts_github_url_with_from() {
         let content = r#"
@@ -437,7 +437,7 @@ packages:
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "extracts remote package with github shorthand" — xcodegen/extract.spec.ts line 92
+    // Ported: "extracts remote package with github shorthand" — lib/modules/manager/xcodegen/extract.spec.ts line 92
     #[test]
     fn extracts_github_shorthand() {
         let content = r#"
@@ -455,7 +455,7 @@ packages:
         assert_eq!(deps[0].current_value, "4.1.0");
     }
 
-    // Ported: "skips local packages with path" — xcodegen/extract.spec.ts line 197
+    // Ported: "skips local packages with path" — lib/modules/manager/xcodegen/extract.spec.ts line 197
     #[test]
     fn local_path_skipped() {
         let content = r#"
@@ -468,7 +468,7 @@ packages:
         assert_eq!(deps[0].skip_reason, Some(XcodeGenSkipReason::LocalPath));
     }
 
-    // Ported: "skips packages with branch reference" — xcodegen/extract.spec.ts line 214
+    // Ported: "skips packages with branch reference" — lib/modules/manager/xcodegen/extract.spec.ts line 214
     #[test]
     fn branch_only_skipped() {
         let content = r#"
@@ -485,7 +485,7 @@ packages:
         );
     }
 
-    // Ported: "extracts packages from a realistic project.yml" — xcodegen/extract.spec.ts line 44
+    // Ported: "extracts packages from a realistic project.yml" — lib/modules/manager/xcodegen/extract.spec.ts line 44
     #[test]
     fn multiple_packages() {
         let content = r#"
@@ -503,7 +503,7 @@ packages:
         assert_eq!(deps[1].name, "SnapKit");
     }
 
-    // Ported: "extracts remote package with url and from" — xcodegen/extract.spec.ts line 71
+    // Ported: "extracts remote package with url and from" — lib/modules/manager/xcodegen/extract.spec.ts line 71
     #[test]
     fn gitlab_url_detected() {
         let content = r#"
@@ -520,26 +520,26 @@ packages:
         );
     }
 
-    // Ported: "returns null for YAML without packages" — xcodegen/extract.spec.ts line 22
+    // Ported: "returns null for YAML without packages" — lib/modules/manager/xcodegen/extract.spec.ts line 22
     #[test]
     fn no_packages_returns_empty() {
         assert!(extract("name: MyApp\ntargets: {}").is_empty());
     }
 
-    // Ported: "returns null for empty content" — xcodegen/extract.spec.ts line 7
+    // Ported: "returns null for empty content" — lib/modules/manager/xcodegen/extract.spec.ts line 7
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for empty packages" — xcodegen/extract.spec.ts line 36
+    // Ported: "returns null for empty packages" — lib/modules/manager/xcodegen/extract.spec.ts line 36
     #[test]
     fn empty_packages_section_returns_empty() {
         let content = "name: MyProject\npackages: {}\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "skips packages with revision reference" — xcodegen/extract.spec.ts line 233
+    // Ported: "skips packages with revision reference" — lib/modules/manager/xcodegen/extract.spec.ts line 233
     #[test]
     fn revision_reference_skipped() {
         let content = "packages:\n  MyLib:\n    url: https://github.com/owner/repo.git\n    revision: abc123\n";
@@ -551,7 +551,7 @@ packages:
         );
     }
 
-    // Ported: "skips packages without url or github" — xcodegen/extract.spec.ts line 356
+    // Ported: "skips packages without url or github" — lib/modules/manager/xcodegen/extract.spec.ts line 356
     #[test]
     fn package_without_url_or_github_skipped() {
         let content = "packages:\n  MyLib:\n    from: \"1.0.0\"\n";
@@ -560,13 +560,13 @@ packages:
         assert_eq!(deps[0].skip_reason, Some(XcodeGenSkipReason::MissingSource));
     }
 
-    // Ported: "returns null for invalid YAML" — xcodegen/extract.spec.ts line 11
+    // Ported: "returns null for invalid YAML" — lib/modules/manager/xcodegen/extract.spec.ts line 11
     #[test]
     fn invalid_yaml_returns_empty() {
         assert!(extract("nothing here: [").is_empty());
     }
 
-    // Ported: "extracts remote package with majorVersion" — xcodegen/extract.spec.ts line 113
+    // Ported: "extracts remote package with majorVersion" — lib/modules/manager/xcodegen/extract.spec.ts line 113
     #[test]
     fn extracts_major_version() {
         let content = "packages:\n  Alamofire:\n    url: https://github.com/Alamofire/Alamofire\n    majorVersion: 5.0.0\n";
@@ -577,7 +577,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts remote package with minorVersion" — xcodegen/extract.spec.ts line 134
+    // Ported: "extracts remote package with minorVersion" — lib/modules/manager/xcodegen/extract.spec.ts line 134
     #[test]
     fn extracts_minor_version() {
         let content = "packages:\n  SnapKit:\n    url: https://github.com/SnapKit/SnapKit\n    minorVersion: 5.6.0\n";
@@ -588,7 +588,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts remote package with exactVersion" — xcodegen/extract.spec.ts line 155
+    // Ported: "extracts remote package with exactVersion" — lib/modules/manager/xcodegen/extract.spec.ts line 155
     #[test]
     fn extracts_exact_version() {
         let content = "packages:\n  SwiftLint:\n    url: https://github.com/realm/SwiftLint\n    exactVersion: 0.50.3\n";
@@ -599,7 +599,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts remote package with version" — xcodegen/extract.spec.ts line 176
+    // Ported: "extracts remote package with version" — lib/modules/manager/xcodegen/extract.spec.ts line 176
     #[test]
     fn extracts_version_field() {
         let content =
@@ -611,7 +611,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "skips packages with minVersion/maxVersion range" — xcodegen/extract.spec.ts line 252
+    // Ported: "skips packages with minVersion/maxVersion range" — lib/modules/manager/xcodegen/extract.spec.ts line 252
     #[test]
     fn min_max_version_range_skipped() {
         let content = "packages:\n  SomePkg:\n    url: https://github.com/example/some-pkg\n    minVersion: 1.0.0\n    maxVersion: 2.0.0\n";
@@ -624,7 +624,7 @@ packages:
         assert_eq!(deps[0].current_value, "1.0.0 - 2.0.0");
     }
 
-    // Ported: "uses gitlab-tags datasource for GitLab URLs" — xcodegen/extract.spec.ts line 272
+    // Ported: "uses gitlab-tags datasource for GitLab URLs" — lib/modules/manager/xcodegen/extract.spec.ts line 272
     #[test]
     fn gitlab_url_produces_gitlab_source() {
         let content = "packages:\n  GitLabPkg:\n    url: https://gitlab.com/some-group/some-project\n    from: 1.0.0\n";
@@ -637,7 +637,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "uses git-tags datasource for non-GitHub/GitLab URLs" — xcodegen/extract.spec.ts line 335
+    // Ported: "uses git-tags datasource for non-GitHub/GitLab URLs" — lib/modules/manager/xcodegen/extract.spec.ts line 335
     #[test]
     fn generic_url_produces_git_source() {
         let content = "packages:\n  GenericPkg:\n    url: https://example.com/some/repo.git\n    from: 3.0.0\n";
@@ -652,7 +652,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "skips packages without version specifier" — xcodegen/extract.spec.ts line 373
+    // Ported: "skips packages without version specifier" — lib/modules/manager/xcodegen/extract.spec.ts line 373
     #[test]
     fn no_version_specifier_skipped() {
         let content = "packages:\n  NoPkg:\n    url: https://github.com/example/no-version\n";
@@ -664,7 +664,7 @@ packages:
         );
     }
 
-    // Ported: "extracts multiple packages correctly" — xcodegen/extract.spec.ts line 390
+    // Ported: "extracts multiple packages correctly" — lib/modules/manager/xcodegen/extract.spec.ts line 390
     #[test]
     fn extracts_multiple_packages_correctly() {
         let content = r#"
@@ -689,7 +689,7 @@ packages:
         assert_eq!(deps[2].skip_reason, Some(XcodeGenSkipReason::LocalPath));
     }
 
-    // Ported: "handles github URL with .git suffix" — xcodegen/extract.spec.ts line 427
+    // Ported: "handles github URL with .git suffix" — lib/modules/manager/xcodegen/extract.spec.ts line 427
     #[test]
     fn github_url_with_git_suffix() {
         let content =
@@ -702,7 +702,7 @@ packages:
         );
     }
 
-    // Ported: "handles numeric version values from YAML parsing" — xcodegen/extract.spec.ts line 448
+    // Ported: "handles numeric version values from YAML parsing" — lib/modules/manager/xcodegen/extract.spec.ts line 448
     #[test]
     fn numeric_version_from_yaml() {
         let content =
@@ -713,7 +713,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "uses github-tags datasource with registryUrls for self-hosted GHES" — xcodegen/extract.spec.ts line 293
+    // Ported: "uses github-tags datasource with registryUrls for self-hosted GHES" — lib/modules/manager/xcodegen/extract.spec.ts line 293
     #[test]
     fn self_hosted_ghes_registry_url() {
         let content =
@@ -731,7 +731,7 @@ packages:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "uses gitlab-tags datasource with registryUrls for self-hosted GitLab" — xcodegen/extract.spec.ts line 314
+    // Ported: "uses gitlab-tags datasource with registryUrls for self-hosted GitLab" — lib/modules/manager/xcodegen/extract.spec.ts line 314
     #[test]
     fn self_hosted_gitlab_registry_url() {
         let content = "packages:\n  GitLabPkg:\n    url: https://gitlab.example.com/some-group/some-project\n    from: 1.0.0\n";

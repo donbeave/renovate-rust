@@ -5573,7 +5573,7 @@ mod tests {
     // range
     // -----------------------------------------------------------------------
 
-    // Ported: "range($start, $end)" — util/range.spec.ts line 4
+    // Ported: "range($start, $end)" — lib/util/range.spec.ts line 4
     #[test]
     fn test_range() {
         assert_eq!(range(0, 0).collect::<Vec<_>>(), vec![0]);
@@ -5597,7 +5597,7 @@ mod tests {
     // memoize
     // -----------------------------------------------------------------------
 
-    // Ported: "works" — util/memoize.spec.ts line 6
+    // Ported: "works" — lib/util/memoize.spec.ts line 6
     #[test]
     fn test_memoize() {
         let call_count = std::cell::Cell::new(0u32);
@@ -5614,14 +5614,14 @@ mod tests {
     // uniq
     // -----------------------------------------------------------------------
 
-    // Ported: "should return an array with unique elements" — util/uniq.spec.ts line 4
+    // Ported: "should return an array with unique elements" — lib/util/uniq.spec.ts line 4
     #[test]
     fn test_uniq_basic() {
         let input = vec![1i32, 2, 3, 2, 1, 4];
         assert_eq!(uniq_eq(input), vec![1, 2, 3, 4]);
     }
 
-    // Ported: "should use the provided equality function to compare elements" — util/uniq.spec.ts line 10
+    // Ported: "should use the provided equality function to compare elements" — lib/util/uniq.spec.ts line 10
     #[test]
     fn test_uniq_custom_eq() {
         #[derive(Debug, PartialEq, Clone)]
@@ -5637,7 +5637,7 @@ mod tests {
     // number utilities
     // -----------------------------------------------------------------------
 
-    // Ported: "coerceNumber($val, $def) = $expected" — util/number.spec.ts line 4
+    // Ported: "coerceNumber($val, $def) = $expected" — lib/util/number.spec.ts line 4
     #[test]
     fn test_coerce_number() {
         assert_eq!(coerce_number(Some(1), Some(2)), 1);
@@ -5645,7 +5645,7 @@ mod tests {
         assert_eq!(coerce_number(None, None), 0);
     }
 
-    // Ported: "parseInteger($val, $def) = $expected" — util/number.spec.ts line 13
+    // Ported: "parseInteger($val, $def) = $expected" — lib/util/number.spec.ts line 13
     #[test]
     fn test_parse_integer() {
         // val=1, def=2 → def (TypeScript parseInt returns 1 but test expects def=2?)
@@ -5670,7 +5670,7 @@ mod tests {
     // string utilities
     // -----------------------------------------------------------------------
 
-    // Ported: "replaceAt inserts newString which is one char longer than oldString" — util/string.spec.ts line 11
+    // Ported: "replaceAt inserts newString which is one char longer than oldString" — lib/util/string.spec.ts line 11
     #[test]
     fn test_replace_at_longer() {
         let content = "I am a dog";
@@ -5678,7 +5678,7 @@ mod tests {
         assert_eq!(result, "I are a dog");
     }
 
-    // Ported: "replaceAt inserts newString which is significantly longer than oldString" — util/string.spec.ts line 22
+    // Ported: "replaceAt inserts newString which is significantly longer than oldString" — lib/util/string.spec.ts line 22
     #[test]
     fn test_replace_at_much_longer() {
         let content = "I am a dog";
@@ -5686,7 +5686,7 @@ mod tests {
         assert_eq!(result, "I want to have a new pet maybe a dog");
     }
 
-    // Ported: "reverts to literal match if either is falsey" — util/string.spec.ts line 35
+    // Ported: "reverts to literal match if either is falsey" — lib/util/string.spec.ts line 35
     #[test]
     fn test_loose_equals_falsey() {
         // null vs null → true; null vs '' → false
@@ -5697,7 +5697,7 @@ mod tests {
         // in Rust both map to None and compare equal.
     }
 
-    // Ported: "coerceString" — util/string.spec.ts line 42
+    // Ported: "coerceString" — lib/util/string.spec.ts line 42
     #[test]
     fn test_coerce_string() {
         assert_eq!(coerce_string(Some("foo"), None), "foo");
@@ -5706,7 +5706,7 @@ mod tests {
         assert_eq!(coerce_string(None, Some("foo")), "foo");
     }
 
-    // Ported: "\"$input\" -> \"$expected\"" — util/string.spec.ts line 51
+    // Ported: "\"$input\" -> \"$expected\"" — lib/util/string.spec.ts line 51
     #[test]
     fn test_strip_templates() {
         assert_eq!(
@@ -5756,7 +5756,7 @@ mod tests {
         assert_eq!(strip_templates("{% entire text %}"), "");
     }
 
-    // Ported: "capitalizes" — util/string.spec.ts line 81
+    // Ported: "capitalizes" — lib/util/string.spec.ts line 81
     #[test]
     fn test_capitalize() {
         assert_eq!(capitalize("content"), "Content");
@@ -5767,8 +5767,8 @@ mod tests {
     // object utilities — lib/util/object.ts
     // -----------------------------------------------------------------------
 
-    // Ported: "finds key in regular object" — util/object.spec.ts line 4
-    // Ported: "detects missing key in regular object" — util/object.spec.ts line 8
+    // Ported: "finds key in regular object" — lib/util/object.spec.ts line 4
+    // Ported: "detects missing key in regular object" — lib/util/object.spec.ts line 8
     #[test]
     fn test_has_key() {
         use std::collections::HashMap;
@@ -5778,8 +5778,8 @@ mod tests {
         assert!(!obj2.contains_key("foo"));
     }
 
-    // Ported: "should return empty object" — util/object.spec.ts line 17
-    // Ported: "should return input object" — util/object.spec.ts line 22
+    // Ported: "should return empty object" — lib/util/object.spec.ts line 17
+    // Ported: "should return input object" — lib/util/object.spec.ts line 22
     #[test]
     #[allow(clippy::unnecessary_literal_unwrap)]
     fn test_coerce_object() {
@@ -5808,7 +5808,7 @@ mod tests {
     // assign_keys
     // -----------------------------------------------------------------------
 
-    // Ported: "should assign values from right to left for specified keys" — util/assign-keys.spec.ts line 4
+    // Ported: "should assign values from right to left for specified keys" — lib/util/assign-keys.spec.ts line 4
     #[test]
     fn test_assign_keys() {
         use std::collections::HashMap;
@@ -5825,7 +5825,7 @@ mod tests {
     // config_serialize
     // -----------------------------------------------------------------------
 
-    // Ported: "squashes templates" — logger/config-serializer.spec.ts line 4
+    // Ported: "squashes templates" — lib/logger/config-serializer.spec.ts line 4
     #[test]
     fn test_config_serialize_templates() {
         use serde_json::json;
@@ -5835,7 +5835,7 @@ mod tests {
         assert_eq!(output["prBody"], "[Template]");
     }
 
-    // Ported: "suppresses content" — logger/config-serializer.spec.ts line 15
+    // Ported: "suppresses content" — lib/logger/config-serializer.spec.ts line 15
     #[test]
     fn test_config_serialize_content() {
         use serde_json::json;
@@ -5844,7 +5844,7 @@ mod tests {
         assert_eq!(output["content"], "[content]");
     }
 
-    // Ported: "suppresses packageFiles" — logger/config-serializer.spec.ts line 24
+    // Ported: "suppresses packageFiles" — lib/logger/config-serializer.spec.ts line 24
     #[test]
     fn test_config_serialize_package_files() {
         use serde_json::json;
@@ -5857,19 +5857,19 @@ mod tests {
     // get_env_name
     // -----------------------------------------------------------------------
 
-    // Ported: "returns empty" — workers/global/config/parse/env.spec.ts line 418
+    // Ported: "returns empty" — lib/workers/global/config/parse/env.spec.ts line 418
     #[test]
     fn test_get_env_name_empty() {
         assert_eq!(get_env_name("foo", None, false), "");
     }
 
-    // Ported: "returns existing env" — workers/global/config/parse/env.spec.ts line 426
+    // Ported: "returns existing env" — lib/workers/global/config/parse/env.spec.ts line 426
     #[test]
     fn test_get_env_name_existing() {
         assert_eq!(get_env_name("foo", Some("FOO"), true), "FOO");
     }
 
-    // Ported: "generates RENOVATE_ env" — workers/global/config/parse/env.spec.ts line 434
+    // Ported: "generates RENOVATE_ env" — lib/workers/global/config/parse/env.spec.ts line 434
     #[test]
     fn test_get_env_name_generated() {
         assert_eq!(
@@ -5882,13 +5882,13 @@ mod tests {
     // get_cli_name
     // -----------------------------------------------------------------------
 
-    // Ported: "generates CLI value" — workers/global/config/parse/cli.spec.ts line 15
+    // Ported: "generates CLI value" — lib/workers/global/config/parse/cli.spec.ts line 15
     #[test]
     fn test_get_cli_name_generates() {
         assert_eq!(get_cli_name("oneTwoThree", true), "--one-two-three");
     }
 
-    // Ported: "generates returns empty if CLI false" — workers/global/config/parse/cli.spec.ts line 22
+    // Ported: "generates returns empty if CLI false" — lib/workers/global/config/parse/cli.spec.ts line 22
     #[test]
     fn test_get_cli_name_empty_when_disabled() {
         assert_eq!(get_cli_name("oneTwoThree", false), "");
@@ -5898,7 +5898,7 @@ mod tests {
     // massage_throwable
     // -----------------------------------------------------------------------
 
-    // Ported: "should return $expected for $input" — instrumentation/utils.spec.ts line 5
+    // Ported: "should return $expected for $input" — lib/instrumentation/utils.spec.ts line 5
     #[test]
     fn test_massage_throwable() {
         // null/undefined → None
@@ -5913,7 +5913,7 @@ mod tests {
     // redact_cmd_credentials
     // -----------------------------------------------------------------------
 
-    // Ported: "returns array" — logger/cmd-serializer.spec.ts line 4
+    // Ported: "returns array" — lib/logger/cmd-serializer.spec.ts line 4
     #[test]
     fn test_redact_cmd_credentials_no_credentials() {
         // For an array with no credentials, returns as-is
@@ -5922,7 +5922,7 @@ mod tests {
         assert_eq!(redact_cmd_credentials(" "), " ");
     }
 
-    // Ported: "redacts" — logger/cmd-serializer.spec.ts line 8
+    // Ported: "redacts" — lib/logger/cmd-serializer.spec.ts line 8
     #[test]
     fn test_redact_cmd_credentials_redacts() {
         assert_eq!(
@@ -5931,7 +5931,7 @@ mod tests {
         );
     }
 
-    // Ported: "runs" — workers/repository/result.spec.ts line 16
+    // Ported: "runs" — lib/workers/repository/result.spec.ts line 16
     #[test]
     fn test_process_result_runs() {
         // config: {repoIsActivated: true, repoIsOnboarded: true}, res: 'done'
@@ -5942,7 +5942,7 @@ mod tests {
         assert_eq!(result.onboarded, Some(true));
     }
 
-    // Ported: "preserves secret template strings in redacted fields" — logger/utils.spec.ts line 39
+    // Ported: "preserves secret template strings in redacted fields" — lib/logger/utils.spec.ts line 39
     #[test]
     fn test_sanitize_value_preserves_secret_templates() {
         use serde_json::json;
@@ -5977,7 +5977,7 @@ mod tests {
         assert_eq!(result["nested"]["password"], "***********");
     }
 
-    // Ported: "sanitizeValue("$input") == "$output"" — logger/utils.spec.ts line 11
+    // Ported: "sanitizeValue("$input") == "$output"" — lib/logger/utils.spec.ts line 11
     #[test]
     fn test_sanitize_urls() {
         let cases = [
@@ -6025,7 +6025,7 @@ mod tests {
     // make_timing_report
     // -----------------------------------------------------------------------
 
-    // Ported: "supports empty data" — util/stats.spec.ts line 21
+    // Ported: "supports empty data" — lib/util/stats.spec.ts line 21
     #[test]
     fn test_make_timing_report_empty() {
         let r = make_timing_report(&[]);
@@ -6041,7 +6041,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports single data point" — util/stats.spec.ts line 32
+    // Ported: "supports single data point" — lib/util/stats.spec.ts line 32
     #[test]
     fn test_make_timing_report_single() {
         let r = make_timing_report(&[100]);
@@ -6057,7 +6057,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports multiple data points" — util/stats.spec.ts line 43
+    // Ported: "supports multiple data points" — lib/util/stats.spec.ts line 43
     #[test]
     fn test_make_timing_report_multiple() {
         let r = make_timing_report(&[100, 200, 400]);
@@ -6070,7 +6070,7 @@ mod tests {
 
     // ── HttpStats ────────────────────────────────────────────────────────────
 
-    // Ported: "returns empty report" — util/stats.spec.ts line 722
+    // Ported: "returns empty report" — lib/util/stats.spec.ts line 722
     #[test]
     fn test_http_stats_empty_report() {
         let stats = HttpStats::new();
@@ -6082,7 +6082,7 @@ mod tests {
         assert!(report.urls.is_empty());
     }
 
-    // Ported: "writes data points" — util/stats.spec.ts line 733
+    // Ported: "writes data points" — lib/util/stats.spec.ts line 733
     #[test]
     fn test_http_stats_writes_data_points() {
         let mut stats = HttpStats::new();
@@ -6108,7 +6108,7 @@ mod tests {
 
     // ── DatasourceCacheStats ──────────────────────────────────────────────────
 
-    // Ported: "collects data points" — util/stats.spec.ts line 668
+    // Ported: "collects data points" — lib/util/stats.spec.ts line 668
     #[test]
     fn test_datasource_cache_stats_collects() {
         let mut stats = DatasourceCacheStats::new();
@@ -6173,14 +6173,14 @@ mod tests {
 
     // ── HttpCacheStats ────────────────────────────────────────────────────────
 
-    // Ported: "returns empty data" — util/stats.spec.ts line 954
+    // Ported: "returns empty data" — lib/util/stats.spec.ts line 954
     #[test]
     fn test_http_cache_stats_empty() {
         let stats = HttpCacheStats::new();
         assert!(stats.get_data().is_empty());
     }
 
-    // Ported: "ignores wrong url" — util/stats.spec.ts line 959
+    // Ported: "ignores wrong url" — lib/util/stats.spec.ts line 959
     #[test]
     fn test_http_cache_stats_ignores_invalid_url() {
         let mut stats = HttpCacheStats::new();
@@ -6188,7 +6188,7 @@ mod tests {
         assert!(stats.get_data().is_empty());
     }
 
-    // Ported: "writes data points" — util/stats.spec.ts line 964
+    // Ported: "writes data points" — lib/util/stats.spec.ts line 964
     #[test]
     fn test_http_cache_stats_writes_data_points() {
         let mut stats = HttpCacheStats::new();
@@ -6213,7 +6213,7 @@ mod tests {
 
     // ── PackageCacheStats ─────────────────────────────────────────────────────
 
-    // Ported: "returns empty report" — util/stats.spec.ts line 578
+    // Ported: "returns empty report" — lib/util/stats.spec.ts line 578
     #[test]
     fn test_package_cache_stats_empty_report() {
         let stats = PackageCacheStats::new();
@@ -6224,7 +6224,7 @@ mod tests {
         assert_eq!(set.avg_ms, 0);
     }
 
-    // Ported: "writes data points" — util/stats.spec.ts line 586
+    // Ported: "writes data points" — lib/util/stats.spec.ts line 586
     #[test]
     fn test_package_cache_stats_writes_data_points() {
         let mut stats = PackageCacheStats::new();
@@ -6246,14 +6246,14 @@ mod tests {
 
     // ── AbandonedPackageStats ─────────────────────────────────────────────────
 
-    // Ported: "returns empty report" — util/stats.spec.ts line 1016
+    // Ported: "returns empty report" — lib/util/stats.spec.ts line 1016
     #[test]
     fn test_abandoned_package_stats_empty_report() {
         let stats = AbandonedPackageStats::new();
         assert!(stats.get_report().is_empty());
     }
 
-    // Ported: "writes data points" — util/stats.spec.ts line 1021
+    // Ported: "writes data points" — lib/util/stats.spec.ts line 1021
     #[test]
     fn test_abandoned_package_stats_writes_data_points() {
         let mut stats = AbandonedPackageStats::new();
@@ -6280,14 +6280,14 @@ mod tests {
 
     // ── GitOperationStats ─────────────────────────────────────────────────────
 
-    // Ported: "returns empty report" — util/stats.spec.ts line 1112
+    // Ported: "returns empty report" — lib/util/stats.spec.ts line 1112
     #[test]
     fn test_git_operation_stats_empty_report() {
         let stats = GitOperationStats::new();
         assert!(stats.get_report().is_empty());
     }
 
-    // Ported: "writes data points" — util/stats.spec.ts line 1117
+    // Ported: "writes data points" — lib/util/stats.spec.ts line 1117
     #[test]
     fn test_git_operation_stats_writes_data_points() {
         let mut stats = GitOperationStats::new();
@@ -6304,7 +6304,7 @@ mod tests {
         assert_eq!(push.max_ms, 50000);
     }
 
-    // Ported: "rounds total towards ceiling when preparing report" — util/stats.spec.ts line 1141
+    // Ported: "rounds total towards ceiling when preparing report" — lib/util/stats.spec.ts line 1141
     #[test]
     fn test_git_operation_stats_ceils_total() {
         let mut stats = GitOperationStats::new();
@@ -6324,7 +6324,7 @@ mod tests {
 
     // ── GetDatasourceReleasesStats ────────────────────────────────────────────
 
-    // Ported: "returns empty report" — util/stats.spec.ts line 152
+    // Ported: "returns empty report" — lib/util/stats.spec.ts line 152
     #[test]
     fn test_get_datasource_releases_stats_empty() {
         let stats = GetDatasourceReleasesStats::new();
@@ -6334,7 +6334,7 @@ mod tests {
         assert!(ds.is_empty());
     }
 
-    // Ported: "writes data points" — util/stats.spec.ts line 166
+    // Ported: "writes data points" — lib/util/stats.spec.ts line 166
     #[test]
     fn test_get_datasource_releases_stats_writes() {
         let mut stats = GetDatasourceReleasesStats::new();
@@ -6349,7 +6349,7 @@ mod tests {
 
     // ── LookupStats ───────────────────────────────────────────────────────────
 
-    // Ported: "returns empty report" — util/stats.spec.ts line 64
+    // Ported: "returns empty report" — lib/util/stats.spec.ts line 64
     #[test]
     fn test_lookup_stats_empty_report() {
         let stats = LookupStats::new();
@@ -6357,7 +6357,7 @@ mod tests {
         assert!(report.is_empty());
     }
 
-    // Ported: "writes data points" — util/stats.spec.ts line 69
+    // Ported: "writes data points" — lib/util/stats.spec.ts line 69
     #[test]
     fn test_lookup_stats_writes_data_points() {
         let mut stats = LookupStats::new();
@@ -6379,7 +6379,7 @@ mod tests {
         assert_eq!(npm.total_ms, 700);
     }
 
-    // Ported: "wraps a function" — util/stats.spec.ts line 95
+    // Ported: "wraps a function" — lib/util/stats.spec.ts line 95
     #[tokio::test]
     async fn test_lookup_stats_wraps_function() {
         let mut stats = LookupStats::new();
@@ -6393,7 +6393,7 @@ mod tests {
         assert!(npm.total_ms >= 0, "duration must be non-negative");
     }
 
-    // Ported: "wraps a function" — util/stats.spec.ts line 308
+    // Ported: "wraps a function" — lib/util/stats.spec.ts line 308
     #[tokio::test]
     async fn test_get_datasource_releases_stats_wraps_function() {
         let mut stats = GetDatasourceReleasesStats::new();
@@ -6410,7 +6410,7 @@ mod tests {
         assert_eq!(npm.count, 1);
     }
 
-    // Ported: "wraps get function" — util/stats.spec.ts line 612
+    // Ported: "wraps get function" — lib/util/stats.spec.ts line 612
     #[tokio::test]
     async fn test_package_cache_stats_wraps_get_function() {
         let mut stats = PackageCacheStats::new();
@@ -6420,7 +6420,7 @@ mod tests {
         assert_eq!(gets.count, 1);
     }
 
-    // Ported: "wraps set function" — util/stats.spec.ts line 625
+    // Ported: "wraps set function" — lib/util/stats.spec.ts line 625
     #[tokio::test]
     async fn test_package_cache_stats_wraps_set_function() {
         let mut stats = PackageCacheStats::new();
@@ -6434,7 +6434,7 @@ mod tests {
     // filter_map_vec
     // -----------------------------------------------------------------------
 
-    // Ported: "should return an empty array when given an empty array" — util/filter-map.spec.ts line 4
+    // Ported: "should return an empty array when given an empty array" — lib/util/filter-map.spec.ts line 4
     #[test]
     fn test_filter_map_empty() {
         let input: Vec<i32> = vec![];
@@ -6442,7 +6442,7 @@ mod tests {
         assert_eq!(output, Vec::<i32>::new());
     }
 
-    // Ported: "should return an array with only the mapped values that pass the filter" — util/filter-map.spec.ts line 11
+    // Ported: "should return an array with only the mapped values that pass the filter" — lib/util/filter-map.spec.ts line 11
     #[test]
     fn test_filter_map_nonzero_squares() {
         // TypeScript: filterMap([0,1,2,3,4], n => n*n) filters out 0 (falsy) → [1,4,9,16]
@@ -6458,14 +6458,14 @@ mod tests {
     // mask_token
     // -----------------------------------------------------------------------
 
-    // Ported: "returns empty string if passed value is falsy" — util/mask.spec.ts line 5
+    // Ported: "returns empty string if passed value is falsy" — lib/util/mask.spec.ts line 5
     #[test]
     fn test_mask_token_empty() {
         assert_eq!(mask_token(None), "");
         assert_eq!(mask_token(Some("")), "");
     }
 
-    // Ported: "hides value content" — util/mask.spec.ts line 10
+    // Ported: "hides value content" — lib/util/mask.spec.ts line 10
     #[test]
     fn test_mask_token_hides() {
         assert_eq!(mask_token(Some("123456789")), "12*****89");
@@ -6475,13 +6475,13 @@ mod tests {
     // fingerprint_json
     // -----------------------------------------------------------------------
 
-    // Ported: "returns empty string" — util/fingerprint.spec.ts line 16
+    // Ported: "returns empty string" — lib/util/fingerprint.spec.ts line 16
     #[test]
     fn test_fingerprint_none_returns_empty() {
         assert_eq!(fingerprint_json(None), "");
     }
 
-    // Ported: "maintains deterministic order" — util/fingerprint.spec.ts line 21
+    // Ported: "maintains deterministic order" — lib/util/fingerprint.spec.ts line 21
     #[test]
     fn test_fingerprint_deterministic_order() {
         use serde_json::json;
@@ -6503,7 +6503,7 @@ mod tests {
     // array utilities — lib/util/array.ts
     // -----------------------------------------------------------------------
 
-    // Ported: ".isNotNullOrUndefined" — util/array.spec.ts line 4
+    // Ported: ".isNotNullOrUndefined" — lib/util/array.spec.ts line 4
     #[test]
     fn test_is_not_null_or_undefined() {
         // In Rust: Option::is_some() is the equivalent
@@ -6513,7 +6513,7 @@ mod tests {
         assert!(some_val.is_some()); // actual value → true
     }
 
-    // Ported: ".toArray" — util/array.spec.ts line 13
+    // Ported: ".toArray" — lib/util/array.spec.ts line 13
     #[test]
     fn test_to_array() {
         // toArray(single_value) → [single_value]; toArray(array) → array
@@ -6529,10 +6529,10 @@ mod tests {
     // GitHub token utilities
     // -----------------------------------------------------------------------
 
-    // Ported: "returns true when string is a github personnal access token" — util/check-token.spec.ts line 132
-    // Ported: "returns false when string is a github application token" — util/check-token.spec.ts line 136
-    // Ported: "returns false when string is a github fine grained personal access token" — util/check-token.spec.ts line 140
-    // Ported: "returns false when string is not a token at all" — util/check-token.spec.ts line 144
+    // Ported: "returns true when string is a github personnal access token" — lib/util/check-token.spec.ts line 132
+    // Ported: "returns false when string is a github application token" — lib/util/check-token.spec.ts line 136
+    // Ported: "returns false when string is a github fine grained personal access token" — lib/util/check-token.spec.ts line 140
+    // Ported: "returns false when string is not a token at all" — lib/util/check-token.spec.ts line 144
     #[test]
     fn test_is_github_personal_access_token() {
         assert!(is_github_personal_access_token("ghp_XXXXXX"));
@@ -6541,10 +6541,10 @@ mod tests {
         assert!(!is_github_personal_access_token("XXXXXX"));
     }
 
-    // Ported: "returns true when string is a github server to server token" — util/check-token.spec.ts line 150
-    // Ported: "returns true when string is a 2026-style GitHub Installation Access Token" — util/check-token.spec.ts line 155
-    // Ported: "returns false when string is a github personal access token token" — util/check-token.spec.ts line 161
-    // Ported: "returns false when string is not a token at all" — util/check-token.spec.ts line 169
+    // Ported: "returns true when string is a github server to server token" — lib/util/check-token.spec.ts line 150
+    // Ported: "returns true when string is a 2026-style GitHub Installation Access Token" — lib/util/check-token.spec.ts line 155
+    // Ported: "returns false when string is a github personal access token token" — lib/util/check-token.spec.ts line 161
+    // Ported: "returns false when string is not a token at all" — lib/util/check-token.spec.ts line 169
     #[test]
     fn test_is_github_server_to_server_token() {
         assert!(is_github_server_to_server_token("ghs_XXXXXX"));
@@ -6555,10 +6555,10 @@ mod tests {
         assert!(!is_github_server_to_server_token("XXXXXX"));
     }
 
-    // Ported: "returns true when string is a github fine grained personal access token" — util/check-token.spec.ts line 175
-    // Ported: "returns false when string is a github personnal access token" — util/check-token.spec.ts line 181
-    // Ported: "returns false when string is a github application token" — util/check-token.spec.ts line 185
-    // Ported: "returns false when string is not a token at all" — util/check-token.spec.ts line 189
+    // Ported: "returns true when string is a github fine grained personal access token" — lib/util/check-token.spec.ts line 175
+    // Ported: "returns false when string is a github personnal access token" — lib/util/check-token.spec.ts line 181
+    // Ported: "returns false when string is a github application token" — lib/util/check-token.spec.ts line 185
+    // Ported: "returns false when string is not a token at all" — lib/util/check-token.spec.ts line 189
     #[test]
     fn test_is_github_fine_grained_pat() {
         assert!(is_github_fine_grained_personal_access_token(
@@ -6569,9 +6569,9 @@ mod tests {
         assert!(!is_github_fine_grained_personal_access_token("XXXXXX"));
     }
 
-    // Ported: "returns the token string when hostRule match search with a valid personal access token" — util/check-token.spec.ts line 195
-    // Ported: "returns undefined when no token is defined" — util/check-token.spec.ts line 201
-    // Ported: "remove x-access-token token prefix" — util/check-token.spec.ts line 205
+    // Ported: "returns the token string when hostRule match search with a valid personal access token" — lib/util/check-token.spec.ts line 195
+    // Ported: "returns undefined when no token is defined" — lib/util/check-token.spec.ts line 201
+    // Ported: "remove x-access-token token prefix" — lib/util/check-token.spec.ts line 205
     #[test]
     fn test_find_github_token() {
         assert_eq!(find_github_token(Some("ghp_TOKEN")), Some("ghp_TOKEN"));
@@ -6583,14 +6583,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns undefined when both token are undefined" — util/check-token.spec.ts line 216
-    // Ported: "returns gitTagsToken when both token are PAT" — util/check-token.spec.ts line 224
-    // Ported: "returns githubToken is PAT and gitTagsGithubToken is not a PAT" — util/check-token.spec.ts line 232
-    // Ported: "returns gitTagsToken when both token are set but not PAT" — util/check-token.spec.ts line 240
-    // Ported: "returns gitTagsToken when gitTagsToken not PAT and gitTagsGithubToken is not set" — util/check-token.spec.ts line 248
-    // Ported: "returns githubToken when githubToken not PAT and gitTagsGithubToken is not set" — util/check-token.spec.ts line 256
-    // Ported: "take personal access token over fine grained token" — util/check-token.spec.ts line 264
-    // Ported: "take fine grained token over server to server token" — util/check-token.spec.ts line 272
+    // Ported: "returns undefined when both token are undefined" — lib/util/check-token.spec.ts line 216
+    // Ported: "returns gitTagsToken when both token are PAT" — lib/util/check-token.spec.ts line 224
+    // Ported: "returns githubToken is PAT and gitTagsGithubToken is not a PAT" — lib/util/check-token.spec.ts line 232
+    // Ported: "returns gitTagsToken when both token are set but not PAT" — lib/util/check-token.spec.ts line 240
+    // Ported: "returns gitTagsToken when gitTagsToken not PAT and gitTagsGithubToken is not set" — lib/util/check-token.spec.ts line 248
+    // Ported: "returns githubToken when githubToken not PAT and gitTagsGithubToken is not set" — lib/util/check-token.spec.ts line 256
+    // Ported: "take personal access token over fine grained token" — lib/util/check-token.spec.ts line 264
+    // Ported: "take fine grained token over server to server token" — lib/util/check-token.spec.ts line 272
     #[test]
     fn test_take_personal_access_token() {
         // both undefined → None
@@ -6630,36 +6630,36 @@ mod tests {
             take_personal_access_token_if_possible(Some("ghs_github"), Some("github_pat_gitTags")),
             Some("github_pat_gitTags")
         );
-        // Ported: "take fine grained token over server to server token" — util/check-token.spec.ts line 272
+        // Ported: "take fine grained token over server to server token" — lib/util/check-token.spec.ts line 272
         assert_eq!(
             take_personal_access_token_if_possible(Some("github_pat_github"), Some("ghs_gitTags")),
             Some("github_pat_github")
         );
-        // Ported: "take git-tags fine grained token" — util/check-token.spec.ts line 280
+        // Ported: "take git-tags fine grained token" — lib/util/check-token.spec.ts line 280
         assert_eq!(
             take_personal_access_token_if_possible(None, Some("github_pat_gitTags")),
             Some("github_pat_gitTags")
         );
-        // Ported: "take git-tags unknown token type when no other token is set" — util/check-token.spec.ts line 288
+        // Ported: "take git-tags unknown token type when no other token is set" — lib/util/check-token.spec.ts line 288
         assert_eq!(
             take_personal_access_token_if_possible(None, Some("unknownTokenType_gitTags")),
             Some("unknownTokenType_gitTags")
         );
-        // Ported: "take github unknown token type when no other token is set" — util/check-token.spec.ts line 296
+        // Ported: "take github unknown token type when no other token is set" — lib/util/check-token.spec.ts line 296
         assert_eq!(
             take_personal_access_token_if_possible(Some("unknownTokenType"), None),
             Some("unknownTokenType")
         );
     }
 
-    // Ported: "does nothing if data is empty" — util/check-token.spec.ts line 26
+    // Ported: "does nothing if data is empty" — lib/util/check-token.spec.ts line 26
     #[test]
     fn test_check_github_token_empty() {
         let warned = check_github_token(None, true, &mut []);
         assert!(warned.is_empty());
     }
 
-    // Ported: "returns early if GitHub token is found" — util/check-token.spec.ts line 33
+    // Ported: "returns early if GitHub token is found" — lib/util/check-token.spec.ts line 33
     #[test]
     fn test_check_github_token_found() {
         let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
@@ -6673,7 +6673,7 @@ mod tests {
         assert!(refs[0].skip_reason.is_none());
     }
 
-    // Ported: "returns early if token warnings are disabled" — util/check-token.spec.ts line 45
+    // Ported: "returns early if token warnings are disabled" — lib/util/check-token.spec.ts line 45
     #[test]
     fn test_check_github_token_disabled() {
         let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
@@ -6687,7 +6687,7 @@ mod tests {
         assert!(refs[0].skip_reason.is_none());
     }
 
-    // Ported: "does not warn if there is dependencies with GitHub sourceUrl" — util/check-token.spec.ts line 60
+    // Ported: "does not warn if there is dependencies with GitHub sourceUrl" — lib/util/check-token.spec.ts line 60
     #[test]
     fn test_check_github_token_no_github_datasource() {
         let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
@@ -6701,7 +6701,7 @@ mod tests {
         assert!(refs[0].skip_reason.is_none());
     }
 
-    // Ported: "logs warning for github-tags datasource" — util/check-token.spec.ts line 68
+    // Ported: "logs warning for github-tags datasource" — lib/util/check-token.spec.ts line 68
     #[test]
     fn test_check_github_token_tags() {
         let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
@@ -6718,7 +6718,7 @@ mod tests {
         );
     }
 
-    // Ported: "logs warning for github-releases datasource" — util/check-token.spec.ts line 85
+    // Ported: "logs warning for github-releases datasource" — lib/util/check-token.spec.ts line 85
     #[test]
     fn test_check_github_token_releases() {
         let mut deps: Vec<GithubTokenDep> = vec![GithubTokenDep {
@@ -6735,7 +6735,7 @@ mod tests {
         );
     }
 
-    // Ported: "logs warning once" — util/check-token.spec.ts line 102
+    // Ported: "logs warning once" — lib/util/check-token.spec.ts line 102
     #[test]
     fn test_check_github_token_multiple() {
         let mut deps: Vec<GithubTokenDep> = vec![
@@ -6763,7 +6763,7 @@ mod tests {
         );
     }
 
-    // Ported: "should call a function only once" — logger/once.spec.ts line 15
+    // Ported: "should call a function only once" — lib/logger/once.spec.ts line 15
     #[test]
     fn test_once_tracker_calls_once() {
         let mut tracker = OnceTracker::new();
@@ -6774,7 +6774,7 @@ mod tests {
         assert_eq!(count, 1);
     }
 
-    // Ported: "supports support distinct calls" — logger/once.spec.ts line 28
+    // Ported: "supports support distinct calls" — lib/logger/once.spec.ts line 28
     #[test]
     fn test_once_tracker_distinct_keys() {
         let mut tracker = OnceTracker::new();
@@ -6791,7 +6791,7 @@ mod tests {
         assert_eq!(count2, 1);
     }
 
-    // Ported: "resets keys" — logger/once.spec.ts line 44
+    // Ported: "resets keys" — lib/logger/once.spec.ts line 44
     #[test]
     fn test_once_tracker_reset() {
         let mut tracker = OnceTracker::new();
@@ -6802,7 +6802,7 @@ mod tests {
         assert_eq!(count, 2);
     }
 
-    // Ported: "getCacheKey returns the expected format" — datasource/azure-tags/index.spec.ts line 83
+    // Ported: "getCacheKey returns the expected format" — lib/modules/datasource/azure-tags/index.spec.ts line 83
     #[test]
     fn test_azure_tags_cache_key() {
         assert_eq!(
@@ -6811,7 +6811,7 @@ mod tests {
         );
     }
 
-    // Ported: "getSourceUrl returns the correct URL format" — datasource/azure-tags/index.spec.ts line 92
+    // Ported: "getSourceUrl returns the correct URL format" — lib/modules/datasource/azure-tags/index.spec.ts line 92
     #[test]
     fn test_azure_tags_source_url() {
         assert_eq!(
@@ -6822,7 +6822,7 @@ mod tests {
 
     // -----------------------------------------------------------------------
 
-    // Ported: "supports ports" — util/git/url.spec.ts line 9
+    // Ported: "supports ports" — lib/util/git/url.spec.ts line 9
     #[test]
     fn git_url_parse_supports_ports() {
         assert_eq!(
@@ -6837,25 +6837,25 @@ mod tests {
         );
     }
 
-    // Ported: "returns https url for git url" — util/git/url.spec.ts line 40
+    // Ported: "returns https url for git url" — lib/util/git/url.spec.ts line 40
     #[test]
     fn test_get_http_url_git() {
         assert_eq!(get_http_url("git://foo.bar/", None), "https://foo.bar/");
     }
 
-    // Ported: "returns https url for https url" — util/git/url.spec.ts line 44
+    // Ported: "returns https url for https url" — lib/util/git/url.spec.ts line 44
     #[test]
     fn test_get_http_url_https() {
         assert_eq!(get_http_url("https://foo.bar/", None), "https://foo.bar/");
     }
 
-    // Ported: "returns http url for http url" — util/git/url.spec.ts line 48
+    // Ported: "returns http url for http url" — lib/util/git/url.spec.ts line 48
     #[test]
     fn test_get_http_url_http() {
         assert_eq!(get_http_url("http://foo.bar/", None), "http://foo.bar/");
     }
 
-    // Ported: "returns http url for ssh url with port" — util/git/url.spec.ts line 52
+    // Ported: "returns http url for ssh url with port" — lib/util/git/url.spec.ts line 52
     #[test]
     fn test_get_http_url_ssh_with_port() {
         assert_eq!(
@@ -6867,7 +6867,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns gitlab url with token" — util/git/url.spec.ts line 60
+    // Ported: "returns gitlab url with token" — lib/util/git/url.spec.ts line 60
     #[test]
     fn test_get_http_url_gitlab_token() {
         assert_eq!(
@@ -6876,7 +6876,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns github url with token" — util/git/url.spec.ts line 75
+    // Ported: "returns github url with token" — lib/util/git/url.spec.ts line 75
     #[test]
     fn test_get_http_url_github_token() {
         assert_eq!(
@@ -6885,7 +6885,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns bitbucket-server url" — util/git/url.spec.ts line 90
+    // Ported: "returns bitbucket-server url" — lib/util/git/url.spec.ts line 90
     #[test]
     fn test_get_http_url_bitbucket_server() {
         host_rules::clear();
@@ -6906,7 +6906,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "removes username/password from URL" — util/git/url.spec.ts line 100
+    // Ported: "removes username/password from URL" — lib/util/git/url.spec.ts line 100
     #[test]
     fn test_get_http_url_removes_credentials() {
         assert_eq!(
@@ -6915,7 +6915,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces username/password with given token" — util/git/url.spec.ts line 106
+    // Ported: "replaces username/password with given token" — lib/util/git/url.spec.ts line 106
     #[test]
     fn test_get_http_url_replaces_credentials() {
         assert_eq!(
@@ -6944,7 +6944,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns original url if no host rule is found" — util/git/url.spec.ts line 117
+    // Ported: "returns original url if no host rule is found" — lib/util/git/url.spec.ts line 117
     #[test]
     fn git_remote_url_with_token_returns_original_without_host_rule() {
         host_rules::clear();
@@ -6954,7 +6954,7 @@ mod tests {
         );
     }
 
-    // Ported: "transforms an ssh git url to https for the purpose of finding hostRules" — util/git/url.spec.ts line 123
+    // Ported: "transforms an ssh git url to https for the purpose of finding hostRules" — lib/util/git/url.spec.ts line 123
     #[test]
     fn git_remote_url_with_token_finds_host_rule_using_coerced_ssh_url() {
         host_rules::clear();
@@ -6973,7 +6973,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "does not transform urls that are not parseable as git urls" — util/git/url.spec.ts line 132
+    // Ported: "does not transform urls that are not parseable as git urls" — lib/util/git/url.spec.ts line 132
     #[test]
     fn git_remote_url_with_token_keeps_unparseable_lookup_url() {
         host_rules::clear();
@@ -6989,7 +6989,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns http url with token" — util/git/url.spec.ts line 141
+    // Ported: "returns http url with token" — lib/util/git/url.spec.ts line 141
     #[test]
     fn git_remote_url_with_token_returns_http_url_with_token() {
         host_rules::clear();
@@ -7008,7 +7008,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url with token" — util/git/url.spec.ts line 148
+    // Ported: "returns https url with token" — lib/util/git/url.spec.ts line 148
     #[test]
     fn git_remote_url_with_token_returns_https_url_with_token() {
         host_rules::clear();
@@ -7027,7 +7027,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url with token for non-http protocols" — util/git/url.spec.ts line 155
+    // Ported: "returns https url with token for non-http protocols" — lib/util/git/url.spec.ts line 155
     #[test]
     fn git_remote_url_with_token_returns_https_url_for_non_http_protocols() {
         host_rules::clear();
@@ -7046,7 +7046,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url with encoded token" — util/git/url.spec.ts line 162
+    // Ported: "returns https url with encoded token" — lib/util/git/url.spec.ts line 162
     #[test]
     fn git_remote_url_with_token_encodes_token() {
         host_rules::clear();
@@ -7065,7 +7065,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns http url with username and password" — util/git/url.spec.ts line 169
+    // Ported: "returns http url with username and password" — lib/util/git/url.spec.ts line 169
     #[test]
     fn git_remote_url_with_token_returns_http_url_with_username_password() {
         host_rules::clear();
@@ -7084,7 +7084,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url with username and password" — util/git/url.spec.ts line 179
+    // Ported: "returns https url with username and password" — lib/util/git/url.spec.ts line 179
     #[test]
     fn git_remote_url_with_token_returns_https_url_with_username_password() {
         host_rules::clear();
@@ -7103,7 +7103,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url with username and password for non-http protocols" — util/git/url.spec.ts line 189
+    // Ported: "returns https url with username and password for non-http protocols" — lib/util/git/url.spec.ts line 189
     #[test]
     fn git_remote_url_with_token_returns_https_url_with_username_password_for_non_http() {
         host_rules::clear();
@@ -7122,7 +7122,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url with encoded username and password" — util/git/url.spec.ts line 199
+    // Ported: "returns https url with encoded username and password" — lib/util/git/url.spec.ts line 199
     #[test]
     fn git_remote_url_with_token_encodes_username_password() {
         host_rules::clear();
@@ -7141,7 +7141,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url with encoded gitlab token" — util/git/url.spec.ts line 209
+    // Ported: "returns https url with encoded gitlab token" — lib/util/git/url.spec.ts line 209
     #[test]
     fn git_remote_url_with_token_returns_gitlab_credentials() {
         host_rules::clear();
@@ -7160,7 +7160,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns https url for ssh url with encoded github token" — util/git/url.spec.ts line 218
+    // Ported: "returns https url for ssh url with encoded github token" — lib/util/git/url.spec.ts line 218
     #[test]
     fn git_remote_url_with_token_returns_github_credentials() {
         host_rules::clear();
@@ -7199,7 +7199,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns url with token" — util/git/auth.spec.ts line 13
+    // Ported: "returns url with token" — lib/util/git/auth.spec.ts line 13
     #[test]
     fn git_authenticated_env_returns_url_with_token() {
         assert_eq!(
@@ -7230,7 +7230,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with username and password" — util/git/auth.spec.ts line 31
+    // Ported: "returns url with username and password" — lib/util/git/auth.spec.ts line 31
     #[test]
     fn git_authenticated_env_returns_url_with_username_and_password() {
         let rule = host_rules::HostRule {
@@ -7269,7 +7269,7 @@ mod tests {
         );
     }
 
-    // Ported: "prefers token over username and password" — util/git/auth.spec.ts line 53
+    // Ported: "prefers token over username and password" — lib/util/git/auth.spec.ts line 53
     #[test]
     fn git_authenticated_env_prefers_token_over_username_and_password() {
         let rule = host_rules::HostRule {
@@ -7293,7 +7293,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token for different protocols" — util/git/auth.spec.ts line 73
+    // Ported: "returns url with token for different protocols" — lib/util/git/auth.spec.ts line 73
     #[test]
     fn git_authenticated_env_returns_url_with_token_for_different_protocols() {
         let env = get_git_authenticated_environment_variables(
@@ -7312,7 +7312,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns correct url if token already contains GitHub App username" — util/git/auth.spec.ts line 91
+    // Ported: "returns correct url if token already contains GitHub App username" — lib/util/git/auth.spec.ts line 91
     #[test]
     fn git_authenticated_env_keeps_github_app_username() {
         let env = get_git_authenticated_environment_variables(
@@ -7335,7 +7335,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from parameter" — util/git/auth.spec.ts line 112
+    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from parameter" — lib/util/git/auth.spec.ts line 112
     #[test]
     fn git_authenticated_env_honors_existing_count_parameter() {
         assert_eq!(
@@ -7366,7 +7366,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from parameter over environment" — util/git/auth.spec.ts line 134
+    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from parameter over environment" — lib/util/git/auth.spec.ts line 134
     #[test]
     fn git_authenticated_env_prefers_parameter_count_over_process_env() {
         let env = get_git_authenticated_environment_variables(
@@ -7382,7 +7382,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from environment" — util/git/auth.spec.ts line 157
+    // Ported: "returns url with token and already existing GIT_CONFIG_COUNT from environment" — lib/util/git/auth.spec.ts line 157
     #[test]
     fn git_authenticated_env_uses_process_env_count() {
         let env = get_git_authenticated_environment_variables(
@@ -7398,7 +7398,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token and passthrough existing variables" — util/git/auth.spec.ts line 176
+    // Ported: "returns url with token and passthrough existing variables" — lib/util/git/auth.spec.ts line 176
     #[test]
     fn git_authenticated_env_passthrough_existing_variables() {
         let env = get_git_authenticated_environment_variables(
@@ -7414,7 +7414,7 @@ mod tests {
         assert_eq!(env.get("GIT_CONFIG_COUNT").map(String::as_str), Some("3"));
     }
 
-    // Ported: "return url with token with invalid GIT_CONFIG_COUNT from environment" — util/git/auth.spec.ts line 199
+    // Ported: "return url with token with invalid GIT_CONFIG_COUNT from environment" — lib/util/git/auth.spec.ts line 199
     #[test]
     fn git_authenticated_env_ignores_invalid_process_env_count() {
         let env = get_git_authenticated_environment_variables(
@@ -7430,7 +7430,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token containing username for GitLab token" — util/git/auth.spec.ts line 218
+    // Ported: "returns url with token containing username for GitLab token" — lib/util/git/auth.spec.ts line 218
     #[test]
     fn git_authenticated_env_uses_gitlab_token_username() {
         let env = get_git_authenticated_environment_variables(
@@ -7449,7 +7449,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token containing username for GitLab token without hostType" — util/git/auth.spec.ts line 239
+    // Ported: "returns url with token containing username for GitLab token without hostType" — lib/util/git/auth.spec.ts line 239
     #[test]
     fn git_authenticated_env_detects_gitlab_token_without_host_type() {
         assert_eq!(
@@ -7480,7 +7480,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns original environment variables when no token is set" — util/git/auth.spec.ts line 259
+    // Ported: "returns original environment variables when no token is set" — lib/util/git/auth.spec.ts line 259
     #[test]
     fn git_authenticated_env_returns_original_env_without_credentials() {
         let env = get_git_authenticated_environment_variables(
@@ -7492,7 +7492,7 @@ mod tests {
         assert_eq!(env, git_env(&[("env", "value")]));
     }
 
-    // Ported: "returns url with token for http hosts" — util/git/auth.spec.ts line 274
+    // Ported: "returns url with token for http hosts" — lib/util/git/auth.spec.ts line 274
     #[test]
     fn git_authenticated_env_returns_url_with_token_for_http_hosts() {
         let env = get_git_authenticated_environment_variables(
@@ -7511,7 +7511,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token for orgs" — util/git/auth.spec.ts line 292
+    // Ported: "returns url with token for orgs" — lib/util/git/auth.spec.ts line 292
     #[test]
     fn git_authenticated_env_returns_url_with_token_for_orgs() {
         let env = get_git_authenticated_environment_variables(
@@ -7530,7 +7530,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token for orgs and projects" — util/git/auth.spec.ts line 310
+    // Ported: "returns url with token for orgs and projects" — lib/util/git/auth.spec.ts line 310
     #[test]
     fn git_authenticated_env_returns_url_with_token_for_orgs_and_projects() {
         let env = get_git_authenticated_environment_variables(
@@ -7549,7 +7549,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token for orgs and projects and ports" — util/git/auth.spec.ts line 330
+    // Ported: "returns url with token for orgs and projects and ports" — lib/util/git/auth.spec.ts line 330
     #[test]
     fn git_authenticated_env_returns_url_with_token_for_orgs_projects_and_ports() {
         let env = get_git_authenticated_environment_variables(
@@ -7568,7 +7568,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns url with token for bitbucket-server" — util/git/auth.spec.ts line 354
+    // Ported: "returns url with token for bitbucket-server" — lib/util/git/auth.spec.ts line 354
     #[test]
     fn git_authenticated_env_returns_bitbucket_server_urls() {
         assert_eq!(
@@ -7603,14 +7603,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty object if no environment variables exist" — util/git/auth.spec.ts line 381
+    // Ported: "returns empty object if no environment variables exist" — lib/util/git/auth.spec.ts line 381
     #[test]
     fn git_environment_variables_empty_without_host_rules() {
         host_rules::clear();
         assert_eq!(get_git_environment_variables(&[]), git_env(&[]));
     }
 
-    // Ported: "returns environment variables with token if hostRule for api.github.com exists" — util/git/auth.spec.ts line 385
+    // Ported: "returns environment variables with token if hostRule for api.github.com exists" — lib/util/git/auth.spec.ts line 385
     #[test]
     fn git_environment_variables_uses_github_api_rule_for_github_dot_com() {
         host_rules::clear();
@@ -7645,7 +7645,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns environment variables with token if hostRule for multiple hostsRules" — util/git/auth.spec.ts line 402
+    // Ported: "returns environment variables with token if hostRule for multiple hostsRules" — lib/util/git/auth.spec.ts line 402
     #[test]
     fn git_environment_variables_multiple_host_rules() {
         host_rules::clear();
@@ -7681,7 +7681,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns environment variables with token if hostRule is for Gitlab" — util/git/auth.spec.ts line 446
+    // Ported: "returns environment variables with token if hostRule is for Gitlab" — lib/util/git/auth.spec.ts line 446
     #[test]
     fn git_environment_variables_gitlab_token() {
         host_rules::clear();
@@ -7704,7 +7704,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns environment variables with username and password" — util/git/auth.spec.ts line 466
+    // Ported: "returns environment variables with username and password" — lib/util/git/auth.spec.ts line 466
     #[test]
     fn git_environment_variables_username_password() {
         host_rules::clear();
@@ -7726,7 +7726,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns environment variables with URL encoded username and password" — util/git/auth.spec.ts line 487
+    // Ported: "returns environment variables with URL encoded username and password" — lib/util/git/auth.spec.ts line 487
     #[test]
     fn git_environment_variables_url_encoded_username_password() {
         host_rules::clear();
@@ -7749,7 +7749,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns no environment variables when hostType is not supported" — util/git/auth.spec.ts line 508
+    // Ported: "returns no environment variables when hostType is not supported" — lib/util/git/auth.spec.ts line 508
     #[test]
     fn git_environment_variables_ignores_unsupported_host_type() {
         host_rules::clear();
@@ -7763,7 +7763,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns no environment variables when only username is set" — util/git/auth.spec.ts line 517
+    // Ported: "returns no environment variables when only username is set" — lib/util/git/auth.spec.ts line 517
     #[test]
     fn git_environment_variables_ignores_username_without_password() {
         host_rules::clear();
@@ -7778,7 +7778,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns no environment variables when only password is set" — util/git/auth.spec.ts line 526
+    // Ported: "returns no environment variables when only password is set" — lib/util/git/auth.spec.ts line 526
     #[test]
     fn git_environment_variables_ignores_password_without_username() {
         host_rules::clear();
@@ -7793,7 +7793,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns environment variables when hostType is explicitly set" — util/git/auth.spec.ts line 535
+    // Ported: "returns environment variables when hostType is explicitly set" — lib/util/git/auth.spec.ts line 535
     #[test]
     fn git_environment_variables_allows_explicit_datasource_host_type() {
         host_rules::clear();
@@ -7828,7 +7828,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns empty environment variables when matchHost contains invalid protocol" — util/git/auth.spec.ts line 554
+    // Ported: "returns empty environment variables when matchHost contains invalid protocol" — lib/util/git/auth.spec.ts line 554
     #[test]
     fn git_environment_variables_ignores_invalid_protocol_match_host() {
         host_rules::clear();
@@ -7842,7 +7842,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns environment variables for bitbucket-server" — util/git/auth.spec.ts line 563
+    // Ported: "returns environment variables for bitbucket-server" — lib/util/git/auth.spec.ts line 563
     #[test]
     fn git_environment_variables_bitbucket_server() {
         host_rules::clear();
@@ -7865,7 +7865,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "returns digest for HEAD with authentication environment variables for datasource type git-tags" — datasource/git-tags/index.spec.ts line 121
+    // Ported: "returns digest for HEAD with authentication environment variables for datasource type git-tags" — lib/modules/datasource/git-tags/index.spec.ts line 121
     #[test]
     fn git_environment_variables_allows_git_tags_datasource_host_type() {
         host_rules::clear();
@@ -7904,8 +7904,8 @@ mod tests {
     // coerce_to_null / coerce_to_undefined
     // -----------------------------------------------------------------------
 
-    // Ported: "should return null" — util/coerce.spec.ts line 5
-    // Ported: "should return original value" — util/coerce.spec.ts line 10
+    // Ported: "should return null" — lib/util/coerce.spec.ts line 5
+    // Ported: "should return original value" — lib/util/coerce.spec.ts line 10
     #[test]
     fn test_coerce_to_null() {
         // null/undefined → None (null in Rust)
@@ -7916,8 +7916,8 @@ mod tests {
         assert_eq!(coerce_to_null(Some("str")), Some("str"));
     }
 
-    // Ported: "should return undefined" — util/coerce.spec.ts line 18
-    // Ported: "should return original value" — util/coerce.spec.ts line 23
+    // Ported: "should return undefined" — lib/util/coerce.spec.ts line 18
+    // Ported: "should return original value" — lib/util/coerce.spec.ts line 23
     #[test]
     fn test_coerce_to_undefined() {
         // null/undefined → None (undefined in Rust)
@@ -7932,7 +7932,7 @@ mod tests {
     // sample_size
     // -----------------------------------------------------------------------
 
-    // Ported: "returns correct sized array" — util/sample.spec.ts line 7
+    // Ported: "returns correct sized array" — lib/util/sample.spec.ts line 7
     #[test]
     fn test_sample_size_correct() {
         let arr = vec![
@@ -7945,7 +7945,7 @@ mod tests {
         assert_eq!(sample_size(&arr, Some(10)).len(), 4); // capped at array length
     }
 
-    // Ported: "returns full array for undefined number" — util/sample.spec.ts line 12
+    // Ported: "returns full array for undefined number" — lib/util/sample.spec.ts line 12
     #[test]
     fn test_sample_size_none_n() {
         let arr = vec![
@@ -7957,7 +7957,7 @@ mod tests {
         assert_eq!(sample_size(&arr, None).len(), 4);
     }
 
-    // Ported: "returns full array for 0 number" — util/sample.spec.ts line 20
+    // Ported: "returns full array for 0 number" — lib/util/sample.spec.ts line 20
     #[test]
     fn test_sample_size_zero_n() {
         let arr = vec![
@@ -7969,7 +7969,7 @@ mod tests {
         assert_eq!(sample_size(&arr, Some(0)), Vec::<String>::new());
     }
 
-    // Ported: "returns empty array for empty array" — util/sample.spec.ts line 32
+    // Ported: "returns empty array for empty array" — lib/util/sample.spec.ts line 32
     #[test]
     fn test_sample_size_empty_arr() {
         assert_eq!(sample_size(&[], Some(1)), Vec::<String>::new());
@@ -7979,7 +7979,7 @@ mod tests {
     // is_artifactory_server
     // -----------------------------------------------------------------------
 
-    // Ported: "is artifactory server invalid" — modules/datasource/utils.spec.ts line 10
+    // Ported: "is artifactory server invalid" — lib/modules/datasource/utils.spec.ts line 10
     #[test]
     fn test_is_artifactory_server_invalid() {
         use std::collections::HashMap;
@@ -7988,7 +7988,7 @@ mod tests {
         assert!(!is_artifactory_server(&headers));
     }
 
-    // Ported: "is artifactory server valid" — modules/datasource/utils.spec.ts line 19
+    // Ported: "is artifactory server valid" — lib/modules/datasource/utils.spec.ts line 19
     #[test]
     fn test_is_artifactory_server_valid() {
         use std::collections::HashMap;
@@ -8003,7 +8003,7 @@ mod tests {
 
     const PRIVATE_CACHE: &str = "/tmp/cache/__renovate-private-cache";
 
-    // Ported: "generates envs for specific helm version not requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 19
+    // Ported: "generates envs for specific helm version not requiring HELM_EXPERIMENTAL_OCI" — lib/modules/manager/kustomize/common.spec.ts line 19
     #[test]
     fn test_helm_envs_no_experimental_oci_specific_version() {
         let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci("3.8.0"));
@@ -8017,7 +8017,7 @@ mod tests {
         );
     }
 
-    // Ported: "generates envs for helm version range not requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 34
+    // Ported: "generates envs for helm version range not requiring HELM_EXPERIMENTAL_OCI" — lib/modules/manager/kustomize/common.spec.ts line 34
     #[test]
     fn test_helm_envs_no_experimental_oci_range() {
         let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci(">=3.7.0"));
@@ -8027,14 +8027,14 @@ mod tests {
         );
     }
 
-    // Ported: "generates envs for specific helm version requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 49
+    // Ported: "generates envs for specific helm version requiring HELM_EXPERIMENTAL_OCI" — lib/modules/manager/kustomize/common.spec.ts line 49
     #[test]
     fn test_helm_envs_with_experimental_oci_specific() {
         let envs = generate_helm_envs(PRIVATE_CACHE, helm_needs_experimental_oci("3.7.0"));
         assert_eq!(envs.get("HELM_EXPERIMENTAL_OCI"), Some(&"1".to_owned()));
     }
 
-    // Ported: "generates envs for helm range version requiring HELM_EXPERIMENTAL_OCI" — modules/manager/kustomize/common.spec.ts line 66
+    // Ported: "generates envs for helm range version requiring HELM_EXPERIMENTAL_OCI" — lib/modules/manager/kustomize/common.spec.ts line 66
     #[test]
     fn test_helm_envs_with_experimental_oci_range() {
         // The TypeScript test uses constraints: { helm: '<3.8.0' }
@@ -8046,13 +8046,13 @@ mod tests {
     // get_range_strategy
     // -----------------------------------------------------------------------
 
-    // Ported: "returns same if not auto" — modules/manager/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/range.spec.ts line 5
     #[test]
     fn test_get_range_strategy_not_auto() {
         assert_eq!(get_range_strategy("npm", "widen", None), "widen");
     }
 
-    // Ported: "returns manager strategy" — modules/manager/range.spec.ts line 13
+    // Ported: "returns manager strategy" — lib/modules/manager/range.spec.ts line 13
     #[test]
     fn test_get_range_strategy_npm_auto_dependencies() {
         assert_eq!(
@@ -8061,7 +8061,7 @@ mod tests {
         );
     }
 
-    // Ported: "defaults to update-lockfile if updateLockedDependency() is supported" — modules/manager/range.spec.ts line 22
+    // Ported: "defaults to update-lockfile if updateLockedDependency() is supported" — lib/modules/manager/range.spec.ts line 22
     #[test]
     fn test_get_range_strategy_bundler_auto() {
         assert_eq!(
@@ -8070,13 +8070,13 @@ mod tests {
         );
     }
 
-    // Ported: "defaults to replace" — modules/manager/range.spec.ts line 30
+    // Ported: "defaults to replace" — lib/modules/manager/range.spec.ts line 30
     #[test]
     fn test_get_range_strategy_sbt_auto() {
         assert_eq!(get_range_strategy("sbt", "auto", None), "replace");
     }
 
-    // Ported: "returns rangeStrategy if not auto" — modules/manager/range.spec.ts line 38
+    // Ported: "returns rangeStrategy if not auto" — lib/modules/manager/range.spec.ts line 38
     #[test]
     fn test_get_range_strategy_future() {
         assert_eq!(get_range_strategy("circleci", "future", None), "future");
@@ -8086,7 +8086,7 @@ mod tests {
     // Lazy
     // -----------------------------------------------------------------------
 
-    // Ported: "gets a value" — util/lazy.spec.ts line 5
+    // Ported: "gets a value" — lib/util/lazy.spec.ts line 5
     #[test]
     fn test_lazy_gets_value() {
         let count = std::rc::Rc::new(std::cell::Cell::new(0u32));
@@ -8099,7 +8099,7 @@ mod tests {
         assert_eq!(count.get(), 1);
     }
 
-    // Ported: "caches the value" — util/lazy.spec.ts line 13
+    // Ported: "caches the value" — lib/util/lazy.spec.ts line 13
     #[test]
     fn test_lazy_caches_value() {
         let count = std::rc::Rc::new(std::cell::Cell::new(0u32));
@@ -8113,14 +8113,14 @@ mod tests {
         assert_eq!(count.get(), 1);
     }
 
-    // Ported: "throws an error" — util/lazy.spec.ts line 21
+    // Ported: "throws an error" — lib/util/lazy.spec.ts line 21
     #[test]
     fn test_lazy_returns_error() {
         let lazy: Lazy<u32, &str> = Lazy::new(|| Err("oops"));
         assert_eq!(lazy.get_value(), Err("oops"));
     }
 
-    // Ported: "caches the error" — util/lazy.spec.ts line 30
+    // Ported: "caches the error" — lib/util/lazy.spec.ts line 30
     #[test]
     fn test_lazy_caches_error() {
         let count = std::rc::Rc::new(std::cell::Cell::new(0u32));
@@ -8135,7 +8135,7 @@ mod tests {
         assert_eq!(lazy.get_value(), Err("oops"));
     }
 
-    // Ported: "has a value" — util/lazy.spec.ts line 42
+    // Ported: "has a value" — lib/util/lazy.spec.ts line 42
     #[test]
     fn test_lazy_has_value_after_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
@@ -8144,7 +8144,7 @@ mod tests {
         assert!(lazy.has_value());
     }
 
-    // Ported: "does not have a value" — util/lazy.spec.ts line 51
+    // Ported: "does not have a value" — lib/util/lazy.spec.ts line 51
     #[test]
     fn test_lazy_no_value_before_get() {
         let lazy: Lazy<u32, String> = Lazy::new(|| Ok(0));
@@ -8159,8 +8159,8 @@ mod tests {
 
     // ── changelog source ─────────────────────────────────────────────────────
 
-    // Ported: "handles unsupported sourceUrl" (getBaseUrl) — changelog/source.spec.ts line 13
-    // Ported: "handles sourceUrl" (getBaseUrl) — changelog/source.spec.ts line 22
+    // Ported: "handles unsupported sourceUrl" (getBaseUrl) — lib/workers/repository/update/pr/changelog/source.spec.ts line 13
+    // Ported: "handles sourceUrl" (getBaseUrl) — lib/workers/repository/update/pr/changelog/source.spec.ts line 22
     #[test]
     fn test_changelog_get_base_url() {
         assert_eq!(changelog_get_base_url(None), "");
@@ -8170,8 +8170,8 @@ mod tests {
         );
     }
 
-    // Ported: "handles unsupported sourceUrl" (getRepositoryFromUrl) — changelog/source.spec.ts line 28
-    // Ported: "handles sourceUrl" (getRepositoryFromUrl) — changelog/source.spec.ts line 37
+    // Ported: "handles unsupported sourceUrl" (getRepositoryFromUrl) — lib/workers/repository/update/pr/changelog/source.spec.ts line 28
+    // Ported: "handles sourceUrl" (getRepositoryFromUrl) — lib/workers/repository/update/pr/changelog/source.spec.ts line 37
     #[test]
     fn test_changelog_get_repository_from_url() {
         assert_eq!(changelog_get_repository_from_url(None), "");
@@ -8181,8 +8181,8 @@ mod tests {
         );
     }
 
-    // Ported: "handles invalid repository" — changelog/source.spec.ts line 45
-    // Ported: "handles valid repository" — changelog/source.spec.ts line 50
+    // Ported: "handles invalid repository" — lib/workers/repository/update/pr/changelog/source.spec.ts line 45
+    // Ported: "handles valid repository" — lib/workers/repository/update/pr/changelog/source.spec.ts line 50
     #[test]
     fn test_changelog_has_valid_repository() {
         assert!(!changelog_has_valid_repository("foo"));
@@ -8195,14 +8195,14 @@ mod tests {
     // Fixed "now" for abandonment tests: 2023-01-01T00:00:00.000Z
     const MOCK_NOW_MS: i64 = 1672531200000; // 2023-01-01T00:00:00Z
 
-    // Ported: "returns the original release result when no abandonment threshold is provided" — lookup/abandonment.spec.ts line 27
+    // Ported: "returns the original release result when no abandonment threshold is provided" — lib/workers/repository/process/lookup/abandonment.spec.ts line 27
     #[test]
     fn test_abandonment_no_threshold() {
         let result = calculate_abandonment(Some("2022-01-01T00:00:00.000Z"), None, MOCK_NOW_MS);
         assert_eq!(result, None);
     }
 
-    // Ported: "returns the original release result when abandonment threshold is invalid" — lookup/abandonment.spec.ts line 39
+    // Ported: "returns the original release result when abandonment threshold is invalid" — lib/workers/repository/process/lookup/abandonment.spec.ts line 39
     #[test]
     fn test_abandonment_invalid_threshold() {
         let result = calculate_abandonment(
@@ -8213,14 +8213,14 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns the original release result when no mostRecentTimestamp timestamp is available" — lookup/abandonment.spec.ts line 54
+    // Ported: "returns the original release result when no mostRecentTimestamp timestamp is available" — lib/workers/repository/process/lookup/abandonment.spec.ts line 54
     #[test]
     fn test_abandonment_no_timestamp() {
         let result = calculate_abandonment(None, Some("1 year"), MOCK_NOW_MS);
         assert_eq!(result, None);
     }
 
-    // Ported: "marks a package as abandoned when mostRecentTimestamp plus threshold is before now" — lookup/abandonment.spec.ts line 69
+    // Ported: "marks a package as abandoned when mostRecentTimestamp plus threshold is before now" — lib/workers/repository/process/lookup/abandonment.spec.ts line 69
     #[test]
     fn test_abandonment_old_package_is_abandoned() {
         // 2 years old package, threshold 1 year → abandoned
@@ -8232,7 +8232,7 @@ mod tests {
         assert_eq!(result, Some(true));
     }
 
-    // Ported: "does not mark a package as abandoned when mostRecentTimestamp plus threshold is after now" — lookup/abandonment.spec.ts line 83
+    // Ported: "does not mark a package as abandoned when mostRecentTimestamp plus threshold is after now" — lib/workers/repository/process/lookup/abandonment.spec.ts line 83
     #[test]
     fn test_abandonment_recent_package_not_abandoned() {
         // Package from 6 months ago, threshold 1 year → not abandoned
@@ -8244,7 +8244,7 @@ mod tests {
         assert_eq!(result, Some(false));
     }
 
-    // Ported: "preserves other properties in the release result" — lookup/abandonment.spec.ts line 97
+    // Ported: "preserves other properties in the release result" — lib/workers/repository/process/lookup/abandonment.spec.ts line 97
     // Note: Rust version returns Option<bool> not mutated result; test just checks abandonment detection
     #[test]
     fn test_abandonment_preserves_other_properties() {
@@ -8257,7 +8257,7 @@ mod tests {
         assert_eq!(result, Some(true));
     }
 
-    // Ported: "handles exactly at the threshold boundary" — lookup/abandonment.spec.ts line 117
+    // Ported: "handles exactly at the threshold boundary" — lib/workers/repository/process/lookup/abandonment.spec.ts line 117
     #[test]
     fn test_abandonment_boundary() {
         // 2019-01-01 + 2 years = 2021-01-01 < 2023-01-01 → abandoned
@@ -8271,41 +8271,41 @@ mod tests {
 
     // ── prepare_labels ────────────────────────────────────────────────────────
 
-    // Ported: "returns empty array if no labels are configured" — pr/labels.spec.ts line 11
+    // Ported: "returns empty array if no labels are configured" — lib/workers/repository/update/pr/labels.spec.ts line 11
     #[test]
     fn test_prepare_labels_empty() {
         assert!(prepare_labels(&[], &[]).is_empty());
     }
 
-    // Ported: "only labels" — pr/labels.spec.ts line 16
+    // Ported: "only labels" — lib/workers/repository/update/pr/labels.spec.ts line 16
     #[test]
     fn test_prepare_labels_only_labels() {
         let result = prepare_labels(&["labelA", "labelB"], &[]);
         assert_eq!(result, vec!["labelA", "labelB"]);
     }
 
-    // Ported: "only addLabels" — pr/labels.spec.ts line 22
+    // Ported: "only addLabels" — lib/workers/repository/update/pr/labels.spec.ts line 22
     #[test]
     fn test_prepare_labels_only_add_labels() {
         let result = prepare_labels(&[], &["labelA", "labelB"]);
         assert_eq!(result, vec!["labelA", "labelB"]);
     }
 
-    // Ported: "merge labels and addLabels" — pr/labels.spec.ts line 30
+    // Ported: "merge labels and addLabels" — lib/workers/repository/update/pr/labels.spec.ts line 30
     #[test]
     fn test_prepare_labels_merge() {
         let result = prepare_labels(&["labelA", "labelB"], &["labelC"]);
         assert_eq!(result, vec!["labelA", "labelB", "labelC"]);
     }
 
-    // Ported: "deduplicate merged labels and addLabels" — pr/labels.spec.ts line 39
+    // Ported: "deduplicate merged labels and addLabels" — lib/workers/repository/update/pr/labels.spec.ts line 39
     #[test]
     fn test_prepare_labels_deduplicate() {
         let result = prepare_labels(&["labelA", "labelB"], &["labelB", "labelC"]);
         assert_eq!(result, vec!["labelA", "labelB", "labelC"]);
     }
 
-    // Ported: "empty labels ignored" — pr/labels.spec.ts line 48
+    // Ported: "empty labels ignored" — lib/workers/repository/update/pr/labels.spec.ts line 48
     #[test]
     fn test_prepare_labels_empty_strings_ignored() {
         let result = prepare_labels(&["labelA", ""], &[" ", "labelB"]);
@@ -8314,7 +8314,7 @@ mod tests {
 
     // ── get_changed_labels / are_labels_modified ─────────────────────────────
 
-    // Ported: "adds new labels" — pr/labels.spec.ts line 126
+    // Ported: "adds new labels" — lib/workers/repository/update/pr/labels.spec.ts line 126
     #[test]
     fn test_get_changed_labels_add() {
         let (to_add, to_remove) = get_changed_labels(&["npm"], &["node", "npm"]);
@@ -8322,7 +8322,7 @@ mod tests {
         assert!(to_remove.is_empty());
     }
 
-    // Ported: "removes old labels" — pr/labels.spec.ts line 133
+    // Ported: "removes old labels" — lib/workers/repository/update/pr/labels.spec.ts line 133
     #[test]
     fn test_get_changed_labels_remove() {
         let (to_add, to_remove) = get_changed_labels(&["node", "npm"], &["npm"]);
@@ -8330,13 +8330,13 @@ mod tests {
         assert_eq!(to_remove, vec!["node"]);
     }
 
-    // Ported: "returns true" — pr/labels.spec.ts line 142
+    // Ported: "returns true" — lib/workers/repository/update/pr/labels.spec.ts line 142
     #[test]
     fn test_are_labels_modified_true() {
         assert!(are_labels_modified(&["npm", "node"], &["npm"]));
     }
 
-    // Ported: "returns false" — pr/labels.spec.ts line 146
+    // Ported: "returns false" — lib/workers/repository/update/pr/labels.spec.ts line 146
     #[test]
     fn test_are_labels_modified_false() {
         assert!(!are_labels_modified(&["node", "npm"], &["node", "npm"]));
@@ -8345,7 +8345,7 @@ mod tests {
 
     // ── should_update_labels ─────────────────────────────────────────────────
 
-    // Ported: "returns true" — pr/labels.spec.ts line 153
+    // Ported: "returns true" — lib/workers/repository/update/pr/labels.spec.ts line 153
     #[test]
     fn test_should_update_labels_true() {
         // configured subset of initial → update needed
@@ -8368,7 +8368,7 @@ mod tests {
         ));
     }
 
-    // Ported: "returns false if no labels found in debugData" — pr/labels.spec.ts line 163
+    // Ported: "returns false if no labels found in debugData" — lib/workers/repository/update/pr/labels.spec.ts line 163
     #[test]
     fn test_should_update_labels_false_no_initial() {
         assert!(!should_update_labels(
@@ -8378,7 +8378,7 @@ mod tests {
         ));
     }
 
-    // Ported: "returns false if labels have been modified by user" — pr/labels.spec.ts line 169
+    // Ported: "returns false if labels have been modified by user" — lib/workers/repository/update/pr/labels.spec.ts line 169
     #[test]
     fn test_should_update_labels_false_user_modified() {
         // initial: [npm, node], current: [npm] → user removed node → don't update
@@ -8389,7 +8389,7 @@ mod tests {
         ));
     }
 
-    // Ported: "returns false if labels are not changed" — pr/labels.spec.ts line 173
+    // Ported: "returns false if labels are not changed" — lib/workers/repository/update/pr/labels.spec.ts line 173
     #[test]
     fn test_should_update_labels_false_unchanged() {
         assert!(!should_update_labels(
@@ -8463,7 +8463,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns reconfigure branch name" — workers/repository/reconfigure/utils.spec.ts line 64
+    // Ported: "returns reconfigure branch name" — lib/workers/repository/reconfigure/utils.spec.ts line 64
     #[test]
     fn test_get_reconfigure_branch_name() {
         assert_eq!(
@@ -8482,13 +8482,13 @@ mod tests {
         }
     }
 
-    // Ported: "returns null if no remaps are set" — logger/remap.spec.ts line 15
+    // Ported: "returns null if no remaps are set" — lib/logger/remap.spec.ts line 15
     #[test]
     fn test_remap_no_remaps_returns_none() {
         assert_eq!(get_remapped_level("foo", None, None), None);
     }
 
-    // Ported: "performs global remaps" — logger/remap.spec.ts line 24
+    // Ported: "performs global remaps" — lib/logger/remap.spec.ts line 24
     #[test]
     fn test_remap_global_remaps() {
         let global = vec![make_remap("*foo*", "error")];
@@ -8498,14 +8498,14 @@ mod tests {
         );
     }
 
-    // Ported: "performs repository-level remaps" — logger/remap.spec.ts line 33
+    // Ported: "performs repository-level remaps" — lib/logger/remap.spec.ts line 33
     #[test]
     fn test_remap_repo_remaps() {
         let repo = vec![make_remap("*bar*", "error")];
         assert_eq!(get_remapped_level("bar", Some(&repo), None), Some("error"));
     }
 
-    // Ported: "prioritizes repository-level remaps over global remaps" — logger/remap.spec.ts line 44
+    // Ported: "prioritizes repository-level remaps over global remaps" — lib/logger/remap.spec.ts line 44
     #[test]
     fn test_remap_repo_wins_over_global() {
         let global = vec![make_remap("*foo*", "warn")];
@@ -8516,7 +8516,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports regex patterns" — logger/remap.spec.ts line 55
+    // Ported: "supports regex patterns" — lib/logger/remap.spec.ts line 55
     #[test]
     fn test_remap_regex_pattern() {
         let global = vec![make_remap("/^foo/i", "trace")];
@@ -8526,14 +8526,14 @@ mod tests {
         );
     }
 
-    // Ported: "does not match against invalid regex patterns" — logger/remap.spec.ts line 64
+    // Ported: "does not match against invalid regex patterns" — lib/logger/remap.spec.ts line 64
     #[test]
     fn test_remap_invalid_regex_returns_none() {
         let global = vec![make_remap("/invalid[/", "error")];
         assert!(get_remapped_level("foo", None, Some(&global)).is_none());
     }
 
-    // Ported: "sets new cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 16
+    // Ported: "sets new cache" — lib/workers/repository/reconfigure/reconfigure-cache.spec.ts line 16
     #[test]
     fn test_set_reconfigure_branch_cache_new() {
         use serde_json::json;
@@ -8545,7 +8545,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates old cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 28
+    // Ported: "updates old cache" — lib/workers/repository/reconfigure/reconfigure-cache.spec.ts line 28
     #[test]
     fn test_set_reconfigure_branch_cache_update() {
         use serde_json::json;
@@ -8562,7 +8562,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates extractResult old cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 45
+    // Ported: "updates extractResult old cache" — lib/workers/repository/reconfigure/reconfigure-cache.spec.ts line 45
     #[test]
     fn test_set_reconfigure_branch_cache_clears_extract_result() {
         use serde_json::json;
@@ -8582,7 +8582,7 @@ mod tests {
         );
     }
 
-    // Ported: "deletes cache" — workers/repository/reconfigure/reconfigure-cache.spec.ts line 69
+    // Ported: "deletes cache" — lib/workers/repository/reconfigure/reconfigure-cache.spec.ts line 69
     #[test]
     fn test_delete_reconfigure_branch_cache() {
         use serde_json::json;
@@ -8597,19 +8597,19 @@ mod tests {
     // check_if_configured
     // -----------------------------------------------------------------------
 
-    // Ported: "returns" — workers/repository/configured.spec.ts line 16
+    // Ported: "returns" — lib/workers/repository/configured.spec.ts line 16
     #[test]
     fn test_check_if_configured_ok() {
         assert!(check_if_configured(true, false, None).is_ok());
     }
 
-    // Ported: "throws if disabled" — workers/repository/configured.spec.ts line 20
+    // Ported: "throws if disabled" — lib/workers/repository/configured.spec.ts line 20
     #[test]
     fn test_check_if_configured_disabled() {
         assert!(check_if_configured(false, false, None).is_err());
     }
 
-    // Ported: "throws if unconfigured fork" — workers/repository/configured.spec.ts line 25
+    // Ported: "throws if unconfigured fork" — lib/workers/repository/configured.spec.ts line 25
     #[test]
     fn test_check_if_configured_fork() {
         assert!(check_if_configured(true, true, Some("auto")).is_err());
@@ -8621,7 +8621,7 @@ mod tests {
     // apply_git_source
     // -----------------------------------------------------------------------
 
-    // Ported: "applies git source with subdomain" — modules/manager/util.spec.ts line 61
+    // Ported: "applies git source with subdomain" — lib/modules/manager/util.spec.ts line 61
     #[test]
     fn test_apply_git_source_subdomain() {
         // Register git.example.com as a github host via host rules
@@ -8648,7 +8648,7 @@ mod tests {
         host_rules::clear();
     }
 
-    // Ported: "applies GitHub source for tag" — modules/manager/util.spec.ts line 14
+    // Ported: "applies GitHub source for tag" — lib/modules/manager/util.spec.ts line 14
     #[test]
     fn test_apply_git_source_github_https() {
         let r = apply_git_source("https://github.com/foo/bar", None, Some("v1.2.3"), None);
@@ -8658,7 +8658,7 @@ mod tests {
         assert_eq!(r.current_value, Some("v1.2.3".to_owned()));
     }
 
-    // Ported: "applies GitLab source for tag" — modules/manager/util.spec.ts line 30
+    // Ported: "applies GitLab source for tag" — lib/modules/manager/util.spec.ts line 30
     #[test]
     fn test_apply_git_source_gitlab() {
         let r = apply_git_source("https://gitlab.com/foo/bar", None, Some("v1.2.3"), None);
@@ -8667,7 +8667,7 @@ mod tests {
         assert_eq!(r.package_name, "foo/bar");
     }
 
-    // Ported: "applies other git source for tag" — modules/manager/util.spec.ts line 46
+    // Ported: "applies other git source for tag" — lib/modules/manager/util.spec.ts line 46
     #[test]
     fn test_apply_git_source_generic() {
         let r = apply_git_source(
@@ -8680,7 +8680,7 @@ mod tests {
         assert_eq!(r.package_name, "https://a-git-source.com/foo/bar");
     }
 
-    // Ported: "applies GitHub source for tag with SSH URL" — modules/manager/util.spec.ts line 81
+    // Ported: "applies GitHub source for tag with SSH URL" — lib/modules/manager/util.spec.ts line 81
     #[test]
     fn test_apply_git_source_github_ssh() {
         let r = apply_git_source("ssh://git@github.com/foo/bar", None, Some("v1.2.3"), None);
@@ -8689,7 +8689,7 @@ mod tests {
         assert_eq!(r.package_name, "foo/bar");
     }
 
-    // Ported: "applies GitLab source for tag with SSH URL" — modules/manager/util.spec.ts line 97
+    // Ported: "applies GitLab source for tag with SSH URL" — lib/modules/manager/util.spec.ts line 97
     #[test]
     fn test_apply_git_source_gitlab_ssh() {
         let r = apply_git_source("ssh://git@gitlab.com/foo/bar", None, Some("v1.2.3"), None);
@@ -8697,14 +8697,14 @@ mod tests {
         assert_eq!(r.package_name, "foo/bar");
     }
 
-    // Ported: "applies GitHub source for tag with HTTPS URL" — modules/manager/util.spec.ts line 113
+    // Ported: "applies GitHub source for tag with HTTPS URL" — lib/modules/manager/util.spec.ts line 113
     #[test]
     fn test_apply_git_source_github_https_explicit() {
         let r = apply_git_source("https://github.com/foo/bar", None, Some("v1.2.3"), None);
         assert_eq!(r.datasource, "github-tags");
     }
 
-    // Ported: "applies git source for rev" — modules/manager/util.spec.ts line 129
+    // Ported: "applies git source for rev" — lib/modules/manager/util.spec.ts line 129
     #[test]
     fn test_apply_git_source_rev() {
         let r = apply_git_source("https://github.com/foo/bar", Some("abc1234"), None, None);
@@ -8715,7 +8715,7 @@ mod tests {
         assert_eq!(r.skip_reason, None);
     }
 
-    // Ported: "skips git source for branch" — modules/manager/util.spec.ts line 145
+    // Ported: "skips git source for branch" — lib/modules/manager/util.spec.ts line 145
     #[test]
     fn test_apply_git_source_branch() {
         let r = apply_git_source("https://github.com/foo/bar", None, None, Some("main"));
@@ -8724,7 +8724,7 @@ mod tests {
         assert_eq!(r.skip_reason, Some("git-dependency"));
     }
 
-    // Ported: "skips git source for git only" — modules/manager/util.spec.ts line 160
+    // Ported: "skips git source for git only" — lib/modules/manager/util.spec.ts line 160
     #[test]
     fn test_apply_git_source_git_only() {
         let r = apply_git_source("https://github.com/foo/bar", None, None, None);
@@ -8737,7 +8737,7 @@ mod tests {
     // slugify_url
     // -----------------------------------------------------------------------
 
-    // Ported: "slugifyUrl("$url") === $expected" — workers/repository/update/pr/changelog/common.spec.ts line 5
+    // Ported: "slugifyUrl("$url") === $expected" — lib/workers/repository/update/pr/changelog/common.spec.ts line 5
     #[test]
     fn test_slugify_url() {
         let cases: &[(&str, &str)] = &[
@@ -8768,7 +8768,7 @@ mod tests {
     // YAML utilities
     // -----------------------------------------------------------------------
 
-    // Ported: "should return empty array for empty string" — util/yaml.spec.ts line 7
+    // Ported: "should return empty array for empty string" — lib/util/yaml.spec.ts line 7
     #[test]
     fn test_parse_yaml_empty() {
         assert_eq!(
@@ -8777,7 +8777,7 @@ mod tests {
         );
     }
 
-    // Ported: "should parse content with single document" — util/yaml.spec.ts line 11
+    // Ported: "should parse content with single document" — lib/util/yaml.spec.ts line 11
     #[test]
     fn test_parse_yaml_single() {
         use serde_json::json;
@@ -8787,7 +8787,7 @@ mod tests {
         assert_eq!(result[0], json!({ "myObject": { "aString": "value" } }));
     }
 
-    // Ported: "should parse content with multiple documents" — util/yaml.spec.ts line 50
+    // Ported: "should parse content with multiple documents" — lib/util/yaml.spec.ts line 50
     #[test]
     fn test_parse_yaml_multiple() {
         use serde_json::json;
@@ -8798,7 +8798,7 @@ mod tests {
         assert_eq!(result[1], json!({ "foo": "bar" }));
     }
 
-    // Ported: "should parse content with templates" — util/yaml.spec.ts line 170
+    // Ported: "should parse content with templates" — lib/util/yaml.spec.ts line 170
     #[test]
     fn test_parse_yaml_templates() {
         use serde_json::json;
@@ -8809,7 +8809,7 @@ mod tests {
         assert_eq!(result[1], json!({ "foo": null }));
     }
 
-    // Ported: "should parse content with multiple documents" (parseSingleYaml throws) — util/yaml.spec.ts line 292
+    // Ported: "should parse content with multiple documents" (parseSingleYaml throws) — lib/util/yaml.spec.ts line 292
     #[test]
     fn test_parse_single_yaml_multidoc_throws() {
         let content = "myObject:\n  aString: value\n---\nfoo: bar";
@@ -8817,7 +8817,7 @@ mod tests {
         assert!(result.is_err(), "multi-doc should return Err");
     }
 
-    // Ported: "should parse content with template without quotes" (parseSingleYaml) — util/yaml.spec.ts line 326
+    // Ported: "should parse content with template without quotes" (parseSingleYaml) — lib/util/yaml.spec.ts line 326
     #[test]
     fn test_parse_single_yaml_template_without_quotes() {
         use serde_json::json;
@@ -8838,7 +8838,7 @@ mod tests {
         );
     }
 
-    // Ported: "should parse content with yaml tags" — util/yaml.spec.ts line 353
+    // Ported: "should parse content with yaml tags" — lib/util/yaml.spec.ts line 353
     #[test]
     fn test_parse_single_yaml_custom_tags() {
         use serde_json::json;
@@ -8858,7 +8858,7 @@ mod tests {
         }
     }
 
-    // Ported: "should parse invalid content using strict=false" — util/yaml.spec.ts line 239
+    // Ported: "should parse invalid content using strict=false" — lib/util/yaml.spec.ts line 239
     // serde_yaml handles inline comments after quoted strings natively.
     #[test]
     fn test_parse_single_yaml_strict_false() {
@@ -8868,7 +8868,7 @@ mod tests {
         assert!(result.unwrap().is_some());
     }
 
-    // Ported: "should parse content with templates without quotes" — util/yaml.spec.ts line 193
+    // Ported: "should parse content with templates without quotes" — lib/util/yaml.spec.ts line 193
     #[test]
     fn test_parse_yaml_templates_without_quotes() {
         use serde_json::json;
@@ -8882,13 +8882,13 @@ mod tests {
         assert_eq!(result[1], json!({ "foo": null, "bar": "value:v2" }));
     }
 
-    // Ported: "should return undefined" — util/yaml.spec.ts line 222
+    // Ported: "should return undefined" — lib/util/yaml.spec.ts line 222
     #[test]
     fn test_parse_single_yaml_empty() {
         assert_eq!(parse_single_yaml("", false).unwrap(), None);
     }
 
-    // Ported: "should parse content with single document" (load) — util/yaml.spec.ts line 226
+    // Ported: "should parse content with single document" (load) — lib/util/yaml.spec.ts line 226
     #[test]
     fn test_parse_single_yaml_single() {
         use serde_json::json;
@@ -8897,7 +8897,7 @@ mod tests {
         assert_eq!(result, Some(json!({ "myObject": { "aString": "value" } })));
     }
 
-    // Ported: "should parse content with template" (load) — util/yaml.spec.ts line 303
+    // Ported: "should parse content with template" (load) — lib/util/yaml.spec.ts line 303
     #[test]
     fn test_parse_single_yaml_template() {
         use serde_json::json;
@@ -8910,7 +8910,7 @@ mod tests {
     // detect_platform
     // -----------------------------------------------------------------------
 
-    // Ported: "("$url") === $hostType" — util/common.spec.ts line 46
+    // Ported: "("$url") === $hostType" — lib/util/common.spec.ts line 46
     #[test]
     fn test_detect_platform() {
         let cases: &[(&str, Option<&str>)] = &[
@@ -8956,7 +8956,7 @@ mod tests {
         }
     }
 
-    // Ported: "uses host rules" — util/common.spec.ts line 67
+    // Ported: "uses host rules" — lib/util/common.spec.ts line 67
     #[test]
     fn test_detect_platform_uses_host_rules() {
         host_rules::clear();
@@ -9036,14 +9036,14 @@ mod tests {
     // parse_json
     // -----------------------------------------------------------------------
 
-    // Ported: "returns null" — util/common.spec.ts line 119
+    // Ported: "returns null" — lib/util/common.spec.ts line 119
     #[test]
     fn test_parse_json_null_for_empty() {
         // Empty/null → error (no content to parse)
         assert!(parse_json("").is_err() || parse_json("null").is_ok());
     }
 
-    // Ported: "returns parsed json" — util/common.spec.ts line 123
+    // Ported: "returns parsed json" — lib/util/common.spec.ts line 123
     #[test]
     fn test_parse_json_valid() {
         let input = r#"{"name":"John Doe","age":30}"#;
@@ -9052,7 +9052,7 @@ mod tests {
         assert_eq!(v["age"], 30);
     }
 
-    // Ported: "supports jsonc" — util/common.spec.ts line 131
+    // Ported: "supports jsonc" — lib/util/common.spec.ts line 131
     #[test]
     fn test_parse_json_jsonc() {
         let input = r#"{
@@ -9064,14 +9064,14 @@ mod tests {
         assert_eq!(v["name"], "John Doe");
     }
 
-    // Ported: "throws error for invalid json" — util/common.spec.ts line 149
+    // Ported: "throws error for invalid json" — lib/util/common.spec.ts line 149
     #[test]
     fn test_parse_json_invalid() {
         let input = r#"{"name": "Alice", "hobbies": ["Reading"]  "isStudent": true}"#;
         assert!(parse_json(input).is_err());
     }
 
-    // Ported: "catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse" — util/common.spec.ts line 153
+    // Ported: "catches and warns if content parsing failed with JSONC.parse but not with JSON5.parse" — lib/util/common.spec.ts line 153
     #[test]
     fn test_parse_json_fallback_warns() {
         let input = r#"{name: 'Bob', age: 35, city: 'San Francisco', isMarried: false}"#;
@@ -9080,7 +9080,7 @@ mod tests {
         assert_eq!(val["name"], "Bob");
     }
 
-    // Ported: "does not warn if filename ends with .jsonc" — util/common.spec.ts line 167
+    // Ported: "does not warn if filename ends with .jsonc" — lib/util/common.spec.ts line 167
     #[test]
     fn test_parse_json_no_warn_jsonc() {
         let input = r#"{"name": "John Doe", "age": 30, "city": "New York"}"#;
@@ -9088,7 +9088,7 @@ mod tests {
         assert!(!needs_warning);
     }
 
-    // Ported: "does not warn if filename ends with .json5" — util/common.spec.ts line 172
+    // Ported: "does not warn if filename ends with .json5" — lib/util/common.spec.ts line 172
     #[test]
     fn test_parse_json_no_warn_json5() {
         let input = r#"{name: 'Bob', age: 35, city: 'San Francisco', isMarried: false}"#;
@@ -9102,13 +9102,13 @@ mod tests {
 
     const NAME_PATTERN: &str = "^[A-Za-z][A-Za-z0-9_]*$";
 
-    // Ported: "does nothing if not input" — util/interpolator.spec.ts line 13
+    // Ported: "does nothing if not input" — lib/util/interpolator.spec.ts line 13
     #[test]
     fn test_validate_interpolated_none() {
         assert!(validate_interpolated_values(None, NAME_PATTERN).is_ok());
     }
 
-    // Ported: "does not throw error when keys and values are valid" — util/interpolator.spec.ts line 19
+    // Ported: "does not throw error when keys and values are valid" — lib/util/interpolator.spec.ts line 19
     #[test]
     fn test_validate_interpolated_valid() {
         use serde_json::json;
@@ -9116,7 +9116,7 @@ mod tests {
         assert!(validate_interpolated_values(Some(&input), NAME_PATTERN).is_ok());
     }
 
-    // Ported: "throws when input is not a valid object" — util/interpolator.spec.ts line 25
+    // Ported: "throws when input is not a valid object" — lib/util/interpolator.spec.ts line 25
     #[test]
     fn test_validate_interpolated_not_object() {
         use serde_json::json;
@@ -9124,7 +9124,7 @@ mod tests {
         assert!(validate_interpolated_values(Some(&input), NAME_PATTERN).is_err());
     }
 
-    // Ported: "throws when keys do not follow specified regex patterns" — util/interpolator.spec.ts line 31
+    // Ported: "throws when keys do not follow specified regex patterns" — lib/util/interpolator.spec.ts line 31
     #[test]
     fn test_validate_interpolated_bad_key() {
         use serde_json::json;
@@ -9132,7 +9132,7 @@ mod tests {
         assert!(validate_interpolated_values(Some(&input), NAME_PATTERN).is_err());
     }
 
-    // Ported: "throws when values are not of type string" — util/interpolator.spec.ts line 40
+    // Ported: "throws when values are not of type string" — lib/util/interpolator.spec.ts line 40
     #[test]
     fn test_validate_interpolated_non_string_value() {
         use serde_json::json;
@@ -9144,7 +9144,7 @@ mod tests {
     // URL utilities
     // -----------------------------------------------------------------------
 
-    // Ported: "$baseUrl + $x => $result" — util/url.spec.ts line 18
+    // Ported: "$baseUrl + $x => $result" — lib/util/url.spec.ts line 18
     #[test]
     fn test_resolve_base_url() {
         let cases: &[(&str, &str, &str)] = &[
@@ -9178,7 +9178,7 @@ mod tests {
         }
     }
 
-    // Ported: "replaceUrlPath(\"$baseUrl\", \"$x\") => $result" — util/url.spec.ts line 57
+    // Ported: "replaceUrlPath(\"$baseUrl\", \"$x\") => $result" — lib/util/url.spec.ts line 57
     #[test]
     fn test_replace_url_path() {
         let cases: &[(&str, &str, &str)] = &[
@@ -9197,14 +9197,14 @@ mod tests {
         }
     }
 
-    // Ported: "getQueryString" — util/url.spec.ts line 97
+    // Ported: "getQueryString" — lib/util/url.spec.ts line 97
     #[test]
     fn test_get_query_string() {
         assert_eq!(get_query_string(&[("a", "1")]), "a=1");
         assert_eq!(get_query_string(&[]), "");
     }
 
-    // Ported: "validates http-based URLs" — util/url.spec.ts line 101
+    // Ported: "validates http-based URLs" — lib/util/url.spec.ts line 101
     #[test]
     fn test_is_http_url() {
         assert!(!is_http_url(""));
@@ -9214,7 +9214,7 @@ mod tests {
         assert!(is_http_url("https://github.com"));
     }
 
-    // Ported: "parses URL" — util/url.spec.ts line 112
+    // Ported: "parses URL" — lib/util/url.spec.ts line 112
     #[test]
     fn test_parse_url() {
         assert!(parse_url("bad url").is_none());
@@ -9224,7 +9224,7 @@ mod tests {
         assert_eq!(u.path(), "/renovatebot/renovate");
     }
 
-    // Ported: "trimTrailingSlash" — util/url.spec.ts line 123
+    // Ported: "trimTrailingSlash" — lib/util/url.spec.ts line 123
     #[test]
     fn test_trim_trailing_slash() {
         assert_eq!(trim_trailing_slash("foo"), "foo");
@@ -9233,7 +9233,7 @@ mod tests {
         assert_eq!(trim_trailing_slash("foo//////"), "foo");
     }
 
-    // Ported: "trimSlashes" — util/url.spec.ts line 130
+    // Ported: "trimSlashes" — lib/util/url.spec.ts line 130
     #[test]
     fn test_trim_slashes() {
         assert_eq!(trim_slashes("foo"), "foo");
@@ -9246,7 +9246,7 @@ mod tests {
         assert_eq!(trim_slashes("/foo/bar/"), "foo/bar");
     }
 
-    // Ported: "ensureTrailingSlash" — util/url.spec.ts line 141
+    // Ported: "ensureTrailingSlash" — lib/util/url.spec.ts line 141
     #[test]
     fn test_ensure_trailing_slash() {
         assert_eq!(ensure_trailing_slash(""), "/");
@@ -9257,7 +9257,7 @@ mod tests {
         );
     }
 
-    // Ported: "ensures path prefix" — util/url.spec.ts line 146
+    // Ported: "ensures path prefix" — lib/util/url.spec.ts line 146
     #[test]
     fn test_ensure_path_prefix() {
         assert_eq!(
@@ -9274,7 +9274,7 @@ mod tests {
         );
     }
 
-    // Ported: "joinUrlParts" — util/url.spec.ts line 164
+    // Ported: "joinUrlParts" — lib/util/url.spec.ts line 164
     #[test]
     fn test_join_url_parts() {
         let base = "https://some.test";
@@ -9295,7 +9295,7 @@ mod tests {
         assert_eq!(join_url_parts(&["foo//////"]), "foo/");
     }
 
-    // Ported: "createURLFromHostOrURL" — util/url.spec.ts line 180
+    // Ported: "createURLFromHostOrURL" — lib/util/url.spec.ts line 180
     #[test]
     fn test_create_url_from_host_or_url() {
         assert_eq!(
@@ -9308,7 +9308,7 @@ mod tests {
         );
     }
 
-    // Ported: "parseLinkHeader" — util/url.spec.ts line 189
+    // Ported: "parseLinkHeader" — lib/util/url.spec.ts line 189
     #[test]
     fn test_parse_link_header() {
         assert_eq!(parse_link_header(None), None);
@@ -9332,7 +9332,7 @@ mod tests {
         assert!(result.contains_key("last"));
     }
 
-    // Ported: "massageHostUrl" — util/url.spec.ts line 221
+    // Ported: "massageHostUrl" — lib/util/url.spec.ts line 221
     #[test]
     fn test_massage_host_url() {
         assert_eq!(massage_host_url("domain.com"), "domain.com");
@@ -9351,7 +9351,7 @@ mod tests {
     // regex
     // -----------------------------------------------------------------------
 
-    // Ported: "throws unsafe 2" — util/regex.spec.ts line 10
+    // Ported: "throws unsafe 2" — lib/util/regex.spec.ts line 10
     #[test]
     #[allow(clippy::invalid_regex)]
     fn test_regex_unsafe_pattern_rejected() {
@@ -9372,7 +9372,7 @@ mod tests {
     // sanitize_markdown
     // -----------------------------------------------------------------------
 
-    // Ported: "works" — util/markdown.spec.ts line 32
+    // Ported: "works" — lib/util/markdown.spec.ts line 32
     #[test]
     fn test_linkify_markdown_works() {
         let before = "Some references:\n\n*   Commit: f8083175fe890cbf14f41d0a06e7aa35d4989587\n*   Commit (fork): foo@f8083175fe890cbf14f41d0a06e7aa35d4989587\n*   Commit (repo): remarkjs/remark@e1aa9f6c02de18b9459b7d269712bcb50183ce89\n*   Issue or PR (`#`): #1\n*   Issue or PR (`GH-`): GH-1\n*   Issue or PR (fork): foo#1\n*   Issue or PR (project): remarkjs/remark#1\n*   Mention: @wooorm";
@@ -9380,7 +9380,7 @@ mod tests {
         assert_eq!(linkify_markdown(before, "some/repo"), expected);
     }
 
-    // Ported: "works with gitlab" — util/markdown.spec.ts line 37
+    // Ported: "works with gitlab" — lib/util/markdown.spec.ts line 37
     #[test]
     fn test_linkify_markdown_works_with_gitlab() {
         assert_eq!(
@@ -9392,7 +9392,7 @@ mod tests {
         );
     }
 
-    // Ported: "sanitizeMarkdown check massaged release notes" — util/markdown.spec.ts line 47
+    // Ported: "sanitizeMarkdown check massaged release notes" — lib/util/markdown.spec.ts line 47
     #[test]
     fn test_sanitize_markdown() {
         // Key behaviors: @ → @&#8203;, [#N] → [#&#8203;N]
@@ -9424,7 +9424,7 @@ mod tests {
         clear_global_secrets();
     }
 
-    // Ported: "sanitizes empty string" — util/sanitize.spec.ts line 15
+    // Ported: "sanitizes empty string" — lib/util/sanitize.spec.ts line 15
     #[test]
     fn test_sanitize_empty() {
         setup_sanitize();
@@ -9434,7 +9434,7 @@ mod tests {
         setup_sanitize();
     }
 
-    // Ported: "sanitizes secrets from strings" — util/sanitize.spec.ts line 21
+    // Ported: "sanitizes secrets from strings" — lib/util/sanitize.spec.ts line 21
     #[test]
     fn test_sanitize_secrets() {
         setup_sanitize();
@@ -9459,7 +9459,7 @@ mod tests {
         setup_sanitize();
     }
 
-    // Ported: "sanitizes github app tokens" — util/sanitize.spec.ts line 40
+    // Ported: "sanitizes github app tokens" — lib/util/sanitize.spec.ts line 40
     #[test]
     fn test_sanitize_github_app_token() {
         setup_sanitize();
@@ -9477,7 +9477,7 @@ mod tests {
     // hash_data
     // -----------------------------------------------------------------------
 
-    // Ported: "hashes data with sha256" — util/hash.spec.ts line 6
+    // Ported: "hashes data with sha256" — lib/util/hash.spec.ts line 6
     #[test]
     fn test_hash_sha256() {
         let h = hash_data(b"https://example.com/test.txt", Some("sha256"));
@@ -9487,7 +9487,7 @@ mod tests {
         );
     }
 
-    // Ported: "hashes data with sha512" — util/hash.spec.ts line 15
+    // Ported: "hashes data with sha512" — lib/util/hash.spec.ts line 15
     #[test]
     fn test_hash_sha512() {
         let h = hash_data(b"https://example.com/test.txt", None);
@@ -9495,7 +9495,7 @@ mod tests {
         assert_eq!(h.len(), 128);
     }
 
-    // Ported: "correctly hashes the content of a readable stream" — util/hash.spec.ts line 21
+    // Ported: "correctly hashes the content of a readable stream" — lib/util/hash.spec.ts line 21
     #[test]
     fn test_hash_stream_sha256() {
         let content = b"This is some test content.";
@@ -9503,7 +9503,7 @@ mod tests {
         assert_eq!(hash_data(content, Some("sha256")), expected);
     }
 
-    // Ported: "uses sha512 if no algorithm is specified" — util/hash.spec.ts line 38
+    // Ported: "uses sha512 if no algorithm is specified" — lib/util/hash.spec.ts line 38
     #[test]
     fn test_hash_stream_default_sha512() {
         let content = b"This is some test content.";
@@ -9518,7 +9518,7 @@ mod tests {
     // parse_toml / massage_toml
     // -----------------------------------------------------------------------
 
-    // Ported: "works" — util/toml.spec.ts line 5
+    // Ported: "works" — lib/util/toml.spec.ts line 5
     #[test]
     fn test_parse_toml_works() {
         let input = r#"
@@ -9537,14 +9537,14 @@ include = [
         );
     }
 
-    // Ported: "handles invalid toml" — util/toml.spec.ts line 24
+    // Ported: "handles invalid toml" — lib/util/toml.spec.ts line 24
     #[test]
     fn test_parse_toml_invalid() {
         let input = "!@#$%^&*()\n";
         assert!(parse_toml(input).is_err());
     }
 
-    // Ported: "handles templates" — util/toml.spec.ts line 32
+    // Ported: "handles templates" — lib/util/toml.spec.ts line 32
     #[test]
     fn test_massage_toml_templates() {
         let input = r#"[tool.poetry]
@@ -9572,7 +9572,7 @@ dep1 = "^1.0.0"
     // t0 = 2020-10-10T00:00:00Z as millis
     const T0_MS: i64 = 1_602_288_000_000; // 2020-10-10T00:00:00.000Z
 
-    // Ported: "returns elapsed days" — util/date.spec.ts line 22
+    // Ported: "returns elapsed days" — lib/util/date.spec.ts line 22
     #[test]
     fn test_get_elapsed_days_exact() {
         // t = t0 - 42 days
@@ -9581,7 +9581,7 @@ dep1 = "^1.0.0"
         assert_eq!(get_elapsed_days(&ts, true, T0_MS), 42.0);
     }
 
-    // Ported: "returns floor'd version of floating point when partial days" — util/date.spec.ts line 27
+    // Ported: "returns floor'd version of floating point when partial days" — lib/util/date.spec.ts line 27
     #[test]
     fn test_get_elapsed_days_floor_partial() {
         // t = t0 - 42.5 days
@@ -9590,7 +9590,7 @@ dep1 = "^1.0.0"
         assert_eq!(get_elapsed_days(&ts, true, T0_MS), 42.0);
     }
 
-    // Ported: "returns floating point when partial days" — util/date.spec.ts line 34
+    // Ported: "returns floating point when partial days" — lib/util/date.spec.ts line 34
     #[test]
     fn test_get_elapsed_days_no_floor() {
         let t_ms = T0_MS - (42 * 24 + 12) * 60 * 60 * 1000;
@@ -9598,7 +9598,7 @@ dep1 = "^1.0.0"
         assert_eq!(get_elapsed_days(&ts, false, T0_MS), 42.5);
     }
 
-    // Ported: "returns all decimal places" — util/date.spec.ts line 39
+    // Ported: "returns all decimal places" — lib/util/date.spec.ts line 39
     #[test]
     fn test_get_elapsed_days_decimal() {
         let t_ms = T0_MS - (42 * 24 + 2) * 60 * 60 * 1000;
@@ -9611,14 +9611,14 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "returns elapsed minutes" — util/date.spec.ts line 47
+    // Ported: "returns elapsed minutes" — lib/util/date.spec.ts line 47
     #[test]
     fn test_get_elapsed_minutes() {
         let t_ms = T0_MS - 42 * 60 * 1000; // 42 minutes before t0
         assert_eq!(get_elapsed_minutes(t_ms, T0_MS), 42);
     }
 
-    // Ported: "returns elapsed hours" — util/date.spec.ts line 54
+    // Ported: "returns elapsed hours" — lib/util/date.spec.ts line 54
     #[test]
     fn test_get_elapsed_hours() {
         let t_ms = T0_MS - 42 * 60 * 60 * 1000;
@@ -9626,13 +9626,13 @@ dep1 = "^1.0.0"
         assert_eq!(get_elapsed_hours(&ts, T0_MS), 42);
     }
 
-    // Ported: "returns zero when date passed is invalid" — util/date.spec.ts line 60
+    // Ported: "returns zero when date passed is invalid" — lib/util/date.spec.ts line 60
     #[test]
     fn test_get_elapsed_hours_invalid() {
         assert_eq!(get_elapsed_hours("invalid_date_string", T0_MS), 0);
     }
 
-    // Ported: "returns elapsed time in milliseconds" — util/date.spec.ts line 66
+    // Ported: "returns elapsed time in milliseconds" — lib/util/date.spec.ts line 66
     #[test]
     fn test_get_elapsed_ms() {
         let t_ms = T0_MS - 42;
@@ -9650,7 +9650,7 @@ dep1 = "^1.0.0"
     // to_ms (pretty-time)
     // -----------------------------------------------------------------------
 
-    // Ported: "toMs('$input') === $expected" — util/pretty-time.spec.ts line 5
+    // Ported: "toMs('$input') === $expected" — lib/util/pretty-time.spec.ts line 5
     #[test]
     fn test_to_ms_cases() {
         let cases: &[(&str, Option<i64>)] = &[
@@ -9691,7 +9691,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "returns null for error" — util/pretty-time.spec.ts line 45
+    // Ported: "returns null for error" — lib/util/pretty-time.spec.ts line 45
     #[test]
     fn test_to_ms_null_for_error() {
         assert_eq!(to_ms(""), None);
@@ -9702,7 +9702,7 @@ dep1 = "^1.0.0"
     // clone (JSON deep clone)
     // -----------------------------------------------------------------------
 
-    // Ported: "returns $expected when input is $input" — util/clone.spec.ts line 4
+    // Ported: "returns $expected when input is $input" — lib/util/clone.spec.ts line 4
     #[test]
     fn test_clone_values() {
         use serde_json::{Value, json};
@@ -9726,7 +9726,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "maintains same order" — util/clone.spec.ts line 26
+    // Ported: "maintains same order" — lib/util/clone.spec.ts line 26
     #[test]
     fn test_clone_maintains_order() {
         use serde_json::{Map, Value, json};
@@ -9746,7 +9746,7 @@ dep1 = "^1.0.0"
         assert_eq!(keys, vec!["b", "a", "c"]);
     }
 
-    // Ported: "satisfiesRange('$date', '$range') === $expected" — util/pretty-time.spec.ts line 60
+    // Ported: "satisfiesRange('$date', '$range') === $expected" — lib/util/pretty-time.spec.ts line 60
     #[test]
     fn test_satisfies_date_range() {
         // t0 = 2023-07-07T12:00:00Z
@@ -9782,7 +9782,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "getInvalidReviewers" — modules/platform/bitbucket-server/utils.spec.ts line 95
+    // Ported: "getInvalidReviewers" — lib/modules/platform/bitbucket-server/utils.spec.ts line 95
     #[test]
     fn test_get_invalid_reviewers() {
         // With valid reviewerErrors
@@ -9798,14 +9798,14 @@ dep1 = "^1.0.0"
         assert_eq!(get_invalid_reviewers(&errors2), Vec::<String>::new());
     }
 
-    // Ported: "should not configure bearer token" — modules/platform/bitbucket-server/utils.spec.ts line 347
+    // Ported: "should not configure bearer token" — lib/modules/platform/bitbucket-server/utils.spec.ts line 347
     #[test]
     fn test_get_extra_clone_opts_no_token() {
         assert_eq!(get_extra_clone_opts_value(None), None);
         assert_eq!(get_extra_clone_opts_value(Some("")), None);
     }
 
-    // Ported: "should configure bearer token" — modules/platform/bitbucket-server/utils.spec.ts line 352
+    // Ported: "should configure bearer token" — lib/modules/platform/bitbucket-server/utils.spec.ts line 352
     #[test]
     fn test_get_extra_clone_opts_with_token() {
         assert_eq!(
@@ -9816,7 +9816,7 @@ dep1 = "^1.0.0"
 
     // ── schema-utils v4 ──────────────────────────────────────────────────────
 
-    // Ported: "parses valid JSON" — util/schema-utils/v4.spec.ts line 6
+    // Ported: "parses valid JSON" — lib/util/schema-utils/v4.spec.ts line 6
     #[test]
     fn test_schema_parse_json_valid() {
         let r = schema_parse_json(r#"{"name":"test","version":"1.0.0"}"#);
@@ -9826,14 +9826,14 @@ dep1 = "^1.0.0"
         assert_eq!(v["version"], "1.0.0");
     }
 
-    // Ported: "fails for invalid JSON" — util/schema-utils/v4.spec.ts line 29
+    // Ported: "fails for invalid JSON" — lib/util/schema-utils/v4.spec.ts line 29
     #[test]
     fn test_schema_parse_json_invalid() {
         let r = schema_parse_json(r#"{"name": "test" "version": "1.0.0"}"#);
         assert!(r.is_err());
     }
 
-    // Ported: "parses valid JSON5" — util/schema-utils/v4.spec.ts line 50
+    // Ported: "parses valid JSON5" — lib/util/schema-utils/v4.spec.ts line 50
     #[test]
     fn test_schema_parse_json5_valid() {
         let r = schema_parse_json5("{name: 'test', version: '1.0.0', // comment\n}");
@@ -9842,14 +9842,14 @@ dep1 = "^1.0.0"
         assert_eq!(v["name"], "test");
     }
 
-    // Ported: "fails for invalid JSON5" — util/schema-utils/v4.spec.ts line 74
+    // Ported: "fails for invalid JSON5" — lib/util/schema-utils/v4.spec.ts line 74
     #[test]
     fn test_schema_parse_json5_invalid() {
         let r = schema_parse_json5("{name: 'test'\nversion: 'invalid");
         assert!(r.is_err());
     }
 
-    // Ported: "parses valid JSONC" — util/schema-utils/v4.spec.ts line 95
+    // Ported: "parses valid JSONC" — lib/util/schema-utils/v4.spec.ts line 95
     #[test]
     fn test_schema_parse_jsonc_valid() {
         let r = schema_parse_jsonc("{\"name\": \"test\", // comment\n\"version\": \"1.0.0\"}");
@@ -9858,7 +9858,7 @@ dep1 = "^1.0.0"
         assert_eq!(v["name"], "test");
     }
 
-    // Ported: "fails for invalid JSONC" — util/schema-utils/v4.spec.ts line 119
+    // Ported: "fails for invalid JSONC" — lib/util/schema-utils/v4.spec.ts line 119
     #[test]
     fn test_schema_parse_jsonc_invalid() {
         // Missing commas between properties — invalid JSONC (json5 also requires commas)
@@ -9867,7 +9867,7 @@ dep1 = "^1.0.0"
         assert!(r.is_err(), "JSONC with missing commas should fail");
     }
 
-    // Ported: "parses valid YAML" — util/schema-utils/v4.spec.ts line 140
+    // Ported: "parses valid YAML" — lib/util/schema-utils/v4.spec.ts line 140
     #[test]
     fn test_schema_parse_yaml_valid() {
         let r = schema_parse_yaml("name: test\nversion: 1.0.0\n");
@@ -9876,14 +9876,14 @@ dep1 = "^1.0.0"
         assert_eq!(v["name"], "test");
     }
 
-    // Ported: "fails for invalid YAML" — util/schema-utils/v4.spec.ts line 162
+    // Ported: "fails for invalid YAML" — lib/util/schema-utils/v4.spec.ts line 162
     #[test]
     fn test_schema_parse_yaml_invalid() {
         let r = schema_parse_yaml("name: test\nversion: 1.0.0\n  invalid: indentation\n");
         assert!(r.is_err());
     }
 
-    // Ported: "parses valid multidoc YAML" — util/schema-utils/v4.spec.ts line 181
+    // Ported: "parses valid multidoc YAML" — lib/util/schema-utils/v4.spec.ts line 181
     #[test]
     fn test_schema_parse_multidoc_yaml_valid() {
         let yaml = "---\nname: test1\nversion: 1.0.0\n---\nname: test2\nversion: 2.0.0\n";
@@ -9895,7 +9895,7 @@ dep1 = "^1.0.0"
         assert_eq!(docs[1]["name"], "test2");
     }
 
-    // Ported: "fails for invalid multidoc YAML" — util/schema-utils/v4.spec.ts line 206
+    // Ported: "fails for invalid multidoc YAML" — lib/util/schema-utils/v4.spec.ts line 206
     #[test]
     fn test_schema_parse_multidoc_yaml_invalid() {
         let yaml = "---\nname: test1\nversion: 1.0.0\n---\nname: test2\n  invalid: indentation\n";
@@ -9906,14 +9906,14 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "parses valid TOML" — util/schema-utils/v4.spec.ts line 226
+    // Ported: "parses valid TOML" — lib/util/schema-utils/v4.spec.ts line 226
     #[test]
     fn test_schema_parse_toml_valid() {
         let r = schema_parse_toml("[package]\nname = \"test\"\nversion = \"1.0.0\"\n");
         assert!(r.is_ok());
     }
 
-    // Ported: "fails for invalid TOML" — util/schema-utils/v4.spec.ts line 249
+    // Ported: "fails for invalid TOML" — lib/util/schema-utils/v4.spec.ts line 249
     #[test]
     fn test_schema_parse_toml_invalid() {
         let r = schema_parse_toml("name = \"test\"\ninvalid toml syntax here\n");
@@ -9922,7 +9922,7 @@ dep1 = "^1.0.0"
 
     // ── hidden unicode detection ──────────────────────────────────────────────
 
-    // Ported: "logs a warning for hidden Unicode characters in text files" — util/unicode.spec.ts line 6
+    // Ported: "logs a warning for hidden Unicode characters in text files" — lib/util/unicode.spec.ts line 6
     // The TypeScript test checks logger.once.warn spy; Rust tests the detection function directly.
     #[test]
     fn hidden_unicode_chars_detected_in_text() {
@@ -9933,7 +9933,7 @@ dep1 = "^1.0.0"
         assert!(found.contains(&'\u{200B}'));
     }
 
-    // Ported: "logs a trace message for BOM character only" — util/unicode.spec.ts line 16
+    // Ported: "logs a trace message for BOM character only" — lib/util/unicode.spec.ts line 16
     #[test]
     fn bom_character_detected() {
         let content = "\u{FEFF}<Project Sdk=\"Microsoft.NET.Sdk\">";
@@ -9942,7 +9942,7 @@ dep1 = "^1.0.0"
         assert_eq!(found[0], '\u{FEFF}');
     }
 
-    // Ported: "does not log a warning for binary files with null bytes but no hidden unicode" — util/unicode.spec.ts line 30
+    // Ported: "does not log a warning for binary files with null bytes but no hidden unicode" — lib/util/unicode.spec.ts line 30
     #[test]
     fn binary_content_with_null_bytes_detected() {
         let bytes = [
@@ -9967,7 +9967,7 @@ dep1 = "^1.0.0"
         assert!(!found.is_empty());
     }
 
-    // Ported: "does not log a warning when no hidden characters are present" — util/unicode.spec.ts line 63
+    // Ported: "does not log a warning when no hidden characters are present" — lib/util/unicode.spec.ts line 63
     #[test]
     fn no_hidden_unicode_in_normal_text() {
         let content = "normal text content";
@@ -9978,63 +9978,63 @@ dep1 = "^1.0.0"
 
     // ── get_inherited_or_global ───────────────────────────────────────────────
 
-    // Ported: "returns undefined if not set" — util/common.spec.ts line 198
+    // Ported: "returns undefined if not set" — lib/util/common.spec.ts line 198
     #[test]
     fn get_inherited_or_global_returns_none_when_not_set() {
         let result: Option<i64> = get_inherited_or_global(None, None, false);
         assert!(result.is_none());
     }
 
-    // Ported: "returns inherited value if only inherited value is set" — util/common.spec.ts line 202
+    // Ported: "returns inherited value if only inherited value is set" — lib/util/common.spec.ts line 202
     #[test]
     fn get_inherited_or_global_returns_inherited_when_only_inherited() {
         let result = get_inherited_or_global(Some(42i64), None, false);
         assert_eq!(result, Some(42));
     }
 
-    // Ported: "returns global value if only global value is set" — util/common.spec.ts line 209
+    // Ported: "returns global value if only global value is set" — lib/util/common.spec.ts line 209
     #[test]
     fn get_inherited_or_global_returns_global_when_only_global() {
         let result = get_inherited_or_global(None, Some(99i64), false);
         assert_eq!(result, Some(99));
     }
 
-    // Ported: "returns inherited value - when both global + inherited are set" — util/common.spec.ts line 216
+    // Ported: "returns inherited value - when both global + inherited are set" — lib/util/common.spec.ts line 216
     #[test]
     fn get_inherited_or_global_inherited_wins_when_both_set() {
         let result = get_inherited_or_global(Some(5i64), Some(10i64), false);
         assert_eq!(result, Some(5)); // inherited wins
     }
 
-    // Ported: "returns inherited value when inherited < global" — util/common.spec.ts line 249
+    // Ported: "returns inherited value when inherited < global" — lib/util/common.spec.ts line 249
     #[test]
     fn get_inherited_or_global_age_inherited_less_than_global() {
         let result = get_inherited_or_global(Some(5i64), Some(10i64), true);
         assert_eq!(result, Some(5)); // inherited < global → return inherited
     }
 
-    // Ported: "returns global value when inherited > global value" — util/common.spec.ts line 259
+    // Ported: "returns global value when inherited > global value" — lib/util/common.spec.ts line 259
     #[test]
     fn get_inherited_or_global_age_inherited_greater_than_global() {
         let result = get_inherited_or_global(Some(10i64), Some(5i64), true);
         assert_eq!(result, Some(5)); // inherited > global → return global
     }
 
-    // Ported: "returns inherited value when inherited == global" — util/common.spec.ts line 269
+    // Ported: "returns inherited value when inherited == global" — lib/util/common.spec.ts line 269
     #[test]
     fn get_inherited_or_global_age_equal() {
         let result = get_inherited_or_global(Some(5i64), Some(5i64), true);
         assert_eq!(result, Some(5));
     }
 
-    // Ported: "returns inherited value when global value is not set" — util/common.spec.ts line 279
+    // Ported: "returns inherited value when global value is not set" — lib/util/common.spec.ts line 279
     #[test]
     fn get_inherited_or_global_age_global_not_set() {
         let result = get_inherited_or_global(Some(10i64), None, true);
         assert_eq!(result, Some(10)); // no global → return inherited
     }
 
-    // Ported: "returns global value when inherited value is not set" — util/common.spec.ts line 289
+    // Ported: "returns global value when inherited value is not set" — lib/util/common.spec.ts line 289
     #[test]
     fn get_inherited_or_global_age_inherited_not_set() {
         let result = get_inherited_or_global(None, Some(10i64), true);
@@ -10043,52 +10043,52 @@ dep1 = "^1.0.0"
 
     // ── classify_repo_error ───────────────────────────────────────────────────
 
-    // Ported: "rewrites git 5xx error" — workers/repository/error.spec.ts line 91
+    // Ported: "rewrites git 5xx error" — lib/workers/repository/error.spec.ts line 91
     #[test]
     fn classify_repo_error_rewrites_git_5xx() {
         let msg = "fatal: unable to access 'https://**redacted**@gitlab.com/learnox/learnox.git/': The requested URL returned error: 500\n";
         assert_eq!(classify_repo_error(msg), "external-host-error");
     }
 
-    // Ported: "rewrites git remote error" — workers/repository/error.spec.ts line 99
+    // Ported: "rewrites git remote error" — lib/workers/repository/error.spec.ts line 99
     #[test]
     fn classify_repo_error_rewrites_git_remote_error() {
         let msg = "fatal: remote error: access denied or repository not exported: /b/nw/bd/27/47/159945428/108610112.git\n";
         assert_eq!(classify_repo_error(msg), "external-host-error");
     }
 
-    // Ported: "rewrites git fatal error" — workers/repository/error.spec.ts line 107
+    // Ported: "rewrites git fatal error" — lib/workers/repository/error.spec.ts line 107
     #[test]
     fn classify_repo_error_rewrites_git_fatal() {
         let msg = "fatal: not a git repository (or any parent up to mount point /mnt)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n";
         assert_eq!(classify_repo_error(msg), "temporary-error");
     }
 
-    // Ported: "handles unknown error" — workers/repository/error.spec.ts line 115
+    // Ported: "handles unknown error" — lib/workers/repository/error.spec.ts line 115
     #[test]
     fn classify_repo_error_unknown() {
         assert_eq!(classify_repo_error("abcdefg"), "unknown-error");
     }
 
-    // Ported: "logs config validation errors as warnings by default" — workers/repository/error.spec.ts line 120
+    // Ported: "logs config validation errors as warnings by default" — lib/workers/repository/error.spec.ts line 120
     #[test]
     fn config_validation_log_level_default_warn() {
         assert_eq!(config_validation_log_level(None), "warn");
     }
 
-    // Ported: "logs config validation errors as warnings when configValidationError is false" — workers/repository/error.spec.ts line 130
+    // Ported: "logs config validation errors as warnings when configValidationError is false" — lib/workers/repository/error.spec.ts line 130
     #[test]
     fn config_validation_log_level_false_warn() {
         assert_eq!(config_validation_log_level(Some(false)), "warn");
     }
 
-    // Ported: "logs config validation errors as errors when configValidationError is true" — workers/repository/error.spec.ts line 140
+    // Ported: "logs config validation errors as errors when configValidationError is true" — lib/workers/repository/error.spec.ts line 140
     #[test]
     fn config_validation_log_level_true_error() {
         assert_eq!(config_validation_log_level(Some(true)), "error");
     }
 
-    // Ported: "errors ${err}" — workers/repository/error.spec.ts line 77
+    // Ported: "errors ${err}" — lib/workers/repository/error.spec.ts line 77
     // Tests that known Renovate error constants pass through unchanged.
     #[test]
     fn classify_repo_error_known_constants_pass_through() {
@@ -10108,7 +10108,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "handles ExternalHostError" — workers/repository/error.spec.ts line 83
+    // Ported: "handles ExternalHostError" — lib/workers/repository/error.spec.ts line 83
     #[test]
     fn classify_repo_error_external_host_error_constant() {
         assert_eq!(
@@ -10119,7 +10119,7 @@ dep1 = "^1.0.0"
 
     // ── parse_repo_org ────────────────────────────────────────────────────────
 
-    // Ported: "should generate correct topLevelOrg/parentOrg with multiple levels" — workers/global/index.spec.ts line 56
+    // Ported: "should generate correct topLevelOrg/parentOrg with multiple levels" — lib/workers/global/index.spec.ts line 56
     //         — workers/global/index.spec.ts line 56
     #[test]
     fn parse_repo_org_multiple_levels() {
@@ -10128,7 +10128,7 @@ dep1 = "^1.0.0"
         assert_eq!(parent, "a/b/c");
     }
 
-    // Ported: "should generate correct topLevelOrg/parentOrg with two levels" — workers/global/index.spec.ts line 67
+    // Ported: "should generate correct topLevelOrg/parentOrg with two levels" — lib/workers/global/index.spec.ts line 67
     //         — workers/global/index.spec.ts line 67
     #[test]
     fn parse_repo_org_two_levels() {
@@ -10139,7 +10139,7 @@ dep1 = "^1.0.0"
 
     // ── SplitTracker ──────────────────────────────────────────────────────────
 
-    // Ported: "adds splits and returns results" — util/split.spec.ts line 4
+    // Ported: "adds splits and returns results" — lib/util/split.spec.ts line 4
     // TypeScript test uses vi.setSystemTime for exact values; Rust verifies
     // the structure (correct keys, non-negative durations, total >= splits).
     #[test]
@@ -10160,7 +10160,7 @@ dep1 = "^1.0.0"
 
     // ── parse_s3_url ─────────────────────────────────────────────────────────
 
-    // Ported: "parses S3 URLs" — util/s3.spec.ts line 9
+    // Ported: "parses S3 URLs" — lib/util/s3.spec.ts line 9
     #[test]
     fn test_parse_s3_url_valid() {
         let r = parse_s3_url("s3://bucket/key/path").unwrap();
@@ -10168,13 +10168,13 @@ dep1 = "^1.0.0"
         assert_eq!(r.key, "key/path");
     }
 
-    // Ported: "returns null for non-S3 URLs" — util/s3.spec.ts line 16
+    // Ported: "returns null for non-S3 URLs" — lib/util/s3.spec.ts line 16
     #[test]
     fn test_parse_s3_url_non_s3() {
         assert!(parse_s3_url("http://example.com/key/path").is_none());
     }
 
-    // Ported: "returns null for invalid URLs" — util/s3.spec.ts line 20
+    // Ported: "returns null for invalid URLs" — lib/util/s3.spec.ts line 20
     #[test]
     fn test_parse_s3_url_invalid() {
         assert!(parse_s3_url("thisisnotaurl").is_none());
@@ -10182,7 +10182,7 @@ dep1 = "^1.0.0"
 
     // ── local platform stub ───────────────────────────────────────────────────
 
-    // Ported: "returns input" — modules/platform/local/index.spec.ts line 5
+    // Ported: "returns input" — lib/modules/platform/local/index.spec.ts line 5
     #[test]
     fn test_local_init_platform_default() {
         let r = local_init_platform(None);
@@ -10192,7 +10192,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.require_config, "optional");
     }
 
-    // Ported: "preserves an explicit dryRun=extract override" — modules/platform/local/index.spec.ts line 16
+    // Ported: "preserves an explicit dryRun=extract override" — lib/modules/platform/local/index.spec.ts line 16
     #[test]
     fn test_local_init_platform_extract() {
         let r = local_init_platform(Some("extract"));
@@ -10200,14 +10200,14 @@ dep1 = "^1.0.0"
         assert_eq!(r.endpoint, "local");
     }
 
-    // Ported: "falls back to lookup when dryRun=full is requested" — modules/platform/local/index.spec.ts line 29
+    // Ported: "falls back to lookup when dryRun=full is requested" — lib/modules/platform/local/index.spec.ts line 29
     #[test]
     fn test_local_init_platform_full_falls_back() {
         let r = local_init_platform(Some("full"));
         assert_eq!(r.dry_run, "lookup");
     }
 
-    // Ported: "returns empty array" (getRepos) — modules/platform/local/index.spec.ts line 44
+    // Ported: "returns empty array" (getRepos) — lib/modules/platform/local/index.spec.ts line 44
     #[test]
     fn test_local_get_repos() {
         // In Rust, local platform getRepos returns empty vec
@@ -10215,7 +10215,7 @@ dep1 = "^1.0.0"
         assert!(repos.is_empty());
     }
 
-    // Ported: "returns object" (initRepo) — modules/platform/local/index.spec.ts line 50
+    // Ported: "returns object" (initRepo) — lib/modules/platform/local/index.spec.ts line 50
     #[test]
     fn test_local_init_repo() {
         let r = local_init_repo();
@@ -10224,7 +10224,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.repo_fingerprint, "");
     }
 
-    // Ported: "massageMarkdown" — modules/platform/local/index.spec.ts line 90
+    // Ported: "massageMarkdown" — lib/modules/platform/local/index.spec.ts line 90
     #[test]
     fn test_local_massage_markdown_passthrough() {
         // massageMarkdown is identity function for local platform
@@ -10232,14 +10232,14 @@ dep1 = "^1.0.0"
         assert_eq!(input, input); // identity - already tested by value
     }
 
-    // Ported: "maxBodyLength" — modules/platform/local/index.spec.ts line 94
+    // Ported: "maxBodyLength" — lib/modules/platform/local/index.spec.ts line 94
     #[test]
     fn test_local_max_body_length() {
         // maxBodyLength returns usize::MAX (Infinity)
         assert_eq!(usize::MAX, usize::MAX);
     }
 
-    // Ported: "mergePr" — modules/platform/local/index.spec.ts line 102
+    // Ported: "mergePr" — lib/modules/platform/local/index.spec.ts line 102
     #[test]
     fn test_local_merge_pr_returns_false() {
         // mergePr always returns false for local platform
@@ -10247,7 +10247,7 @@ dep1 = "^1.0.0"
         assert!(!result);
     }
 
-    // Ported: "getBranchStatus" — modules/platform/local/index.spec.ts line 126
+    // Ported: "getBranchStatus" — lib/modules/platform/local/index.spec.ts line 126
     #[test]
     fn test_local_get_branch_status_returns_red() {
         // getBranchStatus always returns 'red' for local platform
@@ -10255,102 +10255,102 @@ dep1 = "^1.0.0"
         assert_eq!(status, "red");
     }
 
-    // Ported: "ensureComment" — modules/platform/local/index.spec.ts line 138
+    // Ported: "ensureComment" — lib/modules/platform/local/index.spec.ts line 138
     #[test]
     fn test_local_ensure_comment_returns_false() {
         let result: bool = false;
         assert!(!result);
     }
 
-    // Ported: "findIssue" — modules/platform/local/index.spec.ts line 62
+    // Ported: "findIssue" — lib/modules/platform/local/index.spec.ts line 62
     #[test]
     fn test_local_find_issue_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "getIssueList" — modules/platform/local/index.spec.ts line 66
+    // Ported: "getIssueList" — lib/modules/platform/local/index.spec.ts line 66
     #[test]
     fn test_local_get_issue_list_returns_empty() {
         let r: Vec<()> = vec![];
         assert!(r.is_empty());
     }
-    // Ported: "getRawFile" — modules/platform/local/index.spec.ts line 70
+    // Ported: "getRawFile" — lib/modules/platform/local/index.spec.ts line 70
     #[test]
     fn test_local_get_raw_file_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "getJsonFile" — modules/platform/local/index.spec.ts line 74
+    // Ported: "getJsonFile" — lib/modules/platform/local/index.spec.ts line 74
     #[test]
     fn test_local_get_json_file_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "getPrList" — modules/platform/local/index.spec.ts line 78
+    // Ported: "getPrList" — lib/modules/platform/local/index.spec.ts line 78
     #[test]
     fn test_local_get_pr_list_returns_empty() {
         let r: Vec<()> = vec![];
         assert!(r.is_empty());
     }
-    // Ported: "ensureIssueClosing" — modules/platform/local/index.spec.ts line 82
+    // Ported: "ensureIssueClosing" — lib/modules/platform/local/index.spec.ts line 82
     #[test]
     fn test_local_ensure_issue_closing_returns_void() { /* void - no assertion needed */
     }
-    // Ported: "ensureIssue" — modules/platform/local/index.spec.ts line 86
+    // Ported: "ensureIssue" — lib/modules/platform/local/index.spec.ts line 86
     #[test]
     fn test_local_ensure_issue_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "updatePr" — modules/platform/local/index.spec.ts line 98
+    // Ported: "updatePr" — lib/modules/platform/local/index.spec.ts line 98
     #[test]
     fn test_local_update_pr_returns_void() { /* void */
     }
-    // Ported: "addReviewers" — modules/platform/local/index.spec.ts line 106
+    // Ported: "addReviewers" — lib/modules/platform/local/index.spec.ts line 106
     #[test]
     fn test_local_add_reviewers_returns_void() { /* void */
     }
-    // Ported: "addAssignees" — modules/platform/local/index.spec.ts line 110
+    // Ported: "addAssignees" — lib/modules/platform/local/index.spec.ts line 110
     #[test]
     fn test_local_add_assignees_returns_void() { /* void */
     }
-    // Ported: "createPr" — modules/platform/local/index.spec.ts line 114
+    // Ported: "createPr" — lib/modules/platform/local/index.spec.ts line 114
     #[test]
     fn test_local_create_pr_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "deleteLabel" — modules/platform/local/index.spec.ts line 118
+    // Ported: "deleteLabel" — lib/modules/platform/local/index.spec.ts line 118
     #[test]
     fn test_local_delete_label_returns_void() { /* void */
     }
-    // Ported: "setBranchStatus" — modules/platform/local/index.spec.ts line 122
+    // Ported: "setBranchStatus" — lib/modules/platform/local/index.spec.ts line 122
     #[test]
     fn test_local_set_branch_status_returns_void() { /* void */
     }
-    // Ported: "getBranchStatusCheck" — modules/platform/local/index.spec.ts line 130
+    // Ported: "getBranchStatusCheck" — lib/modules/platform/local/index.spec.ts line 130
     #[test]
     fn test_local_get_branch_status_check_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "ensureCommentRemoval" — modules/platform/local/index.spec.ts line 134
+    // Ported: "ensureCommentRemoval" — lib/modules/platform/local/index.spec.ts line 134
     #[test]
     fn test_local_ensure_comment_removal_returns_void() { /* void */
     }
-    // Ported: "getPr" — modules/platform/local/index.spec.ts line 142
+    // Ported: "getPr" — lib/modules/platform/local/index.spec.ts line 142
     #[test]
     fn test_local_get_pr_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "findPr" — modules/platform/local/index.spec.ts line 146
+    // Ported: "findPr" — lib/modules/platform/local/index.spec.ts line 146
     #[test]
     fn test_local_find_pr_returns_null() {
         let r: Option<()> = None;
         assert!(r.is_none());
     }
-    // Ported: "getBranchPr" — modules/platform/local/index.spec.ts line 150
+    // Ported: "getBranchPr" — lib/modules/platform/local/index.spec.ts line 150
     #[test]
     fn test_local_get_branch_pr_returns_null() {
         let r: Option<()> = None;
@@ -10359,27 +10359,27 @@ dep1 = "^1.0.0"
 
     // ── getMeta / getDetails ─────────────────────────────────────────────────
 
-    // Ported: "returns empty string if null rec" — logger/pretty-stdout.spec.ts line 9
+    // Ported: "returns empty string if null rec" — lib/logger/pretty-stdout.spec.ts line 9
     #[test]
     fn test_get_meta_null_rec() {
         assert_eq!(get_meta(None, true), "");
     }
 
-    // Ported: "returns empty string if empty rec" — logger/pretty-stdout.spec.ts line 13
+    // Ported: "returns empty string if empty rec" — lib/logger/pretty-stdout.spec.ts line 13
     #[test]
     fn test_get_meta_empty_rec() {
         let rec = BunyanRecord::default();
         assert_eq!(get_meta(Some(&rec), true), "");
     }
 
-    // Ported: "returns empty string if no meta fields" — logger/pretty-stdout.spec.ts line 17
+    // Ported: "returns empty string if no meta fields" — lib/logger/pretty-stdout.spec.ts line 17
     #[test]
     fn test_get_meta_no_meta_fields() {
         let rec = BunyanRecord::default(); // foo: 'bar' is not a meta field
         assert_eq!(get_meta(Some(&rec), true), "");
     }
 
-    // Ported: "supports single meta" — logger/pretty-stdout.spec.ts line 24
+    // Ported: "supports single meta" — lib/logger/pretty-stdout.spec.ts line 24
     #[test]
     fn test_get_meta_single_meta() {
         let rec = BunyanRecord {
@@ -10393,7 +10393,7 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "supports multi meta" — logger/pretty-stdout.spec.ts line 34
+    // Ported: "supports multi meta" — lib/logger/pretty-stdout.spec.ts line 34
     #[test]
     fn test_get_meta_multi_meta() {
         let rec = BunyanRecord {
@@ -10408,7 +10408,7 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "returns plain text when colorize is false" — logger/pretty-stdout.spec.ts line 46
+    // Ported: "returns plain text when colorize is false" — lib/logger/pretty-stdout.spec.ts line 46
     #[test]
     fn test_get_meta_plain_text() {
         let rec = BunyanRecord {
@@ -10421,26 +10421,26 @@ dep1 = "^1.0.0"
 
     // ── getDetails / formatRecord ────────────────────────────────────────────
 
-    // Ported: "returns empty string if null rec" — logger/pretty-stdout.spec.ts line 57
+    // Ported: "returns empty string if null rec" — lib/logger/pretty-stdout.spec.ts line 57
     #[test]
     fn test_get_details_null_rec() {
         assert_eq!(get_details(None), "");
     }
 
-    // Ported: "returns empty string if empty rec" — logger/pretty-stdout.spec.ts line 61
+    // Ported: "returns empty string if empty rec" — lib/logger/pretty-stdout.spec.ts line 61
     #[test]
     fn test_get_details_empty_rec() {
         assert_eq!(get_details(Some(&serde_json::json!({}))), "");
     }
 
-    // Ported: "returns empty string if all are meta fields" — logger/pretty-stdout.spec.ts line 67
+    // Ported: "returns empty string if all are meta fields" — lib/logger/pretty-stdout.spec.ts line 67
     #[test]
     fn test_get_details_all_meta_fields() {
         let rec = serde_json::json!({"branch": "bar", "v": 0});
         assert_eq!(get_details(Some(&rec)), "");
     }
 
-    // Ported: "supports a config" — logger/pretty-stdout.spec.ts line 75
+    // Ported: "supports a config" — lib/logger/pretty-stdout.spec.ts line 75
     #[test]
     fn test_get_details_config() {
         let rec = serde_json::json!({"v": 0, "config": {"a": "b", "d": ["e", "f"]}});
@@ -10451,7 +10451,7 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "formats err.stack as readable multi-line output" — logger/pretty-stdout.spec.ts line 88
+    // Ported: "formats err.stack as readable multi-line output" — lib/logger/pretty-stdout.spec.ts line 88
     #[test]
     fn test_get_details_err_with_stack() {
         let rec = serde_json::json!({
@@ -10468,7 +10468,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("    at foo (file.js:1:1)"));
     }
 
-    // Ported: "formats err.stack without other err fields" — logger/pretty-stdout.spec.ts line 108
+    // Ported: "formats err.stack without other err fields" — lib/logger/pretty-stdout.spec.ts line 108
     #[test]
     fn test_get_details_err_stack_only() {
         let rec = serde_json::json!({
@@ -10484,7 +10484,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("    at bar (file.js:2:2)"));
     }
 
-    // Ported: "formats record" — logger/pretty-stdout.spec.ts line 136
+    // Ported: "formats record" — lib/logger/pretty-stdout.spec.ts line 136
     #[test]
     fn test_format_record() {
         let rec = serde_json::json!({
@@ -10498,7 +10498,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("\"config\": {\"a\": \"b\", \"d\": [\"e\", \"f\"]}"));
     }
 
-    // Ported: "formats record without colors" — logger/pretty-stdout.spec.ts line 155
+    // Ported: "formats record without colors" — lib/logger/pretty-stdout.spec.ts line 155
     #[test]
     fn test_format_record_no_colors() {
         let rec = serde_json::json!({
@@ -10515,7 +10515,7 @@ dep1 = "^1.0.0"
 
     // ── as_raw_commands ──────────────────────────────────────────────────────
 
-    // Ported: "returns array of strings" (string) — util/exec/utils.spec.ts line 189
+    // Ported: "returns array of strings" (string) — lib/util/exec/utils.spec.ts line 189
     #[test]
     fn test_as_raw_commands_single_string() {
         let cmds = [ExecCommand::Str("go mod tidy".to_owned())];
@@ -10523,7 +10523,7 @@ dep1 = "^1.0.0"
         assert_eq!(result, vec!["go mod tidy"]);
     }
 
-    // Ported: "returns array of strings" (string) — util/exec/utils.spec.ts line 198
+    // Ported: "returns array of strings" (string) — lib/util/exec/utils.spec.ts line 198
     #[test]
     fn test_as_raw_commands_array_of_strings() {
         let cmds = [
@@ -10534,7 +10534,7 @@ dep1 = "^1.0.0"
         assert_eq!(result, vec!["go mod tidy", "make tidy"]);
     }
 
-    // Ported: "returns an array of many strings" — util/exec/utils.spec.ts line 207
+    // Ported: "returns an array of many strings" — lib/util/exec/utils.spec.ts line 207
     #[test]
     fn test_as_raw_commands_many_strings() {
         let cmds = [
@@ -10547,7 +10547,7 @@ dep1 = "^1.0.0"
         assert_eq!(result, vec!["go mod tidy", "make tidy", "make generate"]);
     }
 
-    // Ported: "returns commands from the `CommandWithOptions`" — util/exec/utils.spec.ts line 220
+    // Ported: "returns commands from the `CommandWithOptions`" — lib/util/exec/utils.spec.ts line 220
     #[test]
     fn test_as_raw_commands_with_opts() {
         let cmds = [
@@ -10610,13 +10610,13 @@ dep1 = "^1.0.0"
 
     // ── massageUrl / massageGithubUrl / massageGitlabUrl ─────────────────────
 
-    // Ported: "Should return an empty string when massaging an invalid url" — modules/datasource/metadata.spec.ts line 385
+    // Ported: "Should return an empty string when massaging an invalid url" — lib/modules/datasource/metadata.spec.ts line 385
     #[test]
     fn test_massage_url_invalid() {
         assert_eq!(massage_url("not a url"), "");
     }
 
-    // Ported: "Should massage GitHub url $sourceUrl" — modules/datasource/metadata.spec.ts line 389
+    // Ported: "Should massage GitHub url $sourceUrl" — lib/modules/datasource/metadata.spec.ts line 389
     #[test]
     fn test_massage_url_github() {
         let cases = [
@@ -10652,7 +10652,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "Should massage GitLab url $sourceUrl" — modules/datasource/metadata.spec.ts line 403
+    // Ported: "Should massage GitLab url $sourceUrl" — lib/modules/datasource/metadata.spec.ts line 403
     #[test]
     fn test_massage_url_gitlab() {
         let cases = [
@@ -10683,7 +10683,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "Should massage other sourceUrl $sourceUrl" — modules/datasource/metadata.spec.ts line 415
+    // Ported: "Should massage other sourceUrl $sourceUrl" — lib/modules/datasource/metadata.spec.ts line 415
     #[test]
     fn test_massage_url_other_host() {
         let cases = [
@@ -10769,7 +10769,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "should return the same release result if extractVersion is not defined" — modules/datasource/common.spec.ts line 95
+    // Ported: "should return the same release result if extractVersion is not defined" — lib/modules/datasource/common.spec.ts line 95
     #[test]
     fn test_apply_extract_version_none() {
         let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
@@ -10777,7 +10777,7 @@ dep1 = "^1.0.0"
         assert_eq!(result, releases);
     }
 
-    // Ported: "should extract version from release using provided regex" — modules/datasource/common.spec.ts line 103
+    // Ported: "should extract version from release using provided regex" — lib/modules/datasource/common.spec.ts line 103
     #[test]
     fn test_apply_extract_version_with_regex() {
         let releases = vec![mk_release("v1.0.0"), mk_release("v2.0.0")];
@@ -10788,7 +10788,7 @@ dep1 = "^1.0.0"
         assert_eq!(result[1].version, "2.0.0");
     }
 
-    // Ported: "should return null for releases with invalid version" — modules/datasource/common.spec.ts line 116
+    // Ported: "should return null for releases with invalid version" — lib/modules/datasource/common.spec.ts line 116
     #[test]
     fn test_apply_extract_version_filters_non_matching() {
         let releases = vec![mk_release("v1.0.0"), mk_release("invalid")];
@@ -10797,7 +10797,7 @@ dep1 = "^1.0.0"
         assert_eq!(result[0].version, "1.0.0");
     }
 
-    // Ported: "should filter out invalid versions" — modules/datasource/common.spec.ts line 136
+    // Ported: "should filter out invalid versions" — lib/modules/datasource/common.spec.ts line 136
     #[test]
     fn test_filter_valid_versions_removes_invalid() {
         let releases = vec![
@@ -10811,7 +10811,7 @@ dep1 = "^1.0.0"
         assert_eq!(result[1].version, "2.0.0");
     }
 
-    // Ported: "should use specified versioning if provided" — modules/datasource/common.spec.ts line 152
+    // Ported: "should use specified versioning if provided" — lib/modules/datasource/common.spec.ts line 152
     #[test]
     fn test_filter_valid_versions_semver() {
         let releases = vec![
@@ -10823,7 +10823,7 @@ dep1 = "^1.0.0"
         assert_eq!(result.len(), 2);
     }
 
-    // Ported: "should use default versioning if none is specified" — modules/datasource/common.spec.ts line 144
+    // Ported: "should use default versioning if none is specified" — lib/modules/datasource/common.spec.ts line 144
     // TypeScript uses `datasource: 'foobar'` (unknown) → falls back to semver-coerced;
     // 'invalid' version is filtered out, valid semver versions remain.
     #[test]
@@ -10839,7 +10839,7 @@ dep1 = "^1.0.0"
         assert_eq!(result[1].version, "2.0.0");
     }
 
-    // Ported: "should use default versioning if none is specified" — modules/datasource/common.spec.ts line 144
+    // Ported: "should use default versioning if none is specified" — lib/modules/datasource/common.spec.ts line 144
     #[test]
     fn test_filter_valid_versions_default_versioning() {
         let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
@@ -10849,7 +10849,7 @@ dep1 = "^1.0.0"
         assert_eq!(result[1].version, "2.0.0");
     }
 
-    // Ported: "uses default versioning if none is specified" — modules/datasource/common.spec.ts line 183
+    // Ported: "uses default versioning if none is specified" — lib/modules/datasource/common.spec.ts line 183
     #[test]
     fn test_sort_and_remove_duplicates_default_versioning() {
         let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
@@ -10861,7 +10861,7 @@ dep1 = "^1.0.0"
 
     // ── apply_version_compatibility ───────────────────────────────────────────
 
-    // Ported: "returns immediately if no versionCompatibility" — modules/datasource/common.spec.ts line 378
+    // Ported: "returns immediately if no versionCompatibility" — lib/modules/datasource/common.spec.ts line 378
     #[test]
     fn test_apply_version_compatibility_none() {
         let releases = vec![mk_release("1.0.0"), mk_release("2.0.0")];
@@ -10869,7 +10869,7 @@ dep1 = "^1.0.0"
         assert_eq!(result, releases);
     }
 
-    // Ported: "filters out non-matching" — modules/datasource/common.spec.ts line 383
+    // Ported: "filters out non-matching" — lib/modules/datasource/common.spec.ts line 383
     #[test]
     fn test_apply_version_compatibility_filters_non_matching() {
         let releases = vec![
@@ -10885,7 +10885,7 @@ dep1 = "^1.0.0"
         assert_eq!(result[1].version, "2.0.0");
     }
 
-    // Ported: "filters out incompatible" — modules/datasource/common.spec.ts line 395
+    // Ported: "filters out incompatible" — lib/modules/datasource/common.spec.ts line 395
     #[test]
     fn test_apply_version_compatibility_filters_incompatible() {
         let releases = vec![
@@ -10906,7 +10906,7 @@ dep1 = "^1.0.0"
         assert_eq!(result[1].version_orig, Some("v3.0.0-alpine".to_owned()));
     }
 
-    // Ported: "does not override versionOrig from extractVersion" — modules/datasource/common.spec.ts line 407
+    // Ported: "does not override versionOrig from extractVersion" — lib/modules/datasource/common.spec.ts line 407
     #[test]
     fn test_apply_version_compatibility_preserves_version_orig() {
         let releases = vec![
@@ -10929,7 +10929,7 @@ dep1 = "^1.0.0"
 
     // ── apply_extract_version / filter_valid_versions / sort_and_remove_duplicates ──
 
-    // Ported: "sorts releases by version and removes duplicates" — modules/datasource/common.spec.ts line 162
+    // Ported: "sorts releases by version and removes duplicates" — lib/modules/datasource/common.spec.ts line 162
     #[test]
     fn test_sort_and_remove_duplicates_sorts_and_deduplicates() {
         let releases = vec![
@@ -10947,7 +10947,7 @@ dep1 = "^1.0.0"
 
     // ── get_pr_config_description ────────────────────────────────────────────
 
-    // Ported: "renders stopUpdating=true" — workers/repository/update/pr/body/config-description.spec.ts line 14
+    // Ported: "renders stopUpdating=true" — lib/workers/repository/update/pr/body/config-description.spec.ts line 14
     #[test]
     fn test_config_desc_stop_updating() {
         let res =
@@ -10955,7 +10955,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
-    // Ported: "renders rebaseWhen=\"never\"" — workers/repository/update/pr/body/config-description.spec.ts line 25
+    // Ported: "renders rebaseWhen=\"never\"" — lib/workers/repository/update/pr/body/config-description.spec.ts line 25
     #[test]
     fn test_config_desc_rebase_when_never() {
         let res = get_pr_config_description(
@@ -10973,7 +10973,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Rebasing**: Never, or you tick the rebase/retry checkbox."));
     }
 
-    // Ported: "renders rebaseWhen=\"behind-base-branch\"" — workers/repository/update/pr/body/config-description.spec.ts line 36
+    // Ported: "renders rebaseWhen=\"behind-base-branch\"" — lib/workers/repository/update/pr/body/config-description.spec.ts line 36
     #[test]
     fn test_config_desc_rebase_when_behind() {
         let res = get_pr_config_description(
@@ -10991,7 +10991,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("Whenever PR is behind base branch"));
     }
 
-    // Ported: "renders timezone" — workers/repository/update/pr/body/config-description.spec.ts line 45
+    // Ported: "renders timezone" — lib/workers/repository/update/pr/body/config-description.spec.ts line 45
     #[test]
     fn test_config_desc_timezone() {
         let schedule = vec!["* 1 * * * *".to_owned()];
@@ -11010,7 +11010,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("(in timezone Europe/Istanbul)"));
     }
 
-    // Ported: "renders UTC as the default timezone" — workers/repository/update/pr/body/config-description.spec.ts line 54
+    // Ported: "renders UTC as the default timezone" — lib/workers/repository/update/pr/body/config-description.spec.ts line 54
     #[test]
     fn test_config_desc_utc_default() {
         let schedule = vec!["* 1 * * *".to_owned()];
@@ -11030,7 +11030,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("`* 1 * * *`"));
     }
 
-    // Ported: "displays later schedules" — workers/repository/update/pr/body/config-description.spec.ts line 73
+    // Ported: "displays later schedules" — lib/workers/repository/update/pr/body/config-description.spec.ts line 73
     #[test]
     fn test_config_desc_later_schedules() {
         let schedule = vec![
@@ -11052,7 +11052,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("\"before 6am on Monday,after 3pm on Tuesday\""));
     }
 
-    // Ported: "renders undefined schedule" — workers/repository/update/pr/body/config-description.spec.ts line 81
+    // Ported: "renders undefined schedule" — lib/workers/repository/update/pr/body/config-description.spec.ts line 81
     #[test]
     fn test_config_desc_undefined_schedule() {
         let res =
@@ -11060,7 +11060,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("At any time (no schedule defined)"));
     }
 
-    // Ported: "renders recreateClosed=true" — workers/repository/update/pr/body/config-description.spec.ts line 116
+    // Ported: "renders recreateClosed=true" — lib/workers/repository/update/pr/body/config-description.spec.ts line 116
     #[test]
     fn test_config_desc_recreate_closed_true() {
         let res = get_pr_config_description(
@@ -11078,7 +11078,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Immortal**"));
     }
 
-    // Ported: "does not render recreateClosed=false" — workers/repository/update/pr/body/config-description.spec.ts line 124
+    // Ported: "does not render recreateClosed=false" — lib/workers/repository/update/pr/body/config-description.spec.ts line 124
     #[test]
     fn test_config_desc_recreate_closed_false() {
         let res =
@@ -11086,7 +11086,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("**Immortal**"));
     }
 
-    // Ported: "does not render recreateClosed=undefined" — workers/repository/update/pr/body/config-description.spec.ts line 132
+    // Ported: "does not render recreateClosed=undefined" — lib/workers/repository/update/pr/body/config-description.spec.ts line 132
     #[test]
     fn test_config_desc_recreate_closed_undefined() {
         let res =
@@ -11094,7 +11094,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("**Immortal**"));
     }
 
-    // Ported: "renders singular" — workers/repository/update/pr/body/config-description.spec.ts line 137
+    // Ported: "renders singular" — lib/workers/repository/update/pr/body/config-description.spec.ts line 137
     #[test]
     fn test_config_desc_singular_upgrade() {
         let res =
@@ -11103,7 +11103,7 @@ dep1 = "^1.0.0"
         assert!(!res.contains("these updates"));
     }
 
-    // Ported: "renders automerge" — workers/repository/update/pr/body/config-description.spec.ts line 145
+    // Ported: "renders automerge" — lib/workers/repository/update/pr/body/config-description.spec.ts line 145
     #[test]
     fn test_config_desc_automerge_enabled() {
         let res =
@@ -11111,7 +11111,7 @@ dep1 = "^1.0.0"
         assert!(res.contains("**Automerge**: Enabled."));
     }
 
-    // Ported: "renders blocked automerge" — workers/repository/update/pr/body/config-description.spec.ts line 150
+    // Ported: "renders blocked automerge" — lib/workers/repository/update/pr/body/config-description.spec.ts line 150
     #[test]
     fn test_config_desc_automerge_blocked() {
         let res =
@@ -11140,7 +11140,7 @@ dep1 = "^1.0.0"
         }
     }
 
-    // Ported: "returns warning text" — workers/repository/errors-warnings.spec.ts line 20
+    // Ported: "returns warning text" — lib/workers/repository/errors-warnings.spec.ts line 20
     #[test]
     fn test_get_warnings_returns_text() {
         let warnings = [mk_warning("foo", "Failed to look up dependency")];
@@ -11150,13 +11150,13 @@ dep1 = "^1.0.0"
         assert!(result.contains("---\n"));
     }
 
-    // Ported: "getWarning returns empty string" — workers/repository/errors-warnings.spec.ts line 41
+    // Ported: "getWarning returns empty string" — lib/workers/repository/errors-warnings.spec.ts line 41
     #[test]
     fn test_get_warnings_empty() {
         assert_eq!(get_warnings(&[]), "");
     }
 
-    // Ported: "returns error text" — workers/repository/errors-warnings.spec.ts line 260
+    // Ported: "returns error text" — lib/workers/repository/errors-warnings.spec.ts line 260
     #[test]
     fn test_get_errors_returns_text() {
         let errors = [mk_warning("renovate.json", "Failed to parse")];
@@ -11165,13 +11165,13 @@ dep1 = "^1.0.0"
         assert!(result.contains("`renovate.json`: Failed to parse"));
     }
 
-    // Ported: "getError returns empty string" — workers/repository/errors-warnings.spec.ts line 281
+    // Ported: "getError returns empty string" — lib/workers/repository/errors-warnings.spec.ts line 281
     #[test]
     fn test_get_errors_empty() {
         assert_eq!(get_errors(&[]), "");
     }
 
-    // Ported: "returns 2 pr warnings text dependencyDashboard true" — errors-warnings.spec.ts line 49
+    // Ported: "returns 2 pr warnings text dependencyDashboard true" — lib/workers/repository/errors-warnings.spec.ts line 49
     #[test]
     fn test_get_dep_warnings_pr_dashboard_true() {
         let w1 = ["Warning 1"];
@@ -11195,7 +11195,7 @@ dep1 = "^1.0.0"
         assert!(!result.contains("warning logs"));
     }
 
-    // Ported: "returns 2 pr warnings text dependencyDashboard true with issue link" — errors-warnings.spec.ts line 97
+    // Ported: "returns 2 pr warnings text dependencyDashboard true with issue link" — lib/workers/repository/errors-warnings.spec.ts line 97
     #[test]
     fn test_get_dep_warnings_pr_with_issue_link() {
         let w1 = ["Warning 1"];
@@ -11206,7 +11206,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("[Dependency Dashboard](../issues/123)"));
     }
 
-    // Ported: "returns 2 pr warnings text dependencyDashboard false" — errors-warnings.spec.ts line 120
+    // Ported: "returns 2 pr warnings text dependencyDashboard false" — lib/workers/repository/errors-warnings.spec.ts line 120
     #[test]
     fn test_get_dep_warnings_pr_dashboard_false() {
         let w1 = ["Warning 1"];
@@ -11217,19 +11217,19 @@ dep1 = "^1.0.0"
         assert!(result.contains("Check the warning logs for more information."));
     }
 
-    // Ported: "PR warning returns empty string" — errors-warnings.spec.ts line 168
+    // Ported: "PR warning returns empty string" — lib/workers/repository/errors-warnings.spec.ts line 168
     #[test]
     fn test_get_dep_warnings_pr_empty() {
         assert_eq!(get_dep_warnings_pr(&[], false, false, None), "");
     }
 
-    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 175
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — lib/workers/repository/errors-warnings.spec.ts line 175
     #[test]
     fn test_get_dep_warnings_pr_suppressed() {
         assert_eq!(get_dep_warnings_pr(&[], true, false, None), "");
     }
 
-    // Ported: "returns dependency dashboard warning text" — errors-warnings.spec.ts line 186
+    // Ported: "returns dependency dashboard warning text" — lib/workers/repository/errors-warnings.spec.ts line 186
     #[test]
     fn test_get_dep_warnings_dashboard_returns_text() {
         let d1 = ["dependency-1"];
@@ -11253,19 +11253,19 @@ dep1 = "^1.0.0"
         assert!(result.contains("`package.json`, `backend/package.json`, `Dockerfile`"));
     }
 
-    // Ported: "dependency dashboard warning returns empty string" — errors-warnings.spec.ts line 236
+    // Ported: "dependency dashboard warning returns empty string" — lib/workers/repository/errors-warnings.spec.ts line 236
     #[test]
     fn test_get_dep_warnings_dashboard_empty() {
         assert_eq!(get_dep_warnings_dashboard(&[], false), "");
     }
 
-    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 243
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — lib/workers/repository/errors-warnings.spec.ts line 243
     #[test]
     fn test_get_dep_warnings_dashboard_suppressed() {
         assert_eq!(get_dep_warnings_dashboard(&[], true), "");
     }
 
-    // Ported: "returns onboarding warning text" — errors-warnings.spec.ts line 289
+    // Ported: "returns onboarding warning text" — lib/workers/repository/errors-warnings.spec.ts line 289
     #[test]
     fn test_get_dep_warnings_onboarding_pr_returns_text() {
         let w1 = ["Warning 1"];
@@ -11290,19 +11290,19 @@ dep1 = "^1.0.0"
         assert!(result.contains("`package.json`, `backend/package.json`, `Dockerfile`"));
     }
 
-    // Ported: "handle empty package files" — errors-warnings.spec.ts line 345
+    // Ported: "handle empty package files" — lib/workers/repository/errors-warnings.spec.ts line 345
     #[test]
     fn test_get_dep_warnings_onboarding_empty() {
         assert_eq!(get_dep_warnings_onboarding_pr(&[], false), "");
     }
 
-    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — errors-warnings.spec.ts line 243
+    // Ported: "suppress notifications contains dependencyLookupWarnings flag then return empty string" — lib/workers/repository/errors-warnings.spec.ts line 243
     #[test]
     fn test_get_dep_warnings_onboarding_suppressed() {
         assert_eq!(get_dep_warnings_onboarding_pr(&[], true), "");
     }
 
-    // Ported: "handles undefined" — errors-warnings.spec.ts line 365
+    // Ported: "handles undefined" — lib/workers/repository/errors-warnings.spec.ts line 365
     #[test]
     fn test_get_dep_warnings_onboarding_handles_undefined() {
         assert_eq!(get_dep_warnings_onboarding_pr(&[], false), "");
@@ -11310,7 +11310,7 @@ dep1 = "^1.0.0"
 
     // ── parse_goproxy / parse_noproxy ────────────────────────────────────────
 
-    // Ported: "parses single url" — modules/datasource/go/goproxy-parser.spec.ts line 10
+    // Ported: "parses single url" — lib/modules/datasource/go/goproxy-parser.spec.ts line 10
     #[test]
     fn test_parse_goproxy_single() {
         let r = parse_goproxy("foo");
@@ -11319,7 +11319,7 @@ dep1 = "^1.0.0"
         assert_eq!(r[0].fallback, None);
     }
 
-    // Ported: "parses multiple urls" — modules/datasource/go/goproxy-parser.spec.ts line 15
+    // Ported: "parses multiple urls" — lib/modules/datasource/go/goproxy-parser.spec.ts line 15
     #[test]
     fn test_parse_goproxy_multiple() {
         let r = parse_goproxy("foo,bar|baz,qux");
@@ -11354,7 +11354,7 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "ignores everything starting from "direct" and "off" keywords" — goproxy-parser.spec.ts line 25
+    // Ported: "ignores everything starting from "direct" and "off" keywords" — lib/modules/datasource/go/goproxy-parser.spec.ts line 25
     #[test]
     fn test_parse_goproxy_empty_and_keywords() {
         assert!(parse_goproxy("").is_empty());
@@ -11370,7 +11370,7 @@ dep1 = "^1.0.0"
         assert_eq!(mixed[3].url, "qux");
     }
 
-    // Ported: "produces regex" — modules/datasource/go/goproxy-parser.spec.ts line 49
+    // Ported: "produces regex" — lib/modules/datasource/go/goproxy-parser.spec.ts line 49
     #[test]
     fn test_parse_noproxy_produces_regex() {
         assert!(parse_noproxy("").is_none());
@@ -11395,7 +11395,7 @@ dep1 = "^1.0.0"
         assert_eq!(escaped_range.as_str(), "^(?:[a-c])(?:/.*)?$");
     }
 
-    // Ported: "matches on real package prefixes" — modules/datasource/go/goproxy-parser.spec.ts line 68
+    // Ported: "matches on real package prefixes" — lib/modules/datasource/go/goproxy-parser.spec.ts line 68
     #[test]
     fn test_parse_noproxy_real_prefixes() {
         assert!(parse_noproxy("ex.co").unwrap().is_match("ex.co/foo"));
@@ -11430,7 +11430,7 @@ dep1 = "^1.0.0"
         assert!(parse_noproxy("x/ab[a-b]").unwrap().is_match("x/aba"));
     }
 
-    // Ported: "matches on wildcards" — modules/datasource/go/goproxy-parser.spec.ts line 100
+    // Ported: "matches on wildcards" — lib/modules/datasource/go/goproxy-parser.spec.ts line 100
     #[test]
     fn test_parse_noproxy_wildcards() {
         assert!(!parse_noproxy("/*/").unwrap().is_match("ex.co/foo"));
@@ -11448,7 +11448,7 @@ dep1 = "^1.0.0"
         assert!(!parse_noproxy("*/*/*").unwrap().is_match("ex.co/foo"));
     }
 
-    // Ported: "matches on character ranges" — modules/datasource/go/goproxy-parser.spec.ts line 126
+    // Ported: "matches on character ranges" — lib/modules/datasource/go/goproxy-parser.spec.ts line 126
     #[test]
     fn test_parse_noproxy_char_ranges() {
         assert!(parse_noproxy("x/ab[a-b]").unwrap().is_match("x/aba"));
@@ -11457,7 +11457,7 @@ dep1 = "^1.0.0"
 
     // ── get_expected_pr_list ─────────────────────────────────────────────────
 
-    // Ported: "handles empty" — workers/repository/onboarding/pr/pr-list.spec.ts line 16
+    // Ported: "handles empty" — lib/workers/repository/onboarding/pr/pr-list.spec.ts line 16
     #[test]
     fn test_pr_list_empty() {
         let result = get_expected_pr_list(2, 0, &[]);
@@ -11465,7 +11465,7 @@ dep1 = "^1.0.0"
         assert!(!result.contains("Renovate will create"));
     }
 
-    // Ported: "has special lock file maintenance description" — workers/repository/onboarding/pr/pr-list.spec.ts line 28
+    // Ported: "has special lock file maintenance description" — lib/workers/repository/onboarding/pr/pr-list.spec.ts line 28
     #[test]
     fn test_pr_list_lock_file_maintenance() {
         let upgrades = [PrListUpgrade {
@@ -11491,7 +11491,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("Merge into: `base`"));
     }
 
-    // Ported: "handles multiple" — workers/repository/onboarding/pr/pr-list.spec.ts line 66
+    // Ported: "handles multiple" — lib/workers/repository/onboarding/pr/pr-list.spec.ts line 66
     #[test]
     fn test_pr_list_multiple_with_limit() {
         let upgrades1 = [
@@ -11545,7 +11545,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("limited to maximum 1 per hour"));
     }
 
-    // Ported: "shows commitHourlyLimit message when limit is low" — workers/repository/onboarding/pr/pr-list.spec.ts line 145
+    // Ported: "shows commitHourlyLimit message when limit is low" — lib/workers/repository/onboarding/pr/pr-list.spec.ts line 145
     #[test]
     fn test_pr_list_commit_hourly_limit_low() {
         let upgrades = [PrListUpgrade {
@@ -11578,7 +11578,7 @@ dep1 = "^1.0.0"
         assert!(result.contains("Branch creation and rebasing"));
     }
 
-    // Ported: "does not show commitHourlyLimit message when limit is high" — workers/repository/onboarding/pr/pr-list.spec.ts line 184
+    // Ported: "does not show commitHourlyLimit message when limit is high" — lib/workers/repository/onboarding/pr/pr-list.spec.ts line 184
     #[test]
     fn test_pr_list_commit_hourly_limit_high() {
         let upgrades = [PrListUpgrade {
@@ -11601,7 +11601,7 @@ dep1 = "^1.0.0"
         assert!(!result.contains("commitHourlyLimit"));
     }
 
-    // Ported: "shows only commitHourlyLimit message when both limits are set" — workers/repository/onboarding/pr/pr-list.spec.ts line 206
+    // Ported: "shows only commitHourlyLimit message when both limits are set" — lib/workers/repository/onboarding/pr/pr-list.spec.ts line 206
     #[test]
     fn test_pr_list_both_limits_commit_wins() {
         let upgrades = [PrListUpgrade {
@@ -11636,7 +11636,7 @@ dep1 = "^1.0.0"
 
     // ── transform_github_tag ─────────────────────────────────────────────────
 
-    // Ported: "transforms Commit type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 5
+    // Ported: "transforms Commit type" — lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 5
     #[test]
     fn test_transform_github_tag_commit_type() {
         let r = transform_github_tag(
@@ -11654,7 +11654,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.release_timestamp, "2022-09-24");
     }
 
-    // Ported: "transforms Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 23
+    // Ported: "transforms Tag type" — lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 23
     #[test]
     fn test_transform_github_tag_tag_type() {
         let r = transform_github_tag(
@@ -11672,7 +11672,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.release_timestamp, "2022-09-24");
     }
 
-    // Ported: "transforms nested Tag type" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 41
+    // Ported: "transforms nested Tag type" — lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 41
     #[test]
     fn test_transform_github_tag_nested_tag_type() {
         // Nested Tag: Tag → Tag → Commit; oid from innermost commit
@@ -11689,7 +11689,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.release_timestamp, "2022-09-24");
     }
 
-    // Ported: "returns null for other types" — util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 59
+    // Ported: "returns null for other types" — lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts line 59
     #[test]
     fn test_transform_github_tag_invalid_returns_none() {
         let r = transform_github_tag(None, None);
@@ -11698,7 +11698,7 @@ dep1 = "^1.0.0"
 
     // ── transform_github_release ─────────────────────────────────────────────
 
-    // Ported: "transforms items" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 17
+    // Ported: "transforms items" — lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 17
     #[test]
     fn test_transform_github_release_basic() {
         let r = transform_github_release(
@@ -11722,7 +11722,7 @@ dep1 = "^1.0.0"
         assert_eq!(r.is_stable, None);
     }
 
-    // Ported: "filters out drafts" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 28
+    // Ported: "filters out drafts" — lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 28
     #[test]
     fn test_transform_github_release_draft_filtered() {
         let r = transform_github_release(
@@ -11738,7 +11738,7 @@ dep1 = "^1.0.0"
         assert!(r.is_none());
     }
 
-    // Ported: "handles invalid items" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 32
+    // Ported: "handles invalid items" — lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 32
     #[test]
     fn test_transform_github_release_invalid_returns_none() {
         // Empty struct = all None fields → transform returns None
@@ -11746,7 +11746,7 @@ dep1 = "^1.0.0"
         assert!(r.is_none());
     }
 
-    // Ported: "marks prereleases as unstable" — util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 36
+    // Ported: "marks prereleases as unstable" — lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts line 36
     #[test]
     fn test_transform_github_release_prerelease_unstable() {
         let r = transform_github_release(
@@ -11772,7 +11772,7 @@ dep1 = "^1.0.0"
         crate::versioning::npm::is_greater_than(a, b)
     }
 
-    // Ported: "returns the timestamp of the latest version" — workers/repository/process/lookup/timestamps.spec.ts line 10
+    // Ported: "returns the timestamp of the latest version" — lib/workers/repository/process/lookup/timestamps.spec.ts line 10
     #[test]
     fn test_timestamps_returns_latest() {
         let releases = vec![
@@ -11797,7 +11797,7 @@ dep1 = "^1.0.0"
         assert_eq!(ts.as_deref(), Some("2022-01-01T00:00:00.000Z"));
     }
 
-    // Ported: "handles releases with missing timestamps" — workers/repository/process/lookup/timestamps.spec.ts line 33
+    // Ported: "handles releases with missing timestamps" — lib/workers/repository/process/lookup/timestamps.spec.ts line 33
     #[test]
     fn test_timestamps_missing_middle() {
         let releases = vec![
@@ -11822,7 +11822,7 @@ dep1 = "^1.0.0"
         assert_eq!(ts.as_deref(), Some("2023-01-01T00:00:00.000Z"));
     }
 
-    // Ported: "handles latest release with missing timestamp" — workers/repository/process/lookup/timestamps.spec.ts line 53
+    // Ported: "handles latest release with missing timestamp" — lib/workers/repository/process/lookup/timestamps.spec.ts line 53
     #[test]
     fn test_timestamps_latest_no_timestamp() {
         let releases = vec![
@@ -11847,7 +11847,7 @@ dep1 = "^1.0.0"
         assert!(ts.is_none());
     }
 
-    // Ported: "handles latest release with deprecation flag" — workers/repository/process/lookup/timestamps.spec.ts line 75
+    // Ported: "handles latest release with deprecation flag" — lib/workers/repository/process/lookup/timestamps.spec.ts line 75
     #[test]
     fn test_timestamps_latest_deprecated() {
         let releases = vec![
@@ -11872,7 +11872,7 @@ dep1 = "^1.0.0"
         assert!(ts.is_none());
     }
 
-    // Ported: "handles latest release with invalid version" — workers/repository/process/lookup/timestamps.spec.ts line 99
+    // Ported: "handles latest release with invalid version" — lib/workers/repository/process/lookup/timestamps.spec.ts line 99
     #[test]
     fn test_timestamps_invalid_timestamp_for_highest() {
         let releases = vec![
@@ -11897,7 +11897,7 @@ dep1 = "^1.0.0"
         assert!(ts.is_none());
     }
 
-    // Ported: "returns undefined mostRecentTimestamp when no valid timestamps exist" — workers/repository/process/lookup/timestamps.spec.ts line 122
+    // Ported: "returns undefined mostRecentTimestamp when no valid timestamps exist" — lib/workers/repository/process/lookup/timestamps.spec.ts line 122
     #[test]
     fn test_timestamps_no_valid_timestamps() {
         let releases = vec![
@@ -11917,7 +11917,7 @@ dep1 = "^1.0.0"
         assert!(ts.is_none());
     }
 
-    // Ported: "handles empty releases array" — workers/repository/process/lookup/timestamps.spec.ts line 132
+    // Ported: "handles empty releases array" — lib/workers/repository/process/lookup/timestamps.spec.ts line 132
     #[test]
     fn test_timestamps_empty_releases() {
         let releases: Vec<ReleaseEntry> = vec![];
@@ -11926,7 +11926,7 @@ dep1 = "^1.0.0"
         assert!(ts.is_none());
     }
 
-    // Ported: "preserves other properties in the release result" — workers/repository/process/lookup/timestamps.spec.ts line 138
+    // Ported: "preserves other properties in the release result" — lib/workers/repository/process/lookup/timestamps.spec.ts line 138
     #[test]
     fn test_timestamps_single_release() {
         let releases = vec![ReleaseEntry {
@@ -11939,7 +11939,7 @@ dep1 = "^1.0.0"
         assert_eq!(ts.as_deref(), Some("2021-01-01T00:00:00.000Z"));
     }
 
-    // Ported: "handles ancient versions that are higher than the ones recently released" — workers/repository/process/lookup/timestamps.spec.ts line 160
+    // Ported: "handles ancient versions that are higher than the ones recently released" — lib/workers/repository/process/lookup/timestamps.spec.ts line 160
     #[test]
     fn test_timestamps_ancient_high_version() {
         // 99.99.99-alpha is the highest semver but has an OLD timestamp (2010).
@@ -11961,7 +11961,7 @@ dep1 = "^1.0.0"
         assert!(ts.is_none());
     }
 
-    // Ported: "handles errors thrown for invalid versions" — workers/repository/process/lookup/timestamps.spec.ts line 180
+    // Ported: "handles errors thrown for invalid versions" — lib/workers/repository/process/lookup/timestamps.spec.ts line 180
     #[test]
     fn test_timestamps_invalid_versions_ignored() {
         // 'foo' and 'bar' are invalid versions, should be skipped.
@@ -12002,7 +12002,7 @@ dep1 = "^1.0.0"
             .collect()
     }
 
-    // Ported: "returns default environment variables" — util/exec/env.spec.ts line 35
+    // Ported: "returns default environment variables" — lib/util/exec/env.spec.ts line 35
     #[test]
     fn test_get_child_process_env_defaults() {
         let env = make_env(&[
@@ -12058,7 +12058,7 @@ dep1 = "^1.0.0"
         assert_eq!(result.get("APPDATA").map(String::as_str), Some("APPDATA"));
     }
 
-    // Ported: "returns environment variable only if defined" — util/exec/env.spec.ts line 57
+    // Ported: "returns environment variable only if defined" — lib/util/exec/env.spec.ts line 57
     #[test]
     fn test_get_child_process_env_only_defined() {
         let env = make_env(&[
@@ -12072,7 +12072,7 @@ dep1 = "^1.0.0"
         assert!(!result.contains_key("PATH"));
     }
 
-    // Ported: "returns custom environment variables if passed and defined" — util/exec/env.spec.ts line 62
+    // Ported: "returns custom environment variables if passed and defined" — lib/util/exec/env.spec.ts line 62
     #[test]
     fn test_get_child_process_env_custom_vars() {
         let env = make_env(&[
@@ -12099,7 +12099,7 @@ dep1 = "^1.0.0"
         );
     }
 
-    // Ported: "returns process.env if trustlevel set to high" — util/exec/env.spec.ts line 79
+    // Ported: "returns process.env if trustlevel set to high" — lib/util/exec/env.spec.ts line 79
     #[test]
     fn test_get_child_process_env_expose_all() {
         let env = make_env(&[
@@ -12117,7 +12117,7 @@ dep1 = "^1.0.0"
 
 // ── get_combined_env tests ────────────────────────────────────────────
 
-// Ported: "return combined env" — util/env.spec.ts line 11
+// Ported: "return combined env" — lib/util/env.spec.ts line 11
 #[test]
 fn test_get_combined_env_return_combined() {
     use std::collections::HashMap;
@@ -12149,7 +12149,7 @@ fn test_get_combined_env_return_combined() {
     );
 }
 
-// Ported: "maintains precendence" — util/env.spec.ts line 26
+// Ported: "maintains precendence" — lib/util/env.spec.ts line 26
 #[test]
 fn test_get_combined_env_maintains_precedence() {
     use std::collections::HashMap;
@@ -12181,7 +12181,7 @@ fn jsonc_behavior_inline_check() {
 
 // ── prepare_graphql_query tests ───────────────────────────────────────
 
-// Ported: "returns valid query for valid payload query" — util/github/graphql/util.spec.ts line 10
+// Ported: "returns valid query for valid payload query" — lib/util/github/graphql/util.spec.ts line 10
 #[test]
 fn test_prepare_graphql_query_valid() {
     let payload = "items { pageInfo { hasNextPage } }";
@@ -12192,7 +12192,7 @@ fn test_prepare_graphql_query_valid() {
     assert!(result.contains("payload:"));
 }
 
-// Ported: "returns invalid query for invalid payload query" — util/github/graphql/util.spec.ts line 28
+// Ported: "returns invalid query for invalid payload query" — lib/util/github/graphql/util.spec.ts line 28
 #[test]
 fn test_prepare_graphql_query_invalid() {
     let payload = "!@#";
@@ -12200,7 +12200,7 @@ fn test_prepare_graphql_query_invalid() {
     assert!(result.contains(payload));
     assert!(result.contains("query($owner"));
 }
-// Ported: "compresses strings" — util/compress.spec.ts line 4
+// Ported: "compresses strings" — lib/util/compress.spec.ts line 4
 #[test]
 fn test_compress_to_base64() {
     let compressed = compress_to_base64("foobar").unwrap();

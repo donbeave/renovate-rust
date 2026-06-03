@@ -171,7 +171,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/endoflife-date/__fixtures__/fairphone.json"
     );
 
-    // Ported: "processes real data" — datasource/endoflife-date/index.spec.ts line 22
+    // Ported: "processes real data" — lib/modules/datasource/endoflife-date/index.spec.ts line 22
     // Note: TypeScript test froze time at 2023-06-03. Expectations reflect current date.
     #[tokio::test]
     async fn processes_real_data() {
@@ -210,7 +210,7 @@ mod tests {
         assert!(!r8.is_deprecated);
     }
 
-    // Ported: "returns null without registryUrl" — datasource/endoflife-date/index.spec.ts line 83
+    // Ported: "returns null without registryUrl" — lib/modules/datasource/endoflife-date/index.spec.ts line 83
     #[tokio::test]
     async fn returns_null_without_registry_url() {
         let http = HttpClient::new().unwrap();
@@ -218,7 +218,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for 404" — datasource/endoflife-date/index.spec.ts line 92
+    // Ported: "returns null for 404" — lib/modules/datasource/endoflife-date/index.spec.ts line 92
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -235,7 +235,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty result" — datasource/endoflife-date/index.spec.ts line 102
+    // Ported: "returns null for empty result" — lib/modules/datasource/endoflife-date/index.spec.ts line 102
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -252,7 +252,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — datasource/endoflife-date/index.spec.ts line 112
+    // Ported: "throws for 5xx" — lib/modules/datasource/endoflife-date/index.spec.ts line 112
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -267,7 +267,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "detects boolean discontinuation" — datasource/endoflife-date/index.spec.ts line 122
+    // Ported: "detects boolean discontinuation" — lib/modules/datasource/endoflife-date/index.spec.ts line 122
     // Note: TypeScript test froze time at 2023-06-03. At 2026-05-25 all Cassandra cycles are deprecated.
     #[tokio::test]
     async fn detects_boolean_discontinuation() {
@@ -319,7 +319,7 @@ mod tests {
         );
     }
 
-    // Ported: "detects date discontinuation" — datasource/endoflife-date/index.spec.ts line 158
+    // Ported: "detects date discontinuation" — lib/modules/datasource/endoflife-date/index.spec.ts line 158
     #[tokio::test]
     async fn detects_date_discontinuation() {
         let server = MockServer::start().await;

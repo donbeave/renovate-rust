@@ -189,7 +189,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "parseDynamicRevision("$input") === { type: "$type", value: "$value" }" — versioning/ivy/index.spec.ts line 10
+    // Ported: "parseDynamicRevision("$input") === { type: "$type", value: "$value" }" — lib/modules/versioning/ivy/index.spec.ts line 10
     #[test]
     fn ivy_parse_dynamic_revision_ok() {
         let cases = [
@@ -220,7 +220,7 @@ mod tests {
         }
     }
 
-    // Ported: "parseDynamicRevision("$input") === null" — versioning/ivy/index.spec.ts line 33
+    // Ported: "parseDynamicRevision("$input") === null" — lib/modules/versioning/ivy/index.spec.ts line 33
     #[test]
     fn ivy_parse_dynamic_revision_null() {
         assert!(parse_dynamic_revision("").is_none());
@@ -228,7 +228,7 @@ mod tests {
         assert!(parse_dynamic_revision("[0,1),(1,)").is_none()); // multi-interval → null
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/ivy/index.spec.ts line 43
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/ivy/index.spec.ts line 43
     #[test]
     fn ivy_is_valid() {
         let true_cases = [
@@ -257,7 +257,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion("$input") === $expected" — versioning/ivy/index.spec.ts line 72
+    // Ported: "isVersion("$input") === $expected" — lib/modules/versioning/ivy/index.spec.ts line 72
     #[test]
     fn ivy_is_version() {
         let true_cases = [
@@ -294,7 +294,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/ivy/index.spec.ts line 100
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/ivy/index.spec.ts line 100
     #[test]
     fn ivy_matches() {
         let cases: &[(&str, &str, bool)] = &[
@@ -342,7 +342,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/ivy/index.spec.ts line 143
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/ivy/index.spec.ts line 143
     #[test]
     fn ivy_get_new_value() {
         assert_eq!(
@@ -355,7 +355,7 @@ mod tests {
         );
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/ivy/index.spec.ts line 160
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/ivy/index.spec.ts line 160
     #[test]
     fn ivy_get_satisfying_version() {
         assert_eq!(
@@ -364,13 +364,13 @@ mod tests {
         );
     }
 
-    // Ported: "isCompatible("$version") === $expected" — versioning/ivy/index.spec.ts line 170
+    // Ported: "isCompatible("$version") === $expected" — lib/modules/versioning/ivy/index.spec.ts line 170
     #[test]
     fn ivy_is_compatible() {
         assert!(is_version("1.2.0"));
     }
 
-    // Ported: "isSingleVersion("$version") === $expected" — versioning/ivy/index.spec.ts line 177
+    // Ported: "isSingleVersion("$version") === $expected" — lib/modules/versioning/ivy/index.spec.ts line 177
     #[test]
     fn ivy_is_single_version() {
         assert!(is_version("1.2.0"));

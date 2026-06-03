@@ -541,7 +541,7 @@ pub fn is_oci_registry(repository: Option<&str>) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "should generate a login command with username and password" — helmv3/common.spec.ts line 5
+    // Ported: "should generate a login command with username and password" — lib/modules/manager/helmv3/common.spec.ts line 5
     #[test]
     fn generate_login_cmd_with_username_and_password() {
         let repository_rule = HelmRepositoryRule {
@@ -559,7 +559,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses simple requirements.yaml correctly" — helm-requirements/extract.spec.ts line 64
+    // Ported: "parses simple requirements.yaml correctly" — lib/modules/manager/helm-requirements/extract.spec.ts line 64
     #[test]
     fn simple_chart_yaml() {
         let content = r#"
@@ -584,7 +584,7 @@ dependencies:
         assert!(redis.skip_reason.is_none());
     }
 
-    // Ported: "resolves aliased registry urls" — helm-requirements/extract.spec.ts line 112
+    // Ported: "resolves aliased registry urls" — lib/modules/manager/helm-requirements/extract.spec.ts line 112
     #[test]
     fn stable_alias_resolved() {
         let content = r#"
@@ -599,7 +599,7 @@ dependencies:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "skips invalid registry urls" — helm-requirements/extract.spec.ts line 34
+    // Ported: "skips invalid registry urls" — lib/modules/manager/helm-requirements/extract.spec.ts line 34
     #[test]
     fn oci_registry_skipped() {
         let content = r#"
@@ -612,7 +612,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::OciRegistry));
     }
 
-    // Ported: "ensure that currentValue is string" — helm-requirements/extract.spec.ts line 8
+    // Ported: "ensure that currentValue is string" — lib/modules/manager/helm-requirements/extract.spec.ts line 8
     #[test]
     fn at_alias_skipped() {
         let content = r#"
@@ -625,7 +625,7 @@ dependencies:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::UnresolvableAlias));
     }
 
-    // Ported: "validates ${params.fieldName} is required" — helm-requirements/extract.spec.ts line 279
+    // Ported: "validates ${params.fieldName} is required" — lib/modules/manager/helm-requirements/extract.spec.ts line 279
     #[test]
     fn no_repository_skipped() {
         let content = r#"
@@ -649,7 +649,7 @@ dependencies:
         assert!(deps.is_empty());
     }
 
-    // Ported: "parses simple requirements.yaml correctly" — helm-requirements/extract.spec.ts line 64
+    // Ported: "parses simple requirements.yaml correctly" — lib/modules/manager/helm-requirements/extract.spec.ts line 64
     #[test]
     fn requirements_yaml_format() {
         let content = r#"
@@ -687,7 +687,7 @@ maintainers:
         assert_eq!(deps[0].name, "redis");
     }
 
-    // Ported: "returns null if no dependencies" — helm-requirements/extract.spec.ts line 172
+    // Ported: "returns null if no dependencies" — lib/modules/manager/helm-requirements/extract.spec.ts line 172
     #[test]
     fn no_dependencies_returns_empty() {
         let content = r#"
@@ -741,7 +741,7 @@ dependencies:
         assert_eq!(oci.skip_reason, Some(HelmSkipReason::OciRegistry));
     }
 
-    // Ported: "skips local dependencies" — helm-requirements/extract.spec.ts line 141
+    // Ported: "skips local dependencies" — lib/modules/manager/helm-requirements/extract.spec.ts line 141
     #[test]
     fn local_file_dependency_skipped() {
         let content = r#"
@@ -762,7 +762,7 @@ dependencies:
         assert!(pg.skip_reason.is_some());
     }
 
-    // Ported: "returns null if requirements.yaml is invalid" — helm-requirements/extract.spec.ts line 192
+    // Ported: "returns null if requirements.yaml is invalid" — lib/modules/manager/helm-requirements/extract.spec.ts line 192
     #[test]
     fn invalid_yaml_returns_empty() {
         // Malformed YAML — the Rust extractor just returns empty for unrecognised content.
@@ -772,14 +772,14 @@ dependencies:
         assert!(deps.is_empty());
     }
 
-    // Ported: "parses simple requirements.yaml but skips if necessary fields missing" — helm-requirements/extract.spec.ts line 96
+    // Ported: "parses simple requirements.yaml but skips if necessary fields missing" — lib/modules/manager/helm-requirements/extract.spec.ts line 96
     #[test]
     fn empty_requirements_returns_empty() {
         let deps = extract("");
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null if Chart.yaml is empty" — helm-requirements/extract.spec.ts line 214
+    // Ported: "returns null if Chart.yaml is empty" — lib/modules/manager/helm-requirements/extract.spec.ts line 214
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract("");
@@ -799,7 +799,7 @@ dependencies:
         assert!(deps.is_empty());
     }
 
-    // Ported: "skips only invalid dependences" — helm-requirements/extract.spec.ts line 293
+    // Ported: "skips only invalid dependences" — lib/modules/manager/helm-requirements/extract.spec.ts line 293
     #[test]
     fn skips_only_invalid_deps_keeps_valid_ones() {
         let content = r#"
@@ -831,28 +831,28 @@ dependencies:
 
     const CHART_YAML: &str = "apiVersion: v2\nname: test\nversion: 0.0.2\n";
 
-    // Ported: "increments" — modules/manager/helmv3/update.spec.ts line 12
+    // Ported: "increments" — lib/modules/manager/helmv3/update.spec.ts line 12
     #[test]
     fn helm_bump_increments_patch() {
         let result = bump_package_version(CHART_YAML, "0.0.2", "patch");
         assert_eq!(result, CHART_YAML.replace("0.0.2", "0.0.3"));
     }
 
-    // Ported: "no ops" — modules/manager/helmv3/update.spec.ts line 22
+    // Ported: "no ops" — lib/modules/manager/helmv3/update.spec.ts line 22
     #[test]
     fn helm_bump_no_op_when_version_mismatch() {
         let result = bump_package_version(CHART_YAML, "0.0.1", "patch");
         assert_eq!(result, CHART_YAML);
     }
 
-    // Ported: "updates" — modules/manager/helmv3/update.spec.ts line 31
+    // Ported: "updates" — lib/modules/manager/helmv3/update.spec.ts line 31
     #[test]
     fn helm_bump_updates_minor() {
         let result = bump_package_version(CHART_YAML, "0.0.1", "minor");
         assert_eq!(result, CHART_YAML.replace("0.0.2", "0.1.0"));
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/helmv3/update.spec.ts line 41
+    // Ported: "returns content if bumping errors" — lib/modules/manager/helmv3/update.spec.ts line 41
     #[test]
     fn helm_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(CHART_YAML, "0.0.2", "not_valid");
@@ -868,21 +868,21 @@ dependencies:
         m
     }
 
-    // Ported: "return alias with \"alias:\"" — modules/manager/helmv3/utils.spec.ts line 6
+    // Ported: "return alias with \"alias:\"" — lib/modules/manager/helmv3/utils.spec.ts line 6
     #[test]
     fn helm_resolve_alias_with_alias_prefix() {
         let result = resolve_alias(Some("alias:testRepo"), &aliases());
         assert_eq!(result.as_deref(), Some("https://charts.helm.sh/stable"));
     }
 
-    // Ported: "return alias with \"@\"" — modules/manager/helmv3/utils.spec.ts line 14
+    // Ported: "return alias with \"@\"" — lib/modules/manager/helmv3/utils.spec.ts line 14
     #[test]
     fn helm_resolve_alias_with_at_prefix() {
         let result = resolve_alias(Some("@testRepo"), &aliases());
         assert_eq!(result.as_deref(), Some("https://charts.helm.sh/stable"));
     }
 
-    // Ported: "return null if alias repo is not defined" — modules/manager/helmv3/utils.spec.ts line 22
+    // Ported: "return null if alias repo is not defined" — lib/modules/manager/helmv3/utils.spec.ts line 22
     #[test]
     fn helm_resolve_alias_undefined_returns_none() {
         let result = resolve_alias(Some("alias:testRepo"), &{
@@ -896,14 +896,14 @@ dependencies:
         assert!(result.is_none());
     }
 
-    // Ported: "return resolved repository on OCI registries" — modules/manager/helmv3/utils.spec.ts line 29
+    // Ported: "return resolved repository on OCI registries" — lib/modules/manager/helmv3/utils.spec.ts line 29
     #[test]
     fn helm_resolve_alias_oci_registry() {
         let result = resolve_alias(Some("alias:artifactory"), &aliases());
         assert_eq!(result.as_deref(), Some("oci://artifactory.example.com"));
     }
 
-    // Ported: "return repository parameter if it is not an alias" — modules/manager/helmv3/utils.spec.ts line 36
+    // Ported: "return repository parameter if it is not an alias" — lib/modules/manager/helmv3/utils.spec.ts line 36
     #[test]
     fn helm_resolve_alias_non_alias_passthrough() {
         let url = "https://registry.example.com";
@@ -911,38 +911,38 @@ dependencies:
         assert_eq!(result.as_deref(), Some(url));
     }
 
-    // Ported: "return repository parameter if repository is null" — modules/manager/helmv3/utils.spec.ts line 44
+    // Ported: "return repository parameter if repository is null" — lib/modules/manager/helmv3/utils.spec.ts line 44
     #[test]
     fn helm_resolve_alias_null_returns_none() {
         let result = resolve_alias(None, &aliases());
         assert!(result.is_none());
     }
 
-    // Ported: "return repository parameter if repository is undefined" — modules/manager/helmv3/utils.spec.ts line 52
+    // Ported: "return repository parameter if repository is undefined" — lib/modules/manager/helmv3/utils.spec.ts line 52
     #[test]
     fn helm_resolve_alias_undefined_input_returns_none() {
         assert!(resolve_alias(None, &std::collections::HashMap::new()).is_none());
     }
 
-    // Ported: "return false if repository is null" (isAlias) — modules/manager/helmv3/utils.spec.ts line 62
+    // Ported: "return false if repository is null" (isAlias) — lib/modules/manager/helmv3/utils.spec.ts line 62
     #[test]
     fn helm_is_alias_null_returns_false() {
         assert!(!is_alias(None));
     }
 
-    // Ported: "return false if repository is undefined" (isAlias) — modules/manager/helmv3/utils.spec.ts line 68
+    // Ported: "return false if repository is undefined" (isAlias) — lib/modules/manager/helmv3/utils.spec.ts line 68
     #[test]
     fn helm_is_alias_undefined_returns_false() {
         assert!(!is_alias(None));
     }
 
-    // Ported: "return false if repository is null" (isOCIRegistry) — modules/manager/helmv3/utils.spec.ts line 76
+    // Ported: "return false if repository is null" (isOCIRegistry) — lib/modules/manager/helmv3/utils.spec.ts line 76
     #[test]
     fn helm_is_oci_registry_null_returns_false() {
         assert!(!is_oci_registry(None));
     }
 
-    // Ported: "return false if repository is undefined" (isOCIRegistry) — modules/manager/helmv3/utils.spec.ts line 81
+    // Ported: "return false if repository is undefined" (isOCIRegistry) — lib/modules/manager/helmv3/utils.spec.ts line 81
     #[test]
     fn helm_is_oci_registry_undefined_returns_false() {
         assert!(!is_oci_registry(None));
@@ -956,7 +956,7 @@ dependencies:
         m
     }
 
-    // Ported: "skips invalid registry urls" — modules/manager/helmv3/extract.spec.ts line 16
+    // Ported: "skips invalid registry urls" — lib/modules/manager/helmv3/extract.spec.ts line 16
     #[test]
     fn extract_skips_invalid_registry_urls() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: '@placeholder'\n  - name: postgresql\n    version: 0.8.1\n    repository: nope\n  - name: broken\n    version: 0.8.1\n";
@@ -964,7 +964,7 @@ dependencies:
         assert!(result.deps.iter().all(|d| d.skip_reason.is_some()));
     }
 
-    // Ported: "parses simple Chart.yaml correctly" — modules/manager/helmv3/extract.spec.ts line 40
+    // Ported: "parses simple Chart.yaml correctly" — lib/modules/manager/helmv3/extract.spec.ts line 40
     #[test]
     fn extract_parses_simple_chart_yaml() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: https://charts.helm.sh/stable\n  - name: postgresql\n    version: 0.8.1\n    repository: https://charts.helm.sh/stable\n";
@@ -977,7 +977,7 @@ dependencies:
         assert_eq!(result.deps[1].current_value, "0.8.1");
     }
 
-    // Ported: "extract correctly oci references" — modules/manager/helmv3/extract.spec.ts line 67
+    // Ported: "extract correctly oci references" — lib/modules/manager/helmv3/extract.spec.ts line 67
     #[test]
     fn extract_oci_references() {
         let content = "apiVersion: v2\nname: app2\nversion: 0.1.0\ndependencies:\n  - name: library\n    version: 0.1.0\n    repository: oci://ghcr.io/ankitabhopatkar13\n  - name: postgresql\n    version: 0.8.1\n    repository: https://charts.helm.sh/stable\n";
@@ -988,7 +988,7 @@ dependencies:
         assert!(result.deps[1].datasource.is_none());
     }
 
-    // Ported: "resolves aliased registry urls" — modules/manager/helmv3/extract.spec.ts line 100
+    // Ported: "resolves aliased registry urls" — lib/modules/manager/helmv3/extract.spec.ts line 100
     #[test]
     fn extract_resolves_aliased_registry_urls() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: '@placeholder'\n  - name: example\n    version: 1.0.0\n    repository: alias:longalias\n  - name: oci-example\n    version: 2.2.0\n    repository: alias:ociRegistry\n";
@@ -1003,14 +1003,14 @@ dependencies:
         assert!(result.deps.iter().all(|d| d.skip_reason.is_none()));
     }
 
-    // Ported: "doesn't fail if Chart.yaml is invalid" — modules/manager/helmv3/extract.spec.ts line 131
+    // Ported: "doesn't fail if Chart.yaml is invalid" — lib/modules/manager/helmv3/extract.spec.ts line 131
     #[test]
     fn extract_returns_none_for_invalid_chart_yaml() {
         let content = "Invalid Chart.yaml content.\narr:\n[\n";
         assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
     }
 
-    // Ported: "skips local dependencies" — modules/manager/helmv3/extract.spec.ts line 142
+    // Ported: "skips local dependencies" — lib/modules/manager/helmv3/extract.spec.ts line 142
     #[test]
     fn extract_skips_local_dependencies() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - name: redis\n    version: 0.9.0\n    repository: https://charts.helm.sh/stable\n  - name: postgresql\n    version: 0.8.1\n    repository: file:///some/local/path/\n";
@@ -1019,41 +1019,41 @@ dependencies:
         assert_eq!(result.deps[1].skip_reason, Some(HelmSkipReason::LocalChart));
     }
 
-    // Ported: "returns null if no dependencies key" — modules/manager/helmv3/extract.spec.ts line 167
+    // Ported: "returns null if no dependencies key" — lib/modules/manager/helmv3/extract.spec.ts line 167
     #[test]
     fn extract_returns_none_if_no_dependencies_key() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\nhello: world\n";
         assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
     }
 
-    // Ported: "returns null if dependencies are an empty list" — modules/manager/helmv3/extract.spec.ts line 183
+    // Ported: "returns null if dependencies are an empty list" — lib/modules/manager/helmv3/extract.spec.ts line 183
     #[test]
     fn extract_returns_none_if_dependencies_empty_list() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies: []\n";
         assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
     }
 
-    // Ported: "returns null if dependencies key is invalid" — modules/manager/helmv3/extract.spec.ts line 199
+    // Ported: "returns null if dependencies key is invalid" — lib/modules/manager/helmv3/extract.spec.ts line 199
     #[test]
     fn extract_returns_none_if_dependencies_invalid() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  Invalid dependencies content.\n  [\n";
         assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
     }
 
-    // Ported: "returns null if Chart.yaml is empty" — modules/manager/helmv3/extract.spec.ts line 215
+    // Ported: "returns null if Chart.yaml is empty" — lib/modules/manager/helmv3/extract.spec.ts line 215
     #[test]
     fn extract_returns_none_if_chart_yaml_empty() {
         assert!(extract_package_file("", "Chart.yaml", &stable_aliases()).is_none());
     }
 
-    // Ported: "returns null if Chart.yaml uses an unsupported apiVersion" — modules/manager/helmv3/extract.spec.ts line 222
+    // Ported: "returns null if Chart.yaml uses an unsupported apiVersion" — lib/modules/manager/helmv3/extract.spec.ts line 222
     #[test]
     fn extract_returns_none_if_unsupported_api_version() {
         let content = "apiVersion: v1\nname: example\nversion: 0.1.0\n";
         assert!(extract_package_file(content, "Chart.yaml", &stable_aliases()).is_none());
     }
 
-    // Ported: "returns null if name and version are missing for all dependencies" — modules/manager/helmv3/extract.spec.ts line 235
+    // Ported: "returns null if name and version are missing for all dependencies" — lib/modules/manager/helmv3/extract.spec.ts line 235
     #[test]
     fn extract_returns_none_if_all_deps_missing_name_version() {
         let content = "apiVersion: v2\nname: example\nversion: 0.1.0\ndependencies:\n  - repository: test\n  - repository: test\n    alias: test\n";

@@ -144,7 +144,7 @@ mod tests {
     image: registry.example.com/myapp:2.0
 "#;
 
-    // Ported: "extracts multiple image lines from docker_container" — ansible/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines from docker_container" — lib/modules/manager/ansible/extract.spec.ts line 10
     #[test]
     fn extracts_images() {
         let deps = extract(SAMPLE);
@@ -156,34 +156,34 @@ mod tests {
         assert_eq!(pg.tag.as_deref(), Some("15-alpine"));
     }
 
-    // Ported: "extracts multiple image lines from docker_container" — ansible/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines from docker_container" — lib/modules/manager/ansible/extract.spec.ts line 10
     #[test]
     fn skips_variable_images() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.image.contains("MY_IMAGE")));
     }
 
-    // Ported: "extracts multiple image lines from docker_container" — ansible/extract.spec.ts line 10
+    // Ported: "extracts multiple image lines from docker_container" — lib/modules/manager/ansible/extract.spec.ts line 10
     #[test]
     fn extracts_custom_registry_image() {
         let deps = extract(SAMPLE);
         assert!(deps.iter().any(|d| d.image.contains("myapp")));
     }
 
-    // Ported: "returns null for empty" — ansible/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/ansible/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for empty" — ansible/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/ansible/extract.spec.ts line 6
     #[test]
     fn no_image_keys_returns_empty() {
         let content = "- name: task\n  shell: echo hello\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts multiple image lines from docker_service" — ansible/extract.spec.ts line 16
+    // Ported: "extracts multiple image lines from docker_service" — lib/modules/manager/ansible/extract.spec.ts line 16
     #[test]
     fn extracts_docker_service_images() {
         let content = r#"---
@@ -211,7 +211,7 @@ mod tests {
         assert!(deps.iter().any(|d| d.image == "registry"));
     }
 
-    // Ported: "extracts image and replaces registry" — ansible/extract.spec.ts line 22
+    // Ported: "extracts image and replaces registry" — lib/modules/manager/ansible/extract.spec.ts line 22
     #[test]
     fn extracts_image_and_replaces_registry() {
         let content = r#"---
@@ -234,7 +234,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts image but no replacement" — ansible/extract.spec.ts line 52
+    // Ported: "extracts image but no replacement" — lib/modules/manager/ansible/extract.spec.ts line 52
     #[test]
     fn extracts_image_without_registry_replacement() {
         let content = r#"---
@@ -258,7 +258,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts image and no double replacement" — ansible/extract.spec.ts line 82
+    // Ported: "extracts image and no double replacement" — lib/modules/manager/ansible/extract.spec.ts line 82
     #[test]
     fn extracts_image_without_double_registry_replacement() {
         let content = r#"---

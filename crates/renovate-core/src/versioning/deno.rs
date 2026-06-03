@@ -39,7 +39,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$version\") === $isValid" — versioning/deno/index.spec.ts line 4
+    // Ported: "isValid(\"$version\") === $isValid" — lib/modules/versioning/deno/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_deno_spec() {
         let cases = [
@@ -68,7 +68,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion(\"$versions\",\"$range\") === $maxSatisfying" — versioning/deno/index.spec.ts line 31
+    // Ported: "getSatisfyingVersion(\"$versions\",\"$range\") === $maxSatisfying" — lib/modules/versioning/deno/index.spec.ts line 31
     #[test]
     fn get_satisfying_version_matches_renovate_deno_spec() {
         let versions = ["2.3.3.", "2.3.4", "2.4.5", "2.5.1", "3.0.0"];
@@ -89,7 +89,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $isSingle" — versioning/deno/index.spec.ts line 47
+    // Ported: "isSingleVersion(\"$version\") === $isSingle" — lib/modules/versioning/deno/index.spec.ts line 47
     #[test]
     fn is_single_version_matches_renovate_deno_spec() {
         for (version, expected) in [
@@ -106,7 +106,7 @@ mod tests {
         }
     }
 
-    // Ported: "subset(\"$a\", \"$b\") === $expected" — versioning/deno/index.spec.ts line 58
+    // Ported: "subset(\"$a\", \"$b\") === $expected" — lib/modules/versioning/deno/index.spec.ts line 58
     #[test]
     fn subset_matches_renovate_deno_spec() {
         let cases = [
@@ -124,7 +124,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/deno/index.spec.ts line 72
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — lib/modules/versioning/deno/index.spec.ts line 72
     #[test]
     fn get_new_value_matches_renovate_deno_spec() {
         let cases: &[(&str, &str, &str, &str, Option<&str>)] = &[

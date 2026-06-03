@@ -49,7 +49,7 @@ pub fn extract(content: &str) -> Option<RuntimeVersionDep> {
 mod tests {
     use super::*;
 
-    // Ported: "returns a result - python" — runtime-version/extract.spec.ts line 5
+    // Ported: "returns a result - python" — lib/modules/manager/runtime-version/extract.spec.ts line 5
     #[test]
     fn extracts_python_version() {
         let dep = extract("python-3.11.0\n").unwrap();
@@ -57,20 +57,20 @@ mod tests {
         assert_eq!(dep.current_value, "3.11.0");
     }
 
-    // Ported: "returns a result - python" — runtime-version/extract.spec.ts line 5
+    // Ported: "returns a result - python" — lib/modules/manager/runtime-version/extract.spec.ts line 5
     #[test]
     fn extracts_with_trailing_newline() {
         let dep = extract("python-3.12.1\r\n").unwrap();
         assert_eq!(dep.current_value, "3.12.1");
     }
 
-    // Ported: "returns no result" — runtime-version/extract.spec.ts line 16
+    // Ported: "returns no result" — lib/modules/manager/runtime-version/extract.spec.ts line 16
     #[test]
     fn ignores_partial_version() {
         assert!(extract("python-3.11\n").is_none());
     }
 
-    // Ported: "returns no result" — runtime-version/extract.spec.ts line 16
+    // Ported: "returns no result" — lib/modules/manager/runtime-version/extract.spec.ts line 16
     #[test]
     fn returns_none_for_empty() {
         assert!(extract("").is_none());

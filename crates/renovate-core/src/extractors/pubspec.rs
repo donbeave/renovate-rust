@@ -630,7 +630,7 @@ dev_dependencies:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "load and parse successfully" — modules/manager/pub/utils.spec.ts line 14
+    // Ported: "load and parse successfully" — lib/modules/manager/pub/utils.spec.ts line 14
     #[test]
     fn parse_pubspec_loads_valid_yaml() {
         let content = "environment:\n  sdk: \">=3.0.0 <4.0.0\"\n  flutter: \">=3.10.0\"\ndependencies:\n  dep1: 1.0.0\ndev_dependencies:\n  dep2: 1.0.1\n";
@@ -647,21 +647,21 @@ dev_dependencies:
         );
     }
 
-    // Ported: "invalid yaml" — modules/manager/pub/utils.spec.ts line 32
+    // Ported: "invalid yaml" — lib/modules/manager/pub/utils.spec.ts line 32
     #[test]
     fn parse_pubspec_invalid_yaml_returns_none() {
         let content = "clearly: \"invalid\" \"yaml\"\n";
         assert!(parse_pubspec("pubspec.yaml", content).is_none());
     }
 
-    // Ported: "invalid schema" — modules/manager/pub/utils.spec.ts line 37
+    // Ported: "invalid schema" — lib/modules/manager/pub/utils.spec.ts line 37
     #[test]
     fn parse_pubspec_invalid_schema_returns_none() {
         let content = "clearly: invalid\n";
         assert!(parse_pubspec("pubspec.yaml", content).is_none());
     }
 
-    // Ported: "load and parse successfully" — modules/manager/pub/utils.spec.ts line 44
+    // Ported: "load and parse successfully" — lib/modules/manager/pub/utils.spec.ts line 44
     #[test]
     fn parse_pubspec_lock_loads_valid_yaml() {
         let content = "sdks:\n  dart: \">=3.0.0 <4.0.0\"\n  flutter: \">=3.10.0\"\n";
@@ -670,28 +670,28 @@ dev_dependencies:
         assert_eq!(result.sdks.flutter.as_deref(), Some(">=3.10.0"));
     }
 
-    // Ported: "invalid yaml" — modules/manager/pub/utils.spec.ts line 56
+    // Ported: "invalid yaml" — lib/modules/manager/pub/utils.spec.ts line 56
     #[test]
     fn parse_pubspec_lock_invalid_yaml_returns_none() {
         let content = "clearly: \"invalid\" \"yaml\"\n";
         assert!(parse_pubspec_lock("pubspec.lock", content).is_none());
     }
 
-    // Ported: "invalid schema" — modules/manager/pub/utils.spec.ts line 61
+    // Ported: "invalid schema" — lib/modules/manager/pub/utils.spec.ts line 61
     #[test]
     fn parse_pubspec_lock_invalid_schema_returns_none() {
         let content = "clearly: invalid\n";
         assert!(parse_pubspec_lock("pubspec.lock", content).is_none());
     }
 
-    // Ported: "returns null for invalid pubspec file" — modules/manager/pub/extract.spec.ts line 8
+    // Ported: "returns null for invalid pubspec file" — lib/modules/manager/pub/extract.spec.ts line 8
     #[test]
     fn pub_extract_returns_none_for_invalid_yaml() {
         let content = "clarly: \"invalid\" \"yaml\"\n";
         assert!(extract_package_file(content, "pubspec.yaml").is_none());
     }
 
-    // Ported: "returns dart sdk only" — modules/manager/pub/extract.spec.ts line 16
+    // Ported: "returns dart sdk only" — lib/modules/manager/pub/extract.spec.ts line 16
     #[test]
     fn pub_extract_returns_dart_sdk_only() {
         let content = "environment:\n  sdk: ^3.0.0\n";
@@ -703,7 +703,7 @@ dev_dependencies:
         assert!(result.deps[0].dep_type.is_none());
     }
 
-    // Ported: "returns valid dependencies" — modules/manager/pub/extract.spec.ts line 33
+    // Ported: "returns valid dependencies" — lib/modules/manager/pub/extract.spec.ts line 33
     #[test]
     fn pub_extract_returns_valid_dependencies() {
         let content = r#"

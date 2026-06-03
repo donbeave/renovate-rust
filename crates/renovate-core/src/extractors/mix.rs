@@ -246,7 +246,7 @@ pub fn get_range_strategy<'a>(range_strategy: &'a str, current_value: Option<&st
 mod tests {
     use super::*;
 
-    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
+    // Ported: "extracts all dependencies when no lockfile" — lib/modules/manager/mix/extract.spec.ts line 16
     #[test]
     fn simple_hex_dep() {
         let content = r#"
@@ -263,7 +263,7 @@ end
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
+    // Ported: "extracts all dependencies when no lockfile" — lib/modules/manager/mix/extract.spec.ts line 16
     #[test]
     fn dep_with_only_option() {
         let content = r#"
@@ -280,7 +280,7 @@ end
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
+    // Ported: "extracts all dependencies when no lockfile" — lib/modules/manager/mix/extract.spec.ts line 16
     #[test]
     fn git_dep_skipped() {
         let content = r#"
@@ -295,7 +295,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::GitSource));
     }
 
-    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
+    // Ported: "extracts all dependencies when no lockfile" — lib/modules/manager/mix/extract.spec.ts line 16
     #[test]
     fn github_dep_skipped() {
         let content = r#"
@@ -309,7 +309,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::GitSource));
     }
 
-    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
+    // Ported: "extracts all dependencies when no lockfile" — lib/modules/manager/mix/extract.spec.ts line 16
     #[test]
     fn path_dep_skipped() {
         let content = r#"
@@ -323,7 +323,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::LocalPath));
     }
 
-    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
+    // Ported: "extracts all dependencies when no lockfile" — lib/modules/manager/mix/extract.spec.ts line 16
     #[test]
     fn dep_without_version_skipped() {
         let content = r#"
@@ -337,7 +337,7 @@ end
         assert_eq!(deps[0].skip_reason, Some(MixSkipReason::NoVersion));
     }
 
-    // Ported: "extracts all dependencies when no lockfile" — manager/mix/extract.spec.ts line 16
+    // Ported: "extracts all dependencies when no lockfile" — lib/modules/manager/mix/extract.spec.ts line 16
     #[test]
     fn real_world_mix_exs() {
         let content = r#"
@@ -385,7 +385,7 @@ end
         assert_eq!(local.skip_reason, Some(MixSkipReason::LocalPath));
     }
 
-    // Ported: "extracts all dependencies and adds the locked version if lockfile present" — mix/extract.spec.ts line 139
+    // Ported: "extracts all dependencies and adds the locked version if lockfile present" — lib/modules/manager/mix/extract.spec.ts line 139
     #[test]
     fn applies_locked_versions_from_mix_lock() {
         let content = r#"
@@ -424,14 +424,14 @@ end
         assert_eq!(phoenix.locked_version, None);
     }
 
-    // Ported: "returns empty for invalid dependency file" — manager/mix/extract.spec.ts line 11
+    // Ported: "returns empty for invalid dependency file" — lib/modules/manager/mix/extract.spec.ts line 11
     #[test]
     fn no_deps_function_returns_empty() {
         let content = "defmodule MyApp do\n  def hello, do: :world\nend\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns empty for invalid dependency file" — manager/mix/extract.spec.ts line 11
+    // Ported: "returns empty for invalid dependency file" — lib/modules/manager/mix/extract.spec.ts line 11
     #[test]
     fn deps_without_do_end_block() {
         let content = r#"
@@ -444,35 +444,35 @@ end
         assert_eq!(deps[0].name, "cowboy");
     }
 
-    // Ported: "returns same if not auto" — modules/manager/mix/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/mix/range.spec.ts line 5
     #[test]
     fn mix_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("pin", None), "pin");
         assert_eq!(get_range_strategy("widen", None), "widen");
     }
 
-    // Ported: "widens complex bump" — modules/manager/mix/range.spec.ts line 13
+    // Ported: "widens complex bump" — lib/modules/manager/mix/range.spec.ts line 13
     #[test]
     fn mix_range_widens_complex_bump() {
         let result = get_range_strategy("bump", Some(">= 1.6.0 and < 2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "bumps non-complex bump" — modules/manager/mix/range.spec.ts line 22
+    // Ported: "bumps non-complex bump" — lib/modules/manager/mix/range.spec.ts line 22
     #[test]
     fn mix_range_bumps_non_complex() {
         let result = get_range_strategy("bump", Some("~>1.0.0"));
         assert_eq!(result, "bump");
     }
 
-    // Ported: "widens complex auto" — modules/manager/mix/range.spec.ts line 31
+    // Ported: "widens complex auto" — lib/modules/manager/mix/range.spec.ts line 31
     #[test]
     fn mix_range_widens_complex_auto() {
         let result = get_range_strategy("auto", Some("<1.7.0 or ~>1.7.1"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/mix/range.spec.ts line 40
+    // Ported: "defaults to update-lockfile" — lib/modules/manager/mix/range.spec.ts line 40
     #[test]
     fn mix_range_defaults_to_update_lockfile() {
         let result = get_range_strategy("auto", None);

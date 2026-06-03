@@ -113,7 +113,7 @@ pub fn build_npm_install_cmd(
 mod tests {
     use super::*;
 
-    // Ported: "does not install npm if no constraints specified" — modules/manager/npm/post-update/npm.spec.ts line 468
+    // Ported: "does not install npm if no constraints specified" — lib/modules/manager/npm/post-update/npm.spec.ts line 468
     #[test]
     fn get_npm_constraint_from_lock_v1() {
         assert_eq!(
@@ -122,7 +122,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not install npm if no constraints specified" — modules/manager/npm/post-update/npm.spec.ts line 468
+    // Ported: "does not install npm if no constraints specified" — lib/modules/manager/npm/post-update/npm.spec.ts line 468
     #[test]
     fn get_npm_constraint_from_lock_v2() {
         assert_eq!(
@@ -131,7 +131,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not install npm if no constraints specified" — modules/manager/npm/post-update/npm.spec.ts line 468
+    // Ported: "does not install npm if no constraints specified" — lib/modules/manager/npm/post-update/npm.spec.ts line 468
     #[test]
     fn get_npm_constraint_from_lock_v3() {
         assert_eq!(
@@ -140,13 +140,13 @@ mod tests {
         );
     }
 
-    // Ported: "does not install npm if no constraints specified" — modules/manager/npm/post-update/npm.spec.ts line 468
+    // Ported: "does not install npm if no constraints specified" — lib/modules/manager/npm/post-update/npm.spec.ts line 468
     #[test]
     fn get_npm_constraint_from_lock_invalid() {
         assert_eq!(get_npm_constraint_from_package_lock("not json"), None);
     }
 
-    // Ported: "does not install npm if no constraints specified" — modules/manager/npm/post-update/npm.spec.ts line 468
+    // Ported: "does not install npm if no constraints specified" — lib/modules/manager/npm/post-update/npm.spec.ts line 468
     #[test]
     fn npm_constraint_from_pkg_json() {
         let pj = PackageJson::parse(r#"{"engines": {"npm": ">=9"}}"#).unwrap();
@@ -156,13 +156,13 @@ mod tests {
         );
     }
 
-    // Ported: "workspace in sub-folder" — modules/manager/npm/post-update/npm.spec.ts line 696
+    // Ported: "workspace in sub-folder" — lib/modules/manager/npm/post-update/npm.spec.ts line 696
     #[test]
     fn generate_package_key_basic() {
         assert_eq!(generate_package_key("lodash", "4.17.21"), "lodash@4.17.21");
     }
 
-    // Ported: "sets --before from minimumReleaseAge" — modules/manager/npm/post-update/npm.spec.ts line 981
+    // Ported: "sets --before from minimumReleaseAge" — lib/modules/manager/npm/post-update/npm.spec.ts line 981
     #[test]
     fn parse_npmrc_cooldown_date_found() {
         let npmrc = "before=2024-01-01\nmin-release-age=7d\n";
@@ -172,13 +172,13 @@ mod tests {
         );
     }
 
-    // Ported: "skips --before on unparseable minimumReleaseAge" — modules/manager/npm/post-update/npm.spec.ts line 1005
+    // Ported: "skips --before on unparseable minimumReleaseAge" — lib/modules/manager/npm/post-update/npm.spec.ts line 1005
     #[test]
     fn parse_npmrc_cooldown_date_missing() {
         assert_eq!(parse_npmrc_cooldown_date("# no settings\n"), None);
     }
 
-    // Ported: "sets --before from minimumReleaseAge" — modules/manager/npm/post-update/npm.spec.ts line 981
+    // Ported: "sets --before from minimumReleaseAge" — lib/modules/manager/npm/post-update/npm.spec.ts line 981
     #[test]
     fn build_npm_install_cmd_basic() {
         assert_eq!(
@@ -187,7 +187,7 @@ mod tests {
         );
     }
 
-    // Ported: "sets --before from minimumReleaseAge" — modules/manager/npm/post-update/npm.spec.ts line 981
+    // Ported: "sets --before from minimumReleaseAge" — lib/modules/manager/npm/post-update/npm.spec.ts line 981
     #[test]
     fn build_npm_install_cmd_all_flags() {
         assert_eq!(
@@ -203,7 +203,7 @@ mod tests {
         );
     }
 
-    // Ported: "workspace in root folder" — modules/manager/npm/post-update/npm.spec.ts line 728
+    // Ported: "workspace in root folder" — lib/modules/manager/npm/post-update/npm.spec.ts line 728
     #[test]
     fn divide_workspace_and_root_deps_no_patterns() {
         let upgrades = vec![Upgrade {
@@ -216,7 +216,7 @@ mod tests {
         assert_eq!(root.len(), 1);
     }
 
-    // Ported: "workspace in sub-folder" — modules/manager/npm/post-update/npm.spec.ts line 696
+    // Ported: "workspace in sub-folder" — lib/modules/manager/npm/post-update/npm.spec.ts line 696
     #[test]
     fn divide_workspace_and_root_deps_with_patterns() {
         let upgrades = vec![
@@ -237,14 +237,14 @@ mod tests {
         assert_eq!(root.len(), 1);
     }
 
-    // Ported: "skips --before when .npmrc has min-release-age to avoid npm conflict" — modules/manager/npm/post-update/npm.spec.ts line 1098
+    // Ported: "skips --before when .npmrc has min-release-age to avoid npm conflict" — lib/modules/manager/npm/post-update/npm.spec.ts line 1098
     #[test]
     fn parse_npmrc_cooldown_date_skips_when_min_release_age_present() {
         let npmrc = "min-release-age=7d\n";
         assert_eq!(parse_npmrc_cooldown_date(npmrc), None);
     }
 
-    // Ported: "generates lock files" — modules/manager/npm/post-update/npm.spec.ts line 26
+    // Ported: "generates lock files" — lib/modules/manager/npm/post-update/npm.spec.ts line 26
     #[test]
     fn get_npm_constraint_from_lock_generates_lock() {
         assert_eq!(
@@ -253,7 +253,7 @@ mod tests {
         );
     }
 
-    // Ported: "runs npm install twice" — modules/manager/npm/post-update/npm.spec.ts line 54
+    // Ported: "runs npm install twice" — lib/modules/manager/npm/post-update/npm.spec.ts line 54
     #[test]
     fn build_npm_install_cmd_runs_twice() {
         assert_eq!(
@@ -262,7 +262,7 @@ mod tests {
         );
     }
 
-    // Ported: "performs lock file updates" — modules/manager/npm/post-update/npm.spec.ts line 87
+    // Ported: "performs lock file updates" — lib/modules/manager/npm/post-update/npm.spec.ts line 87
     #[test]
     fn build_npm_install_cmd_lock_updates() {
         assert_eq!(
@@ -271,7 +271,7 @@ mod tests {
         );
     }
 
-    // Ported: "performs lock file updates retaining the package.json counterparts" — modules/manager/npm/post-update/npm.spec.ts line 107
+    // Ported: "performs lock file updates retaining the package.json counterparts" — lib/modules/manager/npm/post-update/npm.spec.ts line 107
     #[test]
     fn build_npm_install_cmd_retain_package_json() {
         assert_eq!(
@@ -280,7 +280,7 @@ mod tests {
         );
     }
 
-    // Ported: "performs npm-shrinkwrap.json updates" — modules/manager/npm/post-update/npm.spec.ts line 136
+    // Ported: "performs npm-shrinkwrap.json updates" — lib/modules/manager/npm/post-update/npm.spec.ts line 136
     #[test]
     fn get_npm_constraint_from_lock_shrinkwrap() {
         assert_eq!(
@@ -289,7 +289,7 @@ mod tests {
         );
     }
 
-    // Ported: "performs npm-shrinkwrap.json updates (no package-lock.json)" — modules/manager/npm/post-update/npm.spec.ts line 163
+    // Ported: "performs npm-shrinkwrap.json updates (no package-lock.json)" — lib/modules/manager/npm/post-update/npm.spec.ts line 163
     #[test]
     fn get_npm_constraint_from_lock_no_package_lock() {
         assert_eq!(
@@ -298,7 +298,7 @@ mod tests {
         );
     }
 
-    // Ported: "deduplicates dependencies on installation with npm >= 7" — modules/manager/npm/post-update/npm.spec.ts line 204
+    // Ported: "deduplicates dependencies on installation with npm >= 7" — lib/modules/manager/npm/post-update/npm.spec.ts line 204
     #[test]
     fn build_npm_install_cmd_dedupe_npm7() {
         assert_eq!(
@@ -307,7 +307,7 @@ mod tests {
         );
     }
 
-    // Ported: "deduplicates package-lock.json dependencies after installation with npm <= 6" — modules/manager/npm/post-update/npm.spec.ts line 236
+    // Ported: "deduplicates package-lock.json dependencies after installation with npm <= 6" — lib/modules/manager/npm/post-update/npm.spec.ts line 236
     #[test]
     fn build_npm_install_cmd_dedupe_npm6() {
         assert_eq!(
@@ -316,7 +316,7 @@ mod tests {
         );
     }
 
-    // Ported: "deduplicates npm-shrinkwrap.json dependencies after installation with npm <= 6" — modules/manager/npm/post-update/npm.spec.ts line 271
+    // Ported: "deduplicates npm-shrinkwrap.json dependencies after installation with npm <= 6" — lib/modules/manager/npm/post-update/npm.spec.ts line 271
     #[test]
     fn build_npm_install_cmd_dedupe_shrinkwrap() {
         assert_eq!(
@@ -325,7 +325,7 @@ mod tests {
         );
     }
 
-    // Ported: "runs twice if remediating" — modules/manager/npm/post-update/npm.spec.ts line 311
+    // Ported: "runs twice if remediating" — lib/modules/manager/npm/post-update/npm.spec.ts line 311
     #[test]
     fn build_npm_install_cmd_remediating() {
         assert_eq!(
@@ -334,20 +334,20 @@ mod tests {
         );
     }
 
-    // Ported: "catches errors" — modules/manager/npm/post-update/npm.spec.ts line 328
+    // Ported: "catches errors" — lib/modules/manager/npm/post-update/npm.spec.ts line 328
     #[test]
     fn get_npm_constraint_from_lock_catches_errors() {
         assert_eq!(get_npm_constraint_from_package_lock("not json"), None);
     }
 
-    // Ported: "finds npm globally" — modules/manager/npm/post-update/npm.spec.ts line 344
+    // Ported: "finds npm globally" — lib/modules/manager/npm/post-update/npm.spec.ts line 344
     #[test]
     fn npm_constraint_from_pkg_json_global() {
         let pj = PackageJson::parse(r#"{}"#).unwrap();
         assert_eq!(get_npm_constraint_from_package_json(&pj), None);
     }
 
-    // Ported: "uses docker npm" — modules/manager/npm/post-update/npm.spec.ts line 369
+    // Ported: "uses docker npm" — lib/modules/manager/npm/post-update/npm.spec.ts line 369
     #[test]
     fn build_npm_install_cmd_docker() {
         assert_eq!(
@@ -356,7 +356,7 @@ mod tests {
         );
     }
 
-    // Ported: "performs lock file maintenance" — modules/manager/npm/post-update/npm.spec.ts line 384
+    // Ported: "performs lock file maintenance" — lib/modules/manager/npm/post-update/npm.spec.ts line 384
     #[test]
     fn build_npm_install_cmd_maintenance() {
         assert_eq!(
@@ -365,7 +365,7 @@ mod tests {
         );
     }
 
-    // Ported: "works for docker mode" — modules/manager/npm/post-update/npm.spec.ts line 402
+    // Ported: "works for docker mode" — lib/modules/manager/npm/post-update/npm.spec.ts line 402
     #[test]
     fn build_npm_install_cmd_docker_mode() {
         assert_eq!(
@@ -374,7 +374,7 @@ mod tests {
         );
     }
 
-    // Ported: "works for install mode" — modules/manager/npm/post-update/npm.spec.ts line 442
+    // Ported: "works for install mode" — lib/modules/manager/npm/post-update/npm.spec.ts line 442
     #[test]
     fn build_npm_install_cmd_install_mode() {
         assert_eq!(
@@ -383,7 +383,7 @@ mod tests {
         );
     }
 
-    // Ported: "while performing lockfileUpdate (npm-workspaces)" — modules/manager/npm/post-update/npm.spec.ts line 884
+    // Ported: "while performing lockfileUpdate (npm-workspaces)" — lib/modules/manager/npm/post-update/npm.spec.ts line 884
     #[test]
     fn divide_workspace_and_root_deps_npm_workspaces() {
         let upgrades = vec![Upgrade {
@@ -397,7 +397,7 @@ mod tests {
         assert!(root.is_empty());
     }
 
-    // Ported: "while performing lockfileUpdate (npm)" — modules/manager/npm/post-update/npm.spec.ts line 932
+    // Ported: "while performing lockfileUpdate (npm)" — lib/modules/manager/npm/post-update/npm.spec.ts line 932
     #[test]
     fn divide_workspace_and_root_deps_npm() {
         let upgrades = vec![Upgrade {
@@ -411,7 +411,7 @@ mod tests {
         assert_eq!(root.len(), 1);
     }
 
-    // Ported: "uses stricter npmrc before date when older than minimumReleaseAge" — modules/manager/npm/post-update/npm.spec.ts line 1027
+    // Ported: "uses stricter npmrc before date when older than minimumReleaseAge" — lib/modules/manager/npm/post-update/npm.spec.ts line 1027
     #[test]
     fn parse_npmrc_cooldown_date_stricter_before() {
         let npmrc = "before=2023-01-01\nmin-release-age=7d\n";
@@ -421,7 +421,7 @@ mod tests {
         );
     }
 
-    // Ported: "uses minimumReleaseAge date when stricter than npmrc before date" — modules/manager/npm/post-update/npm.spec.ts line 1051
+    // Ported: "uses minimumReleaseAge date when stricter than npmrc before date" — lib/modules/manager/npm/post-update/npm.spec.ts line 1051
     #[test]
     fn parse_npmrc_cooldown_date_stricter_min_release() {
         let npmrc = "before=2024-12-01\nmin-release-age=30d\n";
@@ -431,14 +431,14 @@ mod tests {
         );
     }
 
-    // Ported: "skips --before when minimumReleaseAge is absent even if npmrc has before" — modules/manager/npm/post-update/npm.spec.ts line 1075
+    // Ported: "skips --before when minimumReleaseAge is absent even if npmrc has before" — lib/modules/manager/npm/post-update/npm.spec.ts line 1075
     #[test]
     fn parse_npmrc_cooldown_date_skips_when_min_release_age_absent() {
         let npmrc = "before=2024-01-01\n";
         assert_eq!(parse_npmrc_cooldown_date(npmrc), None);
     }
 
-    // Ported: "retries without --before on ETARGET with \"with a date before\"" — modules/manager/npm/post-update/npm.spec.ts line 1121
+    // Ported: "retries without --before on ETARGET with \"with a date before\"" — lib/modules/manager/npm/post-update/npm.spec.ts line 1121
     #[test]
     fn build_npm_install_cmd_retries_without_before() {
         assert_eq!(
@@ -447,7 +447,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not retry on non-before ETARGET errors" — modules/manager/npm/post-update/npm.spec.ts line 1167
+    // Ported: "does not retry on non-before ETARGET errors" — lib/modules/manager/npm/post-update/npm.spec.ts line 1167
     #[test]
     fn build_npm_install_cmd_no_retry_non_before() {
         assert_eq!(

@@ -725,8 +725,8 @@ mod tests {
 
     // ── get_retrying ──────────────────────────────────────────────────────────
 
-    // Ported: "works" — util/http/retry-after.spec.ts line 27
-    // Ported: "retries" — util/http/retry-after.spec.ts line 44
+    // Ported: "works" — lib/util/http/retry-after.spec.ts line 27
+    // Ported: "retries" — lib/util/http/retry-after.spec.ts line 44
     #[tokio::test]
     async fn retries_on_429_then_succeeds() {
         let server = MockServer::start().await;
@@ -756,7 +756,7 @@ mod tests {
         assert_eq!(resp.text().await.unwrap(), "ok");
     }
 
-    // Ported: "gives up after max retries" — util/http/retry-after.spec.ts line 59
+    // Ported: "gives up after max retries" — lib/util/http/retry-after.spec.ts line 59
     #[tokio::test]
     async fn stops_retrying_after_max_attempts() {
         let server = MockServer::start().await;
@@ -778,7 +778,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
     }
 
-    // Ported: "gives up when delay exceeds maxRetryAfter" — util/http/retry-after.spec.ts line 76
+    // Ported: "gives up when delay exceeds maxRetryAfter" — lib/util/http/retry-after.spec.ts line 76
     #[tokio::test]
     async fn gives_up_when_retry_after_exceeds_cap() {
         let server = MockServer::start().await;
@@ -800,7 +800,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
     }
 
-    // Ported: "throws" — util/http/retry-after.spec.ts line 34
+    // Ported: "throws" — lib/util/http/retry-after.spec.ts line 34
     #[tokio::test]
     async fn does_not_retry_on_404() {
         let server = MockServer::start().await;
@@ -849,7 +849,7 @@ mod tests {
         assert_eq!(val["v"], 42);
     }
 
-    // Ported: "getJson" — util/http/index.spec.ts line 209
+    // Ported: "getJson" — lib/util/http/index.spec.ts line 209
     #[tokio::test]
     async fn get_json_parses_json_body() {
         let server = MockServer::start().await;
@@ -866,7 +866,7 @@ mod tests {
         assert_eq!(val["test"], true);
     }
 
-    // Ported: "gets plain text with correct headers" — util/http/index.spec.ts line 484
+    // Ported: "gets plain text with correct headers" — lib/util/http/index.spec.ts line 484
     #[tokio::test]
     async fn get_raw_with_accept_returns_body() {
         let server = MockServer::start().await;
@@ -884,7 +884,7 @@ mod tests {
         assert_eq!(body, "plain text");
     }
 
-    // Ported: "postJson" — util/http/index.spec.ts line 233
+    // Ported: "postJson" — lib/util/http/index.spec.ts line 233
     #[tokio::test]
     async fn post_json_sends_body_and_parses_response() {
         let server = MockServer::start().await;
@@ -899,7 +899,7 @@ mod tests {
         assert_eq!(val["id"], 123);
     }
 
-    // Ported: "get" — util/http/index.spec.ts line 111
+    // Ported: "get" — lib/util/http/index.spec.ts line 111
     #[tokio::test]
     async fn get_sends_request_and_receives_response() {
         let server = MockServer::start().await;
@@ -920,7 +920,7 @@ mod tests {
         assert_eq!(body, "hello");
     }
 
-    // Ported: "returns 429 error" — util/http/index.spec.ts line 122
+    // Ported: "returns 429 error" — lib/util/http/index.spec.ts line 122
     #[tokio::test]
     async fn get_returns_429_error_after_retries_exhausted() {
         let server = MockServer::start().await;
@@ -935,7 +935,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::TOO_MANY_REQUESTS);
     }
 
-    // Ported: "returns 401 error" — util/http/index.spec.ts line 130
+    // Ported: "returns 401 error" — lib/util/http/index.spec.ts line 130
     #[tokio::test]
     async fn get_returns_401_error() {
         let server = MockServer::start().await;
@@ -964,7 +964,7 @@ mod tests {
         assert!(header.contains("Bearer"));
     }
 
-    // Ported: "putJson" — util/http/index.spec.ts line 248
+    // Ported: "putJson" — lib/util/http/index.spec.ts line 248
     #[tokio::test]
     async fn put_json_sends_body_and_parses_response() {
         let server = MockServer::start().await;
@@ -981,7 +981,7 @@ mod tests {
         assert_eq!(val["updated"], true);
     }
 
-    // Ported: "patchJson" — util/http/index.spec.ts line 263
+    // Ported: "patchJson" — lib/util/http/index.spec.ts line 263
     #[tokio::test]
     async fn patch_json_sends_body_and_returns_response() {
         let server = MockServer::start().await;
@@ -998,7 +998,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    // Ported: "deleteJson" — util/http/index.spec.ts line 278
+    // Ported: "deleteJson" — lib/util/http/index.spec.ts line 278
     #[tokio::test]
     async fn delete_json_sends_request_and_parses_response() {
         let server = MockServer::start().await;
@@ -1015,7 +1015,7 @@ mod tests {
         assert_eq!(val["deleted"], true);
     }
 
-    // Ported: "headJson" — util/http/index.spec.ts line 293
+    // Ported: "headJson" — lib/util/http/index.spec.ts line 293
     #[tokio::test]
     async fn head_json_sends_request_and_returns_response() {
         let server = MockServer::start().await;
@@ -1031,7 +1031,7 @@ mod tests {
         assert_eq!(resp.headers().get("x-custom").unwrap(), "value");
     }
 
-    // Ported: "sets default user-agent" — util/http/index.spec.ts line 37
+    // Ported: "sets default user-agent" — lib/util/http/index.spec.ts line 37
     #[tokio::test]
     async fn default_user_agent_is_set_on_requests() {
         let server = MockServer::start().await;
@@ -1046,7 +1046,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    // Ported: "preserves existing headers" — util/http/index.spec.ts line 101
+    // Ported: "preserves existing headers" — lib/util/http/index.spec.ts line 101
     #[tokio::test]
     async fn get_preserves_existing_headers() {
         let server = MockServer::start().await;
@@ -1066,7 +1066,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
-    // Ported: "parses yaml response without schema" — util/http/index.spec.ts line 509
+    // Ported: "parses yaml response without schema" — lib/util/http/index.spec.ts line 509
     #[tokio::test]
     async fn get_yaml_parses_response_body() {
         let server = MockServer::start().await;
@@ -1082,7 +1082,7 @@ mod tests {
         assert_eq!(val["version"], 1);
     }
 
-    // Ported: "throws on invalid yaml" — util/http/index.spec.ts line 529
+    // Ported: "throws on invalid yaml" — lib/util/http/index.spec.ts line 529
     #[tokio::test]
     async fn get_yaml_throws_on_invalid_yaml() {
         let server = MockServer::start().await;
@@ -1097,7 +1097,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns error result for invalid yaml" — util/http/index.spec.ts line 604
+    // Ported: "returns error result for invalid yaml" — lib/util/http/index.spec.ts line 604
     #[tokio::test]
     async fn get_yaml_returns_error_for_invalid_yaml() {
         let server = MockServer::start().await;
@@ -1112,7 +1112,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns error result for network errors" — util/http/index.spec.ts line 615
+    // Ported: "returns error result for network errors" — lib/util/http/index.spec.ts line 615
     #[tokio::test]
     async fn get_yaml_returns_error_for_network_errors() {
         let server = MockServer::start().await;
@@ -1127,7 +1127,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws on invalid toml" — util/http/index.spec.ts line 834
+    // Ported: "throws on invalid toml" — lib/util/http/index.spec.ts line 834
     #[tokio::test]
     async fn get_toml_throws_on_invalid_toml() {
         let server = MockServer::start().await;
@@ -1142,7 +1142,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "parses toml with schema validation" — util/http/index.spec.ts line 793
+    // Ported: "parses toml with schema validation" — lib/util/http/index.spec.ts line 793
     #[tokio::test]
     async fn get_toml_parses_valid_toml_response() {
         let server = MockServer::start().await;
@@ -1359,7 +1359,7 @@ mod www_auth_tests {
         WwwAuthParams::Map(m)
     }
 
-    // Ported: "parses: %s" — util/http/www-authenticate.spec.ts line 4
+    // Ported: "parses: %s" — lib/util/http/www-authenticate.spec.ts line 4
     #[test]
     fn www_auth_parses_bearer() {
         let parsed = parse_www_authenticate(&[
@@ -1377,14 +1377,14 @@ mod www_auth_tests {
         );
     }
 
-    // Ported: "parses empty string" — util/http/www-authenticate.spec.ts line 135
+    // Ported: "parses empty string" — lib/util/http/www-authenticate.spec.ts line 135
     #[test]
     fn www_auth_parses_empty_string() {
         let parsed = parse_www_authenticate(&[""]).unwrap();
         assert!(parsed.is_empty());
     }
 
-    // Ported: "throws on invalid input" — util/http/www-authenticate.spec.ts line 139
+    // Ported: "throws on invalid input" — lib/util/http/www-authenticate.spec.ts line 139
     #[test]
     fn www_auth_throws_on_invalid_input() {
         let result = parse_www_authenticate(&[
@@ -1395,7 +1395,7 @@ mod www_auth_tests {
 
     // ── apply_authorization ───────────────────────────────────────────────────
 
-    // Ported: "does nothing" — util/http/auth.spec.ts line 6
+    // Ported: "does nothing" — lib/util/http/auth.spec.ts line 6
     #[test]
     fn auth_does_nothing_with_existing_header() {
         let opts = AuthOptions {
@@ -1405,7 +1405,7 @@ mod www_auth_tests {
         assert_eq!(apply_authorization(&opts), AppliedAuth::default());
     }
 
-    // Ported: "gitea password" — util/http/auth.spec.ts line 24
+    // Ported: "gitea password" — lib/util/http/auth.spec.ts line 24
     #[test]
     fn auth_gitea_password_basic() {
         let opts = AuthOptions {
@@ -1417,7 +1417,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Basic OlhYWFg="));
     }
 
-    // Ported: "gittea token" — util/http/auth.spec.ts line 44
+    // Ported: "gittea token" — lib/util/http/auth.spec.ts line 44
     #[test]
     fn auth_gitea_token_bearer() {
         let opts = AuthOptions {
@@ -1429,7 +1429,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Bearer XXXX"));
     }
 
-    // Ported: "github token" — util/http/auth.spec.ts line 64
+    // Ported: "github token" — lib/util/http/auth.spec.ts line 64
     #[test]
     fn auth_github_token_prefix() {
         let opts = AuthOptions {
@@ -1441,7 +1441,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("token XXX"));
     }
 
-    // Ported: "github token for datasource using github api" — util/http/auth.spec.ts line 82
+    // Ported: "github token for datasource using github api" — lib/util/http/auth.spec.ts line 82
     #[test]
     fn auth_github_releases_token_prefix() {
         let opts = AuthOptions {
@@ -1453,7 +1453,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("token ZZZZ"));
     }
 
-    // Ported: "github app token with hostType not in GITHUB_API_USING_HOST_TYPES" — util/http/auth.spec.ts line 101
+    // Ported: "github app token with hostType not in GITHUB_API_USING_HOST_TYPES" — lib/util/http/auth.spec.ts line 101
     #[test]
     fn auth_github_app_token_bearer() {
         let opts = AuthOptions {
@@ -1465,7 +1465,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Bearer ghs_123test"));
     }
 
-    // Ported: "gitlab personal access token" — util/http/auth.spec.ts line 115
+    // Ported: "gitlab personal access token" — lib/util/http/auth.spec.ts line 115
     #[test]
     fn auth_gitlab_personal_access_token() {
         let opts = AuthOptions {
@@ -1481,7 +1481,7 @@ mod www_auth_tests {
         );
     }
 
-    // Ported: "gitlab oauth token" — util/http/auth.spec.ts line 136
+    // Ported: "gitlab oauth token" — lib/util/http/auth.spec.ts line 136
     #[test]
     fn auth_gitlab_oauth_token_bearer() {
         let token = "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01test";
@@ -1497,7 +1497,7 @@ mod www_auth_tests {
         );
     }
 
-    // Ported: "npm basic token" — util/http/auth.spec.ts line 157
+    // Ported: "npm basic token" — lib/util/http/auth.spec.ts line 157
     #[test]
     fn auth_npm_basic_auth_type() {
         let opts = AuthOptions {
@@ -1510,7 +1510,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("Basic test"));
     }
 
-    // Ported: "bare token" — util/http/auth.spec.ts line 181
+    // Ported: "bare token" — lib/util/http/auth.spec.ts line 181
     #[test]
     fn auth_token_only_auth_type() {
         let opts = AuthOptions {
@@ -1522,7 +1522,7 @@ mod www_auth_tests {
         assert_eq!(result.authorization.as_deref(), Some("test"));
     }
 
-    // Ported: "honors authType" — util/http/auth.spec.ts line 203
+    // Ported: "honors authType" — lib/util/http/auth.spec.ts line 203
     #[test]
     fn auth_honors_auth_type() {
         let opts = AuthOptions {
@@ -1537,7 +1537,7 @@ mod www_auth_tests {
 
     // ── cleanup_http_cache ────────────────────────────────────────────────────
 
-    // Ported: "should not throw if cache is not a valid HttpCache" — util/cache/repository/http-cache.spec.ts line 12
+    // Ported: "should not throw if cache is not a valid HttpCache" — lib/util/cache/repository/http-cache.spec.ts line 12
     #[test]
     fn cleanup_http_cache_noop_for_empty_object() {
         let mut cache = serde_json::json!({});
@@ -1545,7 +1545,7 @@ mod www_auth_tests {
         assert_eq!(cache, serde_json::json!({}));
     }
 
-    // Ported: "should remove expired items from the cache" — util/cache/repository/http-cache.spec.ts line 16
+    // Ported: "should remove expired items from the cache" — lib/util/cache/repository/http-cache.spec.ts line 16
     #[test]
     fn cleanup_http_cache_removes_expired_entries() {
         // Expired: 91 days ago; fresh: now
@@ -1572,7 +1572,7 @@ mod www_auth_tests {
         );
     }
 
-    // Ported: "should remove all items if ttlDays is not configured" — util/cache/repository/http-cache.spec.ts line 50
+    // Ported: "should remove all items if ttlDays is not configured" — lib/util/cache/repository/http-cache.spec.ts line 50
     #[test]
     fn cleanup_http_cache_removes_all_when_ttl_is_zero() {
         let now = Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
@@ -1591,7 +1591,7 @@ mod www_auth_tests {
 
     // ── parse_retry_after_value ───────────────────────────────────────────────
 
-    // Ported: "returns null for non-integer \"retry-after\" header" — util/http/retry-after.spec.ts line 109
+    // Ported: "returns null for non-integer \"retry-after\" header" — lib/util/http/retry-after.spec.ts line 109
     #[test]
     fn retry_after_value_past_date_returns_none() {
         // "Wed, 21 Oct 2015 07:28:00 GMT" is in the past relative to 2026 → None
@@ -1599,7 +1599,7 @@ mod www_auth_tests {
         assert!(parse_retry_after_value("Wed, 21 Oct 2015 07:28:00 GMT", now).is_none());
     }
 
-    // Ported: "returns delay in seconds from date" — util/http/retry-after.spec.ts line 122
+    // Ported: "returns delay in seconds from date" — lib/util/http/retry-after.spec.ts line 122
     #[test]
     fn retry_after_value_future_date_returns_seconds() {
         // Mock: now = 2020-01-01T00:00:00Z, retry-after = 2020-01-01T00:00:42Z → 42
@@ -1610,21 +1610,21 @@ mod www_auth_tests {
         assert_eq!(result, Some(42));
     }
 
-    // Ported: "returns delay in seconds from number" — util/http/retry-after.spec.ts line 136
+    // Ported: "returns delay in seconds from number" — lib/util/http/retry-after.spec.ts line 136
     #[test]
     fn retry_after_value_numeric_returns_seconds() {
         let now = Utc::now();
         assert_eq!(parse_retry_after_value("42", now), Some(42));
     }
 
-    // Ported: "returns null for invalid header value" — util/http/retry-after.spec.ts line 149
+    // Ported: "returns null for invalid header value" — lib/util/http/retry-after.spec.ts line 149
     #[test]
     fn retry_after_value_invalid_returns_none() {
         let now = Utc::now();
         assert!(parse_retry_after_value("invalid", now).is_none());
     }
 
-    // Ported: "returns null missing \"retry-after\" header" — util/http/retry-after.spec.ts line 103
+    // Ported: "returns null missing \"retry-after\" header" — lib/util/http/retry-after.spec.ts line 103
     #[tokio::test]
     async fn retry_after_missing_header_returns_none() {
         let server = wiremock::MockServer::start().await;

@@ -118,7 +118,7 @@ pub async fn fetch_releases(
 mod tests {
     use super::*;
 
-    // Ported: "returns null for empty 200 OK" — node-version/index.spec.ts line 32
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/node-version/index.spec.ts line 32
     #[test]
     fn empty_array_yields_none() {
         // An empty JSON array should map to None (no releases).
@@ -126,7 +126,7 @@ mod tests {
         assert!(raw.is_empty());
     }
 
-    // Ported: "processes real data" — node-version/index.spec.ts line 42
+    // Ported: "processes real data" — lib/modules/datasource/node-version/index.spec.ts line 42
     #[test]
     fn parse_non_lts_release() {
         let json = r#"[{"version":"v16.9.0","date":"2021-09-07","files":[],"npm":"7.21.1","v8":"9.3.345.16","uv":"1.42.0","zlib":"1.2.11","openssl":"1.1.1l+quic","modules":"93","lts":false,"security":false}]"#;

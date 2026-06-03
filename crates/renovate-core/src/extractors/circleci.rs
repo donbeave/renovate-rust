@@ -369,7 +369,7 @@ jobs:
       - image: $CI_IMAGE
 ";
 
-    // Ported: "extracts multiple image and resolves yaml anchors" — circleci/extract.spec.ts line 48
+    // Ported: "extracts multiple image and resolves yaml anchors" — lib/modules/manager/circleci/extract.spec.ts line 48
     #[test]
     fn extracts_executor_images() {
         let deps = extract(SAMPLE);
@@ -381,7 +381,7 @@ jobs:
         assert_eq!(pg.dep.tag.as_deref(), Some("15"));
     }
 
-    // Ported: "extracts multiple image and resolves yaml anchors" — circleci/extract.spec.ts line 48
+    // Ported: "extracts multiple image and resolves yaml anchors" — lib/modules/manager/circleci/extract.spec.ts line 48
     #[test]
     fn extracts_job_images() {
         let deps = extract(SAMPLE);
@@ -392,7 +392,7 @@ jobs:
         assert_eq!(go.dep.tag.as_deref(), Some("1.21-alpine"));
     }
 
-    // Ported: "extracts multiple image and resolves yaml anchors" — circleci/extract.spec.ts line 48
+    // Ported: "extracts multiple image and resolves yaml anchors" — lib/modules/manager/circleci/extract.spec.ts line 48
     #[test]
     fn fixture_config_resolves_yaml_anchor_images() {
         let content = r#"workflows:
@@ -435,7 +435,7 @@ jobs:
         assert_eq!(deps[3].replace_string, "node:8.9.0");
     }
 
-    // Ported: "extracts image without leading dash" — circleci/extract.spec.ts line 200
+    // Ported: "extracts image without leading dash" — lib/modules/manager/circleci/extract.spec.ts line 200
     #[test]
     fn anchor_image_without_leading_dash_is_resolved() {
         let content = r#"aliases:
@@ -458,7 +458,7 @@ jobs:
         }
     }
 
-    // Ported: "extracts and exclude android images" — circleci/extract.spec.ts line 226
+    // Ported: "extracts and exclude android images" — lib/modules/manager/circleci/extract.spec.ts line 226
     #[test]
     fn skips_variable_image() {
         let deps = extract(SAMPLE);
@@ -466,13 +466,13 @@ jobs:
         assert!(!deps.iter().any(|d| d.dep.image.starts_with('$')));
     }
 
-    // Ported: "returns null for empty" — circleci/extract.spec.ts line 12
+    // Ported: "returns null for empty" — lib/modules/manager/circleci/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "handles registry alias" — circleci/extract.spec.ts line 16
+    // Ported: "handles registry alias" — lib/modules/manager/circleci/extract.spec.ts line 16
     #[test]
     fn handles_registry_alias() {
         let content = r#"
@@ -504,7 +504,7 @@ executors:
         );
     }
 
-    // Ported: "extracts orbs without jobs" — circleci/extract.spec.ts line 237
+    // Ported: "extracts orbs without jobs" — lib/modules/manager/circleci/extract.spec.ts line 237
     #[test]
     fn no_docker_section_returns_no_deps() {
         let content =
@@ -512,7 +512,7 @@ executors:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts orbs too" — circleci/extract.spec.ts line 93
+    // Ported: "extracts orbs too" — lib/modules/manager/circleci/extract.spec.ts line 93
     #[test]
     fn extracts_orbs() {
         let orbs = extract_orbs(SAMPLE);
@@ -532,7 +532,7 @@ executors:
         assert!(extract_orbs(content).is_empty());
     }
 
-    // Ported: "extracts orb definitions" — circleci/extract.spec.ts line 273
+    // Ported: "extracts orb definitions" — lib/modules/manager/circleci/extract.spec.ts line 273
     #[test]
     fn orbs_block_ends_at_next_top_level_key() {
         let content = "orbs:\n  node: circleci/node@5.0.0\njobs:\n  build:\n    docker:\n      - image: ubuntu:20.04\n";
@@ -540,27 +540,27 @@ executors:
         assert_eq!(orbs.len(), 1);
     }
 
-    // Ported: "returns null for empty" — circleci/extract.spec.ts line 12
+    // Ported: "returns null for empty" — lib/modules/manager/circleci/extract.spec.ts line 12
     #[test]
     fn empty_orbs_returns_empty() {
         assert!(extract_orbs("").is_empty());
     }
 
-    // Ported: "returns null for empty" — circleci/extract.spec.ts line 12
+    // Ported: "returns null for empty" — lib/modules/manager/circleci/extract.spec.ts line 12
     #[test]
     fn no_orbs_block_returns_empty() {
         let content = "version: 2.1\njobs:\n  build:\n    docker:\n      - image: ubuntu:20.04\n";
         assert!(extract_orbs(content).is_empty());
     }
 
-    // Ported: "extracts and exclude android images" — circleci/extract.spec.ts line 226
+    // Ported: "extracts and exclude android images" — lib/modules/manager/circleci/extract.spec.ts line 226
     #[test]
     fn machine_image_not_extracted() {
         let content = "jobs:\n  build:\n    machine:\n      image: android:202102-01\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts executors" — circleci/extract.spec.ts line 251
+    // Ported: "extracts executors" — lib/modules/manager/circleci/extract.spec.ts line 251
     #[test]
     fn executor_docker_image_extracted() {
         let content =
@@ -571,7 +571,7 @@ executors:
         assert_eq!(deps[0].dep.tag.as_deref(), Some("3.0.3-browsers"));
     }
 
-    // Ported: "extracts orbs without jobs" — circleci/extract.spec.ts line 237
+    // Ported: "extracts orbs without jobs" — lib/modules/manager/circleci/extract.spec.ts line 237
     #[test]
     fn extracts_orbs_without_jobs() {
         // config4.yml: only `orbs:` and `workflows:`, no jobs
@@ -585,7 +585,7 @@ executors:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts orb definitions" — circleci/extract.spec.ts line 273
+    // Ported: "extracts orb definitions" — lib/modules/manager/circleci/extract.spec.ts line 273
     #[test]
     fn extracts_orb_definitions() {
         let content = r#"version: 2.1
@@ -632,19 +632,19 @@ workflows:
         );
     }
 
-    // Ported: "returns same if not auto" — modules/manager/circleci/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/circleci/range.spec.ts line 5
     #[test]
     fn circleci_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("widen"), "widen");
     }
 
-    // Ported: "defaults to bump" — modules/manager/circleci/range.spec.ts line 10
+    // Ported: "defaults to bump" — lib/modules/manager/circleci/range.spec.ts line 10
     #[test]
     fn circleci_range_defaults_to_pin() {
         assert_eq!(get_range_strategy("auto"), "pin");
     }
 
-    // Ported: "matchRegexOrGlobList("$path") === $expected" — modules/manager/circleci/index.spec.ts line 6
+    // Ported: "matchRegexOrGlobList("$path") === $expected" — lib/modules/manager/circleci/index.spec.ts line 6
     #[test]
     fn circleci_file_pattern_matches_expected_paths() {
         let should_match = [

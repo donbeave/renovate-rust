@@ -237,7 +237,7 @@ mod tests {
         format!("{}{}", server.uri(), PYTHON_PATH)
     }
 
-    // Ported: "returns Python EOL data" — datasource/python-version/index.spec.ts line 14
+    // Ported: "returns Python EOL data" — lib/modules/datasource/python-version/index.spec.ts line 14
     #[tokio::test]
     async fn returns_python_eol_data() {
         let server = MockServer::start().await;
@@ -260,7 +260,7 @@ mod tests {
         assert!(release.is_deprecated);
     }
 
-    // Ported: "throws for 500" — datasource/python-version/index.spec.ts line 63
+    // Ported: "throws for 500" — lib/modules/datasource/python-version/index.spec.ts line 63
     #[tokio::test]
     async fn throws_for_500() {
         let server = MockServer::start().await;
@@ -278,7 +278,7 @@ mod tests {
         assert!(result.is_err(), "5xx should propagate as Err");
     }
 
-    // Ported: "returns null for error" — datasource/python-version/index.spec.ts line 73
+    // Ported: "returns null for error" — lib/modules/datasource/python-version/index.spec.ts line 73
     #[tokio::test]
     async fn returns_null_for_error() {
         let server = MockServer::start().await;
@@ -294,7 +294,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "falls back to prebuild releases on 429" — datasource/python-version/index.spec.ts line 83
+    // Ported: "falls back to prebuild releases on 429" — lib/modules/datasource/python-version/index.spec.ts line 83
     #[tokio::test]
     async fn falls_back_to_prebuild_releases_on_429() {
         let server = MockServer::start().await;
@@ -333,7 +333,7 @@ mod tests {
         assert_eq!(r121.is_deprecated, Some(false));
     }
 
-    // Ported: "returns null on 429 when prebuild releases are unavailable" — datasource/python-version/index.spec.ts line 102
+    // Ported: "returns null on 429 when prebuild releases are unavailable" — lib/modules/datasource/python-version/index.spec.ts line 102
     #[tokio::test]
     async fn returns_null_on_429_when_prebuild_unavailable() {
         let server = MockServer::start().await;
@@ -352,7 +352,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty 200 OK" — datasource/python-version/index.spec.ts line 116
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/python-version/index.spec.ts line 116
     #[tokio::test]
     async fn returns_null_for_empty_200() {
         let server = MockServer::start().await;
@@ -371,7 +371,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns the correct data" — datasource/python-version/index.spec.ts line 134
+    // Ported: "returns the correct data" — lib/modules/datasource/python-version/index.spec.ts line 134
     #[tokio::test]
     async fn returns_the_correct_data() {
         let server = MockServer::start().await;
@@ -399,7 +399,7 @@ mod tests {
         );
     }
 
-    // Ported: "only returns stable versions" — datasource/python-version/index.spec.ts line 147
+    // Ported: "only returns stable versions" — lib/modules/datasource/python-version/index.spec.ts line 147
     #[tokio::test]
     async fn only_returns_stable_versions() {
         let server = MockServer::start().await;
@@ -423,7 +423,7 @@ mod tests {
         }
     }
 
-    // Ported: "only returns versions that are prebuilt" — datasource/python-version/index.spec.ts line 158
+    // Ported: "only returns versions that are prebuilt" — lib/modules/datasource/python-version/index.spec.ts line 158
     #[tokio::test]
     async fn only_returns_versions_that_are_prebuilt() {
         let server = MockServer::start().await;
@@ -449,7 +449,7 @@ mod tests {
         assert!(!versions.contains(&"3.12.0a1"));
     }
 
-    // Ported: "returns isDeprecated status for Python 3 minor releases" — datasource/python-version/index.spec.ts line 170
+    // Ported: "returns isDeprecated status for Python 3 minor releases" — lib/modules/datasource/python-version/index.spec.ts line 170
     #[tokio::test]
     async fn returns_is_deprecated_status() {
         let server = MockServer::start().await;

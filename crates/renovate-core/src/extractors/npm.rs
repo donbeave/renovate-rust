@@ -3311,7 +3311,7 @@ mod tests {
         }
     }
 
-    // Ported: "considers default registry" — npm/extract/yarnrc.spec.ts line 10
+    // Ported: "considers default registry" — lib/modules/manager/npm/extract/yarnrc.spec.ts line 10
     #[test]
     fn yarnrc_resolve_registry_url_considers_default_registry() {
         let config = yarn_config(Some("https://private.example.com/npm"), &[]);
@@ -3321,7 +3321,7 @@ mod tests {
         );
     }
 
-    // Ported: "chooses matching scoped registry over default registry" — npm/extract/yarnrc.spec.ts line 17
+    // Ported: "chooses matching scoped registry over default registry" — lib/modules/manager/npm/extract/yarnrc.spec.ts line 17
     #[test]
     fn yarnrc_resolve_registry_url_prefers_matching_scope() {
         let config = yarn_config(
@@ -3334,7 +3334,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignores non matching scoped registry" — npm/extract/yarnrc.spec.ts line 29
+    // Ported: "ignores non matching scoped registry" — lib/modules/manager/npm/extract/yarnrc.spec.ts line 29
     #[test]
     fn yarnrc_resolve_registry_url_ignores_non_matching_scope() {
         let config = yarn_config(
@@ -3344,21 +3344,21 @@ mod tests {
         assert!(resolve_yarn_registry_url("@scope/a-package", &config).is_none());
     }
 
-    // Ported: "ignores partial scope match" — npm/extract/yarnrc.spec.ts line 40
+    // Ported: "ignores partial scope match" — lib/modules/manager/npm/extract/yarnrc.spec.ts line 40
     #[test]
     fn yarnrc_resolve_registry_url_ignores_partial_scope_match() {
         let config = yarn_config(None, &[("scope", Some("https://scope.example.com/npm"))]);
         assert!(resolve_yarn_registry_url("@scope-2/a-package", &config).is_none());
     }
 
-    // Ported: "ignores missing scope registryServer" — npm/extract/yarnrc.spec.ts line 51
+    // Ported: "ignores missing scope registryServer" — lib/modules/manager/npm/extract/yarnrc.spec.ts line 51
     #[test]
     fn yarnrc_resolve_registry_url_ignores_missing_scope_registry_server() {
         let config = yarn_config(Some("https://private.example.com/npm"), &[("scope", None)]);
         assert!(resolve_yarn_registry_url("@scope/a-package", &config).is_none());
     }
 
-    // Ported: "produces expected config (%s)" — npm/extract/yarnrc.spec.ts line 63
+    // Ported: "produces expected config (%s)" — lib/modules/manager/npm/extract/yarnrc.spec.ts line 63
     #[test]
     fn load_config_from_yarnrc_yml_produces_expected_config() {
         let cases = [
@@ -3389,7 +3389,7 @@ mod tests {
         }
     }
 
-    // Ported: "produces expected config (%s)" — npm/extract/yarnrc.spec.ts line 117
+    // Ported: "produces expected config (%s)" — lib/modules/manager/npm/extract/yarnrc.spec.ts line 117
     #[test]
     fn load_config_from_legacy_yarnrc_produces_expected_config() {
         let cases = [
@@ -3418,7 +3418,7 @@ mod tests {
         }
     }
 
-    // Ported: "reads registryUrls from .yarnrc" — npm/extract/index.spec.ts line 348
+    // Ported: "reads registryUrls from .yarnrc" — lib/modules/manager/npm/extract/index.spec.ts line 348
     #[test]
     fn load_config_from_legacy_yarnrc_reads_registry() {
         let config = load_config_from_legacy_yarnrc("registry \"https://registry.yarnpkg.com\"\n");
@@ -3428,14 +3428,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if failed to parse" — npm/extract/npm.spec.ts line 9
+    // Ported: "returns null if failed to parse" — lib/modules/manager/npm/extract/npm.spec.ts line 9
     #[test]
     fn npm_lock_returns_empty_if_failed_to_parse() {
         let lock = parse_npm_lock(Some("abcd"));
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "extracts" — npm/extract/npm.spec.ts line 15
+    // Ported: "extracts" — lib/modules/manager/npm/extract/npm.spec.ts line 15
     #[test]
     fn npm_lock_extracts_v1_dependencies() {
         let lock = parse_npm_lock(Some(
@@ -3467,7 +3467,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts npm 7 lockfile" — npm/extract/npm.spec.ts line 33
+    // Ported: "extracts npm 7 lockfile" — lib/modules/manager/npm/extract/npm.spec.ts line 33
     #[test]
     fn npm_lock_extracts_v2_packages() {
         let lock = parse_npm_lock(Some(
@@ -3494,7 +3494,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts npm 9 lockfile" — npm/extract/npm.spec.ts line 51
+    // Ported: "extracts npm 9 lockfile" — lib/modules/manager/npm/extract/npm.spec.ts line 51
     #[test]
     fn npm_lock_extracts_v3_packages() {
         let lock = parse_npm_lock(Some(
@@ -3526,21 +3526,21 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if no deps" — npm/extract/npm.spec.ts line 69
+    // Ported: "returns null if no deps" — lib/modules/manager/npm/extract/npm.spec.ts line 69
     #[test]
     fn npm_lock_returns_empty_if_no_deps() {
         let lock = parse_npm_lock(Some("{}"));
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "returns null on read error" — npm/extract/npm.spec.ts line 75
+    // Ported: "returns null on read error" — lib/modules/manager/npm/extract/npm.spec.ts line 75
     #[test]
     fn npm_lock_returns_empty_on_read_error() {
         let lock = parse_npm_lock(None);
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "returns empty if exception parsing" — npm/extract/yarn.spec.ts line 13
+    // Ported: "returns empty if exception parsing" — lib/modules/manager/npm/extract/yarn.spec.ts line 13
     #[test]
     fn yarn_lock_returns_empty_if_exception_parsing() {
         let lock = parse_yarn_lock(Some("abcd"));
@@ -3549,7 +3549,7 @@ mod tests {
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "extracts yarn 1" — npm/extract/yarn.spec.ts line 20
+    // Ported: "extracts yarn 1" — lib/modules/manager/npm/extract/yarn.spec.ts line 20
     #[test]
     fn yarn_lock_extracts_yarn1_dependencies() {
         let lock = parse_yarn_lock(Some(
@@ -3587,7 +3587,7 @@ supports-color@^5.3.0:
         );
     }
 
-    // Ported: "extracts yarn 2" — npm/extract/yarn.spec.ts line 30
+    // Ported: "extracts yarn 2" — lib/modules/manager/npm/extract/yarn.spec.ts line 30
     #[test]
     fn yarn_lock_extracts_yarn2_dependencies() {
         let lock = parse_yarn_lock(Some(
@@ -3628,7 +3628,7 @@ __metadata:
         );
     }
 
-    // Ported: "extracts yarn 2 cache version" — npm/extract/yarn.spec.ts line 40
+    // Ported: "extracts yarn 2 cache version" — lib/modules/manager/npm/extract/yarn.spec.ts line 40
     #[test]
     fn yarn_lock_extracts_yarn2_cache_version() {
         let lock = parse_yarn_lock(Some(
@@ -3670,7 +3670,7 @@ __metadata:
         );
     }
 
-    // Ported: "ignores individual invalid entries" — npm/extract/yarn.spec.ts line 50
+    // Ported: "ignores individual invalid entries" — lib/modules/manager/npm/extract/yarn.spec.ts line 50
     #[test]
     fn yarn_lock_ignores_individual_invalid_entries() {
         let lock = parse_yarn_lock(Some(
@@ -3694,7 +3694,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "getYarnVersionFromLock" — npm/extract/yarn.spec.ts line 63
+    // Ported: "getYarnVersionFromLock" — lib/modules/manager/npm/extract/yarn.spec.ts line 63
     #[test]
     fn yarn_version_from_lock_matches_lockfile_version() {
         assert_eq!(
@@ -3747,14 +3747,14 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles empty catalog entries" — npm/extract/yarn.spec.ts line 83
+    // Ported: "handles empty catalog entries" — lib/modules/manager/npm/extract/yarn.spec.ts line 83
     #[test]
     fn yarn_catalogs_handles_empty_catalog_entries() {
         let extraction = extract_yarn_catalogs(&BTreeMap::new(), &BTreeMap::new(), None, false);
         assert!(extraction.deps.is_empty());
     }
 
-    // Ported: "parses valid .yarnrc.yml file" — npm/extract/yarn.spec.ts line 91
+    // Ported: "parses valid .yarnrc.yml file" — lib/modules/manager/npm/extract/yarn.spec.ts line 91
     #[test]
     fn yarn_catalogs_parses_valid_yarnrc_yml() {
         let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.0".to_owned())]);
@@ -3785,7 +3785,7 @@ chalk@^2.4.1:
         assert!(extraction.has_package_manager);
     }
 
-    // Ported: "finds relevant lockfile" — npm/extract/yarn.spec.ts line 133
+    // Ported: "finds relevant lockfile" — lib/modules/manager/npm/extract/yarn.spec.ts line 133
     #[test]
     fn yarn_catalogs_finds_relevant_lockfile() {
         let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.1".to_owned())]);
@@ -3796,7 +3796,7 @@ chalk@^2.4.1:
         assert!(!extraction.has_package_manager);
     }
 
-    // Ported: "returns empty if no deps" — npm/extract/pnpm.spec.ts line 341
+    // Ported: "returns empty if no deps" — lib/modules/manager/npm/extract/pnpm.spec.ts line 341
     #[test]
     fn pnpm_workspace_returns_empty_if_no_deps() {
         let extraction =
@@ -3804,7 +3804,7 @@ chalk@^2.4.1:
         assert!(extraction.deps.is_empty());
     }
 
-    // Ported: "handles empty catalog entries" — npm/extract/pnpm.spec.ts line 349
+    // Ported: "handles empty catalog entries" — lib/modules/manager/npm/extract/pnpm.spec.ts line 349
     #[test]
     fn pnpm_workspace_handles_empty_catalog_entries() {
         let extraction =
@@ -3812,7 +3812,7 @@ chalk@^2.4.1:
         assert!(extraction.deps.is_empty());
     }
 
-    // Ported: "parses valid pnpm-workspace.yaml file" — npm/extract/pnpm.spec.ts line 360
+    // Ported: "parses valid pnpm-workspace.yaml file" — lib/modules/manager/npm/extract/pnpm.spec.ts line 360
     #[test]
     fn pnpm_workspace_parses_valid_workspace_file() {
         let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.0".to_owned())]);
@@ -3842,7 +3842,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "extracts pnpm workspace yaml files" — npm/extract/index.spec.ts line 1303
+    // Ported: "extracts pnpm workspace yaml files" — lib/modules/manager/npm/extract/index.spec.ts line 1303
     #[test]
     fn pnpm_workspace_extracts_from_index() {
         let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.0".to_owned())]);
@@ -3852,7 +3852,7 @@ chalk@^2.4.1:
         assert_eq!(extraction.deps[0].name, "react");
     }
 
-    // Ported: "parses empty pnpm workspace yaml files" — npm/extract/index.spec.ts line 1294
+    // Ported: "parses empty pnpm workspace yaml files" — lib/modules/manager/npm/extract/index.spec.ts line 1294
     #[test]
     fn pnpm_workspace_parses_empty_from_index() {
         let extraction =
@@ -3860,7 +3860,7 @@ chalk@^2.4.1:
         assert!(extraction.deps.is_empty());
     }
 
-    // Ported: "parses overrides in pnpm-workspace.yaml file" — npm/extract/pnpm.spec.ts line 395
+    // Ported: "parses overrides in pnpm-workspace.yaml file" — lib/modules/manager/npm/extract/pnpm.spec.ts line 395
     #[test]
     fn pnpm_workspace_parses_overrides() {
         let overrides = BTreeMap::from([
@@ -3896,7 +3896,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "finds relevant lockfile" — npm/extract/pnpm.spec.ts line 466
+    // Ported: "finds relevant lockfile" — lib/modules/manager/npm/extract/pnpm.spec.ts line 466
     #[test]
     fn pnpm_workspace_finds_relevant_lockfile() {
         let default_catalog = BTreeMap::from([("react".to_owned(), "18.3.1".to_owned())]);
@@ -3913,13 +3913,13 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "returns null if cannot parse" — npm/extract/index.spec.ts line 38
+    // Ported: "returns null if cannot parse" — lib/modules/manager/npm/extract/index.spec.ts line 38
     #[test]
     fn package_json_extract_returns_error_if_cannot_parse() {
         assert!(extract("not json").is_err());
     }
 
-    // Ported: "catches invalid names" — npm/extract/index.spec.ts line 47
+    // Ported: "catches invalid names" — lib/modules/manager/npm/extract/index.spec.ts line 47
     #[test]
     fn package_json_invalid_dependency_names_are_skipped() {
         let json = r#"{
@@ -3938,7 +3938,7 @@ chalk@^2.4.1:
         assert_eq!(deps[0].skip_reason, Some(NpmSkipReason::InvalidName));
     }
 
-    // Ported: "ignores vendorised package.json" — npm/extract/index.spec.ts line 58
+    // Ported: "ignores vendorised package.json" — lib/modules/manager/npm/extract/index.spec.ts line 58
     #[test]
     fn package_json_vendorised_installed_package_is_ignored() {
         let json = r#"{
@@ -3958,7 +3958,7 @@ chalk@^2.4.1:
         assert!(deps.is_empty());
     }
 
-    // Ported: "warns when multiple lock files found" — npm/extract/index.spec.ts line 180
+    // Ported: "warns when multiple lock files found" — lib/modules/manager/npm/extract/index.spec.ts line 180
     #[test]
     fn extracts_all_four_sections() {
         let json = r#"{
@@ -3987,7 +3987,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "finds a lock file" — npm/extract/index.spec.ts line 161
+    // Ported: "finds a lock file" — lib/modules/manager/npm/extract/index.spec.ts line 161
     #[test]
     fn plain_semver_has_no_skip_reason() {
         let json =
@@ -3996,7 +3996,7 @@ chalk@^2.4.1:
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
     }
 
-    // Ported: "finds complex yarn workspaces" — npm/extract/index.spec.ts line 408
+    // Ported: "finds complex yarn workspaces" — lib/modules/manager/npm/extract/index.spec.ts line 408
     #[test]
     fn workspace_protocol_is_skipped() {
         let json = r#"{ "dependencies": { "my-lib": "workspace:*", "other": "workspace:^1.0" } }"#;
@@ -4007,7 +4007,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "sets skipInstalls false if Yarn zero-install is used" — npm/extract/index.spec.ts line 893
+    // Ported: "sets skipInstalls false if Yarn zero-install is used" — lib/modules/manager/npm/extract/index.spec.ts line 893
     #[test]
     fn file_reference_is_skipped() {
         let json =
@@ -4019,7 +4019,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "does not set registryUrls for non-npmjs" — npm/extract/index.spec.ts line 787
+    // Ported: "does not set registryUrls for non-npmjs" — lib/modules/manager/npm/extract/index.spec.ts line 787
     #[test]
     fn git_source_forms_are_skipped() {
         let json = r#"{ "dependencies": {
@@ -4060,7 +4060,7 @@ chalk@^2.4.1:
         assert_eq!(deps[0].skip_reason, Some(NpmSkipReason::UrlInstall));
     }
 
-    // Ported: "extracts npm package alias" — npm/extract/index.spec.ts line 842
+    // Ported: "extracts npm package alias" — lib/modules/manager/npm/extract/index.spec.ts line 842
     #[test]
     fn npm_aliases_are_extracted() {
         let json = r#"{
@@ -4110,7 +4110,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "resolves registry URLs using the package name if set" — npm/extract/index.spec.ts line 375
+    // Ported: "resolves registry URLs using the package name if set" — lib/modules/manager/npm/extract/index.spec.ts line 375
     #[test]
     fn scoped_package_name_is_not_confused_with_git_shorthand() {
         // "@scope/pkg" contains a slash but starts with "@" — must NOT be treated
@@ -4120,7 +4120,7 @@ chalk@^2.4.1:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "returns null if no deps" — npm/extract/index.spec.ts line 77
+    // Ported: "returns null if no deps" — lib/modules/manager/npm/extract/index.spec.ts line 77
     #[test]
     fn empty_package_json_returns_empty_list() {
         let json = r#"{}"#;
@@ -4128,7 +4128,7 @@ chalk@^2.4.1:
         assert!(deps.is_empty());
     }
 
-    // Ported: "handles invalid" — npm/extract/index.spec.ts line 86
+    // Ported: "handles invalid" — lib/modules/manager/npm/extract/index.spec.ts line 86
     #[test]
     fn package_json_invalid_dependency_sections_return_empty() {
         let json = r#"{"dependencies": true, "devDependencies": []}"#;
@@ -4136,7 +4136,7 @@ chalk@^2.4.1:
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns an array of dependencies" — npm/extract/index.spec.ts line 95
+    // Ported: "returns an array of dependencies" — lib/modules/manager/npm/extract/index.spec.ts line 95
     #[test]
     fn package_json_fixture_extracts_dependency_array() {
         let json = r#"{
@@ -4189,7 +4189,7 @@ chalk@^2.4.1:
         assert_eq!(enabled.skip_reason, Some(NpmSkipReason::InvalidValue));
     }
 
-    // Ported: "returns an array of dependencies with resolution comments" — npm/extract/index.spec.ts line 122
+    // Ported: "returns an array of dependencies with resolution comments" — lib/modules/manager/npm/extract/index.spec.ts line 122
     #[test]
     fn package_json_resolution_comments_are_invalid_names() {
         let json = r#"{
@@ -4229,7 +4229,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts engines" — npm/extract/index.spec.ts line 422
+    // Ported: "extracts engines" — lib/modules/manager/npm/extract/index.spec.ts line 422
     #[test]
     fn package_json_extracts_engines() {
         let json = r#"{
@@ -4311,7 +4311,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts volta" — npm/extract/index.spec.ts line 513
+    // Ported: "extracts volta" — lib/modules/manager/npm/extract/index.spec.ts line 513
     #[test]
     fn package_json_extracts_volta() {
         let json = r#"{
@@ -4357,7 +4357,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts volta yarn unspecified-version" — npm/extract/index.spec.ts line 556
+    // Ported: "extracts volta yarn unspecified-version" — lib/modules/manager/npm/extract/index.spec.ts line 556
     #[test]
     fn package_json_extracts_volta_yarn_unspecified() {
         let json = r#"{
@@ -4386,7 +4386,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts volta yarn higher than 1" — npm/extract/index.spec.ts line 597
+    // Ported: "extracts volta yarn higher than 1" — lib/modules/manager/npm/extract/index.spec.ts line 597
     #[test]
     fn package_json_extracts_volta_yarn_higher_than_one() {
         let json = r#"{
@@ -4415,7 +4415,7 @@ chalk@^2.4.1:
         }));
     }
 
-    // Ported: "extracts non-npmjs" — npm/extract/index.spec.ts line 639
+    // Ported: "extracts non-npmjs" — lib/modules/manager/npm/extract/index.spec.ts line 639
     #[test]
     fn package_json_extracts_non_npmjs_github_dependencies() {
         let json = r#"{
@@ -4498,7 +4498,7 @@ chalk@^2.4.1:
         }
     }
 
-    // Ported: "extracts packageManager" — npm/extract/index.spec.ts line 921
+    // Ported: "extracts packageManager" — lib/modules/manager/npm/extract/index.spec.ts line 921
     #[test]
     fn package_json_extracts_package_manager() {
         let json = r#"{
@@ -4514,7 +4514,7 @@ chalk@^2.4.1:
         assert_eq!(yarn.skip_reason, None);
     }
 
-    // Ported: "throws error if non-root renovate config" — npm/extract/index.spec.ts line 67
+    // Ported: "throws error if non-root renovate config" — lib/modules/manager/npm/extract/index.spec.ts line 67
     #[test]
     fn missing_sections_are_ignored() {
         let json = r#"{ "dependencies": { "lodash": "^4" } }"#;
@@ -4522,7 +4522,7 @@ chalk@^2.4.1:
         assert_eq!(deps.len(), 1);
     }
 
-    // Ported: "reads registryUrls from .yarnrc.yml" — npm/extract/index.spec.ts line 320
+    // Ported: "reads registryUrls from .yarnrc.yml" — lib/modules/manager/npm/extract/index.spec.ts line 320
     #[test]
     fn extracts_yarn_resolutions() {
         let json = r#"{
@@ -4539,7 +4539,7 @@ chalk@^2.4.1:
         assert!(resolutions.iter().any(|d| d.name == "lodash"));
     }
 
-    // Ported: "extracts dependencies from overrides" — npm/extract/index.spec.ts line 984
+    // Ported: "extracts dependencies from overrides" — lib/modules/manager/npm/extract/index.spec.ts line 984
     #[test]
     fn extracts_npm_overrides() {
         let json = r#"{
@@ -4592,7 +4592,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "extracts dependencies from pnpm.overrides" — npm/extract/index.spec.ts line 1063
+    // Ported: "extracts dependencies from pnpm.overrides" — lib/modules/manager/npm/extract/index.spec.ts line 1063
     #[test]
     fn extracts_pnpm_overrides() {
         let json = r#"{
@@ -4647,7 +4647,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "extracts dependencies from pnpm.overrides, with version ranges in flat syntax" — npm/extract/index.spec.ts line 1144
+    // Ported: "extracts dependencies from pnpm.overrides, with version ranges in flat syntax" — lib/modules/manager/npm/extract/index.spec.ts line 1144
     #[test]
     fn extracts_pnpm_override_range_keys() {
         let json = r#"{
@@ -4685,41 +4685,41 @@ chalk@^2.4.1:
         }
     }
 
-    // Ported: "returns same if not auto" — modules/manager/npm/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/npm/range.spec.ts line 5
     #[test]
     fn npm_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("widen", None, None), "widen");
     }
 
-    // Ported: "widens peerDependencies" — modules/manager/npm/range.spec.ts line 10
+    // Ported: "widens peerDependencies" — lib/modules/manager/npm/range.spec.ts line 10
     #[test]
     fn npm_range_widens_peer_dependencies() {
         let result = get_range_strategy("auto", Some("peerDependencies"), None);
         assert_eq!(result, "widen");
     }
 
-    // Ported: "widens complex ranges" — modules/manager/npm/range.spec.ts line 18
+    // Ported: "widens complex ranges" — lib/modules/manager/npm/range.spec.ts line 18
     #[test]
     fn npm_range_widens_complex_ranges() {
         let result = get_range_strategy("auto", Some("dependencies"), Some("^1.6.0 || ^2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "widens complex bump" — modules/manager/npm/range.spec.ts line 27
+    // Ported: "widens complex bump" — lib/modules/manager/npm/range.spec.ts line 27
     #[test]
     fn npm_range_widens_complex_bump() {
         let result = get_range_strategy("bump", Some("dependencies"), Some("^1.6.0 || ^2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/npm/range.spec.ts line 36
+    // Ported: "defaults to update-lockfile" — lib/modules/manager/npm/range.spec.ts line 36
     #[test]
     fn npm_range_defaults_to_update_lockfile() {
         let result = get_range_strategy("auto", Some("dependencies"), None);
         assert_eq!(result, "update-lockfile");
     }
 
-    // Ported: "matches package in nested directory" — modules/manager/npm/extract/utils.spec.ts line 5
+    // Ported: "matches package in nested directory" — lib/modules/manager/npm/extract/utils.spec.ts line 5
     #[test]
     fn matches_any_pattern_nested_directory() {
         assert!(matches_any_pattern(
@@ -4728,7 +4728,7 @@ chalk@^2.4.1:
         ));
     }
 
-    // Ported: "matches package in non-nested directory" — modules/manager/npm/extract/utils.spec.ts line 17
+    // Ported: "matches package in non-nested directory" — lib/modules/manager/npm/extract/utils.spec.ts line 17
     #[test]
     fn matches_any_pattern_non_nested_directory() {
         assert!(matches_any_pattern(
@@ -4737,7 +4737,7 @@ chalk@^2.4.1:
         ));
     }
 
-    // Ported: "matches package in explicitly defined directory" — modules/manager/npm/extract/utils.spec.ts line 29
+    // Ported: "matches package in explicitly defined directory" — lib/modules/manager/npm/extract/utils.spec.ts line 29
     #[test]
     fn matches_any_pattern_explicit_directory() {
         assert!(matches_any_pattern(
@@ -4746,21 +4746,21 @@ chalk@^2.4.1:
         ));
     }
 
-    // Ported: "should return false when fileName does not start with pwd" — modules/manager/bun/utils.spec.ts line 7
+    // Ported: "should return false when fileName does not start with pwd" — lib/modules/manager/bun/utils.spec.ts line 7
     #[test]
     fn bun_file_matches_workspaces_false_when_different_pwd() {
         let result = file_matches_workspaces("/project", "/another-path/package.json", &["**"]);
         assert!(!result);
     }
 
-    // Ported: "should correctly evaluate fileName when it starts with pwd" — modules/manager/bun/utils.spec.ts line 14
+    // Ported: "should correctly evaluate fileName when it starts with pwd" — lib/modules/manager/bun/utils.spec.ts line 14
     #[test]
     fn bun_file_matches_workspaces_true_when_starts_with_pwd() {
         let result = file_matches_workspaces("/project", "/project/foo/package.json", &["foo"]);
         assert!(result);
     }
 
-    // Ported: "should filter files matching workspaces and pwd" — modules/manager/bun/utils.spec.ts line 30
+    // Ported: "should filter files matching workspaces and pwd" — lib/modules/manager/bun/utils.spec.ts line 30
     #[test]
     fn bun_files_matching_workspaces_filters_correctly() {
         let pwd = "/project";
@@ -4790,7 +4790,7 @@ chalk@^2.4.1:
         ]
     }
 
-    // Ported: "returns correct dependencies for pnpm" — modules/manager/npm/extract/common/catalogs.spec.ts line 5
+    // Ported: "returns correct dependencies for pnpm" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 5
     #[test]
     fn catalog_deps_for_pnpm() {
         let result = extract_catalog_deps(&sample_catalogs(), "pnpm");
@@ -4803,7 +4803,7 @@ chalk@^2.4.1:
         assert_eq!(result[1].dep_name, "lodash");
     }
 
-    // Ported: "returns correct dependencies for yarn" — modules/manager/npm/extract/common/catalogs.spec.ts line 39
+    // Ported: "returns correct dependencies for yarn" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 39
     #[test]
     fn catalog_deps_for_yarn() {
         let result = extract_catalog_deps(&sample_catalogs(), "yarn");
@@ -4811,14 +4811,14 @@ chalk@^2.4.1:
         assert_eq!(result[1].dep_type, "yarn.catalog.custom");
     }
 
-    // Ported: "handles empty catalogs list" — modules/manager/npm/extract/common/catalogs.spec.ts line 73
+    // Ported: "handles empty catalogs list" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 73
     #[test]
     fn catalog_deps_empty_list() {
         assert!(extract_catalog_deps(&[], "pnpm").is_empty());
         assert!(extract_catalog_deps(&[], "yarn").is_empty());
     }
 
-    // Ported: "handles catalog with no dependencies" — modules/manager/npm/extract/common/catalogs.spec.ts line 80
+    // Ported: "handles catalog with no dependencies" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 80
     #[test]
     fn catalog_deps_empty_dependencies() {
         let catalogs = vec![Catalog {
@@ -4832,7 +4832,7 @@ chalk@^2.4.1:
     const NPM_PKG_CONTENT: &str =
         r#"{"name":"some-package","version":"0.0.2","dependencies":{"chalk":"2.4.2"}}"#;
 
-    // Ported: "mirrors" — modules/manager/npm/update/package-version/index.spec.ts line 11
+    // Ported: "mirrors" — lib/modules/manager/npm/update/package-version/index.spec.ts line 11
     #[test]
     fn npm_bump_mirrors_dependency_version() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "mirror:chalk");
@@ -4842,14 +4842,14 @@ chalk@^2.4.1:
         assert_ne!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "aborts mirror" — modules/manager/npm/update/package-version/index.spec.ts line 21
+    // Ported: "aborts mirror" — lib/modules/manager/npm/update/package-version/index.spec.ts line 21
     #[test]
     fn npm_bump_aborts_mirror_when_dep_not_found() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "mirror:a");
         assert_eq!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "increments" — modules/manager/npm/update/package-version/index.spec.ts line 30
+    // Ported: "increments" — lib/modules/manager/npm/update/package-version/index.spec.ts line 30
     #[test]
     fn npm_bump_increments_patch() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "patch");
@@ -4859,14 +4859,14 @@ chalk@^2.4.1:
         assert_ne!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "no ops" — modules/manager/npm/update/package-version/index.spec.ts line 40
+    // Ported: "no ops" — lib/modules/manager/npm/update/package-version/index.spec.ts line 40
     #[test]
     fn npm_bump_no_op_when_bumped_version_matches_content() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.1", "patch");
         assert_eq!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "updates" — modules/manager/npm/update/package-version/index.spec.ts line 49
+    // Ported: "updates" — lib/modules/manager/npm/update/package-version/index.spec.ts line 49
     #[test]
     fn npm_bump_updates_minor() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.1", "minor");
@@ -4876,21 +4876,21 @@ chalk@^2.4.1:
         assert_ne!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/npm/update/package-version/index.spec.ts line 59
+    // Ported: "returns content if bumping errors" — lib/modules/manager/npm/update/package-version/index.spec.ts line 59
     #[test]
     fn npm_bump_returns_content_on_invalid_bump_type() {
         let result = bump_npm_package_version(NPM_PKG_CONTENT, "0.0.2", "invalid_type");
         assert_eq!(result, NPM_PKG_CONTENT);
     }
 
-    // Ported: "returns version" — modules/manager/npm/post-update/node-version.spec.ts line 101
+    // Ported: "returns version" — lib/modules/manager/npm/post-update/node-version.spec.ts line 101
     #[test]
     fn npm_get_node_update_returns_version() {
         let upgrades = [("node", "16.15.0")];
         assert_eq!(get_node_update(&upgrades), Some("16.15.0"));
     }
 
-    // Ported: "returns undefined" — modules/manager/npm/post-update/node-version.spec.ts line 107
+    // Ported: "returns undefined" — lib/modules/manager/npm/post-update/node-version.spec.ts line 107
     #[test]
     fn npm_get_node_update_returns_none_for_empty() {
         let upgrades: &[(&str, &str)] = &[];
@@ -4900,7 +4900,7 @@ chalk@^2.4.1:
     const NPM_PACKAGE_LOCK: &str =
         include_str!("../../tests/fixtures/npm/lockfile-parsing/package-lock.json");
 
-    // Ported: "parses lockfile string into an object" — modules/manager/npm/utils.spec.ts line 16
+    // Ported: "parses lockfile string into an object" — lib/modules/manager/npm/utils.spec.ts line 16
     #[test]
     fn npm_parse_lock_file_parses_into_object() {
         let result = parse_npm_lock_file(NPM_PACKAGE_LOCK);
@@ -4913,7 +4913,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["packages"][""]["license"], "ISC");
     }
 
-    // Ported: "can deal with invalid lockfiles" — modules/manager/npm/utils.spec.ts line 37
+    // Ported: "can deal with invalid lockfiles" — lib/modules/manager/npm/utils.spec.ts line 37
     #[test]
     fn npm_parse_lock_file_invalid_returns_none() {
         let result = parse_npm_lock_file("");
@@ -4921,7 +4921,7 @@ chalk@^2.4.1:
         assert!(result.lock_file_parsed.is_none());
     }
 
-    // Ported: "composes lockfile string out of an object" — modules/manager/npm/utils.spec.ts line 48
+    // Ported: "composes lockfile string out of an object" — lib/modules/manager/npm/utils.spec.ts line 48
     #[test]
     fn npm_compose_lock_file_serializes_with_indent() {
         let val = serde_json::json!({
@@ -4944,7 +4944,7 @@ chalk@^2.4.1:
         assert_eq!(reparsed["lockfileVersion"], 2);
     }
 
-    // Ported: "adds trailing newline to match npms behavior and avoid diffs" — modules/manager/npm/utils.spec.ts line 66
+    // Ported: "adds trailing newline to match npms behavior and avoid diffs" — lib/modules/manager/npm/utils.spec.ts line 66
     #[test]
     fn npm_compose_lock_file_round_trips_fixture() {
         let result = parse_npm_lock_file(NPM_PACKAGE_LOCK);
@@ -4957,7 +4957,7 @@ chalk@^2.4.1:
 
     // ── load_package_json_content tests ───────────────────────────────────────
 
-    // Ported: "loads and parses package.json correctly" — modules/manager/npm/utils.spec.ts line 81
+    // Ported: "loads and parses package.json correctly" — lib/modules/manager/npm/utils.spec.ts line 81
     #[test]
     fn npm_load_package_json_parses_correctly() {
         let json = r#"{
@@ -4984,7 +4984,7 @@ chalk@^2.4.1:
         assert_eq!(pm.version, "8.5.1");
     }
 
-    // Ported: "returns empty object when package.json is missing" — modules/manager/npm/utils.spec.ts line 100
+    // Ported: "returns empty object when package.json is missing" — lib/modules/manager/npm/utils.spec.ts line 100
     #[test]
     fn npm_load_package_json_missing_returns_none() {
         // Missing file → caller gets None (equivalent to empty object)
@@ -4992,7 +4992,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns empty object when package.json is invalid" — modules/manager/npm/utils.spec.ts line 105
+    // Ported: "returns empty object when package.json is invalid" — lib/modules/manager/npm/utils.spec.ts line 105
     #[test]
     fn npm_load_package_json_invalid_json_returns_none() {
         let result = load_package_json_content("{ invalid json");
@@ -5005,14 +5005,14 @@ chalk@^2.4.1:
     static YARN_LOCK2: &str = include_str!("../../tests/fixtures/yarn-lock/2.yarn.lock");
     static YARN2_LOCK: &str = include_str!("../../tests/fixtures/yarn-lock/yarn2.lock");
 
-    // Ported: "returns same if Yarn 2+" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 11
+    // Ported: "returns same if Yarn 2+" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 11
     #[test]
     fn yarn_replace_returns_same_for_yarn2() {
         let res = replace_constraint_version(YARN2_LOCK, "chalk", "^2.4.1", "2.5.0", None);
         assert_eq!(res, YARN2_LOCK);
     }
 
-    // Ported: "replaces without dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 21
+    // Ported: "replaces without dependencies" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 21
     #[test]
     fn yarn_replace_without_dependencies() {
         let res = replace_constraint_version(YARN_LOCK1, "fresh", "~0.2.1", "0.2.5", None);
@@ -5036,7 +5036,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces with dependencies" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 46
+    // Ported: "replaces with dependencies" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 46
     #[test]
     fn yarn_replace_with_dependencies() {
         let res = replace_constraint_version(YARN_LOCK1, "express", "4.0.0", "4.4.0", None);
@@ -5057,7 +5057,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces constraint too" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 71
+    // Ported: "replaces constraint too" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 71
     #[test]
     fn yarn_replace_constraint_too() {
         let res =
@@ -5073,7 +5073,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles escaped constraints" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 99
+    // Ported: "handles escaped constraints" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 99
     #[test]
     fn yarn_replace_handles_escaped_constraints() {
         let res = replace_constraint_version(
@@ -5099,7 +5099,7 @@ chalk@^2.4.1:
 
     static YARN_LOCK3: &str = include_str!("../../tests/fixtures/yarn-lock/3.yarn.lock");
 
-    // Ported: "finds unscoped" — modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 10
+    // Ported: "finds unscoped" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 10
     #[test]
     fn yarn_get_locked_finds_unscoped() {
         let results = get_yarn_locked_dependencies(YARN_LOCK1, "cookie", "0.1.0");
@@ -5114,7 +5114,7 @@ chalk@^2.4.1:
         assert_eq!(entry.version, "0.1.0");
     }
 
-    // Ported: "finds scoped" — modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 28
+    // Ported: "finds scoped" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 28
     #[test]
     fn yarn_get_locked_finds_scoped() {
         let results = get_yarn_locked_dependencies(YARN_LOCK3, "@actions/core", "1.2.6");
@@ -5129,7 +5129,7 @@ chalk@^2.4.1:
         assert_eq!(entry.version, "1.2.6");
     }
 
-    // Ported: "handles quoted" — modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 124
+    // Ported: "handles quoted" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 124
     #[test]
     fn yarn_replace_handles_quoted() {
         let res = replace_constraint_version(
@@ -5147,7 +5147,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "detects .npmrc in home directory" — manager/npm/detect.spec.ts line 8
+    // Ported: "detects .npmrc in home directory" — lib/modules/manager/npm/detect.spec.ts line 8
     #[test]
     fn detect_global_config_reads_npmrc() {
         let dir = tempfile::TempDir::new().unwrap();
@@ -5162,7 +5162,7 @@ chalk@^2.4.1:
         assert_eq!(res.get("npmrcMerge").and_then(|v| v.as_bool()), Some(true));
     }
 
-    // Ported: "uses rules without host type" — manager/npm/post-update/rules.spec.ts line 146
+    // Ported: "uses rules without host type" — lib/modules/manager/npm/post-update/rules.spec.ts line 146
     #[test]
     fn process_host_rules_no_host_type() {
         crate::util::host_rules::clear();
@@ -5184,7 +5184,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "deduplicates host rules while prefering npm type ones" — manager/npm/post-update/rules.spec.ts line 167
+    // Ported: "deduplicates host rules while prefering npm type ones" — lib/modules/manager/npm/post-update/rules.spec.ts line 167
     #[test]
     fn process_host_rules_deduplicates_preferring_npm_type() {
         crate::util::host_rules::clear();
@@ -5212,7 +5212,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "returns mixed rules content" — manager/npm/post-update/rules.spec.ts line 64
+    // Ported: "returns mixed rules content" — lib/modules/manager/npm/post-update/rules.spec.ts line 64
     #[test]
     fn process_host_rules_mixed_content() {
         crate::util::host_rules::clear();
@@ -5281,7 +5281,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles no .npmrc" — manager/npm/detect.spec.ts line 24
+    // Ported: "handles no .npmrc" — lib/modules/manager/npm/detect.spec.ts line 24
     #[test]
     fn detect_global_config_no_npmrc() {
         let res = detect_global_config_from("/nonexistent/path/.npmrc");
@@ -5290,7 +5290,7 @@ chalk@^2.4.1:
 
     // ── processHostRules ─────────────────────────────────────────────────────
 
-    // Ported: "returns empty if no rules" — manager/npm/post-update/rules.spec.ts line 10
+    // Ported: "returns empty if no rules" — lib/modules/manager/npm/post-update/rules.spec.ts line 10
     #[test]
     fn process_host_rules_empty() {
         crate::util::host_rules::clear();
@@ -5299,7 +5299,7 @@ chalk@^2.4.1:
         assert!(res.additional_yarn_rc_yml.is_none());
     }
 
-    // Ported: "returns empty if no resolvedHost" — manager/npm/post-update/rules.spec.ts line 16
+    // Ported: "returns empty if no resolvedHost" — lib/modules/manager/npm/post-update/rules.spec.ts line 16
     #[test]
     fn process_host_rules_no_resolved_host() {
         crate::util::host_rules::clear();
@@ -5314,7 +5314,7 @@ chalk@^2.4.1:
         assert!(res.additional_yarn_rc_yml.is_none());
     }
 
-    // Ported: "returns rules content" — manager/npm/post-update/rules.spec.ts line 23
+    // Ported: "returns rules content" — lib/modules/manager/npm/post-update/rules.spec.ts line 23
     #[test]
     fn process_host_rules_username_password() {
         crate::util::host_rules::clear();
@@ -5346,7 +5346,7 @@ chalk@^2.4.1:
     const PKG_JSON_FIXTURE: &str =
         include_str!("../../tests/fixtures/npm/package-lock/package.json");
 
-    // Ported: "finds indirect dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 11
+    // Ported: "finds indirect dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 11
     #[test]
     fn dep_constraints_finds_indirect() {
         let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
@@ -5359,7 +5359,7 @@ chalk@^2.4.1:
         assert_eq!(result[0].parent_version.as_deref(), Some("4.0.0"));
     }
 
-    // Ported: "finds direct dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 29
+    // Ported: "finds direct dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 29
     #[test]
     fn dep_constraints_finds_direct() {
         let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
@@ -5371,7 +5371,7 @@ chalk@^2.4.1:
         assert_eq!(result[0].dep_type.as_deref(), Some("dependencies"));
     }
 
-    // Ported: "skips non-matching direct dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 41
+    // Ported: "skips non-matching direct dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 41
     #[test]
     fn dep_constraints_skips_nonmatching() {
         let pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
@@ -5381,7 +5381,7 @@ chalk@^2.4.1:
         assert!(result.is_empty());
     }
 
-    // Ported: "finds direct devDependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 53
+    // Ported: "finds direct devDependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 53
     #[test]
     fn dep_constraints_finds_dev_dep() {
         let mut pkg_json: serde_json::Value = serde_json::from_str(PKG_JSON_FIXTURE).unwrap();
@@ -5402,7 +5402,7 @@ chalk@^2.4.1:
     const BUNDLED_PKG_LOCK: &str =
         include_str!("../../tests/fixtures/npm/package-lock/bundled.package-lock.json");
 
-    // Ported: "handles error" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 11
+    // Ported: "handles error" — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts line 11
     #[test]
     fn pkg_lock_get_locked_handles_null() {
         let result = package_lock_get_locked_dependencies(
@@ -5414,7 +5414,7 @@ chalk@^2.4.1:
         assert!(result.is_empty());
     }
 
-    // Ported: "returns empty if failed to parse" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 17
+    // Ported: "returns empty if failed to parse" — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts line 17
     #[test]
     fn pkg_lock_get_locked_returns_empty_for_no_deps() {
         let result = package_lock_get_locked_dependencies(
@@ -5426,7 +5426,7 @@ chalk@^2.4.1:
         assert!(result.is_empty());
     }
 
-    // Ported: "finds direct dependency" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 21
+    // Ported: "finds direct dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts line 21
     #[test]
     fn pkg_lock_get_locked_finds_direct() {
         let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
@@ -5441,7 +5441,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "finds indirect dependency" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 32
+    // Ported: "finds indirect dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts line 32
     #[test]
     fn pkg_lock_get_locked_finds_indirect() {
         let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
@@ -5450,7 +5450,7 @@ chalk@^2.4.1:
         assert_eq!(result[0]["version"].as_str(), Some("0.2.0"));
     }
 
-    // Ported: "finds any version" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 43
+    // Ported: "finds any version" — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts line 43
     #[test]
     fn pkg_lock_get_locked_finds_any_version() {
         let lock: serde_json::Value = serde_json::from_str(PKG_LOCK_V1).unwrap();
@@ -5458,7 +5458,7 @@ chalk@^2.4.1:
         assert_eq!(result.len(), 2);
     }
 
-    // Ported: "finds bundled dependency" — npm/update/locked-dependency/package-lock/get-locked.spec.ts line 49
+    // Ported: "finds bundled dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts line 49
     #[test]
     fn pkg_lock_get_locked_finds_bundled() {
         let lock: serde_json::Value = serde_json::from_str(BUNDLED_PKG_LOCK).unwrap();
@@ -5493,7 +5493,7 @@ chalk@^2.4.1:
         }
     }
 
-    // Ported: "validates filename" — npm/update/locked-dependency/index.spec.ts line 45
+    // Ported: "validates filename" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 45
     #[test]
     fn npm_locked_dep_main_validates_filename() {
         let config = mk_locked_config("yarn.lock", "abc", "dep", "1.0.0", "1.0.1");
@@ -5508,7 +5508,7 @@ chalk@^2.4.1:
         ));
     }
 
-    // Ported: "validates versions" — npm/update/locked-dependency/index.spec.ts line 54
+    // Ported: "validates versions" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 54
     #[test]
     fn npm_locked_dep_main_validates_versions() {
         let config = mk_locked_config(
@@ -5523,7 +5523,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "returns null for unparseable files" — npm/update/locked-dependency/index.spec.ts line 63
+    // Ported: "returns null for unparseable files" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 63
     #[test]
     fn npm_locked_dep_main_unparseable_lock() {
         let config = mk_locked_config("package-lock.json", "not json", "dep", "1.0.0", "1.0.1");
@@ -5531,7 +5531,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "rejects lockFileVersion 2" — npm/update/locked-dependency/index.spec.ts line 72
+    // Ported: "rejects lockFileVersion 2" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 72
     #[test]
     fn npm_locked_dep_main_rejects_v2() {
         let config = mk_locked_config("package-lock.json", PKG_LOCK_V2, "dep", "1.0.0", "1.0.1");
@@ -5539,7 +5539,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "returns null if no locked deps" — npm/update/locked-dependency/index.spec.ts line 81
+    // Ported: "returns null if no locked deps" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 81
     #[test]
     fn npm_locked_dep_main_no_locked_deps() {
         let config = mk_locked_config(
@@ -5553,7 +5553,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "rejects in-range remediation if lockfile v2+" — npm/update/locked-dependency/index.spec.ts line 109
+    // Ported: "rejects in-range remediation if lockfile v2+" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 109
     #[test]
     fn npm_locked_dep_main_v2_unsupported() {
         let config = mk_locked_config("package-lock.json", PKG_LOCK_V2, "mime", "1.2.11", "1.2.12");
@@ -5562,7 +5562,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed); // returns update-failed for v2
     }
 
-    // Ported: "returns already-updated if already remediated exactly" — npm/update/locked-dependency/index.spec.ts line 161
+    // Ported: "returns already-updated if already remediated exactly" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 161
     #[test]
     fn npm_locked_dep_main_already_updated() {
         // mime@1.2.10 not in lock, but mime@1.2.11 (newVersion) IS → already-updated
@@ -5571,7 +5571,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::AlreadyUpdated);
     }
 
-    // Ported: "returns already-updated if not found" — npm/update/locked-dependency/index.spec.ts line 187
+    // Ported: "returns already-updated if not found" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 187
     #[test]
     fn npm_locked_dep_main_already_updated_via_parent() {
         // express@4.0.0 is in lock → found, returns Updated (simplified)
@@ -5590,7 +5590,7 @@ chalk@^2.4.1:
         ));
     }
 
-    // Ported: "rejects null if no constraint found" — npm/update/locked-dependency/index.spec.ts line 85
+    // Ported: "rejects null if no constraint found" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 85
     #[test]
     fn npm_locked_dep_main_no_constraint_found() {
         // accepts@10.0.0 is not in lock (lock has accepts@1.0.0) and accepts@11.0.0 is also not in lock
@@ -5605,7 +5605,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "remediates in-range" — npm/update/locked-dependency/index.spec.ts line 97
+    // Ported: "remediates in-range" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 97
     #[test]
     fn npm_locked_dep_main_remediates_in_range() {
         let config = mk_locked_config(
@@ -5619,7 +5619,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
 
-    // Ported: "fails to remediate if parent dep cannot support" — npm/update/locked-dependency/index.spec.ts line 120
+    // Ported: "fails to remediate if parent dep cannot support" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 120
     #[test]
     fn npm_locked_dep_main_fails_parent_support() {
         let config = mk_locked_config(
@@ -5634,7 +5634,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
 
-    // Ported: "remediates express" — npm/update/locked-dependency/index.spec.ts line 140
+    // Ported: "remediates express" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 140
     #[test]
     fn npm_locked_dep_main_remediates_express() {
         let config = mk_locked_config(
@@ -5648,7 +5648,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
 
-    // Ported: "remediates lock file v2 express" — npm/update/locked-dependency/index.spec.ts line 150
+    // Ported: "remediates lock file v2 express" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 150
     #[test]
     fn npm_locked_dep_main_remediates_v2_express() {
         let config = mk_locked_config(
@@ -5662,7 +5662,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "returns already-updated if already v2 remediated exactly" — npm/update/locked-dependency/index.spec.ts line 169
+    // Ported: "returns already-updated if already v2 remediated exactly" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 169
     #[test]
     fn npm_locked_dep_main_already_v2_remediated() {
         let config = mk_locked_config("package-lock.json", PKG_LOCK_V2, "mime", "1.2.11", "1.2.11");
@@ -5671,7 +5671,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "returns already-updated if already remediated higher" — npm/update/locked-dependency/index.spec.ts line 178
+    // Ported: "returns already-updated if already remediated higher" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 178
     #[test]
     fn npm_locked_dep_main_already_remediated_higher() {
         let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "mime", "1.2.10", "1.2.11");
@@ -5679,7 +5679,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::AlreadyUpdated);
     }
 
-    // Ported: "returns update-failed if other, lower version found" — npm/update/locked-dependency/index.spec.ts line 196
+    // Ported: "returns update-failed if other, lower version found" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 196
     #[test]
     fn npm_locked_dep_main_other_lower_version() {
         // mime@1.2.5 is not in lock (lock has 1.2.11), mime@1.2.15 is also not in lock
@@ -5688,7 +5688,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::UpdateFailed);
     }
 
-    // Ported: "remediates mime" — npm/update/locked-dependency/index.spec.ts line 205
+    // Ported: "remediates mime" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 205
     #[test]
     fn npm_locked_dep_main_remediates_mime() {
         let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "mime", "1.2.11", "1.2.12");
@@ -5696,7 +5696,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
 
-    // Ported: "fails remediation if cannot update parent" — npm/update/locked-dependency/index.spec.ts line 222
+    // Ported: "fails remediation if cannot update parent" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 222
     #[test]
     fn npm_locked_dep_main_fails_parent_update() {
         let config = mk_locked_config("package-lock.json", PKG_LOCK_V1, "qs", "0.6.6", "6.0.0");
@@ -5705,7 +5705,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
 
-    // Ported: "fails remediation if bundled" — npm/update/locked-dependency/index.spec.ts line 231
+    // Ported: "fails remediation if bundled" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 231
     #[test]
     fn npm_locked_dep_main_fails_bundled() {
         let config = mk_locked_config(
@@ -5720,7 +5720,7 @@ chalk@^2.4.1:
         assert_eq!(res.status, UpdateLockedStatus::Updated);
     }
 
-    // Ported: "rejects in-range remediation if pnpm" — npm/update/locked-dependency/index.spec.ts line 241
+    // Ported: "rejects in-range remediation if pnpm" — lib/modules/manager/npm/update/locked-dependency/index.spec.ts line 241
     #[test]
     fn npm_locked_dep_main_rejects_pnpm() {
         let config = mk_locked_config(
@@ -5740,7 +5740,7 @@ chalk@^2.4.1:
         include_str!("../../tests/fixtures/npm/yarn-lock/express.yarn.lock");
     // Use the existing YARN2_LOCK constant already defined in this test module.
 
-    // Ported: "returns if cannot parse lock file" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 17
+    // Ported: "returns if cannot parse lock file" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts line 17
     #[test]
     fn yarn_locked_dep_fails_invalid_content() {
         let config = UpdateLockedConfig {
@@ -5751,7 +5751,7 @@ chalk@^2.4.1:
         assert_eq!(res.status.as_str(), "update-failed");
     }
 
-    // Ported: "returns if yarn lock 2" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 22
+    // Ported: "returns if yarn lock 2" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts line 22
     #[test]
     fn yarn_locked_dep_unsupported_yarn2() {
         let config = UpdateLockedConfig {
@@ -5765,7 +5765,7 @@ chalk@^2.4.1:
         assert_eq!(res.status.as_str(), "unsupported");
     }
 
-    // Ported: "fails if cannot find dep" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 30
+    // Ported: "fails if cannot find dep" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts line 30
     #[test]
     fn yarn_locked_dep_fails_not_found() {
         let config = UpdateLockedConfig {
@@ -5779,7 +5779,7 @@ chalk@^2.4.1:
         assert_eq!(res.status.as_str(), "update-failed");
     }
 
-    // Ported: "returns already-updated" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 38
+    // Ported: "returns already-updated" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts line 38
     #[test]
     fn yarn_locked_dep_already_updated() {
         let config = UpdateLockedConfig {
@@ -5793,7 +5793,7 @@ chalk@^2.4.1:
         assert_eq!(res.status.as_str(), "already-updated");
     }
 
-    // Ported: "fails if cannot update dep in-range" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 46
+    // Ported: "fails if cannot update dep in-range" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts line 46
     #[test]
     fn yarn_locked_dep_fails_out_of_range() {
         let config = UpdateLockedConfig {
@@ -5807,7 +5807,7 @@ chalk@^2.4.1:
         assert_eq!(res.status.as_str(), "update-failed");
     }
 
-    // Ported: "succeeds if can update within range" — npm/update/locked-dependency/yarn-lock/index.spec.ts line 54
+    // Ported: "succeeds if can update within range" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts line 54
     #[test]
     fn yarn_locked_dep_succeeds_in_range() {
         let config = UpdateLockedConfig {
@@ -5956,7 +5956,7 @@ chalk@^2.4.1:
   }
 }"#;
 
-    // Ported: "replaces a dependency value" — npm/update/dependency/index.spec.ts line 13
+    // Ported: "replaces a dependency value" — lib/modules/manager/npm/update/dependency/index.spec.ts line 13
     #[test]
     fn npm_update_dep_replaces_value() {
         let upgrade = NpmUpdateUpgrade {
@@ -5974,7 +5974,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a github dependency value" — npm/update/dependency/index.spec.ts line 28
+    // Ported: "replaces a github dependency value" — lib/modules/manager/npm/update/dependency/index.spec.ts line 28
     #[test]
     fn npm_update_dep_github_value() {
         let input = r#"{"dependencies":{"gulp":"gulpjs/gulp#v4.0.0-alpha.2"}}"#;
@@ -5991,7 +5991,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["dependencies"]["gulp"], "gulpjs/gulp#v4.0.0");
     }
 
-    // Ported: "replaces a npm package alias" — npm/update/dependency/index.spec.ts line 52
+    // Ported: "replaces a npm package alias" — lib/modules/manager/npm/update/dependency/index.spec.ts line 52
     #[test]
     fn npm_update_dep_npm_alias() {
         let input = r#"{"dependencies":{"hapi":"npm:@hapi/hapi@18.3.0"}}"#;
@@ -6009,7 +6009,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["dependencies"]["hapi"], "npm:@hapi/hapi@18.3.1");
     }
 
-    // Ported: "replaces a github short hash" — npm/update/dependency/index.spec.ts line 77
+    // Ported: "replaces a github short hash" — lib/modules/manager/npm/update/dependency/index.spec.ts line 77
     #[test]
     fn npm_update_dep_short_hash() {
         let input = r#"{"dependencies":{"gulp":"gulpjs/gulp#abcdef7"}}"#;
@@ -6026,7 +6026,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["dependencies"]["gulp"], "gulpjs/gulp#0000000");
     }
 
-    // Ported: "replaces a github fully specified version" — npm/update/dependency/index.spec.ts line 101
+    // Ported: "replaces a github fully specified version" — lib/modules/manager/npm/update/dependency/index.spec.ts line 101
     #[test]
     fn npm_update_dep_git_tag() {
         let input = r#"{"dependencies":{"n":"git+https://github.com/owner/n#v1.0.0"}}"#;
@@ -6047,7 +6047,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "updates resolutions too" — npm/update/dependency/index.spec.ts line 123
+    // Ported: "updates resolutions too" — lib/modules/manager/npm/update/dependency/index.spec.ts line 123
     #[test]
     fn npm_update_dep_updates_resolutions() {
         let upgrade = NpmUpdateUpgrade {
@@ -6062,7 +6062,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["resolutions"]["config"], "1.22.0");
     }
 
-    // Ported: "updates glob resolutions" — npm/update/dependency/index.spec.ts line 138
+    // Ported: "updates glob resolutions" — lib/modules/manager/npm/update/dependency/index.spec.ts line 138
     #[test]
     fn npm_update_dep_glob_resolutions() {
         let upgrade = NpmUpdateUpgrade {
@@ -6077,7 +6077,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["resolutions"]["**/config"], "1.22.0");
     }
 
-    // Ported: "updates glob resolutions without dep" — npm/update/dependency/index.spec.ts line 153
+    // Ported: "updates glob resolutions without dep" — lib/modules/manager/npm/update/dependency/index.spec.ts line 153
     #[test]
     fn npm_update_dep_glob_resolutions_no_dep() {
         let upgrade = NpmUpdateUpgrade {
@@ -6095,7 +6095,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["resolutions"]["**/@angular/cli"], "8.1.0");
     }
 
-    // Ported: "replaces only the first instance of a value" — npm/update/dependency/index.spec.ts line 170
+    // Ported: "replaces only the first instance of a value" — lib/modules/manager/npm/update/dependency/index.spec.ts line 170
     #[test]
     fn npm_update_dep_first_instance() {
         let upgrade = NpmUpdateUpgrade {
@@ -6111,7 +6111,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["devDependencies"]["angular-sanitize"], "1.5.8");
     }
 
-    // Ported: "replaces only the second instance of a value" — npm/update/dependency/index.spec.ts line 185
+    // Ported: "replaces only the second instance of a value" — lib/modules/manager/npm/update/dependency/index.spec.ts line 185
     #[test]
     fn npm_update_dep_second_instance() {
         let upgrade = NpmUpdateUpgrade {
@@ -6127,7 +6127,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["devDependencies"]["angular-touch"], "1.5.8");
     }
 
-    // Ported: "handles the case where the desired version is already supported" — npm/update/dependency/index.spec.ts line 200
+    // Ported: "handles the case where the desired version is already supported" — lib/modules/manager/npm/update/dependency/index.spec.ts line 200
     #[test]
     fn npm_update_dep_already_at_version() {
         let upgrade = NpmUpdateUpgrade {
@@ -6140,7 +6140,7 @@ chalk@^2.4.1:
         assert_eq!(result, INPUT01);
     }
 
-    // Ported: "returns null if throws error" — npm/update/dependency/index.spec.ts line 214
+    // Ported: "returns null if throws error" — lib/modules/manager/npm/update/dependency/index.spec.ts line 214
     #[test]
     fn npm_update_dep_returns_null_on_error() {
         let upgrade = NpmUpdateUpgrade {
@@ -6153,7 +6153,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "updates packageManager" — npm/update/dependency/index.spec.ts line 228
+    // Ported: "updates packageManager" — lib/modules/manager/npm/update/dependency/index.spec.ts line 228
     #[test]
     fn npm_update_dep_package_manager() {
         let upgrade = NpmUpdateUpgrade {
@@ -6167,7 +6167,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["packageManager"], "yarn@3.1.0");
     }
 
-    // Ported: "returns null if empty file" — npm/update/dependency/index.spec.ts line 243
+    // Ported: "returns null if empty file" — lib/modules/manager/npm/update/dependency/index.spec.ts line 243
     #[test]
     fn npm_update_dep_null_on_empty() {
         let upgrade = NpmUpdateUpgrade {
@@ -6180,7 +6180,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "replaces package" — npm/update/dependency/index.spec.ts line 257
+    // Ported: "replaces package" — lib/modules/manager/npm/update/dependency/index.spec.ts line 257
     #[test]
     fn npm_update_dep_replaces_package() {
         let input = r#"{"dependencies":{"config":"1.21.0"}}"#;
@@ -6197,7 +6197,7 @@ chalk@^2.4.1:
         assert!(parsed["dependencies"]["config"].is_null());
     }
 
-    // Ported: "supports alias-based replacement" — npm/update/dependency/index.spec.ts line 273
+    // Ported: "supports alias-based replacement" — lib/modules/manager/npm/update/dependency/index.spec.ts line 273
     #[test]
     fn npm_update_dep_alias_replacement() {
         let upgrade = NpmUpdateUpgrade {
@@ -6213,7 +6213,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["dependencies"]["config"], "npm:abc@2.0.0");
     }
 
-    // Ported: "replaces glob package resolutions" — npm/update/dependency/index.spec.ts line 291
+    // Ported: "replaces glob package resolutions" — lib/modules/manager/npm/update/dependency/index.spec.ts line 291
     #[test]
     fn npm_update_dep_glob_package_resolution() {
         let upgrade = NpmUpdateUpgrade {
@@ -6229,7 +6229,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["resolutions"]["**/abc"], "2.0.0");
     }
 
-    // Ported: "pins also the version in patch with npm protocol in resolutions" — npm/update/dependency/index.spec.ts line 307
+    // Ported: "pins also the version in patch with npm protocol in resolutions" — lib/modules/manager/npm/update/dependency/index.spec.ts line 307
     #[test]
     fn npm_update_dep_patch_npm_protocol() {
         let input = r#"{
@@ -6266,7 +6266,7 @@ chalk@^2.4.1:
         assert!(parsed["dependenciesMeta"]["lodash@4.17.21"].is_object());
     }
 
-    // Ported: "replaces also the version in patch with range in resolutions" — npm/update/dependency/index.spec.ts line 322
+    // Ported: "replaces also the version in patch with range in resolutions" — lib/modules/manager/npm/update/dependency/index.spec.ts line 322
     #[test]
     fn npm_update_dep_patch_range() {
         let input = r#"{
@@ -6293,7 +6293,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles override dependency" — npm/update/dependency/index.spec.ts line 337
+    // Ported: "handles override dependency" — lib/modules/manager/npm/update/dependency/index.spec.ts line 337
     #[test]
     fn npm_update_dep_override() {
         let input = r#"{
@@ -6316,7 +6316,7 @@ chalk@^2.4.1:
         assert_eq!(result, expected);
     }
 
-    // Ported: "handles override dependency object" — npm/update/dependency/index.spec.ts line 361
+    // Ported: "handles override dependency object" — lib/modules/manager/npm/update/dependency/index.spec.ts line 361
     #[test]
     fn npm_update_dep_override_object() {
         let input = r#"{
@@ -6347,7 +6347,7 @@ chalk@^2.4.1:
         assert_eq!(result, expected);
     }
 
-    // Ported: "handles override dependency object where lastParent === depName" — npm/update/dependency/index.spec.ts line 390
+    // Ported: "handles override dependency object where lastParent === depName" — lib/modules/manager/npm/update/dependency/index.spec.ts line 390
     #[test]
     fn npm_update_dep_override_self_parent() {
         let input = r#"{
@@ -6378,7 +6378,7 @@ chalk@^2.4.1:
         assert_eq!(result, expected);
     }
 
-    // Ported: "handles pnpm.override dependency" — npm/update/dependency/index.spec.ts line 419
+    // Ported: "handles pnpm.override dependency" — lib/modules/manager/npm/update/dependency/index.spec.ts line 419
     #[test]
     fn npm_update_dep_pnpm_override() {
         let input = r#"{
@@ -6407,43 +6407,43 @@ chalk@^2.4.1:
 
     // ── has_package_manager tests ─────────────────────────────────────────
 
-    // Ported: "returns true for a valid packageManager with name@version(e.g. pnpm@8.15.4)" — npm/extract/common/package-file.spec.ts line 20
+    // Ported: "returns true for a valid packageManager with name@version(e.g. pnpm@8.15.4)" — lib/modules/manager/npm/extract/common/package-file.spec.ts line 20
     #[test]
     fn has_package_manager_valid_version() {
         assert!(has_package_manager(r#"{"packageManager":"pnpm@8.15.4"}"#));
     }
 
-    // Ported: "returns true for a valid range like npm@^9" — npm/extract/common/package-file.spec.ts line 31
+    // Ported: "returns true for a valid range like npm@^9" — lib/modules/manager/npm/extract/common/package-file.spec.ts line 31
     #[test]
     fn has_package_manager_range() {
         assert!(has_package_manager(r#"{"packageManager":"npm@^9"}"#));
     }
 
-    // Ported: "returns true for yarn classic pin yarn@1.22.19" — npm/extract/common/package-file.spec.ts line 38
+    // Ported: "returns true for yarn classic pin yarn@1.22.19" — lib/modules/manager/npm/extract/common/package-file.spec.ts line 38
     #[test]
     fn has_package_manager_yarn_classic() {
         assert!(has_package_manager(r#"{"packageManager":"yarn@1.22.19"}"#));
     }
 
-    // Ported: "returns false when packageManager does not contain '@' (e.g. 'npm')" — npm/extract/common/package-file.spec.ts line 45
+    // Ported: "returns false when packageManager does not contain '@' (e.g. 'npm')" — lib/modules/manager/npm/extract/common/package-file.spec.ts line 45
     #[test]
     fn has_package_manager_no_at() {
         assert!(!has_package_manager(r#"{"packageManager":"npm"}"#));
     }
 
-    // Ported: "returns false when packageManager is missing" — npm/extract/common/package-file.spec.ts line 52
+    // Ported: "returns false when packageManager is missing" — lib/modules/manager/npm/extract/common/package-file.spec.ts line 52
     #[test]
     fn has_package_manager_missing() {
         assert!(!has_package_manager(r#"{"name":"demo"}"#));
     }
 
-    // Ported: "returns false when package.json is invalid" — npm/extract/common/package-file.spec.ts line 57
+    // Ported: "returns false when package.json is invalid" — lib/modules/manager/npm/extract/common/package-file.spec.ts line 57
     #[test]
     fn has_package_manager_invalid_json() {
         assert!(!has_package_manager("{ not: valid json"));
     }
 
-    // Ported: "returns false if packageManager is an empty string" — npm/extract/common/package-file.spec.ts line 62
+    // Ported: "returns false if packageManager is an empty string" — lib/modules/manager/npm/extract/common/package-file.spec.ts line 62
     #[test]
     fn has_package_manager_empty_string() {
         assert!(!has_package_manager(r#"{"packageManager":""}"#));
@@ -6451,7 +6451,7 @@ chalk@^2.4.1:
 
     // ── pnpm update dependency tests ──────────────────────────────────────
 
-    // Ported: "returns null on invalid input" — npm/update/dependency/pnpm.spec.ts line 8
+    // Ported: "returns null on invalid input" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 8
     #[test]
     fn pnpm_update_dep_null_on_invalid() {
         // No catalog name — dep_type has no dot-separated catalog segment
@@ -6465,7 +6465,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "handles implicit default catalog dependency" — npm/update/dependency/pnpm.spec.ts line 19
+    // Ported: "handles implicit default catalog dependency" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 19
     #[test]
     fn pnpm_update_dep_implicit_default_catalog() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1\n";
@@ -6482,7 +6482,7 @@ chalk@^2.4.1:
         assert!(result.contains("packages:"));
     }
 
-    // Ported: "handles explicit default catalog dependency" — npm/update/dependency/pnpm.spec.ts line 46
+    // Ported: "handles explicit default catalog dependency" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 46
     #[test]
     fn pnpm_update_dep_explicit_default_catalog() {
         let input = "packages:\n  - pkg-a\n\ncatalogs:\n  default:\n    react: 18.3.1\n";
@@ -6500,7 +6500,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles explicit named catalog dependency" — npm/update/dependency/pnpm.spec.ts line 75
+    // Ported: "handles explicit named catalog dependency" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 75
     #[test]
     fn pnpm_update_dep_named_catalog() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1\n\ncatalogs:\n  react17:\n    react: 17.0.0\n";
@@ -6521,7 +6521,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["catalog"]["react"].as_str().unwrap(), "18.3.1");
     }
 
-    // Ported: "does nothing if the new and old values match" — npm/update/dependency/pnpm.spec.ts line 111
+    // Ported: "does nothing if the new and old values match" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 111
     #[test]
     fn pnpm_update_dep_already_at_version() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 19.0.0\n";
@@ -6535,7 +6535,7 @@ chalk@^2.4.1:
         assert_eq!(result, input);
     }
 
-    // Ported: "replaces package" — npm/update/dependency/pnpm.spec.ts line 132
+    // Ported: "replaces package" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 132
     #[test]
     fn pnpm_update_dep_replaces_package() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  config: 1.21.0\n";
@@ -6552,7 +6552,7 @@ chalk@^2.4.1:
         assert!(parsed["catalog"]["config"].is_null());
     }
 
-    // Ported: "replaces a github dependency value" — npm/update/dependency/pnpm.spec.ts line 160
+    // Ported: "replaces a github dependency value" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 160
     #[test]
     fn pnpm_update_dep_github_value() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  gulp: gulpjs/gulp#v4.0.0-alpha.2\n";
@@ -6572,7 +6572,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a npm package alias" — npm/update/dependency/pnpm.spec.ts line 189
+    // Ported: "replaces a npm package alias" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 189
     #[test]
     fn pnpm_update_dep_npm_alias() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  hapi: npm:@hapi/hapi@18.3.0\n";
@@ -6593,7 +6593,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a github short hash" — npm/update/dependency/pnpm.spec.ts line 219
+    // Ported: "replaces a github short hash" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 219
     #[test]
     fn pnpm_update_dep_short_hash() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  gulp: gulpjs/gulp#abcdef7\n";
@@ -6613,7 +6613,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a github fully specified version" — npm/update/dependency/pnpm.spec.ts line 248
+    // Ported: "replaces a github fully specified version" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 248
     #[test]
     fn pnpm_update_dep_git_tag() {
         let input =
@@ -6630,7 +6630,7 @@ chalk@^2.4.1:
         assert!(result.contains("v1.1.0"));
     }
 
-    // Ported: "returns null if the dependency is not present in the target catalog" — npm/update/dependency/pnpm.spec.ts line 277
+    // Ported: "returns null if the dependency is not present in the target catalog" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 277
     #[test]
     fn pnpm_update_dep_null_if_not_in_catalog() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1\n";
@@ -6644,7 +6644,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if catalogs are missing" — npm/update/dependency/pnpm.spec.ts line 298
+    // Ported: "returns null if catalogs are missing" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 298
     #[test]
     fn pnpm_update_dep_null_if_no_catalog() {
         let input = "packages:\n  - pkg-a\n";
@@ -6658,7 +6658,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if empty file" — npm/update/dependency/pnpm.spec.ts line 316
+    // Ported: "returns null if empty file" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 316
     #[test]
     fn pnpm_update_dep_null_on_empty() {
         let upgrade = NpmUpdateUpgrade {
@@ -6671,7 +6671,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "preserves literal whitespace" — npm/update/dependency/pnpm.spec.ts line 330
+    // Ported: "preserves literal whitespace" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 330
     #[test]
     fn pnpm_update_dep_preserves_whitespace() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react:    18.3.1\n";
@@ -6686,7 +6686,7 @@ chalk@^2.4.1:
         assert!(result.contains("react:    19.0.0"));
     }
 
-    // Ported: "preserves single quote style" — npm/update/dependency/pnpm.spec.ts line 357
+    // Ported: "preserves single quote style" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 357
     #[test]
     fn pnpm_update_dep_preserves_single_quotes() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: '18.3.1'\n";
@@ -6700,7 +6700,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: '19.0.0'"));
     }
 
-    // Ported: "preserves comments" — npm/update/dependency/pnpm.spec.ts line 384
+    // Ported: "preserves comments" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 384
     #[test]
     fn pnpm_update_dep_preserves_comments() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: 18.3.1 # This is a comment\n  # Another comment\n  react-dom: 18.3.1\n";
@@ -6718,7 +6718,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["catalog"]["react-dom"].as_str().unwrap(), "18.3.1");
     }
 
-    // Ported: "preserves double quote style" — npm/update/dependency/pnpm.spec.ts line 415
+    // Ported: "preserves double quote style" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 415
     #[test]
     fn pnpm_update_dep_preserves_double_quotes() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: \"18.3.1\"\n";
@@ -6732,7 +6732,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: \"19.0.0\""));
     }
 
-    // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/pnpm.spec.ts line 442
+    // Ported: "preserves anchors, replacing only the value" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 442
     #[test]
     fn pnpm_update_dep_preserves_anchors() {
         let input =
@@ -6750,7 +6750,7 @@ chalk@^2.4.1:
         assert!(result.contains("react-dom: *react"));
     }
 
-    // Ported: "preserves whitespace with anchors" — npm/update/dependency/pnpm.spec.ts line 474
+    // Ported: "preserves whitespace with anchors" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 474
     #[test]
     fn pnpm_update_dep_preserves_anchor_whitespace() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: &react    18.3.1\n";
@@ -6764,7 +6764,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: &react    19.0.0"));
     }
 
-    // Ported: "preserves quotation style with anchors" — npm/update/dependency/pnpm.spec.ts line 501
+    // Ported: "preserves quotation style with anchors" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 501
     #[test]
     fn pnpm_update_dep_preserves_anchor_quote_style() {
         let input = "packages:\n  - pkg-a\n\ncatalog:\n  react: &react \"18.3.1\"\n";
@@ -6778,7 +6778,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: &react \"19.0.0\""));
     }
 
-    // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/pnpm.spec.ts line 528
+    // Ported: "preserves formatting in flow style syntax" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 528
     #[test]
     fn pnpm_update_dep_flow_style() {
         let input = "packages:\n  - pkg-a\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
@@ -6793,7 +6793,7 @@ chalk@^2.4.1:
         assert!(result.contains("# This is a comment"));
     }
 
-    // Ported: "does not replace aliases in the value position" — npm/update/dependency/pnpm.spec.ts line 559
+    // Ported: "does not replace aliases in the value position" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 559
     #[test]
     fn pnpm_update_dep_no_replace_value_alias() {
         let input = "__deps:\n  react: &react 18.3.1\n\npackages:\n  - pkg-a\n\ncatalog:\n  react: *react\n  react-dom: *react\n";
@@ -6808,7 +6808,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "does not replace aliases in the key position" — npm/update/dependency/pnpm.spec.ts line 587
+    // Ported: "does not replace aliases in the key position" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 587
     #[test]
     fn pnpm_update_dep_no_replace_key_alias() {
         // newName provided but no newValue → early return None
@@ -6825,7 +6825,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "handles workspace overrides" — npm/update/dependency/pnpm.spec.ts line 611
+    // Ported: "handles workspace overrides" — lib/modules/manager/npm/update/dependency/pnpm.spec.ts line 611
     #[test]
     fn pnpm_update_dep_workspace_overrides() {
         let input = "overrides:\n  react: 18.3.1\n\ncatalogs:\n  react17:\n    react: 19.0.0\n";
@@ -6845,7 +6845,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "handles yarn.catalogs dependencies" — npm/update/dependency/index.spec.ts line 446
+    // Ported: "handles yarn.catalogs dependencies" — lib/modules/manager/npm/update/dependency/index.spec.ts line 446
     #[test]
     fn npm_update_dep_yarn_catalogs() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  typescript: 0.0.5\n";
@@ -6865,7 +6865,7 @@ chalk@^2.4.1:
 
     // ── yarn update dependency tests ──────────────────────────────────────
 
-    // Ported: "returns null if catalogName is missing and logs error" — npm/update/dependency/yarn.spec.ts line 8
+    // Ported: "returns null if catalogName is missing and logs error" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 8
     #[test]
     fn yarn_update_dep_null_on_missing_catalog_name() {
         // dep_type = "" (undefined in TS) → no catalog name
@@ -6880,7 +6880,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "ensure continuation even if catalog list and update does not match" — npm/update/dependency/yarn.spec.ts line 33
+    // Ported: "ensure continuation even if catalog list and update does not match" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 33
     #[test]
     fn yarn_update_dep_null_catalog_mismatch() {
         let upgrade = NpmUpdateUpgrade {
@@ -6894,7 +6894,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "ensure continuation even if dependency and update does not match" — npm/update/dependency/yarn.spec.ts line 55
+    // Ported: "ensure continuation even if dependency and update does not match" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 55
     #[test]
     fn yarn_update_dep_null_dep_mismatch() {
         let upgrade = NpmUpdateUpgrade {
@@ -6908,7 +6908,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if catalogName is missing" — npm/update/dependency/yarn.spec.ts line 103
+    // Ported: "returns null if catalogName is missing" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 103
     #[test]
     fn yarn_update_dep_null_missing_dep_type() {
         let upgrade = NpmUpdateUpgrade {
@@ -6921,7 +6921,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "handles implicit default catalog dependency" — npm/update/dependency/yarn.spec.ts line 125
+    // Ported: "handles implicit default catalog dependency" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 125
     #[test]
     fn yarn_update_dep_implicit_default_catalog() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 18.3.1\n";
@@ -6936,7 +6936,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["catalog"]["react"].as_str().unwrap(), "19.0.0");
     }
 
-    // Ported: "handles explicit named catalog dependency" — npm/update/dependency/yarn.spec.ts line 150
+    // Ported: "handles explicit named catalog dependency" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 150
     #[test]
     fn yarn_update_dep_named_catalog() {
         let input = "nodeLinker: node-modules\n\ncatalogs:\n  react17:\n    react: 17.0.0\n";
@@ -6954,7 +6954,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "does nothing if the new and old values match" — npm/update/dependency/yarn.spec.ts line 177
+    // Ported: "does nothing if the new and old values match" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 177
     #[test]
     fn yarn_update_dep_already_at_version() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 19.0.0\n";
@@ -6968,7 +6968,7 @@ chalk@^2.4.1:
         assert_eq!(result, input);
     }
 
-    // Ported: "replaces package" — npm/update/dependency/yarn.spec.ts line 197
+    // Ported: "replaces package" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 197
     #[test]
     fn yarn_update_dep_replaces_package() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  config: 1.21.0\n";
@@ -6985,7 +6985,7 @@ chalk@^2.4.1:
         assert!(parsed["catalog"]["config"].is_null());
     }
 
-    // Ported: "replaces a github dependency value" — npm/update/dependency/yarn.spec.ts line 224
+    // Ported: "replaces a github dependency value" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 224
     #[test]
     fn yarn_update_dep_github_value() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  gulp: gulpjs/gulp#v4.0.0-alpha.2\n";
@@ -7005,7 +7005,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a npm package alias" — npm/update/dependency/yarn.spec.ts line 251
+    // Ported: "replaces a npm package alias" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 251
     #[test]
     fn yarn_update_dep_npm_alias() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  hapi: npm:@hapi/hapi@18.3.0\n";
@@ -7026,7 +7026,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a github short hash" — npm/update/dependency/yarn.spec.ts line 279
+    // Ported: "replaces a github short hash" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 279
     #[test]
     fn yarn_update_dep_short_hash() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  gulp: gulpjs/gulp#abcdef7\n";
@@ -7046,7 +7046,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "replaces a github fully specified version" — npm/update/dependency/yarn.spec.ts line 306
+    // Ported: "replaces a github fully specified version" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 306
     #[test]
     fn yarn_update_dep_git_tag() {
         let input =
@@ -7063,7 +7063,7 @@ chalk@^2.4.1:
         assert!(result.contains("v1.1.0"));
     }
 
-    // Ported: "returns null if the dependency is not present in the target catalog" — npm/update/dependency/yarn.spec.ts line 334
+    // Ported: "returns null if the dependency is not present in the target catalog" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 334
     #[test]
     fn yarn_update_dep_null_not_in_catalog() {
         let input =
@@ -7078,7 +7078,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if catalogs are missing" — npm/update/dependency/yarn.spec.ts line 357
+    // Ported: "returns null if catalogs are missing" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 357
     #[test]
     fn yarn_update_dep_null_no_catalog() {
         let input = "nodeLinker: node-modules\n";
@@ -7092,7 +7092,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if empty file" — npm/update/dependency/yarn.spec.ts line 375
+    // Ported: "returns null if empty file" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 375
     #[test]
     fn yarn_update_dep_null_on_empty() {
         let upgrade = NpmUpdateUpgrade {
@@ -7105,7 +7105,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "preserves literal whitespace" — npm/update/dependency/yarn.spec.ts line 389
+    // Ported: "preserves literal whitespace" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 389
     #[test]
     fn yarn_update_dep_preserves_whitespace() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react:    18.3.1\n\n";
@@ -7119,7 +7119,7 @@ chalk@^2.4.1:
         assert!(result.contains("react:    19.0.0"));
     }
 
-    // Ported: "preserves single quote style" — npm/update/dependency/yarn.spec.ts line 415
+    // Ported: "preserves single quote style" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 415
     #[test]
     fn yarn_update_dep_preserves_single_quotes() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: '18.3.1'\n";
@@ -7133,7 +7133,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: '19.0.0'"));
     }
 
-    // Ported: "preserves comments" — npm/update/dependency/yarn.spec.ts line 440
+    // Ported: "preserves comments" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 440
     #[test]
     fn yarn_update_dep_preserves_comments() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: 18.3.1 # This is a comment\n  # This is another comment\n  react-dom: 18.3.1\n";
@@ -7149,7 +7149,7 @@ chalk@^2.4.1:
         assert_eq!(parsed["catalog"]["react-dom"].as_str().unwrap(), "18.3.1");
     }
 
-    // Ported: "preserves double quote style" — npm/update/dependency/yarn.spec.ts line 469
+    // Ported: "preserves double quote style" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 469
     #[test]
     fn yarn_update_dep_preserves_double_quotes() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: \"18.3.1\"\n";
@@ -7163,7 +7163,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: \"19.0.0\""));
     }
 
-    // Ported: "preserves anchors, replacing only the value" — npm/update/dependency/yarn.spec.ts line 494
+    // Ported: "preserves anchors, replacing only the value" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 494
     #[test]
     fn yarn_update_dep_preserves_anchors() {
         let input =
@@ -7179,7 +7179,7 @@ chalk@^2.4.1:
         assert!(result.contains("react-dom: *react"));
     }
 
-    // Ported: "preserves whitespace with anchors" — npm/update/dependency/yarn.spec.ts line 524
+    // Ported: "preserves whitespace with anchors" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 524
     #[test]
     fn yarn_update_dep_preserves_anchor_whitespace() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react    18.3.1\n";
@@ -7193,7 +7193,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: &react    19.0.0"));
     }
 
-    // Ported: "preserves quotation style with anchors" — npm/update/dependency/yarn.spec.ts line 549
+    // Ported: "preserves quotation style with anchors" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 549
     #[test]
     fn yarn_update_dep_preserves_anchor_quote_style() {
         let input = "nodeLinker: node-modules\n\ncatalog:\n  react: &react \"18.3.1\"\n";
@@ -7207,7 +7207,7 @@ chalk@^2.4.1:
         assert!(result.contains("react: &react \"19.0.0\""));
     }
 
-    // Ported: "preserves formatting in flow style syntax" — npm/update/dependency/yarn.spec.ts line 574
+    // Ported: "preserves formatting in flow style syntax" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 574
     #[test]
     fn yarn_update_dep_flow_style() {
         let input = "nodeLinker: node-modules\n\ncatalog: {\n  # This is a comment\n  \"react\": \"18.3.1\"\n}\n";
@@ -7222,7 +7222,7 @@ chalk@^2.4.1:
         assert!(result.contains("# This is a comment"));
     }
 
-    // Ported: "does not replace aliases in the value position" — npm/update/dependency/yarn.spec.ts line 603
+    // Ported: "does not replace aliases in the value position" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 603
     #[test]
     fn yarn_update_dep_no_replace_value_alias() {
         let input = "__deps:\n  react: &react 18.3.1\n\nnodeLinker: node-modules\n\ncatalog:\n  react: *react\n  react-dom: *react\n";
@@ -7236,7 +7236,7 @@ chalk@^2.4.1:
         assert!(result.is_none());
     }
 
-    // Ported: "does not replace aliases in the key position" — npm/update/dependency/yarn.spec.ts line 630
+    // Ported: "does not replace aliases in the key position" — lib/modules/manager/npm/update/dependency/yarn.spec.ts line 630
     #[test]
     fn yarn_update_dep_no_replace_key_alias() {
         // no newValue → early return None
@@ -7254,7 +7254,7 @@ chalk@^2.4.1:
 
     // ── get_locked_versions ──────────────────────────────────────────────────
 
-    // Ported: "does nothing if managerData is not present" — npm/extract/post/locked-versions.spec.ts line 457
+    // Ported: "does nothing if managerData is not present" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 457
     #[test]
     fn get_locked_versions_no_manager_data_noop() {
         let mut files = vec![NpmPackageFile {
@@ -7284,7 +7284,7 @@ chalk@^2.4.1:
         assert!(files[0].deps[0].locked_version.is_none());
     }
 
-    // Ported: "uses yarn.lock with yarn v1.22.0" — npm/extract/post/locked-versions.spec.ts line 57
+    // Ported: "uses yarn.lock with yarn v1.22.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 57
     #[test]
     fn get_locked_versions_yarn_v1_lock() {
         let mut files = vec![NpmPackageFile {
@@ -7320,7 +7320,7 @@ chalk@^2.4.1:
         assert!(files[0].lock_files.contains(&"yarn.lock".into()));
     }
 
-    // Ported: "uses package-lock.json with npm v6.0.0" — npm/extract/post/locked-versions.spec.ts line 267
+    // Ported: "uses package-lock.json with npm v6.0.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 267
     #[test]
     fn get_locked_versions_npm_v1_lock() {
         let mut files = vec![NpmPackageFile {
@@ -7356,7 +7356,7 @@ chalk@^2.4.1:
         assert!(files[0].lock_files.contains(&"package-lock.json".into()));
     }
 
-    // Ported: "does not set locked versions for engines, packageManager, and volta deps" — npm/extract/post/locked-versions.spec.ts line 348
+    // Ported: "does not set locked versions for engines, packageManager, and volta deps" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 348
     #[test]
     fn get_locked_versions_skips_engines_deps() {
         let mut files = vec![NpmPackageFile {
@@ -7433,7 +7433,7 @@ chalk@^2.4.1:
         assert!(files[0].deps[2].locked_version.is_none());
     }
 
-    // Ported: "uses package-lock.json with npm v7.0.0" — npm/extract/post/locked-versions.spec.ts line 485
+    // Ported: "uses package-lock.json with npm v7.0.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 485
     #[test]
     fn get_locked_versions_npm_v2_adds_constraint() {
         let mut files = vec![NpmPackageFile {
@@ -7472,7 +7472,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "uses yarn.lock but doesn't override extractedConstraints" — npm/extract/post/locked-versions.spec.ts line 227
+    // Ported: "uses yarn.lock but doesn't override extractedConstraints" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 227
     #[test]
     fn get_locked_versions_yarn_preserves_existing_constraint() {
         let mut files = vec![NpmPackageFile {
@@ -7570,7 +7570,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "uses locked version corresponding to workspace" — npm/extract/post/locked-versions.spec.ts line 298
+    // Ported: "uses locked version corresponding to workspace" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 298
     #[test]
     fn get_locked_versions_workspace_lock_files() {
         let mut files = vec![
@@ -7639,7 +7639,7 @@ chalk@^2.4.1:
         assert!(files[1].deps[0].locked_version.is_none());
     }
 
-    // Ported: "uses package-lock.json with npm v6.0.0" — npm/extract/post/locked-versions.spec.ts line 267
+    // Ported: "uses package-lock.json with npm v6.0.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 267
     #[test]
     fn parse_npm_lock_v1_extracts_dependencies() {
         let content = r#"{"lockfileVersion":1,"dependencies":{"lodash":{"version":"4.17.21"}}}"#;
@@ -7651,7 +7651,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "uses package-lock.json with npm v7.0.0" — npm/extract/post/locked-versions.spec.ts line 485
+    // Ported: "uses package-lock.json with npm v7.0.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 485
     #[test]
     fn parse_npm_lock_v2_extracts_packages() {
         let content =
@@ -7664,7 +7664,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "uses package-lock.json with npm v9.0.0" — npm/extract/post/locked-versions.spec.ts line 978
+    // Ported: "uses package-lock.json with npm v9.0.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 978
     #[test]
     fn parse_npm_lock_v3_extracts_packages() {
         let content =
@@ -7677,7 +7677,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "should log warning if unsupported lockfileVersion is found" — npm/extract/post/locked-versions.spec.ts line 947
+    // Ported: "should log warning if unsupported lockfileVersion is found" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 947
     #[test]
     fn parse_npm_lock_none_returns_default() {
         let lock = parse_npm_lock(None);
@@ -7685,7 +7685,7 @@ chalk@^2.4.1:
         assert_eq!(lock.lockfile_version, None);
     }
 
-    // Ported: "should log warning if unsupported lockfileVersion is found" — npm/extract/post/locked-versions.spec.ts line 947
+    // Ported: "should log warning if unsupported lockfileVersion is found" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 947
     #[test]
     fn parse_npm_lock_invalid_json_returns_default() {
         let lock = parse_npm_lock(Some("not json"));
@@ -7693,7 +7693,7 @@ chalk@^2.4.1:
         assert_eq!(lock.lockfile_version, None);
     }
 
-    // Ported: "should log warning if unsupported lockfileVersion is found" — npm/extract/post/locked-versions.spec.ts line 947
+    // Ported: "should log warning if unsupported lockfileVersion is found" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 947
     #[test]
     fn parse_npm_lock_unsupported_version_returns_empty() {
         let content = r#"{"lockfileVersion":99,"dependencies":{}}"#;
@@ -7702,7 +7702,7 @@ chalk@^2.4.1:
         assert!(lock.locked_versions.is_empty());
     }
 
-    // Ported: "uses yarn.lock with yarn v1.22.0" — npm/extract/post/locked-versions.spec.ts line 57
+    // Ported: "uses yarn.lock with yarn v1.22.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 57
     #[test]
     fn parse_yarn_lock_v1_format() {
         let content = "lodash@^4.0.0:\n  version \"4.17.21\"\n  resolved ...\n";
@@ -7714,7 +7714,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "uses yarn.lock with yarn v2.1.0" — npm/extract/post/locked-versions.spec.ts line 94
+    // Ported: "uses yarn.lock with yarn v2.1.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 94
     #[test]
     fn parse_yarn_lock_v2_format() {
         let content = "__metadata:\n  version: 6\nlodash@npm:^4.0.0:\n  version: 4.17.21\n";
@@ -7727,7 +7727,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "uses yarn.lock with yarn v3.0.0" — npm/extract/post/locked-versions.spec.ts line 188
+    // Ported: "uses yarn.lock with yarn v3.0.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 188
     #[test]
     fn parse_yarn_lock_v3_format() {
         let content = "__metadata:\n  version: 8\nlodash@npm:^4.0.0:\n  version: 4.17.21\n";
@@ -7740,7 +7740,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "uses yarn.lock with yarn v1.22.0" — npm/extract/post/locked-versions.spec.ts line 57
+    // Ported: "uses yarn.lock with yarn v1.22.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 57
     #[test]
     fn get_yarn_version_from_lock_v1() {
         let lock = YarnLock {
@@ -7751,7 +7751,7 @@ chalk@^2.4.1:
         assert_eq!(get_yarn_version_from_lock(&lock), "^1.22.18");
     }
 
-    // Ported: "uses yarn.lock with yarn v2.2.0" — npm/extract/post/locked-versions.spec.ts line 141
+    // Ported: "uses yarn.lock with yarn v2.2.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 141
     #[test]
     fn get_yarn_version_from_lock_v2() {
         let lock = YarnLock {
@@ -7762,7 +7762,7 @@ chalk@^2.4.1:
         assert_eq!(get_yarn_version_from_lock(&lock), "^2.2.0");
     }
 
-    // Ported: "uses yarn.lock with yarn v3.0.0" — npm/extract/post/locked-versions.spec.ts line 188
+    // Ported: "uses yarn.lock with yarn v3.0.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 188
     #[test]
     fn get_yarn_version_from_lock_v3() {
         let lock = YarnLock {
@@ -7773,7 +7773,7 @@ chalk@^2.4.1:
         assert_eq!(get_yarn_version_from_lock(&lock), "^3.0.0");
     }
 
-    // Ported: "uses yarn.lock with yarn v2.1.0" — npm/extract/post/locked-versions.spec.ts line 94
+    // Ported: "uses yarn.lock with yarn v2.1.0" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 94
     #[test]
     fn get_yarn_version_from_lock_v4() {
         let lock = YarnLock {
@@ -7784,7 +7784,7 @@ chalk@^2.4.1:
         assert_eq!(get_yarn_version_from_lock(&lock), "^4.0.0");
     }
 
-    // Ported: "uses yarn.lock but doesn't override extractedConstraints" — npm/extract/post/locked-versions.spec.ts line 227
+    // Ported: "uses yarn.lock but doesn't override extractedConstraints" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 227
     #[test]
     fn get_yarn_version_from_lock_v4_gte() {
         let lock = YarnLock {
@@ -7795,7 +7795,7 @@ chalk@^2.4.1:
         assert_eq!(get_yarn_version_from_lock(&lock), ">=4.0.0");
     }
 
-    // Ported: "returns correct dependencies for yarn" — npm/extract/common/catalogs.spec.ts line 39
+    // Ported: "returns correct dependencies for yarn" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 39
     #[test]
     fn extract_catalog_deps_yarn_prefix() {
         let catalogs = vec![Catalog {
@@ -7809,7 +7809,7 @@ chalk@^2.4.1:
         assert_eq!(deps[0].dep_type, "yarn.catalog.default");
     }
 
-    // Ported: "returns correct dependencies for pnpm" — npm/extract/common/catalogs.spec.ts line 5
+    // Ported: "returns correct dependencies for pnpm" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 5
     #[test]
     fn extract_catalog_deps_pnpm_prefix() {
         let catalogs = vec![
@@ -7829,14 +7829,14 @@ chalk@^2.4.1:
         assert_eq!(deps[1].dep_name, "express");
     }
 
-    // Ported: "handles empty catalogs list" — npm/extract/common/catalogs.spec.ts line 73
+    // Ported: "handles empty catalogs list" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 73
     #[test]
     fn extract_catalog_deps_empty() {
         let deps = extract_catalog_deps(&[], "yarn");
         assert!(deps.is_empty());
     }
 
-    // Ported: "handles catalog with no dependencies" — npm/extract/common/catalogs.spec.ts line 80
+    // Ported: "handles catalog with no dependencies" — lib/modules/manager/npm/extract/common/catalogs.spec.ts line 80
     #[test]
     fn extract_catalog_deps_no_dependencies() {
         let catalogs = vec![Catalog {
@@ -7847,7 +7847,7 @@ chalk@^2.4.1:
         assert!(deps.is_empty());
     }
 
-    // Ported: "increments" — npm/update/package-version/index.spec.ts line 30
+    // Ported: "increments" — lib/modules/manager/npm/update/package-version/index.spec.ts line 30
     #[test]
     fn bump_npm_package_version_patch() {
         let content = r#"{"version": "1.2.3"}"#;
@@ -7855,7 +7855,7 @@ chalk@^2.4.1:
         assert!(result.contains("\"version\": \"1.2.4\""));
     }
 
-    // Ported: "updates" — npm/update/package-version/index.spec.ts line 49
+    // Ported: "updates" — lib/modules/manager/npm/update/package-version/index.spec.ts line 49
     #[test]
     fn bump_npm_package_version_minor() {
         let content = r#"{"version": "1.2.3"}"#;
@@ -7870,7 +7870,7 @@ chalk@^2.4.1:
         assert!(result.contains("\"version\": \"2.0.0\""));
     }
 
-    // Ported: "mirrors" — npm/update/package-version/index.spec.ts line 11
+    // Ported: "mirrors" — lib/modules/manager/npm/update/package-version/index.spec.ts line 11
     #[test]
     fn bump_npm_package_version_mirror() {
         let content = r#"{"version": "1.0.0", "dependencies": {"lodash": "4.17.21"}}"#;
@@ -7878,7 +7878,7 @@ chalk@^2.4.1:
         assert!(result.contains("\"version\": \"4.17.21\""));
     }
 
-    // Ported: "aborts mirror" — npm/update/package-version/index.spec.ts line 21
+    // Ported: "aborts mirror" — lib/modules/manager/npm/update/package-version/index.spec.ts line 21
     #[test]
     fn bump_npm_package_version_mirror_missing() {
         let content = r#"{"version": "1.0.0"}"#;
@@ -7886,7 +7886,7 @@ chalk@^2.4.1:
         assert_eq!(result, content);
     }
 
-    // Ported: "no ops" — npm/update/package-version/index.spec.ts line 40
+    // Ported: "no ops" — lib/modules/manager/npm/update/package-version/index.spec.ts line 40
     #[test]
     fn bump_npm_package_version_no_op() {
         // When bumped version equals existing version, content is unchanged
@@ -7896,7 +7896,7 @@ chalk@^2.4.1:
         assert_eq!(result, content);
     }
 
-    // Ported: "returns content if bumping errors" — npm/update/package-version/index.spec.ts line 59
+    // Ported: "returns content if bumping errors" — lib/modules/manager/npm/update/package-version/index.spec.ts line 59
     #[test]
     fn bump_npm_package_version_invalid_bump() {
         let content = r#"{"version": "1.0.0"}"#;
@@ -7904,14 +7904,14 @@ chalk@^2.4.1:
         assert_eq!(result, content);
     }
 
-    // Ported: "returns same if not auto" — npm/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/npm/range.spec.ts line 5
     #[test]
     fn get_range_strategy_explicit() {
         assert_eq!(get_range_strategy("pin", None, None), "pin");
         assert_eq!(get_range_strategy("bump", None, None), "bump");
     }
 
-    // Ported: "widens complex bump" — npm/range.spec.ts line 27
+    // Ported: "widens complex bump" — lib/modules/manager/npm/range.spec.ts line 27
     #[test]
     fn get_range_strategy_complex_bump_becomes_widen() {
         assert_eq!(
@@ -7920,7 +7920,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "widens peerDependencies" — npm/range.spec.ts line 10
+    // Ported: "widens peerDependencies" — lib/modules/manager/npm/range.spec.ts line 10
     #[test]
     fn get_range_strategy_peer_deps() {
         assert_eq!(
@@ -7929,7 +7929,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "widens complex ranges" — npm/range.spec.ts line 18
+    // Ported: "widens complex ranges" — lib/modules/manager/npm/range.spec.ts line 18
     #[test]
     fn get_range_strategy_complex_auto() {
         assert_eq!(
@@ -7938,7 +7938,7 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "defaults to update-lockfile" — npm/range.spec.ts line 36
+    // Ported: "defaults to update-lockfile" — lib/modules/manager/npm/range.spec.ts line 36
     #[test]
     fn get_range_strategy_default() {
         assert_eq!(
@@ -7947,28 +7947,28 @@ chalk@^2.4.1:
         );
     }
 
-    // Ported: "returns version" — npm/post-update/node-version.spec.ts line 101
+    // Ported: "returns version" — lib/modules/manager/npm/post-update/node-version.spec.ts line 101
     #[test]
     fn get_node_update_finds_node() {
         let upgrades = [("lodash", "4.17.21"), ("node", "18.0.0")];
         assert_eq!(get_node_update(&upgrades), Some("18.0.0"));
     }
 
-    // Ported: "returns undefined" — npm/post-update/node-version.spec.ts line 107
+    // Ported: "returns undefined" — lib/modules/manager/npm/post-update/node-version.spec.ts line 107
     #[test]
     fn get_node_update_no_node() {
         let upgrades = [("lodash", "4.17.21")];
         assert_eq!(get_node_update(&upgrades), None);
     }
 
-    // Ported: "returns undefined" — npm/post-update/node-version.spec.ts line 107
+    // Ported: "returns undefined" — lib/modules/manager/npm/post-update/node-version.spec.ts line 107
     #[test]
     fn get_node_update_empty() {
         let upgrades: &[(&str, &str)] = &[];
         assert_eq!(get_node_update(upgrades), None);
     }
 
-    // Ported: "extracts yarnrc.yml and adds it as packageFile" — npm/extract/index.spec.ts line 1333
+    // Ported: "extracts yarnrc.yml and adds it as packageFile" — lib/modules/manager/npm/extract/index.spec.ts line 1333
     #[test]
     fn load_package_json_content_basic() {
         let json = r#"{"dependencies":{"lodash":"^4.0.0"},"devDependencies":{"jest":"^29.0.0"},"engines":{"node":">=18"},"volta":{"node":"18.0.0"},"packageManager":"pnpm@8.0.0"}"#;
@@ -7981,13 +7981,13 @@ chalk@^2.4.1:
         assert_eq!(parsed.package_manager.as_ref().unwrap().version, "8.0.0");
     }
 
-    // Ported: "extracts yarnrc.yml and adds it as packageFile and packageManager to true" — npm/extract/index.spec.ts line 1367
+    // Ported: "extracts yarnrc.yml and adds it as packageFile and packageManager to true" — lib/modules/manager/npm/extract/index.spec.ts line 1367
     #[test]
     fn load_package_json_content_invalid() {
         assert!(load_package_json_content("not json").is_none());
     }
 
-    // Ported: "extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps" — npm/extract/index.spec.ts line 1399
+    // Ported: "extracts yarnrc.yml and adds it as packageFile and packageManager to false if no deps" — lib/modules/manager/npm/extract/index.spec.ts line 1399
     #[test]
     fn load_package_json_content_empty_object() {
         let parsed = load_package_json_content("{}").unwrap();
@@ -8123,7 +8123,7 @@ chalk@^2.4.1:
         assert!(!result.has_package_manager);
     }
 
-    // Ported: "finds unscoped" — npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 10
+    // Ported: "finds unscoped" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 10
     #[test]
     fn get_yarn_locked_dependencies_yarn1() {
         let content = r#"lodash@^4.0.0:
@@ -8141,7 +8141,7 @@ express@^4.0.0:
         assert_eq!(results[0].version, "4.17.21");
     }
 
-    // Ported: "returns null if pnpm workspace file does not exist" — npm/artifacts.spec.ts line 254
+    // Ported: "returns null if pnpm workspace file does not exist" — lib/modules/manager/npm/artifacts.spec.ts line 254
     #[test]
     fn get_yarn_locked_dependencies_yarn1_no_match() {
         let content = r#"lodash@^4.0.0:
@@ -8179,7 +8179,7 @@ express@^4.0.0:
         assert_eq!(results.len(), 2);
     }
 
-    // Ported: "finds scoped" — npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 28
+    // Ported: "finds scoped" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts line 28
     #[test]
     fn get_yarn_locked_dependencies_scoped() {
         let content = r#"@types/lodash@^4.0.0:
@@ -8190,7 +8190,7 @@ express@^4.0.0:
         assert_eq!(results[0].dep_name, "@types/lodash");
     }
 
-    // Ported: "replaces without dependencies" — npm/update/locked-dependency/yarn-lock/replace.spec.ts line 21
+    // Ported: "replaces without dependencies" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 21
     #[test]
     fn replace_constraint_version_yarn1() {
         let content = r#"lodash@^4.0.0:
@@ -8204,7 +8204,7 @@ express@^4.0.0:
         assert!(result.contains("lodash@^4.0.0:\n  version \"4.17.22\""));
     }
 
-    // Ported: "returns same if Yarn 2+" — npm/update/locked-dependency/yarn-lock/replace.spec.ts line 11
+    // Ported: "returns same if Yarn 2+" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 11
     #[test]
     fn replace_constraint_version_yarn2_skipped() {
         let content = r#"__metadata:
@@ -8216,7 +8216,7 @@ lodash@npm:^4.0.0:
         assert_eq!(result, content);
     }
 
-    // Ported: "replaces constraint too" — npm/update/locked-dependency/yarn-lock/replace.spec.ts line 71
+    // Ported: "replaces constraint too" — lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts line 71
     #[test]
     fn replace_constraint_version_new_constraint() {
         let content = r#"lodash@^4.0.0:
@@ -8232,7 +8232,7 @@ express@^4.0.0:
         assert!(result.contains("  version \"4.17.22\""));
     }
 
-    // Ported: "finds direct dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 29
+    // Ported: "finds direct dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 29
     #[test]
     fn package_lock_find_dep_constraints_direct() {
         let package_json = serde_json::json!({"dependencies": {"lodash": "^4.0.0"}});
@@ -8250,7 +8250,7 @@ express@^4.0.0:
         assert_eq!(result[0].dep_type, Some("dependencies".into()));
     }
 
-    // Ported: "finds direct devDependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 53
+    // Ported: "finds direct devDependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 53
     #[test]
     fn package_lock_find_dep_constraints_dev() {
         let package_json = serde_json::json!({"devDependencies": {"jest": "^29.0.0"}});
@@ -8267,7 +8267,7 @@ express@^4.0.0:
         assert_eq!(result[0].constraint, "^29.0.0");
     }
 
-    // Ported: "skips non-matching direct dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 41
+    // Ported: "skips non-matching direct dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 41
     #[test]
     fn package_lock_find_dep_constraints_no_match() {
         let package_json = serde_json::json!({});
@@ -8283,7 +8283,7 @@ express@^4.0.0:
         assert!(result.is_empty());
     }
 
-    // Ported: "finds indirect dependency" — npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 11
+    // Ported: "finds indirect dependency" — lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts line 11
     #[test]
     fn package_lock_find_dep_constraints_transitive() {
         let package_json = serde_json::json!({});
@@ -8361,7 +8361,7 @@ express@^4.0.0:
         assert!(result.is_empty());
     }
 
-    // Ported: "sets hasPackageManager to true when devEngines detected in package file" — npm/extract/index.spec.ts line 950
+    // Ported: "sets hasPackageManager to true when devEngines detected in package file" — lib/modules/manager/npm/extract/index.spec.ts line 950
     #[test]
     fn update_pnpm_workspace_dependency_overrides() {
         let content = "overrides:\n  lodash: ^4.0.0\n";
@@ -8501,7 +8501,7 @@ express@^4.0.0:
         assert!(result.is_none());
     }
 
-    // Ported: "finds and filters .npmrc" — npm/extract/index.spec.ts line 207
+    // Ported: "finds and filters .npmrc" — lib/modules/manager/npm/extract/index.spec.ts line 207
     #[test]
     fn resolve_npmrc_with_repo_content() {
         let result = resolve_npmrc(
@@ -8521,7 +8521,7 @@ express@^4.0.0:
         );
     }
 
-    // Ported: "uses config.npmrc if no .npmrc exists" — npm/extract/index.spec.ts line 239
+    // Ported: "uses config.npmrc if no .npmrc exists" — lib/modules/manager/npm/extract/index.spec.ts line 239
     #[test]
     fn resolve_npmrc_with_config_only() {
         let result = resolve_npmrc(
@@ -8537,7 +8537,7 @@ express@^4.0.0:
         );
     }
 
-    // Ported: "returns undefined if no .npmrc exists and no config.npmrc" — modules/manager/npm/npmrc.spec.ts line 19
+    // Ported: "returns undefined if no .npmrc exists and no config.npmrc" — lib/modules/manager/npm/npmrc.spec.ts line 19
     #[test]
     fn resolve_npmrc_returns_none_when_no_npmrc() {
         let result = resolve_npmrc("package.json", None, false, None, false);
@@ -8545,8 +8545,8 @@ express@^4.0.0:
         assert!(result.npmrc_file_name.is_none());
     }
 
-    // Ported: "uses config.npmrc if no .npmrc is returned from search" — npm/extract/index.spec.ts line 230
-    // Ported: "uses config.npmrc if no .npmrc is found" — modules/manager/npm/npmrc.spec.ts line 24
+    // Ported: "uses config.npmrc if no .npmrc is returned from search" — lib/modules/manager/npm/extract/index.spec.ts line 230
+    // Ported: "uses config.npmrc if no .npmrc is found" — lib/modules/manager/npm/npmrc.spec.ts line 24
     #[test]
     fn resolve_npmrc_uses_config_when_no_repo_npmrc() {
         let result = resolve_npmrc("package.json", Some("config-npmrc"), false, None, false);
@@ -8554,7 +8554,7 @@ express@^4.0.0:
         assert!(result.npmrc_file_name.is_none());
     }
 
-    // Ported: "finds and filters .npmrc" — modules/manager/npm/npmrc.spec.ts line 31
+    // Ported: "finds and filters .npmrc" — lib/modules/manager/npm/npmrc.spec.ts line 31
     #[test]
     fn resolve_npmrc_filters_package_lock_line() {
         let result = resolve_npmrc(
@@ -8576,8 +8576,8 @@ express@^4.0.0:
         assert!(!result.npmrc.as_deref().unwrap().contains("package-lock"));
     }
 
-    // Ported: "uses config.npmrc if .npmrc does exist but npmrcMerge=false" — npm/extract/index.spec.ts line 249
-    // Ported: "uses config.npmrc if .npmrc does exist but npmrcMerge=false" — modules/manager/npm/npmrc.spec.ts line 53
+    // Ported: "uses config.npmrc if .npmrc does exist but npmrcMerge=false" — lib/modules/manager/npm/extract/index.spec.ts line 249
+    // Ported: "uses config.npmrc if .npmrc does exist but npmrcMerge=false" — lib/modules/manager/npm/npmrc.spec.ts line 53
     #[test]
     fn resolve_npmrc_prefers_config_when_merge_disabled() {
         let result = resolve_npmrc(
@@ -8591,15 +8591,15 @@ express@^4.0.0:
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
     }
 
-    // Ported: "uses config.npmrc if no .npmrc file is found" — modules/manager/npm/npmrc.spec.ts line 81
+    // Ported: "uses config.npmrc if no .npmrc file is found" — lib/modules/manager/npm/npmrc.spec.ts line 81
     #[test]
     fn resolve_npmrc_uses_config_when_repo_file_missing() {
         let result = resolve_npmrc("package.json", Some("config-npmrc"), false, None, false);
         assert_eq!(result.npmrc.as_deref(), Some("config-npmrc"));
     }
 
-    // Ported: "merges config.npmrc and repo .npmrc when npmrcMerge=true" — npm/extract/index.spec.ts line 272
-    // Ported: "merges config.npmrc and repo .npmrc when npmrcMerge=true" — modules/manager/npm/npmrc.spec.ts line 98
+    // Ported: "merges config.npmrc and repo .npmrc when npmrcMerge=true" — lib/modules/manager/npm/extract/index.spec.ts line 272
+    // Ported: "merges config.npmrc and repo .npmrc when npmrcMerge=true" — lib/modules/manager/npm/npmrc.spec.ts line 98
     #[test]
     fn resolve_npmrc_merges_config_and_repo() {
         let result = resolve_npmrc(
@@ -8613,7 +8613,7 @@ express@^4.0.0:
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
     }
 
-    // Ported: "does not add a newline between config.npmrc and repo .npmrc when npmrcMerge is true, if a newline already exists" — modules/manager/npm/npmrc.spec.ts line 123
+    // Ported: "does not add a newline between config.npmrc and repo .npmrc when npmrcMerge is true, if a newline already exists" — lib/modules/manager/npm/npmrc.spec.ts line 123
     #[test]
     fn resolve_npmrc_merge_avoids_double_newline() {
         let result = resolve_npmrc(
@@ -8629,8 +8629,8 @@ express@^4.0.0:
         );
     }
 
-    // Ported: "finds and filters .npmrc with variables" — npm/extract/index.spec.ts line 295
-    // Ported: "finds and filters .npmrc with variables" — modules/manager/npm/npmrc.spec.ts line 156
+    // Ported: "finds and filters .npmrc with variables" — lib/modules/manager/npm/extract/index.spec.ts line 295
+    // Ported: "finds and filters .npmrc with variables" — lib/modules/manager/npm/npmrc.spec.ts line 156
     #[test]
     fn resolve_npmrc_strips_variable_lines() {
         let result = resolve_npmrc(
@@ -8648,7 +8648,7 @@ express@^4.0.0:
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
     }
 
-    // Ported: "keeps variables when exposeAllEnv is true" — modules/manager/npm/npmrc.spec.ts line 180
+    // Ported: "keeps variables when exposeAllEnv is true" — lib/modules/manager/npm/npmrc.spec.ts line 180
     #[test]
     fn resolve_npmrc_keeps_variables_when_expose_all_env() {
         let result = resolve_npmrc(
@@ -8669,7 +8669,7 @@ express@^4.0.0:
         assert_eq!(result.npmrc_file_name, Some("./.npmrc".to_owned()));
     }
 
-    // Ported: "handles no monorepo" — npm/extract/post/monorepo.spec.ts line 8
+    // Ported: "handles no monorepo" — lib/modules/manager/npm/extract/post/monorepo.spec.ts line 8
     #[test]
     fn detect_monorepos_no_workspaces() {
         let mut files = vec![NpmPackageFile {
@@ -8680,7 +8680,7 @@ express@^4.0.0:
         assert!(files[0].deps.is_empty());
     }
 
-    // Ported: "updates internal packages" — npm/extract/post/monorepo.spec.ts line 19
+    // Ported: "updates internal packages" — lib/modules/manager/npm/extract/post/monorepo.spec.ts line 19
     #[test]
     fn detect_monorepos_updates_internal_packages() {
         let mut files = vec![
@@ -8750,7 +8750,7 @@ express@^4.0.0:
         assert!(files.iter().any(|f| f.deps.iter().any(|d| d.is_internal)));
     }
 
-    // Ported: "uses yarn workspaces package settings" — npm/extract/post/monorepo.spec.ts line 74
+    // Ported: "uses yarn workspaces package settings" — lib/modules/manager/npm/extract/post/monorepo.spec.ts line 74
     #[test]
     fn detect_monorepos_uses_yarn_workspaces_settings() {
         let mut files = vec![
@@ -8788,7 +8788,7 @@ express@^4.0.0:
         );
     }
 
-    // Ported: "uses yarn workspaces package settings with extractedConstraints" — npm/extract/post/monorepo.spec.ts line 98
+    // Ported: "uses yarn workspaces package settings with extractedConstraints" — lib/modules/manager/npm/extract/post/monorepo.spec.ts line 98
     #[test]
     fn detect_monorepos_merges_extracted_constraints() {
         let mut files = vec![
@@ -8835,7 +8835,7 @@ express@^4.0.0:
         assert_eq!(files[1].manager_data.has_package_manager, Some(true));
     }
 
-    // Ported: "uses yarnZeroInstall and skipInstalls from yarn workspaces package settings" — npm/extract/post/monorepo.spec.ts line 142
+    // Ported: "uses yarnZeroInstall and skipInstalls from yarn workspaces package settings" — lib/modules/manager/npm/extract/post/monorepo.spec.ts line 142
     #[test]
     fn detect_monorepos_propagates_yarn_zero_install() {
         let mut files = vec![
@@ -8876,7 +8876,7 @@ express@^4.0.0:
         assert_eq!(files[2].skip_installs, Some(false));
     }
 
-    // Ported: "runs" — npm/extract/index.spec.ts line 1227
+    // Ported: "runs" — lib/modules/manager/npm/extract/index.spec.ts line 1227
     #[test]
     fn post_extract_empty_files() {
         let mut files: Vec<NpmPackageFile> = vec![];

@@ -908,7 +908,7 @@ mod tests {
 
     // ── init_repo ─────────────────────────────────────────────────────────────
 
-    // Ported: "should throw an error if repository is archived" — modules/platform/gitlab/index.spec.ts line 345
+    // Ported: "should throw an error if repository is archived" — lib/modules/platform/gitlab/index.spec.ts line 345
     #[tokio::test]
     async fn init_repo_archived_returns_error() {
         let server = MockServer::start().await;
@@ -934,7 +934,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
     }
 
-    // Ported: "should throw an error if repository is a mirror" — modules/platform/gitlab/index.spec.ts line 357
+    // Ported: "should throw an error if repository is a mirror" — lib/modules/platform/gitlab/index.spec.ts line 357
     #[tokio::test]
     async fn init_repo_mirror_returns_error() {
         let server = MockServer::start().await;
@@ -960,7 +960,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_MIRRORED"));
     }
 
-    // Ported: "should throw an error if repository has empty_repo property" — modules/platform/gitlab/index.spec.ts line 413
+    // Ported: "should throw an error if repository has empty_repo property" — lib/modules/platform/gitlab/index.spec.ts line 413
     #[tokio::test]
     async fn init_repo_empty_returns_error() {
         let server = MockServer::start().await;
@@ -986,7 +986,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
-    // Ported: "should throw an error if repository is empty" — modules/platform/gitlab/index.spec.ts line 425
+    // Ported: "should throw an error if repository is empty" — lib/modules/platform/gitlab/index.spec.ts line 425
     #[tokio::test]
     async fn init_repo_null_default_branch_returns_error() {
         let server = MockServer::start().await;
@@ -1012,7 +1012,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_EMPTY"));
     }
 
-    // Ported: "should throw an error if receiving an error" — modules/platform/gitlab/index.spec.ts line 333
+    // Ported: "should throw an error if receiving an error" — lib/modules/platform/gitlab/index.spec.ts line 333
     #[tokio::test]
     async fn init_repo_server_error_returns_http_error() {
         let server = MockServer::start().await;
@@ -1032,7 +1032,7 @@ mod tests {
         );
     }
 
-    // Ported: "should fall back if http_url_to_repo is empty" — modules/platform/gitlab/index.spec.ts line 437
+    // Ported: "should fall back if http_url_to_repo is empty" — lib/modules/platform/gitlab/index.spec.ts line 437
     #[tokio::test]
     async fn init_repo_minimal_response_succeeds() {
         let server = MockServer::start().await;
@@ -1059,7 +1059,7 @@ mod tests {
         assert!(!result.is_fork);
     }
 
-    // Ported: "should throw an error if repository access is disabled" — modules/platform/gitlab/index.spec.ts line 389
+    // Ported: "should throw an error if repository access is disabled" — lib/modules/platform/gitlab/index.spec.ts line 389
     #[tokio::test]
     async fn init_repo_disabled_returns_error() {
         let server = MockServer::start().await;
@@ -1085,7 +1085,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_DISABLED"));
     }
 
-    // Ported: "should throw an error if MRs are disabled" — modules/platform/gitlab/index.spec.ts line 401
+    // Ported: "should throw an error if MRs are disabled" — lib/modules/platform/gitlab/index.spec.ts line 401
     #[tokio::test]
     async fn init_repo_mrs_disabled_returns_error() {
         let server = MockServer::start().await;
@@ -1111,7 +1111,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_DISABLED"));
     }
 
-    // Ported: "should return an array of repos" — modules/platform/gitlab/index.spec.ts line 163
+    // Ported: "should return an array of repos" — lib/modules/platform/gitlab/index.spec.ts line 163
     #[tokio::test]
     async fn init_repo_returns_real_metadata() {
         let server = MockServer::start().await;
@@ -1148,7 +1148,7 @@ mod tests {
         assert!(!result.has_vulnerability_alerts_enabled);
     }
 
-    // Ported: "should throw an error if receiving an error" — modules/platform/gitlab/index.spec.ts line 333
+    // Ported: "should throw an error if receiving an error" — lib/modules/platform/gitlab/index.spec.ts line 333
     #[tokio::test]
     async fn init_repo_not_found_returns_error() {
         let server = MockServer::start().await;
@@ -1166,7 +1166,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_NOT_FOUND"));
     }
 
-    // Ported: "should throw if endpoint is not a valid URL" — modules/platform/gitlab/index.spec.ts line 82
+    // Ported: "should throw if endpoint is not a valid URL" — lib/modules/platform/gitlab/index.spec.ts line 82
     #[tokio::test]
     async fn init_repo_forbidden_returns_error() {
         let server = MockServer::start().await;
@@ -1188,7 +1188,7 @@ mod tests {
 
     // ── get_current_user ──────────────────────────────────────────────────────
 
-    // Ported: "should throw if auth fails" — modules/platform/gitlab/index.spec.ts line 91
+    // Ported: "should throw if auth fails" — lib/modules/platform/gitlab/index.spec.ts line 91
     #[tokio::test]
     async fn get_current_user_unauthorized() {
         let server = MockServer::start().await;
@@ -1203,7 +1203,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unauthorized));
     }
 
-    // Ported: "should default to gitlab.com" — modules/platform/gitlab/index.spec.ts line 101
+    // Ported: "should default to gitlab.com" — lib/modules/platform/gitlab/index.spec.ts line 101
     #[tokio::test]
     async fn get_current_user_success() {
         let server = MockServer::start().await;
@@ -1223,7 +1223,7 @@ mod tests {
 
     // ── get_raw_file ──────────────────────────────────────────────────────────
 
-    // Ported: "should throw an error if it receives an error" — modules/platform/gitlab/index.spec.ts line 153
+    // Ported: "should throw an error if it receives an error" — lib/modules/platform/gitlab/index.spec.ts line 153
     #[tokio::test]
     async fn get_raw_file_returns_none_for_404() {
         let server = MockServer::start().await;
@@ -1241,7 +1241,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return an array of repos" — modules/platform/gitlab/index.spec.ts line 163
+    // Ported: "should return an array of repos" — lib/modules/platform/gitlab/index.spec.ts line 163
     #[tokio::test]
     async fn get_raw_file_returns_decoded_content() {
         let server = MockServer::start().await;
@@ -1267,7 +1267,7 @@ mod tests {
         assert!(file.content.contains("[package]"));
     }
 
-    // Ported: "should return an array of repos including mirrors" — modules/platform/gitlab/index.spec.ts line 185
+    // Ported: "should return an array of repos including mirrors" — lib/modules/platform/gitlab/index.spec.ts line 185
     #[tokio::test]
     async fn get_raw_file_encodes_path_slashes() {
         let server = MockServer::start().await;
@@ -1295,7 +1295,7 @@ mod tests {
 
     // ── get_file_list ─────────────────────────────────────────────────────────
 
-    // Ported: "should encode the requested topics into the URL" — modules/platform/gitlab/index.spec.ts line 207
+    // Ported: "should encode the requested topics into the URL" — lib/modules/platform/gitlab/index.spec.ts line 207
     #[tokio::test]
     async fn get_file_list_returns_blobs_only() {
         let server = MockServer::start().await;
@@ -1315,7 +1315,7 @@ mod tests {
         assert_eq!(files, vec!["Cargo.toml", "src/main.rs"]);
     }
 
-    // Ported: "should query the groups endpoint for each namespace" — modules/platform/gitlab/index.spec.ts line 225
+    // Ported: "should query the groups endpoint for each namespace" — lib/modules/platform/gitlab/index.spec.ts line 225
     #[tokio::test]
     async fn get_file_list_paginates() {
         let server = MockServer::start().await;
@@ -1353,7 +1353,7 @@ mod tests {
 
     // ── create_pr ─────────────────────────────────────────────────────────────
 
-    // Ported: "uses default branch" — modules/platform/gitlab/index.spec.ts line 2277
+    // Ported: "uses default branch" — lib/modules/platform/gitlab/index.spec.ts line 2277
     #[tokio::test]
     async fn create_pr_succeeds() {
         let server = MockServer::start().await;
@@ -1389,7 +1389,7 @@ mod tests {
 
     // ── update_pr ─────────────────────────────────────────────────────────────
 
-    // Ported: "skips update if unchanged" — modules/platform/gitlab/index.spec.ts line 1587
+    // Ported: "skips update if unchanged" — lib/modules/platform/gitlab/index.spec.ts line 1587
     #[tokio::test]
     async fn update_pr_no_op_when_nothing_to_update() {
         let server = MockServer::start().await;
@@ -1401,7 +1401,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "updates the PR" — modules/platform/gitlab/index.spec.ts line 3610
+    // Ported: "updates the PR" — lib/modules/platform/gitlab/index.spec.ts line 3610
     #[tokio::test]
     async fn update_pr_succeeds() {
         let server = MockServer::start().await;
@@ -1434,7 +1434,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "closes the PR" — modules/platform/gitlab/index.spec.ts line 3791
+    // Ported: "closes the PR" — lib/modules/platform/gitlab/index.spec.ts line 3791
     #[tokio::test]
     async fn update_pr_closes_pr() {
         let server = MockServer::start().await;
@@ -1460,7 +1460,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "retains draft status when draft uses current prefix" — modules/platform/gitlab/index.spec.ts line 3643
+    // Ported: "retains draft status when draft uses current prefix" — lib/modules/platform/gitlab/index.spec.ts line 3643
     #[tokio::test]
     async fn update_pr_preserves_draft_prefix() {
         let server = MockServer::start().await;
@@ -1513,7 +1513,7 @@ mod tests {
 
     // ── get_branch_status ─────────────────────────────────────────────────────
 
-    // Ported: "returns pending if no results" — modules/platform/gitlab/index.spec.ts line 698
+    // Ported: "returns pending if no results" — lib/modules/platform/gitlab/index.spec.ts line 698
     #[tokio::test]
     async fn get_branch_status_returns_not_supported() {
         let server = MockServer::start().await;
@@ -1527,7 +1527,7 @@ mod tests {
 
     // ── write_file ────────────────────────────────────────────────────────────
 
-    // Ported: "updates issue with labels" — modules/platform/gitlab/index.spec.ts line 1559
+    // Ported: "updates issue with labels" — lib/modules/platform/gitlab/index.spec.ts line 1559
     #[tokio::test]
     async fn write_file_requires_branch() {
         let server = MockServer::start().await;
@@ -1539,7 +1539,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("requires a branch")));
     }
 
-    // Ported: "creates issue" — modules/platform/gitlab/index.spec.ts line 1490
+    // Ported: "creates issue" — lib/modules/platform/gitlab/index.spec.ts line 1490
     #[tokio::test]
     async fn write_file_creates_file() {
         let server = MockServer::start().await;
@@ -1567,7 +1567,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "updates issue" — modules/platform/gitlab/index.spec.ts line 1532
+    // Ported: "updates issue" — lib/modules/platform/gitlab/index.spec.ts line 1532
     #[tokio::test]
     async fn write_file_updates_existing_file() {
         let server = MockServer::start().await;
@@ -1609,7 +1609,7 @@ mod tests {
 
     // ── get_pr_list ───────────────────────────────────────────────────────────
 
-    // Ported: "fetches cache initially" — modules/platform/gitlab/pr-cache.spec.ts line 81
+    // Ported: "fetches cache initially" — lib/modules/platform/gitlab/pr-cache.spec.ts line 81
     #[tokio::test]
     async fn get_pr_list_returns_prs() {
         let server = MockServer::start().await;
@@ -1657,7 +1657,7 @@ mod tests {
         assert_eq!(prs[1].title, "Draft PR");
     }
 
-    // Ported: "fetches cache with ignorePrAuthor=true" — modules/platform/gitlab/pr-cache.spec.ts line 110
+    // Ported: "fetches cache with ignorePrAuthor=true" — lib/modules/platform/gitlab/pr-cache.spec.ts line 110
     #[tokio::test]
     async fn get_pr_list_filters_by_state() {
         let server = MockServer::start().await;
@@ -1690,7 +1690,7 @@ mod tests {
 
     // ── get_pr ────────────────────────────────────────────────────────────────
 
-    // Ported: "returns the PR" — modules/platform/gitlab/index.spec.ts line 3442
+    // Ported: "returns the PR" — lib/modules/platform/gitlab/index.spec.ts line 3442
     #[tokio::test]
     async fn get_pr_returns_mr() {
         let server = MockServer::start().await;
@@ -1725,7 +1725,7 @@ mod tests {
         assert_eq!(pr.sha, Some("abc123".to_owned()));
     }
 
-    // Ported: "returns the mergeable PR" — modules/platform/gitlab/index.spec.ts line 3514
+    // Ported: "returns the mergeable PR" — lib/modules/platform/gitlab/index.spec.ts line 3514
     #[tokio::test]
     async fn get_pr_returns_none_for_404() {
         let server = MockServer::start().await;
@@ -1740,7 +1740,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "returns null if no results" — modules/platform/gitlab/index.spec.ts line 1062
+    // Ported: "returns null if no results" — lib/modules/platform/gitlab/index.spec.ts line 1062
     #[tokio::test]
     async fn get_pr_returns_none_for_zero() {
         let server = MockServer::start().await;
@@ -1749,7 +1749,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "removes draft prefix from returned title" — modules/platform/gitlab/index.spec.ts line 3466
+    // Ported: "removes draft prefix from returned title" — lib/modules/platform/gitlab/index.spec.ts line 3466
     #[tokio::test]
     async fn get_pr_strips_draft_prefix() {
         let server = MockServer::start().await;
@@ -1775,7 +1775,7 @@ mod tests {
         assert!(pr.is_draft);
     }
 
-    // Ported: "removes deprecated draft prefix from returned title" — modules/platform/gitlab/index.spec.ts line 3490
+    // Ported: "removes deprecated draft prefix from returned title" — lib/modules/platform/gitlab/index.spec.ts line 3490
     #[tokio::test]
     async fn get_pr_strips_wip_prefix() {
         let server = MockServer::start().await;
@@ -1803,7 +1803,7 @@ mod tests {
 
     // ── get_branch_pr ─────────────────────────────────────────────────────────
 
-    // Ported: "should return the PR object" — modules/platform/gitlab/index.spec.ts line 579
+    // Ported: "should return the PR object" — lib/modules/platform/gitlab/index.spec.ts line 579
     #[tokio::test]
     async fn get_branch_pr_finds_open_mr() {
         let server = MockServer::start().await;
@@ -1851,7 +1851,7 @@ mod tests {
         assert_eq!(pr.title, "Update deps");
     }
 
-    // Ported: "should return null if no PR exists" — modules/platform/gitlab/index.spec.ts line 567
+    // Ported: "should return null if no PR exists" — lib/modules/platform/gitlab/index.spec.ts line 567
     #[tokio::test]
     async fn get_branch_pr_returns_none_when_no_mr() {
         let server = MockServer::start().await;
@@ -1871,7 +1871,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "should strip draft prefix from title" — modules/platform/gitlab/index.spec.ts line 618
+    // Ported: "should strip draft prefix from title" — lib/modules/platform/gitlab/index.spec.ts line 618
     #[tokio::test]
     async fn get_branch_pr_strips_draft_prefix() {
         let server = MockServer::start().await;
@@ -1919,7 +1919,7 @@ mod tests {
         assert!(pr.is_draft);
     }
 
-    // Ported: "should strip deprecated draft prefix from title" — modules/platform/gitlab/index.spec.ts line 657
+    // Ported: "should strip deprecated draft prefix from title" — lib/modules/platform/gitlab/index.spec.ts line 657
     #[tokio::test]
     async fn get_branch_pr_strips_wip_prefix() {
         let server = MockServer::start().await;
@@ -1967,7 +1967,7 @@ mod tests {
         assert!(pr.is_draft);
     }
 
-    // Ported: "handles empty response" — modules/platform/gitlab/pr-cache.spec.ts line 251
+    // Ported: "handles empty response" — lib/modules/platform/gitlab/pr-cache.spec.ts line 251
     #[tokio::test]
     async fn get_pr_list_empty_response() {
         let server = MockServer::start().await;
@@ -1983,7 +1983,7 @@ mod tests {
         assert!(prs.is_empty());
     }
 
-    // Ported: "returns the mergeable PR" — modules/platform/gitlab/index.spec.ts line 3514
+    // Ported: "returns the mergeable PR" — lib/modules/platform/gitlab/index.spec.ts line 3514
     #[tokio::test]
     async fn get_pr_returns_merged_mr() {
         let server = MockServer::start().await;
@@ -2013,7 +2013,7 @@ mod tests {
         assert!(!pr.has_assignees);
     }
 
-    // Ported: "supports draftPR on < 13.2" — modules/platform/gitlab/index.spec.ts line 2309
+    // Ported: "supports draftPR on < 13.2" — lib/modules/platform/gitlab/index.spec.ts line 2309
     #[tokio::test]
     async fn create_pr_with_deprecated_draft_prefix() {
         let server = MockServer::start().await;
@@ -2047,7 +2047,7 @@ mod tests {
         assert_eq!(pr_number, Some(44));
     }
 
-    // Ported: "retains draft status when draft uses deprecated prefix" — modules/platform/gitlab/index.spec.ts line 3676
+    // Ported: "retains draft status when draft uses deprecated prefix" — lib/modules/platform/gitlab/index.spec.ts line 3676
     #[tokio::test]
     async fn update_pr_retains_deprecated_draft_prefix() {
         let server = MockServer::start().await;
@@ -2095,7 +2095,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "updates target branch of the PR" — modules/platform/gitlab/index.spec.ts line 3709
+    // Ported: "updates target branch of the PR" — lib/modules/platform/gitlab/index.spec.ts line 3709
     #[tokio::test]
     async fn update_pr_changes_target_branch() {
         let server = MockServer::start().await;
@@ -2136,7 +2136,7 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // Ported: "should return false for merge_method=merge" — modules/platform/gitlab/index.spec.ts line 522
+    // Ported: "should return false for merge_method=merge" — lib/modules/platform/gitlab/index.spec.ts line 522
     #[tokio::test]
     async fn init_repo_merge_method_merge() {
         let server = MockServer::start().await;
@@ -2163,7 +2163,7 @@ mod tests {
         assert_eq!(result.merge_method, Some("merge".to_owned()));
     }
 
-    // Ported: "should return true for merge_method=ff" — modules/platform/gitlab/index.spec.ts line 536
+    // Ported: "should return true for merge_method=ff" — lib/modules/platform/gitlab/index.spec.ts line 536
     #[tokio::test]
     async fn init_repo_merge_method_ff() {
         let server = MockServer::start().await;
@@ -2190,7 +2190,7 @@ mod tests {
         assert_eq!(result.merge_method, Some("rebase".to_owned()));
     }
 
-    // Ported: "finds pr from other authors" — modules/platform/gitlab/index.spec.ts line 2173
+    // Ported: "finds pr from other authors" — lib/modules/platform/gitlab/index.spec.ts line 2173
     #[tokio::test]
     async fn get_branch_pr_finds_pr_from_other_authors() {
         let server = MockServer::start().await;
@@ -2237,7 +2237,7 @@ mod tests {
         assert_eq!(pr.number, 8);
     }
 
-    // Ported: "returns null if no pr found - (includeOtherAuthors)" — modules/platform/gitlab/index.spec.ts line 2205
+    // Ported: "returns null if no pr found - (includeOtherAuthors)" — lib/modules/platform/gitlab/index.spec.ts line 2205
     #[tokio::test]
     async fn get_branch_pr_returns_none_for_other_authors() {
         let server = MockServer::start().await;
@@ -2257,7 +2257,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "should consider topics when querying the groups endpoint" — modules/platform/gitlab/index.spec.ts line 251
+    // Ported: "should consider topics when querying the groups endpoint" — lib/modules/platform/gitlab/index.spec.ts line 251
     #[tokio::test]
     async fn get_file_list_considers_topics() {
         let server = MockServer::start().await;
@@ -2275,7 +2275,7 @@ mod tests {
         assert_eq!(files, vec!["src/lib.rs"]);
     }
 
-    // Ported: "should include order and sort query parameters" — modules/platform/gitlab/index.spec.ts line 272
+    // Ported: "should include order and sort query parameters" — lib/modules/platform/gitlab/index.spec.ts line 272
     #[tokio::test]
     async fn get_file_list_includes_order_and_sort() {
         let server = MockServer::start().await;
@@ -2293,7 +2293,7 @@ mod tests {
         assert_eq!(files, vec!["README.md"]);
     }
 
-    // Ported: "should reuse existing gitAuthor" — modules/platform/gitlab/index.spec.ts line 138
+    // Ported: "should reuse existing gitAuthor" — lib/modules/platform/gitlab/index.spec.ts line 138
     #[tokio::test]
     async fn get_current_user_reuses_git_author() {
         let server = MockServer::start().await;
@@ -2311,7 +2311,7 @@ mod tests {
         assert_eq!(user.login, "renovate-bot");
     }
 
-    // Ported: "returns null if no matching results" — modules/platform/gitlab/index.spec.ts line 1076
+    // Ported: "returns null if no matching results" — lib/modules/platform/gitlab/index.spec.ts line 1076
     #[tokio::test]
     async fn get_pr_returns_none_for_missing() {
         let server = MockServer::start().await;
@@ -2326,7 +2326,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "returns true with draft prefix title" — modules/platform/gitlab/index.spec.ts line 2123
+    // Ported: "returns true with draft prefix title" — lib/modules/platform/gitlab/index.spec.ts line 2123
     #[tokio::test]
     async fn get_branch_pr_returns_true_with_draft_prefix() {
         let server = MockServer::start().await;
@@ -2373,7 +2373,7 @@ mod tests {
         assert!(pr.is_draft);
     }
 
-    // Ported: "returns true with deprecated draft prefix title" — modules/platform/gitlab/index.spec.ts line 2148
+    // Ported: "returns true with deprecated draft prefix title" — lib/modules/platform/gitlab/index.spec.ts line 2148
     #[tokio::test]
     async fn get_branch_pr_returns_true_with_deprecated_draft() {
         let server = MockServer::start().await;
@@ -2420,7 +2420,7 @@ mod tests {
         assert!(pr.is_draft);
     }
 
-    // Ported: "returns null" — modules/platform/gitlab/index.spec.ts line 4049
+    // Ported: "returns null" — lib/modules/platform/gitlab/index.spec.ts line 4049
     #[tokio::test]
     async fn get_raw_file_returns_null() {
         let server = MockServer::start().await;
@@ -2443,7 +2443,7 @@ mod tests {
         assert_eq!(file.content, "");
     }
 
-    // Ported: "should escape all forward slashes in project names" — modules/platform/gitlab/index.spec.ts line 302
+    // Ported: "should escape all forward slashes in project names" — lib/modules/platform/gitlab/index.spec.ts line 302
     #[tokio::test]
     async fn get_file_list_escapes_forward_slashes() {
         let server = MockServer::start().await;
@@ -2464,7 +2464,7 @@ mod tests {
         assert_eq!(files, vec!["main.rs"]);
     }
 
-    // Ported: "should accept custom endpoint" — modules/platform/gitlab/index.spec.ts line 117
+    // Ported: "should accept custom endpoint" — lib/modules/platform/gitlab/index.spec.ts line 117
     #[tokio::test]
     async fn get_current_user_custom_endpoint() {
         let server = MockServer::start().await;
@@ -2484,7 +2484,7 @@ mod tests {
 
     // ── code-owners ───────────────────────────────────────────────────────────
 
-    // Ported: "should extract an owner rule from a line" — modules/platform/gitlab/code-owners.spec.ts line 5
+    // Ported: "should extract an owner rule from a line" — lib/modules/platform/gitlab/code-owners.spec.ts line 5
     #[test]
     fn code_owners_parses_pattern_with_usernames() {
         let rules = extract_rules_from_code_owners_lines(&["pattern username1 username2"]);
@@ -2494,7 +2494,7 @@ mod tests {
         assert_eq!(rules[0].score, 7);
     }
 
-    // Ported: "should extract an owner rule from a line with no usernames" — modules/platform/gitlab/code-owners.spec.ts line 20
+    // Ported: "should extract an owner rule from a line with no usernames" — lib/modules/platform/gitlab/code-owners.spec.ts line 20
     #[test]
     fn code_owners_parses_pattern_without_usernames() {
         let rules = extract_rules_from_code_owners_lines(&["pattern"]);
@@ -2504,7 +2504,7 @@ mod tests {
         assert_eq!(rules[0].score, 7);
     }
 
-    // Ported: "should extract an owner rule from a line after a section header" — modules/platform/gitlab/code-owners.spec.ts line 33
+    // Ported: "should extract an owner rule from a line after a section header" — lib/modules/platform/gitlab/code-owners.spec.ts line 33
     #[test]
     fn code_owners_section_header_default_users() {
         let rules =
@@ -2515,7 +2515,7 @@ mod tests {
         assert_eq!(rules[0].score, 8);
     }
 
-    // Ported: "should extract an owner rule from a line after a section header with no usernames" — modules/platform/gitlab/code-owners.spec.ts line 47
+    // Ported: "should extract an owner rule from a line after a section header with no usernames" — lib/modules/platform/gitlab/code-owners.spec.ts line 47
     #[test]
     fn code_owners_section_header_no_users() {
         let rules = extract_rules_from_code_owners_lines(&["[team]", "filename"]);
@@ -2525,7 +2525,7 @@ mod tests {
         assert_eq!(rules[0].score, 8);
     }
 
-    // Ported: "should extract an owner rule from a line after a section header with spaces" — modules/platform/gitlab/code-owners.spec.ts line 61
+    // Ported: "should extract an owner rule from a line after a section header with spaces" — lib/modules/platform/gitlab/code-owners.spec.ts line 61
     #[test]
     fn code_owners_section_header_with_spaces() {
         let rules =
@@ -2536,7 +2536,7 @@ mod tests {
         assert_eq!(rules[0].score, 8);
     }
 
-    // Ported: "should extract an owner rule from a line after a section header with spaces and no usernames" — modules/platform/gitlab/code-owners.spec.ts line 75
+    // Ported: "should extract an owner rule from a line after a section header with spaces and no usernames" — lib/modules/platform/gitlab/code-owners.spec.ts line 75
     #[test]
     fn code_owners_section_header_with_spaces_no_users() {
         let rules = extract_rules_from_code_owners_lines(&["[Backend Team]", "filename"]);
@@ -2546,7 +2546,7 @@ mod tests {
         assert_eq!(rules[0].score, 8);
     }
 
-    // Ported: "should extract an owner rule from a line after a section header with spaces and multiple usernames" — modules/platform/gitlab/code-owners.spec.ts line 89
+    // Ported: "should extract an owner rule from a line after a section header with spaces and multiple usernames" — lib/modules/platform/gitlab/code-owners.spec.ts line 89
     #[test]
     fn code_owners_section_header_multiple_users() {
         let rules = extract_rules_from_code_owners_lines(&[
@@ -2561,7 +2561,7 @@ mod tests {
 
     // ── gitlab/utils.spec.ts tests ────────────────────────────────────────────
 
-    // Ported: "throws on invalid endpoint when gitUrl is endpoint" — modules/platform/gitlab/utils.spec.ts line 42
+    // Ported: "throws on invalid endpoint when gitUrl is endpoint" — lib/modules/platform/gitlab/utils.spec.ts line 42
     #[test]
     fn get_repo_url_throws_on_invalid_endpoint_when_git_url_is_endpoint() {
         let result = get_repo_url(
@@ -2580,7 +2580,7 @@ mod tests {
         }
     }
 
-    // Ported: "throws on invalid endpoint when http_url_to_repo is null" — modules/platform/gitlab/utils.spec.ts line 48
+    // Ported: "throws on invalid endpoint when http_url_to_repo is null" — lib/modules/platform/gitlab/utils.spec.ts line 48
     #[test]
     fn get_repo_url_throws_on_invalid_endpoint_when_http_url_is_null() {
         let result = get_repo_url("group/repo", None, None, None, "not-a-valid-url", None);
@@ -2592,7 +2592,7 @@ mod tests {
         }
     }
 
-    // Ported: "should extract an owner rule from a line after an optional section header with spaces" — modules/platform/gitlab/code-owners.spec.ts line 103
+    // Ported: "should extract an owner rule from a line after an optional section header with spaces" — lib/modules/platform/gitlab/code-owners.spec.ts line 103
     #[test]
     fn code_owners_optional_section_header() {
         let rules =
@@ -2603,7 +2603,7 @@ mod tests {
         assert_eq!(rules[0].score, 8);
     }
 
-    // Ported: "should extract an owner rule from a line after a section header with approval count and spaces" — modules/platform/gitlab/code-owners.spec.ts line 117
+    // Ported: "should extract an owner rule from a line after a section header with approval count and spaces" — lib/modules/platform/gitlab/code-owners.spec.ts line 117
     #[test]
     fn code_owners_section_header_with_approval_count() {
         let rules =
@@ -2614,7 +2614,7 @@ mod tests {
         assert_eq!(rules[0].score, 8);
     }
 
-    // Ported: "strips invalid unicode null characters" — modules/platform/gitlab/index.spec.ts line 3950
+    // Ported: "strips invalid unicode null characters" — lib/modules/platform/gitlab/index.spec.ts line 3950
     #[test]
     fn massage_markdown_strips_null_chars() {
         assert_eq!(
@@ -2623,7 +2623,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces PR with MR including pluralization" — modules/platform/gitlab/index.spec.ts line 3958
+    // Ported: "replaces PR with MR including pluralization" — lib/modules/platform/gitlab/index.spec.ts line 3958
     #[test]
     fn massage_markdown_replaces_pr_with_mr() {
         assert_eq!(
@@ -2632,7 +2632,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces PR reference with MR reference" — modules/platform/gitlab/index.spec.ts line 3966
+    // Ported: "replaces PR reference with MR reference" — lib/modules/platform/gitlab/index.spec.ts line 3966
     #[test]
     fn massage_markdown_replaces_pr_ref() {
         assert_eq!(
@@ -2641,7 +2641,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces PR relative link with MR reference" — modules/platform/gitlab/index.spec.ts line 3972
+    // Ported: "replaces PR relative link with MR reference" — lib/modules/platform/gitlab/index.spec.ts line 3972
     #[test]
     fn massage_markdown_replaces_pr_link() {
         assert_eq!(
@@ -2650,7 +2650,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces issues relative link with issue reference" — modules/platform/gitlab/index.spec.ts line 3980
+    // Ported: "replaces issues relative link with issue reference" — lib/modules/platform/gitlab/index.spec.ts line 3980
     #[test]
     fn massage_markdown_replaces_issues_link() {
         assert_eq!(
@@ -2661,14 +2661,14 @@ mod tests {
         );
     }
 
-    // Ported: "avoids false positives when replacing PR with MR" — modules/platform/gitlab/index.spec.ts line 3988
+    // Ported: "avoids false positives when replacing PR with MR" — lib/modules/platform/gitlab/index.spec.ts line 3988
     #[test]
     fn massage_markdown_avoids_false_positives() {
         let input = "PROCESSING APPROPRIATE SUPPRESS NOPR";
         assert_eq!(massage_markdown(input), input);
     }
 
-    // Ported: "should use ssh_url_to_repo if gitUrl is set to ssh" — modules/platform/gitlab/index.spec.ts line 456
+    // Ported: "should use ssh_url_to_repo if gitUrl is set to ssh" — lib/modules/platform/gitlab/index.spec.ts line 456
     #[test]
     fn get_repo_url_uses_ssh_when_git_url_is_ssh() {
         let result = get_repo_url(
@@ -2685,7 +2685,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw if ssh_url_to_repo is not present but gitUrl is set to ssh" — modules/platform/gitlab/index.spec.ts line 473
+    // Ported: "should throw if ssh_url_to_repo is not present but gitUrl is set to ssh" — lib/modules/platform/gitlab/index.spec.ts line 473
     #[test]
     fn get_repo_url_throws_when_ssh_missing_and_git_url_is_ssh() {
         let result = get_repo_url(
@@ -2699,7 +2699,7 @@ mod tests {
         assert!(matches!(result, Err(GetRepoUrlError::SshUrlUnavailable)));
     }
 
-    // Ported: "returns updated pr body" — modules/platform/gitlab/index.spec.ts line 3993
+    // Ported: "returns updated pr body" — lib/modules/platform/gitlab/index.spec.ts line 3993
     #[test]
     fn massage_markdown_returns_updated_pr_body() {
         let input = "https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5\n\n  Pull Requests are the best, here are some PRs.\n\n  ## Open\n\nThese updates have all been created already. To force a retry/rebase of any, click on a checkbox below.\n\n - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../pull/2433) (\\`gh-got\\`, \\`gl-got\\`, \\`got\\`)\n";

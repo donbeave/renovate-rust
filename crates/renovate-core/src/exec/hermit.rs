@@ -60,7 +60,7 @@ fn parse_hermit_env_output(output: &str) -> HashMap<String, String> {
 mod tests {
     use super::*;
 
-    // Ported: "should return true when binarySource is hermit" — util/exec/hermit.spec.ts line 16
+    // Ported: "should return true when binarySource is hermit" — lib/util/exec/hermit.spec.ts line 16
     #[test]
     fn is_hermit_true() {
         assert!(is_hermit(&BinarySource::Hermit));
@@ -74,14 +74,14 @@ mod tests {
         assert!(!is_hermit(&BinarySource::Install));
     }
 
-    // Ported: "should throw error when hermit cwd is not found" — util/exec/hermit.spec.ts line 49
+    // Ported: "should throw error when hermit cwd is not found" — lib/util/exec/hermit.spec.ts line 49
     #[test]
     fn find_hermit_cwd_nonexistent() {
         let result = find_hermit_cwd(Path::new("/tmp/definitely_no_hermit_here"));
         assert!(result.is_none());
     }
 
-    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 30
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — lib/util/exec/hermit.spec.ts line 30
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_same_dir() {
@@ -93,7 +93,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 30
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — lib/util/exec/hermit.spec.ts line 30
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_nested_dir() {
@@ -107,7 +107,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — util/exec/hermit.spec.ts line 30
+    // Ported: "(\"$dir\") === $expected (hermit: $hermitLocation)" — lib/util/exec/hermit.spec.ts line 30
     //         — util/exec/hermit.spec.ts line 30
     #[test]
     fn find_hermit_cwd_in_parent_dir() {
@@ -121,7 +121,7 @@ mod tests {
         assert_eq!(result, Some(dir.path().to_path_buf()));
     }
 
-    // Ported: "should return hermit environment variables when hermit env returns successfully" — util/exec/hermit.spec.ts line 62
+    // Ported: "should return hermit environment variables when hermit env returns successfully" — lib/util/exec/hermit.spec.ts line 62
     //         — util/exec/hermit.spec.ts line 62
     #[test]
     fn parse_hermit_env_output_parses_valid_lines() {
@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(envs.get("PATH").unwrap(), "/usr/src/app/repository-a/bin");
     }
 
-    // Ported: "should return hermit environment variables when hermit env returns successfully" — util/exec/hermit.spec.ts line 62
+    // Ported: "should return hermit environment variables when hermit env returns successfully" — lib/util/exec/hermit.spec.ts line 62
     //         — util/exec/hermit.spec.ts line 62
     #[test]
     fn parse_hermit_env_output_skips_comments_and_empty_lines() {
@@ -146,7 +146,7 @@ mod tests {
         assert_eq!(envs.get("BAZ").unwrap(), "qux");
     }
 
-    // Ported: "should return hermit environment variables when hermit env returns successfully" — util/exec/hermit.spec.ts line 62
+    // Ported: "should return hermit environment variables when hermit env returns successfully" — lib/util/exec/hermit.spec.ts line 62
     //         — util/exec/hermit.spec.ts line 62
     #[test]
     fn parse_hermit_env_output_empty() {

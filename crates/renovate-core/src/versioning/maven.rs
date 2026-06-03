@@ -888,7 +888,7 @@ mod tests {
         assert!(s.latest.is_none());
     }
 
-    // Ported: "$x == $y" — versioning/maven/compare.spec.ts line 15
+    // Ported: "$x == $y" — lib/modules/versioning/maven/compare.spec.ts line 15
     #[test]
     fn compare_equals_matches_renovate_maven_compare_spec() {
         let cases: &[(&str, &str)] = &[
@@ -981,7 +981,7 @@ mod tests {
         }
     }
 
-    // Ported: "$x < $y" — versioning/maven/compare.spec.ts line 106
+    // Ported: "$x < $y" — lib/modules/versioning/maven/compare.spec.ts line 106
     #[test]
     fn compare_ordering_matches_renovate_maven_compare_spec() {
         let cases: &[(&str, &str)] = &[
@@ -1081,7 +1081,7 @@ mod tests {
         }
     }
 
-    // Ported: "$qualifier" — versioning/maven/compare.spec.ts line 203
+    // Ported: "$qualifier" — lib/modules/versioning/maven/compare.spec.ts line 203
     #[test]
     fn qualifier_mng7644_matches_renovate_maven_compare_spec() {
         let qualifiers = [
@@ -1117,7 +1117,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSubversion("$majorVersion", "$minorVersion") === $expected" — versioning/maven/compare.spec.ts line 226
+    // Ported: "isSubversion("$majorVersion", "$minorVersion") === $expected" — lib/modules/versioning/maven/compare.spec.ts line 226
     #[test]
     fn is_subversion_matches_renovate_maven_compare_spec() {
         assert!(is_subversion("1.2.3", "1.2.3"));
@@ -1133,7 +1133,7 @@ mod tests {
         assert!(is_subversion("v1.2.3", "v1.2.3"));
     }
 
-    // Ported: "$x == $y" — versioning/maven/compare.spec.ts line 463
+    // Ported: "$x == $y" — lib/modules/versioning/maven/compare.spec.ts line 463
     #[test]
     fn compare_nonstandard_equals_matches_renovate_maven_compare_spec() {
         let cases: &[(&str, &str)] = &[
@@ -1150,7 +1150,7 @@ mod tests {
         }
     }
 
-    // Ported: "$x < $y" — versioning/maven/compare.spec.ts line 478
+    // Ported: "$x < $y" — lib/modules/versioning/maven/compare.spec.ts line 478
     #[test]
     fn compare_nonstandard_ordering_matches_renovate_maven_compare_spec() {
         let cases: &[(&str, &str)] = &[("1-snap", "1"), ("1-preview", "1-snapshot")];
@@ -1160,7 +1160,7 @@ mod tests {
         }
     }
 
-    // Ported: "filters out incorrect range: $input" — versioning/maven/compare.spec.ts line 490
+    // Ported: "filters out incorrect range: $input" — lib/modules/versioning/maven/compare.spec.ts line 490
     #[test]
     fn parse_range_filters_invalid_matches_renovate_maven_compare_spec() {
         let invalid = [
@@ -1195,7 +1195,7 @@ mod tests {
         }
     }
 
-    // Ported: "parseRange("$input")" — versioning/maven/compare.spec.ts line 521
+    // Ported: "parseRange("$input")" — lib/modules/versioning/maven/compare.spec.ts line 521
     #[test]
     #[allow(clippy::type_complexity)]
     fn parse_range_valid_matches_renovate_maven_compare_spec() {
@@ -1269,10 +1269,10 @@ mod tests {
         }
     }
 
-    // Ported: "uses same function module export and api object" — versioning/maven/index.spec.ts line 7
+    // Ported: "uses same function module export and api object" — lib/modules/versioning/maven/index.spec.ts line 7
     // Not applicable: tests TypeScript named-export identity (isValid === _isValid); no Rust equivalent
 
-    // Ported: "isValid("$version") === $expected" — versioning/maven/index.spec.ts line 11
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/maven/index.spec.ts line 11
     #[test]
     fn is_valid_matches_renovate_maven_index_spec() {
         assert!(is_valid("1.0.0"));
@@ -1291,7 +1291,7 @@ mod tests {
         assert!(!is_valid("[2.0,1.0)"));
     }
 
-    // Ported: "isVersion("$version") === $expected" — versioning/maven/index.spec.ts line 32
+    // Ported: "isVersion("$version") === $expected" — lib/modules/versioning/maven/index.spec.ts line 32
     #[test]
     fn is_version_matches_renovate_maven_index_spec() {
         assert!(!is_version(""));
@@ -1318,7 +1318,7 @@ mod tests {
         assert!(is_version("foobar"));
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/maven/index.spec.ts line 60
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/maven/index.spec.ts line 60
     #[test]
     fn is_stable_index_matches_renovate_maven_index_spec() {
         assert!(!is_stable(""));
@@ -1345,7 +1345,7 @@ mod tests {
         assert!(is_stable("Hoxton.SR1"));
     }
 
-    // Ported: ""$input" is represented as [$major, $minor, $patch]" — versioning/maven/index.spec.ts line 89
+    // Ported: ""$input" is represented as [$major, $minor, $patch]" — lib/modules/versioning/maven/index.spec.ts line 89
     #[test]
     #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_maven_index_spec() {
@@ -1368,7 +1368,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/maven/index.spec.ts line 111
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/maven/index.spec.ts line 111
     #[test]
     fn matches_range_matches_renovate_maven_index_spec() {
         let cases: &[(&str, &str, bool)] = &[
@@ -1420,13 +1420,13 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/maven/index.spec.ts line 158
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/maven/index.spec.ts line 158
     #[test]
     fn is_greater_than_matches_renovate_maven_index_spec() {
         assert!(is_greater_than("1.1", "1"));
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/maven/index.spec.ts line 165
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/maven/index.spec.ts line 165
     #[test]
     fn get_satisfying_version_matches_renovate_maven_index_spec() {
         assert_eq!(get_satisfying_version(&["1"], "1"), Some("1"));
@@ -1439,7 +1439,7 @@ mod tests {
         );
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/maven/index.spec.ts line 179
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/maven/index.spec.ts line 179
     #[test]
     fn min_satisfying_version_matches_renovate_maven_index_spec() {
         assert_eq!(get_satisfying_version(&["1"], "1"), Some("1"));
@@ -1452,7 +1452,7 @@ mod tests {
         );
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/maven/index.spec.ts line 193
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — lib/modules/versioning/maven/index.spec.ts line 193
     #[test]
     fn get_new_value_matches_renovate_maven_index_spec() {
         let cases: &[(&str, Option<&str>, &str, &str)] = &[
@@ -1482,7 +1482,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$version", "${range}") === $expected" — versioning/maven/index.spec.ts line 228
+    // Ported: "matches("$version", "${range}") === $expected" — lib/modules/versioning/maven/index.spec.ts line 228
     #[test]
     fn matches_jenkins_range_excl_matches_renovate_maven_index_spec() {
         let range = "[2.164.0,2.165.0)";
@@ -1494,7 +1494,7 @@ mod tests {
         assert!(!matches_range("2.164.0-SNAPSHOT", range));
     }
 
-    // Ported: "matches("$version", "${range}") === $expected" — versioning/maven/index.spec.ts line 247
+    // Ported: "matches("$version", "${range}") === $expected" — lib/modules/versioning/maven/index.spec.ts line 247
     #[test]
     fn matches_jenkins_range_incl_matches_renovate_maven_index_spec() {
         let range = "[2.164.0,2.165.0]";
@@ -1506,7 +1506,7 @@ mod tests {
         assert!(!matches_range("2.164.0-SNAPSHOT", range));
     }
 
-    // Ported: "matches("$version", "${range}") === $expected" — versioning/maven/index.spec.ts line 266
+    // Ported: "matches("$version", "${range}") === $expected" — lib/modules/versioning/maven/index.spec.ts line 266
     #[test]
     fn matches_jenkins_range_lt_matches_renovate_maven_index_spec() {
         let range = "(,2.164.0)";
@@ -1517,7 +1517,7 @@ mod tests {
         assert!(matches_range("1.0.0", range));
     }
 
-    // Ported: "autoExtendMavenRange("$range", "$version") === $expected" — versioning/maven/compare.spec.ts line 560
+    // Ported: "autoExtendMavenRange("$range", "$version") === $expected" — lib/modules/versioning/maven/compare.spec.ts line 560
     #[test]
     fn auto_extend_maven_range_matches_renovate_maven_compare_spec() {
         let cases: &[(&str, &str, &str)] = &[
@@ -1576,7 +1576,7 @@ mod tests {
         }
     }
 
-    // Ported: "should tokenize" — versioning/maven/compare.spec.ts line 454
+    // Ported: "should tokenize" — lib/modules/versioning/maven/compare.spec.ts line 454
     #[test]
     fn tokenize_matches_renovate_maven_compare_spec() {
         let none_prefix = Prefix::Other(String::new());

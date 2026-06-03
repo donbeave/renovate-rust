@@ -216,7 +216,7 @@ pub fn manager_for_file(filename: &str) -> Option<&'static str> {
 mod tests {
     use super::*;
 
-    // Ported: "returns a result" — terraform-version/extract.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/terraform-version/extract.spec.ts line 5
     #[test]
     fn terraform_version_plain() {
         let dep = extract("1.6.3\n", "terraform-version").unwrap();
@@ -231,7 +231,7 @@ mod tests {
         );
     }
 
-    // Ported: "skips non ranges" — terraform-version/extract.spec.ts line 18
+    // Ported: "skips non ranges" — lib/modules/manager/terraform-version/extract.spec.ts line 18
     #[test]
     fn terraform_version_passes_through_non_alias_literal() {
         let dep = extract("latest", "terraform-version").unwrap();
@@ -290,14 +290,14 @@ mod tests {
         assert!(extract("lts/*\n", "nvmrc").is_none());
     }
 
-    // Ported: "returns a result" — nvm/extract.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/nvm/extract.spec.ts line 5
     #[test]
     fn nvmrc_plain_version() {
         let dep = extract("20.9.0\n", "nvmrc").unwrap();
         assert_eq!(dep.current_value, "20.9.0");
     }
 
-    // Ported: "skips non ranges" — nvm/extract.spec.ts line 27
+    // Ported: "skips non ranges" — lib/modules/manager/nvm/extract.spec.ts line 27
     #[test]
     fn nvmrc_passes_through_latest_literal() {
         let dep = extract("latest\n", "nvmrc").unwrap();
@@ -362,7 +362,7 @@ mod tests {
         assert_eq!(manager_for_file("Gemfile"), None);
     }
 
-    // Ported: "returns a result" — ruby-version/extract.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/ruby-version/extract.spec.ts line 5
     #[test]
     fn ruby_version_file() {
         let dep = extract("3.3.0\n", "ruby-version").unwrap();
@@ -383,7 +383,7 @@ mod tests {
         assert_eq!(manager_for_file(".ruby-version"), Some("ruby-version"));
     }
 
-    // Ported: "returns a result" — terragrunt-version/extract.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/terragrunt-version/extract.spec.ts line 5
     #[test]
     fn terragrunt_version_file() {
         let dep = extract("12.0.0\n", "terragrunt-version").unwrap();
@@ -398,7 +398,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports ranges" — nvm/extract.spec.ts line 16
+    // Ported: "supports ranges" — lib/modules/manager/nvm/extract.spec.ts line 16
     #[test]
     fn nvmrc_partial_version_range() {
         let dep = extract("8.4\n", "nvmrc").unwrap();
@@ -406,7 +406,7 @@ mod tests {
         assert_eq!(dep.current_value, "8.4");
     }
 
-    // Ported: "supports code comments" — nvm/extract.spec.ts line 38
+    // Ported: "supports code comments" — lib/modules/manager/nvm/extract.spec.ts line 38
     #[test]
     fn nvmrc_skips_full_line_comments_and_inline_comment() {
         let content =
@@ -417,7 +417,7 @@ mod tests {
         assert_eq!(dep.current_value, "20.19.3");
     }
 
-    // Ported: "supports ranges" — ruby-version/extract.spec.ts line 16
+    // Ported: "supports ranges" — lib/modules/manager/ruby-version/extract.spec.ts line 16
     #[test]
     fn ruby_version_partial_range() {
         let dep = extract("8.4\n", "ruby-version").unwrap();
@@ -425,7 +425,7 @@ mod tests {
         assert_eq!(dep.current_value, "8.4");
     }
 
-    // Ported: "skips non ranges" — ruby-version/extract.spec.ts line 27
+    // Ported: "skips non ranges" — lib/modules/manager/ruby-version/extract.spec.ts line 27
     //
     // The TS spec passes the literal `latestn` (a typo for `latest`) and
     // expects the extractor to return it unchanged. Rust matches: `latestn`
@@ -437,7 +437,7 @@ mod tests {
         assert_eq!(dep.current_value, "latestn");
     }
 
-    // Ported: "returns a result" — modules/manager/nodenv/extract.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/nodenv/extract.spec.ts line 5
     #[test]
     fn nodenv_returns_dep_for_version() {
         let dep = extract_nodenv("8.4.0\n");
@@ -446,7 +446,7 @@ mod tests {
         assert_eq!(dep.datasource, "node-version");
     }
 
-    // Ported: "supports ranges" — modules/manager/nodenv/extract.spec.ts line 16
+    // Ported: "supports ranges" — lib/modules/manager/nodenv/extract.spec.ts line 16
     #[test]
     fn nodenv_supports_partial_version() {
         let dep = extract_nodenv("8.4\n");
@@ -455,7 +455,7 @@ mod tests {
         assert_eq!(dep.datasource, "node-version");
     }
 
-    // Ported: "skips non ranges" — modules/manager/nodenv/extract.spec.ts line 27
+    // Ported: "skips non ranges" — lib/modules/manager/nodenv/extract.spec.ts line 27
     #[test]
     fn nodenv_passes_through_non_version_string() {
         let dep = extract_nodenv("latestn");
@@ -464,7 +464,7 @@ mod tests {
         assert_eq!(dep.datasource, "node-version");
     }
 
-    // Ported: "returns a result" — modules/manager/bazelisk/extract.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/bazelisk/extract.spec.ts line 5
     #[test]
     fn bazelisk_returns_dep_for_version() {
         let dep = extract_bazelisk("5.2.0\n");
@@ -474,21 +474,21 @@ mod tests {
         assert_eq!(dep.package_name, "bazelbuild/bazel");
     }
 
-    // Ported: "supports ranges" — modules/manager/bazelisk/extract.spec.ts line 17
+    // Ported: "supports ranges" — lib/modules/manager/bazelisk/extract.spec.ts line 17
     #[test]
     fn bazelisk_supports_partial_version() {
         let dep = extract_bazelisk("5.2");
         assert_eq!(dep.current_value, "5.2");
     }
 
-    // Ported: "skips non ranges" — modules/manager/bazelisk/extract.spec.ts line 29
+    // Ported: "skips non ranges" — lib/modules/manager/bazelisk/extract.spec.ts line 29
     #[test]
     fn bazelisk_passes_through_non_version_string() {
         let dep = extract_bazelisk("latestn");
         assert_eq!(dep.current_value, "latestn");
     }
 
-    // Ported: "ignores comments past the first line" — modules/manager/bazelisk/extract.spec.ts line 41
+    // Ported: "ignores comments past the first line" — lib/modules/manager/bazelisk/extract.spec.ts line 41
     #[test]
     fn bazelisk_ignores_comments_past_first_line() {
         let dep = extract_bazelisk("5.2.0\n# comment1\n\n# comment2");

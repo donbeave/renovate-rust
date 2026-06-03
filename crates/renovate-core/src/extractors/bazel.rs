@@ -440,7 +440,7 @@ fn parse_http_archive(block: &str) -> Option<BazelDep> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts github tags" — bazel/extract.spec.ts line 31
+    // Ported: "extracts github tags" — lib/modules/manager/bazel/extract.spec.ts line 31
     #[test]
     fn extracts_github_archive_dep() {
         let content = r#"
@@ -464,7 +464,7 @@ http_archive(
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "extracts github tags" — bazel/extract.spec.ts line 31
+    // Ported: "extracts github tags" — lib/modules/manager/bazel/extract.spec.ts line 31
     #[test]
     fn extracts_github_release_dep() {
         let content = r#"
@@ -484,7 +484,7 @@ http_archive(
         );
     }
 
-    // Ported: "sequential http_archive" — bazel/extract.spec.ts line 166
+    // Ported: "sequential http_archive" — lib/modules/manager/bazel/extract.spec.ts line 166
     #[test]
     fn extracts_multiple_archives() {
         let content = r#"
@@ -504,7 +504,7 @@ http_archive(
         assert_eq!(deps[1].dep_name, "dep_b");
     }
 
-    // Ported: "returns empty if fails to parse" — bazel/extract.spec.ts line 10
+    // Ported: "returns empty if fails to parse" — lib/modules/manager/bazel/extract.spec.ts line 10
     #[test]
     fn skips_non_github_url() {
         let content = r#"
@@ -518,27 +518,27 @@ http_archive(
         assert_eq!(deps[0].skip_reason, Some(BazelSkipReason::NoGithubUrl));
     }
 
-    // Ported: "returns empty if fails to parse" — bazel/extract.spec.ts line 10
+    // Ported: "returns empty if fails to parse" — lib/modules/manager/bazel/extract.spec.ts line 10
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
         assert!(extract("# just comments\n").is_empty());
     }
 
-    // Ported: "returns empty if fails to parse" — bazel/extract.spec.ts line 10
+    // Ported: "returns empty if fails to parse" — lib/modules/manager/bazel/extract.spec.ts line 10
     #[test]
     fn invalid_content_returns_empty() {
         assert!(extract("blahhhhh:foo:@what\n").is_empty());
     }
 
-    // Ported: "returns empty if cannot parse dependency" — bazel/extract.spec.ts line 15
+    // Ported: "returns empty if cannot parse dependency" — lib/modules/manager/bazel/extract.spec.ts line 15
     #[test]
     fn git_repository_without_url_returns_empty() {
         // We only handle http_archive; git_repository alone returns nothing.
         assert!(extract("git_repository(\n  nothing\n)\n").is_empty());
     }
 
-    // Ported: "sequential http_archive" (first archive uses `url =` singular) — bazel/extract.spec.ts line 166
+    // Ported: "sequential http_archive" (first archive uses `url =` singular) — lib/modules/manager/bazel/extract.spec.ts line 166
     #[test]
     fn singular_url_form_extracted() {
         let content = r#"
@@ -563,7 +563,7 @@ http_archive(
         assert_eq!(deps[1].current_value, "5.5.3");
     }
 
-    // Ported: "http_archive with GitLab url" (semver version) — bazel/extract.spec.ts line 190
+    // Ported: "http_archive with GitLab url" (semver version) — lib/modules/manager/bazel/extract.spec.ts line 190
     #[test]
     fn gitlab_archive_with_version_extracted() {
         let content = r#"
@@ -588,7 +588,7 @@ http_archive(
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "http_archive with GitLab url" (commit digest) — bazel/extract.spec.ts line 190
+    // Ported: "http_archive with GitLab url" (commit digest) — lib/modules/manager/bazel/extract.spec.ts line 190
     #[test]
     fn gitlab_archive_with_commit_digest_extracted() {
         let digest = "90ee821c563fa20db4d64d6991ddca256d5c52f2";
@@ -619,7 +619,7 @@ http_archive(
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handle comments and strings" — bazel/extract.spec.ts line 42
+    // Ported: "handle comments and strings" — lib/modules/manager/bazel/extract.spec.ts line 42
     #[test]
     fn workspace3_comments_and_strings() {
         let content = r#"
@@ -652,7 +652,7 @@ http_archive(
         );
     }
 
-    // Ported: "returns empty for incomplete dependency" — bazel/extract.spec.ts line 20
+    // Ported: "returns empty for incomplete dependency" — lib/modules/manager/bazel/extract.spec.ts line 20
     #[test]
     fn http_archive_with_no_url_returns_dep_with_skip_reason() {
         // A git_repository with only foo = "bar" — no URLs — returns nothing
@@ -661,7 +661,7 @@ http_archive(
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts dependencies for container_pull deptype" — bazel/extract.spec.ts line 65
+    // Ported: "extracts dependencies for container_pull deptype" — lib/modules/manager/bazel/extract.spec.ts line 65
     #[test]
     fn container_pull_extracted() {
         let content = r#"
@@ -695,7 +695,7 @@ container_pull(
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "extracts dependencies for oci_pull deptype" — bazel/extract.spec.ts line 90
+    // Ported: "extracts dependencies for oci_pull deptype" — lib/modules/manager/bazel/extract.spec.ts line 90
     #[test]
     fn oci_pull_extracted() {
         let content = r#"
@@ -727,7 +727,7 @@ oci_pull(
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "check remote option in go_repository" — bazel/extract.spec.ts line 113
+    // Ported: "check remote option in go_repository" — lib/modules/manager/bazel/extract.spec.ts line 113
     #[test]
     fn go_repository_remote_option() {
         let success = extract(
@@ -778,7 +778,7 @@ go_repository(
         }
     }
 
-    // Ported: "extracts multiple types of dependencies" — bazel/extract.spec.ts line 25
+    // Ported: "extracts multiple types of dependencies" — lib/modules/manager/bazel/extract.spec.ts line 25
     #[test]
     fn workspace1_multiple_dependency_types() {
         let content = r#"
@@ -848,7 +848,7 @@ http_file(name="distroless", urls=["https://github.com/GoogleContainerTools/dist
         );
     }
 
-    // Ported: "extracts dependencies from *.bzl files" — bazel/extract.spec.ts line 47
+    // Ported: "extracts dependencies from *.bzl files" — lib/modules/manager/bazel/extract.spec.ts line 47
     #[test]
     fn extracts_dependencies_from_bzl_files() {
         let content = r#"

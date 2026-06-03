@@ -201,7 +201,7 @@ mod tests {
         }
     }"#;
 
-    // Ported: "returns null for a package miss" — datasource/jenkins-plugins/index.spec.ts line 57
+    // Ported: "returns null for a package miss" — lib/modules/datasource/jenkins-plugins/index.spec.ts line 57
     #[tokio::test]
     async fn returns_null_for_package_miss() {
         let server = MockServer::start().await;
@@ -218,7 +218,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns package releases for a hit for info and releases" — datasource/jenkins-plugins/index.spec.ts line 69
+    // Ported: "returns package releases for a hit for info and releases" — lib/modules/datasource/jenkins-plugins/index.spec.ts line 69
     #[tokio::test]
     async fn returns_releases_for_info_and_releases_hit() {
         let server = MockServer::start().await;
@@ -265,7 +265,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns package releases for a hit for info and miss for releases" — datasource/jenkins-plugins/index.spec.ts line 104
+    // Ported: "returns package releases for a hit for info and miss for releases" — lib/modules/datasource/jenkins-plugins/index.spec.ts line 104
     #[tokio::test]
     async fn returns_empty_releases_for_info_hit_versions_miss() {
         let server = MockServer::start().await;
@@ -293,7 +293,7 @@ mod tests {
         assert!(result.releases.is_empty());
     }
 
-    // Ported: "returns null empty response" — datasource/jenkins-plugins/index.spec.ts line 122
+    // Ported: "returns null empty response" — lib/modules/datasource/jenkins-plugins/index.spec.ts line 122
     #[tokio::test]
     async fn returns_null_for_empty_info_response() {
         let server = MockServer::start().await;
@@ -310,7 +310,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns package releases from a custom registry" — datasource/jenkins-plugins/index.spec.ts line 131
+    // Ported: "returns package releases from a custom registry" — lib/modules/datasource/jenkins-plugins/index.spec.ts line 131
     #[tokio::test]
     async fn returns_releases_from_custom_registry() {
         let server = MockServer::start().await;

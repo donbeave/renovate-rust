@@ -177,7 +177,7 @@ mod tests {
             .to_string()
     }
 
-    // Ported: "returns tags" — datasource/bitbucket-server-tags/index.spec.ts line 12
+    // Ported: "returns tags" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 12
     #[tokio::test]
     async fn returns_tags() {
         let server = MockServer::start().await;
@@ -240,7 +240,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null on empty result" — datasource/bitbucket-server-tags/index.spec.ts line 66
+    // Ported: "returns null on empty result" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 66
     #[tokio::test]
     async fn returns_null_on_empty_result() {
         let server = MockServer::start().await;
@@ -258,7 +258,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null on missing registryUrl" — datasource/bitbucket-server-tags/index.spec.ts line 80
+    // Ported: "returns null on missing registryUrl" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 80
     #[tokio::test]
     async fn returns_null_on_missing_registry_url() {
         let http = HttpClient::new().unwrap();
@@ -268,7 +268,7 @@ mod tests {
         assert!(result.is_err() || matches!(result, Ok(None)));
     }
 
-    // Ported: "handles not found" — datasource/bitbucket-server-tags/index.spec.ts line 88
+    // Ported: "handles not found" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 88
     #[tokio::test]
     async fn handles_not_found() {
         let server = MockServer::start().await;
@@ -288,7 +288,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns commit hash of provided tag" — datasource/bitbucket-server-tags/index.spec.ts line 104
+    // Ported: "returns commit hash of provided tag" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 104
     #[tokio::test]
     async fn returns_commit_hash_of_provided_tag() {
         let server = MockServer::start().await;
@@ -312,7 +312,7 @@ mod tests {
         );
     }
 
-    // Ported: "missing hash" — datasource/bitbucket-server-tags/index.spec.ts line 124
+    // Ported: "missing hash" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 124
     #[tokio::test]
     async fn missing_hash() {
         let server = MockServer::start().await;
@@ -333,7 +333,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns most recent commit hash" — datasource/bitbucket-server-tags/index.spec.ts line 146
+    // Ported: "returns most recent commit hash" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 146
     #[tokio::test]
     async fn returns_most_recent_commit_hash() {
         let server = MockServer::start().await;
@@ -362,7 +362,7 @@ mod tests {
         );
     }
 
-    // Ported: "no commits" — datasource/bitbucket-server-tags/index.spec.ts line 173
+    // Ported: "no commits" — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 173
     #[tokio::test]
     async fn no_commits() {
         let server = MockServer::start().await;
@@ -387,7 +387,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null on empty result" (getDigest) — datasource/bitbucket-server-tags/index.spec.ts line 195
+    // Ported: "returns null on empty result" (getDigest) — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 195
     #[tokio::test]
     async fn get_digest_returns_null_on_empty_result() {
         let server = MockServer::start().await;
@@ -406,7 +406,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null on missing registryUrl" (getDigest) — datasource/bitbucket-server-tags/index.spec.ts line 211
+    // Ported: "returns null on missing registryUrl" (getDigest) — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 211
     #[tokio::test]
     async fn get_digest_returns_null_on_missing_registry_url() {
         let http = HttpClient::new().unwrap();
@@ -416,7 +416,7 @@ mod tests {
         assert!(result.is_err() || matches!(result, Ok(None)));
     }
 
-    // Ported: "handles not found" (getDigest) — datasource/bitbucket-server-tags/index.spec.ts line 219
+    // Ported: "handles not found" (getDigest) — lib/modules/datasource/bitbucket-server-tags/index.spec.ts line 219
     #[tokio::test]
     async fn get_digest_handles_not_found() {
         let server = MockServer::start().await;
@@ -440,7 +440,7 @@ mod tests {
 mod schema_tests {
     use super::*;
 
-    // Ported: "parses BitbucketServerTags" — datasource/bitbucket-server-tags/schema.spec.ts line 4
+    // Ported: "parses BitbucketServerTags" — lib/modules/datasource/bitbucket-server-tags/schema.spec.ts line 4
     #[test]
     fn parses_bitbucket_server_tags() {
         let json = r#"[
@@ -461,7 +461,7 @@ mod schema_tests {
         assert!(tags[2].hash.is_none()); // missing hash field
     }
 
-    // Ported: "parses BitbucketServerCommits" — datasource/bitbucket-server-tags/schema.spec.ts line 40
+    // Ported: "parses BitbucketServerCommits" — lib/modules/datasource/bitbucket-server-tags/schema.spec.ts line 40
     #[test]
     fn parses_bitbucket_server_commits() {
         let json = r#"[

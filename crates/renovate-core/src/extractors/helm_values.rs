@@ -262,7 +262,7 @@ pub fn helm_values_update_dependency(
 mod tests {
     use super::*;
 
-    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — lib/modules/manager/helm-values/extract.spec.ts line 36
     #[test]
     fn object_form_repository_and_tag() {
         let content = r#"
@@ -276,7 +276,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("1.25"));
     }
 
-    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — lib/modules/manager/helm-values/extract.spec.ts line 36
     #[test]
     fn object_form_version_key() {
         let content = r#"
@@ -290,7 +290,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("7.0"));
     }
 
-    // Ported: "extracts from complex values file correctly"" — helm-values/extract.spec.ts line 52
+    // Ported: "extracts from complex values file correctly"" — lib/modules/manager/helm-values/extract.spec.ts line 52
     #[test]
     fn inline_string_form() {
         let content = "busyboxImage: busybox:1.36\n";
@@ -300,7 +300,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("1.36"));
     }
 
-    // Ported: "extracts from complex values file correctly"" — helm-values/extract.spec.ts line 52
+    // Ported: "extracts from complex values file correctly"" — lib/modules/manager/helm-values/extract.spec.ts line 52
     #[test]
     fn multiple_images() {
         let content = r#"
@@ -318,7 +318,7 @@ sidecar:
         assert!(deps.iter().any(|d| d.image == "redis"));
     }
 
-    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — lib/modules/manager/helm-values/extract.spec.ts line 36
     #[test]
     fn key_not_ending_in_image_ignored() {
         let content = "pullPolicy: IfNotPresent\nrepository: nginx\n";
@@ -326,7 +326,7 @@ sidecar:
         assert!(deps.is_empty());
     }
 
-    // Ported: "extract data from file with registry aliases" — helm-values/extract.spec.ts line 85
+    // Ported: "extract data from file with registry aliases" — lib/modules/manager/helm-values/extract.spec.ts line 85
     #[test]
     fn registry_prefix_combined() {
         let content = r#"
@@ -339,19 +339,19 @@ image:
         assert_eq!(deps[0].image, "gcr.io/myproject/app");
     }
 
-    // Ported: "returns null for empty yaml file content" — helm-values/extract.spec.ts line 31
+    // Ported: "returns null for empty yaml file content" — lib/modules/manager/helm-values/extract.spec.ts line 31
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for invalid yaml file content" — helm-values/extract.spec.ts line 26
+    // Ported: "returns null for invalid yaml file content" — lib/modules/manager/helm-values/extract.spec.ts line 26
     #[test]
     fn invalid_yaml_returns_empty() {
         assert!(extract("nothing here: [").is_empty());
     }
 
-    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — helm-values/extract.spec.ts line 36
+    // Ported: "extracts from values.yaml correctly with same structure as \"helm create\"" — lib/modules/manager/helm-values/extract.spec.ts line 36
     #[test]
     fn helm_create_default_values() {
         let content = "image:\n  repository: nginx\n  tag: 1.16.1\n  pullPolicy: IfNotPresent\n";
@@ -361,7 +361,7 @@ image:
         assert_eq!(deps[0].tag.as_deref(), Some("1.16.1"));
     }
 
-    // Ported: "extract data from file with multiple documents" — helm-values/extract.spec.ts line 62
+    // Ported: "extract data from file with multiple documents" — lib/modules/manager/helm-values/extract.spec.ts line 62
     #[test]
     fn multidoc_yaml_extracts_nested_images() {
         // Simulates single_file_with_multiple_documents.yaml fixture:

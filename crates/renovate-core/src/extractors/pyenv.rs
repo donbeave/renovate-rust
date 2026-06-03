@@ -24,7 +24,7 @@ pub fn extract(content: &str) -> PyenvDep {
 mod tests {
     use super::*;
 
-    // Ported: "returns a result" — manager/pyenv/extract.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/pyenv/extract.spec.ts line 5
     #[test]
     fn returns_a_result() {
         let dep = extract("3.7.1\n");
@@ -40,7 +40,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports ranges" — manager/pyenv/extract.spec.ts line 17
+    // Ported: "supports ranges" — lib/modules/manager/pyenv/extract.spec.ts line 17
     #[test]
     fn supports_ranges() {
         let dep = extract("3.8\n");
@@ -56,7 +56,7 @@ mod tests {
         );
     }
 
-    // Ported: "skips non ranges" — manager/pyenv/extract.spec.ts line 29
+    // Ported: "skips non ranges" — lib/modules/manager/pyenv/extract.spec.ts line 29
     #[test]
     fn skips_non_ranges() {
         let dep = extract("latestn");

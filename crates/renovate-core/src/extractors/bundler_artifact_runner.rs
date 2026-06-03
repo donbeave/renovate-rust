@@ -248,7 +248,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns null by default" — bundler/artifacts.spec.ts line 66
+    // Ported: "returns null by default" — lib/modules/manager/bundler/artifacts.spec.ts line 66
     #[tokio::test]
     async fn returns_null_by_default() {
         let dir = tempdir().unwrap();
@@ -266,7 +266,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if Gemfile.lock was not changed" — bundler/artifacts.spec.ts line 77
+    // Ported: "returns null if Gemfile.lock was not changed" — lib/modules/manager/bundler/artifacts.spec.ts line 77
     #[tokio::test]
     async fn returns_null_if_unchanged() {
         let dir = tempdir().unwrap();
@@ -350,7 +350,7 @@ mod tests {
         assert_eq!(results[0].file.as_ref().unwrap().path, "Gemfile.lock");
     }
 
-    // Ported: "performs lockFileMaintenance" — bundler/artifacts.spec.ts line 517
+    // Ported: "performs lockFileMaintenance" — lib/modules/manager/bundler/artifacts.spec.ts line 517
     #[tokio::test]
     async fn performs_lockfile_maintenance() {
         let dir = tempdir().unwrap();
@@ -394,7 +394,7 @@ mod tests {
         assert_eq!(results.len(), 1);
     }
 
-    // Ported: "updates the Gemfile.lock when upgrading ruby" — bundler/artifacts.spec.ts line 678
+    // Ported: "updates the Gemfile.lock when upgrading ruby" — lib/modules/manager/bundler/artifacts.spec.ts line 678
     #[tokio::test]
     async fn updates_gemfile_lock_when_upgrading_ruby() {
         let dir = tempdir().unwrap();
@@ -440,7 +440,7 @@ mod tests {
         assert_eq!(results[0].file.as_ref().unwrap().path, "Gemfile.lock");
     }
 
-    // Ported: "updates the Gemfile.lock when upgrading bundler" — bundler/artifacts.spec.ts line 699
+    // Ported: "updates the Gemfile.lock when upgrading bundler" — lib/modules/manager/bundler/artifacts.spec.ts line 699
     #[tokio::test]
     async fn updates_gemfile_lock_when_upgrading_bundler() {
         let dir = tempdir().unwrap();
@@ -485,7 +485,7 @@ mod tests {
         assert_eq!(results.len(), 1);
     }
 
-    // Ported: "returns error when failing in lockFileMaintenance true" — bundler/artifacts.spec.ts line 488
+    // Ported: "returns error when failing in lockFileMaintenance true" — lib/modules/manager/bundler/artifacts.spec.ts line 488
     #[tokio::test]
     async fn returns_error_when_failing_in_lockfile_maintenance() {
         let dir = tempdir().unwrap();
@@ -559,7 +559,7 @@ mod tests {
         assert_eq!(cmds, vec!["bundler lock"]);
     }
 
-    // Ported: "supports conservative mode and updateType option" — bundler/artifacts.spec.ts line 176
+    // Ported: "supports conservative mode and updateType option" — lib/modules/manager/bundler/artifacts.spec.ts line 176
     #[test]
     fn build_commands_conservative_and_update_type() {
         let mut foo = updated_dep("foo");
@@ -583,7 +583,7 @@ mod tests {
         );
     }
 
-    // Ported: "executes commands from lockFile path" — bundler/artifacts.spec.ts line 100
+    // Ported: "executes commands from lockFile path" — lib/modules/manager/bundler/artifacts.spec.ts line 100
     #[tokio::test]
     async fn executes_commands_from_lockfile_path() {
         let dir = tempdir().unwrap();
@@ -633,7 +633,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "handles \"Could not parse object\" error" — bundler/artifacts.spec.ts line 599
+    // Ported: "handles \"Could not parse object\" error" — lib/modules/manager/bundler/artifacts.spec.ts line 599
     #[tokio::test]
     async fn handles_could_not_parse_object_error() {
         let dir = tempdir().unwrap();

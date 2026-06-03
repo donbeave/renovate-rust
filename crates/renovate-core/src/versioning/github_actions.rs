@@ -337,7 +337,7 @@ mod tests {
         values.iter().map(|value| (*value).to_owned()).collect()
     }
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 6
+    // Ported: "isValid(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 6
     #[test]
     fn is_valid_matches_renovate_github_actions_spec() {
         let cases = [
@@ -364,7 +364,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 30
+    // Ported: "isVersion(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 30
     #[test]
     fn is_version_matches_renovate_github_actions_spec() {
         let cases = [
@@ -392,7 +392,7 @@ mod tests {
         assert!(!is_version(None));
     }
 
-    // Ported: "isStable(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 54
+    // Ported: "isStable(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 54
     #[test]
     fn is_stable_matches_renovate_github_actions_spec() {
         let cases = [
@@ -422,7 +422,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 81
+    // Ported: "isSingleVersion(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 81
     #[test]
     fn is_single_version_matches_renovate_github_actions_spec() {
         let cases = [
@@ -447,7 +447,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/github-actions/index.spec.ts line 99
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 99
     #[test]
     fn matches_floating_ranges_and_versions_like_renovate() {
         let cases = [
@@ -476,13 +476,13 @@ mod tests {
         }
     }
 
-    // Ported: "should not handle invalid range that is not ~latest or valid version" — versioning/github-actions/index.spec.ts line 158
+    // Ported: "should not handle invalid range that is not ~latest or valid version" — lib/modules/versioning/github-actions/index.spec.ts line 158
     #[test]
     fn matches_rejects_invalid_ranges() {
         assert!(!matches("1.0.0", "completely-invalid-range"));
     }
 
-    // Ported: "getSatisfyingVersion($versions, \"$range\") === $expected" — versioning/github-actions/index.spec.ts line 166
+    // Ported: "getSatisfyingVersion($versions, \"$range\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 166
     #[test]
     fn get_satisfying_version_matches_renovate_github_actions_spec() {
         let cases = [
@@ -515,7 +515,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, \"$range\") === $expected" — versioning/github-actions/index.spec.ts line 202
+    // Ported: "minSatisfyingVersion($versions, \"$range\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 202
     #[test]
     fn min_satisfying_version_matches_renovate_github_actions_spec() {
         let cases = [
@@ -542,7 +542,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange(\"$version\", \"$range\") === $expected" — versioning/github-actions/index.spec.ts line 226
+    // Ported: "isLessThanRange(\"$version\", \"$range\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 226
     #[test]
     fn is_less_than_range_matches_renovate_github_actions_spec() {
         let cases = [
@@ -561,7 +561,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals(\"$version\", \"$other\") === $expected" — versioning/github-actions/index.spec.ts line 260
+    // Ported: "equals(\"$version\", \"$other\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 260
     #[test]
     fn equals_matches_renovate_github_actions_spec() {
         let cases = [
@@ -579,9 +579,9 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 287
-    // Ported: "getMinor(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 302
-    // Ported: "getPatch(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 316
+    // Ported: "getMajor(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 287
+    // Ported: "getMinor(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 302
+    // Ported: "getPatch(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 316
     #[test]
     fn component_getters_match_renovate_github_actions_spec() {
         assert_eq!(get_major("v2.3.4"), Some(2));
@@ -595,7 +595,7 @@ mod tests {
         assert_eq!(get_patch("invalid"), None);
     }
 
-    // Ported: "isGreaterThan(\"$version\", \"$other\") === $expected" — versioning/github-actions/index.spec.ts line 330
+    // Ported: "isGreaterThan(\"$version\", \"$other\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 330
     #[test]
     fn is_greater_than_matches_renovate_github_actions_spec() {
         let cases = [
@@ -614,7 +614,7 @@ mod tests {
         }
     }
 
-    // Ported: "sortVersions(\"$a\", \"$b\") === $expected" — versioning/github-actions/index.spec.ts line 364
+    // Ported: "sortVersions(\"$a\", \"$b\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 364
     #[test]
     fn sort_versions_matches_renovate_github_actions_spec() {
         let cases = [
@@ -632,7 +632,7 @@ mod tests {
         }
     }
 
-    // Ported: "isBreaking(\"$version\", \"$current\") === $expected" — versioning/github-actions/index.spec.ts line 394
+    // Ported: "isBreaking(\"$version\", \"$current\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 394
     #[test]
     fn is_breaking_matches_renovate_github_actions_spec() {
         let cases = [
@@ -650,7 +650,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible(\"$version\") === $expected" — versioning/github-actions/index.spec.ts line 422
+    // Ported: "isCompatible(\"$version\") === $expected" — lib/modules/versioning/github-actions/index.spec.ts line 422
     #[test]
     fn is_compatible_matches_renovate_github_actions_spec() {
         let cases = [
@@ -667,7 +667,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/github-actions/index.spec.ts line 436
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — lib/modules/versioning/github-actions/index.spec.ts line 436
     #[test]
     fn get_new_value_matches_renovate_github_actions_spec() {
         let cases = [
@@ -698,7 +698,7 @@ mod tests {
         }
     }
 
-    // Ported: "does not determine if the proposed newVersion exists, if allVersions is not set" — versioning/github-actions/index.spec.ts line 502
+    // Ported: "does not determine if the proposed newVersion exists, if allVersions is not set" — lib/modules/versioning/github-actions/index.spec.ts line 502
     #[test]
     fn get_new_value_without_all_versions_returns_floating_major() {
         assert_eq!(
@@ -714,7 +714,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not determine if the proposed newVersion exists, if allVersions is an empty array: %s -> %s" — versioning/github-actions/index.spec.ts line 514
+    // Ported: "does not determine if the proposed newVersion exists, if allVersions is an empty array: %s -> %s" — lib/modules/versioning/github-actions/index.spec.ts line 514
     #[test]
     fn get_new_value_empty_all_versions_behaves_like_absent_all_versions() {
         assert_eq!(
@@ -730,7 +730,7 @@ mod tests {
         );
     }
 
-    // Ported: "%s" — versioning/github-actions/index.spec.ts line 532
+    // Ported: "%s" — lib/modules/versioning/github-actions/index.spec.ts line 532
     #[test]
     fn get_new_value_uses_shortest_existing_matching_version() {
         assert_eq!(
@@ -746,7 +746,7 @@ mod tests {
         );
     }
 
-    // Ported: "preserves floating major for non-major updates ($description)" — versioning/github-actions/index.spec.ts line 562
+    // Ported: "preserves floating major for non-major updates ($description)" — lib/modules/versioning/github-actions/index.spec.ts line 562
     #[test]
     fn get_new_value_preserves_floating_major_for_non_major_updates() {
         for (new_version, all_versions) in [
@@ -767,7 +767,7 @@ mod tests {
         }
     }
 
-    // Ported: "migrates from a floating major to a floating major.minor if the floating major no longer exists" — versioning/github-actions/index.spec.ts line 614
+    // Ported: "migrates from a floating major to a floating major.minor if the floating major no longer exists" — lib/modules/versioning/github-actions/index.spec.ts line 614
     #[test]
     fn get_new_value_migrates_to_floating_minor_when_floating_major_missing() {
         assert_eq!(
@@ -783,7 +783,7 @@ mod tests {
         );
     }
 
-    // Ported: "preserves floating minor for non-major updates ($description)" — versioning/github-actions/index.spec.ts line 625
+    // Ported: "preserves floating minor for non-major updates ($description)" — lib/modules/versioning/github-actions/index.spec.ts line 625
     #[test]
     fn get_new_value_preserves_floating_minor_for_non_major_updates() {
         assert_eq!(
@@ -799,7 +799,7 @@ mod tests {
         );
     }
 
-    // Ported: "when a release candidate version exists, that exact version is used" — versioning/github-actions/index.spec.ts line 658
+    // Ported: "when a release candidate version exists, that exact version is used" — lib/modules/versioning/github-actions/index.spec.ts line 658
     #[test]
     fn get_new_value_uses_existing_release_candidate() {
         assert_eq!(
@@ -815,7 +815,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns newVersion when newVersion is a floating tag and allVersions is not set" — versioning/github-actions/index.spec.ts line 675
+    // Ported: "returns newVersion when newVersion is a floating tag and allVersions is not set" — lib/modules/versioning/github-actions/index.spec.ts line 675
     #[test]
     fn get_new_value_returns_floating_new_version_without_all_versions() {
         assert_eq!(
@@ -831,7 +831,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns the floating newVersion when it exists in allVersions" — versioning/github-actions/index.spec.ts line 685
+    // Ported: "returns the floating newVersion when it exists in allVersions" — lib/modules/versioning/github-actions/index.spec.ts line 685
     #[test]
     fn get_new_value_returns_existing_floating_new_version() {
         assert_eq!(
@@ -847,7 +847,7 @@ mod tests {
         );
     }
 
-    // Ported: "newVersion is returned anyway" — versioning/github-actions/index.spec.ts line 698
+    // Ported: "newVersion is returned anyway" — lib/modules/versioning/github-actions/index.spec.ts line 698
     #[test]
     fn get_new_value_returns_missing_new_version_anyway() {
         assert_eq!(
@@ -863,7 +863,7 @@ mod tests {
         );
     }
 
-    // Ported: "debug logs" — versioning/github-actions/index.spec.ts line 709
+    // Ported: "debug logs" — lib/modules/versioning/github-actions/index.spec.ts line 709
     #[test]
     fn get_new_value_missing_new_version_logging_is_not_applicable() {
         assert_eq!(

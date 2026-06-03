@@ -200,7 +200,7 @@ mod tests {
   ]
 }"#;
 
-    // Ported: "extracts dependency" — jsonnet-bundler/extract.spec.ts line 57
+    // Ported: "extracts dependency" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 57
     #[test]
     fn extracts_github_deps() {
         let deps = extract(SAMPLE);
@@ -233,40 +233,40 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for invalid jsonnetfile" — jsonnet-bundler/extract.spec.ts line 24
+    // Ported: "returns null for invalid jsonnetfile" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 24
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
     }
 
-    // Ported: "returns null for jsonnetfile with no dependencies" — jsonnet-bundler/extract.spec.ts line 30
+    // Ported: "returns null for jsonnetfile with no dependencies" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 30
     #[test]
     fn empty_returns_empty() {
         assert!(extract("{}").is_empty());
     }
 
-    // Ported: "returns null for local dependencies" — jsonnet-bundler/extract.spec.ts line 36
+    // Ported: "returns null for local dependencies" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 36
     #[test]
     fn local_deps_returns_empty() {
         let content = r#"{"version":1,"dependencies":[{"source":{"local":{"directory":"jsonnet"}},"version":""}]}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for vendored dependencies" — jsonnet-bundler/extract.spec.ts line 42
+    // Ported: "returns null for vendored dependencies" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 42
     #[test]
     fn vendored_dependencies_return_empty() {
         assert!(extract_with_path(SAMPLE, "vendor/jsonnetfile.json").is_empty());
         assert!(extract_with_path(SAMPLE, "components/vendor/jsonnetfile.json").is_empty());
     }
 
-    // Ported: "returns null for dependencies with empty Git source" — jsonnet-bundler/extract.spec.ts line 48
+    // Ported: "returns null for dependencies with empty Git source" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 48
     #[test]
     fn empty_git_source_returns_empty() {
         let content = r#"{"version":1,"dependencies":[{"source":{"git":{}},"version":"v0.50.0"}]}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts dependency with custom name" — jsonnet-bundler/extract.spec.ts line 79
+    // Ported: "extracts dependency with custom name" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 79
     //
     // The TS extractor builds depName from the remote path + subdir
     // regardless of the optional `name` field on the dependency, so a
@@ -300,7 +300,7 @@ mod tests {
         assert_eq!(deps[0].version, "v0.50.0");
     }
 
-    // Ported: "extracts dependency" — jsonnet-bundler/extract.spec.ts line 57
+    // Ported: "extracts dependency" — lib/modules/manager/jsonnet-bundler/extract.spec.ts line 57
     #[test]
     fn extracts_main_fixture_two_deps() {
         // Mirrors jsonnetfile.json: prometheus-operator + kube-prometheus

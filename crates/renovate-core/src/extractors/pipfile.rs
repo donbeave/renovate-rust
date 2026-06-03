@@ -287,7 +287,7 @@ black = "*"
 coverage = {version = ">=6.0"}
 "#;
 
-    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
+    // Ported: "extracts dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 45
     #[test]
     fn extracts_string_form() {
         let deps = extract(SAMPLE);
@@ -297,7 +297,7 @@ coverage = {version = ">=6.0"}
         assert!(req.skip_reason.is_none());
     }
 
-    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
+    // Ported: "extracts dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 45
     #[test]
     fn extracts_multi_constraint() {
         let deps = extract(SAMPLE);
@@ -305,7 +305,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(flask.current_value, ">=2.0,<3.0");
     }
 
-    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
+    // Ported: "extracts dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 45
     #[test]
     fn extracts_table_form() {
         let deps = extract(SAMPLE);
@@ -314,7 +314,7 @@ coverage = {version = ">=6.0"}
         assert!(django.skip_reason.is_none());
     }
 
-    // Ported: "ignores invalid versions" — manager/pipenv/extract.spec.ts line 223
+    // Ported: "ignores invalid versions" — lib/modules/manager/pipenv/extract.spec.ts line 223
     #[test]
     fn wildcard_skipped() {
         let deps = extract(SAMPLE);
@@ -322,7 +322,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(unver.skip_reason, Some(PipfileSkipReason::Wildcard));
     }
 
-    // Ported: "ignores git dependencies" — manager/pipenv/extract.spec.ts line 192
+    // Ported: "ignores git dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 192
     #[test]
     fn git_dep_skipped() {
         let deps = extract(SAMPLE);
@@ -330,7 +330,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(mylib.skip_reason, Some(PipfileSkipReason::GitDependency));
     }
 
-    // Ported: "ignores relative path dependencies" — manager/pipenv/extract.spec.ts line 213
+    // Ported: "ignores relative path dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 213
     #[test]
     fn local_dep_skipped() {
         let deps = extract(SAMPLE);
@@ -338,7 +338,7 @@ coverage = {version = ">=6.0"}
         assert_eq!(local.skip_reason, Some(PipfileSkipReason::LocalDependency));
     }
 
-    // Ported: "extracts dependencies" — manager/pipenv/extract.spec.ts line 45
+    // Ported: "extracts dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 45
     #[test]
     fn dev_packages_flagged() {
         let deps = extract(SAMPLE);
@@ -348,7 +348,7 @@ coverage = {version = ">=6.0"}
         assert!(pytest.skip_reason.is_none());
     }
 
-    // Ported: "ignores invalid versions" — manager/pipenv/extract.spec.ts line 223
+    // Ported: "ignores invalid versions" — lib/modules/manager/pipenv/extract.spec.ts line 223
     #[test]
     fn dev_wildcard_skipped() {
         let deps = extract(SAMPLE);
@@ -365,19 +365,19 @@ coverage = {version = ">=6.0"}
         assert_eq!(deps[0].name, "my-package");
     }
 
-    // Ported: "returns null for invalid toml file" — pipenv/extract.spec.ts line 41
+    // Ported: "returns null for invalid toml file" — lib/modules/manager/pipenv/extract.spec.ts line 41
     #[test]
     fn invalid_toml_returns_empty() {
         assert!(extract("not valid [toml").is_empty());
     }
 
-    // Ported: "returns null for empty" — pipenv/extract.spec.ts line 37
+    // Ported: "returns null for empty" — lib/modules/manager/pipenv/extract.spec.ts line 37
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "marks packages with \"extras\" as skipReason === unspecified-version" — pipenv/extract.spec.ts line 136
+    // Ported: "marks packages with \"extras\" as skipReason === unspecified-version" — lib/modules/manager/pipenv/extract.spec.ts line 136
     #[test]
     fn packages_with_only_extras_are_skipped() {
         let content = r#"[packages]
@@ -393,7 +393,7 @@ Flask-Login = {editable = true}
         assert!(deps.iter().all(|d| d.skip_reason.is_some()));
     }
 
-    // Ported: "ignores git dependencies" — pipenv/extract.spec.ts line 192
+    // Ported: "ignores git dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 192
     #[test]
     fn git_dependency_in_mixed_list_skipped() {
         let content = r#"[packages]
@@ -406,7 +406,7 @@ werkzeug = ">=0.14"
         assert_eq!(valid[0].name, "werkzeug");
     }
 
-    // Ported: "ignores invalid package names" — pipenv/extract.spec.ts line 202
+    // Ported: "ignores invalid package names" — lib/modules/manager/pipenv/extract.spec.ts line 202
     #[test]
     fn invalid_package_name_starting_with_underscore_skipped() {
         let content = r#"[packages]
@@ -420,7 +420,7 @@ _invalid = "==1.0.0"
         assert_eq!(valid[0].name, "foo");
     }
 
-    // Ported: "ignores relative path dependencies" — pipenv/extract.spec.ts line 213
+    // Ported: "ignores relative path dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 213
     #[test]
     fn relative_path_in_mixed_list_skipped() {
         let content = r#"[packages]
@@ -433,7 +433,7 @@ test = {path = "."}
         assert_eq!(valid[0].name, "foo");
     }
 
-    // Ported: "ignores invalid versions" — pipenv/extract.spec.ts line 223
+    // Ported: "ignores invalid versions" — lib/modules/manager/pipenv/extract.spec.ts line 223
     #[test]
     fn version_with_spaces_skipped() {
         let content = r#"[packages]
@@ -447,7 +447,7 @@ some-package = "==0 0"
         assert_eq!(valid[0].name, "foo");
     }
 
-    // Ported: "extracts all sources" — pipenv/extract.spec.ts line 234
+    // Ported: "extracts all sources" — lib/modules/manager/pipenv/extract.spec.ts line 234
     #[test]
     fn extracts_all_sources() {
         let content = r#"
@@ -465,7 +465,7 @@ foo = "==1.0.0"
         );
     }
 
-    // Ported: "extracts example pipfile" — pipenv/extract.spec.ts line 247
+    // Ported: "extracts example pipfile" — lib/modules/manager/pipenv/extract.spec.ts line 247
     #[test]
     fn extracts_example_pipfile() {
         let package_file = extract_package_file(PIPFILE4);
@@ -571,7 +571,7 @@ foo = "==1.0.0"
         );
     }
 
-    // Ported: "supports custom index" — pipenv/extract.spec.ts line 313
+    // Ported: "supports custom index" — lib/modules/manager/pipenv/extract.spec.ts line 313
     #[test]
     fn supports_custom_index() {
         let content = r#"
@@ -607,7 +607,7 @@ requests = {version = "==0.21.0", index = "testpypi"}
         assert!(dep.skip_reason.is_none());
     }
 
-    // Ported: "gets python constraint from python_version" — pipenv/extract.spec.ts line 338
+    // Ported: "gets python constraint from python_version" — lib/modules/manager/pipenv/extract.spec.ts line 338
     #[test]
     fn gets_python_constraint_from_python_version() {
         let content = r#"
@@ -623,7 +623,7 @@ python_version = "3.8"
         );
     }
 
-    // Ported: "gets python constraint from python_full_version" — pipenv/extract.spec.ts line 350
+    // Ported: "gets python constraint from python_full_version" — lib/modules/manager/pipenv/extract.spec.ts line 350
     #[test]
     fn gets_python_constraint_from_python_full_version() {
         let content = r#"
@@ -639,7 +639,7 @@ python_full_version = "3.8.6"
         );
     }
 
-    // Ported: "gets pipenv constraint from packages" — pipenv/extract.spec.ts line 362
+    // Ported: "gets pipenv constraint from packages" — lib/modules/manager/pipenv/extract.spec.ts line 362
     #[test]
     fn gets_pipenv_constraint_from_packages() {
         let content = r#"[packages]
@@ -652,7 +652,7 @@ pipenv = "==2020.8.13"
         );
     }
 
-    // Ported: "gets pipenv constraint from dev-packages" — pipenv/extract.spec.ts line 372
+    // Ported: "gets pipenv constraint from dev-packages" — lib/modules/manager/pipenv/extract.spec.ts line 372
     #[test]
     fn gets_pipenv_constraint_from_dev_packages() {
         let content = r#"[dev-packages]
@@ -665,7 +665,7 @@ pipenv = "==2020.8.13"
         );
     }
 
-    // Ported: "extracts multiple dependencies" — pipenv/extract.spec.ts line 142
+    // Ported: "extracts multiple dependencies" — lib/modules/manager/pipenv/extract.spec.ts line 142
     #[test]
     fn extracts_multiple_dependencies() {
         let content = r#"

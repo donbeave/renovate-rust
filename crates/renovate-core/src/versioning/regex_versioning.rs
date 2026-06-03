@@ -320,27 +320,27 @@ mod tests {
         .unwrap()
     }
 
-    // Ported: "requires a valid configuration to be initialized" — versioning/regex/index.spec.ts line 10
+    // Ported: "requires a valid configuration to be initialized" — lib/modules/versioning/regex/index.spec.ts line 10
     #[test]
     fn regex_invalid_config_throws() {
         assert!(RegexVersioning::from_config("regex:not a regex").is_err());
     }
 
-    // Ported: "works without config" — versioning/regex/index.spec.ts line 14
+    // Ported: "works without config" — lib/modules/versioning/regex/index.spec.ts line 14
     #[test]
     fn regex_no_config() {
         let re = RegexVersioning::from_config("regex").unwrap();
         assert!(!re.is_valid("alpine")); // 'alpine' doesn't match ^\d+$
     }
 
-    // Ported: "works with missing version" — versioning/regex/index.spec.ts line 19
+    // Ported: "works with missing version" — lib/modules/versioning/regex/index.spec.ts line 19
     #[test]
     fn regex_with_missing_version() {
         let re = RegexVersioning::new(r"^(?<major>\d+)?(?<compabillity>.+)").unwrap();
         assert!(re.is_valid("alpine"));
     }
 
-    // Ported: "on invalid regex: "$regex"" — versioning/regex/index.spec.ts line 25
+    // Ported: "on invalid regex: "$regex"" — lib/modules/versioning/regex/index.spec.ts line 25
     #[test]
     fn regex_invalid_patterns() {
         // Unclosed paren
@@ -350,7 +350,7 @@ mod tests {
         assert!(RegexVersioning::new(r"^(?<major>\d+)?(?<=y)x$").is_err());
     }
 
-    // Ported: "isValid("$version") === $expected" — versioning/regex/index.spec.ts line 35
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/regex/index.spec.ts line 35
     #[test]
     fn regex_is_valid() {
         let re = semver_re();
@@ -368,7 +368,7 @@ mod tests {
         assert!(!re.is_valid("1.2a2.3"));
     }
 
-    // Ported: "isCompatible("$version") === $expected" — versioning/regex/index.spec.ts line 58
+    // Ported: "isCompatible("$version") === $expected" — lib/modules/versioning/regex/index.spec.ts line 58
     #[test]
     fn regex_is_compatible() {
         let re = semver_re();
@@ -383,7 +383,7 @@ mod tests {
         assert!(!re.is_compatible("1.2.3-foo", "2.3.4-bar"));
     }
 
-    // Ported: "isSingleVersion("$version") === $expected" — versioning/regex/index.spec.ts line 83
+    // Ported: "isSingleVersion("$version") === $expected" — lib/modules/versioning/regex/index.spec.ts line 83
     #[test]
     fn regex_is_single_version() {
         let re = semver_re();
@@ -391,7 +391,7 @@ mod tests {
         assert!(!re.is_valid("1"));
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/regex/index.spec.ts line 104
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/regex/index.spec.ts line 104
     #[test]
     fn regex_is_stable() {
         let re = semver_re();
@@ -401,7 +401,7 @@ mod tests {
         assert!(!re.is_stable("1.2.3b3-foo")); // prerelease + compatibility
     }
 
-    // Ported: "isVersion("$version") === $expected" — versioning/regex/index.spec.ts line 115
+    // Ported: "isVersion("$version") === $expected" — lib/modules/versioning/regex/index.spec.ts line 115
     #[test]
     fn regex_is_version() {
         let re = semver_re();
@@ -410,7 +410,7 @@ mod tests {
         assert!(!re.is_valid("1"));
     }
 
-    // Ported: "getMajor, getMinor, getPatch for "$version"" — versioning/regex/index.spec.ts line 135
+    // Ported: "getMajor, getMinor, getPatch for "$version"" — lib/modules/versioning/regex/index.spec.ts line 135
     #[test]
     fn regex_major_minor_patch() {
         let re = semver_re();
@@ -427,7 +427,7 @@ mod tests {
         assert_eq!(re.get_patch("1.2.3a1-foo"), Some(3));
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/regex/index.spec.ts line 149
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/regex/index.spec.ts line 149
     #[test]
     fn regex_equals() {
         let re = semver_re();
@@ -444,7 +444,7 @@ mod tests {
         assert!(!re.equals("1.2.3a1", "1.2.3a2"));
     }
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/regex/index.spec.ts line 171
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/regex/index.spec.ts line 171
     #[test]
     fn regex_is_greater_than() {
         let re = semver_re();
@@ -462,7 +462,7 @@ mod tests {
         assert!(!re.is_greater_than("3.0.0b2", "3.0.0")); // pre-release < release
     }
 
-    // Ported: "isLessThanRange($version, $range) === $expected" — versioning/regex/index.spec.ts line 204
+    // Ported: "isLessThanRange($version, $range) === $expected" — lib/modules/versioning/regex/index.spec.ts line 204
     #[test]
     fn regex_is_less_than_range() {
         let re = semver_re();
@@ -473,7 +473,7 @@ mod tests {
         assert!(!re.is_less_than_range("1.2.4", "1.2.3")); // greater → not less
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/regex/index.spec.ts line 253
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/regex/index.spec.ts line 253
     #[test]
     fn regex_get_satisfying_version() {
         let re = semver_re();
@@ -491,7 +491,7 @@ mod tests {
         assert_eq!(re.get_satisfying_version(&["1.2.3", "1.2.4"], "!@#"), None);
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — versioning/regex/index.spec.ts line 267
+    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — lib/modules/versioning/regex/index.spec.ts line 267
     #[test]
     fn regex_min_satisfying_version() {
         let re = semver_re();
@@ -509,7 +509,7 @@ mod tests {
         assert_eq!(re.min_satisfying_version(&["1.2.3", "1.2.4"], "!@#"), None);
     }
 
-    // Ported: "returns newVersion" — versioning/regex/index.spec.ts line 282
+    // Ported: "returns newVersion" — lib/modules/versioning/regex/index.spec.ts line 282
     #[test]
     fn regex_get_new_value() {
         let re = semver_re();
@@ -519,7 +519,7 @@ mod tests {
         );
     }
 
-    // Ported: "sorts versions in an ascending order" — versioning/regex/index.spec.ts line 295
+    // Ported: "sorts versions in an ascending order" — lib/modules/versioning/regex/index.spec.ts line 295
     #[test]
     fn regex_sort_versions() {
         let re = semver_re();
@@ -533,7 +533,7 @@ mod tests {
         assert_eq!(versions, vec!["1.2.3a1", "1.2.3", "1.3.4", "2.0.1"]);
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/regex/index.spec.ts line 304
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/regex/index.spec.ts line 304
     #[test]
     fn regex_matches() {
         let re = semver_re();
@@ -544,7 +544,7 @@ mod tests {
         assert!(!re.matches_range("1.2.4", "1.2.3"));
     }
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/regex/index.spec.ts line 365
+    // Ported: "isValid(\"$version\") === $expected" — lib/modules/versioning/regex/index.spec.ts line 365
     #[test]
     fn regex_build_revision_is_valid() {
         let re = RegexVersioning::new(
@@ -555,7 +555,7 @@ mod tests {
         assert!(re.is_valid("12.7.0-debian-10-r100"));
     }
 
-    // Ported: "isCompatible(\"$version\") === $expected" — versioning/regex/index.spec.ts line 373
+    // Ported: "isCompatible(\"$version\") === $expected" — lib/modules/versioning/regex/index.spec.ts line 373
     #[test]
     fn regex_build_revision_is_compatible() {
         let re = RegexVersioning::new(
@@ -565,7 +565,7 @@ mod tests {
         assert!(re.is_compatible("12.7.0-debian-10-r69", "12.7.0-debian-10-r100"));
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/regex/index.spec.ts line 384
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — lib/modules/versioning/regex/index.spec.ts line 384
     #[test]
     fn regex_build_revision_is_greater_than() {
         let re = RegexVersioning::new(
@@ -576,7 +576,7 @@ mod tests {
         assert!(re.is_greater_than("12.7.0-debian-10-r169", "12.7.0-debian-10-r100"));
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/regex/index.spec.ts line 392
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — lib/modules/versioning/regex/index.spec.ts line 392
     #[test]
     fn regex_build_revision_matches() {
         let re = RegexVersioning::new(
@@ -587,7 +587,7 @@ mod tests {
         assert!(!re.matches_range("12.7.0-debian-9-r69", "12.7.0-debian-10-r68"));
     }
 
-    // Ported: "getSatisfyingVersion" (4-part) — versioning/regex/index.spec.ts line 403
+    // Ported: "getSatisfyingVersion" (4-part) — lib/modules/versioning/regex/index.spec.ts line 403
     #[test]
     fn regex_build_revision_satisfying() {
         let re = RegexVersioning::new(
@@ -609,7 +609,7 @@ mod tests {
         );
     }
 
-    // Ported: "minSatisfyingVersion" (4-part) — versioning/regex/index.spec.ts line 412
+    // Ported: "minSatisfyingVersion" (4-part) — lib/modules/versioning/regex/index.spec.ts line 412
     #[test]
     fn regex_build_revision_min_satisfying() {
         let re = RegexVersioning::new(
@@ -644,7 +644,7 @@ mod tests {
         .unwrap()
     }
 
-    // Ported: "Scheme keys" — versioning/generic.spec.ts line 54
+    // Ported: "Scheme keys" — lib/modules/versioning/generic.spec.ts line 54
     #[test]
     fn generic_scheme_keys_api_methods_exist() {
         let api = dummy();
@@ -665,7 +665,7 @@ mod tests {
         assert!(api.get_new_value("1.2.3", Some("1.2.3"), "3.2.1").is_some());
     }
 
-    // Ported: "equals" — versioning/generic.spec.ts line 82
+    // Ported: "equals" — lib/modules/versioning/generic.spec.ts line 82
     #[test]
     fn generic_equals() {
         let api = dummy();
@@ -673,7 +673,7 @@ mod tests {
         assert!(!api.equals("1.2.3", "3.2.1"));
     }
 
-    // Ported: "getMajor" — versioning/generic.spec.ts line 87
+    // Ported: "getMajor" — lib/modules/versioning/generic.spec.ts line 87
     #[test]
     fn generic_get_major() {
         let api = dummy();
@@ -681,7 +681,7 @@ mod tests {
         assert_eq!(api.get_major("invalid"), None);
     }
 
-    // Ported: "getMinor" — versioning/generic.spec.ts line 92
+    // Ported: "getMinor" — lib/modules/versioning/generic.spec.ts line 92
     #[test]
     fn generic_get_minor() {
         let api = dummy();
@@ -689,7 +689,7 @@ mod tests {
         assert_eq!(api.get_minor("invalid"), None);
     }
 
-    // Ported: "getPatch" — versioning/generic.spec.ts line 97
+    // Ported: "getPatch" — lib/modules/versioning/generic.spec.ts line 97
     #[test]
     fn generic_get_patch() {
         let api = dummy();
@@ -697,7 +697,7 @@ mod tests {
         assert_eq!(api.get_patch("invalid"), None);
     }
 
-    // Ported: "getNewValue" — versioning/generic.spec.ts line 102
+    // Ported: "getNewValue" — lib/modules/versioning/generic.spec.ts line 102
     #[test]
     fn generic_get_new_value() {
         let api = dummy();
@@ -714,14 +714,14 @@ mod tests {
         assert_eq!(api.get_new_value("", None, ""), None);
     }
 
-    // Ported: "isCompatible" — versioning/generic.spec.ts line 124
+    // Ported: "isCompatible" — lib/modules/versioning/generic.spec.ts line 124
     #[test]
     fn generic_is_compatible() {
         let api = dummy();
         assert!(api.is_compatible("1.2.3", ""));
     }
 
-    // Ported: "isGreaterThan" — versioning/generic.spec.ts line 128
+    // Ported: "isGreaterThan" — lib/modules/versioning/generic.spec.ts line 128
     #[test]
     fn generic_is_greater_than() {
         let api = dummy();
@@ -730,7 +730,7 @@ mod tests {
         assert!(api.is_greater_than("1.2.3-a10", "1.2.3-a1"));
     }
 
-    // Ported: "isSingleVersion" — versioning/generic.spec.ts line 134
+    // Ported: "isSingleVersion" — lib/modules/versioning/generic.spec.ts line 134
     // TypeScript isSingleVersion = is_valid in Rust for RegexVersioning (all valid versions are single)
     #[test]
     fn generic_is_single_version() {
@@ -738,14 +738,14 @@ mod tests {
         assert!(api.is_valid("1.2.3"));
     }
 
-    // Ported: "isStable" — versioning/generic.spec.ts line 138
+    // Ported: "isStable" — lib/modules/versioning/generic.spec.ts line 138
     #[test]
     fn generic_is_stable() {
         let api = dummy();
         assert!(api.is_stable("1.2.3"));
     }
 
-    // Ported: "isValid" — versioning/generic.spec.ts line 142
+    // Ported: "isValid" — lib/modules/versioning/generic.spec.ts line 142
     #[test]
     fn generic_is_valid() {
         let api = dummy();
@@ -754,7 +754,7 @@ mod tests {
         assert!(!api.is_valid("invalid"));
     }
 
-    // Ported: "isVersion" — versioning/generic.spec.ts line 148
+    // Ported: "isVersion" — lib/modules/versioning/generic.spec.ts line 148
     // TypeScript isVersion = is_valid in Rust for RegexVersioning
     #[test]
     fn generic_is_version() {
@@ -763,7 +763,7 @@ mod tests {
         assert!(!api.is_valid("invalid"));
     }
 
-    // Ported: "matches" — versioning/generic.spec.ts line 153
+    // Ported: "matches" — lib/modules/versioning/generic.spec.ts line 153
     #[test]
     fn generic_matches() {
         let api = dummy();
@@ -771,7 +771,7 @@ mod tests {
         assert!(!api.matches_range("1.2.3", "3.2.1"));
     }
 
-    // Ported: "sortVersions" — versioning/generic.spec.ts line 158
+    // Ported: "sortVersions" — lib/modules/versioning/generic.spec.ts line 158
     #[test]
     fn generic_sort_versions() {
         let api = dummy();
@@ -780,7 +780,7 @@ mod tests {
         assert_eq!(api.sort_versions("3.2.1", "1.2.3"), 2);
     }
 
-    // Ported: "isLessThanRange" — versioning/generic.spec.ts line 164
+    // Ported: "isLessThanRange" — lib/modules/versioning/generic.spec.ts line 164
     #[test]
     fn generic_is_less_than_range() {
         let api = dummy();
@@ -788,7 +788,7 @@ mod tests {
         assert!(!api.is_less_than_range("3.2.1", "1.2.3"));
     }
 
-    // Ported: "minSatisfyingVersion" — versioning/generic.spec.ts line 169
+    // Ported: "minSatisfyingVersion" — lib/modules/versioning/generic.spec.ts line 169
     #[test]
     fn generic_min_satisfying_version() {
         let api = dummy();
@@ -806,7 +806,7 @@ mod tests {
         );
     }
 
-    // Ported: "isSame" — versioning/generic.spec.ts line 189
+    // Ported: "isSame" — lib/modules/versioning/generic.spec.ts line 189
     // TypeScript: isSame(type, a, b) compares a component of two versions
     #[test]
     fn generic_is_same() {
@@ -825,7 +825,7 @@ mod tests {
         assert_ne!(api.get_patch("4.5.6"), api.get_patch("4.6.0")); // 6 vs 0
     }
 
-    // Ported: "getSatisfyingVersion" — versioning/generic.spec.ts line 179
+    // Ported: "getSatisfyingVersion" — lib/modules/versioning/generic.spec.ts line 179
     #[test]
     fn generic_get_satisfying_version() {
         let api = dummy();

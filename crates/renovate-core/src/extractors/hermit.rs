@@ -128,7 +128,7 @@ pub fn update_hermit_dependency(file_content: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
+    // Ported: "should list packages on command success" — lib/modules/manager/hermit/extract.spec.ts line 11
     #[test]
     fn extracts_versioned_packages() {
         let files = vec![
@@ -147,7 +147,7 @@ mod tests {
         assert_eq!(deps[2].current_value, "21.0.5");
     }
 
-    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
+    // Ported: "should list packages on command success" — lib/modules/manager/hermit/extract.spec.ts line 11
     #[test]
     fn extracts_channel_pinned_packages() {
         let files = vec!["bin/.kubectl@stable.pkg".to_owned()];
@@ -158,7 +158,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(HermitSkipReason::ChannelPin));
     }
 
-    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
+    // Ported: "should list packages on command success" — lib/modules/manager/hermit/extract.spec.ts line 11
     #[test]
     fn ignores_non_bin_directories() {
         let files = vec![
@@ -171,7 +171,7 @@ mod tests {
         assert_eq!(deps.len(), 1);
     }
 
-    // Ported: "should list packages on command success" — hermit/extract.spec.ts line 11
+    // Ported: "should list packages on command success" — lib/modules/manager/hermit/extract.spec.ts line 11
     #[test]
     fn ignores_hermit_hcl_and_non_pkg_files() {
         let files = vec![
@@ -183,13 +183,13 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "should throw error on execution failure" — hermit/extract.spec.ts line 75
+    // Ported: "should throw error on execution failure" — lib/modules/manager/hermit/extract.spec.ts line 75
     #[test]
     fn handles_empty_file_list() {
         assert!(extract_from_file_list(&[]).is_empty());
     }
 
-    // Ported: "should append a new marking line at the end to trigger the artifact update" — modules/manager/hermit/update.spec.ts line 6
+    // Ported: "should append a new marking line at the end to trigger the artifact update" — lib/modules/manager/hermit/update.spec.ts line 6
     #[test]
     fn hermit_update_appends_marker() {
         let content = "#!/bin/bash\n#some hermit content";
@@ -197,7 +197,7 @@ mod tests {
         assert_eq!(result, format!("{content}\n#hermit updated"));
     }
 
-    // Ported: "should not update again if the new line has been appended" — modules/manager/hermit/update.spec.ts line 19
+    // Ported: "should not update again if the new line has been appended" — lib/modules/manager/hermit/update.spec.ts line 19
     #[test]
     fn hermit_update_no_op_if_already_marked() {
         let content = "#!/bin/bash\n#some hermit content\n#hermit updated";
@@ -205,7 +205,7 @@ mod tests {
         assert_eq!(result, content);
     }
 
-    // Ported: "minimatches("$path") === $expected" — modules/manager/hermit/default-config.spec.ts line 13
+    // Ported: "minimatches("$path") === $expected" — lib/modules/manager/hermit/default-config.spec.ts line 13
     #[test]
     fn hermit_exclude_commit_paths_glob() {
         let should_match = [
@@ -227,7 +227,7 @@ mod tests {
         }
     }
 
-    // Ported: "matchRegexOrGlobList("$path") === $expected" — modules/manager/hermit/default-config.spec.ts line 30
+    // Ported: "matchRegexOrGlobList("$path") === $expected" — lib/modules/manager/hermit/default-config.spec.ts line 30
     #[test]
     fn hermit_file_pattern_matches_expected() {
         let should_match = [

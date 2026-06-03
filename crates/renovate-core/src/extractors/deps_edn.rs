@@ -534,7 +534,7 @@ mod tests {
  {:dev {:extra-deps {ring/ring-mock {:mvn/version "0.4.0"}}}}}
 "#;
 
-    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
+    // Ported: "extractPackageFile" — lib/modules/manager/deps-edn/extract.spec.ts line 10
     #[test]
     fn extracts_deps() {
         let deps = extract(SAMPLE);
@@ -558,21 +558,21 @@ mod tests {
         assert_eq!(compojure.current_value, "1.6.3");
     }
 
-    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
+    // Ported: "extractPackageFile" — lib/modules/manager/deps-edn/extract.spec.ts line 10
     #[test]
     fn skips_git_deps() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.dep_name == "nrepl:nrepl"));
     }
 
-    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
+    // Ported: "extractPackageFile" — lib/modules/manager/deps-edn/extract.spec.ts line 10
     #[test]
     fn skips_local_deps() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.dep_name == "local-lib:local-lib"));
     }
 
-    // Ported: "extractPackageFile" — deps-edn/extract.spec.ts line 10
+    // Ported: "extractPackageFile" — lib/modules/manager/deps-edn/extract.spec.ts line 10
     #[test]
     fn extracts_alias_deps() {
         let deps = extract(SAMPLE);
@@ -587,14 +587,14 @@ mod tests {
         assert!(extract("{}").is_empty());
     }
 
-    // Ported: "returns null for invalid file" — deps-edn/extract.spec.ts line 6
+    // Ported: "returns null for invalid file" — lib/modules/manager/deps-edn/extract.spec.ts line 6
     #[test]
     fn invalid_edn_returns_empty() {
         assert!(extract("123").is_empty());
     }
 }
 
-// Ported: "'$input' parses to $output" — modules/manager/deps-edn/parser.spec.ts line 7
+// Ported: "'$input' parses to $output" — lib/modules/manager/deps-edn/parser.spec.ts line 7
 #[test]
 fn edn_parse_inputs_to_outputs() {
     let cases: &[(&str, Option<serde_json::Value>)] = &[
@@ -652,7 +652,7 @@ fn edn_parse_inputs_to_outputs() {
     }
 }
 
-// Ported: "extracts file" — modules/manager/deps-edn/parser.spec.ts line 41
+// Ported: "extracts file" — lib/modules/manager/deps-edn/parser.spec.ts line 41
 #[test]
 fn edn_extracts_file() {
     let content = include_str!("../../../../tests/fixtures/deps_edn/deps.edn");

@@ -129,7 +129,7 @@ pub async fn fetch_releases(
 mod tests {
     use super::*;
 
-    // Ported: "returns package from custom registry" — gitlab-packages/index.spec.ts line 8
+    // Ported: "returns package from custom registry" — lib/modules/datasource/gitlab-packages/index.spec.ts line 8
     #[test]
     fn filter_by_package_name() {
         let pkgs = [
@@ -170,7 +170,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns conan package from custom registry" — gitlab-packages/index.spec.ts line 48
+    // Ported: "returns conan package from custom registry" — lib/modules/datasource/gitlab-packages/index.spec.ts line 48
     #[test]
     fn filter_by_conan_package_name() {
         let pkgs = [
@@ -203,7 +203,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for empty 200 OK" — gitlab-packages/index.spec.ts line 103
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/gitlab-packages/index.spec.ts line 103
     #[test]
     fn empty_releases_yields_none() {
         let pkgs: Vec<ApiPackage> = vec![];
@@ -214,7 +214,7 @@ mod tests {
         }));
     }
 
-    // Ported: "returns null for 404" — gitlab-packages/index.spec.ts line 85
+    // Ported: "returns null for 404" — lib/modules/datasource/gitlab-packages/index.spec.ts line 85
     #[tokio::test]
     async fn returns_null_for_404() {
         use wiremock::matchers::{method, path};
@@ -234,7 +234,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — gitlab-packages/index.spec.ts line 121
+    // Ported: "throws for 5xx" — lib/modules/datasource/gitlab-packages/index.spec.ts line 121
     #[tokio::test]
     async fn throws_for_5xx() {
         use wiremock::matchers::{method, path};

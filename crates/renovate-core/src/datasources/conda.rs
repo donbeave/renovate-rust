@@ -350,7 +350,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/conda/__fixtures__/pytest.json"
     );
 
-    // Ported: "throws for error" — datasource/conda/index.spec.ts line 14
+    // Ported: "throws for error" — lib/modules/datasource/conda/index.spec.ts line 14
     #[tokio::test]
     async fn throws_for_network_error() {
         let http = HttpClient::new().unwrap();
@@ -358,7 +358,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for 404" — datasource/conda/index.spec.ts line 24
+    // Ported: "returns null for 404" — lib/modules/datasource/conda/index.spec.ts line 24
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -375,7 +375,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty result" — datasource/conda/index.spec.ts line 34
+    // Ported: "returns null for empty result" — lib/modules/datasource/conda/index.spec.ts line 34
     #[tokio::test]
     async fn returns_null_for_empty_versions() {
         let server = MockServer::start().await;
@@ -392,7 +392,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — datasource/conda/index.spec.ts line 47
+    // Ported: "throws for 5xx" — lib/modules/datasource/conda/index.spec.ts line 47
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -407,7 +407,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "processes real data" — datasource/conda/index.spec.ts line 57
+    // Ported: "processes real data" — lib/modules/datasource/conda/index.spec.ts line 57
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -426,7 +426,7 @@ mod tests {
         assert_eq!(result.releases.len(), 94);
     }
 
-    // Ported: "returns null without registryUrl" — datasource/conda/index.spec.ts line 70
+    // Ported: "returns null without registryUrl" — lib/modules/datasource/conda/index.spec.ts line 70
     #[tokio::test]
     async fn returns_null_without_registry_url() {
         let http = HttpClient::new().unwrap();
@@ -434,7 +434,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "supports multiple custom datasource urls" — datasource/conda/index.spec.ts line 79
+    // Ported: "supports multiple custom datasource urls" — lib/modules/datasource/conda/index.spec.ts line 79
     #[tokio::test]
     async fn supports_multiple_custom_datasource_urls() {
         let server = MockServer::start().await;
@@ -488,7 +488,7 @@ mod tests {
         assert!(versions.contains(&"2.6.0"));
     }
 
-    // Ported: "supports channel from prefix.dev with null response" — datasource/conda/index.spec.ts line 118
+    // Ported: "supports channel from prefix.dev with null response" — lib/modules/datasource/conda/index.spec.ts line 118
     #[tokio::test]
     async fn prefix_dev_null_response() {
         let server = MockServer::start().await;
@@ -511,7 +511,7 @@ mod tests {
         assert!(variants.is_none());
     }
 
-    // Ported: "supports channel from prefix.dev with multiple page responses" — datasource/conda/index.spec.ts line 135
+    // Ported: "supports channel from prefix.dev with multiple page responses" — lib/modules/datasource/conda/index.spec.ts line 135
     #[tokio::test]
     async fn prefix_dev_multiple_pages() {
         // Verify the de-duplication and url extraction logic with mock data.

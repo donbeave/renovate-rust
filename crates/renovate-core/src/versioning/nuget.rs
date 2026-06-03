@@ -885,7 +885,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "sortNugetVersions(\"$version\", \"$other\") === $result" — datasource/nuget/common.spec.ts line 4
+    // Ported: "sortNugetVersions(\"$version\", \"$other\") === $result" — lib/modules/datasource/nuget/common.spec.ts line 4
     #[test]
     fn sort_nuget_versions_matches_renovate_spec() {
         assert_eq!(sort_nuget_versions("invalid1", "invalid2"), Ordering::Equal);
@@ -956,7 +956,7 @@ mod tests {
         assert_eq!(compare("1.0.0-alpha", "1.0.0-beta"), Ordering::Less);
     }
 
-    // Ported: "compare($x, $y) === $expected" — versioning/nuget/version.spec.ts line 6
+    // Ported: "compare($x, $y) === $expected" — lib/modules/versioning/nuget/version.spec.ts line 6
     #[test]
     fn compare_matches_renovate_version_spec() {
         let cases = [
@@ -1119,7 +1119,7 @@ mod tests {
         assert!(!is_stable("1.0.0-rc.1"));
     }
 
-    // Ported: "isStable(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 18
+    // Ported: "isStable(\"$input\") === $expected" — lib/modules/versioning/nuget/index.spec.ts line 18
     #[test]
     fn is_stable_matches_renovate_index_spec() {
         let cases = [
@@ -1149,14 +1149,14 @@ mod tests {
 
     // ── parse_version ─────────────────────────────────────────────────────────
 
-    // Ported: "returns null for invalid input" — versioning/nuget/parser.spec.ts line 13
+    // Ported: "returns null for invalid input" — lib/modules/versioning/nuget/parser.spec.ts line 13
     #[test]
     fn parse_version_rejects_invalid_input() {
         assert_eq!(parse_version("!@#"), None);
         assert_eq!(parse_version("abc"), None);
     }
 
-    // Ported: "parses version" — versioning/nuget/parser.spec.ts line 18
+    // Ported: "parses version" — lib/modules/versioning/nuget/parser.spec.ts line 18
     #[test]
     fn parse_version_parses_full_version() {
         assert_eq!(
@@ -1174,7 +1174,7 @@ mod tests {
 
     // ── parse_floating_range ──────────────────────────────────────────────────
 
-    // Ported: "rejects invalid input" — versioning/nuget/parser.spec.ts line 32
+    // Ported: "rejects invalid input" — lib/modules/versioning/nuget/parser.spec.ts line 32
     #[test]
     fn parse_floating_range_rejects_invalid_input() {
         assert_eq!(parse_floating_range("!@#"), None);
@@ -1183,7 +1183,7 @@ mod tests {
         assert_eq!(parse_floating_range("1.2.3"), None);
     }
 
-    // Ported: "$input" — versioning/nuget/parser.spec.ts line 39
+    // Ported: "$input" — lib/modules/versioning/nuget/parser.spec.ts line 39
     #[test]
     fn parse_floating_range_parametrized() {
         macro_rules! fr {
@@ -1389,7 +1389,7 @@ mod tests {
 
     // ── get_floating_range_lower_bound ────────────────────────────────────────
 
-    // Ported: "$input" — versioning/nuget/parser.spec.ts line 78
+    // Ported: "$input" — lib/modules/versioning/nuget/parser.spec.ts line 78
     #[test]
     fn get_floating_range_lower_bound_parametrized() {
         macro_rules! vd {
@@ -1449,7 +1449,7 @@ mod tests {
 
     // ── parse_exact_range ─────────────────────────────────────────────────────
 
-    // Ported: "rejects invalid input" — versioning/nuget/parser.spec.ts line 115
+    // Ported: "rejects invalid input" — lib/modules/versioning/nuget/parser.spec.ts line 115
     #[test]
     fn parse_exact_range_rejects_invalid_input() {
         assert_eq!(parse_exact_range("!@#"), None);
@@ -1459,7 +1459,7 @@ mod tests {
         assert_eq!(parse_exact_range("[foobar]"), None);
     }
 
-    // Ported: "parses exact range" — versioning/nuget/parser.spec.ts line 123
+    // Ported: "parses exact range" — lib/modules/versioning/nuget/parser.spec.ts line 123
     #[test]
     fn parse_exact_range_parses() {
         assert_eq!(
@@ -1479,7 +1479,7 @@ mod tests {
 
     // ── parse_bracket_range ───────────────────────────────────────────────────
 
-    // Ported: "rejects invalid input" — versioning/nuget/parser.spec.ts line 137
+    // Ported: "rejects invalid input" — lib/modules/versioning/nuget/parser.spec.ts line 137
     #[test]
     fn parse_bracket_range_rejects_invalid_input() {
         assert_eq!(parse_bracket_range("!@#"), None);
@@ -1491,7 +1491,7 @@ mod tests {
         assert_eq!(parse_bracket_range("[1.2.3,bar]"), None);
     }
 
-    // Ported: "parses range without lower bound" — versioning/nuget/parser.spec.ts line 147
+    // Ported: "parses range without lower bound" — lib/modules/versioning/nuget/parser.spec.ts line 147
     #[test]
     fn parse_bracket_range_no_lower_bound() {
         assert_eq!(
@@ -1512,7 +1512,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses range without upper bound" — versioning/nuget/parser.spec.ts line 157
+    // Ported: "parses range without upper bound" — lib/modules/versioning/nuget/parser.spec.ts line 157
     #[test]
     fn parse_bracket_range_no_upper_bound() {
         assert_eq!(
@@ -1533,7 +1533,7 @@ mod tests {
         );
     }
 
-    // Ported: "$input" — versioning/nuget/parser.spec.ts line 168
+    // Ported: "$input" — lib/modules/versioning/nuget/parser.spec.ts line 168
     #[test]
     fn parse_bracket_range_bounds_inclusivity() {
         let v1 = || NugetVersionData {
@@ -1572,7 +1572,7 @@ mod tests {
         }
     }
 
-    // Ported: "handles whitespaces" — versioning/nuget/parser.spec.ts line 185
+    // Ported: "handles whitespaces" — lib/modules/versioning/nuget/parser.spec.ts line 185
     #[test]
     fn parse_bracket_range_handles_whitespace() {
         assert_eq!(
@@ -1600,7 +1600,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles floating ranges as lower bounds" — versioning/nuget/parser.spec.ts line 195
+    // Ported: "handles floating ranges as lower bounds" — lib/modules/versioning/nuget/parser.spec.ts line 195
     #[test]
     fn parse_bracket_range_floating_lower_bound() {
         let float_1_minor = NugetFloatingRangeData {
@@ -1640,7 +1640,7 @@ mod tests {
 
     // ── version_to_string ─────────────────────────────────────────────────────
 
-    // Ported: "$version" — versioning/nuget/parser.spec.ts line 224
+    // Ported: "$version" — lib/modules/versioning/nuget/parser.spec.ts line 224
     #[test]
     fn version_to_string_roundtrip() {
         let cases = [
@@ -1667,7 +1667,7 @@ mod tests {
 
     // ── range_to_string ───────────────────────────────────────────────────────
 
-    // Ported: "$version" — versioning/nuget/parser.spec.ts line 242
+    // Ported: "$version" — lib/modules/versioning/nuget/parser.spec.ts line 242
     #[test]
     fn range_to_string_roundtrip() {
         let cases = [
@@ -1725,7 +1725,7 @@ mod tests {
 
     // ── nuget_is_single_version ───────────────────────────────────────────────
 
-    // Ported: "isSingleVersion(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 5
+    // Ported: "isSingleVersion(\"$input\") === $expected" — lib/modules/versioning/nuget/index.spec.ts line 5
     #[test]
     fn nuget_is_single_version_parametrized() {
         let cases: &[(&str, bool)] = &[
@@ -1746,7 +1746,7 @@ mod tests {
 
     // ── nuget_is_valid ────────────────────────────────────────────────────────
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 43
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/nuget/index.spec.ts line 43
     #[test]
     fn nuget_is_valid_parametrized() {
         let cases: &[(&str, bool)] = &[
@@ -1803,7 +1803,7 @@ mod tests {
 
     // ── nuget_is_version ──────────────────────────────────────────────────────
 
-    // Ported: "isVersion(\"$input\") === $expected" — versioning/nuget/index.spec.ts line 118
+    // Ported: "isVersion(\"$input\") === $expected" — lib/modules/versioning/nuget/index.spec.ts line 118
     #[test]
     fn nuget_is_version_parametrized() {
         let cases: &[(&str, bool)] = &[
@@ -1906,7 +1906,7 @@ mod tests {
 
     // ── nuget_get_major / get_minor / get_patch ───────────────────────────────
 
-    // Ported: "$input -> [$major, $minor, $patch]" — versioning/nuget/index.spec.ts line 218
+    // Ported: "$input -> [$major, $minor, $patch]" — lib/modules/versioning/nuget/index.spec.ts line 218
     #[test]
     #[allow(clippy::type_complexity)]
     fn nuget_get_major_minor_patch_parametrized() {
@@ -1951,7 +1951,7 @@ mod tests {
 
     // ── nuget_equals ─────────────────────────────────────────────────────────
 
-    // Ported: "equals($a, $b) === $expected" — versioning/nuget/index.spec.ts line 258
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/nuget/index.spec.ts line 258
     #[test]
     fn nuget_equals_parametrized() {
         let cases: &[(&str, &str, bool)] = &[
@@ -2003,7 +2003,7 @@ mod tests {
 
     // ── nuget_is_greater_than ─────────────────────────────────────────────────
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/nuget/index.spec.ts line 303
+    // Ported: "isGreaterThan($a, $b) === $expected" — lib/modules/versioning/nuget/index.spec.ts line 303
     #[test]
     fn nuget_is_greater_than_parametrized() {
         let cases: &[(&str, &str, bool)] = &[
@@ -2059,7 +2059,7 @@ mod tests {
 
     // ── nuget_get_satisfying_version ──────────────────────────────────────────
 
-    // Ported: "getSatisfyingVersion($versions, $range) === \"$expected\"" — versioning/nuget/index.spec.ts line 392
+    // Ported: "getSatisfyingVersion($versions, $range) === \"$expected\"" — lib/modules/versioning/nuget/index.spec.ts line 392
     #[test]
     fn nuget_get_satisfying_version_parametrized() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -2114,7 +2114,7 @@ mod tests {
 
     // ── nuget_min_satisfying_version ──────────────────────────────────────────
 
-    // Ported: "minSatisfyingVersion($versions, $range) === $expected" — versioning/nuget/index.spec.ts line 420
+    // Ported: "minSatisfyingVersion($versions, $range) === $expected" — lib/modules/versioning/nuget/index.spec.ts line 420
     #[test]
     fn nuget_min_satisfying_version_parametrized() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -2143,7 +2143,7 @@ mod tests {
 
     // ── nuget_get_pinned_value ────────────────────────────────────────────────
 
-    // Ported: "returns a pinned value" — versioning/nuget/index.spec.ts line 435
+    // Ported: "returns a pinned value" — lib/modules/versioning/nuget/index.spec.ts line 435
     #[test]
     fn nuget_get_pinned_value_test() {
         assert_eq!(nuget_get_pinned_value("a"), "");
@@ -2153,7 +2153,7 @@ mod tests {
 
     // ── nuget_get_new_value ───────────────────────────────────────────────────
 
-    // Ported: "returns newVersion if the range is version too" — versioning/nuget/index.spec.ts line 441
+    // Ported: "returns newVersion if the range is version too" — lib/modules/versioning/nuget/index.spec.ts line 441
     #[test]
     fn nuget_get_new_value_version_range_returns_new_version() {
         assert_eq!(
@@ -2162,25 +2162,25 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if version is invalid" — versioning/nuget/index.spec.ts line 451
+    // Ported: "returns null if version is invalid" — lib/modules/versioning/nuget/index.spec.ts line 451
     #[test]
     fn nuget_get_new_value_invalid_version_returns_none() {
         assert_eq!(nuget_get_new_value("[1.2.3]", "foobar"), None);
     }
 
-    // Ported: "returns null if range is invalid" — versioning/nuget/index.spec.ts line 461
+    // Ported: "returns null if range is invalid" — lib/modules/versioning/nuget/index.spec.ts line 461
     #[test]
     fn nuget_get_new_value_invalid_range_returns_none() {
         assert_eq!(nuget_get_new_value("foobar", "1.2.3"), None);
     }
 
-    // Ported: "returns the new version" — versioning/nuget/index.spec.ts line 472
+    // Ported: "returns the new version" — lib/modules/versioning/nuget/index.spec.ts line 472
     #[test]
     fn nuget_get_pinned_value_pin() {
         assert_eq!(nuget_get_pinned_value("2.0.0"), "[2.0.0]");
     }
 
-    // Ported: "currentValue=$currentValue newVersion=$newVersion -> $expected" — versioning/nuget/index.spec.ts line 478
+    // Ported: "currentValue=$currentValue newVersion=$newVersion -> $expected" — lib/modules/versioning/nuget/index.spec.ts line 478
     #[test]
     fn nuget_get_new_value_bump_parametrized() {
         let cases: &[(&str, &str, &str)] = &[
@@ -2221,7 +2221,7 @@ mod tests {
 
     // ── nuget_sort_versions ───────────────────────────────────────────────────
 
-    // Ported: "sortVersions($a, $b) === $expected" — versioning/nuget/index.spec.ts line 522
+    // Ported: "sortVersions($a, $b) === $expected" — lib/modules/versioning/nuget/index.spec.ts line 522
     #[test]
     fn nuget_sort_versions_parametrized() {
         let cases: &[(&str, &str, i32)] = &[
@@ -2254,7 +2254,7 @@ mod tests {
 
     // ── nuget_matches ─────────────────────────────────────────────────────────
 
-    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/nuget/index.spec.ts line 547
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — lib/modules/versioning/nuget/index.spec.ts line 547
     #[test]
     fn nuget_matches_parametrized() {
         let cases: &[(&str, &str, bool)] = &[
@@ -2324,7 +2324,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange(\"$version\", \"$range\") === $expected" — versioning/nuget/index.spec.ts line 347
+    // Ported: "isLessThanRange(\"$version\", \"$range\") === $expected" — lib/modules/versioning/nuget/index.spec.ts line 347
     #[test]
     fn nuget_is_less_than_range_parametrized() {
         let cases: &[(&str, &str, bool)] = &[

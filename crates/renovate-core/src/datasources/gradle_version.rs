@@ -222,7 +222,7 @@ mod tests {
         assert_eq!(get_git_ref("8.2-milestone-1"), "v8.2.0-M1");
     }
 
-    // Ported: "processes real data" — gradle-version/index.spec.ts line 26
+    // Ported: "processes real data" — lib/modules/datasource/gradle-version/index.spec.ts line 26
     #[tokio::test]
     async fn processes_real_data() {
         let fixture = include_str!(
@@ -250,7 +250,7 @@ mod tests {
         assert_eq!(result.source_url, "https://github.com/gradle/gradle");
     }
 
-    // Ported: "calls configured registryUrls" — gradle-version/index.spec.ts line 40
+    // Ported: "calls configured registryUrls" — lib/modules/datasource/gradle-version/index.spec.ts line 40
     #[tokio::test]
     async fn calls_configured_registry_urls() {
         let fixture = include_str!(
@@ -268,7 +268,7 @@ mod tests {
         assert!(result.is_some());
     }
 
-    // Ported: "handles empty releases" — gradle-version/index.spec.ts line 59
+    // Ported: "handles empty releases" — lib/modules/datasource/gradle-version/index.spec.ts line 59
     #[tokio::test]
     async fn handles_empty_releases() {
         let server = MockServer::start().await;
@@ -285,7 +285,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles errors" — gradle-version/index.spec.ts line 69
+    // Ported: "handles errors" — lib/modules/datasource/gradle-version/index.spec.ts line 69
     #[tokio::test]
     async fn handles_errors_500() {
         let server = MockServer::start().await;
@@ -300,7 +300,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "handles errors" (429) — gradle-version/index.spec.ts line 69
+    // Ported: "handles errors" (429) — lib/modules/datasource/gradle-version/index.spec.ts line 69
     #[tokio::test]
     async fn handles_errors_429() {
         let server = MockServer::start().await;

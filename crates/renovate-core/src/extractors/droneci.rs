@@ -171,7 +171,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts multiple image lines" — droneci/extract.spec.ts line 12
+    // Ported: "extracts multiple image lines" — lib/modules/manager/droneci/extract.spec.ts line 12
     #[test]
     fn extracts_step_image() {
         let content = r#"
@@ -188,7 +188,7 @@ steps:
         assert_eq!(deps[0].tag.as_deref(), Some("1.21"));
     }
 
-    // Ported: "extracts multiple image lines" — droneci/extract.spec.ts line 12
+    // Ported: "extracts multiple image lines" — lib/modules/manager/droneci/extract.spec.ts line 12
     #[test]
     fn extracts_service_image() {
         let content = r#"
@@ -202,7 +202,7 @@ services:
         assert_eq!(deps[0].tag.as_deref(), Some("14"));
     }
 
-    // Ported: "extracts multiple image lines" — droneci/extract.spec.ts line 12
+    // Ported: "extracts multiple image lines" — lib/modules/manager/droneci/extract.spec.ts line 12
     #[test]
     fn multiple_images() {
         let content = r#"
@@ -231,7 +231,7 @@ services:
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "extracts image but no replacement" — droneci/extract.spec.ts line 42
+    // Ported: "extracts image but no replacement" — lib/modules/manager/droneci/extract.spec.ts line 42
     #[test]
     fn private_registry_not_docker_hub() {
         let content = "steps:\n- image: gcr.io/myproject/myapp:v1.0\n";
@@ -240,13 +240,13 @@ services:
         assert_eq!(deps[0].image, "gcr.io/myproject/myapp");
     }
 
-    // Ported: "returns null for empty" — droneci/extract.spec.ts line 8
+    // Ported: "returns null for empty" — lib/modules/manager/droneci/extract.spec.ts line 8
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts multiple image lines" — droneci/extract.spec.ts line 12
+    // Ported: "extracts multiple image lines" — lib/modules/manager/droneci/extract.spec.ts line 12
     #[test]
     fn extracts_drone_fixture_six_deps() {
         // Mirrors the .drone.yml fixture: steps (2) + services (4, including 2 multiline quoted).
@@ -285,7 +285,7 @@ services:
         assert_eq!(deps.iter().filter(|d| d.image == "amd64/node").count(), 3);
     }
 
-    // Ported: "extracts image and replaces registry" — droneci/extract.spec.ts line 19
+    // Ported: "extracts image and replaces registry" — lib/modules/manager/droneci/extract.spec.ts line 19
     #[test]
     fn extracts_image_and_replaces_registry() {
         let content = "steps:\n- image: quay.io/elixir:1.8.1-alpine\n";
@@ -304,7 +304,7 @@ services:
         );
     }
 
-    // Ported: "extracts image but no replacement" — droneci/extract.spec.ts line 42
+    // Ported: "extracts image but no replacement" — lib/modules/manager/droneci/extract.spec.ts line 42
     #[test]
     fn extracts_image_without_registry_replacement() {
         let content = "steps:\n- image: quay.io/elixir:1.8.1-alpine\n";
@@ -324,7 +324,7 @@ services:
         );
     }
 
-    // Ported: "extracts image and no double replacement" — droneci/extract.spec.ts line 65
+    // Ported: "extracts image and no double replacement" — lib/modules/manager/droneci/extract.spec.ts line 65
     #[test]
     fn extracts_image_without_double_registry_replacement() {
         let content = "steps:\n- image: quay.io/elixir:1.8.1-alpine\n";

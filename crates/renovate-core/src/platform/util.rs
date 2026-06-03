@@ -39,7 +39,7 @@ pub fn get_new_branch_name(branch_name: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "("$repoId", "$endpoint") === $fingerprint" — modules/platform/util.spec.ts line 8
+    // Ported: "("$repoId", "$endpoint") === $fingerprint" — lib/modules/platform/util.spec.ts line 8
     #[test]
     fn platform_util_repo_fingerprint() {
         assert_eq!(
@@ -52,13 +52,13 @@ mod tests {
         );
     }
 
-    // Ported: "should add refs/heads" — modules/platform/util.spec.ts line 21
+    // Ported: "should add refs/heads" — lib/modules/platform/util.spec.ts line 21
     #[test]
     fn platform_util_get_new_branch_name_adds_prefix() {
         assert_eq!(get_new_branch_name("testBB"), "refs/heads/testBB");
     }
 
-    // Ported: "should be the same" — modules/platform/util.spec.ts line 26
+    // Ported: "should be the same" — lib/modules/platform/util.spec.ts line 26
     #[test]
     fn platform_util_get_new_branch_name_keeps_prefix() {
         assert_eq!(

@@ -145,7 +145,7 @@ fn image_ref(image: &str, tag: Option<&str>, digest: Option<&str>) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
+    // Ported: "extracts multiple image lines" — lib/modules/manager/crow/extract.spec.ts line 19
     #[test]
     fn extracts_pipeline_images() {
         let content = r#"
@@ -161,7 +161,7 @@ pipeline:
         assert!(deps.iter().any(|d| d.image == "golangci/golangci-lint"));
     }
 
-    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
+    // Ported: "extracts multiple image lines" — lib/modules/manager/crow/extract.spec.ts line 19
     #[test]
     fn extracts_services_image() {
         let content = r#"
@@ -175,7 +175,7 @@ services:
         assert_eq!(deps[0].tag.as_deref(), Some("14"));
     }
 
-    // Ported: "extracts images from array-based steps format" — crow/extract.spec.ts line 408
+    // Ported: "extracts images from array-based steps format" — lib/modules/manager/crow/extract.spec.ts line 408
     #[test]
     fn steps_as_array() {
         let content = r#"
@@ -189,7 +189,7 @@ steps:
         assert_eq!(deps.len(), 2);
     }
 
-    // Ported: "return dependency when a plugin-git is cloned" — crow/extract.spec.ts line 321
+    // Ported: "return dependency when a plugin-git is cloned" — lib/modules/manager/crow/extract.spec.ts line 321
     #[test]
     fn clone_section() {
         let content = r#"
@@ -202,7 +202,7 @@ clone:
         assert_eq!(deps[0].image, "plugins/git");
     }
 
-    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
+    // Ported: "extracts multiple image lines" — lib/modules/manager/crow/extract.spec.ts line 19
     #[test]
     fn top_level_image_ignored() {
         let content = r#"
@@ -216,13 +216,13 @@ pipeline:
         assert_eq!(deps[0].image, "golang");
     }
 
-    // Ported: "returns null for empty" — crow/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/crow/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts multiple image lines" — crow/extract.spec.ts line 19
+    // Ported: "extracts multiple image lines" — lib/modules/manager/crow/extract.spec.ts line 19
     #[test]
     fn variable_ref_classified() {
         let content = r#"
@@ -235,34 +235,34 @@ pipeline:
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "returns null for non-object YAML" — crow/extract.spec.ts line 10
+    // Ported: "returns null for non-object YAML" — lib/modules/manager/crow/extract.spec.ts line 10
     #[test]
     fn no_image_keys_returns_empty() {
         assert!(extract("nothing here").is_empty());
         assert!(extract("clone: null").is_empty());
     }
 
-    // Ported: "return null when no dependencies are provided" — crow/extract.spec.ts line 348
+    // Ported: "return null when no dependencies are provided" — lib/modules/manager/crow/extract.spec.ts line 348
     #[test]
     fn no_dependencies_returns_empty() {
         let content = "info:\n  version:\n    3.5\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null when pipeline keys exist but contain no valid images" — crow/extract.spec.ts line 390
+    // Ported: "returns null when pipeline keys exist but contain no valid images" — lib/modules/manager/crow/extract.spec.ts line 390
     #[test]
     fn pipeline_without_valid_images_returns_empty() {
         let content = "pipeline:\n  test:\n    script: echo 'hello'\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for malformed YAML" — crow/extract.spec.ts line 15
+    // Ported: "returns null for malformed YAML" — lib/modules/manager/crow/extract.spec.ts line 15
     #[test]
     fn malformed_yaml_returns_empty() {
         assert!(extract("nothing here\n:::::::").is_empty());
     }
 
-    // Ported: "extracts the 1.0.0 version" — crow/extract.spec.ts line 255
+    // Ported: "extracts the 1.0.0 version" — lib/modules/manager/crow/extract.spec.ts line 255
     #[test]
     fn extracts_semver_version_from_steps() {
         let content = "steps:\n  redis:\n    image: quay.io/something/redis:1.0.0\n";
@@ -273,7 +273,7 @@ pipeline:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts image and replaces registry" — crow/extract.spec.ts line 164
+    // Ported: "extracts image and replaces registry" — lib/modules/manager/crow/extract.spec.ts line 164
     #[test]
     fn extracts_image_and_replaces_registry() {
         let content = r#"
@@ -295,7 +295,7 @@ pipeline:
         );
     }
 
-    // Ported: "extracts image but no replacement" — crow/extract.spec.ts line 194
+    // Ported: "extracts image but no replacement" — lib/modules/manager/crow/extract.spec.ts line 194
     #[test]
     fn extracts_image_without_registry_replacement() {
         let content = r#"
@@ -318,7 +318,7 @@ pipeline:
         );
     }
 
-    // Ported: "extracts image and no double replacement" — crow/extract.spec.ts line 224
+    // Ported: "extracts image and no double replacement" — lib/modules/manager/crow/extract.spec.ts line 224
     #[test]
     fn extracts_image_without_double_registry_replacement() {
         let content = r#"
@@ -343,7 +343,7 @@ pipeline:
         );
     }
 
-    // Ported: "should parse multiple sources of dependencies together" — crow/extract.spec.ts line 281
+    // Ported: "should parse multiple sources of dependencies together" — lib/modules/manager/crow/extract.spec.ts line 281
     #[test]
     fn extracts_from_clone_and_steps_sections() {
         let content = r#"
@@ -360,7 +360,7 @@ steps:
         assert!(deps.iter().any(|d| d.image == "quay.io/something/redis"));
     }
 
-    // Ported: "handles empty pipeline section gracefully" — crow/extract.spec.ts line 362
+    // Ported: "handles empty pipeline section gracefully" — lib/modules/manager/crow/extract.spec.ts line 362
     #[test]
     fn empty_pipeline_object_is_skipped() {
         // `pipeline: {}` does not match "pipeline:" → not entered; `steps:` still extracted
@@ -370,7 +370,7 @@ steps:
         assert_eq!(deps[0].image, "quay.io/something/redis");
     }
 
-    // Ported: "extracts images from mixed array and object formats" — crow/extract.spec.ts line 447
+    // Ported: "extracts images from mixed array and object formats" — lib/modules/manager/crow/extract.spec.ts line 447
     #[test]
     fn extracts_images_from_mixed_array_and_object_formats() {
         let content = r#"

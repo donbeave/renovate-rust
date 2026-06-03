@@ -197,19 +197,19 @@ mod tests {
 
     use super::*;
 
-    // Ported: "works with default config" — config/secrets.spec.ts line 14
+    // Ported: "works with default config" — lib/config/secrets.spec.ts line 14
     #[test]
     fn validate_config_secrets_and_variables_works_with_default_config() {
         assert!(validate_config_secrets_and_variables(&json!({})).is_ok());
     }
 
-    // Ported: "returns if no secrets/variables" — config/secrets.spec.ts line 20
+    // Ported: "returns if no secrets/variables" — lib/config/secrets.spec.ts line 20
     #[test]
     fn validate_config_secrets_and_variables_returns_without_entries() {
         assert!(validate_config_secrets_and_variables(&json!({})).is_ok());
     }
 
-    // Ported: "throws for invalid secret name" — config/secrets.spec.ts line 24
+    // Ported: "throws for invalid secret name" — lib/config/secrets.spec.ts line 24
     #[test]
     fn validate_config_secrets_and_variables_rejects_invalid_secret_name() {
         assert_eq!(
@@ -218,7 +218,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws for invalid variable name" — config/secrets.spec.ts line 32
+    // Ported: "throws for invalid variable name" — lib/config/secrets.spec.ts line 32
     #[test]
     fn validate_config_secrets_and_variables_rejects_invalid_variable_name() {
         assert_eq!(
@@ -227,7 +227,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws for secrets in repositories" — config/secrets.spec.ts line 40
+    // Ported: "throws for secrets in repositories" — lib/config/secrets.spec.ts line 40
     #[test]
     fn validate_config_secrets_and_variables_rejects_repository_secrets() {
         assert_eq!(
@@ -238,7 +238,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws for variables in repositories" — config/secrets.spec.ts line 48
+    // Ported: "throws for variables in repositories" — lib/config/secrets.spec.ts line 48
     #[test]
     fn validate_config_secrets_and_variables_rejects_repository_variables() {
         assert_eq!(
@@ -249,7 +249,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces both secrets and variables" — config/secrets.spec.ts line 58
+    // Ported: "replaces both secrets and variables" — lib/config/secrets.spec.ts line 58
     #[test]
     fn apply_secrets_and_variables_replaces_both() {
         let result = apply_secrets_and_variables_to_config(
@@ -269,7 +269,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces all secrets and variables" — config/secrets.spec.ts line 75
+    // Ported: "replaces all secrets and variables" — lib/config/secrets.spec.ts line 75
     #[test]
     fn apply_secrets_and_variables_replaces_all() {
         let result = apply_secrets_and_variables_to_config(
@@ -292,7 +292,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles a mix of space characters around the curly braces" — config/secrets.spec.ts line 94
+    // Ported: "handles a mix of space characters around the curly braces" — lib/config/secrets.spec.ts line 94
     #[test]
     fn apply_secrets_and_variables_handles_spaces_around_braces() {
         let result = apply_secrets_and_variables_to_config(
@@ -312,7 +312,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not handle non-space characters around the curly braces" — config/secrets.spec.ts line 111
+    // Ported: "does not handle non-space characters around the curly braces" — lib/config/secrets.spec.ts line 111
     #[test]
     fn apply_secrets_and_variables_does_not_handle_non_space_characters() {
         let result = apply_secrets_and_variables_to_config(
@@ -332,7 +332,7 @@ mod tests {
         );
     }
 
-    // Ported: "preserves secrets and variables if delete flags are false" — config/secrets.spec.ts line 128
+    // Ported: "preserves secrets and variables if delete flags are false" — lib/config/secrets.spec.ts line 128
     #[test]
     fn apply_secrets_and_variables_preserves_sources_when_delete_flags_are_false() {
         let config = json!({
@@ -352,7 +352,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws if secret is missing" — config/secrets.spec.ts line 151
+    // Ported: "throws if secret is missing" — lib/config/secrets.spec.ts line 151
     #[test]
     fn apply_secrets_and_variables_errors_if_secret_missing() {
         assert_eq!(
@@ -365,7 +365,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws if variable is missing" — config/secrets.spec.ts line 160
+    // Ported: "throws if variable is missing" — lib/config/secrets.spec.ts line 160
     #[test]
     fn apply_secrets_and_variables_errors_if_variable_missing() {
         assert_eq!(
@@ -380,7 +380,7 @@ mod tests {
 
     // ── interpolator.spec.ts — replaceInterpolatedValuesInObject ─────────────
 
-    // Ported: "replaces values and deletes secrets" — util/interpolator.spec.ts line 48
+    // Ported: "replaces values and deletes secrets" — lib/util/interpolator.spec.ts line 48
     #[test]
     fn replaces_values_and_deletes_secrets() {
         let config = json!({
@@ -406,7 +406,7 @@ mod tests {
         assert!(result.get("secrets").is_none(), "secrets should be deleted");
     }
 
-    // Ported: "replaces values and keeps secrets" — util/interpolator.spec.ts line 97
+    // Ported: "replaces values and keeps secrets" — lib/util/interpolator.spec.ts line 97
     #[test]
     fn replaces_values_and_keeps_secrets() {
         let config = json!({
@@ -418,7 +418,7 @@ mod tests {
         assert!(result.get("secrets").is_some(), "secrets should be kept");
     }
 
-    // Ported: "does not resolve secrets in onboaringConfig" — util/interpolator.spec.ts line 115
+    // Ported: "does not resolve secrets in onboaringConfig" — lib/util/interpolator.spec.ts line 115
     #[test]
     fn does_not_resolve_secrets_in_onboarding_config() {
         let config = json!({
@@ -441,7 +441,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws error if secrets are used in disallowed options" — util/interpolator.spec.ts line 155
+    // Ported: "throws error if secrets are used in disallowed options" — lib/util/interpolator.spec.ts line 155
     #[test]
     fn errors_if_secrets_in_disallowed_options() {
         // 'prHeader' starts with 'pr' which is a disallowed prefix
@@ -453,7 +453,7 @@ mod tests {
         assert_eq!(result, Err(SecretsError::ConfigValidation));
     }
 
-    // Ported: "throws error if secret key is not present in config" — util/interpolator.spec.ts line 175
+    // Ported: "throws error if secret key is not present in config" — lib/util/interpolator.spec.ts line 175
     #[test]
     fn errors_if_secret_key_is_not_present_in_config() {
         let config = json!({

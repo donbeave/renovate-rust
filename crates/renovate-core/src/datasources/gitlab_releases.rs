@@ -118,7 +118,7 @@ pub async fn fetch_releases(
 mod tests {
     use super::*;
 
-    // Ported: "returns releases from custom registry" — gitlab-releases/index.spec.ts line 18
+    // Ported: "returns releases from custom registry" — lib/modules/datasource/gitlab-releases/index.spec.ts line 18
     #[test]
     fn parse_releases_from_api_response() {
         let json = r#"[{"tag_name":"v1.0.0","released_at":"2021-01-01T00:00:00.000Z"},{"tag_name":"v1.1.0","released_at":"2021-03-01T00:00:00.000Z"}]"#;
@@ -131,14 +131,14 @@ mod tests {
         );
     }
 
-    // Ported: "return null if not found" — gitlab-releases/index.spec.ts line 45
+    // Ported: "return null if not found" — lib/modules/datasource/gitlab-releases/index.spec.ts line 45
     #[test]
     fn client_errors_return_none() {
         // 4xx client errors are handled by is_fatal_status → false → Ok(None)
         assert!(!is_fatal_status(StatusCode::NOT_FOUND));
     }
 
-    // Ported: "returns releases from default registry" — gitlab-releases/index.spec.ts line 32
+    // Ported: "returns releases from default registry" — lib/modules/datasource/gitlab-releases/index.spec.ts line 32
     #[tokio::test]
     async fn returns_releases_from_default_registry() {
         use wiremock::matchers::{method, path};

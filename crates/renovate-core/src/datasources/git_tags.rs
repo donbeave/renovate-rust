@@ -81,21 +81,21 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
 2d138c34e4c6939d0a8686943e851c6528aa04db\trefs/tags/v1.0.5
 6d7a933c2e6b7b39e992b1f93b6b42de083b28f0\trefs/tags/v1.0.5^{}";
 
-    // Ported: "returns nil if response is wrong" — datasource/git-tags/index.spec.ts line 38
+    // Ported: "returns nil if response is wrong" — lib/modules/datasource/git-tags/index.spec.ts line 38
     #[test]
     fn returns_nil_if_response_is_wrong() {
         let result = get_releases("https://github.com/example/example.git", Some(""));
         assert!(result.is_none());
     }
 
-    // Ported: "returns nil if remote call throws exception" — datasource/git-tags/index.spec.ts line 45
+    // Ported: "returns nil if remote call throws exception" — lib/modules/datasource/git-tags/index.spec.ts line 45
     #[test]
     fn returns_nil_if_remote_call_throws_exception() {
         let result = get_releases("https://github.com/example/example.git", None);
         assert!(result.is_none());
     }
 
-    // Ported: "returns versions filtered from tags" — datasource/git-tags/index.spec.ts line 52
+    // Ported: "returns versions filtered from tags" — lib/modules/datasource/git-tags/index.spec.ts line 52
     #[test]
     fn returns_versions_filtered_from_tags() {
         let result =
@@ -132,21 +132,21 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         );
     }
 
-    // Ported: "returns null if not found" — datasource/git-tags/index.spec.ts line 64
+    // Ported: "returns null if not found" — lib/modules/datasource/git-tags/index.spec.ts line 64
     #[test]
     fn returns_null_if_not_found() {
         let digest = get_digest(Some(LS_REMOTE_1), Some("notfound"));
         assert!(digest.is_none());
     }
 
-    // Ported: "returns digest for tag" — datasource/git-tags/index.spec.ts line 74
+    // Ported: "returns digest for tag" — lib/modules/datasource/git-tags/index.spec.ts line 74
     #[test]
     fn returns_digest_for_tag() {
         let digest = get_digest(Some(LS_REMOTE_1), Some("v1.0.2")).unwrap();
         assert_eq!(digest, "3936a6bced3587dc9fd464b0a910e0dfd4cfe10d");
     }
 
-    // Ported: "returns digest for HEAD" — datasource/git-tags/index.spec.ts line 84
+    // Ported: "returns digest for HEAD" — lib/modules/datasource/git-tags/index.spec.ts line 84
     #[test]
     fn returns_digest_for_head() {
         let digest = get_digest(Some(LS_REMOTE_1), None).unwrap();

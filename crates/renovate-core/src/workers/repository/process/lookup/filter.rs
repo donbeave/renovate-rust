@@ -204,7 +204,7 @@ mod tests {
         assert_eq!(result[0].version, "1.0.2");
     }
 
-    // Ported: "filters versions with major increment greater than maxMajorIncrement" — lookup/filter.spec.ts line 187
+    // Ported: "filters versions with major increment greater than maxMajorIncrement" — lib/workers/repository/process/lookup/filter.spec.ts line 187
     #[test]
     fn filter_versions_max_major_increment_large() {
         let config = FilterConfig {
@@ -224,7 +224,7 @@ mod tests {
         assert_eq!(result[1].version, "21.0.0");
     }
 
-    // Ported: "allows all versions when maxMajorIncrement is 0" — lookup/filter.spec.ts line 216
+    // Ported: "allows all versions when maxMajorIncrement is 0" — lib/workers/repository/process/lookup/filter.spec.ts line 216
     #[test]
     fn filter_versions_max_major_increment_zero_allows_all() {
         let config = FilterConfig {
@@ -242,7 +242,7 @@ mod tests {
         assert_eq!(result[1].version, "2023.3.3");
     }
 
-    // Ported: "filters with maxMajorIncrement set to 1" — lookup/filter.spec.ts line 243
+    // Ported: "filters with maxMajorIncrement set to 1" — lib/workers/repository/process/lookup/filter.spec.ts line 243
     #[test]
     fn filter_versions_max_major_increment_one() {
         let config = FilterConfig {
@@ -262,7 +262,7 @@ mod tests {
         assert_eq!(result[2].version, "2.0.0");
     }
 
-    // Ported: "handles maxMajorIncrement with 0.x versions" — lookup/filter.spec.ts line 272
+    // Ported: "handles maxMajorIncrement with 0.x versions" — lib/workers/repository/process/lookup/filter.spec.ts line 272
     #[test]
     fn filter_versions_max_major_increment_with_zero_x() {
         let config = FilterConfig {

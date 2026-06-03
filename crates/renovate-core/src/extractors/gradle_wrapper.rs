@@ -203,7 +203,7 @@ fn parse_distribution_url(url: &str) -> Option<String> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts version for property file with distribution type \"bin\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 33
+    // Ported: "extracts version for property file with distribution type \"bin\" in distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 33
     #[test]
     fn extracts_bin_version() {
         let content =
@@ -212,7 +212,7 @@ mod tests {
         assert_eq!(dep.version, "8.4");
     }
 
-    // Ported: "extracts version for property file with distribution type \"all\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 47
+    // Ported: "extracts version for property file with distribution type \"all\" in distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 47
     #[test]
     fn extracts_all_version() {
         let content =
@@ -221,7 +221,7 @@ mod tests {
         assert_eq!(dep.version, "8.4.1");
     }
 
-    // Ported: "extracts version for property file with distribution type \"bin\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 33
+    // Ported: "extracts version for property file with distribution type \"bin\" in distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 33
     #[test]
     fn full_properties_file() {
         let content = r#"
@@ -235,19 +235,19 @@ zipStorePath=wrapper/dists
         assert_eq!(dep.version, "8.3");
     }
 
-    // Ported: "returns null for property file without distributionUrl" — gradle-wrapper/extract.spec.ts line 24
+    // Ported: "returns null for property file without distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 24
     #[test]
     fn no_distribution_url_returns_none() {
         assert!(extract("distributionBase=GRADLE_USER_HOME\n").is_none());
     }
 
-    // Ported: "returns null for property file without distributionUrl" — gradle-wrapper/extract.spec.ts line 24
+    // Ported: "returns null for property file without distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 24
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
     }
 
-    // Ported: "extracts version for property file with prerelease version in distributionUrl" — gradle-wrapper/extract.spec.ts line 61
+    // Ported: "extracts version for property file with prerelease version in distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 61
     #[test]
     fn prerelease_version_extracted() {
         let content = "distributionUrl=https\\://services.gradle.org/distributions/gradle-7.0-milestone-1-bin.zip\n";
@@ -255,7 +255,7 @@ zipStorePath=wrapper/dists
         assert_eq!(dep.version, "7.0-milestone-1");
     }
 
-    // Ported: "extracts version for property file with unnecessary whitespace in distributionUrl" — gradle-wrapper/extract.spec.ts line 75
+    // Ported: "extracts version for property file with unnecessary whitespace in distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 75
     #[test]
     fn whitespace_around_value_handled() {
         let content =
@@ -264,14 +264,14 @@ zipStorePath=wrapper/dists
         assert_eq!(dep.version, "4.10.3");
     }
 
-    // Ported: "returns null for property file with unsupported distributionUrl format" — gradle-wrapper/extract.spec.ts line 28
+    // Ported: "returns null for property file with unsupported distributionUrl format" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 28
     #[test]
     fn unsupported_url_format_returns_none() {
         let content = "distributionUrl=https://example.com/gradle/custom-gradle.zip\n";
         assert!(extract(content).is_none());
     }
 
-    // Ported: "extracts version for property file with custom distribution of type \"bin\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 89
+    // Ported: "extracts version for property file with custom distribution of type \"bin\" in distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 89
     #[test]
     fn custom_distribution_bin_extracted() {
         let content = r"distributionUrl=https\://domain.tld/repository/maven-releases/tld/domain/gradle-wrapper/custom-gradle-wrapper/1.3.7/custom-gradle-wrapper-1.3.7-bin.zip
@@ -280,7 +280,7 @@ zipStorePath=wrapper/dists
         assert_eq!(dep.version, "1.3.7");
     }
 
-    // Ported: "extracts version for property file with custom distribution of type \"all\" in distributionUrl" — gradle-wrapper/extract.spec.ts line 103
+    // Ported: "extracts version for property file with custom distribution of type \"all\" in distributionUrl" — lib/modules/manager/gradle-wrapper/extract.spec.ts line 103
     #[test]
     fn custom_distribution_all_extracted() {
         let content = r"distributionUrl=https\://domain.tld/repository/maven-releases/tld/domain/gradle-wrapper/custom-gradle-wrapper/6.6.6/custom-gradle-wrapper-6.6.6-all.zip
@@ -291,14 +291,14 @@ zipStorePath=wrapper/dists
 
     // --- extractGradleVersion tests ---
 
-    // Ported: "returns null" — gradle-wrapper/util.spec.ts line 113
+    // Ported: "returns null" — lib/modules/manager/gradle-wrapper/util.spec.ts line 113
     #[test]
     fn extract_gradle_version_returns_none_without_distribution_url() {
         let properties = "distributionSha256Sum=038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768\nzipStoreBase=GRADLE_USER_HOME\n";
         assert!(extract_gradle_version(properties).is_none());
     }
 
-    // Ported: "returns gradle version" — gradle-wrapper/util.spec.ts line 121
+    // Ported: "returns gradle version" — lib/modules/manager/gradle-wrapper/util.spec.ts line 121
     #[test]
     fn extract_gradle_version_returns_url_and_version() {
         let properties = "distributionSha256Sum=038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip\nzipStoreBase=GRADLE_USER_HOME\n";
@@ -312,7 +312,7 @@ zipStorePath=wrapper/dists
 
     // --- getJavaConstraint pure tests ---
 
-    // Ported: "$gradleVersion | $javaConstraint" — gradle-wrapper/util.spec.ts line 20
+    // Ported: "$gradleVersion | $javaConstraint" — lib/modules/manager/gradle-wrapper/util.spec.ts line 20
     #[test]
     fn java_constraint_from_gradle_version_cases() {
         let cases = [
@@ -337,21 +337,21 @@ zipStorePath=wrapper/dists
         }
     }
 
-    // Ported: "extracts toolChainVersion value" — gradle-wrapper/util.spec.ts line 63
+    // Ported: "extracts toolChainVersion value" — lib/modules/manager/gradle-wrapper/util.spec.ts line 63
     #[test]
     fn parse_jvm_toolchain_version_extracts_value() {
         let content = "#This file is generated by updateDaemonJvm\ntoolchainVersion=21\n";
         assert_eq!(parse_jvm_toolchain_version(content), Some("21".to_owned()));
     }
 
-    // Ported: "returns null if gradle-daemon-jvm.properties file not found" — gradle-wrapper/util.spec.ts line 72
+    // Ported: "returns null if gradle-daemon-jvm.properties file not found" — lib/modules/manager/gradle-wrapper/util.spec.ts line 72
     #[test]
     fn parse_jvm_toolchain_version_returns_none_for_missing() {
         assert_eq!(parse_jvm_toolchain_version(""), None);
         assert_eq!(parse_jvm_toolchain_version("# just a comment\n"), None);
     }
 
-    // Ported: "returns null if build.gradle does not include languageVersion" — gradle-wrapper/util.spec.ts line 102
+    // Ported: "returns null if build.gradle does not include languageVersion" — lib/modules/manager/gradle-wrapper/util.spec.ts line 102
     #[test]
     fn parse_java_language_version_returns_none_for_no_pattern() {
         let content =
@@ -359,14 +359,14 @@ zipStorePath=wrapper/dists
         assert_eq!(parse_java_language_version(content), None);
     }
 
-    // Ported: "extract languageVersion value" — gradle-wrapper/util.spec.ts line 83
+    // Ported: "extract languageVersion value" — lib/modules/manager/gradle-wrapper/util.spec.ts line 83
     #[test]
     fn parse_java_language_version_extracts_value() {
         let content = "java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }";
         assert_eq!(parse_java_language_version(content), Some("21".to_owned()));
     }
 
-    // Ported: "returns toolChainVersion constraint if daemon JVM configured" — gradle-wrapper/util.spec.ts line 43
+    // Ported: "returns toolChainVersion constraint if daemon JVM configured" — lib/modules/manager/gradle-wrapper/util.spec.ts line 43
     #[test]
     fn toolchain_version_constraint_from_daemon_jvm_content() {
         let content = "#This file is generated by updateDaemonJvm\ntoolchainVersion=999\n";
@@ -374,7 +374,7 @@ zipStorePath=wrapper/dists
         assert_eq!(java_constraint_from_version(&version), "^999.0.0");
     }
 
-    // Ported: "returns languageVersion constraint if found" — gradle-wrapper/util.spec.ts line 52
+    // Ported: "returns languageVersion constraint if found" — lib/modules/manager/gradle-wrapper/util.spec.ts line 52
     #[test]
     fn language_version_constraint_from_build_gradle_content() {
         let content = "java { toolchain { languageVersion = JavaLanguageVersion.of(456) } }";
@@ -382,21 +382,21 @@ zipStorePath=wrapper/dists
         assert_eq!(java_constraint_from_version(&version), "^456.0.0");
     }
 
-    // Ported: "returns null if build.gradle or build.gradle.kts file not found" — gradle-wrapper/util.spec.ts line 92
+    // Ported: "returns null if build.gradle or build.gradle.kts file not found" — lib/modules/manager/gradle-wrapper/util.spec.ts line 92
     #[test]
     fn language_version_returns_none_for_empty_content() {
         assert_eq!(parse_java_language_version(""), None);
         assert_eq!(parse_java_language_version("dependencies { }"), None);
     }
 
-    // Ported: "works on windows" — gradle-wrapper/util.spec.ts line 135
+    // Ported: "works on windows" — lib/modules/manager/gradle-wrapper/util.spec.ts line 135
     #[test]
     #[cfg(target_os = "windows")]
     fn gradle_wrapper_filename_windows() {
         assert_eq!(gradle_wrapper_filename(), "gradlew.bat");
     }
 
-    // Ported: "works on linux" — gradle-wrapper/util.spec.ts line 140
+    // Ported: "works on linux" — lib/modules/manager/gradle-wrapper/util.spec.ts line 140
     #[test]
     #[cfg(not(target_os = "windows"))]
     fn gradle_wrapper_filename_linux() {

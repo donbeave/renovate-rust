@@ -657,7 +657,7 @@ mod tests {
 
     // ── [project].dependencies ────────────────────────────────────────────────
 
-    // Ported: "should return dependencies for valid content" — pep621/extract.spec.ts line 32
+    // Ported: "should return dependencies for valid content" — lib/modules/manager/pep621/extract.spec.ts line 32
     #[test]
     fn extracts_project_dependencies() {
         let content = r#"
@@ -718,7 +718,7 @@ dependencies = ["cachecontrol[filecache]>=0.12.11"]
 
     // ── [project.optional-dependencies] ──────────────────────────────────────
 
-    // Ported: "should return dependencies for valid content" — pep621/extract.spec.ts line 32
+    // Ported: "should return dependencies for valid content" — lib/modules/manager/pep621/extract.spec.ts line 32
     #[test]
     fn extracts_optional_dependencies() {
         let content = r#"
@@ -742,7 +742,7 @@ lint = ["ruff==0.1.0"]
 
     // ── [dependency-groups] ───────────────────────────────────────────────────
 
-    // Ported: "should return dependencies for valid content" — pep621/extract.spec.ts line 32
+    // Ported: "should return dependencies for valid content" — lib/modules/manager/pep621/extract.spec.ts line 32
     #[test]
     fn extracts_dependency_groups_skips_include_tables() {
         let content = r#"
@@ -784,7 +784,7 @@ dependencies = ["mypkg @ https://example.com/mypkg.tar.gz"]
         assert_eq!(deps[0].skip_reason, Some(Pep621SkipReason::DirectReference));
     }
 
-    // Ported: "should skip dependencies with unsupported uv sources" — pep621/extract.spec.ts line 340
+    // Ported: "should skip dependencies with unsupported uv sources" — lib/modules/manager/pep621/extract.spec.ts line 340
     #[test]
     fn uv_sources_classify_git_path_url_and_workspace_sources() {
         let content = r#"
@@ -857,7 +857,7 @@ dep_WITH-normalization = { workspace = true }
         );
     }
 
-    // Ported: "should handle SSH git URLs correctly for GitHub sources" — pep621/extract.spec.ts line 412
+    // Ported: "should handle SSH git URLs correctly for GitHub sources" — lib/modules/manager/pep621/extract.spec.ts line 412
     #[test]
     fn uv_sources_handle_ssh_github_tag_and_rev() {
         let content = r#"
@@ -894,7 +894,7 @@ dep2 = { git = "ssh://git@github.com/foo/dep2", rev = "abcd1234" }
         assert!(dep2.skip_reason.is_none());
     }
 
-    // Ported: "should extract dependencies from hatch environments" — pep621/extract.spec.ts line 446
+    // Ported: "should extract dependencies from hatch environments" — lib/modules/manager/pep621/extract.spec.ts line 446
     #[test]
     fn hatch_env_dependencies_and_extra_dependencies_are_extracted() {
         let content = r#"
@@ -960,7 +960,7 @@ extra-dependencies = [
         assert!(baz.current_value.is_empty());
     }
 
-    // Ported: "should return dependencies with original pypi registryUrl" — pep621/extract.spec.ts line 309
+    // Ported: "should return dependencies with original pypi registryUrl" — lib/modules/manager/pep621/extract.spec.ts line 309
     #[test]
     fn pdm_sources_apply_registry_urls_to_project_dependencies() {
         let content = r#"
@@ -988,7 +988,7 @@ name = "internal"
         );
     }
 
-    // Ported: "should return dependencies with overwritten pypi registryUrl" — pep621/extract.spec.ts line 233
+    // Ported: "should return dependencies with overwritten pypi registryUrl" — lib/modules/manager/pep621/extract.spec.ts line 233
     #[test]
     fn pdm_sources_apply_registry_urls_to_project_optional_and_dev_dependencies() {
         let content = r#"
@@ -1114,21 +1114,21 @@ dependencies = ["requests>=2.28"]
         assert!(deps.iter().any(|d| d.name == "requests"));
     }
 
-    // Ported: "should return null for empty content" — pep621/extract.spec.ts line 16
+    // Ported: "should return null for empty content" — lib/modules/manager/pep621/extract.spec.ts line 16
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract_ok("");
         assert!(deps.is_empty());
     }
 
-    // Ported: "should return null for invalid toml" — pep621/extract.spec.ts line 21
+    // Ported: "should return null for invalid toml" — lib/modules/manager/pep621/extract.spec.ts line 21
     #[test]
     fn invalid_toml_returns_error() {
         let content = "[project]\nname =\n";
         assert!(extract(content).is_err());
     }
 
-    // Ported: "should extract project version" — pep621/extract.spec.ts line 498
+    // Ported: "should extract project version" — lib/modules/manager/pep621/extract.spec.ts line 498
     #[test]
     fn project_version_field_is_parseable() {
         // The spec checks res?.packageFileVersion === '0.0.2'.
@@ -1145,7 +1145,7 @@ dependencies = [ "requests==2.30.0" ]
         assert_eq!(deps[0].current_value, "==2.30.0");
     }
 
-    // Ported: "should extract dependencies from build-system.requires" — pep621/extract.spec.ts line 510
+    // Ported: "should extract dependencies from build-system.requires" — lib/modules/manager/pep621/extract.spec.ts line 510
     #[test]
     fn build_system_requires_extracted_with_project_deps() {
         let content = r#"[build-system]
@@ -1175,7 +1175,7 @@ dependencies = [ "requests==2.30.0" ]
 
     // ── real-world fixture (from Renovate pep621 fixture) ─────────────────────
 
-    // Ported: "should resolve lockedVersions from pdm.lock" — pep621/extract.spec.ts line 551
+    // Ported: "should resolve lockedVersions from pdm.lock" — lib/modules/manager/pep621/extract.spec.ts line 551
     #[test]
     fn pdm_fixture() {
         let content = r#"
@@ -1215,7 +1215,7 @@ pytest = [
         );
     }
 
-    // Ported: "should resolve lockedVersions from uv.lock" — pep621/extract.spec.ts line 595
+    // Ported: "should resolve lockedVersions from uv.lock" — lib/modules/manager/pep621/extract.spec.ts line 595
     #[test]
     fn uv_lock_applies_locked_versions() {
         let content = r#"
@@ -1251,7 +1251,7 @@ requires-dist = [{ name = "attrs", specifier = ">=24.1.0" }]
         assert_eq!(attrs.locked_version.as_deref(), Some("24.2.0"));
     }
 
-    // Ported: "should resolve dependencies without locked versions on invalid uv.lock" — pep621/extract.spec.ts line 661
+    // Ported: "should resolve dependencies without locked versions on invalid uv.lock" — lib/modules/manager/pep621/extract.spec.ts line 661
     #[test]
     fn invalid_uv_lock_leaves_deps_without_locked_versions() {
         let content = r#"
@@ -1267,7 +1267,7 @@ requires-python = ">=3.11"
         assert_eq!(attrs.locked_version, None);
     }
 
-    // Ported: "should resolve dependencies with template" — pep621/extract.spec.ts line 694
+    // Ported: "should resolve dependencies with template" — lib/modules/manager/pep621/extract.spec.ts line 694
     #[test]
     fn resolves_dependencies_with_template_lines() {
         let content = r#"
@@ -1304,28 +1304,28 @@ readme = "README.md"
     const PEP621_CONTENT: &str =
         "[project]\nname = \"test\"\nversion = \"0.0.2\"\ndescription = \"test\"\n";
 
-    // Ported: "increments" — modules/manager/pep621/update.spec.ts line 13
+    // Ported: "increments" — lib/modules/manager/pep621/update.spec.ts line 13
     #[test]
     fn pep621_bump_increments_patch() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.2", "patch");
         assert_eq!(result, PEP621_CONTENT.replace("0.0.2", "0.0.3"));
     }
 
-    // Ported: "no ops" — modules/manager/pep621/update.spec.ts line 23
+    // Ported: "no ops" — lib/modules/manager/pep621/update.spec.ts line 23
     #[test]
     fn pep621_bump_no_op_when_version_mismatch() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.1", "patch");
         assert_eq!(result, PEP621_CONTENT);
     }
 
-    // Ported: "updates" — modules/manager/pep621/update.spec.ts line 32
+    // Ported: "updates" — lib/modules/manager/pep621/update.spec.ts line 32
     #[test]
     fn pep621_bump_updates_minor() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.1", "minor");
         assert_eq!(result, PEP621_CONTENT.replace("0.0.2", "0.1.0"));
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/pep621/update.spec.ts line 42
+    // Ported: "returns content if bumping errors" — lib/modules/manager/pep621/update.spec.ts line 42
     #[test]
     fn pep621_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(PEP621_CONTENT, "0.0.2", "not_valid");
@@ -1334,7 +1334,7 @@ readme = "README.md"
 
     // --- parse_pep508_str tests ---
 
-    // Ported: "(parse $value"" — pep621/utils.spec.ts line 6
+    // Ported: "(parse $value"" — lib/modules/manager/pep621/utils.spec.ts line 6
     #[test]
     fn parse_pep508_empty_returns_none() {
         assert!(parse_pep508_str("").is_none());

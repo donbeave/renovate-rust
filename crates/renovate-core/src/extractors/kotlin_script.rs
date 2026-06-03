@@ -66,7 +66,7 @@ pub fn extract(content: &str) -> Vec<KotlinScriptDep> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts dependencies in a generic case" — manager/kotlin-script/extract.spec.ts line 12
+    // Ported: "extracts dependencies in a generic case" — lib/modules/manager/kotlin-script/extract.spec.ts line 12
     #[test]
     fn extracts_single_dep() {
         let content = r#"@file:DependsOn("it.krzeminski:github-actions-kotlin-dsl:0.22.0")"#;
@@ -77,7 +77,7 @@ mod tests {
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "extracts dependencies in a generic case" — manager/kotlin-script/extract.spec.ts line 12
+    // Ported: "extracts dependencies in a generic case" — lib/modules/manager/kotlin-script/extract.spec.ts line 12
     #[test]
     fn extracts_multiple_deps() {
         let content = r#"
@@ -91,7 +91,7 @@ mod tests {
         assert_eq!(deps[1].current_value, "4.6.0.201612231935-r");
     }
 
-    // Ported: "detects custom repository definitions" — kotlin-script/extract.spec.ts line 43
+    // Ported: "detects custom repository definitions" — lib/modules/manager/kotlin-script/extract.spec.ts line 43
     #[test]
     fn extracts_custom_repositories() {
         let content = r#"
@@ -103,7 +103,7 @@ mod tests {
         assert_eq!(deps[0].registry_urls, vec!["https://jitpack.io"]);
     }
 
-    // Ported: "no dependencies" — kotlin-script/extract.spec.ts line 71
+    // Ported: "no dependencies" — lib/modules/manager/kotlin-script/extract.spec.ts line 71
     #[test]
     fn no_annotations_returns_empty() {
         assert!(extract("// just a comment\nfun main() {}").is_empty());
@@ -121,7 +121,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "3.0.2");
     }
 
-    // Ported: "extracts dependencies in a generic case" — kotlin-script/extract.spec.ts line 12
+    // Ported: "extracts dependencies in a generic case" — lib/modules/manager/kotlin-script/extract.spec.ts line 12
     #[test]
     fn extracts_generic_case_fixture_three_deps() {
         // Mirrors kotlin-script/__fixtures__/generic-case.main.kts
@@ -157,7 +157,7 @@ println("Hello world")
         ));
     }
 
-    // Ported: "skips dependencies with missing parts" — kotlin-script/extract.spec.ts line 81
+    // Ported: "skips dependencies with missing parts" — lib/modules/manager/kotlin-script/extract.spec.ts line 81
     #[test]
     fn skips_missing_parts() {
         // Mirrors missing-parts.main.kts: :group:version, group::version, group:artifact: are invalid

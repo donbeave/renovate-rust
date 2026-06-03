@@ -872,13 +872,13 @@ pub fn postprocess_release(
 mod registry_tests {
     use super::*;
 
-    // Ported: "returns null for unknown datasource" — modules/datasource/common.spec.ts line 21
+    // Ported: "returns null for unknown datasource" — lib/modules/datasource/common.spec.ts line 21
     #[test]
     fn datasource_registry_unknown_returns_none() {
         assert!(get_datasource_for("foobar").is_none());
     }
 
-    // Ported: "supports custom datasource" — modules/datasource/common.spec.ts line 25
+    // Ported: "supports custom datasource" — lib/modules/datasource/common.spec.ts line 25
     #[test]
     fn datasource_registry_custom_prefix() {
         let custom = get_datasource_for("custom.foobar");
@@ -887,20 +887,20 @@ mod registry_tests {
         assert_eq!(custom.map(|d| d.id), base.map(|d| d.id));
     }
 
-    // Ported: "returns datasource for known datasource" — modules/datasource/common.spec.ts line 31
+    // Ported: "returns datasource for known datasource" — lib/modules/datasource/common.spec.ts line 31
     #[test]
     fn datasource_registry_known_returns_some() {
         let ds = get_datasource_for("npm").unwrap();
         assert_eq!(ds.id, "npm");
     }
 
-    // Ported: "returns default versioning for undefined datasource" — modules/datasource/common.spec.ts line 39
+    // Ported: "returns default versioning for undefined datasource" — lib/modules/datasource/common.spec.ts line 39
     #[test]
     fn datasource_registry_default_versioning_undefined() {
         assert_eq!(get_datasource_default_versioning(None), "semver-coerced");
     }
 
-    // Ported: "returns default versioning for unknown datasource" — modules/datasource/common.spec.ts line 43
+    // Ported: "returns default versioning for unknown datasource" — lib/modules/datasource/common.spec.ts line 43
     #[test]
     fn datasource_registry_default_versioning_unknown() {
         assert_eq!(
@@ -909,7 +909,7 @@ mod registry_tests {
         );
     }
 
-    // Ported: "returns default versioning for datasource with missing default versioning configuration" — modules/datasource/common.spec.ts line 52
+    // Ported: "returns default versioning for datasource with missing default versioning configuration" — lib/modules/datasource/common.spec.ts line 52
     #[test]
     fn datasource_registry_default_versioning_no_specific() {
         // artifactory has no specific default → semver-coerced
@@ -919,35 +919,35 @@ mod registry_tests {
         );
     }
 
-    // Ported: "returns datasource-defined default versioning" — modules/datasource/common.spec.ts line 56
+    // Ported: "returns datasource-defined default versioning" — lib/modules/datasource/common.spec.ts line 56
     #[test]
     fn datasource_registry_datasource_defined_versioning() {
         // crate uses cargo versioning
         assert_eq!(get_datasource_default_versioning(Some("crate")), "cargo");
     }
 
-    // Ported: "returns true for valid input" — modules/datasource/common.spec.ts line 62
+    // Ported: "returns true for valid input" — lib/modules/datasource/common.spec.ts line 62
     #[test]
     fn is_get_pkg_releases_config_valid() {
         let input = serde_json::json!({"datasource": "npm", "packageName": "lodash"});
         assert!(is_get_pkg_releases_config(&input));
     }
 
-    // Ported: "returns false for invalid input" — modules/datasource/common.spec.ts line 70
+    // Ported: "returns false for invalid input" — lib/modules/datasource/common.spec.ts line 70
     #[test]
     fn is_get_pkg_releases_config_empty_datasource() {
         let input = serde_json::json!({"datasource": "", "packageName": "lodash"});
         assert!(!is_get_pkg_releases_config(&input));
     }
 
-    // Ported: "returns false for input with missing properties" — modules/datasource/common.spec.ts line 78
+    // Ported: "returns false for input with missing properties" — lib/modules/datasource/common.spec.ts line 78
     #[test]
     fn is_get_pkg_releases_config_missing_package_name() {
         let input = serde_json::json!({"datasource": "npm"});
         assert!(!is_get_pkg_releases_config(&input));
     }
 
-    // Ported: "returns false for input with non-string properties" — modules/datasource/common.spec.ts line 85
+    // Ported: "returns false for input with non-string properties" — lib/modules/datasource/common.spec.ts line 85
     #[test]
     fn is_get_pkg_releases_config_non_string_datasource() {
         let input = serde_json::json!({"datasource": 123, "packageName": "lodash"});
@@ -956,7 +956,7 @@ mod registry_tests {
 
     // ── add_metadata tests ─────────────────────────────────────────────────
 
-    // Ported: "Should handle manualChangelogUrls" — modules/datasource/metadata.spec.ts line 19
+    // Ported: "Should handle manualChangelogUrls" — lib/modules/datasource/metadata.spec.ts line 19
     #[test]
     fn add_metadata_manual_changelog_url() {
         let mut dep = ReleaseResult {
@@ -979,7 +979,7 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should handle manualSourceUrls" — modules/datasource/metadata.spec.ts line 51
+    // Ported: "Should handle manualSourceUrls" — lib/modules/datasource/metadata.spec.ts line 51
     #[test]
     fn add_metadata_manual_source_url() {
         let mut dep = ReleaseResult {
@@ -996,7 +996,7 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should handle parsing of sourceUrls correctly" — modules/datasource/metadata.spec.ts line 82
+    // Ported: "Should handle parsing of sourceUrls correctly" — lib/modules/datasource/metadata.spec.ts line 82
     #[test]
     fn add_metadata_parses_github_tree_url() {
         let mut dep = ReleaseResult {
@@ -1125,7 +1125,7 @@ mod registry_tests {
         assert!(dep.source_directory.is_none());
     }
 
-    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl" — modules/datasource/metadata.spec.ts line 134
+    // Ported: "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl" — lib/modules/datasource/metadata.spec.ts line 134
     //         — modules/datasource/metadata.spec.ts line 134
     // Note: only GitLab cases tested here; "somehost.com" sub-path truncation is a known
     // limitation of the current massage_github_url implementation (5-segment limit).
@@ -1347,7 +1347,7 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should massage github sourceUrls" — modules/datasource/metadata.spec.ts line 197
+    // Ported: "Should massage github sourceUrls" — lib/modules/datasource/metadata.spec.ts line 197
     #[test]
     fn add_metadata_massage_github_pages_url() {
         let mut dep = ReleaseResult {
@@ -1390,7 +1390,7 @@ mod registry_tests {
         );
     }
 
-    // Ported: "Should handle parsing/converting of GitHub sourceUrls with http and www correctly" — modules/datasource/metadata.spec.ts line 319
+    // Ported: "Should handle parsing/converting of GitHub sourceUrls with http and www correctly" — lib/modules/datasource/metadata.spec.ts line 319
     //         — modules/datasource/metadata.spec.ts line 319
     #[test]
     fn add_metadata_github_http_www_url() {
@@ -1411,7 +1411,7 @@ mod registry_tests {
 
     // ── apply_constraints_filtering tests ─────────────────────────────────
 
-    // Ported: "should remove constraints from releases if constraintsFiltering is not strict" — modules/datasource/common.spec.ts line 201
+    // Ported: "should remove constraints from releases if constraintsFiltering is not strict" — lib/modules/datasource/common.spec.ts line 201
     #[test]
     fn constraints_filtering_non_strict_removes_constraints() {
         let result = ReleaseResult {
@@ -1440,7 +1440,7 @@ mod registry_tests {
         assert!(res.releases[1].constraints.is_none());
     }
 
-    // Ported: "should filter releases based on constraints if constraintsFiltering is strict" — modules/datasource/common.spec.ts line 230
+    // Ported: "should filter releases based on constraints if constraintsFiltering is strict" — lib/modules/datasource/common.spec.ts line 230
     #[test]
     fn constraints_filtering_strict_filters_releases() {
         let result = ReleaseResult {
@@ -1477,7 +1477,7 @@ mod registry_tests {
         assert!(versions.contains(&"2.0.0"));
     }
 
-    // Ported: "should return all releases when no configConstraints" — modules/datasource/common.spec.ts line 250
+    // Ported: "should return all releases when no configConstraints" — lib/modules/datasource/common.spec.ts line 250
     #[test]
     fn constraints_filtering_strict_no_config_constraints() {
         let result = ReleaseResult {
@@ -1503,7 +1503,7 @@ mod registry_tests {
         assert_eq!(res.releases.len(), 2);
     }
 
-    // Ported: "should match exact constraints" — modules/datasource/common.spec.ts line 268
+    // Ported: "should match exact constraints" — lib/modules/datasource/common.spec.ts line 268
     #[test]
     fn constraints_filtering_exact_match() {
         let result = ReleaseResult {
@@ -1533,7 +1533,7 @@ mod registry_tests {
         assert_eq!(res.releases[0].version, "2.0.0");
     }
 
-    // Ported: "should handle config with a range constraint, and a release with an exact version" — common.spec.ts line 287
+    // Ported: "should handle config with a range constraint, and a release with an exact version" — lib/modules/datasource/common.spec.ts line 287
     #[test]
     fn constraints_filtering_range_config_exact_release() {
         let result = ReleaseResult {
@@ -1563,7 +1563,7 @@ mod registry_tests {
         assert_eq!(res.releases[0].version, "2.0.0");
     }
 
-    // Ported: "should allow constraintsVersioning to override the datasource's default versioning" — modules/datasource/common.spec.ts line 325
+    // Ported: "should allow constraintsVersioning to override the datasource's default versioning" — lib/modules/datasource/common.spec.ts line 325
     //         — modules/datasource/common.spec.ts line 325
     // constraintsVersioning.rubygems = 'semver-coerced' → '^1.3' is valid semver
     #[test]
@@ -1612,7 +1612,7 @@ mod registry_tests {
         assert!(res.releases.iter().any(|r| r.version == "8.1.3"));
     }
 
-    // Ported: "should handle config with an exact version, and a release with a range constraint" — common.spec.ts line 306
+    // Ported: "should handle config with an exact version, and a release with a range constraint" — lib/modules/datasource/common.spec.ts line 306
     #[test]
     fn constraints_filtering_exact_config_range_release() {
         let result = ReleaseResult {
@@ -1644,7 +1644,7 @@ mod registry_tests {
 
     // ── postprocess_release — lib/modules/datasource/postprocess-release.spec.ts ──
 
-    // Ported: "returns original release for empty datasource field" — modules/datasource/postprocess-release.spec.ts line 27
+    // Ported: "returns original release for empty datasource field" — lib/modules/datasource/postprocess-release.spec.ts line 27
     #[test]
     fn postprocess_release_empty_datasource_returns_original() {
         let release = Release {
@@ -1656,7 +1656,7 @@ mod registry_tests {
         assert_eq!(result.unwrap().version, "1.0.0");
     }
 
-    // Ported: "returns original release for missing datasource" — modules/datasource/postprocess-release.spec.ts line 36
+    // Ported: "returns original release for missing datasource" — lib/modules/datasource/postprocess-release.spec.ts line 36
     #[test]
     fn postprocess_release_unknown_datasource_returns_original() {
         let release = Release {
@@ -1668,7 +1668,7 @@ mod registry_tests {
         assert_eq!(result.unwrap().version, "1.0.0");
     }
 
-    // Ported: "returns original release for datasource with missing `postprocessRelease` method" — modules/datasource/postprocess-release.spec.ts line 48
+    // Ported: "returns original release for datasource with missing `postprocessRelease` method" — lib/modules/datasource/postprocess-release.spec.ts line 48
     #[test]
     fn postprocess_release_no_override_returns_original() {
         let release = Release {
@@ -1680,7 +1680,7 @@ mod registry_tests {
         assert_eq!(result.unwrap().version, "1.0.0");
     }
 
-    // Ported: "returns original release for datasource with missing `packageName` field" — modules/datasource/postprocess-release.spec.ts line 60
+    // Ported: "returns original release for datasource with missing `packageName` field" — lib/modules/datasource/postprocess-release.spec.ts line 60
     #[test]
     fn postprocess_release_no_package_name_returns_original() {
         let release = Release {
@@ -1692,7 +1692,7 @@ mod registry_tests {
         assert_eq!(result.unwrap().version, "1.0.0");
     }
 
-    // Ported: "updates release via `postprocessRelease` method" — modules/datasource/postprocess-release.spec.ts line 81
+    // Ported: "updates release via `postprocessRelease` method" — lib/modules/datasource/postprocess-release.spec.ts line 81
     #[test]
     fn postprocess_release_passthrough_when_no_override() {
         let release = Release {
@@ -1707,7 +1707,7 @@ mod registry_tests {
         assert_eq!(r.is_stable, Some(true));
     }
 
-    // Ported: "rejects release via `postprocessRelease` method" — modules/datasource/postprocess-release.spec.ts line 110
+    // Ported: "rejects release via `postprocessRelease` method" — lib/modules/datasource/postprocess-release.spec.ts line 110
     #[test]
     fn postprocess_release_returns_some_for_default_impl() {
         let release = Release {
@@ -1718,7 +1718,7 @@ mod registry_tests {
         assert!(result.is_some());
     }
 
-    // Ported: "falls back when error was thrown" — modules/datasource/postprocess-release.spec.ts line 131
+    // Ported: "falls back when error was thrown" — lib/modules/datasource/postprocess-release.spec.ts line 131
     #[test]
     fn postprocess_release_fallback_on_missing_datasource() {
         let release = Release {

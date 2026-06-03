@@ -337,7 +337,7 @@ mod tests {
   :profiles {:dev {:dependencies [[ring/ring-mock "0.4.0"]]}})
 "#;
 
-    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
+    // Ported: "extractPackageFile" — lib/modules/manager/leiningen/extract.spec.ts line 74
     #[test]
     fn extracts_dependencies() {
         let deps = extract(SAMPLE);
@@ -362,7 +362,7 @@ mod tests {
         assert_eq!(compojure.current_value, "1.6.3");
     }
 
-    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
+    // Ported: "extractPackageFile" — lib/modules/manager/leiningen/extract.spec.ts line 74
     #[test]
     fn extracts_managed_dependencies() {
         let deps = extract(SAMPLE);
@@ -374,7 +374,7 @@ mod tests {
         assert_eq!(cheshire.dep_type, LeinDepType::ManagedDependencies);
     }
 
-    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
+    // Ported: "extractPackageFile" — lib/modules/manager/leiningen/extract.spec.ts line 74
     #[test]
     fn extracts_plugins() {
         let deps = extract(SAMPLE);
@@ -386,7 +386,7 @@ mod tests {
         assert_eq!(plugin.dep_type, LeinDepType::Plugins);
     }
 
-    // Ported: "extractPackageFile" — manager/leiningen/extract.spec.ts line 74
+    // Ported: "extractPackageFile" — lib/modules/manager/leiningen/extract.spec.ts line 74
     #[test]
     fn dev_profile_dependencies_also_extracted() {
         let deps = extract(SAMPLE);
@@ -410,7 +410,7 @@ mod tests {
         assert_eq!(expand_dep_name("ring"), "ring:ring");
     }
 
-    // Ported: "trimAtKey" — manager/leiningen/extract.spec.ts line 10
+    // Ported: "trimAtKey" — lib/modules/manager/leiningen/extract.spec.ts line 10
     #[test]
     fn trim_at_key_cases() {
         assert_eq!(trim_at_key("foo", "bar"), None);
@@ -428,7 +428,7 @@ mod tests {
         );
     }
 
-    // Ported: "extractFromVectors" — manager/leiningen/extract.spec.ts line 22
+    // Ported: "extractFromVectors" — lib/modules/manager/leiningen/extract.spec.ts line 22
     #[test]
     fn extract_from_vectors_cases() {
         let empty: HashMap<String, String> = HashMap::new();
@@ -473,7 +473,7 @@ mod tests {
         assert_eq!(res[0].current_value, "4.3.0");
     }
 
-    // Ported: "extractVariables" — manager/leiningen/extract.spec.ts line 239
+    // Ported: "extractVariables" — lib/modules/manager/leiningen/extract.spec.ts line 239
     #[test]
     fn extract_variables_cases() {
         let res = extract_variables("(def foo \"1\")");

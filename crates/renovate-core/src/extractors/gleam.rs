@@ -258,7 +258,7 @@ pub fn get_range_strategy<'a>(range_strategy: &'a str, current_value: Option<&st
 mod tests {
     use super::*;
 
-    // Ported: "should extract dev and prod dependencies" — gleam/extract.spec.ts line 8
+    // Ported: "should extract dev and prod dependencies" — lib/modules/manager/gleam/extract.spec.ts line 8
     #[test]
     fn extracts_dependencies() {
         let content = r#"
@@ -272,7 +272,7 @@ lustre = ">= 4.0.0, < 5.0.0"
         assert!(deps.iter().any(|d| d.name == "lustre" && !d.dev));
     }
 
-    // Ported: "should extract dev only dependencies" — gleam/extract.spec.ts line 41
+    // Ported: "should extract dev only dependencies" — lib/modules/manager/gleam/extract.spec.ts line 41
     #[test]
     fn extracts_dev_dependencies() {
         let content = r#"
@@ -285,7 +285,7 @@ gleeunit = "~> 1.0"
         assert_eq!(deps[0].name, "gleeunit");
     }
 
-    // Ported: "should extract dev and prod dependencies" — gleam/extract.spec.ts line 8
+    // Ported: "should extract dev and prod dependencies" — lib/modules/manager/gleam/extract.spec.ts line 8
     #[test]
     fn both_sections() {
         let content = r#"
@@ -299,39 +299,39 @@ gleeunit = "~> 1.0"
         assert_eq!(deps.len(), 2);
     }
 
-    // Ported: "should return null when gleam.toml is invalid" — gleam/extract.spec.ts line 82
+    // Ported: "should return null when gleam.toml is invalid" — lib/modules/manager/gleam/extract.spec.ts line 82
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "should return null when no dependencies are found" — gleam/extract.spec.ts line 65
+    // Ported: "should return null when no dependencies are found" — lib/modules/manager/gleam/extract.spec.ts line 65
     #[test]
     fn no_deps_section_returns_empty() {
         let content = r#"name = "test"\nversion = "1.0.0"\n\n[unknown]\ngleam_http = "~> 3.6.0""#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should return null when gleam.toml is invalid" — gleam/extract.spec.ts line 82
+    // Ported: "should return null when gleam.toml is invalid" — lib/modules/manager/gleam/extract.spec.ts line 82
     #[test]
     fn invalid_toml_returns_empty() {
         assert!(extract("foo").is_empty());
     }
 
-    // Ported: "returns same if not auto" — modules/manager/gleam/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/gleam/range.spec.ts line 5
     #[test]
     fn gleam_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("pin", None), "pin");
     }
 
-    // Ported: "widens complex bump" — modules/manager/gleam/range.spec.ts line 10
+    // Ported: "widens complex bump" — lib/modules/manager/gleam/range.spec.ts line 10
     #[test]
     fn gleam_range_widens_complex_bump() {
         let result = get_range_strategy("bump", Some(">= 1.6.0 and < 2.0.0"));
         assert_eq!(result, "widen");
     }
 
-    // Ported: "defaults to widen" — modules/manager/gleam/range.spec.ts line 19
+    // Ported: "defaults to widen" — lib/modules/manager/gleam/range.spec.ts line 19
     #[test]
     fn gleam_range_defaults_to_widen() {
         let result = get_range_strategy("auto", None);
@@ -359,7 +359,7 @@ gleeunit = "~> 1.0"
         "]\n\n[requirements]\nfoo = { version = \">= 1.0.0 and < 2.0.0\" }\n"
     );
 
-    // Ported: "should return locked versions" — gleam/extract.spec.ts line 91
+    // Ported: "should return locked versions" — lib/modules/manager/gleam/extract.spec.ts line 91
     #[test]
     fn gleam_extract_returns_locked_versions() {
         let deps = extract_with_lock(GLEAM_TOML, Some(LOCK_FILE_SATISFYING));
@@ -372,7 +372,7 @@ gleeunit = "~> 1.0"
         assert_eq!(foo.locked_version.as_deref(), Some("1.0.4"));
     }
 
-    // Ported: "should fail to extract locked version" — gleam/extract.spec.ts line 119
+    // Ported: "should fail to extract locked version" — lib/modules/manager/gleam/extract.spec.ts line 119
     #[test]
     fn gleam_extract_no_lock_file_no_locked_version() {
         let deps = extract_with_lock(GLEAM_TOML, None);
@@ -383,7 +383,7 @@ gleeunit = "~> 1.0"
         );
     }
 
-    // Ported: "should fail to find locked version in range" — gleam/extract.spec.ts line 138
+    // Ported: "should fail to find locked version in range" — lib/modules/manager/gleam/extract.spec.ts line 138
     #[test]
     fn gleam_extract_locked_version_out_of_range() {
         let deps = extract_with_lock(GLEAM_TOML, Some(LOCK_FILE_OUT_OF_RANGE));
@@ -392,7 +392,7 @@ gleeunit = "~> 1.0"
         assert!(foo.locked_version.is_none(), "out-of-range version not set");
     }
 
-    // Ported: "should handle invalid versions in lock file" — gleam/extract.spec.ts line 166
+    // Ported: "should handle invalid versions in lock file" — lib/modules/manager/gleam/extract.spec.ts line 166
     #[test]
     fn gleam_extract_invalid_lock_version() {
         let deps = extract_with_lock(GLEAM_TOML, Some(LOCK_FILE_INVALID_VERSION));
@@ -401,7 +401,7 @@ gleeunit = "~> 1.0"
         assert!(foo.locked_version.is_none(), "invalid version not set");
     }
 
-    // Ported: "should handle lock file parsing and extracting errors" — gleam/extract.spec.ts line 193
+    // Ported: "should handle lock file parsing and extracting errors" — lib/modules/manager/gleam/extract.spec.ts line 193
     #[test]
     fn gleam_extract_invalid_lock_toml() {
         let deps = extract_with_lock(GLEAM_TOML, Some("invalid"));
@@ -422,26 +422,26 @@ gleeunit = "~> 1.0"
 foo = { version = ">= 1.0.0 and < 2.0.0" }
 "#;
 
-    // Ported: "returns null for missing lock file" — modules/manager/gleam/locked-version.spec.ts line 19
+    // Ported: "returns null for missing lock file" — lib/modules/manager/gleam/locked-version.spec.ts line 19
     #[test]
     fn extract_versions_missing_file_returns_none() {
         assert!(extract_gleam_lock_file_versions_opt(None).is_none());
     }
 
-    // Ported: "returns null for invalid lock file" — modules/manager/gleam/locked-version.spec.ts line 23
+    // Ported: "returns null for invalid lock file" — lib/modules/manager/gleam/locked-version.spec.ts line 23
     #[test]
     fn gleam_lock_returns_none_for_invalid() {
         assert!(parse_gleam_lock_file("foo").is_none());
     }
 
-    // Ported: "returns empty map for lock file without packages" — modules/manager/gleam/locked-version.spec.ts line 28
+    // Ported: "returns empty map for lock file without packages" — lib/modules/manager/gleam/locked-version.spec.ts line 28
     #[test]
     fn gleam_lock_returns_empty_map_for_no_packages() {
         let result = extract_gleam_lock_file_versions("[requirements]").unwrap();
         assert!(result.is_empty());
     }
 
-    // Ported: "returns a map of package versions" — modules/manager/gleam/locked-version.spec.ts line 33
+    // Ported: "returns a map of package versions" — lib/modules/manager/gleam/locked-version.spec.ts line 33
     #[test]
     fn gleam_lock_returns_map_of_package_versions() {
         let result = extract_gleam_lock_file_versions(LOCK_FILE).unwrap();
@@ -449,7 +449,7 @@ foo = { version = ">= 1.0.0 and < 2.0.0" }
         assert_eq!(result.get("bar"), Some(&vec!["2.1.0".to_owned()]));
     }
 
-    // Ported: "parses lockfile string into an object" — modules/manager/gleam/locked-version.spec.ts line 45
+    // Ported: "parses lockfile string into an object" — lib/modules/manager/gleam/locked-version.spec.ts line 45
     #[test]
     fn gleam_lock_parses_into_object() {
         let result = parse_gleam_lock_file(LOCK_FILE).unwrap();
@@ -462,7 +462,7 @@ foo = { version = ">= 1.0.0 and < 2.0.0" }
         assert!(result.packages[1].requirements.is_empty());
     }
 
-    // Ported: "can deal with invalid lockfiles" — modules/manager/gleam/locked-version.spec.ts line 63
+    // Ported: "can deal with invalid lockfiles" — lib/modules/manager/gleam/locked-version.spec.ts line 63
     #[test]
     fn gleam_lock_handles_invalid_lockfile() {
         assert!(parse_gleam_lock_file("foo").is_none());

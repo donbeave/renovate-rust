@@ -134,7 +134,7 @@ fn is_version_like(s: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "extracts version for property file with distribution type "bin" in distributionUrl" — maven-wrapper/extract.spec.ts line 14
+    // Ported: "extracts version for property file with distribution type "bin" in distributionUrl" — lib/modules/manager/maven-wrapper/extract.spec.ts line 14
     #[test]
     fn extracts_wrapper_and_maven_properties() {
         let content = "distributionUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/apache-maven/3.8.4/apache-maven-3.8.4-bin.zip\nwrapperUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar";
@@ -155,7 +155,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts version for property file with only a wrapper url" — maven-wrapper/extract.spec.ts line 37
+    // Ported: "extracts version for property file with only a wrapper url" — lib/modules/manager/maven-wrapper/extract.spec.ts line 37
     #[test]
     fn extracts_only_wrapper_url() {
         let content = "wrapperUrl=https://repo.maven.apache.org/maven2/io/takari/maven-wrapper/0.5.6/maven-wrapper-0.5.6.jar";
@@ -173,7 +173,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts version for property file with only a wrapper version" — maven-wrapper/extract.spec.ts line 51
+    // Ported: "extracts version for property file with only a wrapper version" — lib/modules/manager/maven-wrapper/extract.spec.ts line 51
     #[test]
     fn extracts_only_wrapper_version_key() {
         let content = "wrapperVersion=3.3.1";
@@ -184,7 +184,7 @@ mod tests {
         assert_eq!(deps[0].replace_string, "3.3.1");
     }
 
-    // Ported: "extracts wrapper information from wrapperUrl in precedence to wrapperVersion" — maven-wrapper/extract.spec.ts line 64
+    // Ported: "extracts wrapper information from wrapperUrl in precedence to wrapperVersion" — lib/modules/manager/maven-wrapper/extract.spec.ts line 64
     #[test]
     fn wrapper_url_takes_precedence_over_wrapper_version() {
         let content = "wrapperVersion=3.1.0\nwrapperUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.2/maven-wrapper-3.1.2.jar";
@@ -198,7 +198,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts maven warapper version from mvnw file" — maven-wrapper/extract.spec.ts line 80
+    // Ported: "extracts maven warapper version from mvnw file" — lib/modules/manager/maven-wrapper/extract.spec.ts line 80
     #[test]
     fn extracts_version_from_mvnw_unix() {
         let content = "# Apache Maven Wrapper startup batch script, version 3.3.0";
@@ -209,7 +209,7 @@ mod tests {
         assert_eq!(deps[0].replace_string, "3.3.0");
     }
 
-    // Ported: "extracts maven warapper version from mvnw file - Windows" — maven-wrapper/extract.spec.ts line 93
+    // Ported: "extracts maven warapper version from mvnw file - Windows" — lib/modules/manager/maven-wrapper/extract.spec.ts line 93
     #[test]
     fn extracts_version_from_mvnw_windows() {
         let content = "@REM Apache Maven Wrapper startup batch script, version 3.3.0";
@@ -220,14 +220,14 @@ mod tests {
         assert_eq!(deps[0].replace_string, "3.3.0");
     }
 
-    // Ported: "returns null for invalid wrapper version string in from mvnw file" — maven-wrapper/extract.spec.ts line 106
+    // Ported: "returns null for invalid wrapper version string in from mvnw file" — lib/modules/manager/maven-wrapper/extract.spec.ts line 106
     #[test]
     fn invalid_mvnw_prefix_returns_empty() {
         let content = "invalid Apache Maven Wrapper startup batch script, version 3.3.0";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts version for property file with only a maven url" — maven-wrapper/extract.spec.ts line 111
+    // Ported: "extracts version for property file with only a maven url" — lib/modules/manager/maven-wrapper/extract.spec.ts line 111
     #[test]
     fn extracts_maven_version() {
         let content = "distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.5.4/apache-maven-3.5.4-bin.zip\n";
@@ -242,7 +242,7 @@ mod tests {
         );
     }
 
-    // Ported: "should return null when there is no string matching the maven properties regex" — maven-wrapper/extract.spec.ts line 125
+    // Ported: "should return null when there is no string matching the maven properties regex" — lib/modules/manager/maven-wrapper/extract.spec.ts line 125
     #[test]
     fn no_matching_key_returns_empty() {
         assert!(extract("nowrapper").is_empty());

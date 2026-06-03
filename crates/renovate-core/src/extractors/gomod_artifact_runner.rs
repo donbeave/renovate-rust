@@ -425,7 +425,7 @@ mod tests {
         env
     }
 
-    // Ported: "returns if no go.sum found" — gomod/artifacts.spec.ts line 94
+    // Ported: "returns if no go.sum found" — lib/modules/manager/gomod/artifacts.spec.ts line 94
     #[tokio::test]
     async fn returns_none_if_no_go_sum_found() {
         let dir = tempfile::tempdir().unwrap();
@@ -435,7 +435,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if unchanged" — gomod/artifacts.spec.ts line 107
+    // Ported: "returns null if unchanged" — lib/modules/manager/gomod/artifacts.spec.ts line 107
     #[tokio::test]
     async fn returns_none_if_unchanged() {
         let dir = tempfile::tempdir().unwrap();
@@ -451,7 +451,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns updated go.sum" — gomod/artifacts.spec.ts line 145
+    // Ported: "returns updated go.sum" — lib/modules/manager/gomod/artifacts.spec.ts line 145
     #[tokio::test]
     async fn returns_updated_go_sum() {
         let dir = tempfile::tempdir().unwrap();
@@ -567,7 +567,7 @@ mod tests {
         }
     }
 
-    // Ported: "uses -modfile flag for non-default go.mod filename" — gomod/artifacts.spec.ts line 2698
+    // Ported: "uses -modfile flag for non-default go.mod filename" — lib/modules/manager/gomod/artifacts.spec.ts line 2698
     #[tokio::test]
     async fn uses_modfile_for_non_default_go_mod() {
         let dir = tempfile::tempdir().unwrap();
@@ -599,7 +599,7 @@ mod tests {
         assert_eq!(result[0].file.as_ref().unwrap().path, "tools.sum");
     }
 
-    // Ported: "uses -modfile flag with go mod tidy for non-default go.mod filename" — gomod/artifacts.spec.ts line 2733
+    // Ported: "uses -modfile flag with go mod tidy for non-default go.mod filename" — lib/modules/manager/gomod/artifacts.spec.ts line 2733
     #[tokio::test]
     async fn uses_modfile_with_go_mod_tidy() {
         let dir = tempfile::tempdir().unwrap();
@@ -630,7 +630,7 @@ mod tests {
         assert_eq!(result[0].file.as_ref().unwrap().path, "tools.sum");
     }
 
-    // Ported: "runs go mod vendor with gomodVendor" — gomod/artifacts.spec.ts line 192
+    // Ported: "runs go mod vendor with gomodVendor" — lib/modules/manager/gomod/artifacts.spec.ts line 192
     #[tokio::test]
     async fn runs_go_mod_vendor_with_gomod_vendor() {
         let dir = tempfile::tempdir().unwrap();
@@ -662,7 +662,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "skips vendor directory update with gomodSkipVendor" — gomod/artifacts.spec.ts line 390
+    // Ported: "skips vendor directory update with gomodSkipVendor" — lib/modules/manager/gomod/artifacts.spec.ts line 390
     #[tokio::test]
     async fn skips_vendor_with_gomod_skip_vendor() {
         let dir = tempfile::tempdir().unwrap();
@@ -697,7 +697,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "supports go generate when configured" — gomod/artifacts.spec.ts line 647
+    // Ported: "supports go generate when configured" — lib/modules/manager/gomod/artifacts.spec.ts line 647
     #[tokio::test]
     async fn supports_go_generate_when_configured_and_allowed() {
         let dir = tempfile::tempdir().unwrap();
@@ -739,7 +739,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "only allows go generate usage when permitted globally" — gomod/artifacts.spec.ts line 735
+    // Ported: "only allows go generate usage when permitted globally" — lib/modules/manager/gomod/artifacts.spec.ts line 735
     #[tokio::test]
     async fn skips_go_generate_when_not_permitted() {
         let dir = tempfile::tempdir().unwrap();
@@ -773,7 +773,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "handles goGetDirs configuration correctly" — gomod/artifacts.spec.ts line 2582
+    // Ported: "handles goGetDirs configuration correctly" — lib/modules/manager/gomod/artifacts.spec.ts line 2582
     #[tokio::test]
     async fn handles_go_get_dirs_with_invalid_paths() {
         let dir = tempfile::tempdir().unwrap();
@@ -802,7 +802,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns updated go.sum when goGetDirs is specified" — gomod/artifacts.spec.ts line 2613
+    // Ported: "returns updated go.sum when goGetDirs is specified" — lib/modules/manager/gomod/artifacts.spec.ts line 2613
     #[tokio::test]
     async fn returns_updated_go_sum_with_go_get_dirs() {
         let dir = tempfile::tempdir().unwrap();
@@ -826,7 +826,7 @@ mod tests {
         assert_eq!(result[0].file.as_ref().unwrap().path, "go.sum");
     }
 
-    // Ported: "errors when goGetDirs is specified with all invalid paths" — gomod/artifacts.spec.ts line 2654
+    // Ported: "errors when goGetDirs is specified with all invalid paths" — lib/modules/manager/gomod/artifacts.spec.ts line 2654
     #[tokio::test]
     async fn errors_when_all_go_get_dirs_invalid() {
         let dir = tempfile::tempdir().unwrap();
@@ -843,7 +843,7 @@ mod tests {
         assert!(err.stderr.contains("Invalid goGetDirs"));
     }
 
-    // Ported: "skips gomodTidy without gomodUpdateImportPaths on major update" — gomod/artifacts.spec.ts line 1998
+    // Ported: "skips gomodTidy without gomodUpdateImportPaths on major update" — lib/modules/manager/gomod/artifacts.spec.ts line 1998
     #[tokio::test]
     async fn skips_go_mod_tidy_on_major_without_import_paths() {
         let dir = tempfile::tempdir().unwrap();
@@ -879,7 +879,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set" — gomod/artifacts.spec.ts line 2036
+    // Ported: "does not execute go mod tidy when none of gomodTidy and gomodUpdateImportPaths are set" — lib/modules/manager/gomod/artifacts.spec.ts line 2036
     #[tokio::test]
     async fn skips_go_mod_tidy_without_gomod_tidy_or_import_paths() {
         let dir = tempfile::tempdir().unwrap();
@@ -910,7 +910,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "returns config constraint when set" — gomod/artifacts.spec.ts line 2837
+    // Ported: "returns config constraint when set" — lib/modules/manager/gomod/artifacts.spec.ts line 2837
     #[test]
     fn derive_go_toolchain_constraints_config() {
         assert_eq!(
@@ -919,7 +919,7 @@ mod tests {
         );
     }
 
-    // Ported: "config constraint takes precedence over go.mod content" — gomod/artifacts.spec.ts line 2843
+    // Ported: "config constraint takes precedence over go.mod content" — lib/modules/manager/gomod/artifacts.spec.ts line 2843
     #[test]
     fn derive_go_toolchain_constraints_config_precedence() {
         assert_eq!(
@@ -928,7 +928,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns toolchain version when toolchain directive is present" — gomod/artifacts.spec.ts line 2852
+    // Ported: "returns toolchain version when toolchain directive is present" — lib/modules/manager/gomod/artifacts.spec.ts line 2852
     #[test]
     fn derive_go_toolchain_constraints_toolchain() {
         assert_eq!(
@@ -937,7 +937,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns full go version when only full go directive is present (no toolchain)" — gomod/artifacts.spec.ts line 2858
+    // Ported: "returns full go version when only full go directive is present (no toolchain)" — lib/modules/manager/gomod/artifacts.spec.ts line 2858
     #[test]
     fn derive_go_toolchain_constraints_full_go() {
         assert_eq!(
@@ -946,7 +946,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns range constraint for major.minor go directive" — gomod/artifacts.spec.ts line 2862
+    // Ported: "returns range constraint for major.minor go directive" — lib/modules/manager/gomod/artifacts.spec.ts line 2862
     #[test]
     fn derive_go_toolchain_constraints_minor_range() {
         assert_eq!(
@@ -955,7 +955,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns undefined when no go version in content and no config constraint" — gomod/artifacts.spec.ts line 2866
+    // Ported: "returns undefined when no go version in content and no config constraint" — lib/modules/manager/gomod/artifacts.spec.ts line 2866
     #[test]
     fn derive_go_toolchain_constraints_undefined() {
         assert_eq!(
@@ -964,7 +964,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignores constraints.golang and falls back to go.mod content" — gomod/artifacts.spec.ts line 2873
+    // Ported: "ignores constraints.golang and falls back to go.mod content" — lib/modules/manager/gomod/artifacts.spec.ts line 2873
     #[test]
     fn derive_go_toolchain_constraints_ignores_golang_constraint() {
         // Our Rust API only passes `constraints.go`, so `constraints.golang`
@@ -975,7 +975,7 @@ mod tests {
         );
     }
 
-    // Ported: "skips updating import paths when incompatible version" — gomod/artifacts.spec.ts line 1948
+    // Ported: "skips updating import paths when incompatible version" — lib/modules/manager/gomod/artifacts.spec.ts line 1948
     #[tokio::test]
     async fn skips_updating_import_paths_when_incompatible_version() {
         let dir = tempfile::tempdir().unwrap();
@@ -1020,7 +1020,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "skips updating import paths when invalid major version" — gomod/artifacts.spec.ts line 1902
+    // Ported: "skips updating import paths when invalid major version" — lib/modules/manager/gomod/artifacts.spec.ts line 1902
     #[tokio::test]
     async fn skips_updating_import_paths_when_invalid_major_version() {
         let dir = tempfile::tempdir().unwrap();
@@ -1065,7 +1065,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "skips updating import paths with gomodUpdateImportPaths on v0 to v1" — gomod/artifacts.spec.ts line 1856
+    // Ported: "skips updating import paths with gomodUpdateImportPaths on v0 to v1" — lib/modules/manager/gomod/artifacts.spec.ts line 1856
     #[tokio::test]
     async fn skips_updating_import_paths_on_v0_to_v1() {
         let dir = tempfile::tempdir().unwrap();
@@ -1110,7 +1110,7 @@ mod tests {
         assert!(paths.contains(&"go.mod".to_owned()));
     }
 
-    // Ported: "returns artifact notices" — gomod/artifacts.spec.ts line 2466
+    // Ported: "returns artifact notices" — lib/modules/manager/gomod/artifacts.spec.ts line 2466
     #[tokio::test]
     async fn returns_artifact_notices() {
         let dir = tempfile::tempdir().unwrap();
@@ -1142,7 +1142,7 @@ mod tests {
         assert!(notice.message.contains("github.com/bar/bar"));
     }
 
-    // Ported: "uses -modfile flag with go mod vendor for non-default go.mod filename" — gomod/artifacts.spec.ts line 2779
+    // Ported: "uses -modfile flag with go mod vendor for non-default go.mod filename" — lib/modules/manager/gomod/artifacts.spec.ts line 2779
     #[tokio::test]
     async fn uses_modfile_with_go_mod_vendor() {
         let dir = tempfile::tempdir().unwrap();

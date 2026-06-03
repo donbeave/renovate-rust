@@ -78,7 +78,7 @@ mod tests {
         is_stable_in_schedule(version, d(now), TEST_SCHEDULE)
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/lambda-node/index.spec.ts line 47
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — lib/modules/versioning/lambda-node/index.spec.ts line 47
     #[test]
     fn get_new_value_matches_renovate_lambda_node_index_spec() {
         let cases = [
@@ -99,7 +99,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/lambda-node/index.spec.ts line 71
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/lambda-node/index.spec.ts line 71
     #[test]
     fn is_stable_matches_renovate_lambda_node_index_spec() {
         let t1 = "2025-03-01";
@@ -136,7 +136,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid("$version") === $expected" — versioning/lambda-node/index.spec.ts line 100
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/lambda-node/index.spec.ts line 100
     #[test]
     fn is_valid_matches_renovate_lambda_node_index_spec() {
         let cases = [
@@ -152,7 +152,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/lambda-node/index.spec.ts line 112
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/lambda-node/index.spec.ts line 112
     #[test]
     fn matches_matches_renovate_lambda_node_index_spec() {
         let cases = [("16.0.0", "gallium", true), ("16.0.0", "fermium", false)];
@@ -165,7 +165,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion("$versions", "$range") === $expected" — versioning/lambda-node/index.spec.ts line 125
+    // Ported: "getSatisfyingVersion("$versions", "$range") === $expected" — lib/modules/versioning/lambda-node/index.spec.ts line 125
     #[test]
     fn get_satisfying_version_matches_renovate_lambda_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -182,7 +182,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion("$versions", "$range") === $expected" — versioning/lambda-node/index.spec.ts line 139
+    // Ported: "minSatisfyingVersion("$versions", "$range") === $expected" — lib/modules/versioning/lambda-node/index.spec.ts line 139
     #[test]
     fn min_satisfying_version_matches_renovate_lambda_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[

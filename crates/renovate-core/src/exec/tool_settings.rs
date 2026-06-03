@@ -122,7 +122,7 @@ pub fn gradle_jvm_arg(options: &ToolSettingsOptions) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "returns default values if no global or repo config" — util/exec/index.spec.ts line 1194
+    // Ported: "returns default values if no global or repo config" — lib/util/exec/index.spec.ts line 1194
     #[test]
     fn returns_default_values_if_no_global_or_repo_config() {
         let global = RawToolSettings::default();
@@ -131,7 +131,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(512));
     }
 
-    // Ported: "returns default values if empty repo config" — util/exec/index.spec.ts line 1205
+    // Ported: "returns default values if empty repo config" — lib/util/exec/index.spec.ts line 1205
     #[test]
     fn returns_default_values_if_empty_repo_config() {
         let global = RawToolSettings::default();
@@ -141,7 +141,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(512));
     }
 
-    // Ported: "returns default values if empty global config" — util/exec/index.spec.ts line 1216
+    // Ported: "returns default values if empty global config" — lib/util/exec/index.spec.ts line 1216
     #[test]
     fn returns_default_values_if_empty_global_config() {
         let global = RawToolSettings::default();
@@ -150,7 +150,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(512));
     }
 
-    // Ported: "in global config" — util/exec/index.spec.ts line 1230
+    // Ported: "in global config" — lib/util/exec/index.spec.ts line 1230
     #[test]
     fn does_not_allow_floating_point_in_global_config() {
         let global = RawToolSettings {
@@ -163,7 +163,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(600));
     }
 
-    // Ported: "in repo config" — util/exec/index.spec.ts line 1243
+    // Ported: "in repo config" — lib/util/exec/index.spec.ts line 1243
     #[test]
     fn does_not_allow_floating_point_in_repo_config() {
         let global = RawToolSettings {
@@ -181,7 +181,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(600));
     }
 
-    // Ported: "when below global settings, repo settings are used" — util/exec/index.spec.ts line 1263
+    // Ported: "when below global settings, repo settings are used" — lib/util/exec/index.spec.ts line 1263
     #[test]
     fn repo_settings_below_global_are_used() {
         let global = RawToolSettings {
@@ -199,7 +199,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(700));
     }
 
-    // Ported: "when repo settings are the same as global settings, they are used" — util/exec/index.spec.ts line 1277
+    // Ported: "when repo settings are the same as global settings, they are used" — lib/util/exec/index.spec.ts line 1277
     #[test]
     fn repo_settings_same_as_global_are_used() {
         let global = RawToolSettings {
@@ -217,7 +217,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(600));
     }
 
-    // Ported: "when repo jvmMemory setting is higher than global setting, but lower than global jvmMaxMemory, the repo config is used" — util/exec/index.spec.ts line 1291
+    // Ported: "when repo jvmMemory setting is higher than global setting, but lower than global jvmMaxMemory, the repo config is used" — lib/util/exec/index.spec.ts line 1291
     #[test]
     fn repo_jvm_memory_higher_than_global_but_lower_than_max() {
         let global = RawToolSettings {
@@ -233,7 +233,7 @@ mod tests {
         assert_eq!(res.jvm_memory, Some(600));
     }
 
-    // Ported: "when repo jvmMaxMemory setting is lower than global settings, it is applied" — util/exec/index.spec.ts line 1303
+    // Ported: "when repo jvmMaxMemory setting is lower than global settings, it is applied" — lib/util/exec/index.spec.ts line 1303
     #[test]
     fn repo_jvm_max_memory_lower_than_global_is_applied() {
         let global = RawToolSettings {
@@ -249,7 +249,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(680));
     }
 
-    // Ported: "when repo jvmMaxMemory setting is lower than global jvmMemory, jvmMemory is set to the same value" — util/exec/index.spec.ts line 1315
+    // Ported: "when repo jvmMaxMemory setting is lower than global jvmMemory, jvmMemory is set to the same value" — lib/util/exec/index.spec.ts line 1315
     #[test]
     fn repo_jvm_max_memory_lower_than_global_jvm_memory() {
         let global = RawToolSettings {
@@ -266,7 +266,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(600));
     }
 
-    // Ported: "when repo jvmMaxMemory setting is lower than repo jvmMemory, jvmMemory is set to the same value" — util/exec/index.spec.ts line 1328
+    // Ported: "when repo jvmMaxMemory setting is lower than repo jvmMemory, jvmMemory is set to the same value" — lib/util/exec/index.spec.ts line 1328
     #[test]
     fn repo_jvm_max_memory_lower_than_repo_jvm_memory() {
         let global = RawToolSettings {
@@ -284,7 +284,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(600));
     }
 
-    // Ported: "when repo jvmMaxMemory setting is higher than global settings, they are ignored" — util/exec/index.spec.ts line 1342
+    // Ported: "when repo jvmMaxMemory setting is higher than global settings, they are ignored" — lib/util/exec/index.spec.ts line 1342
     #[test]
     fn repo_jvm_max_memory_higher_than_global_is_ignored() {
         let global = RawToolSettings {
@@ -301,7 +301,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(800));
     }
 
-    // Ported: "when global settings are lower than 512M, they are overridden to 512M" — util/exec/index.spec.ts line 1375
+    // Ported: "when global settings are lower than 512M, they are overridden to 512M" — lib/util/exec/index.spec.ts line 1375
     #[test]
     fn global_settings_lower_than_512m_overridden() {
         let global = RawToolSettings {
@@ -314,7 +314,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(512));
     }
 
-    // Ported: "when repo settings are lower than 512M, they are overridden to 512M" — util/exec/index.spec.ts line 1400
+    // Ported: "when repo settings are lower than 512M, they are overridden to 512M" — lib/util/exec/index.spec.ts line 1400
     #[test]
     fn repo_settings_lower_than_512m_overridden() {
         let global = RawToolSettings {
@@ -332,7 +332,7 @@ mod tests {
         assert_eq!(res.jvm_max_memory, Some(512));
     }
 
-    // Ported: "does not return a default value if no global or repo config" — util/exec/index.spec.ts line 1439
+    // Ported: "does not return a default value if no global or repo config" — lib/util/exec/index.spec.ts line 1439
     #[test]
     fn node_max_memory_no_default_without_config() {
         let global = RawToolSettings::default();
@@ -340,7 +340,7 @@ mod tests {
         assert_eq!(res.node_max_memory, None);
     }
 
-    // Ported: "does not return default values if empty global config" — util/exec/index.spec.ts line 1449
+    // Ported: "does not return default values if empty global config" — lib/util/exec/index.spec.ts line 1449
     #[test]
     fn node_max_memory_no_default_with_empty_global() {
         let global = RawToolSettings::default();
@@ -348,7 +348,7 @@ mod tests {
         assert_eq!(res.node_max_memory, None);
     }
 
-    // Ported: "in global config" — util/exec/index.spec.ts line 1462
+    // Ported: "in global config" — lib/util/exec/index.spec.ts line 1462
     #[test]
     fn node_max_memory_floor_in_global_config() {
         let global = RawToolSettings {
@@ -359,7 +359,7 @@ mod tests {
         assert_eq!(res.node_max_memory, Some(1024));
     }
 
-    // Ported: "in repo config" — util/exec/index.spec.ts line 1474
+    // Ported: "in repo config" — lib/util/exec/index.spec.ts line 1474
     #[test]
     fn node_max_memory_floor_in_repo_config() {
         let global = RawToolSettings::default();
@@ -371,7 +371,7 @@ mod tests {
         assert_eq!(res.node_max_memory, Some(1024));
     }
 
-    // Ported: "when below global settings, repo settings are used" — util/exec/index.spec.ts line 1490
+    // Ported: "when below global settings, repo settings are used" — lib/util/exec/index.spec.ts line 1490
     #[test]
     fn node_max_memory_repo_below_global() {
         let global = RawToolSettings {
@@ -386,7 +386,7 @@ mod tests {
         assert_eq!(res.node_max_memory, Some(700));
     }
 
-    // Ported: "when repo settings are the same as global settings, they are used" — util/exec/index.spec.ts line 1502
+    // Ported: "when repo settings are the same as global settings, they are used" — lib/util/exec/index.spec.ts line 1502
     #[test]
     fn node_max_memory_repo_same_as_global() {
         let global = RawToolSettings {
@@ -401,7 +401,7 @@ mod tests {
         assert_eq!(res.node_max_memory, Some(1024));
     }
 
-    // Ported: "when repo nodeMaxMemory setting is lower than global settings, it is applied" — util/exec/index.spec.ts line 1514
+    // Ported: "when repo nodeMaxMemory setting is lower than global settings, it is applied" — lib/util/exec/index.spec.ts line 1514
     #[test]
     fn node_max_memory_repo_lower_than_global() {
         let global = RawToolSettings {
@@ -416,7 +416,7 @@ mod tests {
         assert_eq!(res.node_max_memory, Some(128));
     }
 
-    // Ported: "when repo nodeMaxMemory setting is higher than global settings, they are ignored" — util/exec/index.spec.ts line 1526
+    // Ported: "when repo nodeMaxMemory setting is higher than global settings, they are ignored" — lib/util/exec/index.spec.ts line 1526
     #[test]
     fn node_max_memory_repo_higher_than_global_ignored() {
         let global = RawToolSettings {
@@ -431,7 +431,7 @@ mod tests {
         assert_eq!(res.node_max_memory, Some(1024));
     }
 
-    // Ported: "takes the values given to it, and returns the JVM arguments" — util/exec/index.spec.ts line 1558
+    // Ported: "takes the values given to it, and returns the JVM arguments" — lib/util/exec/index.spec.ts line 1558
     #[test]
     fn gradle_jvm_arg_builds_correct_string() {
         let opts = ToolSettingsOptions {

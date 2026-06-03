@@ -146,13 +146,13 @@ mod tests {
 
     use super::massage_config;
 
-    // Ported: "returns empty" — config/massage.spec.ts line 6
+    // Ported: "returns empty" — lib/config/massage.spec.ts line 6
     #[test]
     fn massage_config_returns_empty() {
         assert_eq!(massage_config(&json!({})), json!({}));
     }
 
-    // Ported: "massages strings to array" — config/massage.spec.ts line 12
+    // Ported: "massages strings to array" — lib/config/massage.spec.ts line 12
     #[test]
     fn massage_config_converts_allowed_string_to_array() {
         assert_eq!(
@@ -166,7 +166,7 @@ mod tests {
         );
     }
 
-    // Ported: "normalizes zero minimumReleaseAge to null" — config/massage.spec.ts line 20
+    // Ported: "normalizes zero minimumReleaseAge to null" — lib/config/massage.spec.ts line 20
     #[test]
     fn massage_config_normalizes_zero_minimum_release_age() {
         assert_eq!(
@@ -175,7 +175,7 @@ mod tests {
         );
     }
 
-    // Ported: "normalizes zero minimumReleaseAge in packageRules" — config/massage.spec.ts line 30
+    // Ported: "normalizes zero minimumReleaseAge in packageRules" — lib/config/massage.spec.ts line 30
     #[test]
     fn massage_config_normalizes_zero_minimum_release_age_in_package_rules() {
         let result = massage_config(&json!({
@@ -195,7 +195,7 @@ mod tests {
         );
     }
 
-    // Ported: "massages packageRules matchUpdateTypes" — config/massage.spec.ts line 58
+    // Ported: "massages packageRules matchUpdateTypes" — lib/config/massage.spec.ts line 58
     #[test]
     fn massage_config_expands_package_rule_update_types() {
         let result = massage_config(&json!({
@@ -217,7 +217,7 @@ mod tests {
         );
     }
 
-    // Ported: "filters packageRules with only match/exclude" — config/massage.spec.ts line 95
+    // Ported: "filters packageRules with only match/exclude" — lib/config/massage.spec.ts line 95
     #[test]
     fn massage_config_filters_package_rules_with_only_match_or_exclude() {
         let result = massage_config(&json!({
@@ -235,7 +235,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not massage lockFileMaintenance" — config/massage.spec.ts line 110
+    // Ported: "does not massage lockFileMaintenance" — lib/config/massage.spec.ts line 110
     #[test]
     fn massage_config_does_not_expand_lock_file_maintenance() {
         let result = massage_config(&json!({

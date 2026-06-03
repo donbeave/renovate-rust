@@ -305,7 +305,7 @@ fn extract_version(spec: &Value) -> Option<String> {
 mod tests {
     use super::*;
 
-    // Ported: "returns parse pixi.toml" — pixi/extract.spec.ts line 161
+    // Ported: "returns parse pixi.toml" — lib/modules/manager/pixi/extract.spec.ts line 161
     #[test]
     fn extracts_pypi_deps() {
         let content = r#"
@@ -335,7 +335,7 @@ requests = { version = ">=2.31" }
         }
     }
 
-    // Ported: "returns parse pixi.toml" — pixi/extract.spec.ts line 161
+    // Ported: "returns parse pixi.toml" — lib/modules/manager/pixi/extract.spec.ts line 161
     #[test]
     fn extracts_conda_deps_as_actionable() {
         let content = r#"
@@ -354,7 +354,7 @@ python = ">=3.9"
         }
     }
 
-    // Ported: "returns parse pixi.toml with features" — pixi/extract.spec.ts line 335
+    // Ported: "returns parse pixi.toml with features" — lib/modules/manager/pixi/extract.spec.ts line 335
     #[test]
     fn extracts_feature_pypi_deps() {
         let content = r#"
@@ -373,7 +373,7 @@ torch = ">=2.0"
         assert!(pypi.iter().any(|d| d.dep_name == "torch"));
     }
 
-    // Ported: "returns parse pixi section from pyproject.toml" — pixi/extract.spec.ts line 297
+    // Ported: "returns parse pixi section from pyproject.toml" — lib/modules/manager/pixi/extract.spec.ts line 297
     #[test]
     fn extract_from_pyproject_tool_pixi() {
         let content = r#"
@@ -393,14 +393,14 @@ numpy = ">=1.26"
         assert_eq!(pypi[0].dep_name, "requests");
     }
 
-    // Ported: "returns null for empty pixi.toml" — pixi/extract.spec.ts line 151
+    // Ported: "returns null for empty pixi.toml" — lib/modules/manager/pixi/extract.spec.ts line 151
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
         assert!(extract("nothing here").is_empty());
     }
 
-    // Ported: "returns null for parsed file without pixi section" — pixi/extract.spec.ts line 155
+    // Ported: "returns null for parsed file without pixi section" — lib/modules/manager/pixi/extract.spec.ts line 155
     #[test]
     fn file_without_pixi_section_returns_empty() {
         let content = "[project]\nname = \"myapp\"\n";
@@ -423,14 +423,14 @@ mylib = { git = "https://github.com/foo/mylib" }
         );
     }
 
-    // Ported: "returns null for empty pyproject.toml" — pixi/extract.spec.ts line 145
+    // Ported: "returns null for empty pyproject.toml" — lib/modules/manager/pixi/extract.spec.ts line 145
     #[test]
     fn empty_pyproject_returns_empty() {
         assert!(extract_from_pyproject("nothing here").is_empty());
         assert!(extract_from_pyproject("").is_empty());
     }
 
-    // Ported: "returns package of pyproject.toml tool.pixi section" — pixi/extract.spec.ts line 316
+    // Ported: "returns package of pyproject.toml tool.pixi section" — lib/modules/manager/pixi/extract.spec.ts line 316
     #[test]
     fn extract_tool_pixi_section_without_lockfile() {
         let content = r#"
@@ -444,7 +444,7 @@ numpy = ">=1.26"
         assert_eq!(deps[0].source, PixiSource::Conda);
     }
 
-    // Ported: "returns parse non-known config file as pyproject.toml" — pixi/extract.spec.ts line 481
+    // Ported: "returns parse non-known config file as pyproject.toml" — lib/modules/manager/pixi/extract.spec.ts line 481
     #[test]
     fn non_known_file_with_tool_pixi_section() {
         let content = r#"
@@ -462,7 +462,7 @@ requests = '*'
         assert_eq!(deps[0].source, PixiSource::Conda);
     }
 
-    // Ported: "returns parse non-known config file as pixi.toml" — pixi/extract.spec.ts line 509
+    // Ported: "returns parse non-known config file as pixi.toml" — lib/modules/manager/pixi/extract.spec.ts line 509
     #[test]
     fn non_known_file_with_project_section() {
         let content = r#"
@@ -480,7 +480,7 @@ requests = '*'
         assert_eq!(deps[0].source, PixiSource::Conda);
     }
 
-    // Ported: "extract feature with channels" — pixi/extract.spec.ts line 538
+    // Ported: "extract feature with channels" — lib/modules/manager/pixi/extract.spec.ts line 538
     #[test]
     fn extract_feature_with_url_channel() {
         let content = r#"
@@ -501,7 +501,7 @@ scipy = { version = "==1.15.1" }
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extract package from with workspace" — pixi/extract.spec.ts line 601
+    // Ported: "extract package from with workspace" — lib/modules/manager/pixi/extract.spec.ts line 601
     #[test]
     fn extract_from_workspace_section() {
         let content = r#"
@@ -518,7 +518,7 @@ scipy = { version = "==1.15.1" }
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extract package with channel priority" — pixi/extract.spec.ts line 630
+    // Ported: "extract package with channel priority" — lib/modules/manager/pixi/extract.spec.ts line 630
     #[test]
     fn feature_channel_priority_prepends_prioritized_channels() {
         let content = r#"
@@ -552,7 +552,7 @@ dependencies = { numpy = "==1.15.1" }
         assert_eq!(numpy.channels, vec!["conda-forge", "conda-not-forge"]);
     }
 
-    // Ported: "set registryStrategy='merge' for channel-priority='disabled'"" — pixi/extract.spec.ts line 685
+    // Ported: "set registryStrategy='merge' for channel-priority='disabled'"" — lib/modules/manager/pixi/extract.spec.ts line 685
     #[test]
     fn disabled_channel_priority_sets_merge_registry_strategy() {
         let content = r#"
@@ -570,7 +570,7 @@ python = "3.12.*"
         assert_eq!(deps[0].registry_strategy, Some("merge"));
     }
 
-    // Ported: "use default registryStrategy for channel-priority='strict'"" — pixi/extract.spec.ts line 706
+    // Ported: "use default registryStrategy for channel-priority='strict'"" — lib/modules/manager/pixi/extract.spec.ts line 706
     #[test]
     fn strict_channel_priority_uses_default_registry_strategy() {
         let content = r#"
@@ -587,14 +587,14 @@ python = "3.12.*"
         assert_eq!(deps[0].registry_strategy, None);
     }
 
-    // Ported: "returns null for non-known config file" — pixi/extract.spec.ts line 681
+    // Ported: "returns null for non-known config file" — lib/modules/manager/pixi/extract.spec.ts line 681
     #[test]
     fn non_toml_content_returns_empty() {
         assert!(extract("{}").is_empty());
         assert!(extract_from_pyproject("{}").is_empty());
     }
 
-    // Ported: "skip package without channels" — pixi/extract.spec.ts line 571
+    // Ported: "skip package without channels" — lib/modules/manager/pixi/extract.spec.ts line 571
     #[test]
     fn skip_package_without_channels() {
         let content = r#"

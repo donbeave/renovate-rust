@@ -581,7 +581,7 @@ mod tests {
 
     // ── existing tests (unchanged) ────────────────────────────────────────────
 
-    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
+    // Ported: "extracts multiple dependencies simple" — lib/modules/manager/cargo/extract.spec.ts line 73
     #[test]
     fn extracts_simple_string_deps() {
         let toml = r#"
@@ -596,7 +596,7 @@ tokio = "1.52"
         assert!(serde.skip_reason.is_none());
     }
 
-    // Ported: "handles standard tables" — cargo/extract.spec.ts line 91
+    // Ported: "handles standard tables" — lib/modules/manager/cargo/extract.spec.ts line 91
     #[test]
     fn extracts_table_deps_with_version() {
         let toml = r#"
@@ -609,7 +609,7 @@ tokio = { version = "1.52", features = ["full"] }
         assert!(tokio.skip_reason.is_none());
     }
 
-    // Ported: "extracts original package name of renamed dependencies" — cargo/extract.spec.ts line 539
+    // Ported: "extracts original package name of renamed dependencies" — lib/modules/manager/cargo/extract.spec.ts line 539
     #[test]
     fn package_field_overrides_name() {
         let toml = r#"
@@ -623,7 +623,7 @@ openssl = { package = "openssl-sys", version = "0.9" }
         assert_eq!(dep.current_value, "0.9");
     }
 
-    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
+    // Ported: "extracts multiple dependencies simple" — lib/modules/manager/cargo/extract.spec.ts line 73
     #[test]
     fn path_dep_is_skipped() {
         let toml = r#"
@@ -635,7 +635,7 @@ my-lib = { path = "../my-lib" }
         assert_eq!(dep.skip_reason, Some(SkipReason::PathDependency));
     }
 
-    // Ported: "skips workspace dependency" — cargo/extract.spec.ts line 390
+    // Ported: "skips workspace dependency" — lib/modules/manager/cargo/extract.spec.ts line 390
     #[test]
     fn workspace_dep_is_skipped() {
         let toml = r#"
@@ -647,7 +647,7 @@ serde = { workspace = true }
         assert_eq!(dep.skip_reason, Some(SkipReason::WorkspaceInherited));
     }
 
-    // Ported: "does not extract locked versions for git dependencies" — cargo/extract.spec.ts line 567
+    // Ported: "does not extract locked versions for git dependencies" — lib/modules/manager/cargo/extract.spec.ts line 567
     #[test]
     fn git_dep_is_skipped() {
         let toml = r#"
@@ -659,7 +659,7 @@ foo = { git = "https://github.com/owner/foo", tag = "v1.0" }
         assert_eq!(dep.skip_reason, Some(SkipReason::GitSource));
     }
 
-    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
+    // Ported: "extracts multiple dependencies simple" — lib/modules/manager/cargo/extract.spec.ts line 73
     #[test]
     fn dev_and_build_deps_have_correct_type() {
         let toml = r#"
@@ -676,7 +676,7 @@ cc = "1.0"
         assert_eq!(cc.dep_type, DepType::Build);
     }
 
-    // Ported: "returns null for empty dependencies" — cargo/extract.spec.ts line 52
+    // Ported: "returns null for empty dependencies" — lib/modules/manager/cargo/extract.spec.ts line 52
     #[test]
     fn empty_manifest_returns_empty_list() {
         let toml = r#"
@@ -688,7 +688,7 @@ version = "0.1.0"
         assert!(deps.is_empty());
     }
 
-    // Ported: "extracts multiple dependencies advanced" — cargo/extract.spec.ts line 79
+    // Ported: "extracts multiple dependencies advanced" — lib/modules/manager/cargo/extract.spec.ts line 79
     #[test]
     fn version_constraint_forms_are_preserved() {
         let toml = r#"
@@ -705,7 +705,7 @@ d = "*"
         assert_eq!(b.current_value, ">=1.0,<2");
     }
 
-    // Ported: "extracts multiple dependencies simple" — cargo/extract.spec.ts line 73
+    // Ported: "extracts multiple dependencies simple" — lib/modules/manager/cargo/extract.spec.ts line 73
     #[test]
     fn mixed_manifest_extracts_all_sections() {
         let toml = r#"
@@ -722,7 +722,7 @@ criterion = "0.5"
         assert_eq!(deps.iter().filter(|d| d.skip_reason.is_none()).count(), 3); // serde, tokio, criterion
     }
 
-    // Ported: "extracts workspace dependencies" — cargo/extract.spec.ts line 345
+    // Ported: "extracts workspace dependencies" — lib/modules/manager/cargo/extract.spec.ts line 345
     #[test]
     fn workspace_dependencies_extracted() {
         let toml = r#"
@@ -748,7 +748,7 @@ anyhow = { version = "1.0", path = "../anyhow" }
         assert_eq!(anyhow.skip_reason, Some(SkipReason::PathDependency));
     }
 
-    // Ported: "extracts workspace dependencies" — cargo/extract.spec.ts line 345
+    // Ported: "extracts workspace dependencies" — lib/modules/manager/cargo/extract.spec.ts line 345
     #[test]
     fn workspace_and_member_deps_both_extracted() {
         let toml = r#"
@@ -763,7 +763,7 @@ tokio = "1.35"
         assert!(deps.iter().any(|d| d.dep_name == "tokio"));
     }
 
-    // Ported: "extracts platform specific dependencies" — cargo/extract.spec.ts line 97
+    // Ported: "extracts platform specific dependencies" — lib/modules/manager/cargo/extract.spec.ts line 97
     #[test]
     fn target_cfg_dependencies_extracted() {
         let toml = r#"
@@ -786,7 +786,7 @@ libc = "0.2"
         assert_eq!(libc.dep_type, DepType::Dev);
     }
 
-    // Ported: "extracts original package name of renamed dependencies" — cargo/extract.spec.ts line 539
+    // Ported: "extracts original package name of renamed dependencies" — lib/modules/manager/cargo/extract.spec.ts line 539
     #[test]
     fn renamed_dep_extracts_original_package_name() {
         let toml =
@@ -798,7 +798,7 @@ libc = "0.2"
         assert_eq!(deps[0].current_value, "0.4.0");
     }
 
-    // Ported: "returns null for empty dev-dependencies" — cargo/extract.spec.ts line 59
+    // Ported: "returns null for empty dev-dependencies" — lib/modules/manager/cargo/extract.spec.ts line 59
     #[test]
     fn empty_dev_dependencies_returns_empty() {
         let toml = "[dev-dependencies]";
@@ -806,7 +806,7 @@ libc = "0.2"
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for empty dependencies" — cargo/extract.spec.ts line 52
+    // Ported: "returns null for empty dependencies" — lib/modules/manager/cargo/extract.spec.ts line 52
     #[test]
     fn empty_dependencies_section_returns_empty() {
         let toml = "[dependencies]\n";
@@ -814,7 +814,7 @@ libc = "0.2"
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for empty custom target" — cargo/extract.spec.ts line 66
+    // Ported: "returns null for empty custom target" — lib/modules/manager/cargo/extract.spec.ts line 66
     #[test]
     fn empty_custom_target_returns_empty() {
         let toml = "[target.'cfg(windows)'.dependencies]";
@@ -822,13 +822,13 @@ libc = "0.2"
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for invalid toml" — cargo/extract.spec.ts line 46
+    // Ported: "returns null for invalid toml" — lib/modules/manager/cargo/extract.spec.ts line 46
     #[test]
     fn invalid_toml_returns_error() {
         assert!(extract("invalid toml [[[").is_err());
     }
 
-    // Ported: "skips workspace dependency" — cargo/extract.spec.ts line 390
+    // Ported: "skips workspace dependency" — lib/modules/manager/cargo/extract.spec.ts line 390
     #[test]
     fn workspace_true_dep_gets_inherited_skip_reason() {
         let toml = "[dependencies]\nfoobar = { workspace = true }";
@@ -838,7 +838,7 @@ libc = "0.2"
         assert_eq!(deps[0].skip_reason, Some(SkipReason::WorkspaceInherited));
     }
 
-    // Ported: "handles inline tables" — cargo/extract.spec.ts line 85
+    // Ported: "handles inline tables" — lib/modules/manager/cargo/extract.spec.ts line 85
     #[test]
     fn handles_inline_tables() {
         let toml = r#"
@@ -880,14 +880,14 @@ dep6 = { vesion = "1.2.3" }
         assert_eq!(path_skipped_count, 4); // pcap-sys, dep1, dep2, dep3
     }
 
-    // Ported: "should extract project version" — cargo/extract.spec.ts line 650
+    // Ported: "should extract project version" — lib/modules/manager/cargo/extract.spec.ts line 650
     #[test]
     fn extracts_project_version() {
         let toml = "[package]\nname = \"test\"\nversion = \"0.1.0\"\nedition = \"2021\"\n[dependencies]\nsyn = \"2.0\"\n";
         assert_eq!(extract_project_version(toml).as_deref(), Some("0.1.0"));
     }
 
-    // Ported: "should extract project version from workspace" — cargo/extract.spec.ts line 664
+    // Ported: "should extract project version from workspace" — lib/modules/manager/cargo/extract.spec.ts line 664
     #[test]
     fn extracts_project_version_from_workspace() {
         let toml = "[package]\nname = \"test\"\nversion.workspace = true\nedition = \"2021\"\n[workspace.package]\nversion = \"0.1.0\"\n[dependencies]\nsyn = \"2.0\"\n";
@@ -917,7 +917,7 @@ private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/
 index = "https://github.com/mcorbin/testregistry"
 "#;
 
-    // Ported: "extracts registry urls from .cargo/config.toml" — cargo/extract.spec.ts line 103
+    // Ported: "extracts registry urls from .cargo/config.toml" — lib/modules/manager/cargo/extract.spec.ts line 103
     #[test]
     fn extracts_registry_urls_from_cargo_config_toml() {
         let ctx = CargoContext {
@@ -947,7 +947,7 @@ index = "https://github.com/mcorbin/testregistry"
         assert!(tokio.registry_urls.is_empty());
     }
 
-    // Ported: "extracts registry urls from .cargo/config (legacy path)" — cargo/extract.spec.ts line 112
+    // Ported: "extracts registry urls from .cargo/config (legacy path)" — lib/modules/manager/cargo/extract.spec.ts line 112
     #[test]
     fn extracts_registry_urls_from_cargo_config_legacy() {
         // Same behavior — legacy path uses same TOML format
@@ -967,7 +967,7 @@ index = "https://github.com/mcorbin/testregistry"
         );
     }
 
-    // Ported: "extracts overridden registry indexes from .cargo/config.toml" — cargo/extract.spec.ts line 121
+    // Ported: "extracts overridden registry indexes from .cargo/config.toml" — lib/modules/manager/cargo/extract.spec.ts line 121
     #[test]
     fn extracts_overridden_registry_indexes() {
         let config = r#"
@@ -1013,7 +1013,7 @@ replace-with = "private-crates"
         );
     }
 
-    // Ported: "extracts overridden source registry indexes from .cargo/config.toml" — cargo/extract.spec.ts line 180
+    // Ported: "extracts overridden source registry indexes from .cargo/config.toml" — lib/modules/manager/cargo/extract.spec.ts line 180
     #[test]
     fn extracts_overridden_source_registry_indexes() {
         let config = r#"
@@ -1048,7 +1048,7 @@ tokio = "0.2"
         );
     }
 
-    // Ported: "extracts registries overridden to the default" — cargo/extract.spec.ts line 205
+    // Ported: "extracts registries overridden to the default" — lib/modules/manager/cargo/extract.spec.ts line 205
     #[test]
     fn extracts_registries_overridden_to_default() {
         // Chain: private-crates → mcorbin → crates-io (default, no URL)
@@ -1079,7 +1079,7 @@ replace-with = "mcorbin"
         assert!(mcorbin.skip_reason.is_none());
     }
 
-    // Ported: "extracts registries with an empty config.toml" — cargo/extract.spec.ts line 249
+    // Ported: "extracts registries with an empty config.toml" — lib/modules/manager/cargo/extract.spec.ts line 249
     #[test]
     fn extracts_registries_with_empty_config_toml() {
         let cargo5_toml = r#"
@@ -1114,7 +1114,7 @@ features = ["AudioBuffer"]
         assert_eq!(path_dep.skip_reason, Some(SkipReason::PathDependency));
     }
 
-    // Ported: "extracts registry urls from environment" — cargo/extract.spec.ts line 299
+    // Ported: "extracts registry urls from environment" — lib/modules/manager/cargo/extract.spec.ts line 299
     #[test]
     fn extracts_registry_urls_from_environment() {
         let mut env = HashMap::new();
@@ -1152,7 +1152,7 @@ features = ["AudioBuffer"]
         assert!(tokio.registry_urls.is_empty());
     }
 
-    // Ported: "skips unknown registries" — cargo/extract.spec.ts line 407
+    // Ported: "skips unknown registries" — lib/modules/manager/cargo/extract.spec.ts line 407
     #[test]
     fn skips_unknown_registries() {
         let toml = "[dependencies]\nfoobar = { version = \"0.1.0\", registry = \"not-listed\" }";
@@ -1161,7 +1161,7 @@ features = ["AudioBuffer"]
         assert_eq!(deps[0].skip_reason, Some(SkipReason::UnknownRegistry));
     }
 
-    // Ported: "fails to parse cargo config with invalid TOML" — cargo/extract.spec.ts line 415
+    // Ported: "fails to parse cargo config with invalid TOML" — lib/modules/manager/cargo/extract.spec.ts line 415
     #[test]
     fn fails_to_parse_cargo_config_with_invalid_toml() {
         let ctx = CargoContext {
@@ -1179,7 +1179,7 @@ features = ["AudioBuffer"]
         assert_eq!(prop.skip_reason, Some(SkipReason::UnknownRegistry));
     }
 
-    // Ported: "ignore cargo config registries with missing index" — cargo/extract.spec.ts line 424
+    // Ported: "ignore cargo config registries with missing index" — lib/modules/manager/cargo/extract.spec.ts line 424
     #[test]
     fn ignore_cargo_config_registries_with_missing_index() {
         let config = "[registries.mine]\nfoo = \"bar\"";
@@ -1197,7 +1197,7 @@ features = ["AudioBuffer"]
         assert_eq!(prop.skip_reason, Some(SkipReason::UnknownRegistry));
     }
 
-    // Ported: "ignore cargo config source replaced registries with missing index" — cargo/extract.spec.ts line 433
+    // Ported: "ignore cargo config source replaced registries with missing index" — lib/modules/manager/cargo/extract.spec.ts line 433
     #[test]
     fn ignore_cargo_config_source_replaced_registries_with_missing_index() {
         let config = r#"
@@ -1221,7 +1221,7 @@ replace-with = "mine"
         assert_eq!(prop.skip_reason, Some(SkipReason::UnknownRegistry));
     }
 
-    // Ported: "ignore cargo config with circular registry source replacements" — cargo/extract.spec.ts line 481
+    // Ported: "ignore cargo config with circular registry source replacements" — lib/modules/manager/cargo/extract.spec.ts line 481
     #[test]
     fn ignore_cargo_config_with_circular_registry_source_replacements() {
         // Circular: private-crates → mcorbin → private-crates.
@@ -1343,7 +1343,7 @@ a = { package = "syn", version = "2.0" }
 b = { package = "syn", version = "1.0" }
 "#;
 
-    // Ported: "extracts locked versions" — cargo/extract.spec.ts line 549
+    // Ported: "extracts locked versions" — lib/modules/manager/cargo/extract.spec.ts line 549
     #[test]
     fn extracts_locked_versions() {
         let toml = r#"
@@ -1363,7 +1363,7 @@ syn = "2.0"
         assert_eq!(syn.locked_version.as_deref(), Some("2.0.1"));
     }
 
-    // Ported: "does not extract locked versions for git dependencies" — cargo/extract.spec.ts line 567
+    // Ported: "does not extract locked versions for git dependencies" — lib/modules/manager/cargo/extract.spec.ts line 567
     #[test]
     fn does_not_extract_locked_versions_for_git_dependencies() {
         let toml = r#"
@@ -1383,7 +1383,7 @@ git_dep = { git = "https://github.com/foo/bar" }
         assert!(git_dep.locked_version.is_none());
     }
 
-    // Ported: "extracts locked versions for renamed packages" — cargo/extract.spec.ts line 585
+    // Ported: "extracts locked versions for renamed packages" — lib/modules/manager/cargo/extract.spec.ts line 585
     #[test]
     fn extracts_locked_versions_for_renamed_packages() {
         let ctx = CargoContext {
@@ -1397,7 +1397,7 @@ git_dep = { git = "https://github.com/foo/bar" }
         assert_eq!(b.locked_version.as_deref(), Some("1.0.1"));
     }
 
-    // Ported: "handles missing locked versions" — cargo/extract.spec.ts line 601
+    // Ported: "handles missing locked versions" — lib/modules/manager/cargo/extract.spec.ts line 601
     #[test]
     fn handles_missing_locked_versions() {
         // CARGO2_LOCK only has syn 2.0.1; "b" needs syn 1.x which is missing
@@ -1412,7 +1412,7 @@ git_dep = { git = "https://github.com/foo/bar" }
         assert!(b.locked_version.is_none());
     }
 
-    // Ported: "handles invalid versions in the toml file" — cargo/extract.spec.ts line 617
+    // Ported: "handles invalid versions in the toml file" — lib/modules/manager/cargo/extract.spec.ts line 617
     #[test]
     fn handles_invalid_versions_in_toml_file() {
         let toml = r#"
@@ -1433,7 +1433,7 @@ syn = "2.foo.1"
         assert!(syn.locked_version.is_none());
     }
 
-    // Ported: "handles invalid lock file" — cargo/extract.spec.ts line 635
+    // Ported: "handles invalid lock file" — lib/modules/manager/cargo/extract.spec.ts line 635
     #[test]
     fn handles_invalid_lock_file() {
         let ctx = CargoContext {
@@ -1857,28 +1857,28 @@ mod artifacts_decision_tests {
         }
     }
 
-    // Ported: "returns null if no Cargo.lock found" — cargo/artifacts.spec.ts line 44
+    // Ported: "returns null if no Cargo.lock found" — lib/modules/manager/cargo/artifacts.spec.ts line 44
     #[test]
     fn no_lock_file_returns_no_lock_file() {
         let result = determine_cargo_update_type(false, false, &[crate_dep("dep1", None, None)]);
         assert_eq!(result, CargoUpdateType::NoLockFile);
     }
 
-    // Ported: "returns null if updatedDeps is empty" — cargo/artifacts.spec.ts line 62
+    // Ported: "returns null if updatedDeps is empty" — lib/modules/manager/cargo/artifacts.spec.ts line 62
     #[test]
     fn empty_deps_returns_no_deps() {
         let result = determine_cargo_update_type(true, false, &[]);
         assert_eq!(result, CargoUpdateType::NoDepsToUpdate);
     }
 
-    // Ported: "returns updated Cargo.lock for lockfile maintenance" — cargo/artifacts.spec.ts line 488
+    // Ported: "returns updated Cargo.lock for lockfile maintenance" — lib/modules/manager/cargo/artifacts.spec.ts line 488
     #[test]
     fn lockfile_maintenance() {
         let result = determine_cargo_update_type(true, true, &[]);
         assert_eq!(result, CargoUpdateType::LockfileMaintenance);
     }
 
-    // Ported: "returns updated Cargo.lock with precise version update" — cargo/artifacts.spec.ts line 122
+    // Ported: "returns updated Cargo.lock with precise version update" — lib/modules/manager/cargo/artifacts.spec.ts line 122
     #[test]
     fn precise_update_when_all_deps_have_locked_version() {
         let deps = vec![ArtifactDep {
@@ -1902,7 +1902,7 @@ mod artifacts_decision_tests {
         }
     }
 
-    // Ported: "skips precise update when manifest range has changed" — cargo/artifacts.spec.ts line 164
+    // Ported: "skips precise update when manifest range has changed" — lib/modules/manager/cargo/artifacts.spec.ts line 164
     #[test]
     fn skips_precise_when_range_changed() {
         let deps = vec![crate_dep_with_range(
@@ -1923,7 +1923,7 @@ mod artifacts_decision_tests {
         }
     }
 
-    // Ported: "handles mixed deps where some have range changes and some do not" — cargo/artifacts.spec.ts line 199
+    // Ported: "handles mixed deps where some have range changes and some do not" — lib/modules/manager/cargo/artifacts.spec.ts line 199
     #[test]
     fn mixed_deps_with_range_changes() {
         let deps = vec![
@@ -1941,7 +1941,7 @@ mod artifacts_decision_tests {
         }
     }
 
-    // Ported: "returns an artifact error when cargo update fails" — cargo/artifacts.spec.ts line 247
+    // Ported: "returns an artifact error when cargo update fails" — lib/modules/manager/cargo/artifacts.spec.ts line 247
     #[test]
     fn workspace_update_when_missing_locked_version() {
         let deps = vec![crate_dep("dep1", None, Some("1.0.1"))];
@@ -1949,7 +1949,7 @@ mod artifacts_decision_tests {
         assert_eq!(result, CargoUpdateType::Workspace);
     }
 
-    // Ported: "returns updated Cargo.lock when there are no more dependencies to update" — cargo/artifacts.spec.ts line 413
+    // Ported: "returns updated Cargo.lock when there are no more dependencies to update" — lib/modules/manager/cargo/artifacts.spec.ts line 413
     #[test]
     fn workspace_for_non_crate_dep() {
         let deps = vec![non_crate_dep("git-dep")];

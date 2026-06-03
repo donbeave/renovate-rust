@@ -695,7 +695,7 @@ mod tests {
 
     // ── Platform packages ─────────────────────────────────────────────────────
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn php_constraint_skipped() {
         let content = r#"{"require": {"php": ">=8.1"}}"#;
@@ -707,7 +707,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn ext_skipped() {
         let content = r#"{"require": {"ext-intl": "*"}}"#;
@@ -718,7 +718,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn lib_skipped() {
         let content = r#"{"require": {"lib-curl": "*"}}"#;
@@ -731,7 +731,7 @@ mod tests {
 
     // ── Dev branch versions ───────────────────────────────────────────────────
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn dev_master_skipped() {
         let content = r#"{"require": {"vendor/pkg": "dev-master"}}"#;
@@ -739,7 +739,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(ComposerSkipReason::DevBranch));
     }
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn x_dev_skipped() {
         let content = r#"{"require": {"vendor/pkg": "2.x-dev"}}"#;
@@ -749,7 +749,7 @@ mod tests {
 
     // ── Normal deps ───────────────────────────────────────────────────────────
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn extracts_regular_deps() {
         let content = r#"{
@@ -776,7 +776,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn extracts_dev_deps() {
         let content = r#"{
@@ -796,7 +796,7 @@ mod tests {
 
     // ── Fixture composer1.json (Renovate reference fixture) ──────────────────
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn composer1_fixture() {
         let content = r#"{
@@ -840,7 +840,7 @@ mod tests {
         assert_eq!(symfony.current_value, "2.1.*");
     }
 
-    // Ported: "extracts dependencies with no lock file" — composer/extract.spec.ts line 32
+    // Ported: "extracts dependencies with no lock file" — lib/modules/manager/composer/extract.spec.ts line 32
     #[test]
     fn composer1_fixture_has_33_deps() {
         // Full composer1.json fixture: 27 require + 6 require-dev = 33 total.
@@ -849,7 +849,7 @@ mod tests {
         assert_eq!(deps.len(), 33);
     }
 
-    // Ported: "skips path dependencies" — composer/extract.spec.ts line 284
+    // Ported: "skips path dependencies" — lib/modules/manager/composer/extract.spec.ts line 284
     #[test]
     fn path_dependency_skipped() {
         let content = r#"{
@@ -873,7 +873,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts registryUrls" — composer/extract.spec.ts line 38
+    // Ported: "extracts registryUrls" — lib/modules/manager/composer/extract.spec.ts line 38
     #[test]
     fn extracts_registry_urls() {
         let content = r#"{
@@ -904,7 +904,7 @@ mod tests {
         assert!(akismet.skip_reason.is_none());
     }
 
-    // Ported: "extracts object registryUrls" — composer/extract.spec.ts line 81
+    // Ported: "extracts object registryUrls" — lib/modules/manager/composer/extract.spec.ts line 81
     #[test]
     fn extracts_object_registry_urls() {
         let content = r#"{
@@ -946,7 +946,7 @@ mod tests {
         }
     }
 
-    // Ported: "extracts repositories and registryUrls" — composer/extract.spec.ts line 186
+    // Ported: "extracts repositories and registryUrls" — lib/modules/manager/composer/extract.spec.ts line 186
     #[test]
     fn extracts_repositories_and_registry_urls() {
         let content = r#"{
@@ -998,7 +998,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts bitbucket repositories and registryUrls" — composer/extract.spec.ts line 219
+    // Ported: "extracts bitbucket repositories and registryUrls" — lib/modules/manager/composer/extract.spec.ts line 219
     #[test]
     fn extracts_bitbucket_repositories() {
         let content = r#"{
@@ -1023,7 +1023,7 @@ mod tests {
         }
     }
 
-    // Ported: "extracts object repositories and registryUrls with lock file" — composer/extract.spec.ts line 248
+    // Ported: "extracts object repositories and registryUrls with lock file" — lib/modules/manager/composer/extract.spec.ts line 248
     #[test]
     fn extracts_object_repositories_and_registry_urls_with_lock_file() {
         let content = r#"{
@@ -1080,7 +1080,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts dependencies with lock file" — composer/extract.spec.ts line 313
+    // Ported: "extracts dependencies with lock file" — lib/modules/manager/composer/extract.spec.ts line 313
     #[test]
     fn extracts_dependencies_with_empty_lock_file() {
         let content = include_str!("../../tests/fixtures/composer/composer1.json");
@@ -1089,14 +1089,14 @@ mod tests {
         assert!(deps.iter().all(|dep| dep.locked_version.is_none()));
     }
 
-    // Ported: "returns null for empty deps" — composer/extract.spec.ts line 28
+    // Ported: "returns null for empty deps" — lib/modules/manager/composer/extract.spec.ts line 28
     #[test]
     fn empty_content_ok() {
         let deps = extract_ok("{}");
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for invalid json" — composer/extract.spec.ts line 24
+    // Ported: "returns null for invalid json" — lib/modules/manager/composer/extract.spec.ts line 24
     #[test]
     fn invalid_json_returns_error() {
         assert!(extract("nothing here").is_err());
@@ -1104,7 +1104,7 @@ mod tests {
 
     const LOCK_CONTENT: &str = include_str!("../../tests/fixtures/composer/composer5.lock");
 
-    // Ported: "detects already updated" — modules/manager/composer/update-locked.spec.ts line 10
+    // Ported: "detects already updated" — lib/modules/manager/composer/update-locked.spec.ts line 10
     #[test]
     fn composer_update_locked_detects_already_updated() {
         let result = update_locked_composer_dependency(
@@ -1115,7 +1115,7 @@ mod tests {
         assert_eq!(result.as_str(), "already-updated");
     }
 
-    // Ported: "returns unsupported" — modules/manager/composer/update-locked.spec.ts line 22
+    // Ported: "returns unsupported" — lib/modules/manager/composer/update-locked.spec.ts line 22
     #[test]
     fn composer_update_locked_returns_unsupported() {
         let result = update_locked_composer_dependency(
@@ -1126,13 +1126,13 @@ mod tests {
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns same if not auto" — modules/manager/composer/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/composer/range.spec.ts line 5
     #[test]
     fn composer_range_returns_same_if_not_auto() {
         assert_eq!(get_composer_range_strategy("widen", None, None), "widen");
     }
 
-    // Ported: "replaces require-dev" — modules/manager/composer/range.spec.ts line 10
+    // Ported: "replaces require-dev" — lib/modules/manager/composer/range.spec.ts line 10
     #[test]
     fn composer_range_auto_require_dev_returns_update_lockfile() {
         assert_eq!(
@@ -1141,7 +1141,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces project require" — modules/manager/composer/range.spec.ts line 18
+    // Ported: "replaces project require" — lib/modules/manager/composer/range.spec.ts line 18
     #[test]
     fn composer_range_auto_project_returns_update_lockfile() {
         assert_eq!(
@@ -1150,7 +1150,7 @@ mod tests {
         );
     }
 
-    // Ported: "widens complex ranges" — modules/manager/composer/range.spec.ts line 27
+    // Ported: "widens complex ranges" — lib/modules/manager/composer/range.spec.ts line 27
     #[test]
     fn composer_range_auto_complex_returns_widen() {
         assert_eq!(
@@ -1159,7 +1159,7 @@ mod tests {
         );
     }
 
-    // Ported: "widens complex bump" — modules/manager/composer/range.spec.ts line 36
+    // Ported: "widens complex bump" — lib/modules/manager/composer/range.spec.ts line 36
     #[test]
     fn composer_range_bump_complex_returns_widen() {
         assert_eq!(
@@ -1168,7 +1168,7 @@ mod tests {
         );
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/composer/range.spec.ts line 45
+    // Ported: "defaults to update-lockfile" — lib/modules/manager/composer/range.spec.ts line 45
     #[test]
     fn composer_range_auto_defaults_to_update_lockfile() {
         assert_eq!(
@@ -1177,7 +1177,7 @@ mod tests {
         );
     }
 
-    // Ported: "defaults to widen for TYPO3 extensions" — modules/manager/composer/range.spec.ts line 50
+    // Ported: "defaults to widen for TYPO3 extensions" — lib/modules/manager/composer/range.spec.ts line 50
     #[test]
     fn composer_range_auto_typo3_returns_widen() {
         assert_eq!(
@@ -1187,14 +1187,14 @@ mod tests {
     }
 }
 
-// Ported: "parses default values" — modules/manager/composer/schema.spec.ts line 5
+// Ported: "parses default values" — lib/modules/manager/composer/schema.spec.ts line 5
 #[test]
 fn repos_record_parses_default() {
     let result = parse_repos_record(&serde_json::json!({}));
     assert_eq!(result, vec![]);
 }
 
-// Ported: "parses repositories" — modules/manager/composer/schema.spec.ts line 9
+// Ported: "parses repositories" — lib/modules/manager/composer/schema.spec.ts line 9
 #[test]
 fn repos_record_parses_repositories() {
     let input = serde_json::json!({
@@ -1229,14 +1229,14 @@ fn repos_record_parses_repositories() {
     assert_eq!(result.len(), 5); // foo: 'bar' is filtered
 }
 
-// Ported: "parses default values" — modules/manager/composer/schema.spec.ts line 30
+// Ported: "parses default values" — lib/modules/manager/composer/schema.spec.ts line 30
 #[test]
 fn repos_array_parses_default() {
     let result = parse_repos_array(&serde_json::json!([]));
     assert_eq!(result, vec![]);
 }
 
-// Ported: "parses repositories" — modules/manager/composer/schema.spec.ts line 34
+// Ported: "parses repositories" — lib/modules/manager/composer/schema.spec.ts line 34
 #[test]
 fn repos_array_parses_repositories() {
     let input = serde_json::json!([
@@ -1274,7 +1274,7 @@ fn repos_array_parses_repositories() {
     assert_eq!(result.len(), 5); // foo:bar filtered
 }
 
-// Ported: "parses default values" — modules/manager/composer/schema.spec.ts line 58
+// Ported: "parses default values" — lib/modules/manager/composer/schema.spec.ts line 58
 #[test]
 fn repos_parses_null_default() {
     let result = parse_repos(&serde_json::Value::Null);
@@ -1283,7 +1283,7 @@ fn repos_parses_null_default() {
     assert!(result.path_repos.is_empty());
 }
 
-// Ported: "parses repositories" — modules/manager/composer/schema.spec.ts line 66
+// Ported: "parses repositories" — lib/modules/manager/composer/schema.spec.ts line 66
 #[test]
 fn repos_parses_array_repos() {
     let input = serde_json::json!([
@@ -1305,7 +1305,7 @@ fn repos_parses_array_repos() {
     assert!(result.path_repos.contains_key("somePath"));
 }
 
-// Ported: "parses repositories with packagist disabled" — modules/manager/composer/schema.spec.ts line 92
+// Ported: "parses repositories with packagist disabled" — lib/modules/manager/composer/schema.spec.ts line 92
 #[test]
 fn repos_parses_with_packagist_disabled() {
     let input = serde_json::json!({

@@ -121,7 +121,7 @@ mod tests {
         }
     }
 
-    // Ported: "checks for valid log levels" — logger/bunyan.spec.ts line 6
+    // Ported: "checks for valid log levels" — lib/logger/bunyan.spec.ts line 6
     #[test]
     fn parses_all_valid_renovate_levels() {
         assert_eq!(level("trace"), Some(Level::TRACE));
@@ -131,14 +131,14 @@ mod tests {
         assert_eq!(level("error"), Some(Level::ERROR));
     }
 
-    // Ported: "checks for valid log levels" — logger/bunyan.spec.ts line 6
+    // Ported: "checks for valid log levels" — lib/logger/bunyan.spec.ts line 6
     #[test]
     fn fatal_maps_to_error() {
         // Bunyan-specific level — no tracing equivalent above error.
         assert_eq!(level("fatal"), Some(Level::ERROR));
     }
 
-    // Ported: "checks for invalid log level: $input" — logger/bunyan.spec.ts line 16
+    // Ported: "checks for invalid log level: $input" — lib/logger/bunyan.spec.ts line 16
     #[test]
     fn invalid_level_returns_none() {
         assert!(level("WARN").is_none()); // case-sensitive, like Renovate

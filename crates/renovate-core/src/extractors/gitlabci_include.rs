@@ -237,7 +237,7 @@ pub fn gitlabci_include_update_dependency(
 mod tests {
     use super::*;
 
-    // Ported: "extracts single include block" — gitlabci-include/extract.spec.ts line 22
+    // Ported: "extracts single include block" — lib/modules/manager/gitlabci-include/extract.spec.ts line 22
     #[test]
     fn extracts_include_with_ref() {
         let content = r#"
@@ -252,7 +252,7 @@ include:
         assert_eq!(deps[0].ref_value, "v2.1.0");
     }
 
-    // Ported: "extracts multiple include blocks" — gitlabci-include/extract.spec.ts line 28
+    // Ported: "extracts multiple include blocks" — lib/modules/manager/gitlabci-include/extract.spec.ts line 28
     #[test]
     fn multiple_includes() {
         let content = r#"
@@ -288,13 +288,13 @@ build:
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for empty" — gitlabci-include/extract.spec.ts line 13
+    // Ported: "returns null for empty" — lib/modules/manager/gitlabci-include/extract.spec.ts line 13
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts multiple embedded include blocks" — gitlabci-include/extract.spec.ts line 34
+    // Ported: "extracts multiple embedded include blocks" — lib/modules/manager/gitlabci-include/extract.spec.ts line 34
     //
     // The fixture has a top-level `include:` plus a nested `trigger.include:`
     // block inside a job. Both should produce a dep.
@@ -323,7 +323,7 @@ trigger-my-job:
         assert_eq!(deps[1].ref_value, "master");
     }
 
-    // Ported: "supports multi-document files" — gitlabci-include/extract.spec.ts line 73
+    // Ported: "supports multi-document files" — lib/modules/manager/gitlabci-include/extract.spec.ts line 73
     //
     // A single YAML file may contain multiple documents separated by `---`.
     // Each document's `include:` block should be parsed independently.
@@ -352,7 +352,7 @@ more:
         assert_eq!(deps[1].ref_value, "2.0.0");
     }
 
-    // Ported: "returns null for include block without any actual includes" — gitlabci-include/extract.spec.ts line 17
+    // Ported: "returns null for include block without any actual includes" — lib/modules/manager/gitlabci-include/extract.spec.ts line 17
     //
     // A bare `include:` key with no list under it produces no deps.
     #[test]
@@ -367,7 +367,7 @@ script:
         assert!(deps.is_empty());
     }
 
-    // Ported: "ignores includes without project and file keys" — gitlabci-include/extract.spec.ts line 51
+    // Ported: "ignores includes without project and file keys" — lib/modules/manager/gitlabci-include/extract.spec.ts line 51
     //
     // String form, `remote:` form, and `local:` form includes have no
     // project+ref pair so the extractor produces nothing.
@@ -383,7 +383,7 @@ include:
         assert!(deps.is_empty());
     }
 
-    // Ported: "normalizes configured endpoints" — gitlabci-include/extract.spec.ts line 60
+    // Ported: "normalizes configured endpoints" — lib/modules/manager/gitlabci-include/extract.spec.ts line 60
     #[test]
     fn normalizes_configured_endpoints() {
         let content = "\

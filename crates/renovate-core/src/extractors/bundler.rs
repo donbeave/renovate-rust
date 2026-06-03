@@ -964,7 +964,7 @@ end
 
     // ── Ported: update-locked tests ────────────────────────────────────────────
 
-    // Ported: "detects already updated" — modules/manager/bundler/update-locked.spec.ts line 9
+    // Ported: "detects already updated" — lib/modules/manager/bundler/update-locked.spec.ts line 9
     #[test]
     fn bundler_update_locked_detects_already_updated() {
         let result =
@@ -972,21 +972,21 @@ end
         assert_eq!(result.as_str(), "already-updated");
     }
 
-    // Ported: "returns unsupported for empty lockfile" — modules/manager/bundler/update-locked.spec.ts line 21
+    // Ported: "returns unsupported for empty lockfile" — lib/modules/manager/bundler/update-locked.spec.ts line 21
     #[test]
     fn bundler_update_locked_unsupported_for_no_content() {
         let result = update_locked_bundler_dependency(Some("activejob"), Some("5.2.3"), None);
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported for empty depName" — modules/manager/bundler/update-locked.spec.ts line 32
+    // Ported: "returns unsupported for empty depName" — lib/modules/manager/bundler/update-locked.spec.ts line 32
     #[test]
     fn bundler_update_locked_unsupported_for_no_dep_name() {
         let result = update_locked_bundler_dependency(None, Some("5.2.3"), Some(GEMFILE_LOCK));
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported" — modules/manager/bundler/update-locked.spec.ts line 44
+    // Ported: "returns unsupported" — lib/modules/manager/bundler/update-locked.spec.ts line 44
     #[test]
     fn bundler_update_locked_unsupported_version_not_in_lock() {
         let result =
@@ -994,7 +994,7 @@ end
         assert_eq!(result.as_str(), "unsupported");
     }
 
-    // Ported: "returns update-failed in case of errors" — modules/manager/bundler/update-locked.spec.ts line 56
+    // Ported: "returns update-failed in case of errors" — lib/modules/manager/bundler/update-locked.spec.ts line 56
     #[test]
     fn bundler_update_locked_update_failed_on_invalid_lock() {
         let result = update_locked_bundler_dependency(
@@ -1010,21 +1010,21 @@ end
 
     // ── Ported: host-rules tests ───────────────────────────────────────────────
 
-    // Ported: "returns the authentication header with the password" — modules/manager/bundler/host-rules.spec.ts line 15
+    // Ported: "returns the authentication header with the password" — lib/modules/manager/bundler/host-rules.spec.ts line 15
     #[test]
     fn bundler_auth_header_with_password() {
         let val = get_authentication_header_value(Some("test"), Some("password"), None);
         assert_eq!(val, "test:password");
     }
 
-    // Ported: "returns the authentication header with the token" — modules/manager/bundler/host-rules.spec.ts line 24
+    // Ported: "returns the authentication header with the token" — lib/modules/manager/bundler/host-rules.spec.ts line 24
     #[test]
     fn bundler_auth_header_with_token() {
         let val = get_authentication_header_value(None, None, Some("token"));
         assert_eq!(val, "token");
     }
 
-    // Ported: "escapes special characters in the username but not the password" — modules/manager/bundler/host-rules.spec.ts line 32
+    // Ported: "escapes special characters in the username but not the password" — lib/modules/manager/bundler/host-rules.spec.ts line 32
     #[test]
     fn bundler_auth_header_encodes_username_at_sign() {
         let val = get_authentication_header_value(Some("test@example.com"), Some("p@ssword"), None);
@@ -1033,55 +1033,55 @@ end
 
     // ── Ported: locked-version tests ──────────────────────────────────────────
 
-    // Ported: "Parse Rails Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 13
-    // Ported: "matches the expected output" — modules/manager/bundler/gemfile.spec.ts line 7
+    // Ported: "Parse Rails Gem Lock File" — lib/modules/manager/bundler/locked-version.spec.ts line 13
+    // Ported: "matches the expected output" — lib/modules/manager/bundler/gemfile.spec.ts line 7
     #[test]
     fn bundler_locked_version_parse_rails() {
         let entries = extract_lock_file_entries(RAILS_LOCK);
         assert_eq!(entries.len(), 185);
     }
 
-    // Ported: "Parse WebPacker Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 19
+    // Ported: "Parse WebPacker Gem Lock File" — lib/modules/manager/bundler/locked-version.spec.ts line 19
     #[test]
     fn bundler_locked_version_parse_webpacker() {
         let entries = extract_lock_file_entries(WEBPACKER_LOCK);
         assert_eq!(entries.len(), 53);
     }
 
-    // Ported: "Parse Mastodon Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 25
+    // Ported: "Parse Mastodon Gem Lock File" — lib/modules/manager/bundler/locked-version.spec.ts line 25
     #[test]
     fn bundler_locked_version_parse_mastodon() {
         let entries = extract_lock_file_entries(MASTODON_LOCK);
         assert_eq!(entries.len(), 266);
     }
 
-    // Ported: "Parse Ruby CI Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 31
+    // Ported: "Parse Ruby CI Gem Lock File" — lib/modules/manager/bundler/locked-version.spec.ts line 31
     #[test]
     fn bundler_locked_version_parse_rubyci() {
         let entries = extract_lock_file_entries(GEMFILE_LOCK);
         assert_eq!(entries.len(), 64);
     }
 
-    // Ported: "Parse Gitlab Foss Gem Lock File" — modules/manager/bundler/locked-version.spec.ts line 37
+    // Ported: "Parse Gitlab Foss Gem Lock File" — lib/modules/manager/bundler/locked-version.spec.ts line 37
     #[test]
     fn bundler_locked_version_parse_gitlab_foss() {
         let entries = extract_lock_file_entries(GITLAB_FOSS_LOCK);
         assert_eq!(entries.len(), 478);
     }
 
-    // Ported: "returns empty map for empty string" — modules/manager/bundler/locked-version.spec.ts line 43
+    // Ported: "returns empty map for empty string" — lib/modules/manager/bundler/locked-version.spec.ts line 43
     #[test]
     fn bundler_locked_version_empty_string() {
         assert!(extract_lock_file_entries("").is_empty());
     }
 
-    // Ported: "returns empty map when errors occur" — modules/manager/bundler/locked-version.spec.ts line 48
+    // Ported: "returns empty map when errors occur" — lib/modules/manager/bundler/locked-version.spec.ts line 48
     #[test]
     fn bundler_locked_version_invalid_input_empty() {
         assert!(extract_lock_file_entries("not a gemfile lock").is_empty());
     }
 
-    // Ported: "strips platform suffixes from dependencies" — modules/manager/bundler/locked-version.spec.ts line 54
+    // Ported: "strips platform suffixes from dependencies" — lib/modules/manager/bundler/locked-version.spec.ts line 54
     #[test]
     fn bundler_locked_version_strips_platform_suffix() {
         let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    sqlite3 (2.7.4-aarch64-linux-gnu)\n    sqlite3 (2.7.4-arm64-darwin)\n    sqlite3 (2.7.4-x86_64-darwin)\n    nokogiri (1.18.10-aarch64-linux-gnu)\n      racc (~> 1.4)\n    nokogiri (1.18.10-x86_64-darwin)\n      racc (~> 1.4)\n    regular_gem (1.0.0)\n\nPLATFORMS\n  aarch64-linux-gnu\n  arm64-darwin\n  x86_64-darwin\n\nDEPENDENCIES\n  sqlite3 (>= 2.1)\n";
@@ -1091,7 +1091,7 @@ end
         assert_eq!(entries.get("regular_gem"), Some(&"1.0.0".to_owned()));
     }
 
-    // Ported: "extracts simple versions from parentheses" — modules/manager/bundler/locked-version.spec.ts line 84
+    // Ported: "extracts simple versions from parentheses" — lib/modules/manager/bundler/locked-version.spec.ts line 84
     #[test]
     fn bundler_locked_version_simple_versions() {
         let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    simple_gem (1.0.0)\n    another_gem (2.3.4)\n";
@@ -1100,7 +1100,7 @@ end
         assert_eq!(entries.get("another_gem"), Some(&"2.3.4".to_owned()));
     }
 
-    // Ported: "extracts complex version formats from parentheses" — modules/manager/bundler/locked-version.spec.ts line 98
+    // Ported: "extracts complex version formats from parentheses" — lib/modules/manager/bundler/locked-version.spec.ts line 98
     #[test]
     fn bundler_locked_version_complex_versions() {
         let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    gem_with_prerelease (1.0.0.beta1)\n    gem_with_patch (1.2.3.4)\n    gem_with_alpha (2.0.0.alpha)\n";
@@ -1116,7 +1116,7 @@ end
         );
     }
 
-    // Ported: "correctly extracts gem names when versions contain special characters" — modules/manager/bundler/locked-version.spec.ts line 114
+    // Ported: "correctly extracts gem names when versions contain special characters" — lib/modules/manager/bundler/locked-version.spec.ts line 114
     #[test]
     fn bundler_locked_version_gem_names_with_special_chars() {
         let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    gem-with-dashes (1.0.0)\n    gem_with_underscores (2.0.0)\n    gem.with.dots (3.0.0)\n";
@@ -1129,7 +1129,7 @@ end
         assert_eq!(entries.get("gem.with.dots"), Some(&"3.0.0".to_owned()));
     }
 
-    // Ported: "handles gems with platform-specific versions" — modules/manager/bundler/locked-version.spec.ts line 130
+    // Ported: "handles gems with platform-specific versions" — lib/modules/manager/bundler/locked-version.spec.ts line 130
     #[test]
     fn bundler_locked_version_platform_specific_versions() {
         let content = "GEM\n  remote: https://rubygems.org/\n  specs:\n    platform_gem (1.5.0-x86_64-linux)\n    another_platform_gem (2.1.0-arm64-darwin)\n\nPLATFORMS\n  x86_64-linux\n  arm64-darwin\n";
@@ -1143,13 +1143,13 @@ end
 
     // ── Ported: extract.spec.ts tests ─────────────────────────────────────────
 
-    // Ported: "returns null for empty" — bundler/extract.spec.ts line 36
+    // Ported: "returns null for empty" — lib/modules/manager/bundler/extract.spec.ts line 36
     #[test]
     fn extract_returns_none_for_empty() {
         assert!(extract("nothing here").is_none());
     }
 
-    // Ported: "parses rails Gemfile" — bundler/extract.spec.ts line 40
+    // Ported: "parses rails Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 40
     #[test]
     fn extract_parses_rails_gemfile() {
         let pkg = extract_with_lock(RAILS_GEMFILE, Some(RAILS_LOCK)).unwrap();
@@ -1166,14 +1166,14 @@ end
         }
     }
 
-    // Ported: "parses sourceGroups" — bundler/extract.spec.ts line 57
+    // Ported: "parses sourceGroups" — lib/modules/manager/bundler/extract.spec.ts line 57
     #[test]
     fn extract_parses_source_groups() {
         let pkg = extract(SOURCE_GROUP_GEMFILE).unwrap();
         assert_eq!(pkg.deps.len(), 7);
     }
 
-    // Ported: "parse webpacker Gemfile" — bundler/extract.spec.ts line 63
+    // Ported: "parse webpacker Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 63
     #[test]
     fn extract_parses_webpacker_gemfile() {
         let pkg = extract_with_lock(WEBPACKER_GEMFILE, Some(WEBPACKER_LOCK)).unwrap();
@@ -1184,14 +1184,14 @@ end
         );
     }
 
-    // Ported: "parse mastodon Gemfile" — bundler/extract.spec.ts line 75
+    // Ported: "parse mastodon Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 75
     #[test]
     fn extract_parses_mastodon_gemfile() {
         let pkg = extract_with_lock(MASTODON_GEMFILE, Some(MASTODON_LOCK)).unwrap();
         assert_eq!(pkg.deps.len(), 125);
     }
 
-    // Ported: "parse Ruby CI Gemfile" — bundler/extract.spec.ts line 91
+    // Ported: "parse Ruby CI Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 91
     #[test]
     fn extract_parses_rubyci_gemfile() {
         let pkg = extract_with_lock(RUBYCI_GEMFILE, Some(GEMFILE_LOCK)).unwrap();
@@ -1202,7 +1202,7 @@ end
         );
     }
 
-    // Ported: "parse Gitlab Foss Gemfile" — bundler/extract.spec.ts line 104
+    // Ported: "parse Gitlab Foss Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 104
     #[test]
     fn extract_parses_gitlab_foss_gemfile() {
         let pkg = extract_with_lock(GITLAB_FOSS_GEMFILE, Some(GITLAB_FOSS_LOCK)).unwrap();
@@ -1213,7 +1213,7 @@ end
         );
     }
 
-    // Ported: "parse source blocks in Gemfile" — bundler/extract.spec.ts line 116
+    // Ported: "parse source blocks in Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 116
     #[test]
     fn extract_parses_source_block_gemfile() {
         let pkg = extract(SOURCE_BLOCK_GEMFILE).unwrap();
@@ -1222,14 +1222,14 @@ end
         assert!(pkg.deps.iter().all(|d| !d.registry_urls.is_empty()));
     }
 
-    // Ported: "parse source blocks with spaces in Gemfile" — bundler/extract.spec.ts line 122
+    // Ported: "parse source blocks with spaces in Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 122
     #[test]
     fn extract_parses_source_block_with_new_lines() {
         let pkg = extract_with_lock(SOURCE_BLOCK_NL_GEMFILE, Some(SOURCE_BLOCK_NL_LOCK)).unwrap();
         assert_eq!(pkg.deps.len(), 2);
     }
 
-    // Ported: "parses source blocks with groups in Gemfile" — bundler/extract.spec.ts line 132
+    // Ported: "parses source blocks with groups in Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 132
     #[test]
     fn extract_parses_source_block_with_groups() {
         let pkg = extract(SOURCE_BLOCK_GROUPS_GEMFILE).unwrap();
@@ -1265,7 +1265,7 @@ end
         );
     }
 
-    // Ported: "parses source variable in Gemfile" — bundler/extract.spec.ts line 146
+    // Ported: "parses source variable in Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 146
     #[test]
     fn extract_parses_source_variable() {
         let gemfile = "foo = 'https://gems.foo.com'\nbar = 'https://gems.bar.com'\n\nsource foo\n\nsource bar do\n  gem \"some_internal_gem\"\nend\n";
@@ -1276,7 +1276,7 @@ end
         assert_eq!(pkg.deps[0].registry_urls, vec!["https://gems.bar.com"]);
     }
 
-    // Ported: "parses inline source in Gemfile" — bundler/extract.spec.ts line 171
+    // Ported: "parses inline source in Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 171
     #[test]
     fn extract_parses_inline_source() {
         let gemfile = concat!(
@@ -1304,7 +1304,7 @@ end
         );
     }
 
-    // Ported: "parses git refs in Gemfile" — bundler/extract.spec.ts line 223
+    // Ported: "parses git refs in Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 223
     #[test]
     fn extract_parses_git_refs() {
         let gemfile = concat!(
@@ -1351,7 +1351,7 @@ end
         assert_eq!(baz.current_value, "master");
     }
 
-    // Ported: "parses multiple current values Gemfile" — bundler/extract.spec.ts line 259
+    // Ported: "parses multiple current values Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 259
     #[test]
     fn extract_parses_multiple_current_values() {
         let gemfile = concat!(
@@ -1391,7 +1391,7 @@ end
         }
     }
 
-    // Ported: "returns an empty array if matchHost is missing" — bundler/host-rules.spec.ts line 55
+    // Ported: "returns an empty array if matchHost is missing" — lib/modules/manager/bundler/host-rules.spec.ts line 55
     #[test]
     fn find_all_authenticatable_empty_if_no_match_host() {
         crate::util::host_rules::clear();
@@ -1407,7 +1407,7 @@ end
         crate::util::host_rules::clear();
     }
 
-    // Ported: "returns an empty array if username is missing and password is present" — bundler/host-rules.spec.ts line 63
+    // Ported: "returns an empty array if username is missing and password is present" — lib/modules/manager/bundler/host-rules.spec.ts line 63
     #[test]
     fn find_all_authenticatable_empty_if_no_username() {
         crate::util::host_rules::clear();
@@ -1423,7 +1423,7 @@ end
         crate::util::host_rules::clear();
     }
 
-    // Ported: "returns an empty array if password and token are missing" — bundler/host-rules.spec.ts line 73
+    // Ported: "returns an empty array if password and token are missing" — lib/modules/manager/bundler/host-rules.spec.ts line 73
     #[test]
     fn find_all_authenticatable_empty_if_no_credentials() {
         crate::util::host_rules::clear();
@@ -1439,7 +1439,7 @@ end
         crate::util::host_rules::clear();
     }
 
-    // Ported: "returns the hostRule if using matchHost and password" — bundler/host-rules.spec.ts line 83
+    // Ported: "returns the hostRule if using matchHost and password" — lib/modules/manager/bundler/host-rules.spec.ts line 83
     #[test]
     fn find_all_authenticatable_returns_rule_with_match_host_and_password() {
         crate::util::host_rules::clear();
@@ -1457,7 +1457,7 @@ end
         crate::util::host_rules::clear();
     }
 
-    // Ported: "returns the hostRule if using matchHost and token" — bundler/host-rules.spec.ts line 92
+    // Ported: "returns the hostRule if using matchHost and token" — lib/modules/manager/bundler/host-rules.spec.ts line 92
     #[test]
     fn find_all_authenticatable_returns_rule_with_match_host_and_token() {
         crate::util::host_rules::clear();
@@ -1474,7 +1474,7 @@ end
         crate::util::host_rules::clear();
     }
 
-    // Ported: "returns the hostRule if using baseUrl and password" — bundler/host-rules.spec.ts line 101
+    // Ported: "returns the hostRule if using baseUrl and password" — lib/modules/manager/bundler/host-rules.spec.ts line 101
     #[test]
     fn find_all_authenticatable_returns_rule_with_base_url_and_password() {
         crate::util::host_rules::clear();
@@ -1491,7 +1491,7 @@ end
         crate::util::host_rules::clear();
     }
 
-    // Ported: "returns the hostRule if using baseUrl and token" — bundler/host-rules.spec.ts line 110
+    // Ported: "returns the hostRule if using baseUrl and token" — lib/modules/manager/bundler/host-rules.spec.ts line 110
     #[test]
     fn find_all_authenticatable_returns_rule_with_base_url_and_token() {
         crate::util::host_rules::clear();
@@ -1508,7 +1508,7 @@ end
         crate::util::host_rules::clear();
     }
 
-    // Ported: "skips local gems in Gemfile" — bundler/extract.spec.ts line 284
+    // Ported: "skips local gems in Gemfile" — lib/modules/manager/bundler/extract.spec.ts line 284
     #[test]
     fn extract_skips_local_gems() {
         let gemfile = "gem 'foo', path: 'vendor/foo'\ngem 'bar'\n";
@@ -1528,7 +1528,7 @@ end
 
     // ── Ported: common tests ───────────────────────────────────────────────────
 
-    // Ported: "uses existing constraint" — modules/manager/bundler/common.spec.ts line 31
+    // Ported: "uses existing constraint" — lib/modules/manager/bundler/common.spec.ts line 31
     #[test]
     fn get_bundler_constraint_uses_existing() {
         let mut config = crate::artifacts::ArtifactConfig::default();
@@ -1539,7 +1539,7 @@ end
         assert_eq!(result, Some("2.1.0".to_owned()));
     }
 
-    // Ported: "extracts from lockfile" — modules/manager/bundler/common.spec.ts line 41
+    // Ported: "extracts from lockfile" — lib/modules/manager/bundler/common.spec.ts line 41
     #[test]
     fn get_bundler_constraint_from_lockfile() {
         let config = crate::artifacts::ArtifactConfig::default();
@@ -1548,7 +1548,7 @@ end
         assert_eq!(result, Some("1.17.3".to_owned()));
     }
 
-    // Ported: "returns null" — modules/manager/bundler/common.spec.ts line 49
+    // Ported: "returns null" — lib/modules/manager/bundler/common.spec.ts line 49
     #[test]
     fn get_bundler_constraint_returns_none() {
         let config = crate::artifacts::ArtifactConfig::default();
@@ -1556,7 +1556,7 @@ end
         assert_eq!(result, None);
     }
 
-    // Ported: "uses existing constraint" — modules/manager/bundler/common.spec.ts line 59
+    // Ported: "uses existing constraint" — lib/modules/manager/bundler/common.spec.ts line 59
     #[tokio::test]
     async fn get_ruby_constraint_uses_existing() {
         let mut config = crate::artifacts::ArtifactConfig::default();
@@ -1567,7 +1567,7 @@ end
         assert_eq!(result, Some("2.1.0".to_owned()));
     }
 
-    // Ported: "extracts from gemfile" — modules/manager/bundler/common.spec.ts line 71
+    // Ported: "extracts from gemfile" — lib/modules/manager/bundler/common.spec.ts line 71
     #[tokio::test]
     async fn get_ruby_constraint_from_gemfile() {
         let config = crate::artifacts::ArtifactConfig::default();
@@ -1576,7 +1576,7 @@ end
         assert_eq!(result, Some("~> 1.5.3".to_owned()));
     }
 
-    // Ported: "extracts from .ruby-version" — modules/manager/bundler/common.spec.ts line 81
+    // Ported: "extracts from .ruby-version" — lib/modules/manager/bundler/common.spec.ts line 81
     #[tokio::test]
     async fn get_ruby_constraint_from_ruby_version() {
         let dir = tempfile::tempdir().unwrap();
@@ -1591,7 +1591,7 @@ end
         assert_eq!(result, Some("2.7.8".to_owned()));
     }
 
-    // Ported: "extracts from .tool-versions" — modules/manager/bundler/common.spec.ts line 92
+    // Ported: "extracts from .tool-versions" — lib/modules/manager/bundler/common.spec.ts line 92
     #[tokio::test]
     async fn get_ruby_constraint_from_tool_versions() {
         let dir = tempfile::tempdir().unwrap();
@@ -1609,7 +1609,7 @@ end
         assert_eq!(result, Some("3.3.4".to_owned()));
     }
 
-    // Ported: "extracts from lockfile" — modules/manager/bundler/common.spec.ts line 105
+    // Ported: "extracts from lockfile" — lib/modules/manager/bundler/common.spec.ts line 105
     #[tokio::test]
     async fn get_ruby_constraint_from_lockfile() {
         let dir = tempfile::tempdir().unwrap();
@@ -1627,7 +1627,7 @@ end
         assert_eq!(result, Some("2.6.5".to_owned()));
     }
 
-    // Ported: "returns null" — modules/manager/bundler/common.spec.ts line 120
+    // Ported: "returns null" — lib/modules/manager/bundler/common.spec.ts line 120
     #[tokio::test]
     async fn get_ruby_constraint_returns_none() {
         let dir = tempfile::tempdir().unwrap();
@@ -1639,7 +1639,7 @@ end
         assert_eq!(result, None);
     }
 
-    // Ported: "returns packageFileName.lock" — modules/manager/bundler/common.spec.ts line 132
+    // Ported: "returns packageFileName.lock" — lib/modules/manager/bundler/common.spec.ts line 132
     #[tokio::test]
     async fn get_lock_file_path_returns_sibling() {
         let dir = tempfile::tempdir().unwrap();
@@ -1652,7 +1652,7 @@ end
         assert_eq!(result, dir.path().join("packageFileName.lock"));
     }
 
-    // Ported: "returns Gemfile.lock" — modules/manager/bundler/common.spec.ts line 138
+    // Ported: "returns Gemfile.lock" — lib/modules/manager/bundler/common.spec.ts line 138
     #[tokio::test]
     async fn get_lock_file_path_returns_gemfile_lock() {
         let dir = tempfile::tempdir().unwrap();

@@ -53,13 +53,13 @@ pub fn get_releases(package_name: &str) -> Option<KubernetesApiResult> {
 mod tests {
     use super::*;
 
-    // Ported: "returns null for an unknown Kubernetes API type" — kubernetes-api/index.spec.ts line 8
+    // Ported: "returns null for an unknown Kubernetes API type" — lib/modules/datasource/kubernetes-api/index.spec.ts line 8
     #[test]
     fn unknown_type_returns_none() {
         assert!(get_releases("Unknown").is_none());
     }
 
-    // Ported: "returns for a known Kubernetes API type" — kubernetes-api/index.spec.ts line 13
+    // Ported: "returns for a known Kubernetes API type" — lib/modules/datasource/kubernetes-api/index.spec.ts line 13
     #[test]
     fn known_type_returns_versions() {
         let result = get_releases("CSIStorageCapacity").unwrap();
@@ -68,7 +68,7 @@ mod tests {
         assert!(versions.contains(&"storage.k8s.io/v1"));
     }
 
-    // Ported: "is case sensitive" — kubernetes-api/index.spec.ts line 27
+    // Ported: "is case sensitive" — lib/modules/datasource/kubernetes-api/index.spec.ts line 27
     #[test]
     fn lookup_is_case_sensitive() {
         assert!(get_releases("csistoragecapacity").is_none());

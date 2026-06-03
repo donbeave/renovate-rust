@@ -413,7 +413,7 @@ mod tests {
 
     // ── basic extraction ──────────────────────────────────────────────────────
 
-    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
+    // Ported: "extracts dependencies" — lib/modules/manager/pip_requirements/extract.spec.ts line 43
     #[test]
     fn extracts_exact_pin() {
         let deps = extract_ok("Django==4.2.7");
@@ -423,7 +423,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
+    // Ported: "extracts dependencies" — lib/modules/manager/pip_requirements/extract.spec.ts line 43
     #[test]
     fn extracts_range_constraint() {
         let deps = extract_ok("requests>=2.0.0,<3.0.0");
@@ -431,7 +431,7 @@ mod tests {
         assert_eq!(deps[0].current_value, ">=2.0.0,<3.0.0");
     }
 
-    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
+    // Ported: "extracts dependencies" — lib/modules/manager/pip_requirements/extract.spec.ts line 43
     #[test]
     fn extracts_unconstrained_package() {
         let deps = extract_ok("sphinx");
@@ -440,14 +440,14 @@ mod tests {
         assert_eq!(deps[0].current_value, "");
     }
 
-    // Ported: "handles comments and commands" — pip_requirements/extract.spec.ts line 96
+    // Ported: "handles comments and commands" — lib/modules/manager/pip_requirements/extract.spec.ts line 96
     #[test]
     fn strips_inline_comment() {
         let deps = extract_ok("Django==4.2.7 # some comment");
         assert_eq!(deps[0].current_value, "==4.2.7");
     }
 
-    // Ported: "should handle dependency and ignore env markers" — pip_requirements/extract.spec.ts line 198
+    // Ported: "should handle dependency and ignore env markers" — lib/modules/manager/pip_requirements/extract.spec.ts line 198
     #[test]
     fn strips_environment_markers() {
         let deps = extract_ok("importlib-metadata==1.0.0; python_version < '3.8'");
@@ -455,7 +455,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "==1.0.0");
     }
 
-    // Ported: "should handle package with extras and no version specifiers" — pip_requirements/extract.spec.ts line 184
+    // Ported: "should handle package with extras and no version specifiers" — lib/modules/manager/pip_requirements/extract.spec.ts line 184
     #[test]
     fn strips_extras() {
         let deps = extract_ok("celery[redis]==4.1.1");
@@ -463,14 +463,14 @@ mod tests {
         assert_eq!(deps[0].current_value, "==4.1.1");
     }
 
-    // Ported: "handles extras and complex index url" — pip_requirements/extract.spec.ts line 102
+    // Ported: "handles extras and complex index url" — lib/modules/manager/pip_requirements/extract.spec.ts line 102
     #[test]
     fn strips_extras_with_spaces() {
         let deps = extract_ok("celery [redis] == 4.1.1");
         assert_eq!(deps[0].current_value, "== 4.1.1");
     }
 
-    // Ported: "extracts multiple dependencies" — pip_requirements/extract.spec.ts line 90
+    // Ported: "extracts multiple dependencies" — lib/modules/manager/pip_requirements/extract.spec.ts line 90
     #[test]
     fn handles_multiple_packages() {
         let content = "Django==4.2.7\nrequests==2.28.0\nsphinx\n";
@@ -480,21 +480,21 @@ mod tests {
 
     // ── skip reasons ──────────────────────────────────────────────────────────
 
-    // Ported: "should handle git packages" — pip_requirements/extract.spec.ts line 213
+    // Ported: "should handle git packages" — lib/modules/manager/pip_requirements/extract.spec.ts line 213
     #[test]
     fn git_source_is_skipped() {
         let deps = extract_ok("git+https://github.com/owner/repo.git@v1.0");
         assert_eq!(deps[0].skip_reason, Some(PipSkipReason::GitSource));
     }
 
-    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
+    // Ported: "extracts dependencies" — lib/modules/manager/pip_requirements/extract.spec.ts line 43
     #[test]
     fn url_install_is_skipped() {
         let deps = extract_ok("https://example.com/pkg-1.0.tar.gz");
         assert_eq!(deps[0].skip_reason, Some(PipSkipReason::UrlInstall));
     }
 
-    // Ported: "extracts --requirement short code option" — pip_requirements/extract.spec.ts line 68
+    // Ported: "extracts --requirement short code option" — lib/modules/manager/pip_requirements/extract.spec.ts line 68
     #[test]
     fn sub_requirement_is_skipped() {
         let deps = extract_ok("-r base.txt");
@@ -502,7 +502,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(PipSkipReason::SubRequirement));
     }
 
-    // Ported: "extracts --constraints short code option" — pip_requirements/extract.spec.ts line 79
+    // Ported: "extracts --constraints short code option" — lib/modules/manager/pip_requirements/extract.spec.ts line 79
     #[test]
     fn constraints_file_is_skipped() {
         let deps = extract_ok("-c constraints.txt");
@@ -512,28 +512,28 @@ mod tests {
 
     // ── ignored lines ─────────────────────────────────────────────────────────
 
-    // Ported: "handles comments and commands" — pip_requirements/extract.spec.ts line 96
+    // Ported: "handles comments and commands" — lib/modules/manager/pip_requirements/extract.spec.ts line 96
     #[test]
     fn blank_lines_ignored() {
         let deps = extract_ok("\n\n  \nDjango==4.2.7\n\n");
         assert_eq!(deps.len(), 1);
     }
 
-    // Ported: "handles comments and commands" — pip_requirements/extract.spec.ts line 96
+    // Ported: "handles comments and commands" — lib/modules/manager/pip_requirements/extract.spec.ts line 96
     #[test]
     fn comment_only_lines_ignored() {
         let deps = extract_ok("# this is a comment\nDjango==4.2.7");
         assert_eq!(deps.len(), 1);
     }
 
-    // Ported: "extracts a file with only --index-url flags" — pip_requirements/extract.spec.ts line 258
+    // Ported: "extracts a file with only --index-url flags" — lib/modules/manager/pip_requirements/extract.spec.ts line 258
     #[test]
     fn index_url_directive_ignored() {
         let deps = extract_ok("--index-url https://pypi.org/simple\nDjango==4.2.7");
         assert_eq!(deps.len(), 1);
     }
 
-    // Ported: "extracts a file with only --extra-index-url flags" — pip_requirements/extract.spec.ts line 266
+    // Ported: "extracts a file with only --extra-index-url flags" — lib/modules/manager/pip_requirements/extract.spec.ts line 266
     //
     // The TS extractor still returns a (registry-only) PackageFile here, but
     // the actionable dep list is empty. The Rust extractor doesn't track
@@ -547,7 +547,7 @@ mod tests {
         assert_eq!(deps.len(), 0);
     }
 
-    // Ported: "extracts a file with only -r flags" — pip_requirements/extract.spec.ts line 276
+    // Ported: "extracts a file with only -r flags" — lib/modules/manager/pip_requirements/extract.spec.ts line 276
     //
     // TS records the file as managerData.requirementsFiles. The Rust
     // extractor produces one dep with skip_reason = SubRequirement, so
@@ -558,7 +558,7 @@ mod tests {
         assert!(deps.iter().all(|d| d.skip_reason.is_some()));
     }
 
-    // Ported: "extracts a file with only -c flags" — pip_requirements/extract.spec.ts line 286
+    // Ported: "extracts a file with only -c flags" — lib/modules/manager/pip_requirements/extract.spec.ts line 286
     //
     // TS records the file as managerData.constraintsFiles. The Rust
     // extractor produces one dep with skip_reason = SubRequirement, so
@@ -569,14 +569,14 @@ mod tests {
         assert!(deps.iter().all(|d| d.skip_reason.is_some()));
     }
 
-    // Ported: "returns null for empty" — pip_requirements/extract.spec.ts line 39
+    // Ported: "returns null for empty" — lib/modules/manager/pip_requirements/extract.spec.ts line 39
     #[test]
     fn invalid_line_returns_empty() {
         // "nothing here" is not valid PEP 508 — "here" is not a version specifier.
         assert!(extract_ok("nothing here").is_empty());
     }
 
-    // Ported: "extracts dependencies with --index-url short code" — pip_requirements/extract.spec.ts line 50
+    // Ported: "extracts dependencies with --index-url short code" — lib/modules/manager/pip_requirements/extract.spec.ts line 50
     #[test]
     fn index_url_short_code_skipped_package_extracted() {
         let content = "-i http://example.com/private-pypi/\nsome-package==0.3.1";
@@ -586,7 +586,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "==0.3.1");
     }
 
-    // Ported: "handles extras and complex index url" — pip_requirements/extract.spec.ts line 102
+    // Ported: "handles extras and complex index url" — lib/modules/manager/pip_requirements/extract.spec.ts line 102
     #[test]
     fn handles_extras_and_complex_index_url_registry() {
         let content = "--index-url https://artifactory.company.com/artifactory/api/pypi/python/simple --trusted-host artifactory.company.com --default-timeout 600\n\
@@ -601,7 +601,7 @@ mod tests {
         assert_eq!(package_file.deps.len(), 3);
     }
 
-    // Ported: "handles extra index url" — pip_requirements/extract.spec.ts line 111
+    // Ported: "handles extra index url" — lib/modules/manager/pip_requirements/extract.spec.ts line 111
     #[test]
     fn handles_extra_index_url() {
         let content = "--index-url https://artifactory.company.com/artifactory/api/pypi/python/simple --trusted-host artifactory.company.com --default-timeout 600\n\
@@ -624,7 +624,7 @@ mod tests {
         assert_eq!(package_file.deps.len(), 6);
     }
 
-    // Ported: "handles extra index url and defaults without index to config" — pip_requirements/extract.spec.ts line 123
+    // Ported: "handles extra index url and defaults without index to config" — lib/modules/manager/pip_requirements/extract.spec.ts line 123
     #[test]
     fn handles_extra_index_url_without_index_for_config_default() {
         let content = "--extra-index-url http://example.com/private-pypi/\n\
@@ -643,7 +643,7 @@ mod tests {
         assert_eq!(package_file.deps.len(), 6);
     }
 
-    // Ported: "handles extra index url and defaults without index to pypi" — pip_requirements/extract.spec.ts line 132
+    // Ported: "handles extra index url and defaults without index to pypi" — lib/modules/manager/pip_requirements/extract.spec.ts line 132
     #[test]
     fn handles_extra_index_url_without_index_for_pypi_default() {
         let content = "--extra-index-url http://example.com/private-pypi/\n\
@@ -662,7 +662,7 @@ mod tests {
         assert_eq!(package_file.deps.len(), 6);
     }
 
-    // Ported: "should not replace env vars in low trust mode" — pip_requirements/extract.spec.ts line 155
+    // Ported: "should not replace env vars in low trust mode" — lib/modules/manager/pip_requirements/extract.spec.ts line 155
     #[test]
     fn does_not_replace_env_vars_in_low_trust_mode() {
         let content = "--extra-index-url http://$PIP_TEST_TOKEN:example.com/private-pypi/\n\
@@ -682,7 +682,7 @@ mod tests {
         );
     }
 
-    // Ported: "should replace env vars in high trust mode" — pip_requirements/extract.spec.ts line 166
+    // Ported: "should replace env vars in high trust mode" — lib/modules/manager/pip_requirements/extract.spec.ts line 166
     #[test]
     fn replaces_env_vars_in_high_trust_mode() {
         let content = "--extra-index-url http://$PIP_TEST_TOKEN:example.com/private-pypi/\n\
@@ -702,7 +702,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles extra spaces around pinned dependency equal signs" — pip_requirements/extract.spec.ts line 141
+    // Ported: "handles extra spaces around pinned dependency equal signs" — lib/modules/manager/pip_requirements/extract.spec.ts line 141
     #[test]
     fn extra_spaces_around_equal_signs() {
         let content = "Django[argon2]==2.0.12\ncelery [redis]==4.1.1\nfoo [bar] == 3.2.1";
@@ -722,7 +722,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle hashes" — pip_requirements/extract.spec.ts line 178
+    // Ported: "should handle hashes" — lib/modules/manager/pip_requirements/extract.spec.ts line 178
     #[test]
     fn hash_continuation_lines_handled() {
         let content = "Django==1.9.1 \\\n    --hash=sha256:9f7ca04\nbgg==0.22.1 \\\n    --hash=sha256:e5172c3\nhtml2text==2016.1.8";
@@ -744,7 +744,7 @@ mod tests {
 
     // ── real-world fixture (from Renovate __fixtures__/requirements1.txt) ─────
 
-    // Ported: "extracts dependencies" — pip_requirements/extract.spec.ts line 43
+    // Ported: "extracts dependencies" — lib/modules/manager/pip_requirements/extract.spec.ts line 43
     #[test]
     fn requirements1_fixture() {
         let content = "--index-url http://example.com/private-pypi/\n\
@@ -766,7 +766,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts multiple dependencies" — pip_requirements/extract.spec.ts line 90
+    // Ported: "extracts multiple dependencies" — lib/modules/manager/pip_requirements/extract.spec.ts line 90
     #[test]
     fn requirements2_fixture() {
         let content = "Django==1\ndistribute==0.6.27\ndj-database-url==0.2\npsycopg2==2.4.5\nwsgiref==0.1.2\n";
@@ -774,7 +774,7 @@ mod tests {
         assert_eq!(deps.len(), 5);
     }
 
-    // Ported: "extracts --index-url flag" — modules/manager/pip_requirements/common.spec.ts line 5
+    // Ported: "extracts --index-url flag" — lib/modules/manager/pip_requirements/common.spec.ts line 5
     #[test]
     fn pip_flags_extracts_index_url() {
         let result = extract_package_file_flags("--index-url https://example.com/pypi");
@@ -782,7 +782,7 @@ mod tests {
         assert!(result.additional_registry_urls.is_empty());
     }
 
-    // Ported: "extracts --index-url short code" — modules/manager/pip_requirements/common.spec.ts line 15
+    // Ported: "extracts --index-url short code" — lib/modules/manager/pip_requirements/common.spec.ts line 15
     #[test]
     fn pip_flags_extracts_index_url_short_code() {
         let content = "-i http://example.com/private-pypi/\nsome-package==0.3.1";
@@ -793,7 +793,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts --extra-index-url flag" — modules/manager/pip_requirements/common.spec.ts line 27
+    // Ported: "extracts --extra-index-url flag" — lib/modules/manager/pip_requirements/common.spec.ts line 27
     #[test]
     fn pip_flags_extracts_extra_index_url() {
         let result = extract_package_file_flags("--extra-index-url https://example.com/pypi");
@@ -804,7 +804,7 @@ mod tests {
         assert!(result.registry_urls.is_empty());
     }
 
-    // Ported: "extracts --requirement short code option" — modules/manager/pip_requirements/common.spec.ts line 37
+    // Ported: "extracts --requirement short code option" — lib/modules/manager/pip_requirements/common.spec.ts line 37
     #[test]
     fn pip_flags_extracts_requirements_file() {
         let content = "-r base.txt\nsome-package==0.3.1";
@@ -812,7 +812,7 @@ mod tests {
         assert_eq!(result.requirements_files, vec!["base.txt"]);
     }
 
-    // Ported: "extracts --constraints short code option" — modules/manager/pip_requirements/common.spec.ts line 48
+    // Ported: "extracts --constraints short code option" — lib/modules/manager/pip_requirements/common.spec.ts line 48
     #[test]
     fn pip_flags_extracts_constraints_file() {
         let content = "-c constrain.txt\nsome-package==0.3.1";

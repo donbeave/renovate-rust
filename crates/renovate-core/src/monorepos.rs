@@ -206,7 +206,7 @@ pub fn rules_for_monorepo(name: &str) -> Vec<PackageRule> {
 mod tests {
     use super::*;
 
-    // Ported: "presets should have right name" — config/presets/internal/monorepos.spec.ts line 21
+    // Ported: "presets should have right name" — lib/config/presets/internal/monorepos.spec.ts line 21
     #[test]
     fn monorepo_preset_names_use_supported_slug_format() {
         let data = load_data().expect("embedded monorepo data must parse");

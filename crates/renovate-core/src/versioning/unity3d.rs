@@ -93,7 +93,7 @@ impl PartialOrd for UnityVersion {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/unity3d/index.spec.ts line 4
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/unity3d/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_unity3d_spec() {
         let cases = [
@@ -118,7 +118,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$input\") === $expected" — versioning/unity3d/index.spec.ts line 25
+    // Ported: "isStable(\"$input\") === $expected" — lib/modules/versioning/unity3d/index.spec.ts line 25
     #[test]
     fn is_stable_matches_renovate_unity3d_spec() {
         let cases = [
@@ -133,7 +133,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/unity3d/index.spec.ts line 35
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/unity3d/index.spec.ts line 35
     #[test]
     fn equals_matches_renovate_unity3d_spec() {
         let cases = [
@@ -164,7 +164,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/unity3d/index.spec.ts line 45
+    // Ported: "isGreaterThan($a, $b) === $expected" — lib/modules/versioning/unity3d/index.spec.ts line 45
     #[test]
     fn is_greater_than_matches_renovate_unity3d_spec() {
         let cases = [

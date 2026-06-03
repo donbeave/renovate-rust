@@ -181,7 +181,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "throws for error" — hexpm-bob/index.spec.ts line 9
+    // Ported: "throws for error" — lib/modules/datasource/hexpm-bob/index.spec.ts line 9
     #[tokio::test]
     async fn throws_for_network_error() {
         let server = MockServer::start().await;
@@ -196,7 +196,7 @@ mod tests {
         assert!(result.is_err(), "5xx should propagate as Err");
     }
 
-    // Ported: "returns null for 404" — hexpm-bob/index.spec.ts line 22
+    // Ported: "returns null for 404" — lib/modules/datasource/hexpm-bob/index.spec.ts line 22
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -213,7 +213,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty result" — hexpm-bob/index.spec.ts line 35
+    // Ported: "returns null for empty result" — lib/modules/datasource/hexpm-bob/index.spec.ts line 35
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -230,7 +230,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns empty list for empty 200 OK" — hexpm-bob/index.spec.ts line 48
+    // Ported: "returns empty list for empty 200 OK" — lib/modules/datasource/hexpm-bob/index.spec.ts line 48
     #[tokio::test]
     async fn returns_null_for_empty_200_ok() {
         let server = MockServer::start().await;
@@ -247,7 +247,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — hexpm-bob/index.spec.ts line 61
+    // Ported: "throws for 5xx" — lib/modules/datasource/hexpm-bob/index.spec.ts line 61
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -262,7 +262,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "processes real data" — hexpm-bob/index.spec.ts line 74
+    // Ported: "processes real data" — lib/modules/datasource/hexpm-bob/index.spec.ts line 74
     #[tokio::test]
     async fn processes_real_data_elixir() {
         let fixture = include_str!(
@@ -316,7 +316,7 @@ mod tests {
         assert!(v141_otp25.unwrap().is_stable);
     }
 
-    // Ported: "processes real data (erlang / ubuntu 20.04)" — hexpm-bob/index.spec.ts line 122
+    // Ported: "processes real data (erlang / ubuntu 20.04)" — lib/modules/datasource/hexpm-bob/index.spec.ts line 122
     #[tokio::test]
     async fn processes_real_data_erlang_ubuntu() {
         let fixture = include_str!(
@@ -359,7 +359,7 @@ mod tests {
         assert!(!maint.unwrap().is_stable);
     }
 
-    // Ported: "can override registry url" — hexpm-bob/index.spec.ts line 155
+    // Ported: "can override registry url" — lib/modules/datasource/hexpm-bob/index.spec.ts line 155
     #[tokio::test]
     async fn can_override_registry_url() {
         let fixture = include_str!(
@@ -384,7 +384,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty list for invalid package name" — hexpm-bob/index.spec.ts line 172
+    // Ported: "returns empty list for invalid package name" — lib/modules/datasource/hexpm-bob/index.spec.ts line 172
     #[tokio::test]
     async fn returns_null_for_invalid_package_name() {
         let http = HttpClient::new().unwrap();

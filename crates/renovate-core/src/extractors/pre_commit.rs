@@ -374,7 +374,7 @@ repos:
   - id: check-hooks-apply
 ";
 
-    // Ported: "extracts from complex config file correctly" — pre-commit/extract.spec.ts line 105
+    // Ported: "extracts from complex config file correctly" — lib/modules/manager/pre-commit/extract.spec.ts line 105
     #[test]
     fn extracts_github_hooks() {
         let deps = extract(SAMPLE);
@@ -395,7 +395,7 @@ repos:
         assert_eq!(black.current_value, "23.7.0");
     }
 
-    // Ported: "extracts from complex config file correctly" — pre-commit/extract.spec.ts line 105
+    // Ported: "extracts from complex config file correctly" — lib/modules/manager/pre-commit/extract.spec.ts line 105
     #[test]
     fn extracts_gitlab_hooks() {
         let deps = extract(SAMPLE);
@@ -408,7 +408,7 @@ repos:
         assert_eq!(gl[0].current_value, "6.0.0");
     }
 
-    // Ported: "extracts from complex config file correctly" — pre-commit/extract.spec.ts line 105
+    // Ported: "extracts from complex config file correctly" — lib/modules/manager/pre-commit/extract.spec.ts line 105
     #[test]
     fn skips_local_hooks() {
         let deps = extract(SAMPLE);
@@ -418,7 +418,7 @@ repos:
         assert!(local.is_some());
     }
 
-    // Ported: "extracts from complex config file correctly" — pre-commit/extract.spec.ts line 105
+    // Ported: "extracts from complex config file correctly" — lib/modules/manager/pre-commit/extract.spec.ts line 105
     #[test]
     fn skips_meta_hooks() {
         let deps = extract(SAMPLE);
@@ -428,7 +428,7 @@ repos:
         assert!(meta.is_some());
     }
 
-    // Ported: "extracts from complex config file correctly" — pre-commit/extract.spec.ts line 105
+    // Ported: "extracts from complex config file correctly" — lib/modules/manager/pre-commit/extract.spec.ts line 105
     #[test]
     fn total_dep_count() {
         let deps = extract(SAMPLE);
@@ -436,19 +436,19 @@ repos:
         assert_eq!(deps.len(), 5);
     }
 
-    // Ported: "returns null for empty yaml file content" — pre-commit/extract.spec.ts line 57
+    // Ported: "returns null for empty yaml file content" — lib/modules/manager/pre-commit/extract.spec.ts line 57
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for no repos" — pre-commit/extract.spec.ts line 68
+    // Ported: "returns null for no repos" — lib/modules/manager/pre-commit/extract.spec.ts line 68
     #[test]
     fn no_repos_section_returns_no_deps() {
         assert!(extract("default_language_version:\n  python: python3\n").is_empty());
     }
 
-    // Ported: "extracts from values.yaml correctly with same structure as \"pre-commit sample-config\"" — pre-commit/extract.spec.ts line 83
+    // Ported: "extracts from values.yaml correctly with same structure as \"pre-commit sample-config\"" — lib/modules/manager/pre-commit/extract.spec.ts line 83
     #[test]
     fn git_suffix_stripped() {
         let content = "repos:\n- repo: https://github.com/owner/myhook.git\n  rev: v1.0\n  hooks:\n  - id: hook\n";
@@ -456,7 +456,7 @@ repos:
         assert_eq!(deps[0].dep_name, "owner/myhook");
     }
 
-    // Ported: "can handle invalid private git repos" — pre-commit/extract.spec.ts line 183
+    // Ported: "can handle invalid private git repos" — lib/modules/manager/pre-commit/extract.spec.ts line 183
     #[test]
     fn unknown_registry_gets_skip_reason() {
         let content =
@@ -468,7 +468,7 @@ repos:
         );
     }
 
-    // Ported: "can handle private git repos" — pre-commit/extract.spec.ts line 161
+    // Ported: "can handle private git repos" — lib/modules/manager/pre-commit/extract.spec.ts line 161
     #[test]
     fn private_gitlab_host_uses_gitlab_tags_and_registry_url() {
         let content = "fail_fast: true\nrepos:\n  - repo: https://enterprise.com/pre-commit/pre-commit-hooks\n    rev: v1.0.0\n";
@@ -481,7 +481,7 @@ repos:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "can handle unknown private git repos" — pre-commit/extract.spec.ts line 200
+    // Ported: "can handle unknown private git repos" — lib/modules/manager/pre-commit/extract.spec.ts line 200
     #[test]
     fn private_git_host_without_provider_is_unknown_registry() {
         let content = "fail_fast: true\nrepos:\n  - repo: https://enterprise.com/pre-commit/pre-commit-hooks\n    rev: v1.0.0\n";
@@ -496,33 +496,33 @@ repos:
         );
     }
 
-    // Ported: "returns null for invalid yaml file content" — pre-commit/extract.spec.ts line 52
+    // Ported: "returns null for invalid yaml file content" — lib/modules/manager/pre-commit/extract.spec.ts line 52
     #[test]
     fn invalid_yaml_returns_empty() {
         assert!(extract("nothing here: [").is_empty());
     }
 
-    // Ported: "returns null for empty repos" — pre-commit/extract.spec.ts line 73
+    // Ported: "returns null for empty repos" — lib/modules/manager/pre-commit/extract.spec.ts line 73
     #[test]
     fn empty_repos_list_returns_empty() {
         assert!(extract("repos: []\n").is_empty());
     }
 
-    // Ported: "returns null for invalid repo" — pre-commit/extract.spec.ts line 78
+    // Ported: "returns null for invalid repo" — lib/modules/manager/pre-commit/extract.spec.ts line 78
     #[test]
     fn repo_entry_without_repo_key_returns_empty() {
         let content = "repos:\n- hooks:\n  - id: some-hook\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for no file content" — pre-commit/extract.spec.ts line 62
+    // Ported: "returns null for no file content" — lib/modules/manager/pre-commit/extract.spec.ts line 62
     #[test]
     fn null_content_returns_empty() {
         // TypeScript passes null; Rust equivalent is empty string.
         assert!(extract("").is_empty());
     }
 
-    // Ported: "can handle pinned repo versions" — pre-commit/extract.spec.ts line 220
+    // Ported: "can handle pinned repo versions" — lib/modules/manager/pre-commit/extract.spec.ts line 220
     #[test]
     fn frozen_digest_rev_extracts_version_and_digest() {
         let content = r#"failfast: true

@@ -272,7 +272,7 @@ mod tests {
     use super::*;
     use crate::extractors::terraform;
 
-    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
+    // Ported: "extracts terragrunt sources" — lib/modules/manager/terragrunt/extract.spec.ts line 51
     #[test]
     fn extracts_github_ref_source() {
         let content = r#"
@@ -292,7 +292,7 @@ terraform {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts terragrunt sources using tfr protocol" — terragrunt/extract.spec.ts line 10
+    // Ported: "extracts terragrunt sources using tfr protocol" — lib/modules/manager/terragrunt/extract.spec.ts line 10
     #[test]
     fn extracts_tfr_protocol_sources() {
         let content = r#"
@@ -353,7 +353,7 @@ terraform {
         assert_eq!(deps[5].current_value, "1.0.0");
     }
 
-    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
+    // Ported: "extracts terragrunt sources" — lib/modules/manager/terragrunt/extract.spec.ts line 51
     #[test]
     fn extracts_git_prefix_github() {
         let content = r#"
@@ -370,7 +370,7 @@ terraform {
         assert_eq!(deps[0].current_value, "v1.0.0");
     }
 
-    // Ported: "extracts terragrunt sources with depth specified after the branch" — terragrunt/extract.spec.ts line 269
+    // Ported: "extracts terragrunt sources with depth specified after the branch" — lib/modules/manager/terragrunt/extract.spec.ts line 269
     #[test]
     fn extracts_sources_with_depth_after_ref() {
         let content = r#"
@@ -399,7 +399,7 @@ terraform {
         assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
     }
 
-    // Ported: "extracts terragrunt sources with depth specified before the branch" — terragrunt/extract.spec.ts line 487
+    // Ported: "extracts terragrunt sources with depth specified before the branch" — lib/modules/manager/terragrunt/extract.spec.ts line 487
     #[test]
     fn extracts_sources_with_depth_before_ref() {
         let content = r#"
@@ -428,7 +428,7 @@ terraform {
         assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
     }
 
-    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
+    // Ported: "extracts terragrunt sources" — lib/modules/manager/terragrunt/extract.spec.ts line 51
     #[test]
     fn local_path_skipped() {
         let content = r#"
@@ -441,7 +441,7 @@ terraform {
         assert_eq!(deps[0].skip_reason, Some(TerragruntSkipReason::Local));
     }
 
-    // Ported: "extracts terragrunt sources" — terragrunt/extract.spec.ts line 51
+    // Ported: "extracts terragrunt sources" — lib/modules/manager/terragrunt/extract.spec.ts line 51
     #[test]
     fn multiple_terraform_blocks() {
         let content = r#"
@@ -459,7 +459,7 @@ terraform {
         assert_eq!(deps[1].current_value, "v2.0.0");
     }
 
-    // Ported: "returns null for empty" — terragrunt/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/terragrunt/extract.spec.ts line 6
     #[test]
     fn no_terraform_block_returns_empty() {
         assert!(extract("# just a comment\n").is_empty());
@@ -467,7 +467,7 @@ terraform {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null if only local terragrunt deps" — terragrunt/extract.spec.ts line 698
+    // Ported: "returns null if only local terragrunt deps" — lib/modules/manager/terragrunt/extract.spec.ts line 698
     #[test]
     fn local_only_deps_returns_empty() {
         // `terragrunt {` block is not recognized (only `terraform {`) → empty.
@@ -478,14 +478,14 @@ terraform {
         assert_eq!(deps[0].skip_reason, Some(TerragruntSkipReason::Local));
     }
 
-    // Ported: "returns empty deps if only local terragrunt includes" — terragrunt/extract.spec.ts line 707
+    // Ported: "returns empty deps if only local terragrunt includes" — lib/modules/manager/terragrunt/extract.spec.ts line 707
     #[test]
     fn include_block_only_returns_empty() {
         let content = "include \"root\" {\n  path = find_in_parent_folders(\"root.hcl\")\n}\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should split project and tag from source" — modules/manager/terragrunt/modules.spec.ts line 11
+    // Ported: "should split project and tag from source" — lib/modules/manager/terragrunt/modules.spec.ts line 11
     #[test]
     fn github_ref_regex_splits_project_and_tag() {
         let source = "github.com/hashicorp/example?ref=v1.0.0";
@@ -494,7 +494,7 @@ terraform {
         assert_eq!(&cap["tag"], "v1.0.0");
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 21
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — lib/modules/manager/terragrunt/modules.spec.ts line 21
     #[test]
     fn github_ref_regex_parses_complex_repo_names() {
         let source = "github.com/hashicorp/example.repo-123?ref=v1.0.0";
@@ -503,7 +503,7 @@ terraform {
         assert_eq!(&cap["tag"], "v1.0.0");
     }
 
-    // Ported: "should split host, path and tag from source" — modules/manager/terragrunt/modules.spec.ts line 33
+    // Ported: "should split host, path and tag from source" — lib/modules/manager/terragrunt/modules.spec.ts line 33
     #[test]
     fn git_ref_regex_splits_host_path_and_tag() {
         for prefix in &["http://", "https://", "ssh://"] {
@@ -514,7 +514,7 @@ terraform {
         }
     }
 
-    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — modules/manager/terragrunt/modules.spec.ts line 61
+    // Ported: "should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names" — lib/modules/manager/terragrunt/modules.spec.ts line 61
     #[test]
     fn git_ref_regex_parses_complex_repo_path() {
         for prefix in &["http://", "https://", "ssh://"] {
@@ -525,25 +525,25 @@ terraform {
         }
     }
 
-    // Ported: "returns terraform" — modules/manager/terragrunt/util.spec.ts line 5
+    // Ported: "returns terraform" — lib/modules/manager/terragrunt/util.spec.ts line 5
     #[test]
     fn get_dependency_type_returns_terraform() {
         assert_eq!(get_terragrunt_dependency_type("terraform"), "terraform");
     }
 
-    // Ported: "returns unknown" — modules/manager/terragrunt/util.spec.ts line 9
+    // Ported: "returns unknown" — lib/modules/manager/terragrunt/util.spec.ts line 9
     #[test]
     fn get_dependency_type_returns_unknown() {
         assert_eq!(get_terragrunt_dependency_type("unknown"), "unknown");
     }
 
-    // Ported: "returns unknown on empty string" — modules/manager/terragrunt/util.spec.ts line 13
+    // Ported: "returns unknown on empty string" — lib/modules/manager/terragrunt/util.spec.ts line 13
     #[test]
     fn get_dependency_type_returns_unknown_for_empty() {
         assert_eq!(get_terragrunt_dependency_type(""), "unknown");
     }
 
-    // Ported: "returns unknown on string with random chars" — modules/manager/terragrunt/util.spec.ts line 17
+    // Ported: "returns unknown on string with random chars" — lib/modules/manager/terragrunt/util.spec.ts line 17
     #[test]
     fn get_dependency_type_returns_unknown_for_random() {
         assert_eq!(
@@ -552,7 +552,7 @@ terraform {
         );
     }
 
-    // Ported: "sets skipReason for invalid git tags URL" — terragrunt/modules.spec.ts line 89
+    // Ported: "sets skipReason for invalid git tags URL" — lib/modules/manager/terragrunt/modules.spec.ts line 89
     #[test]
     fn sets_skip_reason_for_invalid_git_tags_url() {
         let content = r#"
@@ -567,7 +567,7 @@ terraform {
 
     // ── update_terragrunt_artifacts (terragrunt/artifacts.spec.ts) ────────────
 
-    // Ported: "does not call terraform updateArtifacts if the update type is %s" — terragrunt/artifacts.spec.ts line 58
+    // Ported: "does not call terraform updateArtifacts if the update type is %s" — lib/modules/manager/terragrunt/artifacts.spec.ts line 58
     #[tokio::test]
     async fn update_artifacts_returns_null_for_non_lockfile_maintenance() {
         let tmp = std::env::temp_dir();
@@ -581,7 +581,7 @@ terraform {
         assert!(result.is_none());
     }
 
-    // Ported: "calls terraform updateArtifacts if the update type is lockfileMaintenance" — terragrunt/artifacts.spec.ts line 40
+    // Ported: "calls terraform updateArtifacts if the update type is lockfileMaintenance" — lib/modules/manager/terragrunt/artifacts.spec.ts line 40
     #[tokio::test]
     async fn update_artifacts_delegates_to_terraform_on_lockfile_maintenance() {
         let tmp = tempfile::tempdir().unwrap();

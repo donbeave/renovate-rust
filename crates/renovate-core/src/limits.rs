@@ -230,7 +230,7 @@ mod tests {
         f();
     }
 
-    // Ported: "increments limited value" — workers/global/limits.spec.ts line 23
+    // Ported: "increments limited value" — lib/workers/global/limits.spec.ts line 23
     #[test]
     fn increments_limited_value() {
         clean(|| {
@@ -245,7 +245,7 @@ mod tests {
         });
     }
 
-    // Ported: "defaults to unlimited" — workers/global/limits.spec.ts line 38
+    // Ported: "defaults to unlimited" — lib/workers/global/limits.spec.ts line 38
     #[test]
     fn defaults_to_unlimited() {
         clean(|| {
@@ -253,7 +253,7 @@ mod tests {
         });
     }
 
-    // Ported: "increments undefined" — workers/global/limits.spec.ts line 42
+    // Ported: "increments undefined" — lib/workers/global/limits.spec.ts line 42
     #[test]
     fn increments_undefined() {
         clean(|| {
@@ -262,7 +262,7 @@ mod tests {
         });
     }
 
-    // Ported: "resets counter" — workers/global/limits.spec.ts line 47
+    // Ported: "resets counter" — lib/workers/global/limits.spec.ts line 47
     #[test]
     fn resets_counter() {
         clean(|| {
@@ -274,7 +274,7 @@ mod tests {
         });
     }
 
-    // Ported: "resets limit" — workers/global/limits.spec.ts line 55
+    // Ported: "resets limit" — lib/workers/global/limits.spec.ts line 55
     #[test]
     fn resets_limit() {
         clean(|| {
@@ -286,7 +286,7 @@ mod tests {
         });
     }
 
-    // Ported: "sets non-positive limit as reached" — workers/global/limits.spec.ts line 63
+    // Ported: "sets non-positive limit as reached" — lib/workers/global/limits.spec.ts line 63
     #[test]
     fn sets_non_positive_limit_as_reached() {
         clean(|| {
@@ -310,7 +310,7 @@ mod tests {
         }]
     }
 
-    // Ported: "handles single upgrade" — workers/global/limits.spec.ts line 71
+    // Ported: "handles single upgrade" — lib/workers/global/limits.spec.ts line 71
     #[test]
     fn calc_limit_handles_single_upgrade() {
         let upgrades = single_upgrade(Some(10), BranchConcurrentLimit::Value(11), Some(12));
@@ -319,7 +319,7 @@ mod tests {
         assert_eq!(calc_limit(&upgrades, LimitName::PrConcurrentLimit), 12);
     }
 
-    // Ported: "inherits prConcurrentLimit if branchConcurrentLimit is null" — workers/global/limits.spec.ts line 85
+    // Ported: "inherits prConcurrentLimit if branchConcurrentLimit is null" — lib/workers/global/limits.spec.ts line 85
     #[test]
     fn calc_limit_inherits_pr_concurrent_when_branch_is_null() {
         let upgrades = single_upgrade(Some(10), BranchConcurrentLimit::Null, Some(12));
@@ -328,7 +328,7 @@ mod tests {
         assert_eq!(calc_limit(&upgrades, LimitName::PrConcurrentLimit), 12);
     }
 
-    // Ported: "returns 0 if at least one upgrade has no limit in the branch" — workers/global/limits.spec.ts line 99
+    // Ported: "returns 0 if at least one upgrade has no limit in the branch" — lib/workers/global/limits.spec.ts line 99
     #[test]
     fn calc_limit_returns_zero_when_any_upgrade_has_no_limit() {
         let upgrades = vec![
@@ -356,7 +356,7 @@ mod tests {
         assert_eq!(calc_limit(&upgrades, LimitName::PrConcurrentLimit), 0);
     }
 
-    // Ported: "computes the lowest limit if multiple limits are present" — workers/global/limits.spec.ts line 123
+    // Ported: "computes the lowest limit if multiple limits are present" — lib/workers/global/limits.spec.ts line 123
     #[test]
     fn calc_limit_computes_lowest() {
         let upgrades = vec![
@@ -405,7 +405,7 @@ mod tests {
         assert_eq!(calc_limit(&upgrades, LimitName::PrConcurrentLimit), 1);
     }
 
-    // Ported: "de-duplicates upgrades by depName from debug log" — workers/global/limits.spec.ts line 165
+    // Ported: "de-duplicates upgrades by depName from debug log" — lib/workers/global/limits.spec.ts line 165
     #[test]
     fn calc_limit_dedup_by_dep_name_return_value() {
         // Note: logger assertion (debug call) not ported — Rust has no mock logger.
@@ -429,7 +429,7 @@ mod tests {
         assert_eq!(calc_limit(&upgrades, LimitName::PrHourlyLimit), 1);
     }
 
-    // Ported: "handles single limit" — workers/global/limits.spec.ts line 195
+    // Ported: "handles single limit" — lib/workers/global/limits.spec.ts line 195
     #[test]
     fn has_multiple_limits_single_upgrade() {
         let upgrades = single_upgrade(Some(10), BranchConcurrentLimit::Value(11), Some(12));
@@ -444,7 +444,7 @@ mod tests {
         ));
     }
 
-    // Ported: "returns false if there are multiple limits with value" — workers/global/limits.spec.ts line 208
+    // Ported: "returns false if there are multiple limits with value" — lib/workers/global/limits.spec.ts line 208
     #[test]
     fn has_multiple_limits_same_values() {
         let row = UpgradeConfig {
@@ -465,7 +465,7 @@ mod tests {
         ));
     }
 
-    // Ported: "handles multiple limits" — workers/global/limits.spec.ts line 226
+    // Ported: "handles multiple limits" — lib/workers/global/limits.spec.ts line 226
     #[test]
     fn has_multiple_limits_different_values() {
         let upgrades = vec![
@@ -523,7 +523,7 @@ mod tests {
         ]
     }
 
-    // Ported: "returns false based on concurrent limits" — workers/global/limits.spec.ts line 251
+    // Ported: "returns false based on concurrent limits" — lib/workers/global/limits.spec.ts line 251
     #[test]
     fn is_limit_reached_returns_false_concurrent() {
         clean(|| {
@@ -536,7 +536,7 @@ mod tests {
         });
     }
 
-    // Ported: "returns true when pr hourly limit is reached" — workers/global/limits.spec.ts line 280
+    // Ported: "returns true when pr hourly limit is reached" — lib/workers/global/limits.spec.ts line 280
     #[test]
     fn is_limit_reached_true_pr_hourly() {
         clean(|| {
@@ -569,7 +569,7 @@ mod tests {
         });
     }
 
-    // Ported: "returns true when concurrent limit is reached" — workers/global/limits.spec.ts line 309
+    // Ported: "returns true when concurrent limit is reached" — lib/workers/global/limits.spec.ts line 309
     #[test]
     fn is_limit_reached_true_concurrent() {
         clean(|| {
@@ -602,7 +602,7 @@ mod tests {
         });
     }
 
-    // Ported: "commit hourly limit only affects HourlyCommits check" — workers/global/limits.spec.ts line 338
+    // Ported: "commit hourly limit only affects HourlyCommits check" — lib/workers/global/limits.spec.ts line 338
     #[test]
     fn commit_hourly_limit_only_affects_hourly_commits() {
         clean(|| {
@@ -626,7 +626,7 @@ mod tests {
         });
     }
 
-    // Ported: "commit hourly limit does not block branch or PR checks" — workers/global/limits.spec.ts line 362
+    // Ported: "commit hourly limit does not block branch or PR checks" — lib/workers/global/limits.spec.ts line 362
     #[test]
     fn commit_hourly_limit_does_not_block_branch_or_pr() {
         clean(|| {

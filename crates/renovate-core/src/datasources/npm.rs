@@ -733,10 +733,10 @@ mod tests {
         assert!(matches!(result, Err(NpmError::Parse(_))));
     }
 
-    // Ported: "should throw error for 429" — datasource/npm/index.spec.ts line 229
-    // Ported: "should throw error for 5xx" — datasource/npm/index.spec.ts line 236
-    // Ported: "should throw error for 408" — datasource/npm/index.spec.ts line 243
-    // Ported: "should throw error for others" — datasource/npm/index.spec.ts line 250
+    // Ported: "should throw error for 429" — lib/modules/datasource/npm/index.spec.ts line 229
+    // Ported: "should throw error for 5xx" — lib/modules/datasource/npm/index.spec.ts line 236
+    // Ported: "should throw error for 408" — lib/modules/datasource/npm/index.spec.ts line 243
+    // Ported: "should throw error for others" — lib/modules/datasource/npm/index.spec.ts line 250
     #[tokio::test]
     async fn fetch_versions_non_success_statuses_return_error() {
         for status in [429, 503, 408, 451] {

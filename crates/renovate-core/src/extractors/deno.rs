@@ -538,7 +538,7 @@ mod tests {
         }
     }
 
-    // Ported: "updates dependency in imports" — deno/update.spec.ts line 9
+    // Ported: "updates dependency in imports" — lib/modules/manager/deno/update.spec.ts line 9
     #[test]
     fn deno_update_imports() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.223.0/fs/mod.ts"}}"#;
@@ -557,7 +557,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws when multiple imports require more than one replacement" — deno/update.spec.ts line 39
+    // Ported: "throws when multiple imports require more than one replacement" — lib/modules/manager/deno/update.spec.ts line 39
     #[test]
     fn deno_update_imports_multiple_returns_none() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.223.0/fs/mod.ts","path":"https://deno.land/std@0.223.0/path/mod.ts"}}"#;
@@ -573,7 +573,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "updates dependency in scopes" — deno/update.spec.ts line 64
+    // Ported: "updates dependency in scopes" — lib/modules/manager/deno/update.spec.ts line 64
     #[test]
     fn deno_update_scopes() {
         let content = r#"{"scopes":{"https://deno.land/x/":{"dep2":"jsr:@scope/dep1@latest"}}}"#;
@@ -588,7 +588,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when scopes element not found" — deno/update.spec.ts line 98
+    // Ported: "returns null when scopes element not found" — lib/modules/manager/deno/update.spec.ts line 98
     #[test]
     fn deno_update_scopes_not_found() {
         let content = r#"{"scopes":{"https://deno.land/x/":{"dep2":"jsr:@scope/other@latest"}}}"#;
@@ -597,7 +597,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "updates dependency in tasks" — deno/update.spec.ts line 127
+    // Ported: "updates dependency in tasks" — lib/modules/manager/deno/update.spec.ts line 127
     #[test]
     fn deno_update_tasks() {
         let content = r#"{"tasks":{"build":"deno run npm:esbuild@0.20.0 main.ts"}}"#;
@@ -610,7 +610,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when tasks element not found" — deno/update.spec.ts line 191
+    // Ported: "returns null when tasks element not found" — lib/modules/manager/deno/update.spec.ts line 191
     #[test]
     fn deno_update_tasks_not_found() {
         let content = r#"{"tasks":{"build":"deno run npm:other@0.20.0 main.ts"}}"#;
@@ -619,7 +619,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "updates dependency in compilerOptions.types" — deno/update.spec.ts line 251
+    // Ported: "updates dependency in compilerOptions.types" — lib/modules/manager/deno/update.spec.ts line 251
     #[test]
     fn deno_update_compiler_types() {
         let content = r#"{"compilerOptions":{"types":["npm:jest@29.0.0"]}}"#;
@@ -632,7 +632,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when compilerOptions.types is empty array" — deno/update.spec.ts line 281
+    // Ported: "returns null when compilerOptions.types is empty array" — lib/modules/manager/deno/update.spec.ts line 281
     #[test]
     fn deno_update_compiler_types_empty() {
         let content = r#"{"compilerOptions":{"types":[]}}"#;
@@ -641,7 +641,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "updates dependency in compilerOptions.jsxImportSource" — deno/update.spec.ts line 335
+    // Ported: "updates dependency in compilerOptions.jsxImportSource" — lib/modules/manager/deno/update.spec.ts line 335
     #[test]
     fn deno_update_jsx_import_source() {
         let content = r#"{"compilerOptions":{"jsxImportSource":"npm:preact@10.22.0"}}"#;
@@ -662,7 +662,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates dependency in lint plugins" — deno/update.spec.ts line 453
+    // Ported: "updates dependency in lint plugins" — lib/modules/manager/deno/update.spec.ts line 453
     #[test]
     fn deno_update_lint_plugins() {
         let content = r#"{"lint":{"plugins":["jsr:@scope/plugin@1.0.0"]}}"#;
@@ -675,7 +675,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if packageFile is not defined" — deno/update.spec.ts line 563
+    // Ported: "returns null if packageFile is not defined" — lib/modules/manager/deno/update.spec.ts line 563
     #[test]
     fn deno_update_no_package_file() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.223.0/fs/mod.ts"}}"#;
@@ -691,7 +691,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles the case where the desired version is already supported" — deno/update.spec.ts line 689
+    // Ported: "handles the case where the desired version is already supported" — lib/modules/manager/deno/update.spec.ts line 689
     #[test]
     fn deno_update_already_at_version() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.224.0/fs/mod.ts"}}"#;
@@ -715,7 +715,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns null if empty file" — deno/update.spec.ts line 712
+    // Ported: "returns null if empty file" — lib/modules/manager/deno/update.spec.ts line 712
     #[test]
     fn deno_update_empty_file() {
         let upgrade = mk_deno_upgrade(
@@ -729,7 +729,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles error during update gracefully" — deno/update.spec.ts line 731
+    // Ported: "handles error during update gracefully" — lib/modules/manager/deno/update.spec.ts line 731
     #[test]
     fn deno_update_invalid_json_returns_none() {
         let upgrade = mk_deno_upgrade(
@@ -743,7 +743,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for not supported datasource" — deno/update.spec.ts line 575
+    // Ported: "returns null for not supported datasource" — lib/modules/manager/deno/update.spec.ts line 575
     #[test]
     fn deno_update_unsupported_datasource() {
         let content = r#"{"imports":{"fs":"https://deno.land/std@0.223.0/fs/mod.ts"}}"#;
@@ -751,7 +751,7 @@ mod tests {
         let result = deno_update_dependency(content, &upgrade);
         assert!(result.is_none());
     }
-    // Ported: "updates dependency in tasks.command" — deno/update.spec.ts line 158
+    // Ported: "updates dependency in tasks.command" — lib/modules/manager/deno/update.spec.ts line 158
     #[test]
     fn deno_update_tasks_command() {
         let content = r#"{"tasks":{"build":"deno run -A npm:dep1@4.0.0","dev":{"command":"deno run --allow-net npm:dep2@14.0.1"}}}"#;
@@ -764,7 +764,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when tasks.command element not found" — deno/update.spec.ts line 221
+    // Ported: "returns null when tasks.command element not found" — lib/modules/manager/deno/update.spec.ts line 221
     #[test]
     fn deno_update_tasks_command_not_found() {
         let content = r#"{"tasks":{"build":"deno run -A npm:dep1@4.0.0","dev":{"command":"deno run --allow-net npm:dep2@14.0.1"}}}"#;
@@ -773,7 +773,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null when compilerOptions.types element not found" — deno/update.spec.ts line 308
+    // Ported: "returns null when compilerOptions.types element not found" — lib/modules/manager/deno/update.spec.ts line 308
     #[test]
     fn deno_update_compiler_types_not_found() {
         let content = r#"{"compilerOptions":{"types":["npm:@types/other@18.0.0"]}}"#;
@@ -788,7 +788,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null when compilerOptions.jsxImportSource does not exist" — deno/update.spec.ts line 367
+    // Ported: "returns null when compilerOptions.jsxImportSource does not exist" — lib/modules/manager/deno/update.spec.ts line 367
     #[test]
     fn deno_update_jsx_import_source_not_found() {
         let content = r#"{"compilerOptions":{"types":["npm:@types/dep2@18.0.0"]}}"#;
@@ -803,7 +803,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null when compilerOptions.jsxImportSourceTypes does not exist" — deno/update.spec.ts line 394
+    // Ported: "returns null when compilerOptions.jsxImportSourceTypes does not exist" — lib/modules/manager/deno/update.spec.ts line 394
     #[test]
     fn deno_update_jsx_import_source_types_not_found() {
         let content = r#"{"compilerOptions":{"types":["npm:@types/dep2@18.0.0"]}}"#;
@@ -818,7 +818,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "updates dependency in compilerOptions.jsxImportSourceTypes" — deno/update.spec.ts line 421
+    // Ported: "updates dependency in compilerOptions.jsxImportSourceTypes" — lib/modules/manager/deno/update.spec.ts line 421
     #[test]
     fn deno_update_jsx_import_source_types() {
         let content = r#"{"compilerOptions":{"jsxImportSourceTypes":"npm:@types/dep2@18.0.0"}}"#;
@@ -839,7 +839,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when lint.plugins element not found" — deno/update.spec.ts line 481
+    // Ported: "returns null when lint.plugins element not found" — lib/modules/manager/deno/update.spec.ts line 481
     #[test]
     fn deno_update_lint_plugins_not_found() {
         let content = r#"{"lint":{"plugins":["npm:dep2@5.0.0"]}}"#;
@@ -848,7 +848,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null when lint.plugins is empty array" — deno/update.spec.ts line 508
+    // Ported: "returns null when lint.plugins is empty array" — lib/modules/manager/deno/update.spec.ts line 508
     #[test]
     fn deno_update_lint_plugins_empty() {
         let content = r#"{"lint":{"plugins":[]}}"#;
@@ -857,7 +857,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles dependency without version" — deno/update.spec.ts line 535
+    // Ported: "handles dependency without version" — lib/modules/manager/deno/update.spec.ts line 535
     #[test]
     fn deno_update_dep_without_version() {
         let content = r#"{"imports":{"dep1":"npm:dep1"}}"#;
@@ -871,7 +871,7 @@ mod tests {
         );
     }
 
-    // Ported: "currentValue is not defined when deno datasource" — deno/update.spec.ts line 602
+    // Ported: "currentValue is not defined when deno datasource" — lib/modules/manager/deno/update.spec.ts line 602
     #[test]
     fn deno_update_no_current_value_deno() {
         let content = r#"{"imports":{"fs":"https://deno.land/std/fs"}}"#;
@@ -886,7 +886,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for missing required values" — deno/update.spec.ts line 629
+    // Ported: "returns null for missing required values" — lib/modules/manager/deno/update.spec.ts line 629
     #[test]
     fn deno_update_missing_required_values() {
         let upgrade = DenoUpdateUpgrade {
@@ -899,7 +899,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles complex JSON with nested structures" — deno/update.spec.ts line 648
+    // Ported: "handles complex JSON with nested structures" — lib/modules/manager/deno/update.spec.ts line 648
     #[test]
     fn deno_update_complex_json() {
         let content =
@@ -1005,7 +1005,7 @@ mod tests {
         assert!(get_locked_version(&dep, &lock).is_none());
     }
 
-    // Ported: "get exact lockedVersion" — deno/post.spec.ts line 139
+    // Ported: "get exact lockedVersion" — lib/modules/manager/deno/post.spec.ts line 139
     #[test]
     fn get_locked_version_jsr_exact() {
         let lock = DenoLockFile {
@@ -1026,7 +1026,7 @@ mod tests {
         assert_eq!(get_locked_version(&dep, &lock), Some("1.2.3".to_owned()));
     }
 
-    // Ported: "get latest lockedVersion" — deno/post.spec.ts line 155
+    // Ported: "get latest lockedVersion" — lib/modules/manager/deno/post.spec.ts line 155
     #[test]
     fn get_locked_version_jsr_wildcard() {
         let lock = DenoLockFile {
@@ -1098,7 +1098,7 @@ mod tests {
         assert_eq!(pkgs[0].deps[0].locked_version, Some("4.18.2".to_owned()));
     }
 
-    // Ported: "should handle lock file with no lockFiles" — deno/post.spec.ts line 506
+    // Ported: "should handle lock file with no lockFiles" — lib/modules/manager/deno/post.spec.ts line 506
     #[test]
     fn apply_locked_versions_no_lock_files() {
         let mut pkgs = vec![DenoPackageFilePost {
@@ -1118,7 +1118,7 @@ mod tests {
         assert!(pkgs[0].deps[0].locked_version.is_none());
     }
 
-    // Ported: "should use lock file cache for multiple packages" — deno/post.spec.ts line 532
+    // Ported: "should use lock file cache for multiple packages" — lib/modules/manager/deno/post.spec.ts line 532
     #[test]
     fn apply_locked_versions_uses_cache() {
         let _lock = DenoLockFile {

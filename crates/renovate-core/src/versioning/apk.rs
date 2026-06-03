@@ -378,7 +378,7 @@ pub fn get_new_value(current_value: &str, new_version: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "isValid($version) === $expected" — versioning/apk/index.spec.ts line 5
+    // Ported: "isValid($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 5
     #[test]
     fn is_valid_matches_renovate_apk_index_spec() {
         assert!(is_valid("2.39.0-r0"));
@@ -389,7 +389,7 @@ mod tests {
         assert!(is_valid("6.5_p20250503-r0"));
     }
 
-    // Ported: "isStable($version) === $expected" — versioning/apk/index.spec.ts line 19
+    // Ported: "isStable($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 19
     #[test]
     fn is_stable_matches_renovate_apk_index_spec() {
         assert!(is_stable("2.39.0-r0"));
@@ -408,21 +408,21 @@ mod tests {
         assert!(!is_stable("5.0_beta-r0"));
     }
 
-    // Ported: "getMajor($version) === $expected" — versioning/apk/index.spec.ts line 41
+    // Ported: "getMajor($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 41
     #[test]
     fn get_major_matches_renovate_apk_index_spec() {
         assert_eq!(get_major("2.39.0-r0"), Some(2));
         assert_eq!(get_major("2.39.0_rc1-r0"), Some(2));
     }
 
-    // Ported: "getMinor($version) === $expected" — versioning/apk/index.spec.ts line 51
+    // Ported: "getMinor($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 51
     #[test]
     fn get_minor_matches_renovate_apk_index_spec() {
         assert_eq!(get_minor("2.39.0-r0"), Some(39));
         assert_eq!(get_minor("2.39.0_rc1-r0"), Some(39));
     }
 
-    // Ported: "getPatch($version) === $expected" — versioning/apk/index.spec.ts line 61
+    // Ported: "getPatch($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 61
     #[test]
     fn get_patch_matches_renovate_apk_index_spec() {
         assert_eq!(get_patch("2.39.0-r0"), Some(0));
@@ -432,7 +432,7 @@ mod tests {
         assert_eq!(get_patch("0.3.4_pre20061029"), Some(4));
     }
 
-    // Ported: "compare($a, $b) === $expected" — versioning/apk/index.spec.ts line 74
+    // Ported: "compare($a, $b) === $expected" — lib/modules/versioning/apk/index.spec.ts line 74
     #[test]
     fn compare_matches_renovate_apk_index_spec() {
         assert_eq!(sort_versions("2.39.0-r1", "2.39.0-r0").signum(), 1);
@@ -472,7 +472,7 @@ mod tests {
         assert_eq!(sort_versions("0.3.4_beta", "0.3.4_alpha").signum(), 1);
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/apk/index.spec.ts line 102
+    // Ported: "isGreaterThan($a, $b) === $expected" — lib/modules/versioning/apk/index.spec.ts line 102
     #[test]
     fn is_greater_than_matches_renovate_apk_index_spec() {
         assert!(is_greater_than("2.39.1-r0", "2.39.0-r0"));
@@ -482,7 +482,7 @@ mod tests {
         assert!(is_greater_than("1.4_p12-r5", "1.4_p12-r2"));
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/apk/index.spec.ts line 115
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/apk/index.spec.ts line 115
     #[test]
     fn equals_matches_renovate_apk_index_spec() {
         assert!(equals("2.39.0-r0", "2.39.0-r0"));
@@ -491,7 +491,7 @@ mod tests {
         assert!(!equals("2.39.0", "2.39.1"));
     }
 
-    // Ported: "getSatisfyingVersion with exact match ($range) === $expected" — versioning/apk/index.spec.ts line 136
+    // Ported: "getSatisfyingVersion with exact match ($range) === $expected" — lib/modules/versioning/apk/index.spec.ts line 136
     #[test]
     fn get_satisfying_version_exact_matches_renovate_apk_index_spec() {
         let versions = &[
@@ -517,7 +517,7 @@ mod tests {
         assert_eq!(get_satisfying_version(versions, "nonexistent"), None);
     }
 
-    // Ported: "getSatisfyingVersion with range operator ($range) === $expected" — versioning/apk/index.spec.ts line 149
+    // Ported: "getSatisfyingVersion with range operator ($range) === $expected" — lib/modules/versioning/apk/index.spec.ts line 149
     #[test]
     fn get_satisfying_version_range_operator_matches_renovate_apk_index_spec() {
         let versions = &[
@@ -554,7 +554,7 @@ mod tests {
         );
     }
 
-    // Ported: "getSatisfyingVersion with tilde range ($range) === $expected" — versioning/apk/index.spec.ts line 164
+    // Ported: "getSatisfyingVersion with tilde range ($range) === $expected" — lib/modules/versioning/apk/index.spec.ts line 164
     #[test]
     fn get_satisfying_version_tilde_matches_renovate_apk_index_spec() {
         let versions = &[
@@ -575,7 +575,7 @@ mod tests {
         );
     }
 
-    // Ported: "should return null for invalid range operators" — versioning/apk/index.spec.ts line 175
+    // Ported: "should return null for invalid range operators" — lib/modules/versioning/apk/index.spec.ts line 175
     #[test]
     fn get_satisfying_version_null_invalid_range_matches_renovate_apk_index_spec() {
         let versions = &[
@@ -589,13 +589,13 @@ mod tests {
         assert_eq!(get_satisfying_version(versions, "invalid-range"), None);
     }
 
-    // Ported: "should return null for empty versions array" — versioning/apk/index.spec.ts line 179
+    // Ported: "should return null for empty versions array" — lib/modules/versioning/apk/index.spec.ts line 179
     #[test]
     fn get_satisfying_version_null_empty_array_matches_renovate_apk_index_spec() {
         assert_eq!(get_satisfying_version(&[], "2.39.0-r0"), None);
     }
 
-    // Ported: "should filter out invalid versions" — versioning/apk/index.spec.ts line 183
+    // Ported: "should filter out invalid versions" — lib/modules/versioning/apk/index.spec.ts line 183
     #[test]
     fn get_satisfying_version_filter_invalid_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "invalid", "2.40.0-r0"];
@@ -605,7 +605,7 @@ mod tests {
         );
     }
 
-    // Ported: "isSingleVersion($version) === $expected" — versioning/apk/index.spec.ts line 192
+    // Ported: "isSingleVersion($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 192
     #[test]
     fn is_single_version_matches_renovate_apk_index_spec() {
         assert!(is_single_version("2.39.0-r0"));
@@ -614,13 +614,13 @@ mod tests {
         assert!(!is_single_version(">2.39.0-r0"));
     }
 
-    // Ported: "should return false for empty versions" — versioning/apk/index.spec.ts line 202
+    // Ported: "should return false for empty versions" — lib/modules/versioning/apk/index.spec.ts line 202
     #[test]
     fn is_single_version_empty_matches_renovate_apk_index_spec() {
         assert!(!is_single_version(""));
     }
 
-    // Ported: "isLessThanRange($version, $range) === $expected" — versioning/apk/index.spec.ts line 210
+    // Ported: "isLessThanRange($version, $range) === $expected" — lib/modules/versioning/apk/index.spec.ts line 210
     #[test]
     fn is_less_than_range_matches_renovate_apk_index_spec() {
         assert!(is_less_than_range("2.39.0-r0", "2.39.0-r1"));
@@ -629,7 +629,7 @@ mod tests {
         assert!(is_less_than_range("2.38.0-r0", "2.39.0-r0"));
     }
 
-    // Ported: "should sort versions correctly" — versioning/apk/index.spec.ts line 225
+    // Ported: "should sort versions correctly" — lib/modules/versioning/apk/index.spec.ts line 225
     #[test]
     fn sort_versions_sort_correctly_matches_renovate_apk_index_spec() {
         let mut versions = vec!["2.40.0-r0", "2.39.0-r1", "2.39.0-r0", "2.39.1-r0"];
@@ -649,7 +649,7 @@ mod tests {
         );
     }
 
-    // Ported: "should compare release numbers when version parts are equal" — versioning/apk/index.spec.ts line 236
+    // Ported: "should compare release numbers when version parts are equal" — lib/modules/versioning/apk/index.spec.ts line 236
     #[test]
     fn sort_versions_release_numbers_matches_renovate_apk_index_spec() {
         assert!(sort_versions("2.39.0-r1", "2.39.0-r2") < 0);
@@ -657,7 +657,7 @@ mod tests {
         assert_eq!(sort_versions("2.39.0", "2.39.0"), 0);
     }
 
-    // Ported: "should parse complex versions ($version) === $expected" — versioning/apk/index.spec.ts line 246
+    // Ported: "should parse complex versions ($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 246
     #[test]
     fn complex_version_parsing_is_valid_matches_renovate_apk_index_spec() {
         assert!(is_valid("v2.39.0-r0"));
@@ -668,7 +668,7 @@ mod tests {
         assert!(is_valid("2.39.0_git-r0"));
     }
 
-    // Ported: "should identify stable versions ($version) === $expected" — versioning/apk/index.spec.ts line 261
+    // Ported: "should identify stable versions ($version) === $expected" — lib/modules/versioning/apk/index.spec.ts line 261
     #[test]
     fn complex_version_parsing_is_stable_matches_renovate_apk_index_spec() {
         assert!(is_stable("v2.39.0-r0"));
@@ -679,7 +679,7 @@ mod tests {
         assert!(is_stable("2.39.0_git-r0"));
     }
 
-    // Ported: "should compare versions with prerelease identifiers ($a, $b) === $expected" — versioning/apk/index.spec.ts line 278
+    // Ported: "should compare versions with prerelease identifiers ($a, $b) === $expected" — lib/modules/versioning/apk/index.spec.ts line 278
     #[test]
     fn version_comparison_edge_cases_matches_renovate_apk_index_spec() {
         assert_eq!(sort_versions("2.39.0-r0", "2.39.0").signum(), 1);
@@ -696,7 +696,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle invalid version parsing gracefully" — versioning/apk/index.spec.ts line 295
+    // Ported: "should handle invalid version parsing gracefully" — lib/modules/versioning/apk/index.spec.ts line 295
     #[test]
     fn error_handling_invalid_gracefully_matches_renovate_apk_index_spec() {
         assert!(!is_valid(""));
@@ -708,7 +708,7 @@ mod tests {
         assert!(!is_stable("invalid"));
     }
 
-    // Ported: "should handle null/undefined inputs" — versioning/apk/index.spec.ts line 305
+    // Ported: "should handle null/undefined inputs" — lib/modules/versioning/apk/index.spec.ts line 305
     #[test]
     fn error_handling_null_inputs_matches_renovate_apk_index_spec() {
         // Rust has no null/undefined; we test empty string behavior
@@ -718,7 +718,7 @@ mod tests {
         assert_eq!(get_patch(""), None);
     }
 
-    // Ported: "should return false for unstable versions with prerelease" — versioning/apk/index.spec.ts line 315
+    // Ported: "should return false for unstable versions with prerelease" — lib/modules/versioning/apk/index.spec.ts line 315
     #[test]
     fn error_handling_unstable_prerelease_matches_renovate_apk_index_spec() {
         assert!(!is_stable("=2.39.0_rc1-r0"));
@@ -726,13 +726,13 @@ mod tests {
         assert!(!is_stable("~2.39.0_alpha-r0"));
     }
 
-    // Ported: "should return false for empty versions in isStable" — versioning/apk/index.spec.ts line 321
+    // Ported: "should return false for empty versions in isStable" — lib/modules/versioning/apk/index.spec.ts line 321
     #[test]
     fn error_handling_empty_is_stable_matches_renovate_apk_index_spec() {
         assert!(!is_stable(""));
     }
 
-    // Ported: "should handle versions with different major versions in tilde range" — versioning/apk/index.spec.ts line 329
+    // Ported: "should handle versions with different major versions in tilde range" — lib/modules/versioning/apk/index.spec.ts line 329
     #[test]
     fn get_satisfying_version_tilde_major_matches_renovate_apk_index_spec() {
         let versions = &["1.0.0-r0", "2.0.0-r0", "2.1.0-r0"];
@@ -746,7 +746,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle versions with different minor versions in tilde range" — versioning/apk/index.spec.ts line 335
+    // Ported: "should handle versions with different minor versions in tilde range" — lib/modules/versioning/apk/index.spec.ts line 335
     #[test]
     fn get_satisfying_version_tilde_minor_matches_renovate_apk_index_spec() {
         let versions = &["2.0.0-r0", "2.1.0-r0", "2.2.0-r0", "3.0.0-r0"];
@@ -756,7 +756,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle invalid target versions in ranges" — versioning/apk/index.spec.ts line 340
+    // Ported: "should handle invalid target versions in ranges" — lib/modules/versioning/apk/index.spec.ts line 340
     #[test]
     fn get_satisfying_version_invalid_target_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "2.40.0-r0"];
@@ -764,7 +764,7 @@ mod tests {
         assert_eq!(get_satisfying_version(versions, "~invalid"), None);
     }
 
-    // Ported: "should handle versions with prerelease identifiers in ranges" — versioning/apk/index.spec.ts line 346
+    // Ported: "should handle versions with prerelease identifiers in ranges" — lib/modules/versioning/apk/index.spec.ts line 346
     #[test]
     fn get_satisfying_version_prerelease_ranges_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "2.39.0_rc1-r0", "2.40.0-r0"];
@@ -778,21 +778,21 @@ mod tests {
         );
     }
 
-    // Ported: "should return null for versions with _p package fix suffix" — versioning/apk/index.spec.ts line 358
+    // Ported: "should return null for versions with _p package fix suffix" — lib/modules/versioning/apk/index.spec.ts line 358
     #[test]
     fn get_patch_edge_cases_p_suffix_matches_renovate_apk_index_spec() {
         assert_eq!(get_patch("6.5_p20250503-r0"), None);
         assert_eq!(get_patch("1.0_p1-r0"), None);
     }
 
-    // Ported: "should return null for invalid versions" — versioning/apk/index.spec.ts line 364
+    // Ported: "should return null for invalid versions" — lib/modules/versioning/apk/index.spec.ts line 364
     #[test]
     fn get_patch_edge_cases_invalid_matches_renovate_apk_index_spec() {
         assert_eq!(get_patch("invalid"), None);
         assert_eq!(get_patch("2.0_package-r0"), None);
     }
 
-    // Ported: "should return patch version for non-_p patterns" — versioning/apk/index.spec.ts line 370
+    // Ported: "should return patch version for non-_p patterns" — lib/modules/versioning/apk/index.spec.ts line 370
     #[test]
     fn get_patch_edge_cases_non_p_matches_renovate_apk_index_spec() {
         assert_eq!(get_patch("2.39.0-r0"), Some(0));
@@ -800,7 +800,7 @@ mod tests {
         assert_eq!(get_patch("2.39.0_rc1-r0"), Some(0));
     }
 
-    // Ported: "should handle versions with operators" — versioning/apk/index.spec.ts line 376
+    // Ported: "should handle versions with operators" — lib/modules/versioning/apk/index.spec.ts line 376
     #[test]
     fn get_patch_edge_cases_operators_matches_renovate_apk_index_spec() {
         assert_eq!(get_patch("=2.39.0-r0"), Some(0));
@@ -808,31 +808,31 @@ mod tests {
         assert_eq!(get_patch("~2.39.2-r0"), Some(2));
     }
 
-    // Ported: "should strip revision from newVersion when currentValue has no revision" — versioning/apk/index.spec.ts line 384
+    // Ported: "should strip revision from newVersion when currentValue has no revision" — lib/modules/versioning/apk/index.spec.ts line 384
     #[test]
     fn get_new_value_strip_revision_matches_renovate_apk_index_spec() {
         assert_eq!(get_new_value("2.50.0", "2.51.1-r1"), "2.51.1");
     }
 
-    // Ported: "should keep revision in newVersion when currentValue has revision" — versioning/apk/index.spec.ts line 394
+    // Ported: "should keep revision in newVersion when currentValue has revision" — lib/modules/versioning/apk/index.spec.ts line 394
     #[test]
     fn get_new_value_keep_revision_matches_renovate_apk_index_spec() {
         assert_eq!(get_new_value("2.50.0-r0", "2.51.1-r1"), "2.51.1-r1");
     }
 
-    // Ported: "should handle newVersion without revision when currentValue has no revision" — versioning/apk/index.spec.ts line 404
+    // Ported: "should handle newVersion without revision when currentValue has no revision" — lib/modules/versioning/apk/index.spec.ts line 404
     #[test]
     fn get_new_value_no_revision_matches_renovate_apk_index_spec() {
         assert_eq!(get_new_value("2.50.0", "2.51.1"), "2.51.1");
     }
 
-    // Ported: "should handle newVersion without revision when currentValue has revision" — versioning/apk/index.spec.ts line 414
+    // Ported: "should handle newVersion without revision when currentValue has revision" — lib/modules/versioning/apk/index.spec.ts line 414
     #[test]
     fn get_new_value_has_revision_no_new_revision_matches_renovate_apk_index_spec() {
         assert_eq!(get_new_value("2.50.0-r0", "2.51.1"), "2.51.1");
     }
 
-    // Ported: "should handle complex prerelease identifier comparisons" — versioning/apk/index.spec.ts line 426
+    // Ported: "should handle complex prerelease identifier comparisons" — lib/modules/versioning/apk/index.spec.ts line 426
     #[test]
     fn version_comparison_prerelease_complex_matches_renovate_apk_index_spec() {
         assert!(sort_versions("2.39.0_alpha-r0", "2.39.0_beta-r0") < 0);
@@ -840,14 +840,14 @@ mod tests {
         assert!(sort_versions("2.39.0_rc1-r0", "2.39.0_rc2-r0") < 0);
     }
 
-    // Ported: "should handle versions with different prerelease patterns" — versioning/apk/index.spec.ts line 438
+    // Ported: "should handle versions with different prerelease patterns" — lib/modules/versioning/apk/index.spec.ts line 438
     #[test]
     fn version_comparison_prerelease_patterns_matches_renovate_apk_index_spec() {
         assert!(sort_versions("2.39.0-r0", "2.39.0_rc1-r0") < 0);
         assert!(sort_versions("2.39.0_rc1-r0", "2.39.0-r0") > 0);
     }
 
-    // Ported: "should handle unknown range operators" — versioning/apk/index.spec.ts line 445
+    // Ported: "should handle unknown range operators" — lib/modules/versioning/apk/index.spec.ts line 445
     #[test]
     fn get_satisfying_version_unknown_operators_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "2.40.0-r0"];
@@ -858,7 +858,7 @@ mod tests {
         assert_eq!(get_satisfying_version(versions, "#2.39.0-r0"), None);
     }
 
-    // Ported: "should handle unhandled range operators that match regex" — versioning/apk/index.spec.ts line 456
+    // Ported: "should handle unhandled range operators that match regex" — lib/modules/versioning/apk/index.spec.ts line 456
     #[test]
     fn get_satisfying_version_unhandled_operators_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "2.40.0-r0"];
@@ -868,14 +868,14 @@ mod tests {
         assert_eq!(get_satisfying_version(versions, "~~~2.39.0-r0"), None);
     }
 
-    // Ported: "should handle tilde range with invalid target version" — versioning/apk/index.spec.ts line 467
+    // Ported: "should handle tilde range with invalid target version" — lib/modules/versioning/apk/index.spec.ts line 467
     #[test]
     fn get_satisfying_version_tilde_invalid_target_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "2.40.0-r0"];
         assert_eq!(get_satisfying_version(versions, "~invalid"), None);
     }
 
-    // Ported: "should handle tilde range with invalid version in list" — versioning/apk/index.spec.ts line 474
+    // Ported: "should handle tilde range with invalid version in list" — lib/modules/versioning/apk/index.spec.ts line 474
     #[test]
     fn get_satisfying_version_tilde_invalid_in_list_matches_renovate_apk_index_spec() {
         let versions = &["2.39.0-r0", "invalid", "2.40.0-r0"];
@@ -885,7 +885,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle major-only versions without minor/patch" — versioning/apk/index.spec.ts line 485
+    // Ported: "should handle major-only versions without minor/patch" — lib/modules/versioning/apk/index.spec.ts line 485
     #[test]
     fn version_comparison_major_only_matches_renovate_apk_index_spec() {
         assert!(is_valid("1"));
@@ -895,55 +895,55 @@ mod tests {
         assert_eq!(sort_versions("1", "1"), 0);
     }
 
-    // Ported: "should handle letter vs number at same position in version parts" — versioning/apk/index.spec.ts line 494
+    // Ported: "should handle letter vs number at same position in version parts" — lib/modules/versioning/apk/index.spec.ts line 494
     #[test]
     fn version_comparison_letter_vs_number_matches_renovate_apk_index_spec() {
         assert!(sort_versions("1a", "1.1") < 0);
         assert!(sort_versions("1.1", "1a") > 0);
     }
 
-    // Ported: "should handle number vs letter comparison in version parts" — versioning/apk/index.spec.ts line 499
+    // Ported: "should handle number vs letter comparison in version parts" — lib/modules/versioning/apk/index.spec.ts line 499
     #[test]
     fn version_comparison_number_vs_letter_matches_renovate_apk_index_spec() {
         assert!(sort_versions("2.39.0.1-r0", "2.39.0a-r0") > 0);
         assert!(sort_versions("2.39.0a-r0", "2.39.0.1-r0") < 0);
     }
 
-    // Ported: "should handle extra numeric parts in remaining segments" — versioning/apk/index.spec.ts line 504
+    // Ported: "should handle extra numeric parts in remaining segments" — lib/modules/versioning/apk/index.spec.ts line 504
     #[test]
     fn version_comparison_extra_numeric_matches_renovate_apk_index_spec() {
         assert!(sort_versions("2.39.0.1-r0", "2.39.0-r0") > 0);
         assert!(sort_versions("2.39.0-r0", "2.39.0.1-r0") < 0);
     }
 
-    // Ported: "should handle lexicographic string comparison in version parts" — versioning/apk/index.spec.ts line 509
+    // Ported: "should handle lexicographic string comparison in version parts" — lib/modules/versioning/apk/index.spec.ts line 509
     #[test]
     fn version_comparison_lexicographic_matches_renovate_apk_index_spec() {
         assert!(sort_versions("2.39.0a-r0", "2.39.0b-r0") < 0);
         assert!(sort_versions("2.39.0b-r0", "2.39.0a-r0") > 0);
     }
 
-    // Ported: "should handle equal letter parts continuing to next segment" — versioning/apk/index.spec.ts line 514
+    // Ported: "should handle equal letter parts continuing to next segment" — lib/modules/versioning/apk/index.spec.ts line 514
     #[test]
     fn version_comparison_equal_letter_continues_matches_renovate_apk_index_spec() {
         assert!(sort_versions("1.0a_p1-r0", "1.0a_p2-r0") < 0);
         assert!(sort_versions("1.0a_p2-r0", "1.0a_p1-r0") > 0);
     }
 
-    // Ported: "should handle trailing letter in remaining segments" — versioning/apk/index.spec.ts line 519
+    // Ported: "should handle trailing letter in remaining segments" — lib/modules/versioning/apk/index.spec.ts line 519
     #[test]
     fn version_comparison_trailing_letter_matches_renovate_apk_index_spec() {
         assert!(sort_versions("1", "1a") > 0);
         assert!(sort_versions("1a", "1") < 0);
     }
 
-    // Ported: "should return 0 for numerically equal but string-different versions" — versioning/apk/index.spec.ts line 524
+    // Ported: "should return 0 for numerically equal but string-different versions" — lib/modules/versioning/apk/index.spec.ts line 524
     #[test]
     fn version_comparison_numeric_equal_string_diff_matches_renovate_apk_index_spec() {
         assert_eq!(sort_versions("1.0", "1.00"), 0);
     }
 
-    // Ported: "should handle versions with different extra segment lengths" — versioning/apk/index.spec.ts line 528
+    // Ported: "should handle versions with different extra segment lengths" — lib/modules/versioning/apk/index.spec.ts line 528
     #[test]
     fn version_comparison_extra_segments_matches_renovate_apk_index_spec() {
         assert!(sort_versions("2.39.0.1.2", "2.39.0.1") > 0);

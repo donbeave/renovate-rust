@@ -163,7 +163,7 @@ pub fn gradle_version_matches(version: &str, range: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "should return versioning list" — modules/versioning/index.spec.ts line 8
+    // Ported: "should return versioning list" — lib/modules/versioning/index.spec.ts line 8
     #[test]
     fn versioning_registry_get_list() {
         let list = get_versioning_list();
@@ -173,7 +173,7 @@ mod tests {
         assert!(list.contains(&"semver-coerced"));
     }
 
-    // Ported: "should fallback to semver-coerced" — modules/versioning/index.spec.ts line 12
+    // Ported: "should fallback to semver-coerced" — lib/modules/versioning/index.spec.ts line 12
     #[test]
     fn versioning_registry_fallback() {
         assert_eq!(get_versioning_id(None), DEFAULT_VERSIONING);
@@ -181,7 +181,7 @@ mod tests {
         assert_eq!(get_versioning_id(Some("semver-coerced")), "semver-coerced");
     }
 
-    // Ported: "should accept config" — modules/versioning/index.spec.ts line 18
+    // Ported: "should accept config" — lib/modules/versioning/index.spec.ts line 18
     #[test]
     fn versioning_registry_accept_config() {
         // "semver:test" → strips ":test" → "semver" which is valid

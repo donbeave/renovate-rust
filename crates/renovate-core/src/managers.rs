@@ -1619,7 +1619,7 @@ mod tests {
         assert!(!pip.matched_files.contains(&"src/setup.py".to_owned()));
     }
 
-    // Ported: "default config file pattern" — pip_requirements/index.spec.ts line 5
+    // Ported: "default config file pattern" — lib/modules/manager/pip_requirements/index.spec.ts line 5
     #[test]
     fn pip_requirements_file_patterns_match_spec() {
         // Verifies our managerFilePatterns regex matches the same files as Renovate.
@@ -1667,7 +1667,7 @@ mod tests {
         }
     }
 
-    // Ported: "matchRegexOrGlobList("$path") === $expected" — manager/circleci/index.spec.ts line 6
+    // Ported: "matchRegexOrGlobList("$path") === $expected" — lib/modules/manager/circleci/index.spec.ts line 6
     #[test]
     fn circleci_file_patterns_match_spec() {
         let should_match = &[
@@ -1708,7 +1708,7 @@ mod tests {
         }
     }
 
-    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/mise/index.spec.ts line 6
+    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — lib/modules/manager/mise/index.spec.ts line 6
     #[test]
     fn mise_file_patterns_match_spec() {
         let should_match = &[
@@ -1777,7 +1777,7 @@ mod tests {
         }
     }
 
-    // Ported: "managerFilePatterns regex is correct" — manager/kotlin-script/index.spec.ts line 6
+    // Ported: "managerFilePatterns regex is correct" — lib/modules/manager/kotlin-script/index.spec.ts line 6
     #[test]
     fn kotlin_script_manager_file_patterns_regex_is_correct() {
         let def = MANAGER_DEFS
@@ -1791,7 +1791,7 @@ mod tests {
         assert!(!regex.is_match("build.gradle.kts"));
     }
 
-    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — manager/proto/index.spec.ts line 6
+    // Ported: "matchRegexOrGlobList(\"$path\") === $expected" — lib/modules/manager/proto/index.spec.ts line 6
     #[test]
     fn proto_file_patterns_match_spec() {
         let should_match = &[
@@ -1923,14 +1923,14 @@ mod tests {
         assert_eq!(manager_default_datasource("hermit"), None);
     }
 
-    // Ported: "getCustomManagerList" — modules/manager/custom/index.spec.ts line 4
+    // Ported: "getCustomManagerList" — lib/modules/manager/custom/index.spec.ts line 4
     #[test]
     fn custom_manager_list_contains_strings() {
         assert!(!CUSTOM_MANAGER_LIST.is_empty());
         assert!(CUSTOM_MANAGER_LIST.iter().all(|s| !s.is_empty()));
     }
 
-    // Ported: "works" — modules/manager/custom/index.spec.ts line 9
+    // Ported: "works" — lib/modules/manager/custom/index.spec.ts line 9
     #[test]
     fn is_custom_manager_returns_correct_values() {
         assert!(!is_custom_manager("npm"));
@@ -1965,7 +1965,7 @@ mod tests {
         }
     }
 
-    // Ported: "handles empty input" — workers/repository/extract/supersedes.spec.ts line 6
+    // Ported: "handles empty input" — lib/workers/repository/extract/supersedes.spec.ts line 6
     #[test]
     fn supersedes_handles_empty_input() {
         let mut results: Vec<ExtractResult> = vec![];
@@ -1973,7 +1973,7 @@ mod tests {
         assert!(results.is_empty());
     }
 
-    // Ported: "ignores extracts without superseding managers" — workers/repository/extract/supersedes.spec.ts line 12
+    // Ported: "ignores extracts without superseding managers" — lib/workers/repository/extract/supersedes.spec.ts line 12
     #[test]
     fn supersedes_ignores_non_superseding_managers() {
         let mut results = vec![extract("ansible", &[pkg("test.yml")])];
@@ -1981,7 +1981,7 @@ mod tests {
         assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
     }
 
-    // Ported: "removes superseded package files without lock files" — workers/repository/extract/supersedes.spec.ts line 28
+    // Ported: "removes superseded package files without lock files" — lib/workers/repository/extract/supersedes.spec.ts line 28
     #[test]
     fn supersedes_removes_superseded_files_without_lock() {
         let mut results = vec![
@@ -1993,7 +1993,7 @@ mod tests {
         assert!(results[1].package_files.as_ref().unwrap().is_empty());
     }
 
-    // Ported: "keeps superseded package files with lock files" — workers/repository/extract/supersedes.spec.ts line 52
+    // Ported: "keeps superseded package files with lock files" — lib/workers/repository/extract/supersedes.spec.ts line 52
     #[test]
     fn supersedes_keeps_files_with_lock_files() {
         let mut results = vec![
@@ -2006,7 +2006,7 @@ mod tests {
         assert_eq!(results[1].package_files.as_ref().unwrap().len(), 1);
     }
 
-    // Ported: "keeps non-superseded package files" — workers/repository/extract/supersedes.spec.ts line 88
+    // Ported: "keeps non-superseded package files" — lib/workers/repository/extract/supersedes.spec.ts line 88
     #[test]
     fn supersedes_keeps_non_superseded_files() {
         let mut results = vec![
@@ -2022,7 +2022,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles primary extract with undefined packageFiles" — workers/repository/extract/supersedes.spec.ts line 115
+    // Ported: "handles primary extract with undefined packageFiles" — lib/workers/repository/extract/supersedes.spec.ts line 115
     #[test]
     fn supersedes_handles_primary_with_no_package_files() {
         let mut results = vec![extract_none("bun"), extract("npm", &[pkg("package.json")])];
@@ -2031,7 +2031,7 @@ mod tests {
         assert_eq!(results[1].package_files.as_ref().unwrap().len(), 1);
     }
 
-    // Ported: "handles missing secondary extract manager" — workers/repository/extract/supersedes.spec.ts line 137
+    // Ported: "handles missing secondary extract manager" — lib/workers/repository/extract/supersedes.spec.ts line 137
     #[test]
     fn supersedes_handles_missing_secondary_manager() {
         let mut results = vec![extract("bun", &[pkg("package.json")])];
@@ -2039,7 +2039,7 @@ mod tests {
         assert_eq!(results[0].package_files.as_ref().unwrap().len(), 1);
     }
 
-    // Ported: "handles secondary extract with undefined packageFiles" — workers/repository/extract/supersedes.spec.ts line 153
+    // Ported: "handles secondary extract with undefined packageFiles" — lib/workers/repository/extract/supersedes.spec.ts line 153
     #[test]
     fn supersedes_handles_secondary_with_no_package_files() {
         let mut results = vec![extract("bun", &[pkg("package.json")]), extract_none("npm")];
@@ -2048,7 +2048,7 @@ mod tests {
         assert!(results[1].package_files.is_none());
     }
 
-    // Ported: "does not crash for lazy regex" — modules/manager/custom/regex/utils.spec.ts line 16
+    // Ported: "does not crash for lazy regex" — lib/modules/manager/custom/regex/utils.spec.ts line 16
     #[test]
     fn regex_match_all_does_not_crash_for_lazy_regex() {
         let re = regex::Regex::new(r"(?P<currentDigest>.*?)").unwrap();
@@ -2066,7 +2066,7 @@ mod tests {
         ]
     }
 
-    // Ported: "returns fileList if no includePaths" — workers/repository/extract/file-match.spec.ts line 8
+    // Ported: "returns fileList if no includePaths" — lib/workers/repository/extract/file-match.spec.ts line 8
     #[test]
     fn get_included_files_returns_all_when_no_include_paths() {
         let fl = file_list();
@@ -2074,7 +2074,7 @@ mod tests {
         assert_eq!(res, vec!["package.json", "frontend/package.json"]);
     }
 
-    // Ported: "returns exact matches" — workers/repository/extract/file-match.spec.ts line 13
+    // Ported: "returns exact matches" — lib/workers/repository/extract/file-match.spec.ts line 13
     #[test]
     fn get_included_files_exact_match() {
         let fl = file_list();
@@ -2083,7 +2083,7 @@ mod tests {
         assert_eq!(res[0], "frontend/package.json");
     }
 
-    // Ported: "returns minimatch matches" — workers/repository/extract/file-match.spec.ts line 20
+    // Ported: "returns minimatch matches" — lib/workers/repository/extract/file-match.spec.ts line 20
     #[test]
     fn get_included_files_glob_match() {
         let fl = file_list();
@@ -2092,7 +2092,7 @@ mod tests {
         assert_eq!(res[0], "frontend/package.json");
     }
 
-    // Ported: "returns fileList if no ignoredPaths" — workers/repository/extract/file-match.spec.ts line 29
+    // Ported: "returns fileList if no ignoredPaths" — lib/workers/repository/extract/file-match.spec.ts line 29
     #[test]
     fn filter_ignored_files_returns_all_when_no_ignore_paths() {
         let fl = file_list();
@@ -2100,7 +2100,7 @@ mod tests {
         assert_eq!(res, vec!["package.json", "frontend/package.json"]);
     }
 
-    // Ported: "ignores partial matches" — workers/repository/extract/file-match.spec.ts line 34
+    // Ported: "ignores partial matches" — lib/workers/repository/extract/file-match.spec.ts line 34
     #[test]
     fn filter_ignored_files_ignores_substring_matches() {
         let fl = file_list();
@@ -2109,7 +2109,7 @@ mod tests {
         assert_eq!(res[0], "package.json");
     }
 
-    // Ported: "returns minimatch matches" — workers/repository/extract/file-match.spec.ts line 41
+    // Ported: "returns minimatch matches" — lib/workers/repository/extract/file-match.spec.ts line 41
     #[test]
     fn filter_ignored_files_glob_match() {
         let fl = file_list();
@@ -2118,7 +2118,7 @@ mod tests {
         assert_eq!(res[0], "package.json");
     }
 
-    // Ported: "returns npm files" — workers/repository/extract/file-match.spec.ts line 57
+    // Ported: "returns npm files" — lib/workers/repository/extract/file-match.spec.ts line 57
     #[test]
     fn get_matching_files_npm_pattern() {
         let mut fl = file_list();
@@ -2129,7 +2129,7 @@ mod tests {
         assert!(res.contains(&"frontend/package.json".to_owned()));
     }
 
-    // Ported: "deduplicates" — workers/repository/extract/file-match.spec.ts line 64
+    // Ported: "deduplicates" — lib/workers/repository/extract/file-match.spec.ts line 64
     #[test]
     fn get_matching_files_deduplicates() {
         let mut fl = file_list();
@@ -2141,7 +2141,7 @@ mod tests {
 
     // ── manager registry tests ────────────────────────────────────────────
 
-    // Ported: "gets" — modules/manager/index.spec.ts line 45
+    // Ported: "gets" — lib/modules/manager/index.spec.ts line 45
     #[test]
     fn manager_registry_get_manager_list() {
         let list = get_manager_list();
@@ -2151,7 +2151,7 @@ mod tests {
         assert!(list.contains(&"maven"));
     }
 
-    // Ported: "works" — modules/manager/index.spec.ts line 51
+    // Ported: "works" — lib/modules/manager/index.spec.ts line 51
     #[test]
     fn manager_registry_get_enabled_managers_all() {
         // No config → all managers
@@ -2159,7 +2159,7 @@ mod tests {
         assert_eq!(all, all_managers_list());
     }
 
-    // Ported: "works" — modules/manager/index.spec.ts line 51
+    // Ported: "works" — lib/modules/manager/index.spec.ts line 51
     #[test]
     fn manager_registry_get_enabled_managers_filtered() {
         let config = vec!["custom.regex".to_owned(), "npm".to_owned()];
@@ -2168,9 +2168,9 @@ mod tests {
         assert_eq!(result, vec!["npm", "regex"]);
     }
 
-    // Ported: "when no manager found, returns undefined" — modules/manager/index.spec.ts line 265
-    // Ported: "when manager found, but no prettyDepType found, returns undefined" — modules/manager/index.spec.ts line 271
-    // Ported: "when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType" — modules/manager/index.spec.ts line 279
+    // Ported: "when no manager found, returns undefined" — lib/modules/manager/index.spec.ts line 265
+    // Ported: "when manager found, but no prettyDepType found, returns undefined" — lib/modules/manager/index.spec.ts line 271
+    // Ported: "when manager found, and a prettyDepType found in knownDepTypes, returns the defined prettyDepType" — lib/modules/manager/index.spec.ts line 279
     #[test]
     fn manager_get_pretty_dep_type() {
         // Unknown manager → None
@@ -2185,9 +2185,9 @@ mod tests {
         );
     }
 
-    // Ported: "gets something" — modules/manager/index.spec.ts line 38
-    // Ported: "returns true" — modules/manager/index.spec.ts line 252
-    // Ported: "returns false" — modules/manager/index.spec.ts line 258
+    // Ported: "gets something" — lib/modules/manager/index.spec.ts line 38
+    // Ported: "returns true" — lib/modules/manager/index.spec.ts line 252
+    // Ported: "returns false" — lib/modules/manager/index.spec.ts line 258
     #[test]
     fn manager_registry_manager_exists() {
         assert!(manager_exists("dockerfile"));
@@ -2201,7 +2201,7 @@ mod tests {
         assert!(!manager_exists("custom.unknown"));
     }
 
-    // Ported: "iterates through managers" — modules/manager/index.spec.ts line 108
+    // Ported: "iterates through managers" — lib/modules/manager/index.spec.ts line 108
     #[test]
     fn manager_registry_detect_all_global_config_empty() {
         let result = detect_all_global_config();

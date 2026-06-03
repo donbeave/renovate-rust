@@ -460,14 +460,14 @@ mod tests {
 
     // ── resolve_config_path ──────────────────────────────────────────────────
 
-    // Ported: "parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env" — workers/global/config/parse/file.spec.ts line 85
+    // Ported: "parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env" — lib/workers/global/config/parse/file.spec.ts line 85
     #[test]
     fn resolve_returns_none_when_env_not_set() {
         let dir = tempfile::tempdir().unwrap();
         assert!(resolve_config_path(None, dir.path()).unwrap().is_none());
     }
 
-    // Ported: "skip when RENOVATE_CONFIG_FILE is not set (\"%s\")" — workers/global/config/parse/file.spec.ts line 220
+    // Ported: "skip when RENOVATE_CONFIG_FILE is not set (\"%s\")" — lib/workers/global/config/parse/file.spec.ts line 220
     #[test]
     fn resolve_returns_none_when_env_is_blank() {
         let dir = tempfile::tempdir().unwrap();
@@ -488,7 +488,7 @@ mod tests {
         assert_eq!(resolved, Some(path));
     }
 
-    // Ported: "fatal error and exit if custom config file does not exist" — workers/global/config/parse/file.spec.ts line 118
+    // Ported: "fatal error and exit if custom config file does not exist" — lib/workers/global/config/parse/file.spec.ts line 118
     #[test]
     fn resolve_errors_when_explicit_file_missing() {
         let dir = tempfile::tempdir().unwrap();
@@ -498,14 +498,14 @@ mod tests {
 
     // ── delete_non_default_config ───────────────────────────────────────────
 
-    // Ported: "skip when RENOVATE_CONFIG_FILE is not set (\"%s\")" — workers/global/config/parse/file.spec.ts line 220
+    // Ported: "skip when RENOVATE_CONFIG_FILE is not set (\"%s\")" — lib/workers/global/config/parse/file.spec.ts line 220
     #[test]
     fn delete_non_default_config_skips_when_env_not_set() {
         assert!(!delete_non_default_config(None, true));
         assert!(!delete_non_default_config(Some(" "), true));
     }
 
-    // Ported: "skip when config file does not exist" — workers/global/config/parse/file.spec.ts line 232
+    // Ported: "skip when config file does not exist" — lib/workers/global/config/parse/file.spec.ts line 232
     #[test]
     fn delete_non_default_config_skips_missing_file() {
         let dir = tempfile::tempdir().unwrap();
@@ -513,7 +513,7 @@ mod tests {
         assert!(!delete_non_default_config(missing.to_str(), true));
     }
 
-    // Ported: "skip if deleteConfigFile is not set (\"%s\")" — workers/global/config/parse/file.spec.ts line 245
+    // Ported: "skip if deleteConfigFile is not set (\"%s\")" — lib/workers/global/config/parse/file.spec.ts line 245
     #[test]
     fn delete_non_default_config_skips_when_flag_is_false() {
         let (_f, path) = write_temp("{}", ".json");
@@ -521,7 +521,7 @@ mod tests {
         assert!(path.exists());
     }
 
-    // Ported: "removes the specified config file" — workers/global/config/parse/file.spec.ts line 261
+    // Ported: "removes the specified config file" — lib/workers/global/config/parse/file.spec.ts line 261
     #[test]
     fn delete_non_default_config_removes_file() {
         let (_f, path) = write_temp("{}", ".json");
@@ -529,7 +529,7 @@ mod tests {
         assert!(!path.exists());
     }
 
-    // Ported: "fails silently when attempting to delete the config file" — workers/global/config/parse/file.spec.ts line 284
+    // Ported: "fails silently when attempting to delete the config file" — lib/workers/global/config/parse/file.spec.ts line 284
     #[cfg(unix)]
     #[test]
     fn delete_non_default_config_fails_silently() {
@@ -606,7 +606,7 @@ mod tests {
         assert!(matches!(err, ConfigFileError::UnsupportedFormat(_)));
     }
 
-    // Ported: "fatal error and exit if %s" — workers/global/config/parse/file.spec.ts line 153
+    // Ported: "fatal error and exit if %s" — lib/workers/global/config/parse/file.spec.ts line 153
     #[test]
     fn load_rejects_unsupported_or_missing_extension() {
         let (_f, txt_path) = write_temp(r#"{"token":"abc"}"#, ".txt");
@@ -628,7 +628,7 @@ mod tests {
         assert!(matches!(err, ConfigFileError::Parse { .. }));
     }
 
-    // Ported: "parses" — config/parse.spec.ts line 8
+    // Ported: "parses" — lib/config/parse.spec.ts line 8
     #[test]
     fn parse_file_config_json_parses() {
         assert_eq!(
@@ -639,7 +639,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns error" — config/parse.spec.ts line 15
+    // Ported: "returns error" — lib/config/parse.spec.ts line 15
     #[test]
     fn parse_file_config_json_returns_error() {
         let result = parse_file_config("config.json", "{");
@@ -653,7 +653,7 @@ mod tests {
         ));
     }
 
-    // Ported: "parses" — config/parse.spec.ts line 43
+    // Ported: "parses" — lib/config/parse.spec.ts line 43
     #[test]
     fn parse_file_config_json5_parses() {
         assert_eq!(
@@ -664,7 +664,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns error" — config/parse.spec.ts line 50
+    // Ported: "returns error" — lib/config/parse.spec.ts line 50
     #[test]
     fn parse_file_config_json5_returns_error() {
         let result = parse_file_config("config.json5", "{");

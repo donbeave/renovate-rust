@@ -638,7 +638,7 @@ pub fn update_dependency_with_hash(
 mod tests {
     use super::*;
 
-    // Ported: "extracts \"archive\" github dependency" — homebrew/extract.spec.ts line 99
+    // Ported: "extracts \"archive\" github dependency" — lib/modules/manager/homebrew/extract.spec.ts line 99
     #[test]
     fn extracts_github_archive_refs_tags() {
         let content = r#"
@@ -659,7 +659,7 @@ end"#;
         assert!(dep.skip_reason.is_none());
     }
 
-    // Ported: "handles old \"archive\" github url format" — homebrew/extract.spec.ts line 121
+    // Ported: "handles old \"archive\" github url format" — lib/modules/manager/homebrew/extract.spec.ts line 121
     #[test]
     fn extracts_github_archive_old_form() {
         let content = r#"class MyApp < Formula
@@ -677,7 +677,7 @@ end"#;
         );
     }
 
-    // Ported: "extracts \"releases\" github dependency" — homebrew/extract.spec.ts line 77
+    // Ported: "extracts \"releases\" github dependency" — lib/modules/manager/homebrew/extract.spec.ts line 77
     #[test]
     fn extracts_github_release() {
         let content = r#"class Mytool < Formula
@@ -695,7 +695,7 @@ end"#;
         );
     }
 
-    // Ported: "skips if sha256 field is invalid" — homebrew/extract.spec.ts line 301
+    // Ported: "skips if sha256 field is invalid" — lib/modules/manager/homebrew/extract.spec.ts line 301
     #[test]
     fn invalid_sha256_skipped() {
         let content = r#"class Bad < Formula
@@ -706,7 +706,7 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::InvalidSha256));
     }
 
-    // Ported: "skips sourceforge dependency 1" — homebrew/extract.spec.ts line 10
+    // Ported: "skips sourceforge dependency 1" — lib/modules/manager/homebrew/extract.spec.ts line 10
     #[test]
     fn unsupported_url_skipped() {
         let content = r#"class Other < Formula
@@ -717,14 +717,14 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
     }
 
-    // Ported: "skips if there is no url field" — homebrew/extract.spec.ts line 213
+    // Ported: "skips if there is no url field" — lib/modules/manager/homebrew/extract.spec.ts line 213
     #[test]
     fn missing_url_skipped() {
         let dep = extract("class NoUrl < Formula\nend").unwrap();
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::MissingUrl));
     }
 
-    // Ported: "returns null for invalid class header 2" — homebrew/extract.spec.ts line 198
+    // Ported: "returns null for invalid class header 2" — lib/modules/manager/homebrew/extract.spec.ts line 198
     #[test]
     fn invalid_class_header_not_formula_returns_none() {
         // "class X < NotFormula" is not a valid Formula class
@@ -738,7 +738,7 @@ end"#;
         assert!(extract("").is_none());
     }
 
-    // Ported: "returns null for invalid class header 1" — homebrew/extract.spec.ts line 183
+    // Ported: "returns null for invalid class header 1" — lib/modules/manager/homebrew/extract.spec.ts line 183
     #[test]
     fn no_class_header_returns_none() {
         // Invalid class syntax (no " < Formula") → None
@@ -746,7 +746,7 @@ end"#;
         assert!(extract(content).is_none());
     }
 
-    // Ported: "skips sourceforge dependency 2" — homebrew/extract.spec.ts line 32
+    // Ported: "skips sourceforge dependency 2" — lib/modules/manager/homebrew/extract.spec.ts line 32
     #[test]
     fn skips_sourceforge_dependency_2() {
         let content = r#"class Aap < Formula
@@ -760,7 +760,7 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
     }
 
-    // Ported: "skips github dependency with wrong format" — homebrew/extract.spec.ts line 54
+    // Ported: "skips github dependency with wrong format" — lib/modules/manager/homebrew/extract.spec.ts line 54
     #[test]
     fn skips_github_dependency_wrong_format() {
         // Git-style URL with :tag/:revision instead of archive/release — no sha256 field
@@ -776,7 +776,7 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::InvalidSha256));
     }
 
-    // Ported: "handles no space before class header" — homebrew/extract.spec.ts line 152
+    // Ported: "handles no space before class header" — lib/modules/manager/homebrew/extract.spec.ts line 152
     #[test]
     fn handles_no_space_before_class_header() {
         let content = r#"class Ibazel < Formula
@@ -797,7 +797,7 @@ end"#;
         assert!(dep.skip_reason.is_none());
     }
 
-    // Ported: "skips if invalid url protocol" — homebrew/extract.spec.ts line 235
+    // Ported: "skips if invalid url protocol" — lib/modules/manager/homebrew/extract.spec.ts line 235
     #[test]
     fn skips_invalid_url_protocol() {
         // url ??https://... has no opening quote — URL_RE won't match → MissingUrl
@@ -806,7 +806,7 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::MissingUrl));
     }
 
-    // Ported: "skips if invalid url" — homebrew/extract.spec.ts line 257
+    // Ported: "skips if invalid url" — lib/modules/manager/homebrew/extract.spec.ts line 257
     #[test]
     fn skips_invalid_url() {
         let content = r#"class Ibazel < Formula
@@ -817,7 +817,7 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::UnsupportedUrl));
     }
 
-    // Ported: "skips if there is no sha256 field" — homebrew/extract.spec.ts line 279
+    // Ported: "skips if there is no sha256 field" — lib/modules/manager/homebrew/extract.spec.ts line 279
     #[test]
     fn skips_no_sha256_field() {
         let content = r#"class Ibazel < Formula
@@ -828,7 +828,7 @@ end"#;
         assert_eq!(dep.skip_reason, Some(HomebrewSkipReason::InvalidSha256));
     }
 
-    // Ported: "extracts npm scoped package dependency" — homebrew/extract.spec.ts line 323
+    // Ported: "extracts npm scoped package dependency" — lib/modules/manager/homebrew/extract.spec.ts line 323
     #[test]
     fn extracts_npm_scoped_package() {
         let content = r#"class ClaudeCode < Formula
@@ -848,7 +848,7 @@ end"#;
         assert!(dep.skip_reason.is_none());
     }
 
-    // Ported: "extracts npm unscoped package dependency" — homebrew/extract.spec.ts line 354
+    // Ported: "extracts npm unscoped package dependency" — lib/modules/manager/homebrew/extract.spec.ts line 354
     #[test]
     fn extracts_npm_unscoped_package() {
         let content = r#"class Express < Formula
@@ -867,7 +867,7 @@ end"#;
         assert!(dep.skip_reason.is_none());
     }
 
-    // Ported: "skips npm package from custom registry" — homebrew/extract.spec.ts line 385
+    // Ported: "skips npm package from custom registry" — lib/modules/manager/homebrew/extract.spec.ts line 385
     #[test]
     fn skips_npm_custom_registry() {
         let content = r#"class CustomPackage < Formula
@@ -880,13 +880,13 @@ end"#;
 
     // --- github handler tests ---
 
-    // Ported: "returns null for empty string" — homebrew/handlers/github.spec.ts line 8
+    // Ported: "returns null for empty string" — lib/modules/manager/homebrew/handlers/github.spec.ts line 8
     #[test]
     fn github_parse_url_empty_string_returns_none() {
         assert!(github_parse_url("").is_none());
     }
 
-    // Ported: "parses valid releases URL" — homebrew/handlers/github.spec.ts line 19
+    // Ported: "parses valid releases URL" — lib/modules/manager/homebrew/handlers/github.spec.ts line 19
     #[test]
     fn github_parse_url_releases() {
         let result = github_parse_url(
@@ -899,7 +899,7 @@ end"#;
         assert_eq!(result.url_type, GitHubUrlType::Release);
     }
 
-    // Ported: "parses valid archive URL" — homebrew/handlers/github.spec.ts line 33
+    // Ported: "parses valid archive URL" — lib/modules/manager/homebrew/handlers/github.spec.ts line 33
     #[test]
     fn github_parse_url_archive() {
         let result = github_parse_url(
@@ -912,7 +912,7 @@ end"#;
         assert_eq!(result.url_type, GitHubUrlType::Archive);
     }
 
-    // Ported: "uses original version when semver.coerce fails" — homebrew/handlers/github.spec.ts line 49
+    // Ported: "uses original version when semver.coerce fails" — lib/modules/manager/homebrew/handlers/github.spec.ts line 49
     #[test]
     fn github_build_archive_urls_non_semver() {
         let data = GitHubManagerData {
@@ -933,7 +933,7 @@ end"#;
         );
     }
 
-    // Ported: "uses coerced version for filename when semver succeeds" — homebrew/handlers/github.spec.ts line 66
+    // Ported: "uses coerced version for filename when semver succeeds" — lib/modules/manager/homebrew/handlers/github.spec.ts line 66
     #[test]
     fn github_build_archive_urls_semver_coerce() {
         let data = GitHubManagerData {
@@ -952,7 +952,7 @@ end"#;
         );
     }
 
-    // Ported: "creates dependency with github-releases datasource for releases URL" — homebrew/handlers/github.spec.ts line 85
+    // Ported: "creates dependency with github-releases datasource for releases URL" — lib/modules/manager/homebrew/handlers/github.spec.ts line 85
     #[test]
     fn github_create_dependency_releases() {
         let parsed = GitHubParsedResult {
@@ -971,7 +971,7 @@ end"#;
         assert_eq!(dep.datasource, "github-releases");
     }
 
-    // Ported: "creates dependency with github-tags datasource for archive URL" — homebrew/handlers/github.spec.ts line 107
+    // Ported: "creates dependency with github-tags datasource for archive URL" — lib/modules/manager/homebrew/handlers/github.spec.ts line 107
     #[test]
     fn github_create_dependency_archive() {
         let parsed = GitHubParsedResult {
@@ -993,19 +993,19 @@ end"#;
 
     // --- npm handler tests ---
 
-    // Ported: "returns null for empty string" — homebrew/handlers/npm.spec.ts line 8
+    // Ported: "returns null for empty string" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 8
     #[test]
     fn npm_parse_url_empty_string_returns_none() {
         assert!(npm_parse_url("").is_none());
     }
 
-    // Ported: "returns null for non-npm registry URL" — homebrew/handlers/npm.spec.ts line 19
+    // Ported: "returns null for non-npm registry URL" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 19
     #[test]
     fn npm_parse_url_non_npm_registry_returns_none() {
         assert!(npm_parse_url("https://example.com/package/-/package-1.0.0.tgz").is_none());
     }
 
-    // Ported: "returns null for custom npm registry" — homebrew/handlers/npm.spec.ts line 25
+    // Ported: "returns null for custom npm registry" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 25
     #[test]
     fn npm_parse_url_custom_registry_returns_none() {
         assert!(
@@ -1013,7 +1013,7 @@ end"#;
         );
     }
 
-    // Ported: "parses scoped package URL" — homebrew/handlers/npm.spec.ts line 33
+    // Ported: "parses scoped package URL" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 33
     #[test]
     fn npm_parse_url_scoped_package() {
         let result = npm_parse_url(
@@ -1024,7 +1024,7 @@ end"#;
         assert_eq!(result.package_name, "@anthropic-ai/claude-code");
     }
 
-    // Ported: "parses unscoped package URL" — homebrew/handlers/npm.spec.ts line 45
+    // Ported: "parses unscoped package URL" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 45
     #[test]
     fn npm_parse_url_unscoped_package() {
         let result =
@@ -1033,7 +1033,7 @@ end"#;
         assert_eq!(result.package_name, "express");
     }
 
-    // Ported: "parses version with prerelease" — homebrew/handlers/npm.spec.ts line 57
+    // Ported: "parses version with prerelease" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 57
     #[test]
     fn npm_parse_url_prerelease_version() {
         let result =
@@ -1042,7 +1042,7 @@ end"#;
         assert_eq!(result.package_name, "package");
     }
 
-    // Ported: "parses version with build metadata" — homebrew/handlers/npm.spec.ts line 69
+    // Ported: "parses version with build metadata" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 69
     #[test]
     fn npm_parse_url_build_metadata_version() {
         let result =
@@ -1052,13 +1052,13 @@ end"#;
         assert_eq!(result.package_name, "package");
     }
 
-    // Ported: "returns null for malformed URL" — homebrew/handlers/npm.spec.ts line 81
+    // Ported: "returns null for malformed URL" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 81
     #[test]
     fn npm_parse_url_malformed_returns_none() {
         assert!(npm_parse_url("https://registry.npmjs.org/invalid-url").is_none());
     }
 
-    // Ported: "creates dependency with npm datasource for scoped package" — homebrew/handlers/npm.spec.ts line 89
+    // Ported: "creates dependency with npm datasource for scoped package" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 89
     #[test]
     fn npm_create_dependency_scoped() {
         let parsed = NpmParsedResult {
@@ -1081,7 +1081,7 @@ end"#;
         );
     }
 
-    // Ported: "creates dependency with npm datasource for unscoped package" — homebrew/handlers/npm.spec.ts line 116
+    // Ported: "creates dependency with npm datasource for unscoped package" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 116
     #[test]
     fn npm_create_dependency_unscoped() {
         let parsed = NpmParsedResult {
@@ -1098,7 +1098,7 @@ end"#;
         assert_eq!(dep.datasource, "npm");
     }
 
-    // Ported: "builds URL for scoped package" — homebrew/handlers/npm.spec.ts line 145
+    // Ported: "builds URL for scoped package" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 145
     #[test]
     fn npm_build_archive_urls_scoped() {
         let data = NpmManagerData {
@@ -1116,7 +1116,7 @@ end"#;
         );
     }
 
-    // Ported: "builds URL for unscoped package" — homebrew/handlers/npm.spec.ts line 160
+    // Ported: "builds URL for unscoped package" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 160
     #[test]
     fn npm_build_archive_urls_unscoped() {
         let data = NpmManagerData {
@@ -1131,7 +1131,7 @@ end"#;
         );
     }
 
-    // Ported: "builds URL with prerelease version" — homebrew/handlers/npm.spec.ts line 175
+    // Ported: "builds URL with prerelease version" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 175
     #[test]
     fn npm_build_archive_urls_prerelease() {
         let data = NpmManagerData {
@@ -1146,7 +1146,7 @@ end"#;
         );
     }
 
-    // Ported: "builds URL for deeply scoped package" — homebrew/handlers/npm.spec.ts line 190
+    // Ported: "builds URL for deeply scoped package" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 190
     #[test]
     fn npm_build_archive_urls_deeply_scoped() {
         let data = NpmManagerData {
@@ -1166,19 +1166,19 @@ end"#;
 
     // --- handler dispatch tests ---
 
-    // Ported: "returns null for handler type \"%s\"" — homebrew/handlers/index.spec.ts line 5
+    // Ported: "returns null for handler type \"%s\"" — lib/modules/manager/homebrew/handlers/index.spec.ts line 5
     #[test]
     fn find_handler_by_type_unknown_returns_none() {
         assert!(find_handler_by_type("unknown").is_none());
     }
 
-    // Ported: "returns null for handler type \"%s\"" — homebrew/handlers/index.spec.ts line 5
+    // Ported: "returns null for handler type \"%s\"" — lib/modules/manager/homebrew/handlers/index.spec.ts line 5
     #[test]
     fn find_handler_by_type_empty_returns_none() {
         assert!(find_handler_by_type("").is_none());
     }
 
-    // Ported: "returns github handler for github type" — homebrew/handlers/index.spec.ts line 9
+    // Ported: "returns github handler for github type" — lib/modules/manager/homebrew/handlers/index.spec.ts line 9
     #[test]
     fn find_handler_by_type_github() {
         let h = find_handler_by_type("github").unwrap();
@@ -1186,19 +1186,19 @@ end"#;
         assert_eq!(h.as_str(), "github");
     }
 
-    // Ported: "returns null for null URL" — homebrew/handlers/index.spec.ts line 16
+    // Ported: "returns null for null URL" — lib/modules/manager/homebrew/handlers/index.spec.ts line 16
     #[test]
     fn find_handler_none_url_returns_none() {
         assert!(find_handler(None).is_none());
     }
 
-    // Ported: "returns null for unsupported URL" — homebrew/handlers/index.spec.ts line 20
+    // Ported: "returns null for unsupported URL" — lib/modules/manager/homebrew/handlers/index.spec.ts line 20
     #[test]
     fn find_handler_unsupported_url_returns_none() {
         assert!(find_handler(Some("https://example.com/file.tar.gz")).is_none());
     }
 
-    // Ported: "returns handler and parsed result for GitHub URL" — homebrew/handlers/index.spec.ts line 24
+    // Ported: "returns handler and parsed result for GitHub URL" — lib/modules/manager/homebrew/handlers/index.spec.ts line 24
     #[test]
     fn find_handler_github_url() {
         let result = find_handler(Some(
@@ -1296,19 +1296,19 @@ sha256 "oldhash"
         assert!(matches!(result, HomebrewUpdateResult::NoChange));
     }
 
-    // Ported: "returns null for non-string input: %s" — homebrew/handlers/github.spec.ts line 12
+    // Ported: "returns null for non-string input: %s" — lib/modules/manager/homebrew/handlers/github.spec.ts line 12
     #[test]
     fn github_parse_url_non_string_input_returns_none() {
         assert!(github_parse_url("").is_none());
     }
 
-    // Ported: "returns null for non-string input: %s" — homebrew/handlers/npm.spec.ts line 12
+    // Ported: "returns null for non-string input: %s" — lib/modules/manager/homebrew/handlers/npm.spec.ts line 12
     #[test]
     fn npm_parse_url_non_string_input_returns_none() {
         assert!(npm_parse_url("").is_none());
     }
 
-    // Ported: "returns unchanged content if url field in upgrade object is invalid" — homebrew/update.spec.ts line 165
+    // Ported: "returns unchanged content if url field in upgrade object is invalid" — lib/modules/manager/homebrew/update.spec.ts line 165
     #[test]
     fn update_dependency_invalid_upgrade_url_returns_no_change() {
         let config = HomebrewUpdateConfig {
@@ -1326,7 +1326,7 @@ sha256 "oldhash"
         ));
     }
 
-    // Ported: "returns unchanged content if url field in Formula file is invalid" — homebrew/update.spec.ts line 240
+    // Ported: "returns unchanged content if url field in Formula file is invalid" — lib/modules/manager/homebrew/update.spec.ts line 240
     #[test]
     fn update_dependency_invalid_formula_url_returns_no_change() {
         let config = HomebrewUpdateConfig {
@@ -1345,7 +1345,7 @@ sha256 "oldhash"
         ));
     }
 
-    // Ported: "returns unchanged content if url field in Formula file is missing" — homebrew/update.spec.ts line 280
+    // Ported: "returns unchanged content if url field in Formula file is missing" — lib/modules/manager/homebrew/update.spec.ts line 280
     #[test]
     fn update_dependency_missing_formula_url_returns_no_change() {
         let config = HomebrewUpdateConfig {
@@ -1363,7 +1363,7 @@ sha256 "oldhash"
         ));
     }
 
-    // Ported: "returns unchanged content if sha256 field in Formula file is invalid" — homebrew/update.spec.ts line 319
+    // Ported: "returns unchanged content if sha256 field in Formula file is invalid" — lib/modules/manager/homebrew/update.spec.ts line 319
     #[test]
     fn update_dependency_with_hash_invalid_formula_sha256_returns_none() {
         let content = "url \"https://example.com/foo-1.0.tar.gz\"\nsha256 ???invalid\n".to_owned();
@@ -1377,7 +1377,7 @@ sha256 "oldhash"
         assert!(result.is_none());
     }
 
-    // Ported: "returns unchanged content if sha256 field in Formula file is missing" — homebrew/update.spec.ts line 359
+    // Ported: "returns unchanged content if sha256 field in Formula file is missing" — lib/modules/manager/homebrew/update.spec.ts line 359
     #[test]
     fn update_dependency_with_hash_missing_formula_sha256_returns_none() {
         let content = "url \"https://example.com/foo-1.0.tar.gz\"\n".to_owned();
@@ -1391,7 +1391,7 @@ sha256 "oldhash"
         assert!(result.is_none());
     }
 
-    // Ported: "returns unchanged content for unknown handler type" — homebrew/update.spec.ts line 452
+    // Ported: "returns unchanged content for unknown handler type" — lib/modules/manager/homebrew/update.spec.ts line 452
     #[test]
     fn update_dependency_unknown_handler_returns_no_change() {
         let config = HomebrewUpdateConfig {
@@ -1409,7 +1409,7 @@ sha256 "oldhash"
         ));
     }
 
-    // Ported: "returns unchanged content if newValue is missing" — homebrew/update.spec.ts line 476
+    // Ported: "returns unchanged content if newValue is missing" — lib/modules/manager/homebrew/update.spec.ts line 476
     #[test]
     fn update_dependency_missing_new_value_returns_no_change() {
         let config = HomebrewUpdateConfig {

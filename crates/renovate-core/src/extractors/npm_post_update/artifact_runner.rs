@@ -142,7 +142,7 @@ mod tests {
     use crate::artifacts::UpdatedDep;
     use tempfile::tempdir;
 
-    // Ported: "returns updated package.json" — modules/manager/npm/artifacts.spec.ts line 105
+    // Ported: "returns updated package.json" — lib/modules/manager/npm/artifacts.spec.ts line 105
     #[test]
     fn detect_lock_file_npm() {
         let dir = tempdir().unwrap();
@@ -153,7 +153,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns updated package.json" — modules/manager/npm/artifacts.spec.ts line 105
+    // Ported: "returns updated package.json" — lib/modules/manager/npm/artifacts.spec.ts line 105
     #[test]
     fn detect_lock_file_yarn() {
         let dir = tempdir().unwrap();
@@ -164,7 +164,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns updated package.json" — modules/manager/npm/artifacts.spec.ts line 105
+    // Ported: "returns updated package.json" — lib/modules/manager/npm/artifacts.spec.ts line 105
     #[test]
     fn detect_lock_file_pnpm() {
         let dir = tempdir().unwrap();
@@ -175,14 +175,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if no packageManager updates present" — modules/manager/npm/artifacts.spec.ts line 57
+    // Ported: "returns null if no packageManager updates present" — lib/modules/manager/npm/artifacts.spec.ts line 57
     #[test]
     fn detect_lock_file_none() {
         let dir = tempdir().unwrap();
         assert!(NpmArtifactRunner::detect_lock_file(dir.path()).is_none());
     }
 
-    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
+    // Ported: "supports install mode" — lib/modules/manager/npm/artifacts.spec.ts line 180
     #[test]
     fn build_install_cmd_npm() {
         let cmd = NpmArtifactRunner::build_install_cmd("npm", &ArtifactConfig::default());
@@ -192,14 +192,14 @@ mod tests {
         );
     }
 
-    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
+    // Ported: "supports install mode" — lib/modules/manager/npm/artifacts.spec.ts line 180
     #[test]
     fn build_install_cmd_yarn() {
         let cmd = NpmArtifactRunner::build_install_cmd("yarn", &ArtifactConfig::default());
         assert_eq!(cmd, vec!["yarn", "install"]);
     }
 
-    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
+    // Ported: "supports install mode" — lib/modules/manager/npm/artifacts.spec.ts line 180
     #[test]
     fn build_install_cmd_pnpm() {
         let cmd = NpmArtifactRunner::build_install_cmd("pnpm", &ArtifactConfig::default());
@@ -302,7 +302,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if no packageManager updates present" — modules/manager/npm/artifacts.spec.ts line 57
+    // Ported: "returns null if no packageManager updates present" — lib/modules/manager/npm/artifacts.spec.ts line 57
     #[test]
     fn detect_lock_file_priority_npm() {
         let dir = tempdir().unwrap();
@@ -314,7 +314,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports install mode" — modules/manager/npm/artifacts.spec.ts line 180
+    // Ported: "supports install mode" — lib/modules/manager/npm/artifacts.spec.ts line 180
     #[test]
     fn build_install_cmd_default() {
         let cmd = NpmArtifactRunner::build_install_cmd("other", &ArtifactConfig::default());
@@ -324,7 +324,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if currentValue is undefined" — modules/manager/npm/artifacts.spec.ts line 68
+    // Ported: "returns null if currentValue is undefined" — lib/modules/manager/npm/artifacts.spec.ts line 68
     #[tokio::test]
     async fn artifact_runner_returns_none_undefined_current_value() {
         let dir = tempdir().unwrap();
@@ -345,7 +345,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if unchanged" — modules/manager/npm/artifacts.spec.ts line 90
+    // Ported: "returns null if unchanged" — lib/modules/manager/npm/artifacts.spec.ts line 90
     #[tokio::test]
     async fn artifact_runner_returns_none_unchanged() {
         let dir = tempdir().unwrap();
@@ -366,7 +366,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "catches errors" — modules/manager/npm/artifacts.spec.ts line 221
+    // Ported: "catches errors" — lib/modules/manager/npm/artifacts.spec.ts line 221
     #[tokio::test]
     #[allow(clippy::permissions_set_readonly_false)]
     async fn artifact_runner_catches_errors() {
@@ -397,7 +397,7 @@ mod tests {
         std::fs::set_permissions(dir.path(), perms).unwrap();
     }
 
-    // Ported: "returns null if currentValue has no hash" — modules/manager/npm/artifacts.spec.ts line 79
+    // Ported: "returns null if currentValue has no hash" — lib/modules/manager/npm/artifacts.spec.ts line 79
     #[tokio::test]
     async fn artifact_runner_returns_none_no_hash() {
         let dir = tempdir().unwrap();
@@ -418,14 +418,14 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "supports docker mode" — modules/manager/npm/artifacts.spec.ts line 131
+    // Ported: "supports docker mode" — lib/modules/manager/npm/artifacts.spec.ts line 131
     #[test]
     fn build_install_cmd_docker_mode() {
         let cmd = NpmArtifactRunner::build_install_cmd("npm", &ArtifactConfig::default());
         assert!(cmd.contains(&"--package-lock-only".to_owned()));
     }
 
-    // Ported: "returns null if no security updates are found" — modules/manager/npm/artifacts.spec.ts line 243
+    // Ported: "returns null if no security updates are found" — lib/modules/manager/npm/artifacts.spec.ts line 243
     #[tokio::test]
     async fn artifact_runner_returns_none_no_security_updates() {
         let dir = tempdir().unwrap();

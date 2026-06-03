@@ -14,7 +14,7 @@ fn renovate() -> Command {
     Command::cargo_bin("renovate").expect("binary 'renovate' built")
 }
 
-// Ported: "prints version and exits when --version is passed" — workers/global/config/parse/cli.spec.ts line 212
+// Ported: "prints version and exits when --version is passed" — lib/workers/global/config/parse/cli.spec.ts line 212
 #[test]
 fn version_long_flag_prints_bare_version() {
     renovate()
@@ -131,7 +131,7 @@ fn no_color_env_does_not_crash() {
 // Each one would exit 2 ("unknown flag") without the corresponding option
 // registered in the Cli struct.
 
-// Ported: "dryRun no value" — workers/global/config/parse/cli.spec.ts line 180
+// Ported: "dryRun no value" — lib/workers/global/config/parse/cli.spec.ts line 180
 #[test]
 fn dry_run_bare_is_accepted_via_migrate() {
     // migrateArgs rewrites --dry-run to --dry-run=true; clap maps "true" to
@@ -139,7 +139,7 @@ fn dry_run_bare_is_accepted_via_migrate() {
     renovate().arg("--dry-run").assert().success();
 }
 
-// Ported: "does not error when --dry-run is the last argument" — workers/global/config/parse/cli.spec.ts line 229
+// Ported: "does not error when --dry-run is the last argument" — lib/workers/global/config/parse/cli.spec.ts line 229
 #[test]
 fn dry_run_last_argument_after_repository_is_accepted() {
     renovate().arg("myrepo").arg("--dry-run").assert().success();
@@ -157,7 +157,7 @@ fn dry_run_false_is_accepted() {
     renovate().arg("--dry-run=false").assert().success();
 }
 
-// Ported: "requireConfig no value" — workers/global/config/parse/cli.spec.ts line 200
+// Ported: "requireConfig no value" — lib/workers/global/config/parse/cli.spec.ts line 200
 #[test]
 fn require_config_bare_is_accepted_via_migrate() {
     renovate().arg("--require-config").assert().success();

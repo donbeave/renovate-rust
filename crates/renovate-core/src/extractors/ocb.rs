@@ -191,7 +191,7 @@ providers:
   - gomod: go.opentelemetry.io/collector/confmap/provider/envprovider v1.0.0-rcv0015
 "#;
 
-    // Ported: "run successfully with full example" — ocb/extract.spec.ts line 6
+    // Ported: "run successfully with full example" — lib/modules/manager/ocb/extract.spec.ts line 6
     #[test]
     fn extracts_full_example() {
         let deps = extract(FULL_EXAMPLE);
@@ -226,7 +226,7 @@ providers:
         assert!(types.contains(&"providers"));
     }
 
-    // Ported: "increments with all fields" — modules/manager/ocb/update.spec.ts line 6
+    // Ported: "increments with all fields" — lib/modules/manager/ocb/update.spec.ts line 6
     #[test]
     fn ocb_bump_increments_all_fields() {
         let content = "dist:\n  name: otelcol-custom\n  description: Local OpenTelemetry Collector binary\n  module: github.com/open-telemetry/opentelemetry-collector\n  otelcol_version: 0.40.0\n  version: 1.0.0\n  output_path: /tmp/dist\n";
@@ -234,7 +234,7 @@ providers:
         assert_eq!(bumped, content.replace("version: 1.0.0", "version: 1.0.1"));
     }
 
-    // Ported: "increments with double quotes" — modules/manager/ocb/update.spec.ts line 22
+    // Ported: "increments with double quotes" — lib/modules/manager/ocb/update.spec.ts line 22
     #[test]
     fn ocb_bump_increments_double_quotes() {
         let content = "dist:\n  version: \"1.0.0\"\n";
@@ -242,7 +242,7 @@ providers:
         assert!(bumped.contains("1.0.1"), "bumped: {bumped}");
     }
 
-    // Ported: "increments with single quotes" — modules/manager/ocb/update.spec.ts line 33
+    // Ported: "increments with single quotes" — lib/modules/manager/ocb/update.spec.ts line 33
     #[test]
     fn ocb_bump_increments_single_quotes() {
         let content = "dist:\n  version: '1.0.0'\n";
@@ -250,7 +250,7 @@ providers:
         assert!(bumped.contains("1.0.1"), "bumped: {bumped}");
     }
 
-    // Ported: "no ops" — modules/manager/ocb/update.spec.ts line 44
+    // Ported: "no ops" — lib/modules/manager/ocb/update.spec.ts line 44
     #[test]
     fn ocb_bump_no_op_when_bumped_matches_content() {
         let content = "dist:\n  version: '0.0.2'\n";
@@ -259,7 +259,7 @@ providers:
         assert_eq!(bumped, content);
     }
 
-    // Ported: "updates" — modules/manager/ocb/update.spec.ts line 53
+    // Ported: "updates" — lib/modules/manager/ocb/update.spec.ts line 53
     #[test]
     fn ocb_bump_updates_minor() {
         let content = "dist:\n  version: '0.0.2'\n";
@@ -267,7 +267,7 @@ providers:
         assert!(bumped.contains("0.1.0"), "bumped: {bumped}");
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/ocb/update.spec.ts line 63
+    // Ported: "returns content if bumping errors" — lib/modules/manager/ocb/update.spec.ts line 63
     #[test]
     fn ocb_bump_returns_content_on_error() {
         let content = "dist:\n  version: '1.0.0'\n";
@@ -275,13 +275,13 @@ providers:
         assert_eq!(bumped, content);
     }
 
-    // Ported: "return null for unknown content" — ocb/extract.spec.ts line 81
+    // Ported: "return null for unknown content" — lib/modules/manager/ocb/extract.spec.ts line 81
     #[test]
     fn skips_unknown_content() {
         assert!(extract("foo: bar\nbaz: qux\n").is_empty());
     }
 
-    // Ported: "return null for content which is not YAML" — ocb/extract.spec.ts line 85
+    // Ported: "return null for content which is not YAML" — lib/modules/manager/ocb/extract.spec.ts line 85
     //
     // The TS extractor parses the file as YAML; without an OCB-recognised
     // top-level key (`dist:`, `exporters:`, etc.) it returns null. The

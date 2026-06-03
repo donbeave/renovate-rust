@@ -406,7 +406,7 @@ executable my-exe
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extractPackageFile($content).deps.map(x => x.packageName)" (it.each) — modules/manager/haskell-cabal/index.spec.ts line 15
+    // Ported: "extractPackageFile($content).deps.map(x => x.packageName)" (it.each) — lib/modules/manager/haskell-cabal/index.spec.ts line 15
     #[test]
     fn cabal_extract_package_names() {
         let cases: &[(&str, &[&str])] = &[
@@ -424,7 +424,7 @@ executable my-exe
         }
     }
 
-    // Ported: "getRangeStrategy({ rangeStrategy: $input })" (it.each) — modules/manager/haskell-cabal/index.spec.ts line 46
+    // Ported: "getRangeStrategy({ rangeStrategy: $input })" (it.each) — lib/modules/manager/haskell-cabal/index.spec.ts line 46
     #[test]
     fn cabal_get_range_strategy() {
         assert_eq!(get_range_strategy("auto"), "widen");
@@ -432,7 +432,7 @@ executable my-exe
         assert_eq!(get_range_strategy("replace"), "replace");
     }
 
-    // Ported: "matches $input" (countPackageNameLength it.each) — modules/manager/haskell-cabal/extract.spec.ts line 20
+    // Ported: "matches $input" (countPackageNameLength it.each) — lib/modules/manager/haskell-cabal/extract.spec.ts line 20
     #[test]
     fn cabal_count_package_name_length() {
         assert_eq!(count_package_name_length("-"), None);
@@ -453,7 +453,7 @@ executable my-exe
         assert_eq!(count_package_name_length("parsec"), Some(6));
     }
 
-    // Ported: "countPrecedingIndentation($content, $index)" (it.each) — modules/manager/haskell-cabal/extract.spec.ts line 45
+    // Ported: "countPrecedingIndentation($content, $index)" (it.each) — lib/modules/manager/haskell-cabal/extract.spec.ts line 45
     #[test]
     fn cabal_count_preceding_indentation() {
         assert_eq!(
@@ -467,7 +467,7 @@ executable my-exe
         assert_eq!(count_preceding_indentation("  b", 2), 2);
     }
 
-    // Ported: "findExtents($indent, $content)" (it.each) — modules/manager/haskell-cabal/extract.spec.ts line 62
+    // Ported: "findExtents($indent, $content)" (it.each) — lib/modules/manager/haskell-cabal/extract.spec.ts line 62
     #[test]
     fn cabal_find_extents() {
         assert_eq!(find_extents(1, "a: b\n\tc: d"), 10);
@@ -477,7 +477,7 @@ executable my-exe
         assert_eq!(find_extents(1, "a: b\n c: d\ne: f"), 10);
     }
 
-    // Ported: "splitSingleDependency($depLine)" (it.each) — modules/manager/haskell-cabal/extract.spec.ts line 75
+    // Ported: "splitSingleDependency($depLine)" (it.each) — lib/modules/manager/haskell-cabal/extract.spec.ts line 75
     #[test]
     fn cabal_split_single_dependency() {
         assert_eq!(
@@ -499,7 +499,7 @@ executable my-exe
         assert_eq!(split_single_dependency("-invalid-package-name"), None);
     }
 
-    // Ported: "trims replaceString" — modules/manager/haskell-cabal/extract.spec.ts line 95
+    // Ported: "trims replaceString" — lib/modules/manager/haskell-cabal/extract.spec.ts line 95
     #[test]
     fn cabal_extract_names_and_ranges() {
         let res = extract_names_and_ranges(" a , b ");
@@ -522,7 +522,7 @@ executable my-exe
         );
     }
 
-    // Ported: "strips comments" — modules/manager/haskell-cabal/extract.spec.ts line 105
+    // Ported: "strips comments" — lib/modules/manager/haskell-cabal/extract.spec.ts line 105
     #[test]
     fn cabal_find_depends_strips_comments() {
         let comment_cabal_file =

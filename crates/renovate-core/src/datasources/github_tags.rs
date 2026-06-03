@@ -466,7 +466,7 @@ mod tests {
         ])
     }
 
-    // Ported: "returns commit digest" — datasource/github-tags/index.spec.ts line 25
+    // Ported: "returns commit digest" — lib/modules/datasource/github-tags/index.spec.ts line 25
     #[tokio::test]
     async fn returns_commit_digest() {
         let server = MockServer::start().await;
@@ -483,7 +483,7 @@ mod tests {
         assert_eq!(res.as_deref(), Some("abcdef"));
     }
 
-    // Ported: "returns null for missing commit" — datasource/github-tags/index.spec.ts line 36
+    // Ported: "returns null for missing commit" — lib/modules/datasource/github-tags/index.spec.ts line 36
     #[tokio::test]
     async fn returns_null_for_missing_commit() {
         let server = MockServer::start().await;
@@ -498,7 +498,7 @@ mod tests {
         assert!(res.is_none());
     }
 
-    // Ported: "returns untagged commit digest" — datasource/github-tags/index.spec.ts line 45
+    // Ported: "returns untagged commit digest" — lib/modules/datasource/github-tags/index.spec.ts line 45
     #[tokio::test]
     async fn returns_untagged_commit_digest() {
         let server = MockServer::start().await;
@@ -515,7 +515,7 @@ mod tests {
         assert_eq!(res.as_deref(), Some("abcdef"));
     }
 
-    // Ported: "returns tagged commit digest" — datasource/github-tags/index.spec.ts line 54
+    // Ported: "returns tagged commit digest" — lib/modules/datasource/github-tags/index.spec.ts line 54
     #[tokio::test]
     async fn returns_tagged_commit_digest() {
         let server = MockServer::start().await;
@@ -533,7 +533,7 @@ mod tests {
     // "returns null for missing hash" (line 73) → not-applicable:
     // REST /tags always includes commit.sha; missing-hash is GraphQL-specific.
 
-    // Ported: "returns null for missing tagged commit digest" — datasource/github-tags/index.spec.ts line 91
+    // Ported: "returns null for missing tagged commit digest" — lib/modules/datasource/github-tags/index.spec.ts line 91
     #[tokio::test]
     async fn returns_null_for_missing_tagged_commit_digest() {
         let server = MockServer::start().await;
@@ -548,7 +548,7 @@ mod tests {
         assert!(res.is_none());
     }
 
-    // Ported: "returns null for error" — datasource/github-tags/index.spec.ts line 110
+    // Ported: "returns null for error" — lib/modules/datasource/github-tags/index.spec.ts line 110
     #[tokio::test]
     async fn returns_null_for_error() {
         let server = MockServer::start().await;
@@ -563,7 +563,7 @@ mod tests {
         assert!(res.is_none());
     }
 
-    // Ported: "returns tags" — datasource/github-tags/index.spec.ts line 120
+    // Ported: "returns tags" — lib/modules/datasource/github-tags/index.spec.ts line 120
     #[tokio::test]
     async fn returns_tags() {
         let server = MockServer::start().await;
@@ -628,7 +628,7 @@ mod tests {
         assert_eq!(r2.hash.as_deref(), Some("abc"));
     }
 
-    // Ported: "if it is newer than tag timestamp" — datasource/github-tags/index.spec.ts line 184
+    // Ported: "if it is newer than tag timestamp" — lib/modules/datasource/github-tags/index.spec.ts line 184
     #[tokio::test]
     async fn release_timestamp_newer_than_tag_timestamp() {
         let server = MockServer::start().await;
@@ -665,7 +665,7 @@ mod tests {
         );
     }
 
-    // Ported: "keeps tag timestamp when release timestamp is older" — datasource/github-tags/index.spec.ts line 213
+    // Ported: "keeps tag timestamp when release timestamp is older" — lib/modules/datasource/github-tags/index.spec.ts line 213
     #[tokio::test]
     async fn keeps_tag_timestamp_when_release_timestamp_is_older() {
         let server = MockServer::start().await;
@@ -702,7 +702,7 @@ mod tests {
         );
     }
 
-    // Ported: "keeps tag timestamp when release timestamp is equal" — datasource/github-tags/index.spec.ts line 242
+    // Ported: "keeps tag timestamp when release timestamp is equal" — lib/modules/datasource/github-tags/index.spec.ts line 242
     #[tokio::test]
     async fn keeps_tag_timestamp_when_release_timestamp_is_equal() {
         let server = MockServer::start().await;
@@ -739,7 +739,7 @@ mod tests {
         );
     }
 
-    // Ported: "keeps tag timestamp when no corresponding release exists" — datasource/github-tags/index.spec.ts line 271
+    // Ported: "keeps tag timestamp when no corresponding release exists" — lib/modules/datasource/github-tags/index.spec.ts line 271
     #[tokio::test]
     async fn keeps_tag_timestamp_when_no_corresponding_release_exists() {
         let server = MockServer::start().await;

@@ -181,7 +181,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "parses nightly URL" — rust-version/parse.spec.ts line 5
+    // Ported: "parses nightly URL" — lib/modules/datasource/rust-version/parse.spec.ts line 5
     #[test]
     fn parse_nightly_url() {
         let result =
@@ -195,7 +195,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses versioned release URL" — rust-version/parse.spec.ts line 15
+    // Ported: "parses versioned release URL" — lib/modules/datasource/rust-version/parse.spec.ts line 15
     #[test]
     fn parse_versioned_release_url() {
         let result =
@@ -209,7 +209,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses beta versioned URL" — rust-version/parse.spec.ts line 25
+    // Ported: "parses beta versioned URL" — lib/modules/datasource/rust-version/parse.spec.ts line 25
     #[test]
     fn parse_beta_versioned_url() {
         let result = parse_manifest_url(
@@ -224,7 +224,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses stable channel URL" — rust-version/parse.spec.ts line 35
+    // Ported: "parses stable channel URL" — lib/modules/datasource/rust-version/parse.spec.ts line 35
     #[test]
     fn parse_stable_channel_url() {
         let result =
@@ -238,7 +238,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses beta channel URL" — rust-version/parse.spec.ts line 45
+    // Ported: "parses beta channel URL" — lib/modules/datasource/rust-version/parse.spec.ts line 45
     #[test]
     fn parse_beta_channel_url() {
         let result =
@@ -252,7 +252,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses URL with https protocol" — rust-version/parse.spec.ts line 55
+    // Ported: "parses URL with https protocol" — lib/modules/datasource/rust-version/parse.spec.ts line 55
     #[test]
     fn parse_url_with_https_protocol() {
         let result = parse_manifest_url(
@@ -267,7 +267,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses URL with http protocol" — rust-version/parse.spec.ts line 65
+    // Ported: "parses URL with http protocol" — lib/modules/datasource/rust-version/parse.spec.ts line 65
     #[test]
     fn parse_url_with_http_protocol() {
         let result = parse_manifest_url(
@@ -282,27 +282,27 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for URL without date" — rust-version/parse.spec.ts line 75
+    // Ported: "returns null for URL without date" — lib/modules/datasource/rust-version/parse.spec.ts line 75
     #[test]
     fn returns_none_without_date() {
         let result = parse_manifest_url("static.rust-lang.org/dist/channel-rust-nightly.toml");
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for URL without channel-rust pattern" — rust-version/parse.spec.ts line 82
+    // Ported: "returns null for URL without channel-rust pattern" — lib/modules/datasource/rust-version/parse.spec.ts line 82
     #[test]
     fn returns_none_without_channel_rust() {
         let result = parse_manifest_url("static.rust-lang.org/dist/2025-11-24/something-else.toml");
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty string" — rust-version/parse.spec.ts line 89
+    // Ported: "returns null for empty string" — lib/modules/datasource/rust-version/parse.spec.ts line 89
     #[test]
     fn returns_none_for_empty_string() {
         assert!(parse_manifest_url("").is_none());
     }
 
-    // Ported: "returns null for malformed date" — rust-version/parse.spec.ts line 94
+    // Ported: "returns null for malformed date" — lib/modules/datasource/rust-version/parse.spec.ts line 94
     // Note: upstream TypeScript parses successfully even for out-of-range dates.
     #[test]
     fn accepts_out_of_range_date() {
@@ -319,7 +319,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses URL with different domain" — rust-version/parse.spec.ts line 104
+    // Ported: "parses URL with different domain" — lib/modules/datasource/rust-version/parse.spec.ts line 104
     #[test]
     fn parse_url_with_different_domain() {
         let result = parse_manifest_url("example.com/archives/2025-11-24/channel-rust-1.82.0.toml");
@@ -332,7 +332,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses URL with complex version" — rust-version/parse.spec.ts line 114
+    // Ported: "parses URL with complex version" — lib/modules/datasource/rust-version/parse.spec.ts line 114
     #[test]
     fn parse_url_with_complex_version() {
         let result =
@@ -346,20 +346,20 @@ mod tests {
         );
     }
 
-    // Ported: "ignores blank lines silently (no spurious warning)" — rust-version/index.spec.ts line 92
+    // Ported: "ignores blank lines silently (no spurious warning)" — lib/modules/datasource/rust-version/index.spec.ts line 92
     #[test]
     fn skip_blank_lines() {
         assert!(parse_manifest_url("").is_none());
         assert!(parse_manifest_url("   ").is_none());
     }
 
-    // Ported: "ignores unexpected URLs" — rust-version/index.spec.ts line 70
+    // Ported: "ignores unexpected URLs" — lib/modules/datasource/rust-version/index.spec.ts line 70
     #[test]
     fn skip_invalid_url() {
         assert!(parse_manifest_url("static.rust-lang.org/dist/invalid.toml").is_none());
     }
 
-    // Ported: "deduplicates versions with latest date" — rust-version/index.spec.ts line 47
+    // Ported: "deduplicates versions with latest date" — lib/modules/datasource/rust-version/index.spec.ts line 47
     #[test]
     fn deduplication_keeps_latest_date() {
         let lines = [
@@ -427,7 +427,7 @@ mod tests {
         assert!(version_map.contains_key("1.82.0"));
     }
 
-    // Ported: "fetches and parses manifest data" — rust-version/index.spec.ts line 10
+    // Ported: "fetches and parses manifest data" — lib/modules/datasource/rust-version/index.spec.ts line 10
     #[tokio::test]
     async fn fetches_and_parses_manifest_data() {
         let server = MockServer::start().await;
@@ -454,7 +454,7 @@ mod tests {
         assert!(versions.contains(&"nightly-2024-10-19"));
     }
 
-    // Ported: "throws for network error" — rust-version/index.spec.ts line 118
+    // Ported: "throws for network error" — lib/modules/datasource/rust-version/index.spec.ts line 118
     #[tokio::test]
     async fn throws_for_network_error() {
         let server = MockServer::start().await;

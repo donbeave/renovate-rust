@@ -284,7 +284,7 @@ fn flush_chart(
 mod tests {
     use super::*;
 
-    // Ported: "supports clusterprofiles" — sveltos/extract.spec.ts line 444
+    // Ported: "supports clusterprofiles" — lib/modules/manager/sveltos/extract.spec.ts line 444
     #[test]
     fn extracts_helm_chart() {
         let content = r#"
@@ -304,7 +304,7 @@ spec:
         assert_eq!(deps[0].registry_url, "https://charts.helm.sh/stable");
     }
 
-    // Ported: "supports clusterprofiles" — sveltos/extract.spec.ts line 444
+    // Ported: "supports clusterprofiles" — lib/modules/manager/sveltos/extract.spec.ts line 444
     #[test]
     fn extracts_multiple_charts() {
         let content = r#"
@@ -325,7 +325,7 @@ spec:
         assert_eq!(deps.len(), 2);
     }
 
-    // Ported: "considers registryAliases" — sveltos/extract.spec.ts line 495
+    // Ported: "considers registryAliases" — lib/modules/manager/sveltos/extract.spec.ts line 495
     #[test]
     fn considers_registry_aliases_for_oci_charts() {
         let content = r#"---
@@ -360,27 +360,27 @@ spec:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "return null for Kubernetes manifest" — sveltos/extract.spec.ts line 308
+    // Ported: "return null for Kubernetes manifest" — lib/modules/manager/sveltos/extract.spec.ts line 308
     #[test]
     fn skips_non_sveltos_files() {
         assert!(extract("apiVersion: v1\nkind: ConfigMap\n").is_empty());
     }
 
-    // Ported: "returns an empty array when parsing fails" — sveltos/extract.spec.ts line 278
+    // Ported: "returns an empty array when parsing fails" — lib/modules/manager/sveltos/extract.spec.ts line 278
     #[test]
     fn extract_definition_invalid_input_returns_empty() {
         // TypeScript: extractDefinition({}) returns [] — empty/invalid doc has no deps
         assert!(extract("{}").is_empty());
     }
 
-    // Ported: "returns null for empty" — sveltos/extract.spec.ts line 298
+    // Ported: "returns null for empty" — lib/modules/manager/sveltos/extract.spec.ts line 298
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
         assert!(extract("nothing here").is_empty());
     }
 
-    // Ported: "return null if deps array would be empty" — sveltos/extract.spec.ts line 313
+    // Ported: "return null if deps array would be empty" — lib/modules/manager/sveltos/extract.spec.ts line 313
     #[test]
     fn malformed_no_charts_returns_empty() {
         let content = r#"apiVersion: config.projectsveltos.io/v1beta1
@@ -395,7 +395,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "return result for double quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 332
+    // Ported: "return result for double quoted projectsveltos.io apiVersion reference" — lib/modules/manager/sveltos/extract.spec.ts line 332
     #[test]
     fn double_quoted_api_version_extracted() {
         let content = r#"apiVersion: "config.projectsveltos.io/v1beta1"
@@ -415,7 +415,7 @@ spec:
         assert_eq!(deps[0].current_value, "23.4.0");
     }
 
-    // Ported: "return result for single quoted projectsveltos.io apiVersion reference" — sveltos/extract.spec.ts line 364
+    // Ported: "return result for single quoted projectsveltos.io apiVersion reference" — lib/modules/manager/sveltos/extract.spec.ts line 364
     #[test]
     fn single_quoted_api_version_extracted() {
         let content = r#"apiVersion: 'config.projectsveltos.io/v1beta1'
@@ -434,7 +434,7 @@ spec:
         assert_eq!(deps[0].chart_name, "prometheus-community/prometheus");
     }
 
-    // Ported: "returns null if extractDefinition returns an empty array" — sveltos/extract.spec.ts line 284
+    // Ported: "returns null if extractDefinition returns an empty array" — lib/modules/manager/sveltos/extract.spec.ts line 284
     #[test]
     fn clusterprofile_with_no_helm_charts_returns_empty() {
         let content = r#"apiVersion: "config.projectsveltos.io/v1beta1"
@@ -445,7 +445,7 @@ metadata:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for invalid" — sveltos/extract.spec.ts line 302
+    // Ported: "returns null for invalid" — lib/modules/manager/sveltos/extract.spec.ts line 302
     #[test]
     fn malformed_profiles_all_empty_charts_returns_empty() {
         let content = r#"---
@@ -462,7 +462,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "return null if YAML is invalid" — sveltos/extract.spec.ts line 318
+    // Ported: "return null if YAML is invalid" — lib/modules/manager/sveltos/extract.spec.ts line 318
     #[test]
     fn invalid_yaml_with_no_valid_helm_charts_returns_empty() {
         let content = r#"----
@@ -474,7 +474,7 @@ name: prometheus
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "supports profiles" — sveltos/extract.spec.ts line 396
+    // Ported: "supports profiles" — lib/modules/manager/sveltos/extract.spec.ts line 396
     #[test]
     fn profile_kind_extracted() {
         let content = r#"---
@@ -506,7 +506,7 @@ spec:
         );
     }
 
-    // Ported: "supports clusterpromotions" — sveltos/extract.spec.ts line 518
+    // Ported: "supports clusterpromotions" — lib/modules/manager/sveltos/extract.spec.ts line 518
     #[test]
     fn clusterpromotion_kind_extracted() {
         let content = r#"---
@@ -578,7 +578,7 @@ spec:
         assert!(vault.registry_urls.is_empty());
     }
 
-    // Ported: "supports eventtriggers" — sveltos/extract.spec.ts line 554
+    // Ported: "supports eventtriggers" — lib/modules/manager/sveltos/extract.spec.ts line 554
     #[test]
     fn eventtrigger_kind_extracted() {
         let content = r#"---

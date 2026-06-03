@@ -164,7 +164,7 @@ mod tests {
     const SRI_JSON: &str =
         include_str!("../../../../../renovate/lib/modules/datasource/cdnjs/__fixtures__/sri.json");
 
-    // Ported: "throws for empty result" — datasource/cdnjs/index.spec.ts line 18
+    // Ported: "throws for empty result" — lib/modules/datasource/cdnjs/index.spec.ts line 18
     #[tokio::test]
     async fn throws_for_malformed_json() {
         let server = MockServer::start().await;
@@ -179,7 +179,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws for error" — datasource/cdnjs/index.spec.ts line 28
+    // Ported: "throws for error" — lib/modules/datasource/cdnjs/index.spec.ts line 28
     #[tokio::test]
     async fn throws_for_network_error() {
         let http = HttpClient::new().unwrap();
@@ -187,7 +187,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for 404" — datasource/cdnjs/index.spec.ts line 38
+    // Ported: "returns null for 404" — lib/modules/datasource/cdnjs/index.spec.ts line 38
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -204,7 +204,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty 200 OK" — datasource/cdnjs/index.spec.ts line 48
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/cdnjs/index.spec.ts line 48
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -221,7 +221,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 401" — datasource/cdnjs/index.spec.ts line 61
+    // Ported: "throws for 401" — lib/modules/datasource/cdnjs/index.spec.ts line 61
     #[tokio::test]
     async fn throws_for_401() {
         let server = MockServer::start().await;
@@ -236,7 +236,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws for 429" — datasource/cdnjs/index.spec.ts line 71
+    // Ported: "throws for 429" — lib/modules/datasource/cdnjs/index.spec.ts line 71
     #[tokio::test]
     async fn throws_for_429() {
         let server = MockServer::start().await;
@@ -251,7 +251,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws for 5xx" — datasource/cdnjs/index.spec.ts line 81
+    // Ported: "throws for 5xx" — lib/modules/datasource/cdnjs/index.spec.ts line 81
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -266,7 +266,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws for unknown error" — datasource/cdnjs/index.spec.ts line 91
+    // Ported: "throws for unknown error" — lib/modules/datasource/cdnjs/index.spec.ts line 91
     #[tokio::test]
     async fn throws_for_unknown_error() {
         let http = HttpClient::new().unwrap();
@@ -274,7 +274,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "processes real data" — datasource/cdnjs/index.spec.ts line 101
+    // Ported: "processes real data" — lib/modules/datasource/cdnjs/index.spec.ts line 101
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -301,7 +301,7 @@ mod tests {
         );
     }
 
-    // Ported: "returs null for no result" — datasource/cdnjs/index.spec.ts line 115
+    // Ported: "returs null for no result" — lib/modules/datasource/cdnjs/index.spec.ts line 115
     #[tokio::test]
     async fn digest_returns_null_for_empty_response() {
         let server = MockServer::start().await;
@@ -319,7 +319,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returs null for empty sri object" — datasource/cdnjs/index.spec.ts line 131
+    // Ported: "returs null for empty sri object" — lib/modules/datasource/cdnjs/index.spec.ts line 131
     #[tokio::test]
     async fn digest_returns_null_for_empty_sri() {
         let server = MockServer::start().await;
@@ -337,7 +337,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returs null if file not found" — datasource/cdnjs/index.spec.ts line 147
+    // Ported: "returs null if file not found" — lib/modules/datasource/cdnjs/index.spec.ts line 147
     #[tokio::test]
     async fn digest_returns_null_if_file_not_found() {
         let server = MockServer::start().await;
@@ -358,7 +358,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for 404" — datasource/cdnjs/index.spec.ts line 163
+    // Ported: "returns null for 404" — lib/modules/datasource/cdnjs/index.spec.ts line 163
     #[tokio::test]
     async fn digest_throws_for_404() {
         let server = MockServer::start().await;
@@ -373,7 +373,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns digest" — datasource/cdnjs/index.spec.ts line 176
+    // Ported: "returns digest" — lib/modules/datasource/cdnjs/index.spec.ts line 176
     #[tokio::test]
     async fn digest_returns_hash() {
         let server = MockServer::start().await;

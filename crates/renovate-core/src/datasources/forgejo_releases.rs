@@ -48,7 +48,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "returns tags from forgejo.com" — forgejo-releases/index.spec.ts line 9
+    // Ported: "returns tags from forgejo.com" — lib/modules/datasource/forgejo-releases/index.spec.ts line 9
     #[tokio::test]
     async fn returns_tags_from_forgejo_com() {
         let server = MockServer::start().await;
@@ -81,7 +81,7 @@ mod tests {
         assert!(result.source_url.ends_with("/forgejo/helm-chart"));
     }
 
-    // Ported: "returns tags from codeberg.org" — forgejo-releases/index.spec.ts line 106
+    // Ported: "returns tags from codeberg.org" — lib/modules/datasource/forgejo-releases/index.spec.ts line 106
     #[tokio::test]
     async fn returns_tags_from_codeberg_org() {
         let server = MockServer::start().await;
@@ -123,7 +123,7 @@ mod tests {
         assert!(result.source_url.ends_with("/forgejo-contrib/forgejo-helm"));
     }
 
-    // Ported: "returns commits from codeberg.org" — forgejo-releases/index.spec.ts line 236
+    // Ported: "returns commits from codeberg.org" — lib/modules/datasource/forgejo-releases/index.spec.ts line 236
     #[tokio::test]
     async fn returns_commits_from_codeberg_org() {
         let server = MockServer::start().await;
@@ -147,7 +147,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns commits from forgejo.com" — forgejo-releases/index.spec.ts line 283
+    // Ported: "returns commits from forgejo.com" — lib/modules/datasource/forgejo-releases/index.spec.ts line 283
     #[tokio::test]
     async fn returns_commits_from_forgejo_com_empty() {
         let server = MockServer::start().await;
@@ -164,7 +164,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns tags commit hash from forgejo.com" — forgejo-releases/index.spec.ts line 299
+    // Ported: "returns tags commit hash from forgejo.com" — lib/modules/datasource/forgejo-releases/index.spec.ts line 299
     #[tokio::test]
     async fn returns_tags_commit_hash_from_forgejo_com() {
         let server = MockServer::start().await;

@@ -184,7 +184,7 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
 mod tests {
     use super::*;
 
-    // Ported: "isVersion("$input") === $expected" — versioning/elm/index.spec.ts line 5
+    // Ported: "isVersion("$input") === $expected" — lib/modules/versioning/elm/index.spec.ts line 5
     #[test]
     fn is_version_table() {
         let cases = [
@@ -206,7 +206,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/elm/index.spec.ts line 23
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/elm/index.spec.ts line 23
     #[test]
     fn is_valid_table() {
         let cases = [
@@ -232,7 +232,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion("$input") === $expected" — versioning/elm/index.spec.ts line 43
+    // Ported: "isSingleVersion("$input") === $expected" — lib/modules/versioning/elm/index.spec.ts line 43
     #[test]
     fn is_single_version_table() {
         let cases = [
@@ -250,7 +250,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable("$input") === $expected" — versioning/elm/index.spec.ts line 55
+    // Ported: "isStable("$input") === $expected" — lib/modules/versioning/elm/index.spec.ts line 55
     #[test]
     fn is_stable_table() {
         let cases = [
@@ -268,20 +268,20 @@ mod tests {
         }
     }
 
-    // Ported: "returns false for invalid version" — versioning/elm/index.spec.ts line 65
+    // Ported: "returns false for invalid version" — lib/modules/versioning/elm/index.spec.ts line 65
     #[test]
     fn is_stable_invalid_returns_false() {
         assert!(!is_stable("invalid"));
     }
 
-    // Ported: "isCompatible("$input") === $expected" — versioning/elm/index.spec.ts line 71
+    // Ported: "isCompatible("$input") === $expected" — lib/modules/versioning/elm/index.spec.ts line 71
     #[test]
     fn is_compatible_table() {
         assert!(is_compatible("1.0.0"));
         assert!(!is_compatible("invalid"));
     }
 
-    // Ported: "extracts version components" — versioning/elm/index.spec.ts line 81
+    // Ported: "extracts version components" — lib/modules/versioning/elm/index.spec.ts line 81
     #[test]
     fn extracts_version_components() {
         assert_eq!(get_major("1.2.3"), Some(1));
@@ -289,7 +289,7 @@ mod tests {
         assert_eq!(get_patch("1.2.3"), Some(3));
     }
 
-    // Ported: "equals("$a", "$b") === $expected" — versioning/elm/index.spec.ts line 89
+    // Ported: "equals("$a", "$b") === $expected" — lib/modules/versioning/elm/index.spec.ts line 89
     #[test]
     fn equals_table() {
         assert!(equals("1.0.0", "1.0.0"));
@@ -297,7 +297,7 @@ mod tests {
         assert!(!equals("2.0.0", "1.0.0"));
     }
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/elm/index.spec.ts line 100
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/elm/index.spec.ts line 100
     #[test]
     fn is_greater_than_table() {
         assert!(is_greater_than("2.0.0", "1.0.0"));
@@ -306,7 +306,7 @@ mod tests {
         assert!(!is_greater_than("1.0.0", "2.0.0"));
     }
 
-    // Ported: "sorts versions correctly" — versioning/elm/index.spec.ts line 112
+    // Ported: "sorts versions correctly" — lib/modules/versioning/elm/index.spec.ts line 112
     #[test]
     fn sorts_versions_correctly() {
         assert!(sort_versions("1.0.0", "2.0.0") == std::cmp::Ordering::Less);
@@ -314,7 +314,7 @@ mod tests {
         assert!(sort_versions("1.0.0", "1.0.0") == std::cmp::Ordering::Equal);
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/elm/index.spec.ts line 120
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/elm/index.spec.ts line 120
     #[test]
     fn matches_table() {
         let cases = [
@@ -338,25 +338,25 @@ mod tests {
         }
     }
 
-    // Ported: "returns false for invalid version" — versioning/elm/index.spec.ts line 139
+    // Ported: "returns false for invalid version" — lib/modules/versioning/elm/index.spec.ts line 139
     #[test]
     fn matches_invalid_version_returns_false() {
         assert!(!matches("invalid", "1.0.0 <= v < 2.0.0"));
     }
 
-    // Ported: "returns false for invalid range" — versioning/elm/index.spec.ts line 143
+    // Ported: "returns false for invalid range" — lib/modules/versioning/elm/index.spec.ts line 143
     #[test]
     fn matches_invalid_range_returns_false() {
         assert!(!matches("1.0.0", "invalid"));
     }
 
-    // Ported: "returns false for malformed range where lower > upper" — versioning/elm/index.spec.ts line 147
+    // Ported: "returns false for malformed range where lower > upper" — lib/modules/versioning/elm/index.spec.ts line 147
     #[test]
     fn matches_lower_gt_upper_returns_false() {
         assert!(!matches("1.5.0", "2.0.0 <= v < 1.0.0"));
     }
 
-    // Ported: "isLessThanRange("$version", "$range") === $expected" — versioning/elm/index.spec.ts line 153
+    // Ported: "isLessThanRange("$version", "$range") === $expected" — lib/modules/versioning/elm/index.spec.ts line 153
     #[test]
     fn is_less_than_range_table() {
         let cases = [
@@ -378,19 +378,19 @@ mod tests {
         }
     }
 
-    // Ported: "returns false for invalid version" — versioning/elm/index.spec.ts line 170
+    // Ported: "returns false for invalid version" — lib/modules/versioning/elm/index.spec.ts line 170
     #[test]
     fn is_less_than_range_invalid_version_returns_false() {
         assert!(!is_less_than_range("invalid", "1.0.0 <= v < 2.0.0"));
     }
 
-    // Ported: "returns false for invalid range" — versioning/elm/index.spec.ts line 176
+    // Ported: "returns false for invalid range" — lib/modules/versioning/elm/index.spec.ts line 176
     #[test]
     fn is_less_than_range_invalid_range_returns_false() {
         assert!(!is_less_than_range("1.0.0", "invalid"));
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/elm/index.spec.ts line 182
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/elm/index.spec.ts line 182
     #[test]
     fn get_satisfying_version_table() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
@@ -418,7 +418,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/elm/index.spec.ts line 199
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/elm/index.spec.ts line 199
     #[test]
     fn min_satisfying_version_table() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
@@ -444,7 +444,7 @@ mod tests {
         }
     }
 
-    // Ported: "replaces exact version with new version" — versioning/elm/index.spec.ts line 215
+    // Ported: "replaces exact version with new version" — lib/modules/versioning/elm/index.spec.ts line 215
     #[test]
     fn get_new_value_exact_replace() {
         let result = get_new_value(&NewValueParams {
@@ -455,7 +455,7 @@ mod tests {
         assert_eq!(result, Some("1.0.5".to_owned()));
     }
 
-    // Ported: "handles bump strategy for exact version" — versioning/elm/index.spec.ts line 225
+    // Ported: "handles bump strategy for exact version" — lib/modules/versioning/elm/index.spec.ts line 225
     #[test]
     fn get_new_value_exact_bump() {
         let result = get_new_value(&NewValueParams {
@@ -466,7 +466,7 @@ mod tests {
         assert_eq!(result, Some("2.0.0".to_owned()));
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$newVersion") === "$expected"" — versioning/elm/index.spec.ts line 237
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$newVersion") === "$expected"" — lib/modules/versioning/elm/index.spec.ts line 237
     #[test]
     fn get_new_value_range_table() {
         let cases = [
@@ -527,7 +527,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns null for invalid new version" — versioning/elm/index.spec.ts line 266
+    // Ported: "returns null for invalid new version" — lib/modules/versioning/elm/index.spec.ts line 266
     #[test]
     fn get_new_value_invalid_new_version_returns_none() {
         let result = get_new_value(&NewValueParams {
@@ -538,7 +538,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns null for invalid current value" — versioning/elm/index.spec.ts line 276
+    // Ported: "returns null for invalid current value" — lib/modules/versioning/elm/index.spec.ts line 276
     #[test]
     fn get_new_value_invalid_current_value_returns_none() {
         let result = get_new_value(&NewValueParams {
@@ -549,7 +549,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns null for unknown range strategy" — versioning/elm/index.spec.ts line 286
+    // Ported: "returns null for unknown range strategy" — lib/modules/versioning/elm/index.spec.ts line 286
     #[test]
     fn get_new_value_unknown_strategy_returns_none() {
         let result = get_new_value(&NewValueParams {
@@ -560,7 +560,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "handles widen when newVersion equals upper bound exactly" — versioning/elm/index.spec.ts line 296
+    // Ported: "handles widen when newVersion equals upper bound exactly" — lib/modules/versioning/elm/index.spec.ts line 296
     #[test]
     fn get_new_value_widen_equals_upper() {
         let result = get_new_value(&NewValueParams {
@@ -571,7 +571,7 @@ mod tests {
         assert_eq!(result, Some("1.0.0 <= v < 3.0.0".to_owned()));
     }
 
-    // Ported: "widens elm-version range for new compiler release" — versioning/elm/index.spec.ts line 307
+    // Ported: "widens elm-version range for new compiler release" — lib/modules/versioning/elm/index.spec.ts line 307
     #[test]
     fn get_new_value_widen_elm_compiler() {
         let result = get_new_value(&NewValueParams {
@@ -582,7 +582,7 @@ mod tests {
         assert_eq!(result, Some("0.19.0 <= v < 1.0.0".to_owned()));
     }
 
-    // Ported: "keeps elm-version range unchanged when version is already satisfied" — versioning/elm/index.spec.ts line 318
+    // Ported: "keeps elm-version range unchanged when version is already satisfied" — lib/modules/versioning/elm/index.spec.ts line 318
     #[test]
     fn get_new_value_update_lockfile_satisfied() {
         let result = get_new_value(&NewValueParams {
@@ -593,7 +593,7 @@ mod tests {
         assert_eq!(result, Some("0.19.0 <= v < 0.20.0".to_owned()));
     }
 
-    // Ported: "replaces elm-version range when explicitly requested" — versioning/elm/index.spec.ts line 328
+    // Ported: "replaces elm-version range when explicitly requested" — lib/modules/versioning/elm/index.spec.ts line 328
     #[test]
     fn get_new_value_replace_elm_version() {
         let result = get_new_value(&NewValueParams {
@@ -604,7 +604,7 @@ mod tests {
         assert_eq!(result, Some("0.19.1 <= v < 1.0.0".to_owned()));
     }
 
-    // Ported: "finds highest satisfying version for elm-version range" — versioning/elm/index.spec.ts line 341
+    // Ported: "finds highest satisfying version for elm-version range" — lib/modules/versioning/elm/index.spec.ts line 341
     #[test]
     fn get_satisfying_version_elm_compiler() {
         let versions = vec!["0.18.0", "0.19.0", "0.19.1", "0.20.0", "0.21.0"];
@@ -614,7 +614,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when no compiler version satisfies range" — versioning/elm/index.spec.ts line 355
+    // Ported: "returns null when no compiler version satisfies range" — lib/modules/versioning/elm/index.spec.ts line 355
     #[test]
     fn get_satisfying_version_none_satisfies() {
         let versions = vec!["0.18.0", "0.20.0"];

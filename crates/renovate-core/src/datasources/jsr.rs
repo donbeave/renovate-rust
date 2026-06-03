@@ -213,7 +213,7 @@ mod tests {
 
     // ── util tests ────────────────────────────────────────────────────────────
 
-    // Ported: "should extract package name" — datasource/jsr/util.spec.ts line 4
+    // Ported: "should extract package name" — lib/modules/datasource/jsr/util.spec.ts line 4
     #[test]
     fn extract_package_name_valid() {
         let result = extract_jsr_package_name("@scope/package-name").unwrap();
@@ -221,51 +221,51 @@ mod tests {
         assert_eq!(result.name, "package-name");
     }
 
-    // Ported: "should return null for invalid name" — datasource/jsr/util.spec.ts line 12
+    // Ported: "should return null for invalid name" — lib/modules/datasource/jsr/util.spec.ts line 12
     #[test]
     fn extract_null_for_invalid_path() {
         assert!(extract_jsr_package_name("@invalid/package/name").is_none());
     }
 
-    // Ported: "should return null for below scope min length" — datasource/jsr/util.spec.ts line 17
+    // Ported: "should return null for below scope min length" — lib/modules/datasource/jsr/util.spec.ts line 17
     #[test]
     fn extract_null_for_short_scope() {
         assert!(extract_jsr_package_name("@sc/packagename").is_none());
     }
 
-    // Ported: "should return null for exceed scope max length" — datasource/jsr/util.spec.ts line 22
+    // Ported: "should return null for exceed scope max length" — lib/modules/datasource/jsr/util.spec.ts line 22
     #[test]
     fn extract_null_for_long_scope() {
         let long_scope = format!("@{}/packagename", "a".repeat(101));
         assert!(extract_jsr_package_name(&long_scope).is_none());
     }
 
-    // Ported: "should return null for invalid scope name" — datasource/jsr/util.spec.ts line 27
+    // Ported: "should return null for invalid scope name" — lib/modules/datasource/jsr/util.spec.ts line 27
     #[test]
     fn extract_null_for_non_ascii_scope() {
         assert!(extract_jsr_package_name("@🦕🦕🦕/package-name").is_none());
     }
 
-    // Ported: "should return null for invalid package name starting with @" — datasource/jsr/util.spec.ts line 32
+    // Ported: "should return null for invalid package name starting with @" — lib/modules/datasource/jsr/util.spec.ts line 32
     #[test]
     fn extract_null_for_package_starting_with_at() {
         assert!(extract_jsr_package_name("@scope/@package-name").is_none());
     }
 
-    // Ported: "should return null for exceed package max length" — datasource/jsr/util.spec.ts line 37
+    // Ported: "should return null for exceed package max length" — lib/modules/datasource/jsr/util.spec.ts line 37
     #[test]
     fn extract_null_for_long_package_name() {
         let long_name = format!("@scope/{}", "a".repeat(59));
         assert!(extract_jsr_package_name(&long_name).is_none());
     }
 
-    // Ported: "should return null for invalid package name" — datasource/jsr/util.spec.ts line 42
+    // Ported: "should return null for invalid package name" — lib/modules/datasource/jsr/util.spec.ts line 42
     #[test]
     fn extract_null_for_uppercase_package() {
         assert!(extract_jsr_package_name("@scope/PACKAGE-NAME").is_none());
     }
 
-    // Ported: "should return null for invalid package name starting with -" — datasource/jsr/util.spec.ts line 47
+    // Ported: "should return null for invalid package name starting with -" — lib/modules/datasource/jsr/util.spec.ts line 47
     #[test]
     fn extract_null_for_package_starting_with_dash() {
         assert!(extract_jsr_package_name("@scope/-package-name").is_none());
@@ -273,7 +273,7 @@ mod tests {
 
     // ── index tests ───────────────────────────────────────────────────────────
 
-    // Ported: "should return null for invalid package name" — datasource/jsr/index.spec.ts line 24
+    // Ported: "should return null for invalid package name" — lib/modules/datasource/jsr/index.spec.ts line 24
     #[tokio::test]
     async fn returns_null_for_invalid_package_name() {
         let http = HttpClient::new().unwrap();
@@ -283,7 +283,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return null for no versions" — datasource/jsr/index.spec.ts line 32
+    // Ported: "should return null for no versions" — lib/modules/datasource/jsr/index.spec.ts line 32
     #[tokio::test]
     async fn returns_null_for_no_versions() {
         let server = MockServer::start().await;
@@ -302,7 +302,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should fetch package info from jsr" — datasource/jsr/index.spec.ts line 46
+    // Ported: "should fetch package info from jsr" — lib/modules/datasource/jsr/index.spec.ts line 46
     #[tokio::test]
     async fn fetches_package_info() {
         let server = MockServer::start().await;
@@ -338,7 +338,7 @@ mod tests {
         assert!(r1.is_latest);
     }
 
-    // Ported: "contains yanked versions" — datasource/jsr/index.spec.ts line 74
+    // Ported: "contains yanked versions" — lib/modules/datasource/jsr/index.spec.ts line 74
     #[tokio::test]
     async fn contains_yanked_versions() {
         let server = MockServer::start().await;
@@ -367,7 +367,7 @@ mod tests {
         assert!(r1.is_latest);
     }
 
-    // Ported: "should return null if lookup fails" — datasource/jsr/index.spec.ts line 102
+    // Ported: "should return null if lookup fails" — lib/modules/datasource/jsr/index.spec.ts line 102
     #[tokio::test]
     async fn throws_for_404() {
         let server = MockServer::start().await;
@@ -383,7 +383,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "should throw error for unparseable" — datasource/jsr/index.spec.ts line 115
+    // Ported: "should throw error for unparseable" — lib/modules/datasource/jsr/index.spec.ts line 115
     #[tokio::test]
     async fn throws_for_unparseable() {
         let server = MockServer::start().await;

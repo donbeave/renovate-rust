@@ -517,7 +517,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/hex/index.spec.ts line 4
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — lib/modules/versioning/hex/index.spec.ts line 4
     #[test]
     fn hex_matches_parametrized() {
         let cases = [
@@ -537,7 +537,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, \"$range\") === $expected" — versioning/hex/index.spec.ts line 19
+    // Ported: "getSatisfyingVersion($versions, \"$range\") === $expected" — lib/modules/versioning/hex/index.spec.ts line 19
     #[test]
     fn hex_get_satisfying_version_parametrized() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
@@ -561,7 +561,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/hex/index.spec.ts line 30
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/hex/index.spec.ts line 30
     #[test]
     fn hex_is_valid_parametrized() {
         let cases = [
@@ -575,7 +575,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/hex/index.spec.ts line 41
+    // Ported: "isSingleVersion(\"$version\") === $expected" — lib/modules/versioning/hex/index.spec.ts line 41
     #[test]
     fn hex_is_single_version_parametrized() {
         let cases = [
@@ -594,13 +594,13 @@ mod tests {
         }
     }
 
-    // Ported: "getPinnedValue returns == prefixed version" — versioning/hex/index.spec.ts line 52
+    // Ported: "getPinnedValue returns == prefixed version" — lib/modules/versioning/hex/index.spec.ts line 52
     #[test]
     fn hex_get_pinned_value() {
         assert_eq!(get_pinned_value("1.2.3"), "== 1.2.3");
     }
 
-    // Ported: "isLessThanRange($version, $range) === $expected" — versioning/hex/index.spec.ts line 56
+    // Ported: "isLessThanRange($version, $range) === $expected" — lib/modules/versioning/hex/index.spec.ts line 56
     #[test]
     fn hex_is_less_than_range_parametrized() {
         let cases = [
@@ -618,7 +618,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, \"$range\") === $expected" — versioning/hex/index.spec.ts line 69
+    // Ported: "minSatisfyingVersion($versions, \"$range\") === $expected" — lib/modules/versioning/hex/index.spec.ts line 69
     #[test]
     fn hex_min_satisfying_version_parametrized() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
@@ -638,7 +638,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/hex/index.spec.ts line 80
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — lib/modules/versioning/hex/index.spec.ts line 80
     #[test]
     fn hex_get_new_value_parametrized() {
         let cases: &[(&str, &str, &str, &str, &str)] = &[

@@ -47,7 +47,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "returns tags from code.forgejo.org" — forgejo-tags/index.spec.ts line 9
+    // Ported: "returns tags from code.forgejo.org" — lib/modules/datasource/forgejo-tags/index.spec.ts line 9
     #[tokio::test]
     async fn returns_tags_from_forgejo_org() {
         let server = MockServer::start().await;
@@ -76,7 +76,7 @@ mod tests {
         assert!(result.source_url.ends_with("/forgejo/helm-chart"));
     }
 
-    // Ported: "returns tags from codeberg.org" — forgejo-tags/index.spec.ts line 129
+    // Ported: "returns tags from codeberg.org" — lib/modules/datasource/forgejo-tags/index.spec.ts line 129
     #[tokio::test]
     async fn returns_tags_from_codeberg_org() {
         let server = MockServer::start().await;
@@ -106,7 +106,7 @@ mod tests {
         assert!(result.source_url.ends_with("/forgejo-contrib/forgejo-helm"));
     }
 
-    // Ported: "returns commits from codeberg.org" — forgejo-tags/index.spec.ts line 214
+    // Ported: "returns commits from codeberg.org" — lib/modules/datasource/forgejo-tags/index.spec.ts line 214
     #[tokio::test]
     async fn returns_commits_from_codeberg_org() {
         let server = MockServer::start().await;
@@ -128,7 +128,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null from code.forgejo.org when no commits found" — forgejo-tags/index.spec.ts line 261
+    // Ported: "returns null from code.forgejo.org when no commits found" — lib/modules/datasource/forgejo-tags/index.spec.ts line 261
     #[tokio::test]
     async fn returns_null_when_no_commits() {
         let server = MockServer::start().await;
@@ -145,7 +145,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns tags commit hash from code.forgejo.org" — forgejo-tags/index.spec.ts line 277
+    // Ported: "returns tags commit hash from code.forgejo.org" — lib/modules/datasource/forgejo-tags/index.spec.ts line 277
     #[tokio::test]
     async fn returns_tags_commit_hash() {
         let server = MockServer::start().await;

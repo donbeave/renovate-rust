@@ -218,7 +218,7 @@ uri = "buildpacks/nodejs:3.3.3"
 id = "no/version"
 "#;
 
-    // Ported: "extracts builder and buildpack images" — buildpacks/extract.spec.ts line 20
+    // Ported: "extracts builder and buildpack images" — lib/modules/manager/buildpacks/extract.spec.ts line 20
     #[test]
     fn extracts_registry_deps() {
         let deps = extract(SAMPLE);
@@ -236,7 +236,7 @@ id = "no/version"
         );
     }
 
-    // Ported: "extracts builder and buildpack images" — buildpacks/extract.spec.ts line 20
+    // Ported: "extracts builder and buildpack images" — lib/modules/manager/buildpacks/extract.spec.ts line 20
     #[test]
     fn skips_docker_refs() {
         let deps = extract(SAMPLE);
@@ -251,7 +251,7 @@ id = "no/version"
         }
     }
 
-    // Ported: "extracts builder and buildpack images" — buildpacks/extract.spec.ts line 20
+    // Ported: "extracts builder and buildpack images" — lib/modules/manager/buildpacks/extract.spec.ts line 20
     #[test]
     fn no_version_skipped() {
         let deps = extract(SAMPLE);
@@ -263,19 +263,19 @@ id = "no/version"
         assert!(no_ver.iter().any(|d| d.dep_name == "no/version"));
     }
 
-    // Ported: "returns null for invalid files" — buildpacks/extract.spec.ts line 7
+    // Ported: "returns null for invalid files" — lib/modules/manager/buildpacks/extract.spec.ts line 7
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for empty package.toml" — buildpacks/extract.spec.ts line 11
+    // Ported: "returns null for empty package.toml" — lib/modules/manager/buildpacks/extract.spec.ts line 11
     #[test]
     fn no_io_buildpacks_returns_empty() {
         assert!(extract("[_]\nschema-version = \"0.2\"\n").is_empty());
     }
 
-    // Ported: "returns null for invalid files" — buildpacks/extract.spec.ts line 7
+    // Ported: "returns null for invalid files" — lib/modules/manager/buildpacks/extract.spec.ts line 7
     #[test]
     fn invalid_toml_returns_empty() {
         assert!(extract("not a project toml").is_empty());

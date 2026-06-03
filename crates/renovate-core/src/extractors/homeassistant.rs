@@ -147,7 +147,7 @@ mod tests {
   "requirements": ["requests==2.28.0", "aiohttp>=3.8.0", "no-version"]
 }"#;
 
-    // Ported: "extracts multiple requirements" — homeassistant-manifest/extract.spec.ts line 84
+    // Ported: "extracts multiple requirements" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 84
     #[test]
     fn extracts_requirements() {
         let deps = extract(SAMPLE);
@@ -155,7 +155,7 @@ mod tests {
         assert_eq!(req.current_value, "==2.28.0");
     }
 
-    // Ported: "supports requirements with other operators" — homeassistant-manifest/extract.spec.ts line 168
+    // Ported: "supports requirements with other operators" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 168
     #[test]
     fn extracts_range_version() {
         let deps = extract(SAMPLE);
@@ -163,34 +163,34 @@ mod tests {
         assert_eq!(aio.current_value, ">=3.8.0");
     }
 
-    // Ported: "returns null for invalid JSON" — homeassistant-manifest/extract.spec.ts line 9
+    // Ported: "returns null for invalid JSON" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 9
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not valid json").is_empty());
     }
 
-    // Ported: "returns null for empty requirements" — homeassistant-manifest/extract.spec.ts line 45
+    // Ported: "returns null for empty requirements" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 45
     #[test]
     fn empty_requirements_returns_empty() {
         let content = r#"{"domain": "test", "name": "Test Integration", "requirements": []}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null when no requirements field" — homeassistant-manifest/extract.spec.ts line 55
+    // Ported: "returns null when no requirements field" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 55
     #[test]
     fn no_requirements_field_returns_empty() {
         let content = r#"{"domain": "test", "name": "Test Integration"}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for non-Home Assistant manifest (missing domain)" — homeassistant-manifest/extract.spec.ts line 14
+    // Ported: "returns null for non-Home Assistant manifest (missing domain)" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 14
     #[test]
     fn missing_domain_returns_empty() {
         let content = r#"{"name": "My Extension", "version": "1.0.0", "requirements": ["some-package==1.0.0"]}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for non-Home Assistant manifest (missing name)" — homeassistant-manifest/extract.spec.ts line 24
+    // Ported: "returns null for non-Home Assistant manifest (missing name)" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 24
     #[test]
     fn missing_name_returns_empty() {
         let content =
@@ -198,14 +198,14 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for chrome extension manifest" — homeassistant-manifest/extract.spec.ts line 34
+    // Ported: "returns null for chrome extension manifest" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 34
     #[test]
     fn chrome_extension_manifest_returns_empty() {
         let content = r#"{"manifest_version": 3, "name": "My Extension", "version": "1.0.0", "permissions": ["storage"]}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts single requirement with exact version" — homeassistant-manifest/extract.spec.ts line 64
+    // Ported: "extracts single requirement with exact version" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 64
     #[test]
     fn extracts_single_requirement_exact_version() {
         let content =
@@ -216,7 +216,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "==1.9.1");
     }
 
-    // Ported: "extracts multiple requirements" — homeassistant-manifest/extract.spec.ts line 84
+    // Ported: "extracts multiple requirements" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 84
     #[test]
     fn extracts_multiple_requirements() {
         let content = r#"{"domain": "hue", "name": "Philips Hue", "requirements": ["aiohue==1.9.1", "aiohttp==3.8.1", "pyyaml==6.0"]}"#;
@@ -227,7 +227,7 @@ mod tests {
         assert_eq!(deps[2].name, "pyyaml");
     }
 
-    // Ported: "handles requirements with extras" — homeassistant-manifest/extract.spec.ts line 118
+    // Ported: "handles requirements with extras" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 118
     #[test]
     fn handles_requirements_with_extras() {
         let content = r#"{"domain": "test", "name": "Test", "requirements": ["package[extra1,extra2]==1.0.0"]}"#;
@@ -237,7 +237,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "==1.0.0");
     }
 
-    // Ported: "extracts git+https requirements" — homeassistant-manifest/extract.spec.ts line 138
+    // Ported: "extracts git+https requirements" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 138
     #[test]
     fn extracts_git_https_requirements() {
         let content = r#"{"domain": "test", "name": "Test", "requirements": ["pycoolmaster@git+https://github.com/issacg/pycoolmaster.git@v1.0.0", "aiohue==1.9.1"]}"#;
@@ -259,7 +259,7 @@ mod tests {
         assert_eq!(aiohue.current_version.as_deref(), Some("1.9.1"));
     }
 
-    // Ported: "handles requirements without version" — homeassistant-manifest/extract.spec.ts line 211
+    // Ported: "handles requirements without version" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 211
     #[test]
     fn handles_requirements_without_version() {
         let content =
@@ -276,7 +276,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts from real-world ASUSWRT manifest" — homeassistant-manifest/extract.spec.ts line 237
+    // Ported: "extracts from real-world ASUSWRT manifest" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 237
     #[test]
     fn extracts_asuswrt_manifest() {
         let content = r#"{
@@ -292,7 +292,7 @@ mod tests {
         assert_eq!(b.current_value, "==1.21.3");
     }
 
-    // Ported: "handles invalid requirement types in array" — homeassistant-manifest/extract.spec.ts line 272
+    // Ported: "handles invalid requirement types in array" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 272
     #[test]
     fn skips_non_string_entries_in_requirements_array() {
         let content = r#"{"domain": "test", "name": "Test", "requirements": ["aiohue==1.9.1", 123, null, "valid==2.0.0"]}"#;
@@ -303,14 +303,14 @@ mod tests {
         assert!(deps.iter().any(|d| d.name == "valid"));
     }
 
-    // Ported: "returns null when requirements is not an array" — homeassistant-manifest/extract.spec.ts line 299
+    // Ported: "returns null when requirements is not an array" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 299
     #[test]
     fn requirements_not_an_array_returns_empty() {
         let content = r#"{"domain": "test", "name": "Test", "requirements": "not-an-array"}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "handles unparseable requirement strings with skipReason" — homeassistant-manifest/extract.spec.ts line 313
+    // Ported: "handles unparseable requirement strings with skipReason" — lib/modules/manager/homeassistant-manifest/extract.spec.ts line 313
     #[test]
     fn unparseable_requirement_has_skip_reason() {
         let content = r#"{"domain": "test", "name": "Test", "requirements": ["!!!invalid!!!", "aiohue==1.9.1"]}"#;

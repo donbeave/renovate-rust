@@ -162,7 +162,7 @@ pub fn parse_padded(v: &str) -> Option<Version> {
 mod tests {
     use super::*;
 
-    // Ported: "isSemVerXRange(\"range\") === $expected" — versioning/semver/common.spec.ts line 4
+    // Ported: "isSemVerXRange(\"range\") === $expected" — lib/modules/versioning/semver/common.spec.ts line 4
     #[test]
     fn is_semver_x_range_matches_renovate_spec() {
         for r in ["*", "x", "X", ""] {

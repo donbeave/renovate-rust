@@ -260,7 +260,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/azure-pipelines-tasks/__fixtures__/tasks.json"
     );
 
-    // Ported: "returns null for unknown task" — datasource/azure-pipelines-tasks/index.spec.ts line 21
+    // Ported: "returns null for unknown task" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 21
     #[tokio::test]
     async fn returns_null_for_unknown_task() {
         let server = MockServer::start().await;
@@ -284,7 +284,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "supports built-in tasks" — datasource/azure-pipelines-tasks/index.spec.ts line 36
+    // Ported: "supports built-in tasks" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 36
     #[tokio::test]
     async fn supports_builtin_tasks() {
         let server = MockServer::start().await;
@@ -309,7 +309,7 @@ mod tests {
         assert_eq!(result.releases[1].version, "0.198.0");
     }
 
-    // Ported: "supports marketplace tasks" — datasource/azure-pipelines-tasks/index.spec.ts line 49
+    // Ported: "supports marketplace tasks" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 49
     #[tokio::test]
     async fn supports_marketplace_tasks() {
         let server = MockServer::start().await;
@@ -345,7 +345,7 @@ mod tests {
         assert_eq!(result.releases[1].version, "0.198.0");
     }
 
-    // Ported: "is case insensitive" — datasource/azure-pipelines-tasks/index.spec.ts line 64
+    // Ported: "is case insensitive" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 64
     #[tokio::test]
     async fn is_case_insensitive() {
         let server = MockServer::start().await;
@@ -368,7 +368,7 @@ mod tests {
         assert_eq!(result.releases.len(), 2);
     }
 
-    // Ported: "returns organization task with single version" — datasource/azure-pipelines-tasks/index.spec.ts line 77
+    // Ported: "returns organization task with single version" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 77
     #[tokio::test]
     async fn returns_org_task_single_version() {
         let server = MockServer::start().await;
@@ -397,7 +397,7 @@ mod tests {
         );
     }
 
-    // Ported: "identifies task based on task id" — datasource/azure-pipelines-tasks/index.spec.ts line 112
+    // Ported: "identifies task based on task id" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 112
     #[tokio::test]
     async fn identifies_task_by_id() {
         let server = MockServer::start().await;
@@ -423,7 +423,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "3.1.11");
     }
 
-    // Ported: "identifies task based on contributionIdentifier and id" — datasource/azure-pipelines-tasks/index.spec.ts line 134
+    // Ported: "identifies task based on contributionIdentifier and id" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 134
     #[tokio::test]
     async fn identifies_task_by_contribution_identifier_and_id() {
         let server = MockServer::start().await;
@@ -449,7 +449,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "3.1.11");
     }
 
-    // Ported: "identifies task based on contributionIdentifier and name" — datasource/azure-pipelines-tasks/index.spec.ts line 157
+    // Ported: "identifies task based on contributionIdentifier and name" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 157
     #[tokio::test]
     async fn identifies_task_by_contribution_identifier_and_name() {
         let server = MockServer::start().await;
@@ -475,7 +475,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "3.1.11");
     }
 
-    // Ported: "returns organization task with multiple versions" — datasource/azure-pipelines-tasks/index.spec.ts line 180
+    // Ported: "returns organization task with multiple versions" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 180
     #[tokio::test]
     async fn returns_org_task_multiple_versions() {
         let server = MockServer::start().await;
@@ -513,7 +513,7 @@ mod tests {
         assert_eq!(cmp_version("2.198.0", "2.20.0"), Greater);
     }
 
-    // Ported: "when versions is $a" — datasource/azure-pipelines-tasks/index.spec.ts line 222
+    // Ported: "when versions is $a" — lib/modules/datasource/azure-pipelines-tasks/index.spec.ts line 222
     #[test]
     fn cmp_version_sorts_semver_cases() {
         for (input, expected) in [

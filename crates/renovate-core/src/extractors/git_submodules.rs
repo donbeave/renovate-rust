@@ -336,13 +336,13 @@ pub fn update_dependency(
 mod tests {
     use super::*;
 
-    // Ported: "empty submodule returns null" — git-submodules/extract.spec.ts line 46
+    // Ported: "empty submodule returns null" — lib/modules/manager/git-submodules/extract.spec.ts line 46
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "currentValue is unset when no branch is specified" — git-submodules/extract.spec.ts line 50
+    // Ported: "currentValue is unset when no branch is specified" — lib/modules/manager/git-submodules/extract.spec.ts line 50
     #[test]
     fn single_submodule_no_branch() {
         let content = r#"
@@ -358,7 +358,7 @@ mod tests {
         assert_eq!(deps[0].branch, None);
     }
 
-    // Ported: "given branch is used when branch is specified" — git-submodules/extract.spec.ts line 56
+    // Ported: "given branch is used when branch is specified" — lib/modules/manager/git-submodules/extract.spec.ts line 56
     #[test]
     fn single_submodule_with_branch() {
         let content = r#"
@@ -371,7 +371,7 @@ mod tests {
         assert_eq!(deps[0].branch.as_deref(), Some("staging"));
     }
 
-    // Ported: "fallback to current branch if special value is detected" — git-submodules/extract.spec.ts line 87
+    // Ported: "fallback to current branch if special value is detected" — lib/modules/manager/git-submodules/extract.spec.ts line 87
     #[test]
     fn branch_dot_normalized_to_none() {
         let content = r#"
@@ -384,7 +384,7 @@ mod tests {
         assert_eq!(deps[0].branch, None);
     }
 
-    // Ported: "currentValue is unset when no branch is specified" — git-submodules/extract.spec.ts line 50
+    // Ported: "currentValue is unset when no branch is specified" — lib/modules/manager/git-submodules/extract.spec.ts line 50
     #[test]
     fn multiple_submodules() {
         let content = r#"
@@ -410,7 +410,7 @@ mod tests {
         );
     }
 
-    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 62
+    // Ported: "submodule packageName is constructed from relative path" — lib/modules/manager/git-submodules/extract.spec.ts line 62
     #[test]
     fn https_url_strips_git_suffix() {
         let content = r#"
@@ -422,7 +422,7 @@ mod tests {
         assert_eq!(deps[0].url, "https://github.com/org/repo");
     }
 
-    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 62
+    // Ported: "submodule packageName is constructed from relative path" — lib/modules/manager/git-submodules/extract.spec.ts line 62
     #[test]
     fn https_url_without_git_suffix_passthrough() {
         let content = r#"
@@ -434,7 +434,7 @@ mod tests {
         assert_eq!(deps[0].url, "https://github.com/org/repo");
     }
 
-    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 62
+    // Ported: "submodule packageName is constructed from relative path" — lib/modules/manager/git-submodules/extract.spec.ts line 62
     #[test]
     fn azure_devops_user_prefix_stripped() {
         let content = r#"
@@ -449,7 +449,7 @@ mod tests {
         );
     }
 
-    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 62
+    // Ported: "submodule packageName is constructed from relative path" — lib/modules/manager/git-submodules/extract.spec.ts line 62
     #[test]
     fn relative_url_passthrough() {
         let content = r#"
@@ -461,7 +461,7 @@ mod tests {
         assert_eq!(deps[0].url, "../../PowerShell/PowerShell-Docs");
     }
 
-    // Ported: "when using a relative path" — git-submodules/extract.spec.ts line 78
+    // Ported: "when using a relative path" — lib/modules/manager/git-submodules/extract.spec.ts line 78
     #[test]
     fn relative_url_resolved_with_remote() {
         let content = r#"
@@ -476,7 +476,7 @@ mod tests {
         assert_eq!(deps[0].url, "https://github.com/PowerShell/PowerShell-Docs");
     }
 
-    // Ported: "given semver version is extracted from branch and versioning is set to semver" — git-submodules/extract.spec.ts line 125
+    // Ported: "given semver version is extracted from branch and versioning is set to semver" — lib/modules/manager/git-submodules/extract.spec.ts line 125
     #[test]
     fn semver_and_non_semver_branches() {
         let content = r#"
@@ -500,7 +500,7 @@ mod tests {
         assert_eq!(deps[2].branch.as_deref(), Some("not-a-semver"));
     }
 
-    // Ported: "submodule packageName is constructed from relative path" — git-submodules/extract.spec.ts line 62
+    // Ported: "submodule packageName is constructed from relative path" — lib/modules/manager/git-submodules/extract.spec.ts line 62
     #[test]
     fn gitlab_url() {
         let content = r#"
@@ -512,7 +512,7 @@ mod tests {
         assert_eq!(deps[0].url, "https://gitlab.com/some/repo");
     }
 
-    // Ported: "returns empty content" — git-submodules/artifact.spec.ts line 5
+    // Ported: "returns empty content" — lib/modules/manager/git-submodules/artifact.spec.ts line 5
     #[test]
     fn update_artifacts_empty_dep_name() {
         let result = update_artifacts(&[""]);
@@ -521,7 +521,7 @@ mod tests {
         assert_eq!(result[0].contents, "");
     }
 
-    // Ported: "returns two modules" — git-submodules/artifact.spec.ts line 16
+    // Ported: "returns two modules" — lib/modules/manager/git-submodules/artifact.spec.ts line 16
     #[test]
     fn update_artifacts_two_modules() {
         let result = update_artifacts(&["renovate", "renovate-pro"]);
@@ -532,7 +532,7 @@ mod tests {
         assert_eq!(result[1].contents, "");
     }
 
-    // Ported: "when using SSH clone URL" — git-submodules/extract.spec.ts line 71
+    // Ported: "when using SSH clone URL" — lib/modules/manager/git-submodules/extract.spec.ts line 71
     #[test]
     fn ssh_clone_url_converted_to_https_for_source_url() {
         // .gitmodules.3: git@github.com:PowerShell/PowerShell-Docs (no .git suffix)
@@ -549,7 +549,7 @@ mod tests {
 
     // --- updateDependency tests ---
 
-    // Ported: "update gitmodule branch value if value changed" — git-submodules/update.spec.ts line 107
+    // Ported: "update gitmodule branch value if value changed" — lib/modules/manager/git-submodules/update.spec.ts line 107
     #[test]
     fn git_submodule_update_branch_value() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
@@ -570,7 +570,7 @@ mod tests {
         }
     }
 
-    // Ported: "do not update gitmodule branch value if value not changed" — git-submodules/update.spec.ts line 136
+    // Ported: "do not update gitmodule branch value if value not changed" — lib/modules/manager/git-submodules/update.spec.ts line 136
     #[test]
     fn git_submodule_update_same_value_unchanged() {
         let content = "[submodule \"renovate\"]\n\tpath = deps/renovate\n\turl = https://github.com/renovatebot/renovate.git\n\tbranch = v0.0.1\n";
@@ -604,7 +604,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null on error" — git-submodules/update.spec.ts line 49
+    // Ported: "returns null on error" — lib/modules/manager/git-submodules/update.spec.ts line 49
     #[test]
     fn git_submodule_update_returns_failed_on_empty_content() {
         let config = GitSubmoduleUpdateConfig {

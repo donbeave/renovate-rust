@@ -42,43 +42,43 @@ pub fn satisfies_confidence_level(confidence: &str, minimum_confidence: &str) ->
 mod tests {
     use super::*;
 
-    // Ported: "returns false if null" — util/merge-confidence/index.spec.ts line 22
+    // Ported: "returns false if null" — lib/util/merge-confidence/index.spec.ts line 22
     #[test]
     fn is_active_confidence_level_null_returns_false() {
         assert!(!is_active_confidence_level("null"));
     }
 
-    // Ported: "returns false if low" — util/merge-confidence/index.spec.ts line 26
+    // Ported: "returns false if low" — lib/util/merge-confidence/index.spec.ts line 26
     #[test]
     fn is_active_confidence_level_low_returns_false() {
         assert!(!is_active_confidence_level("low"));
     }
 
-    // Ported: "returns false if nonsense" — util/merge-confidence/index.spec.ts line 30
+    // Ported: "returns false if nonsense" — lib/util/merge-confidence/index.spec.ts line 30
     #[test]
     fn is_active_confidence_level_nonsense_returns_false() {
         assert!(!is_active_confidence_level("nonsense"));
     }
 
-    // Ported: "returns true if valid value (high)" — util/merge-confidence/index.spec.ts line 34
+    // Ported: "returns true if valid value (high)" — lib/util/merge-confidence/index.spec.ts line 34
     #[test]
     fn is_active_confidence_level_high_returns_true() {
         assert!(is_active_confidence_level("high"));
     }
 
-    // Ported: "returns false if less" — util/merge-confidence/index.spec.ts line 40
+    // Ported: "returns false if less" — lib/util/merge-confidence/index.spec.ts line 40
     #[test]
     fn satisfies_confidence_level_less_returns_false() {
         assert!(!satisfies_confidence_level("low", "high"));
     }
 
-    // Ported: "returns true if equal" — util/merge-confidence/index.spec.ts line 44
+    // Ported: "returns true if equal" — lib/util/merge-confidence/index.spec.ts line 44
     #[test]
     fn satisfies_confidence_level_equal_returns_true() {
         assert!(satisfies_confidence_level("high", "high"));
     }
 
-    // Ported: "returns true if more" — util/merge-confidence/index.spec.ts line 48
+    // Ported: "returns true if more" — lib/util/merge-confidence/index.spec.ts line 48
     #[test]
     fn satisfies_confidence_level_more_returns_true() {
         assert!(satisfies_confidence_level("very high", "high"));

@@ -455,7 +455,7 @@ mod tests {
   "version": 7
 }"#;
 
-    // Ported: "returns null when no nixpkgs input exists" — nix/extract.spec.ts line 10
+    // Ported: "returns null when no nixpkgs input exists" — lib/modules/manager/nix/extract.spec.ts line 10
     #[test]
     fn package_file_returns_none_when_no_nixpkgs_input_exists() {
         let flake_nix = r#"{
@@ -464,7 +464,7 @@ mod tests {
         assert!(extract_package_file(Some(flake_nix), Some(EMPTY_ROOT_LOCK)).is_none());
     }
 
-    // Ported: "does not include nixpkgs input with no explicit ref" — nix/extract.spec.ts line 25
+    // Ported: "does not include nixpkgs input with no explicit ref" — lib/modules/manager/nix/extract.spec.ts line 25
     #[test]
     fn package_file_returns_none_for_nixpkgs_without_explicit_ref_when_lock_has_no_input() {
         let flake_nix = r#"{
@@ -475,7 +475,7 @@ mod tests {
         assert!(extract_package_file(Some(flake_nix), Some(EMPTY_ROOT_LOCK)).is_none());
     }
 
-    // Ported: "includes nixpkgs input with only ref" — nix/extract.spec.ts line 42
+    // Ported: "includes nixpkgs input with only ref" — lib/modules/manager/nix/extract.spec.ts line 42
     #[test]
     fn package_file_returns_none_for_ref_only_flake_when_lock_has_no_input() {
         let flake_nix = r#"{
@@ -486,7 +486,7 @@ mod tests {
         assert!(extract_package_file(Some(flake_nix), Some(EMPTY_ROOT_LOCK)).is_none());
     }
 
-    // Ported: "returns null when no inputs" — nix/extract.spec.ts line 59
+    // Ported: "returns null when no inputs" — lib/modules/manager/nix/extract.spec.ts line 59
     #[test]
     fn package_file_returns_none_when_flake_nix_has_no_inputs() {
         assert!(extract_package_file(Some(""), Some(EMPTY_ROOT_LOCK)).is_none());
@@ -499,7 +499,7 @@ mod tests {
         assert!(!deps.iter().any(|d| d.input_name == "nixpkgs_2"));
     }
 
-    // Ported: "returns nixpkgs input" — nix/extract.spec.ts line 217
+    // Ported: "returns nixpkgs input" — lib/modules/manager/nix/extract.spec.ts line 217
     #[test]
     fn extracts_nixpkgs_correctly() {
         let deps = extract(SAMPLE_LOCK);
@@ -513,7 +513,7 @@ mod tests {
         assert!(np.skip_reason.is_none());
     }
 
-    // Ported: "returns null when original inputs are from local path" — nix/extract.spec.ts line 121
+    // Ported: "returns null when original inputs are from local path" — lib/modules/manager/nix/extract.spec.ts line 121
     #[test]
     fn original_path_input_is_skipped_as_local_path() {
         let content = r#"{
@@ -549,7 +549,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::LocalPath));
     }
 
-    // Ported: "returns null when locked inputs are indirect" — nix/extract.spec.ts line 153
+    // Ported: "returns null when locked inputs are indirect" — lib/modules/manager/nix/extract.spec.ts line 153
     #[test]
     fn locked_indirect_input_is_skipped() {
         let content = r#"{
@@ -585,7 +585,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::Indirect));
     }
 
-    // Ported: "returns null when locked inputs are from local path" — nix/extract.spec.ts line 185
+    // Ported: "returns null when locked inputs are from local path" — lib/modules/manager/nix/extract.spec.ts line 185
     #[test]
     fn locked_path_input_is_skipped_as_local_path() {
         let content = r#"{
@@ -621,7 +621,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::LocalPath));
     }
 
-    // Ported: "returns null when inputs are missing locked" — nix/extract.spec.ts line 71
+    // Ported: "returns null when inputs are missing locked" — lib/modules/manager/nix/extract.spec.ts line 71
     #[test]
     fn missing_locked_section_is_skipped_as_no_rev() {
         let content = r#"{
@@ -649,7 +649,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::NoRev));
     }
 
-    // Ported: "returns null when inputs are missing original" — nix/extract.spec.ts line 95
+    // Ported: "returns null when inputs are missing original" — lib/modules/manager/nix/extract.spec.ts line 95
     #[test]
     fn missing_original_section_is_skipped_as_no_rev() {
         let content = r#"{
@@ -679,7 +679,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::NoRev));
     }
 
-    // Ported: "includes nixpkgs with no explicit ref" — nix/extract.spec.ts line 260
+    // Ported: "includes nixpkgs with no explicit ref" — lib/modules/manager/nix/extract.spec.ts line 260
     #[test]
     fn includes_nixpkgs_with_no_explicit_ref() {
         let content = r#"{
@@ -723,7 +723,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes patchelf from HEAD" — nix/extract.spec.ts line 300
+    // Ported: "includes patchelf from HEAD" — lib/modules/manager/nix/extract.spec.ts line 300
     #[test]
     fn includes_git_input_from_head() {
         let content = r#"{
@@ -770,7 +770,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes ijq from sourcehut without a flake" — nix/extract.spec.ts line 358
+    // Ported: "includes ijq from sourcehut without a flake" — lib/modules/manager/nix/extract.spec.ts line 358
     #[test]
     fn includes_sourcehut_input_without_flake() {
         let content = r#"{
@@ -815,7 +815,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes home-manager from gitlab" — nix/extract.spec.ts line 399
+    // Ported: "includes home-manager from gitlab" — lib/modules/manager/nix/extract.spec.ts line 399
     #[test]
     fn includes_gitlab_input() {
         let content = r#"{
@@ -860,7 +860,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "test other version" — nix/extract.spec.ts line 440
+    // Ported: "test other version" — lib/modules/manager/nix/extract.spec.ts line 440
     #[test]
     fn other_lockfile_version_returns_empty() {
         let content = r#"{
@@ -873,7 +873,7 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "includes nixpkgs with ref and shallow arguments" — nix/extract.spec.ts line 452
+    // Ported: "includes nixpkgs with ref and shallow arguments" — lib/modules/manager/nix/extract.spec.ts line 452
     #[test]
     fn includes_git_input_with_ref_and_shallow_arguments() {
         let content = r#"{
@@ -920,7 +920,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes nixpkgs but using indirect type that cannot be updated" — nix/extract.spec.ts line 494
+    // Ported: "includes nixpkgs but using indirect type that cannot be updated" — lib/modules/manager/nix/extract.spec.ts line 494
     #[test]
     fn original_indirect_input_is_skipped() {
         let content = r#"{
@@ -954,7 +954,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::Indirect));
     }
 
-    // Ported: "includes nixpkgs but using indirect type and path locked type that cannot be updated" — nix/extract.spec.ts line 524
+    // Ported: "includes nixpkgs but using indirect type and path locked type that cannot be updated" — lib/modules/manager/nix/extract.spec.ts line 524
     #[test]
     fn original_indirect_locked_path_input_is_skipped_as_local_path() {
         let content = r#"{
@@ -987,7 +987,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::LocalPath));
     }
 
-    // Ported: "includes flake from GitHub Enterprise" — nix/extract.spec.ts line 553
+    // Ported: "includes flake from GitHub Enterprise" — lib/modules/manager/nix/extract.spec.ts line 553
     #[test]
     fn includes_github_enterprise_input() {
         let content = r#"{
@@ -1049,7 +1049,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes flake with tarball type" — nix/extract.spec.ts line 649
+    // Ported: "includes flake with tarball type" — lib/modules/manager/nix/extract.spec.ts line 649
     #[test]
     fn includes_tarball_input_with_archive_url() {
         let content = r#"{
@@ -1094,7 +1094,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes flake with nixpkgs channel as tarball type" — nix/extract.spec.ts line 897
+    // Ported: "includes flake with nixpkgs channel as tarball type" — lib/modules/manager/nix/extract.spec.ts line 897
     #[test]
     fn includes_nixpkgs_channel_tarball_input() {
         let content = r#"{
@@ -1137,7 +1137,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes flake with only tarball type" — nix/extract.spec.ts line 790
+    // Ported: "includes flake with only tarball type" — lib/modules/manager/nix/extract.spec.ts line 790
     #[test]
     fn tarball_without_locked_rev_is_skipped_as_no_rev() {
         let content = r#"{
@@ -1169,7 +1169,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(NixSkipReason::NoRev));
     }
 
-    // Ported: "includes flake with nixpkgs-lib as tarball type" — nix/extract.spec.ts line 818
+    // Ported: "includes flake with nixpkgs-lib as tarball type" — lib/modules/manager/nix/extract.spec.ts line 818
     #[test]
     fn ignores_transitive_nixpkgs_lib_tarball_while_extracting_root_inputs() {
         let content = r#"{
@@ -1255,7 +1255,7 @@ mod tests {
         );
     }
 
-    // Ported: "includes tarball flake with ref when original has rev" — nix/extract.spec.ts line 1280
+    // Ported: "includes tarball flake with ref when original has rev" — lib/modules/manager/nix/extract.spec.ts line 1280
     #[test]
     fn includes_tarball_input_ref_and_current_digest() {
         let content = r#"{
@@ -1300,7 +1300,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "uri decode gitlab subgroup" — nix/extract.spec.ts line 750
+    // Ported: "uri decode gitlab subgroup" — lib/modules/manager/nix/extract.spec.ts line 750
     #[test]
     fn decodes_gitlab_subgroup_owner() {
         let content = r#"{
@@ -1344,7 +1344,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "finds currentDigest correctly when input sha is pinned" — nix/extract.spec.ts line 937
+    // Ported: "finds currentDigest correctly when input sha is pinned" — lib/modules/manager/nix/extract.spec.ts line 937
     #[test]
     fn extracts_current_digest_from_original_rev() {
         let content = r#"{
@@ -1389,7 +1389,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "does not duplicate nixpkgs dependency" — nix/extract.spec.ts line 983
+    // Ported: "does not duplicate nixpkgs dependency" — lib/modules/manager/nix/extract.spec.ts line 983
     #[test]
     fn package_file_does_not_duplicate_nixpkgs_dependency() {
         let flake_nix = r#"{
@@ -1436,7 +1436,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles currentDigest replacement when config provided" — nix/extract.spec.ts line 1065
+    // Ported: "handles currentDigest replacement when config provided" — lib/modules/manager/nix/extract.spec.ts line 1065
     #[test]
     fn replaces_current_digest_when_config_matches_flake_nix() {
         let flake_nix = r#"{
@@ -1489,13 +1489,13 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "returns null when flake.lock file cannot be read" — nix/extract.spec.ts line 1028
+    // Ported: "returns null when flake.lock file cannot be read" — lib/modules/manager/nix/extract.spec.ts line 1028
     #[test]
     fn package_file_returns_none_when_flake_lock_missing() {
         assert!(extract_package_file(Some(""), None).is_none());
     }
 
-    // Ported: "returns null when flake.nix file cannot be read" — nix/extract.spec.ts line 1033
+    // Ported: "returns null when flake.nix file cannot be read" — lib/modules/manager/nix/extract.spec.ts line 1033
     #[test]
     fn package_file_returns_none_when_flake_nix_missing() {
         let content = r#"{
@@ -1508,7 +1508,7 @@ mod tests {
         assert!(extract_package_file(None, Some(content)).is_none());
     }
 
-    // Ported: "includes nixpkgs with ref when original has rev" — nix/extract.spec.ts line 1112
+    // Ported: "includes nixpkgs with ref when original has rev" — lib/modules/manager/nix/extract.spec.ts line 1112
     #[test]
     fn includes_nixpkgs_ref_and_original_rev() {
         let content = r#"{
@@ -1555,7 +1555,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes github flake with ref when original has rev" — nix/extract.spec.ts line 1154
+    // Ported: "includes github flake with ref when original has rev" — lib/modules/manager/nix/extract.spec.ts line 1154
     #[test]
     fn includes_github_ref_and_original_rev() {
         let content = r#"{
@@ -1602,7 +1602,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes gitlab flake with custom host" — nix/extract.spec.ts line 1196
+    // Ported: "includes gitlab flake with custom host" — lib/modules/manager/nix/extract.spec.ts line 1196
     #[test]
     fn includes_gitlab_input_with_custom_host() {
         let content = r#"{
@@ -1648,7 +1648,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "includes sourcehut flake with custom host" — nix/extract.spec.ts line 1238
+    // Ported: "includes sourcehut flake with custom host" — lib/modules/manager/nix/extract.spec.ts line 1238
     #[test]
     fn includes_sourcehut_input_with_custom_host() {
         let content = r#"{
@@ -1694,13 +1694,13 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "returns null when flake.lock has invalid JSON" — nix/extract.spec.ts line 1046
+    // Ported: "returns null when flake.lock has invalid JSON" — lib/modules/manager/nix/extract.spec.ts line 1046
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
     }
 
-    // Ported: "returns deps when no root inputs but deps exist" — nix/extract.spec.ts line 1051
+    // Ported: "returns deps when no root inputs but deps exist" — lib/modules/manager/nix/extract.spec.ts line 1051
     #[test]
     fn root_without_inputs_returns_empty() {
         let content = r#"{
@@ -1713,7 +1713,7 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "handles unknown flake lock type" — nix/extract.spec.ts line 1321
+    // Ported: "handles unknown flake lock type" — lib/modules/manager/nix/extract.spec.ts line 1321
     #[test]
     fn unknown_flake_lock_type_returns_empty() {
         let content = r#"{
@@ -1739,7 +1739,7 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "ignores unsupported file type and still extracts other inputs" — nix/extract.spec.ts line 1348
+    // Ported: "ignores unsupported file type and still extracts other inputs" — lib/modules/manager/nix/extract.spec.ts line 1348
     #[test]
     fn unsupported_file_type_is_ignored_while_other_inputs_extract() {
         let content = r#"{
@@ -1791,13 +1791,13 @@ mod tests {
         );
     }
 
-    // Ported: "returns replace if currentValue not null" — modules/manager/nix/range.spec.ts line 5
+    // Ported: "returns replace if currentValue not null" — lib/modules/manager/nix/range.spec.ts line 5
     #[test]
     fn nix_range_returns_replace_when_current_value_set() {
         assert_eq!(get_range_strategy(Some("1.0.0")), "replace");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/nix/range.spec.ts line 13
+    // Ported: "defaults to update-lockfile" — lib/modules/manager/nix/range.spec.ts line 13
     #[test]
     fn nix_range_defaults_to_update_lockfile() {
         assert_eq!(get_range_strategy(None), "update-lockfile");

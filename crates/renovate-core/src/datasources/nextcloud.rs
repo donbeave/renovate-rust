@@ -153,7 +153,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "no registryUrl" — nextcloud/index.spec.ts line 6
+    // Ported: "no registryUrl" — lib/modules/datasource/nextcloud/index.spec.ts line 6
     #[tokio::test]
     async fn no_registry_url() {
         let http = HttpClient::new().unwrap();
@@ -161,7 +161,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "no package" — nextcloud/index.spec.ts line 16
+    // Ported: "no package" — lib/modules/datasource/nextcloud/index.spec.ts line 16
     #[tokio::test]
     async fn no_package() {
         let server = MockServer::start().await;
@@ -178,7 +178,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "package with no versions" — nextcloud/index.spec.ts line 30
+    // Ported: "package with no versions" — lib/modules/datasource/nextcloud/index.spec.ts line 30
     #[tokio::test]
     async fn package_with_no_versions() {
         let data = serde_json::json!([{
@@ -207,7 +207,7 @@ mod tests {
         assert!(result.releases.is_empty());
     }
 
-    // Ported: "package with website %s returns %s" — nextcloud/index.spec.ts line 56
+    // Ported: "package with website %s returns %s" — lib/modules/datasource/nextcloud/index.spec.ts line 56
     #[tokio::test]
     async fn package_with_website_changelog_url() {
         // Case 1: github.com/nextcloud/... → github.com/nextcloud-releases/...
@@ -246,7 +246,7 @@ mod tests {
         );
     }
 
-    // Ported: "package with changelog content and url" — nextcloud/index.spec.ts line 102
+    // Ported: "package with changelog content and url" — lib/modules/datasource/nextcloud/index.spec.ts line 102
     #[tokio::test]
     async fn package_with_changelog_content_and_url() {
         let data = serde_json::json!([{

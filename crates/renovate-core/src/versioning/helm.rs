@@ -157,7 +157,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$version\") === $isValid" — versioning/helm/index.spec.ts line 4
+    // Ported: "isValid(\"$version\") === $isValid" — lib/modules/versioning/helm/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_helm_spec() {
         let cases = [
@@ -179,7 +179,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $isSingle" — versioning/helm/index.spec.ts line 22
+    // Ported: "isSingleVersion(\"$version\") === $isSingle" — lib/modules/versioning/helm/index.spec.ts line 22
     #[test]
     fn is_single_version_matches_renovate_helm_spec() {
         let cases = [
@@ -199,7 +199,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/helm/index.spec.ts line 34
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — lib/modules/versioning/helm/index.spec.ts line 34
     #[test]
     fn get_new_value_matches_renovate_helm_spec() {
         let cases = [

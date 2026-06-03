@@ -31,13 +31,13 @@ pub fn get_config_desc(descriptions: &[&str], schedule: Option<&str>) -> String 
 mod tests {
     use super::*;
 
-    // Ported: "returns empty" — workers/repository/onboarding/pr/config-description.spec.ts line 16
+    // Ported: "returns empty" — lib/workers/repository/onboarding/pr/config-description.spec.ts line 16
     #[test]
     fn get_config_desc_returns_empty_when_no_descriptions() {
         assert_eq!(get_config_desc(&[], None), "");
     }
 
-    // Ported: "returns a full list" — workers/repository/onboarding/pr/config-description.spec.ts line 22
+    // Ported: "returns a full list" — lib/workers/repository/onboarding/pr/config-description.spec.ts line 22
     #[test]
     fn get_config_desc_returns_full_list() {
         let descriptions = [
@@ -50,7 +50,7 @@ mod tests {
         assert!(res.contains("Docker-only"));
     }
 
-    // Ported: "assignees, labels and schedule" — workers/repository/onboarding/pr/config-description.spec.ts line 38
+    // Ported: "assignees, labels and schedule" — lib/workers/repository/onboarding/pr/config-description.spec.ts line 38
     #[test]
     fn get_config_desc_includes_schedule() {
         let res = get_config_desc(&[], Some("before 5am"));
@@ -60,7 +60,7 @@ mod tests {
         );
     }
 
-    // Ported: "include retry/refresh checkbox message only if onboardingRebaseCheckbox is true" — workers/repository/onboarding/pr/config-description.spec.ts line 58
+    // Ported: "include retry/refresh checkbox message only if onboardingRebaseCheckbox is true" — lib/workers/repository/onboarding/pr/config-description.spec.ts line 58
     #[test]
     fn get_config_desc_with_schedule_produces_output() {
         // The Rust implementation always produces the same output for a given schedule;

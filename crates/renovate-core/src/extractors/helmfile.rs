@@ -556,13 +556,13 @@ fn is_kustomize_key(line: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "skip null YAML document" — helmfile/extract.spec.ts line 18
+    // Ported: "skip null YAML document" — lib/modules/manager/helmfile/extract.spec.ts line 18
     #[test]
     fn null_yaml_document_returns_empty() {
         assert!(extract("~").is_empty());
     }
 
-    // Ported: "returns null if no releases" — helmfile/extract.spec.ts line 31
+    // Ported: "returns null if no releases" — lib/modules/manager/helmfile/extract.spec.ts line 31
     #[test]
     fn no_releases_section_returns_empty() {
         let content = r#"
@@ -573,7 +573,7 @@ repositories:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "do not crash on invalid helmfile.yaml" — helmfile/extract.spec.ts line 46
+    // Ported: "do not crash on invalid helmfile.yaml" — lib/modules/manager/helmfile/extract.spec.ts line 46
     #[test]
     fn invalid_yaml_does_not_crash() {
         let content = r#"
@@ -586,7 +586,7 @@ releases: [
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "skip if repository details are not specified" — helmfile/extract.spec.ts line 63
+    // Ported: "skip if repository details are not specified" — lib/modules/manager/helmfile/extract.spec.ts line 63
     #[test]
     fn unknown_repo_alias_has_skip_reason() {
         let content = r#"
@@ -603,7 +603,7 @@ releases:
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "skip templetized release with invalid characters" — helmfile/extract.spec.ts line 84
+    // Ported: "skip templetized release with invalid characters" — lib/modules/manager/helmfile/extract.spec.ts line 84
     #[test]
     fn invalid_chart_name_chars_skipped() {
         let content = r#"
@@ -629,7 +629,7 @@ releases:
         assert!(valid.skip_reason.is_none());
     }
 
-    // Ported: "skip local charts" — helmfile/extract.spec.ts line 118
+    // Ported: "skip local charts" — lib/modules/manager/helmfile/extract.spec.ts line 118
     #[test]
     fn local_path_chart_gets_skip_reason() {
         let content = r#"
@@ -644,7 +644,7 @@ releases:
         assert_eq!(deps[0].name, "local");
     }
 
-    // Ported: "skip chart with unknown repository" — helmfile/extract.spec.ts line 139
+    // Ported: "skip chart with unknown repository" — lib/modules/manager/helmfile/extract.spec.ts line 139
     #[test]
     fn chart_with_no_matching_repo_skipped() {
         let content = r#"
@@ -661,7 +661,7 @@ releases:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::UnknownRegistry));
     }
 
-    // Ported: "skip chart with special character in the name" — helmfile/extract.spec.ts line 160
+    // Ported: "skip chart with special character in the name" — lib/modules/manager/helmfile/extract.spec.ts line 160
     #[test]
     fn chart_with_special_chars_skipped() {
         let content = r#"
@@ -684,7 +684,7 @@ releases:
         );
     }
 
-    // Ported: "skip chart that does not have specified version" — helmfile/extract.spec.ts line 184
+    // Ported: "skip chart that does not have specified version" — lib/modules/manager/helmfile/extract.spec.ts line 184
     #[test]
     fn release_without_version_has_invalid_version_skip() {
         let content = r#"
@@ -700,7 +700,7 @@ releases:
         assert_eq!(deps[0].skip_reason, Some(HelmSkipReason::InvalidVersion));
     }
 
-    // Ported: "parses multidoc yaml" — helmfile/extract.spec.ts line 204
+    // Ported: "parses multidoc yaml" — lib/modules/manager/helmfile/extract.spec.ts line 204
     #[test]
     fn parses_multidoc_yaml() {
         let content = r#"
@@ -764,7 +764,7 @@ releases:
         assert_eq!(raw.repository, "https://charts.helm.sh/incubator/");
     }
 
-    // Ported: "parses a chart with a go templating" — helmfile/extract.spec.ts line 242
+    // Ported: "parses a chart with a go templating" — lib/modules/manager/helmfile/extract.spec.ts line 242
     #[test]
     fn go_template_chart_skipped_real_chart_kept() {
         let content = r#"
@@ -787,7 +787,7 @@ releases:
         );
     }
 
-    // Ported: "parses a chart with empty strings for template values" — helmfile/extract.spec.ts line 280
+    // Ported: "parses a chart with empty strings for template values" — lib/modules/manager/helmfile/extract.spec.ts line 280
     #[test]
     fn template_version_gets_invalid_version_skip() {
         let content = r#"
@@ -817,7 +817,7 @@ releases:
         );
     }
 
-    // Ported: "parses a chart with an oci repository and non-oci one" — helmfile/extract.spec.ts line 316
+    // Ported: "parses a chart with an oci repository and non-oci one" — lib/modules/manager/helmfile/extract.spec.ts line 316
     #[test]
     fn oci_backed_repo_uses_docker_datasource() {
         let content = r#"
@@ -862,7 +862,7 @@ releases:
         );
     }
 
-    // Ported: "allows OCI chart names containing forward slashes" — helmfile/extract.spec.ts line 366
+    // Ported: "allows OCI chart names containing forward slashes" — lib/modules/manager/helmfile/extract.spec.ts line 366
     #[test]
     fn oci_nested_path_chart_uses_docker_datasource() {
         let content = r#"
@@ -885,7 +885,7 @@ releases:
         assert_eq!(deps[0].current_value, "1.2.3");
     }
 
-    // Ported: "parses a chart with an oci repository with ---" — helmfile/extract.spec.ts line 392
+    // Ported: "parses a chart with an oci repository with ---" — lib/modules/manager/helmfile/extract.spec.ts line 392
     #[test]
     fn oci_repo_with_yaml_document_separator() {
         let content = r#"repositories:
@@ -907,7 +907,7 @@ releases:
         );
     }
 
-    // Ported: "parses and replaces templating strings" — helmfile/extract.spec.ts line 423
+    // Ported: "parses and replaces templating strings" — lib/modules/manager/helmfile/extract.spec.ts line 423
     #[test]
     fn go_template_fixture_resolves_fallbacks_and_registry_aliases() {
         let content = r#"
@@ -993,7 +993,7 @@ releases:
         );
     }
 
-    // Ported: "detects kustomize and respects relative paths" — helmfile/extract.spec.ts line 477
+    // Ported: "detects kustomize and respects relative paths" — lib/modules/manager/helmfile/extract.spec.ts line 477
     #[test]
     fn local_chart_marks_need_kustomize_and_keeps_relative_dep() {
         let content = r#"
@@ -1026,7 +1026,7 @@ releases:
         assert!(memcached.skip_reason.is_none());
     }
 
-    // Ported: "makes sure url joiner works correctly" — helmfile/extract.spec.ts line 513
+    // Ported: "makes sure url joiner works correctly" — lib/modules/manager/helmfile/extract.spec.ts line 513
     #[test]
     fn oci_url_with_port_in_chart_ref() {
         let content = r#"
@@ -1045,7 +1045,7 @@ releases:
         assert_eq!(deps[0].name, "gitlab.example.com:5000/group/subgroup");
     }
 
-    // Ported: "skips helm-git repos" — helmfile/extract.spec.ts line 539
+    // Ported: "skips helm-git repos" — lib/modules/manager/helmfile/extract.spec.ts line 539
     #[test]
     fn helm_git_repo_releases_get_unknown_registry() {
         let content = r#"
@@ -1209,7 +1209,7 @@ releases:
         assert!(extract("").is_empty());
     }
 
-    // Ported: "parses templates key alongside releases" — helmfile/extract.spec.ts line 576
+    // Ported: "parses templates key alongside releases" — lib/modules/manager/helmfile/extract.spec.ts line 576
     #[test]
     fn parses_templates_key_alongside_releases() {
         let content = "

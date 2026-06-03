@@ -232,7 +232,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/dart/__fixtures__/shared_preferences.json"
     );
 
-    // Ported: "returns null for empty result" — datasource/dart/index.spec.ts line 13
+    // Ported: "returns null for empty result" — lib/modules/datasource/dart/index.spec.ts line 13
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -249,7 +249,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty fields" — datasource/dart/index.spec.ts line 23
+    // Ported: "returns null for empty fields" — lib/modules/datasource/dart/index.spec.ts line 23
     #[tokio::test]
     async fn returns_null_for_empty_fields() {
         // Missing versions field
@@ -284,7 +284,7 @@ mod tests {
         assert!(result2.is_none());
     }
 
-    // Ported: "returns null for 404" — datasource/dart/index.spec.ts line 55
+    // Ported: "returns null for 404" — lib/modules/datasource/dart/index.spec.ts line 55
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -301,7 +301,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — datasource/dart/index.spec.ts line 65
+    // Ported: "throws for 5xx" — lib/modules/datasource/dart/index.spec.ts line 65
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -316,7 +316,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for unknown error" — datasource/dart/index.spec.ts line 75
+    // Ported: "returns null for unknown error" — lib/modules/datasource/dart/index.spec.ts line 75
     // Network errors (connection refused) return None rather than Err.
     #[tokio::test]
     async fn returns_null_for_unknown_error() {
@@ -328,7 +328,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — datasource/dart/index.spec.ts line 85
+    // Ported: "processes real data" — lib/modules/datasource/dart/index.spec.ts line 85
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;

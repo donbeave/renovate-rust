@@ -118,7 +118,7 @@ pub fn smart_links(body: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "trimTrailingApiPath" — modules/platform/forgejo/utils.spec.ts line 26
+    // Ported: "trimTrailingApiPath" — lib/modules/platform/forgejo/utils.spec.ts line 26
     // (same test exists in modules/platform/gitea/utils.spec.ts line 26)
     #[test]
     fn trim_trailing_api_path_strips_api_v1() {
@@ -144,14 +144,14 @@ mod tests {
         );
     }
 
-    // Ported: "should abort when endpoint is not valid" — modules/platform/forgejo/utils.spec.ts line 45
+    // Ported: "should abort when endpoint is not valid" — lib/modules/platform/forgejo/utils.spec.ts line 45
     // (same test exists in modules/platform/gitea/utils.spec.ts line 45)
     #[test]
     fn validate_endpoint_url_invalid_throws() {
         assert!(validate_endpoint_url("abc").is_err());
     }
 
-    // Ported: "getMergeMethod(\"$value\") == \"$expected\"" — modules/platform/forgejo/utils.spec.ts line 53
+    // Ported: "getMergeMethod(\"$value\") == \"$expected\"" — lib/modules/platform/forgejo/utils.spec.ts line 53
     // (same test exists in modules/platform/gitea/utils.spec.ts line 53)
     #[test]
     fn get_merge_method_all_cases() {
@@ -170,13 +170,13 @@ mod tests {
         }
     }
 
-    // Ported: "should return true when repo is usable" — modules/platform/forgejo/utils.spec.ts line 66
+    // Ported: "should return true when repo is usable" — lib/modules/platform/forgejo/utils.spec.ts line 66
     #[test]
     fn usable_repo_returns_true_for_usable_repo() {
         assert!(usable_repo(false, &full_permissions(), true));
     }
 
-    // Ported: "should return false when repo lacks permissions" — modules/platform/forgejo/utils.spec.ts line 70
+    // Ported: "should return false when repo lacks permissions" — lib/modules/platform/forgejo/utils.spec.ts line 70
     #[test]
     fn usable_repo_returns_false_without_permissions() {
         // no pull AND push (admin only)
@@ -199,13 +199,13 @@ mod tests {
         ));
     }
 
-    // Ported: "should return false when repo has disabled pull requests" — modules/platform/forgejo/utils.spec.ts line 85
+    // Ported: "should return false when repo has disabled pull requests" — lib/modules/platform/forgejo/utils.spec.ts line 85
     #[test]
     fn usable_repo_returns_false_without_pull_requests() {
         assert!(!usable_repo(false, &full_permissions(), false));
     }
 
-    // Ported: "replaces pr links" — modules/platform/forgejo/index.spec.ts line 3009
+    // Ported: "replaces pr links" — lib/modules/platform/forgejo/index.spec.ts line 3009
     // (same test exists in modules/platform/gitea/index.spec.ts line 2921)
     #[test]
     fn smart_links_replaces_pr_links() {
@@ -216,7 +216,7 @@ mod tests {
         );
     }
 
-    // Ported: "replaces issue links" — modules/platform/forgejo/index.spec.ts line 3018
+    // Ported: "replaces issue links" — lib/modules/platform/forgejo/index.spec.ts line 3018
     // (same test exists in modules/platform/gitea/index.spec.ts line 2930)
     #[test]
     fn smart_links_replaces_issue_links() {
@@ -227,14 +227,14 @@ mod tests {
         );
     }
 
-    // Ported: "maxBodyLength" — modules/platform/forgejo/index.spec.ts line 3028
+    // Ported: "maxBodyLength" — lib/modules/platform/forgejo/index.spec.ts line 3028
     // (same test exists in modules/platform/gitea/index.spec.ts line 2940)
     #[test]
     fn max_body_length_is_1_000_000() {
         assert_eq!(MAX_BODY_LENGTH, 1_000_000);
     }
 
-    // Ported: "ContentsResponseSchema" — modules/platform/forgejo/schema.spec.ts line 4
+    // Ported: "ContentsResponseSchema" — lib/modules/platform/forgejo/schema.spec.ts line 4
     // (same test exists in modules/platform/gitea/schema.spec.ts line 4)
     #[test]
     fn contents_list_response_parses_empty_array() {

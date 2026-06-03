@@ -142,7 +142,7 @@ fn build_dep(name: String, source: Option<String>, version: Option<String>) -> T
 mod tests {
     use super::*;
 
-    // Ported: "extracts plugins" — tflint-plugin/extract.spec.ts line 38
+    // Ported: "extracts plugins" — lib/modules/manager/tflint-plugin/extract.spec.ts line 38
     #[test]
     fn extracts_github_plugin() {
         let content = r#"
@@ -161,7 +161,7 @@ plugin "aws" {
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "extracts plugins" — tflint-plugin/extract.spec.ts line 38
+    // Ported: "extracts plugins" — lib/modules/manager/tflint-plugin/extract.spec.ts line 38
     #[test]
     fn extracts_multiple_plugins() {
         let content = r#"
@@ -183,7 +183,7 @@ plugin "google" {
         assert_eq!(deps[1].dep_name, "terraform-linters/tflint-ruleset-google");
     }
 
-    // Ported: "extracts nothing if not from github" — tflint-plugin/extract.spec.ts line 138
+    // Ported: "extracts nothing if not from github" — lib/modules/manager/tflint-plugin/extract.spec.ts line 138
     #[test]
     fn non_github_source_skipped() {
         let content = r#"
@@ -200,7 +200,7 @@ plugin "custom" {
         );
     }
 
-    // Ported: "returns null when there are no version" — tflint-plugin/extract.spec.ts line 28
+    // Ported: "returns null when there are no version" — lib/modules/manager/tflint-plugin/extract.spec.ts line 28
     #[test]
     fn missing_version_sets_skip_reason() {
         let content = r#"
@@ -217,7 +217,7 @@ plugin "aws" {
         );
     }
 
-    // Ported: "returns null for empty" — tflint-plugin/extract.spec.ts line 22
+    // Ported: "returns null for empty" — lib/modules/manager/tflint-plugin/extract.spec.ts line 22
     #[test]
     fn no_plugins_returns_empty() {
         let content = r#"
@@ -228,7 +228,7 @@ config {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null when there are no version" — tflint-plugin/extract.spec.ts line 28
+    // Ported: "returns null when there are no version" — lib/modules/manager/tflint-plugin/extract.spec.ts line 28
     #[test]
     fn plugin_without_source_or_version_gets_missing_source() {
         let content = "plugin \"bundled\" {}\n";
@@ -237,7 +237,7 @@ config {
         assert_eq!(deps[0].skip_reason, Some(TflintSkipReason::MissingSource));
     }
 
-    // Ported: "extracts from full configuration" — tflint-plugin/extract.spec.ts line 71
+    // Ported: "extracts from full configuration" — lib/modules/manager/tflint-plugin/extract.spec.ts line 71
     #[test]
     fn extracts_plugin_from_full_config() {
         let content = r#"
@@ -264,7 +264,7 @@ rule "aws_instance_invalid_type" {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts no source" — tflint-plugin/extract.spec.ts line 112
+    // Ported: "extracts no source" — lib/modules/manager/tflint-plugin/extract.spec.ts line 112
     #[test]
     fn plugins_without_source_get_missing_source_skip() {
         let content = r#"
@@ -285,7 +285,7 @@ plugin "bundled" {
         );
     }
 
-    // Ported: "extracts plugins" — tflint-plugin/extract.spec.ts line 38
+    // Ported: "extracts plugins" — lib/modules/manager/tflint-plugin/extract.spec.ts line 38
     #[test]
     fn extracts_plugins_with_org_paths() {
         let content = r#"
@@ -311,7 +311,7 @@ plugin "bar" {
             && d.skip_reason.is_none()));
     }
 
-    // Ported: "extracts nothing if not from github" — tflint-plugin/extract.spec.ts line 138
+    // Ported: "extracts nothing if not from github" — lib/modules/manager/tflint-plugin/extract.spec.ts line 138
     #[test]
     fn gitlab_source_gets_unsupported_datasource() {
         let content = r#"

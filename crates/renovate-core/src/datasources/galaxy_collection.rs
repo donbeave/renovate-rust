@@ -260,7 +260,7 @@ mod tests {
         )).unwrap()
     }
 
-    // Ported: "returns null for 404 result" — galaxy-collection/index.spec.ts line 29
+    // Ported: "returns null for 404 result" — lib/modules/datasource/galaxy-collection/index.spec.ts line 29
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -277,7 +277,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for remote host error" — galaxy-collection/index.spec.ts line 39
+    // Ported: "throws for remote host error" — lib/modules/datasource/galaxy-collection/index.spec.ts line 39
     #[tokio::test]
     async fn throws_for_remote_host_error() {
         let server = MockServer::start().await;
@@ -292,7 +292,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for unexpected data at base" — galaxy-collection/index.spec.ts line 49
+    // Ported: "returns null for unexpected data at base" — lib/modules/datasource/galaxy-collection/index.spec.ts line 49
     #[tokio::test]
     async fn returns_null_for_unexpected_data_at_base() {
         let server = MockServer::start().await;
@@ -312,7 +312,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for unexpected data at versions" — galaxy-collection/index.spec.ts line 62
+    // Ported: "returns null for unexpected data at versions" — lib/modules/datasource/galaxy-collection/index.spec.ts line 62
     #[tokio::test]
     async fn returns_null_for_unexpected_data_at_versions() {
         let server = MockServer::start().await;
@@ -340,7 +340,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws error for remote host versions error" — galaxy-collection/index.spec.ts line 77
+    // Ported: "throws error for remote host versions error" — lib/modules/datasource/galaxy-collection/index.spec.ts line 77
     #[tokio::test]
     async fn throws_for_remote_host_versions_error() {
         let server = MockServer::start().await;
@@ -367,7 +367,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws error for remote host detailed versions error" — galaxy-collection/index.spec.ts line 92
+    // Ported: "throws error for remote host detailed versions error" — lib/modules/datasource/galaxy-collection/index.spec.ts line 92
     #[tokio::test]
     async fn throws_for_remote_host_detailed_versions_error() {
         let server = MockServer::start().await;
@@ -418,7 +418,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for empty lookup" — galaxy-collection/index.spec.ts line 113
+    // Ported: "returns null for empty lookup" — lib/modules/datasource/galaxy-collection/index.spec.ts line 113
     #[tokio::test]
     async fn returns_null_for_empty_package_name() {
         let http = HttpClient::new().unwrap();
@@ -428,7 +428,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for null packageName" — galaxy-collection/index.spec.ts line 122
+    // Ported: "returns null for null packageName" — lib/modules/datasource/galaxy-collection/index.spec.ts line 122
     #[tokio::test]
     async fn returns_null_for_null_package_name() {
         let http = HttpClient::new().unwrap();
@@ -438,7 +438,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for unknown error" — galaxy-collection/index.spec.ts line 131
+    // Ported: "returns null for unknown error" — lib/modules/datasource/galaxy-collection/index.spec.ts line 131
     #[tokio::test]
     async fn returns_null_for_unknown_error() {
         // A request error (network-level) should return Ok(None) per handleGenericErrors
@@ -451,7 +451,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — galaxy-collection/index.spec.ts line 144
+    // Ported: "processes real data" — lib/modules/datasource/galaxy-collection/index.spec.ts line 144
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -520,7 +520,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns ansible url with artifactory URL" — galaxy-collection/index.spec.ts line 212
+    // Ported: "returns ansible url with artifactory URL" — lib/modules/datasource/galaxy-collection/index.spec.ts line 212
     #[test]
     fn construct_base_url_artifactory() {
         let url = construct_base_url(
@@ -534,7 +534,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns galaxy url with automation hub URL" — galaxy-collection/index.spec.ts line 223
+    // Ported: "returns galaxy url with automation hub URL" — lib/modules/datasource/galaxy-collection/index.spec.ts line 223
     #[test]
     fn construct_base_url_automation_hub() {
         let url = construct_base_url(
@@ -548,7 +548,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns galaxy url with other url" — galaxy-collection/index.spec.ts line 234
+    // Ported: "returns galaxy url with other url" — lib/modules/datasource/galaxy-collection/index.spec.ts line 234
     #[test]
     fn construct_base_url_other() {
         let url = construct_base_url(
@@ -562,7 +562,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null but matches automation hub URL" — galaxy-collection/index.spec.ts line 167
+    // Ported: "returns null but matches automation hub URL" — lib/modules/datasource/galaxy-collection/index.spec.ts line 167
     #[tokio::test]
     async fn automation_hub_url_500_throws() {
         let server = MockServer::start().await;
@@ -579,7 +579,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "processes real data with automation hub URL" — galaxy-collection/index.spec.ts line 183
+    // Ported: "processes real data with automation hub URL" — lib/modules/datasource/galaxy-collection/index.spec.ts line 183
     #[tokio::test]
     async fn processes_real_data_with_automation_hub_url() {
         let server = MockServer::start().await;

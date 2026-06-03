@@ -49,7 +49,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts multiple step pipeline image lines" — velaci/extract.spec.ts line 16
+    // Ported: "extracts multiple step pipeline image lines" — lib/modules/manager/velaci/extract.spec.ts line 16
     #[test]
     fn extracts_step_image() {
         let content = "steps:\n  - name: build\n    image: golang:1.21\n";
@@ -59,7 +59,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("1.21"));
     }
 
-    // Ported: "extracts multiple services pipeline image lines" — velaci/extract.spec.ts line 30
+    // Ported: "extracts multiple services pipeline image lines" — lib/modules/manager/velaci/extract.spec.ts line 30
     #[test]
     fn extracts_service_image() {
         let content = "services:\n  - name: db\n    image: postgres:15\n";
@@ -68,7 +68,7 @@ mod tests {
         assert_eq!(deps[0].image, "postgres");
     }
 
-    // Ported: "extracts multiple step pipeline image lines" — velaci/extract.spec.ts line 16
+    // Ported: "extracts multiple step pipeline image lines" — lib/modules/manager/velaci/extract.spec.ts line 16
     #[test]
     fn variable_skipped() {
         let content = "steps:\n  - name: ci\n    image: $VELA_IMAGE\n";
@@ -76,26 +76,26 @@ mod tests {
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "should handle YAML without pipeline/images" — velaci/extract.spec.ts line 11
+    // Ported: "should handle YAML without pipeline/images" — lib/modules/manager/velaci/extract.spec.ts line 11
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "should handle invalid YAML" — velaci/extract.spec.ts line 6
+    // Ported: "should handle invalid YAML" — lib/modules/manager/velaci/extract.spec.ts line 6
     #[test]
     fn invalid_yaml_returns_empty() {
         // invalid YAML ("foo: bar: invalid") has no pipeline steps
         assert!(extract("foo: bar: invalid").is_empty());
     }
 
-    // Ported: "should handle YAML without pipeline/images" — velaci/extract.spec.ts line 11
+    // Ported: "should handle YAML without pipeline/images" — lib/modules/manager/velaci/extract.spec.ts line 11
     #[test]
     fn yaml_without_pipeline_returns_empty() {
         assert!(extract("no: pipeline").is_empty());
     }
 
-    // Ported: "extracts multiple stages pipeline image lines" — velaci/extract.spec.ts line 48
+    // Ported: "extracts multiple stages pipeline image lines" — lib/modules/manager/velaci/extract.spec.ts line 48
     #[test]
     fn extracts_stages_pipeline_images() {
         // Mirrors __fixtures__/.vela-stages.yaml
@@ -109,7 +109,7 @@ mod tests {
         assert!(deps.iter().any(|d| d.image == "amd64/node"));
     }
 
-    // Ported: "extracts multiple secrets pipeline image lines" — velaci/extract.spec.ts line 62
+    // Ported: "extracts multiple secrets pipeline image lines" — lib/modules/manager/velaci/extract.spec.ts line 62
     #[test]
     fn extracts_secrets_pipeline_images() {
         // Mirrors __fixtures__/.vela-secrets.yml

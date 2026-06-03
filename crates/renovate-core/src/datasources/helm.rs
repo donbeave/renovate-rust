@@ -436,7 +436,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/helm/__fixtures__/sample.yaml"
     );
 
-    // Ported: "works" — datasource/helm/schema.spec.ts line 7
+    // Ported: "works" — lib/modules/datasource/helm/schema.spec.ts line 7
     #[test]
     fn schema_source_url_extraction() {
         let cases: &[(&str, Option<&str>, Option<&str>)] = &[
@@ -482,14 +482,14 @@ mod tests {
         }
     }
 
-    // Ported: "returns null if packageName was not provided" — datasource/helm/index.spec.ts line 12
+    // Ported: "returns null if packageName was not provided" — lib/modules/datasource/helm/index.spec.ts line 12
     #[test]
     fn returns_null_if_package_name_not_provided() {
         let result = parse_all_versions(INDEX_YAML, "");
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if repository was not provided" — datasource/helm/index.spec.ts line 22
+    // Ported: "returns null if repository was not provided" — lib/modules/datasource/helm/index.spec.ts line 22
     #[tokio::test]
     async fn returns_null_if_repository_not_provided() {
         let server = MockServer::start().await;
@@ -506,8 +506,8 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for empty response" — datasource/helm/index.spec.ts line 37
-    // Ported: "returns null for missing response body" — datasource/helm/index.spec.ts line 51
+    // Ported: "returns null for empty response" — lib/modules/datasource/helm/index.spec.ts line 37
+    // Ported: "returns null for missing response body" — lib/modules/datasource/helm/index.spec.ts line 51
     #[tokio::test]
     async fn fetch_releases_empty_body_returns_none() {
         let server = MockServer::start().await;
@@ -524,7 +524,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for 404" — datasource/helm/index.spec.ts line 65
+    // Ported: "returns null for 404" — lib/modules/datasource/helm/index.spec.ts line 65
     #[tokio::test]
     async fn fetch_releases_404_returns_none() {
         let server = MockServer::start().await;
@@ -541,7 +541,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — datasource/helm/index.spec.ts line 79
+    // Ported: "throws for 5xx" — lib/modules/datasource/helm/index.spec.ts line 79
     #[tokio::test]
     async fn fetch_releases_5xx_returns_err() {
         let server = MockServer::start().await;
@@ -556,7 +556,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for unknown error" — datasource/helm/index.spec.ts line 93
+    // Ported: "returns null for unknown error" — lib/modules/datasource/helm/index.spec.ts line 93
     #[tokio::test]
     async fn fetch_releases_network_error_returns_none() {
         let http = HttpClient::new().unwrap();
@@ -566,26 +566,26 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if index.yaml in response is empty" — datasource/helm/index.spec.ts line 107
+    // Ported: "returns null if index.yaml in response is empty" — lib/modules/datasource/helm/index.spec.ts line 107
     #[test]
     fn parse_comment_only_index_returns_none() {
         assert!(parse_all_versions("# A comment", "redis").is_none());
     }
 
-    // Ported: "returns null if index.yaml in response is invalid" — datasource/helm/index.spec.ts line 120
+    // Ported: "returns null if index.yaml in response is invalid" — lib/modules/datasource/helm/index.spec.ts line 120
     #[test]
     fn parse_invalid_yaml_returns_none() {
         let invalid = "some\n  invalid:\n  [\n  yaml";
         assert!(parse_all_versions(invalid, "non_existent_chart").is_none());
     }
 
-    // Ported: "returns null if packageName is not in index.yaml" — datasource/helm/index.spec.ts line 139
+    // Ported: "returns null if packageName is not in index.yaml" — lib/modules/datasource/helm/index.spec.ts line 139
     #[test]
     fn parse_returns_none_for_unknown_chart() {
         assert!(parse_all_versions(INDEX_YAML, "non_existent_chart").is_none());
     }
 
-    // Ported: "returns list of versions for normal response" — datasource/helm/index.spec.ts line 152
+    // Ported: "returns list of versions for normal response" — lib/modules/datasource/helm/index.spec.ts line 152
     #[tokio::test]
     async fn fetch_releases_returns_versions() {
         let server = MockServer::start().await;
@@ -605,7 +605,7 @@ mod tests {
         assert_eq!(result.releases.len(), 27);
     }
 
-    // Ported: "returns list of versions for other packages if one packages has no versions" — datasource/helm/index.spec.ts line 166
+    // Ported: "returns list of versions for other packages if one packages has no versions" — lib/modules/datasource/helm/index.spec.ts line 166
     #[tokio::test]
     async fn fetch_releases_skips_empty_package() {
         let server = MockServer::start().await;
@@ -632,7 +632,7 @@ mod tests {
         );
     }
 
-    // Ported: "adds trailing slash to subdirectories" — datasource/helm/index.spec.ts line 184
+    // Ported: "adds trailing slash to subdirectories" — lib/modules/datasource/helm/index.spec.ts line 184
     #[tokio::test]
     async fn fetch_releases_from_subdirectory() {
         let server = MockServer::start().await;
@@ -660,7 +660,7 @@ mod tests {
         );
     }
 
-    // Ported: "uses undefined as the newDigest when no digest is provided" — datasource/helm/index.spec.ts line 203
+    // Ported: "uses undefined as the newDigest when no digest is provided" — lib/modules/datasource/helm/index.spec.ts line 203
     #[tokio::test]
     async fn fetch_releases_blank_digest_is_none() {
         let server = MockServer::start().await;

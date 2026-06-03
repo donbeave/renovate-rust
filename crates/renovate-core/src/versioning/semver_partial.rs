@@ -239,7 +239,7 @@ pub fn get_new_value(params: &NewValueParams) -> Option<String> {
 mod tests {
     use super::*;
 
-    // Ported: "isValid("$version") === $expected" — versioning/semver-partial/index.spec.ts line 5
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 5
     #[test]
     fn is_valid_table() {
         let cases = [
@@ -264,7 +264,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion("$version") === $expected" — versioning/semver-partial/index.spec.ts line 24
+    // Ported: "isVersion("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 24
     #[test]
     fn is_version_table() {
         let cases = [
@@ -293,7 +293,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/semver-partial/index.spec.ts line 47
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 47
     #[test]
     fn is_stable_table() {
         let cases = [
@@ -322,7 +322,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion("$version") === $expected" — versioning/semver-partial/index.spec.ts line 70
+    // Ported: "isSingleVersion("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 70
     #[test]
     fn is_single_version_table() {
         let cases = [
@@ -345,7 +345,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/semver-partial/index.spec.ts line 87
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 87
     #[test]
     fn matches_table() {
         let cases = [
@@ -404,13 +404,13 @@ mod tests {
         }
     }
 
-    // Ported: "should handle invalid range that is not ~latest or valid version" — versioning/semver-partial/index.spec.ts line 141
+    // Ported: "should handle invalid range that is not ~latest or valid version" — lib/modules/versioning/semver-partial/index.spec.ts line 141
     #[test]
     fn matches_completely_invalid_range() {
         assert!(!matches("1.0.0", "completely-invalid-range"));
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/semver-partial/index.spec.ts line 149
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 149
     #[test]
     fn get_satisfying_version_table() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
@@ -487,7 +487,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/semver-partial/index.spec.ts line 185
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 185
     #[test]
     fn min_satisfying_version_table() {
         let cases: Vec<(Vec<&str>, &str, Option<&str>)> = vec![
@@ -536,7 +536,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange("$version", "$range") === $expected" — versioning/semver-partial/index.spec.ts line 209
+    // Ported: "isLessThanRange("$version", "$range") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 209
     #[test]
     fn is_less_than_range_table() {
         let cases = [
@@ -570,7 +570,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals("$version", "$other") === $expected" — versioning/semver-partial/index.spec.ts line 240
+    // Ported: "equals("$version", "$other") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 240
     #[test]
     fn equals_table() {
         let cases = [
@@ -595,7 +595,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor("$version") === $expected" — versioning/semver-partial/index.spec.ts line 262
+    // Ported: "getMajor("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 262
     #[test]
     fn get_major_table() {
         assert_eq!(get_major("1.0.0"), Some(1));
@@ -605,7 +605,7 @@ mod tests {
         assert_eq!(get_major("invalid"), None);
     }
 
-    // Ported: "getMinor("$version") === $expected" — versioning/semver-partial/index.spec.ts line 275
+    // Ported: "getMinor("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 275
     #[test]
     fn get_minor_table() {
         assert_eq!(get_minor("1.0.0"), Some(0));
@@ -615,7 +615,7 @@ mod tests {
         assert_eq!(get_minor("invalid"), None);
     }
 
-    // Ported: "getPatch("$version") === $expected" — versioning/semver-partial/index.spec.ts line 288
+    // Ported: "getPatch("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 288
     #[test]
     fn get_patch_table() {
         assert_eq!(get_patch("1.0.0"), Some(0));
@@ -625,7 +625,7 @@ mod tests {
         assert_eq!(get_patch("invalid"), None);
     }
 
-    // Ported: "isGreaterThan("$version", "$other") === $expected" — versioning/semver-partial/index.spec.ts line 301
+    // Ported: "isGreaterThan("$version", "$other") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 301
     #[test]
     fn is_greater_than_table() {
         let cases = [
@@ -653,7 +653,7 @@ mod tests {
         }
     }
 
-    // Ported: "sortVersions("$a", "$b") === $expected" — versioning/semver-partial/index.spec.ts line 326
+    // Ported: "sortVersions("$a", "$b") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 326
     #[test]
     fn sort_versions_table() {
         use std::cmp::Ordering;
@@ -682,7 +682,7 @@ mod tests {
         }
     }
 
-    // Ported: "isBreaking("$version", "$current") === $expected" — versioning/semver-partial/index.spec.ts line 348
+    // Ported: "isBreaking("$version", "$current") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 348
     #[test]
     fn is_breaking_table() {
         let cases = [
@@ -713,7 +713,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible("$version") === $expected" — versioning/semver-partial/index.spec.ts line 376
+    // Ported: "isCompatible("$version") === $expected" — lib/modules/versioning/semver-partial/index.spec.ts line 376
     #[test]
     fn is_compatible_table() {
         assert!(is_compatible("1.0.0"));
@@ -724,7 +724,7 @@ mod tests {
         assert!(!is_compatible("invalid"));
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/semver-partial/index.spec.ts line 390
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/semver-partial/index.spec.ts line 390
     #[test]
     fn get_new_value_table() {
         let cases = [

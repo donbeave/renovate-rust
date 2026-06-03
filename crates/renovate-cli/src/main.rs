@@ -1260,7 +1260,7 @@ mod tests {
         );
     }
 
-    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "confirms dep updated after auto-replace" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_terraform_match() {
         let content = r#"
@@ -1281,7 +1281,7 @@ terraform {
         ));
     }
 
-    // Ported: "rejects dep that was not updated" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "rejects dep that was not updated" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_terraform_mismatch() {
         let content = r#"
@@ -1292,7 +1292,7 @@ provider "aws" {
         assert!(!verify_auto_replace("terraform", content, "aws", "~> 4.0"));
     }
 
-    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "confirms dep updated after auto-replace" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_terragrunt_match() {
         let content = r#"
@@ -1308,7 +1308,7 @@ terraform {
         ));
     }
 
-    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "confirms dep updated after auto-replace" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_bicep_match() {
         let content = r#"
@@ -1324,7 +1324,7 @@ resource cluster 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
         ));
     }
 
-    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "confirms dep updated after auto-replace" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_ansible_match() {
         let content = r#"
@@ -1342,7 +1342,7 @@ resource cluster 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
         ));
     }
 
-    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "confirms dep updated after auto-replace" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_kubernetes_match() {
         let content = r#"
@@ -1360,7 +1360,7 @@ spec:
         ));
     }
 
-    // Ported: "confirms dep updated after auto-replace" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "confirms dep updated after auto-replace" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_pre_commit_match() {
         let content = r#"
@@ -1376,7 +1376,7 @@ repos:
         ));
     }
 
-    // Ported: "falls back to string heuristic for unknown managers" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "falls back to string heuristic for unknown managers" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_fallback_heuristic_match() {
         let content = "some-dep = \"1.2.3\"";
@@ -1388,7 +1388,7 @@ repos:
         ));
     }
 
-    // Ported: "falls back to string heuristic for unknown managers" — workers/repository/update/branch/auto-replace.spec.ts
+    // Ported: "falls back to string heuristic for unknown managers" — lib/workers/repository/update/branch/auto-replace.spec.ts
     #[test]
     fn verify_auto_replace_fallback_heuristic_mismatch() {
         let content = "some-dep = \"1.2.3\"";

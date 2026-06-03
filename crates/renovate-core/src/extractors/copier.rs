@@ -102,7 +102,7 @@ pub fn update_copier_dependency(file_content: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "extracts repository and version from .copier-answers.yml" — copier/extract.spec.ts line 6
+    // Ported: "extracts repository and version from .copier-answers.yml" — lib/modules/manager/copier/extract.spec.ts line 6
     #[test]
     fn extracts_github_url() {
         let content = "_commit: v1.2.3\n_src_path: https://github.com/owner/template-repo\n";
@@ -112,7 +112,7 @@ mod tests {
         assert_eq!(dep.src_path, "https://github.com/owner/template-repo");
     }
 
-    // Ported: "extracts and strips git+ prefix from $srcPath" — copier/extract.spec.ts line 84
+    // Ported: "extracts and strips git+ prefix from $srcPath" — lib/modules/manager/copier/extract.spec.ts line 84
     #[test]
     fn strips_git_plus_prefix() {
         let content = "_commit: v2.0.0\n_src_path: git+https://github.com/myorg/mytemplate\n";
@@ -121,7 +121,7 @@ mod tests {
         assert_eq!(dep.github_repo, "myorg/mytemplate");
     }
 
-    // Ported: "extracts repository and version from .copier-answers.yml" — copier/extract.spec.ts line 6
+    // Ported: "extracts repository and version from .copier-answers.yml" — lib/modules/manager/copier/extract.spec.ts line 6
     #[test]
     fn non_github_url_has_empty_repo() {
         let content = "_commit: v1.0.0\n_src_path: https://gitlab.com/user/repo\n";
@@ -130,20 +130,20 @@ mod tests {
         assert_eq!(dep.current_value, "v1.0.0");
     }
 
-    // Ported: "returns null for missing _commit field" — copier/extract.spec.ts line 137
+    // Ported: "returns null for missing _commit field" — lib/modules/manager/copier/extract.spec.ts line 137
     #[test]
     fn missing_commit_returns_none() {
         let content = "_src_path: https://github.com/owner/repo\n";
         assert!(extract(content).is_none());
     }
 
-    // Ported: "returns null for invalid .copier-answers.yml" — copier/extract.spec.ts line 119
+    // Ported: "returns null for invalid .copier-answers.yml" — lib/modules/manager/copier/extract.spec.ts line 119
     #[test]
     fn empty_returns_none() {
         assert!(extract("").is_none());
     }
 
-    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL" — copier/extract.spec.ts line 25
+    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL" — lib/modules/manager/copier/extract.spec.ts line 25
     #[test]
     fn ssh_url_src_path_extracted() {
         let content =
@@ -156,20 +156,20 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for missing _src_path field" — copier/extract.spec.ts line 145
+    // Ported: "returns null for missing _src_path field" — lib/modules/manager/copier/extract.spec.ts line 145
     #[test]
     fn missing_src_path_returns_none() {
         let content = "_commit: v1.0.0\n";
         assert!(extract(content).is_none());
     }
 
-    // Ported: "returns null for invalid .copier-answers.yml" — copier/extract.spec.ts line 119
+    // Ported: "returns null for invalid .copier-answers.yml" — lib/modules/manager/copier/extract.spec.ts line 119
     #[test]
     fn invalid_yaml_returns_none() {
         assert!(extract("foo: bar: 123").is_none());
     }
 
-    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL and non-bare Repo" — copier/extract.spec.ts line 44
+    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL and non-bare Repo" — lib/modules/manager/copier/extract.spec.ts line 44
     #[test]
     fn non_github_ssh_url_extracted() {
         let content =
@@ -183,7 +183,7 @@ mod tests {
         assert_eq!(dep.github_repo, "");
     }
 
-    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL and a username different from git" — copier/extract.spec.ts line 63
+    // Ported: "extracts repository and version from .copier-answers.yml with ssh URL and a username different from git" — lib/modules/manager/copier/extract.spec.ts line 63
     #[test]
     fn non_git_username_ssh_url_extracted() {
         let content = "_commit: v1.0.0\n_src_path: someuser@some-scm-server.tld:renovatebot/somedir/renovate.git\n";
@@ -192,7 +192,7 @@ mod tests {
         assert_eq!(dep.github_repo, "");
     }
 
-    // Ported: "returns null for invalid _src_path" — copier/extract.spec.ts line 128
+    // Ported: "returns null for invalid _src_path" — lib/modules/manager/copier/extract.spec.ts line 128
     #[test]
     fn non_url_src_path_extracted_without_github_repo() {
         // TypeScript returns null for bare names like "notaurl". Rust extracts
@@ -203,7 +203,7 @@ mod tests {
         assert_eq!(dep.github_repo, "");
     }
 
-    // Ported: "should append a new marking line at the end to trigger the artifact update" — modules/manager/copier/update.spec.ts line 6
+    // Ported: "should append a new marking line at the end to trigger the artifact update" — lib/modules/manager/copier/update.spec.ts line 6
     #[test]
     fn copier_update_appends_marker() {
         let content = "_src_path: https://foo.bar/baz/quux\n_commit: 1.0.0";
@@ -211,7 +211,7 @@ mod tests {
         assert_eq!(result, format!("{content}\n#copier updated"));
     }
 
-    // Ported: "should not update again if the new line has been appended" — modules/manager/copier/update.spec.ts line 19
+    // Ported: "should not update again if the new line has been appended" — lib/modules/manager/copier/update.spec.ts line 19
     #[test]
     fn copier_update_no_op_if_already_marked() {
         let content = "_src_path: https://foo.bar/baz/quux\n_commit: 1.0.0\n#copier updated";

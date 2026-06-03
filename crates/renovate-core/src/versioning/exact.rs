@@ -69,7 +69,7 @@ pub fn sort_versions(_a: &str, _b: &str) -> Ordering {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/exact/index.spec.ts line 5
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/exact/index.spec.ts line 5
     #[test]
     fn is_valid_matches_renovate_exact_spec() {
         let cases = [
@@ -86,7 +86,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion($input) === $expected" — versioning/exact/index.spec.ts line 19
+    // Ported: "isVersion($input) === $expected" — lib/modules/versioning/exact/index.spec.ts line 19
     #[test]
     fn is_version_matches_renovate_exact_spec() {
         let cases = [
@@ -101,33 +101,33 @@ mod tests {
         }
     }
 
-    // Ported: "returns true for any valid version" — versioning/exact/index.spec.ts line 32
+    // Ported: "returns true for any valid version" — lib/modules/versioning/exact/index.spec.ts line 32
     #[test]
     fn is_single_version_returns_true_for_any_valid_version() {
         assert!(is_single_version("1.0.0"));
         assert!(is_single_version("any-string"));
     }
 
-    // Ported: "returns true for any version" — versioning/exact/index.spec.ts line 39
+    // Ported: "returns true for any version" — lib/modules/versioning/exact/index.spec.ts line 39
     #[test]
     fn is_stable_returns_true_for_any_version() {
         assert!(is_stable("1.0.0-alpha"));
         assert!(is_stable("1.0.0"));
     }
 
-    // Ported: "returns true when version equals current" — versioning/exact/index.spec.ts line 46
+    // Ported: "returns true when version equals current" — lib/modules/versioning/exact/index.spec.ts line 46
     #[test]
     fn is_compatible_returns_true_when_version_equals_current() {
         assert!(is_compatible("v1", "v1"));
     }
 
-    // Ported: "returns false when version differs from current" — versioning/exact/index.spec.ts line 50
+    // Ported: "returns false when version differs from current" — lib/modules/versioning/exact/index.spec.ts line 50
     #[test]
     fn is_compatible_returns_false_when_version_differs_from_current() {
         assert!(!is_compatible("v1.0.0", "v1.1.0"));
     }
 
-    // Ported: "returns null for all" — versioning/exact/index.spec.ts line 56
+    // Ported: "returns null for all" — lib/modules/versioning/exact/index.spec.ts line 56
     #[test]
     fn component_accessors_return_none() {
         assert_eq!(get_major("1.2.3"), None);
@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(get_patch("1.2.3"), None);
     }
 
-    // Ported: "equals(\"$a\", \"$b\") === $expected" — versioning/exact/index.spec.ts line 64
+    // Ported: "equals(\"$a\", \"$b\") === $expected" — lib/modules/versioning/exact/index.spec.ts line 64
     #[test]
     fn equals_matches_renovate_exact_spec() {
         let cases = [
@@ -150,7 +150,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/exact/index.spec.ts line 76
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — lib/modules/versioning/exact/index.spec.ts line 76
     #[test]
     fn is_greater_than_matches_renovate_exact_spec() {
         for (a, b) in [("2.0", "1.0"), ("1.0", "2.0"), ("a", "b")] {
@@ -158,7 +158,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/exact/index.spec.ts line 87
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — lib/modules/versioning/exact/index.spec.ts line 87
     #[test]
     fn matches_matches_renovate_exact_spec() {
         let cases = [
@@ -177,7 +177,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns exact match only" — versioning/exact/index.spec.ts line 102
+    // Ported: "returns exact match only" — lib/modules/versioning/exact/index.spec.ts line 102
     #[test]
     fn get_satisfying_version_returns_exact_match_only() {
         let versions = ["1.0.0", "1.0.1", "2.0.0"];
@@ -185,7 +185,7 @@ mod tests {
         assert_eq!(get_satisfying_version(&versions, "1.0.2"), None);
     }
 
-    // Ported: "returns exact match only" — versioning/exact/index.spec.ts line 110
+    // Ported: "returns exact match only" — lib/modules/versioning/exact/index.spec.ts line 110
     #[test]
     fn min_satisfying_version_returns_exact_match_only() {
         let versions = ["1.0.0", "1.0.1", "2.0.0"];
@@ -193,13 +193,13 @@ mod tests {
         assert_eq!(min_satisfying_version(&versions, "3.0.0"), None);
     }
 
-    // Ported: "returns currentValue unchanged" — versioning/exact/index.spec.ts line 118
+    // Ported: "returns currentValue unchanged" — lib/modules/versioning/exact/index.spec.ts line 118
     #[test]
     fn get_new_value_returns_current_value_unchanged() {
         assert_eq!(get_new_value("v1"), "v1");
     }
 
-    // Ported: "returns 0 for any comparison" — versioning/exact/index.spec.ts line 131
+    // Ported: "returns 0 for any comparison" — lib/modules/versioning/exact/index.spec.ts line 131
     #[test]
     fn sort_versions_returns_equal_for_any_comparison() {
         assert_eq!(sort_versions("1.0", "2.0"), Ordering::Equal);

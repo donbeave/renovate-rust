@@ -252,7 +252,7 @@ tasks:
       container: app
 "#;
 
-    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — batect/extract.spec.ts line 70
+    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — lib/modules/manager/batect/extract.spec.ts line 70
     #[test]
     fn extracts_images() {
         let deps = extract(SAMPLE);
@@ -264,40 +264,40 @@ tasks:
         assert_eq!(pg.tag.as_deref(), Some("15-alpine"));
     }
 
-    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — batect/extract.spec.ts line 70
+    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — lib/modules/manager/batect/extract.spec.ts line 70
     #[test]
     fn skips_build_directory_containers() {
         let deps = extract(SAMPLE);
         assert_eq!(deps.len(), 2); // only alpine and postgres
     }
 
-    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — batect/extract.spec.ts line 70
+    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — lib/modules/manager/batect/extract.spec.ts line 70
     #[test]
     fn stops_at_tasks_block() {
         let deps = extract(SAMPLE);
         assert!(!deps.iter().any(|d| d.image == "app"));
     }
 
-    // Ported: "returns empty array for empty configuration file" — batect/extract.spec.ts line 41
+    // Ported: "returns empty array for empty configuration file" — lib/modules/manager/batect/extract.spec.ts line 41
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns empty array for non-object configuration file" — batect/extract.spec.ts line 49
+    // Ported: "returns empty array for non-object configuration file" — lib/modules/manager/batect/extract.spec.ts line 49
     #[test]
     fn non_object_yaml_returns_empty() {
         assert!(extract("nothing here").is_empty());
     }
 
-    // Ported: "returns an a package file with no dependencies for configuration file without containers or includes" — batect/extract.spec.ts line 57
+    // Ported: "returns an a package file with no dependencies for configuration file without containers or includes" — lib/modules/manager/batect/extract.spec.ts line 57
     #[test]
     fn no_containers_block_returns_empty() {
         let content = "tasks:\n  build:\n    run:\n      container: app\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — batect/extract.spec.ts line 70
+    // Ported: "extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files" — lib/modules/manager/batect/extract.spec.ts line 70
     #[test]
     fn extracts_git_bundles_and_file_includes() {
         let content = r#"containers:

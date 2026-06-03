@@ -628,7 +628,7 @@ mod tests {
         build(&cli, GlobalConfig::default())
     }
 
-    // Ported: "returns empty argv" — workers/global/config/parse/cli.spec.ts line 32
+    // Ported: "returns empty argv" — lib/workers/global/config/parse/cli.spec.ts line 32
     #[test]
     fn default_cli_produces_default_config() {
         let cli = cli_with(|_| {});
@@ -658,7 +658,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports string" — workers/global/config/parse/cli.spec.ts line 84
+    // Ported: "supports string" — lib/workers/global/config/parse/cli.spec.ts line 84
     #[test]
     fn token_is_set() {
         let cli = cli_with(|c| c.token = Some("mytoken".to_owned()));
@@ -728,7 +728,7 @@ mod tests {
         assert_eq!(config.http_cache_ttl_days, Some(45));
     }
 
-    // Ported: "supports repositories" — workers/global/config/parse/cli.spec.ts line 89
+    // Ported: "supports repositories" — lib/workers/global/config/parse/cli.spec.ts line 89
     #[test]
     fn repositories_are_set() {
         let cli = cli_with(|c| {
@@ -916,7 +916,7 @@ mod tests {
         assert_eq!(config.unicode_emoji, Some(false));
     }
 
-    // Ported: "supports boolean no value" — workers/global/config/parse/cli.spec.ts line 36
+    // Ported: "supports boolean no value" — lib/workers/global/config/parse/cli.spec.ts line 36
     // Rust-specific: CLI config-migration flag parsing tests
     #[test]
     fn config_migration_bare_sets_true() {
@@ -988,13 +988,13 @@ mod tests {
         assert_eq!(config.pr_commits_per_run_limit, Some(4));
     }
 
-    // Ported: "supports boolean space true" — workers/global/config/parse/cli.spec.ts line 42
+    // Ported: "supports boolean space true" — lib/workers/global/config/parse/cli.spec.ts line 42
     #[test]
     fn config_migration_space_true_sets_true() {
         assert!(parse_and_build(&["--config-migration", "true"]).config_migration);
     }
 
-    // Ported: "throws exception for invalid boolean value" — workers/global/config/parse/cli.spec.ts line 48
+    // Ported: "throws exception for invalid boolean value" — lib/workers/global/config/parse/cli.spec.ts line 48
     #[test]
     fn config_migration_invalid_boolean_is_rejected() {
         let err = Cli::try_parse_from(["renovate", "--config-migration", "badvalue"])
@@ -1002,19 +1002,19 @@ mod tests {
         assert!(err.to_string().contains("badvalue"));
     }
 
-    // Ported: "supports boolean space false" — workers/global/config/parse/cli.spec.ts line 58
+    // Ported: "supports boolean space false" — lib/workers/global/config/parse/cli.spec.ts line 58
     #[test]
     fn config_migration_space_false_sets_false() {
         assert!(!parse_and_build(&["--config-migration", "false"]).config_migration);
     }
 
-    // Ported: "supports boolean equals true" — workers/global/config/parse/cli.spec.ts line 64
+    // Ported: "supports boolean equals true" — lib/workers/global/config/parse/cli.spec.ts line 64
     #[test]
     fn config_migration_equals_true_sets_true() {
         assert!(parse_and_build(&["--config-migration=true"]).config_migration);
     }
 
-    // Ported: "supports boolean equals false" — workers/global/config/parse/cli.spec.ts line 69
+    // Ported: "supports boolean equals false" — lib/workers/global/config/parse/cli.spec.ts line 69
     // Rust-specific: CLI config-migration flag parsing tests
     #[test]
     fn config_migration_equals_false_sets_false() {
@@ -1069,13 +1069,13 @@ mod tests {
         assert_eq!(config.config_warning_reuse_issue, Some(true));
     }
 
-    // Ported: "supports list single" — workers/global/config/parse/cli.spec.ts line 74
+    // Ported: "supports list single" — lib/workers/global/config/parse/cli.spec.ts line 74
     #[test]
     fn labels_single_value_is_set() {
         assert_eq!(parse_and_build(&["--labels=a"]).labels, vec!["a"]);
     }
 
-    // Ported: "supports list multiple" — workers/global/config/parse/cli.spec.ts line 79
+    // Ported: "supports list multiple" — lib/workers/global/config/parse/cli.spec.ts line 79
     #[test]
     fn labels_comma_separated_values_are_set() {
         assert_eq!(
@@ -1084,7 +1084,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses json lists correctly" — workers/global/config/parse/cli.spec.ts line 95
+    // Ported: "parses json lists correctly" — lib/workers/global/config/parse/cli.spec.ts line 95
     #[test]
     fn host_rules_json_list_is_parsed() {
         let config = parse_and_build(&[
@@ -1097,19 +1097,19 @@ mod tests {
         assert_eq!(config.host_rules[0]["password"], "password");
     }
 
-    // Ported: "parses [] correctly as empty list of hostRules" — workers/global/config/parse/cli.spec.ts line 111
+    // Ported: "parses [] correctly as empty list of hostRules" — lib/workers/global/config/parse/cli.spec.ts line 111
     #[test]
     fn host_rules_empty_array_is_parsed() {
         assert!(parse_and_build(&["--host-rules=[]"]).host_rules.is_empty());
     }
 
-    // Ported: "parses an empty string correctly as empty list of hostRules" — workers/global/config/parse/cli.spec.ts line 118
+    // Ported: "parses an empty string correctly as empty list of hostRules" — lib/workers/global/config/parse/cli.spec.ts line 118
     #[test]
     fn host_rules_empty_string_is_parsed() {
         assert!(parse_and_build(&["--host-rules="]).host_rules.is_empty());
     }
 
-    // Ported: "\"$arg\" -> $config" — workers/global/config/parse/cli.spec.ts line 125
+    // Ported: "\"$arg\" -> $config" — lib/workers/global/config/parse/cli.spec.ts line 125
     #[test]
     fn migrated_cli_aliases_produce_expected_config() {
         let cases = [
@@ -1141,7 +1141,7 @@ mod tests {
         }
     }
 
-    // Ported: "parses json object correctly when empty" — workers/global/config/parse/cli.spec.ts line 145
+    // Ported: "parses json object correctly when empty" — lib/workers/global/config/parse/cli.spec.ts line 145
     #[test]
     fn onboarding_config_empty_string_is_parsed() {
         assert!(
@@ -1151,7 +1151,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses json {} object correctly" — workers/global/config/parse/cli.spec.ts line 152
+    // Ported: "parses json {} object correctly" — lib/workers/global/config/parse/cli.spec.ts line 152
     #[test]
     fn onboarding_config_empty_object_is_parsed() {
         assert!(
@@ -1161,7 +1161,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses json object correctly" — workers/global/config/parse/cli.spec.ts line 159
+    // Ported: "parses json object correctly" — lib/workers/global/config/parse/cli.spec.ts line 159
     #[test]
     fn onboarding_config_object_is_parsed() {
         let config =
@@ -1176,7 +1176,7 @@ mod tests {
         assert_eq!(config.onboarding_config["extends"][0], "config:recommended");
     }
 
-    // Ported: "throws exception for invalid json object" — workers/global/config/parse/cli.spec.ts line 168
+    // Ported: "throws exception for invalid json object" — lib/workers/global/config/parse/cli.spec.ts line 168
     #[test]
     fn onboarding_config_invalid_json_is_rejected() {
         let cli = Cli::try_parse_from(["renovate", "--onboarding-config=Hello_World"])
@@ -1195,7 +1195,7 @@ mod tests {
         );
     }
 
-    // Ported: "dryRun boolean true" — workers/global/config/parse/cli.spec.ts line 175
+    // Ported: "dryRun boolean true" — lib/workers/global/config/parse/cli.spec.ts line 175
     #[test]
     fn dry_run_legacy_true_maps_to_full() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyTrue));
@@ -1205,21 +1205,21 @@ mod tests {
         );
     }
 
-    // Ported: "dryRun boolean false" — workers/global/config/parse/cli.spec.ts line 185
+    // Ported: "dryRun boolean false" — lib/workers/global/config/parse/cli.spec.ts line 185
     #[test]
     fn dry_run_legacy_false_disables_dry_run() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyFalse));
         assert_eq!(build(&cli, GlobalConfig::default()).dry_run, None);
     }
 
-    // Ported: "dryRun  null" — workers/global/config/parse/cli.spec.ts line 190
+    // Ported: "dryRun  null" — lib/workers/global/config/parse/cli.spec.ts line 190
     #[test]
     fn dry_run_legacy_null_disables_dry_run() {
         let cli = cli_with(|c| c.dry_run = Some(DryRunArg::LegacyNull));
         assert_eq!(build(&cli, GlobalConfig::default()).dry_run, None);
     }
 
-    // Ported: "requireConfig boolean true" — workers/global/config/parse/cli.spec.ts line 195
+    // Ported: "requireConfig boolean true" — lib/workers/global/config/parse/cli.spec.ts line 195
     #[test]
     fn require_config_legacy_true_maps_to_required() {
         let cli = cli_with(|c| c.require_config = Some(RequireConfigArg::LegacyTrue));
@@ -1229,7 +1229,7 @@ mod tests {
         );
     }
 
-    // Ported: "requireConfig boolean false" — workers/global/config/parse/cli.spec.ts line 205
+    // Ported: "requireConfig boolean false" — lib/workers/global/config/parse/cli.spec.ts line 205
     #[test]
     fn require_config_legacy_false_maps_to_optional() {
         let cli = cli_with(|c| c.require_config = Some(RequireConfigArg::LegacyFalse));

@@ -301,7 +301,7 @@ fn replace_first_quoted(s: &str, replacement: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "isVersion("$version") === $expected" — versioning/swift/index.spec.ts line 14
+    // Ported: "isVersion("$version") === $expected" — lib/modules/versioning/swift/index.spec.ts line 14
     #[test]
     fn swift_is_version() {
         assert!(!is_version(r#"from: "1.2.3""#));
@@ -310,7 +310,7 @@ mod tests {
         assert!(!is_version("a"));
     }
 
-    // Ported: "isValid("$version") === $expected" — versioning/swift/index.spec.ts line 24
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/swift/index.spec.ts line 24
     #[test]
     fn swift_is_valid() {
         let valid = [
@@ -351,7 +351,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — versioning/swift/index.spec.ts line 62
+    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — lib/modules/versioning/swift/index.spec.ts line 62
     #[test]
     fn swift_min_satisfying_version() {
         assert_eq!(
@@ -368,7 +368,7 @@ mod tests {
         );
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — versioning/swift/index.spec.ts line 74
+    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — lib/modules/versioning/swift/index.spec.ts line 74
     #[test]
     fn swift_get_satisfying_version() {
         assert_eq!(
@@ -389,7 +389,7 @@ mod tests {
         );
     }
 
-    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — versioning/swift/index.spec.ts line 87
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — lib/modules/versioning/swift/index.spec.ts line 87
     #[test]
     fn swift_is_less_than_range() {
         assert!(!is_less_than_range("1.2.3", r#"..."1.2.4""#));
@@ -399,7 +399,7 @@ mod tests {
         assert!(!is_less_than_range("v1.2.3", ""));
     }
 
-    // Ported: "matches("$version", "$range") === "$expected"" — versioning/swift/index.spec.ts line 101
+    // Ported: "matches("$version", "$range") === "$expected"" — lib/modules/versioning/swift/index.spec.ts line 101
     #[test]
     fn swift_matches() {
         assert!(matches_range("1.2.3", "1.2.3"));
@@ -470,7 +470,7 @@ mod tests {
         assert_eq!(to_semver_range("invalid"), None);
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/swift/index.spec.ts line 117
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/swift/index.spec.ts line 117
     #[test]
     fn swift_get_new_value() {
         assert_eq!(get_new_value("1.2.3", "1.2.4"), "1.2.4");

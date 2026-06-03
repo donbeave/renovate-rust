@@ -121,7 +121,7 @@ pub fn is_compatible(a: &str, b: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/nixpkgs/index.spec.ts line 6
+    // Ported: "isValid(\"$version\") === $expected" — lib/modules/versioning/nixpkgs/index.spec.ts line 6
     #[test]
     fn is_valid_matches_renovate_nixpkgs_spec() {
         let cases = [
@@ -148,7 +148,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$version\") === $expected" — versioning/nixpkgs/index.spec.ts line 32
+    // Ported: "isStable(\"$version\") === $expected" — lib/modules/versioning/nixpkgs/index.spec.ts line 32
     #[test]
     fn is_stable_matches_renovate_nixpkgs_spec() {
         let cases = [
@@ -166,7 +166,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/nixpkgs/index.spec.ts line 49
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/nixpkgs/index.spec.ts line 49
     #[test]
     fn equals_matches_renovate_nixpkgs_spec() {
         let cases = [
@@ -181,7 +181,7 @@ mod tests {
         }
     }
 
-    // Ported: "$versions -> sortVersions -> $expected" — versioning/nixpkgs/index.spec.ts line 60
+    // Ported: "$versions -> sortVersions -> $expected" — lib/modules/versioning/nixpkgs/index.spec.ts line 60
     #[test]
     fn sort_versions_matches_renovate_nixpkgs_spec() {
         let mut versions = vec![
@@ -204,7 +204,7 @@ mod tests {
         );
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/nixpkgs/index.spec.ts line 72
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/nixpkgs/index.spec.ts line 72
     #[test]
     fn is_compatible_matches_renovate_nixpkgs_spec() {
         let cases = [

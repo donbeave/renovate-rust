@@ -794,7 +794,7 @@ mod tests {
         remove_global_config,
     };
 
-    // Ported: "merges" — config/index.spec.ts line 16
+    // Ported: "merges" — lib/config/index.spec.ts line 16
     #[test]
     fn merge_child_config_merges_plain_and_nested_options() {
         let parent = default_repo_config();
@@ -815,7 +815,7 @@ mod tests {
         );
     }
 
-    // Ported: "merges packageRules" — config/index.spec.ts line 32
+    // Ported: "merges packageRules" — lib/config/index.spec.ts line 32
     #[test]
     fn merge_child_config_appends_package_rules() {
         let parent = json!({
@@ -842,7 +842,7 @@ mod tests {
         );
     }
 
-    // Ported: "merges constraints" — config/index.spec.ts line 55
+    // Ported: "merges constraints" — lib/config/index.spec.ts line 55
     #[test]
     fn merge_child_config_merges_constraints() {
         let parent = json!({"constraints": {"node": ">=12", "npm": "^6.0.0"}});
@@ -854,7 +854,7 @@ mod tests {
         );
     }
 
-    // Ported: "merges forced options" — config/index.spec.ts line 73
+    // Ported: "merges forced options" — lib/config/index.spec.ts line 73
     #[test]
     fn merge_child_config_merges_force_options() {
         let parent = json!({"force": {"schedule": "at any time"}});
@@ -864,7 +864,7 @@ mod tests {
         assert_eq!(config["force"]["constraints"]["node"], "<15");
     }
 
-    // Ported: "handles null parent packageRules" — config/index.spec.ts line 92
+    // Ported: "handles null parent packageRules" — lib/config/index.spec.ts line 92
     #[test]
     fn merge_child_config_handles_null_parent_package_rules() {
         let parent = json!({"packageRules": null});
@@ -873,7 +873,7 @@ mod tests {
         assert_eq!(config["packageRules"].as_array().unwrap().len(), 2);
     }
 
-    // Ported: "handles null child packageRules" — config/index.spec.ts line 105
+    // Ported: "handles null child packageRules" — lib/config/index.spec.ts line 105
     #[test]
     fn merge_child_config_handles_missing_child_package_rules() {
         let parent = json!({
@@ -887,14 +887,14 @@ mod tests {
         assert_eq!(config["packageRules"], parent["packageRules"]);
     }
 
-    // Ported: "handles undefined childConfig" — config/index.spec.ts line 118
+    // Ported: "handles undefined childConfig" — lib/config/index.spec.ts line 118
     #[test]
     fn merge_child_config_handles_undefined_child_config() {
         let parent = default_repo_config();
         assert_eq!(merge_child_config(&parent, None), parent);
     }
 
-    // Ported: "getManagerConfig()" — config/index.spec.ts line 124
+    // Ported: "getManagerConfig()" — lib/config/index.spec.ts line 124
     #[test]
     fn get_manager_config_adds_manager_file_patterns() {
         let parent = default_repo_config();
@@ -911,13 +911,13 @@ mod tests {
         assert_eq!(html["managerFilePatterns"], json!(["/\\.html?$/"]));
     }
 
-    // Ported: "filterConfig()" — config/index.spec.ts line 142
+    // Ported: "filterConfig()" — lib/config/index.spec.ts line 142
     #[test]
     fn filter_config_returns_object() {
         assert!(filter_config(&default_repo_config(), "pr").is_object());
     }
 
-    // Ported: "highest vulnerabilitySeverity maintained when config is vulnerability alert" — config/index.spec.ts line 148
+    // Ported: "highest vulnerabilitySeverity maintained when config is vulnerability alert" — lib/config/index.spec.ts line 148
     #[test]
     fn merge_child_config_keeps_highest_vulnerability_severity() {
         let parent = json!({"isVulnerabilityAlert": true, "vulnerabilitySeverity": "HIGH"});
@@ -926,7 +926,7 @@ mod tests {
         assert_eq!(config["vulnerabilitySeverity"], "CRITICAL");
     }
 
-    // Ported: "removes all global config" — config/index.spec.ts line 163
+    // Ported: "removes all global config" — lib/config/index.spec.ts line 163
     #[test]
     fn remove_global_config_removes_all_global_config() {
         let filtered = remove_global_config(&default_repo_config(), false);
@@ -935,7 +935,7 @@ mod tests {
         assert_eq!(filtered["prHourlyLimit"], 2);
     }
 
-    // Ported: "retains inherited config" — config/index.spec.ts line 170
+    // Ported: "retains inherited config" — lib/config/index.spec.ts line 170
     #[test]
     fn remove_global_config_retains_inherited_config() {
         let filtered = remove_global_config(&default_repo_config(), true);
@@ -944,7 +944,7 @@ mod tests {
         assert_eq!(filtered["prHourlyLimit"], 2);
     }
 
-    // Ported: "all values in OPTIONS are sorted" — config/global.spec.ts line 4
+    // Ported: "all values in OPTIONS are sorted" — lib/config/global.spec.ts line 4
     #[test]
     fn global_config_options_are_sorted() {
         let mut sorted = GLOBAL_CONFIG_OPTIONS.to_vec();
@@ -952,7 +952,7 @@ mod tests {
         assert_eq!(GLOBAL_CONFIG_OPTIONS, sorted.as_slice());
     }
 
-    // Ported: "returns new instances of arrays when called repeatedly" — config/defaults.spec.ts line 6
+    // Ported: "returns new instances of arrays when called repeatedly" — lib/config/defaults.spec.ts line 6
     #[test]
     fn default_array_values_are_independent() {
         let ConfigDefaultValue::Array(mut array1) = default_value_for_type(ConfigOptionType::Array)
@@ -970,7 +970,7 @@ mod tests {
         assert!(array2.is_empty());
     }
 
-    // Ported: "returns true for boolean values" — config/defaults.spec.ts line 20
+    // Ported: "returns true for boolean values" — lib/config/defaults.spec.ts line 20
     #[test]
     fn default_boolean_value_is_true() {
         assert_eq!(
@@ -979,7 +979,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for %s values" — config/defaults.spec.ts line 31
+    // Ported: "returns null for %s values" — lib/config/defaults.spec.ts line 31
     #[test]
     fn default_scalar_values_are_null() {
         for option_type in [
@@ -1008,7 +1008,7 @@ mod tests {
         assert_eq!(config.binary_source, Some(BinarySource::Global));
     }
 
-    // Ported: "all values in OPTIONS are sorted" — config/inherit.spec.ts line 4
+    // Ported: "all values in OPTIONS are sorted" — lib/config/inherit.spec.ts line 4
     #[test]
     fn inherit_config_options_are_sorted() {
         let mut sorted = INHERIT_CONFIG_OPTIONS.to_vec();
@@ -1016,14 +1016,14 @@ mod tests {
         assert_eq!(INHERIT_CONFIG_OPTIONS, sorted.as_slice());
     }
 
-    // Ported: "return NOT_PRESENT if key is not set" — config/inherit.spec.ts line 15
+    // Ported: "return NOT_PRESENT if key is not set" — lib/config/inherit.spec.ts line 15
     #[test]
     fn inherit_config_returns_not_present_for_missing_key() {
         let config = InheritConfig::default();
         assert_eq!(config.config_file_names(), InheritedValue::NotPresent);
     }
 
-    // Ported: "return value if key is set" — config/inherit.spec.ts line 20
+    // Ported: "return value if key is set" — lib/config/inherit.spec.ts line 20
     #[test]
     fn inherit_config_returns_value_when_key_is_set() {
         let config = InheritConfig::new(Some(vec!["inherited".to_owned()]));

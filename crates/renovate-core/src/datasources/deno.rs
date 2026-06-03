@@ -148,7 +148,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "returns releases of standard library" — deno/index.spec.ts line 9
+    // Ported: "returns releases of standard library" — lib/modules/datasource/deno/index.spec.ts line 9
     #[tokio::test]
     async fn returns_releases_of_standard_library() {
         let server = MockServer::start().await;
@@ -241,7 +241,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws error if module endpoint fails" — deno/index.spec.ts line 74
+    // Ported: "throws error if module endpoint fails" — lib/modules/datasource/deno/index.spec.ts line 74
     #[tokio::test]
     async fn throws_error_if_module_endpoint_fails() {
         let server = MockServer::start().await;
@@ -256,7 +256,7 @@ mod tests {
         assert!(result.is_err(), "404 on module endpoint should throw");
     }
 
-    // Ported: "throws error if version endpoint fails" — deno/index.spec.ts line 88
+    // Ported: "throws error if version endpoint fails" — lib/modules/datasource/deno/index.spec.ts line 88
     #[tokio::test]
     async fn throws_error_if_version_endpoint_fails() {
         let server = MockServer::start().await;
@@ -294,7 +294,7 @@ mod tests {
         assert!(result.is_err(), "503 on version endpoint should throw");
     }
 
-    // Ported: "returns null if we could not match a deno land dependency" — deno/index.spec.ts line 116
+    // Ported: "returns null if we could not match a deno land dependency" — lib/modules/datasource/deno/index.spec.ts line 116
     #[tokio::test]
     async fn returns_null_for_non_deno_land_package() {
         let http = HttpClient::new().unwrap();
@@ -304,7 +304,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns releases of third-party library" — deno/index.spec.ts line 124
+    // Ported: "returns releases of third-party library" — lib/modules/datasource/deno/index.spec.ts line 124
     #[tokio::test]
     async fn returns_releases_of_third_party_library() {
         let server = MockServer::start().await;
@@ -368,7 +368,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns releases of a alternative registry server" — deno/index.spec.ts line 171
+    // Ported: "returns releases of a alternative registry server" — lib/modules/datasource/deno/index.spec.ts line 171
     #[tokio::test]
     async fn returns_releases_of_alternative_registry() {
         let server = MockServer::start().await;

@@ -274,7 +274,7 @@ mod tests {
         }
     }
 
-    // Ported: "stores and retrieves items" — modules/platform/github/api-cache.spec.ts line 12
+    // Ported: "stores and retrieves items" — lib/modules/platform/github/api-cache.spec.ts line 12
     #[test]
     fn stores_and_retrieves_items() {
         let item1 = item(1, 2001);
@@ -296,7 +296,7 @@ mod tests {
         assert_eq!(items.len(), 2);
     }
 
-    // Ported: "maps items" — modules/platform/github/api-cache.spec.ts line 29
+    // Ported: "maps items" — lib/modules/platform/github/api-cache.spec.ts line 29
     #[test]
     fn get_items_maps_items() {
         let item1 = item(1, 2001);
@@ -308,7 +308,7 @@ mod tests {
         assert!(items.contains(&&item2));
     }
 
-    // Ported: "resets cache on item update" — modules/platform/github/api-cache.spec.ts line 46
+    // Ported: "resets cache on item update" — lib/modules/platform/github/api-cache.spec.ts line 46
     #[test]
     fn get_items_resets_on_item_update() {
         let item1 = item(1, 2001);
@@ -323,7 +323,7 @@ mod tests {
         assert_eq!(items[0], &item1_updated);
     }
 
-    // Ported: "resets cache on page reconcile" — modules/platform/github/api-cache.spec.ts line 69
+    // Ported: "resets cache on page reconcile" — lib/modules/platform/github/api-cache.spec.ts line 69
     #[test]
     fn get_items_resets_on_page_reconcile() {
         let item1 = item(1, 2001);
@@ -336,14 +336,14 @@ mod tests {
         assert_eq!(api_cache.get_item(1), Some(&item1_updated));
     }
 
-    // Ported: "returns undefined when no lastModified in cache" — modules/platform/github/api-cache.spec.ts line 94
+    // Ported: "returns undefined when no lastModified in cache" — lib/modules/platform/github/api-cache.spec.ts line 94
     #[test]
     fn get_last_modified_returns_none_when_not_set() {
         let api_cache = ApiCache::new(cache_from(vec![], None));
         assert_eq!(api_cache.get_last_modified(), None);
     }
 
-    // Ported: "returns stored value when present" — modules/platform/github/api-cache.spec.ts line 100
+    // Ported: "returns stored value when present" — lib/modules/platform/github/api-cache.spec.ts line 100
     #[test]
     fn get_last_modified_returns_stored_value() {
         let api_cache = ApiCache::new(cache_from(vec![], Some("2001-01-01T00:00:00.000Z")));
@@ -353,7 +353,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns updated value after reconcile" — modules/platform/github/api-cache.spec.ts line 106
+    // Ported: "returns updated value after reconcile" — lib/modules/platform/github/api-cache.spec.ts line 106
     #[test]
     fn get_last_modified_returns_updated_after_reconcile() {
         let mut api_cache = ApiCache::new(cache_from(vec![], Some("2001-01-01T00:00:00.000Z")));
@@ -364,7 +364,7 @@ mod tests {
         );
     }
 
-    // Ported: "sets lastModified when not present" — modules/platform/github/api-cache.spec.ts line 116
+    // Ported: "sets lastModified when not present" — lib/modules/platform/github/api-cache.spec.ts line 116
     #[test]
     fn update_last_modified_sets_when_absent() {
         let mut api_cache = ApiCache::new(cache_from(vec![], None));
@@ -375,7 +375,7 @@ mod tests {
         );
     }
 
-    // Ported: "advances lastModified to newer timestamp" — modules/platform/github/api-cache.spec.ts line 124
+    // Ported: "advances lastModified to newer timestamp" — lib/modules/platform/github/api-cache.spec.ts line 124
     #[test]
     fn update_last_modified_advances_to_newer() {
         let mut api_cache = ApiCache::new(cache_from(vec![], Some("2001-01-01T00:00:00.000Z")));
@@ -386,7 +386,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not regress lastModified to older timestamp" — modules/platform/github/api-cache.spec.ts line 132
+    // Ported: "does not regress lastModified to older timestamp" — lib/modules/platform/github/api-cache.spec.ts line 132
     #[test]
     fn update_last_modified_does_not_regress() {
         let mut api_cache = ApiCache::new(cache_from(vec![], Some("2003-01-01T00:00:00.000Z")));
@@ -397,14 +397,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns false for empty page" — modules/platform/github/api-cache.spec.ts line 142
+    // Ported: "returns false for empty page" — lib/modules/platform/github/api-cache.spec.ts line 142
     #[test]
     fn reconcile_returns_false_for_empty_page() {
         let mut api_cache = ApiCache::new(cache_from(vec![], None));
         assert!(!api_cache.reconcile(&[]));
     }
 
-    // Ported: "appends new items" — modules/platform/github/api-cache.spec.ts line 152
+    // Ported: "appends new items" — lib/modules/platform/github/api-cache.spec.ts line 152
     #[test]
     fn reconcile_appends_new_items() {
         let item1 = item(1, 2001);
@@ -419,7 +419,7 @@ mod tests {
         assert_eq!(api_cache.get_item(2), Some(&item2));
     }
 
-    // Ported: "handles updated items" — modules/platform/github/api-cache.spec.ts line 175
+    // Ported: "handles updated items" — lib/modules/platform/github/api-cache.spec.ts line 175
     #[test]
     fn reconcile_handles_updated_items() {
         let item1 = item(1, 2001);
@@ -437,7 +437,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignores page overlap" — modules/platform/github/api-cache.spec.ts line 199
+    // Ported: "ignores page overlap" — lib/modules/platform/github/api-cache.spec.ts line 199
     #[test]
     fn reconcile_ignores_page_overlap() {
         let item1 = item(1, 2001);
@@ -456,7 +456,7 @@ mod tests {
         assert_eq!(api_cache.get_item(2), Some(&item2));
     }
 
-    // Ported: "does not require new page if all items are old" — modules/platform/github/api-cache.spec.ts line 226
+    // Ported: "does not require new page if all items are old" — lib/modules/platform/github/api-cache.spec.ts line 226
     #[test]
     fn reconcile_does_not_require_next_page_if_all_old() {
         let item1 = item(1, 2001);
@@ -482,14 +482,14 @@ mod tests {
         }
     }
 
-    // Ported: "returns null for empty cache" — modules/platform/github/issue.spec.ts line 16
+    // Ported: "returns null for empty cache" — lib/modules/platform/github/issue.spec.ts line 16
     #[test]
     fn issue_cache_returns_none_for_empty() {
         let cache = GithubIssueCache::new();
         assert!(cache.get_issues().is_none());
     }
 
-    // Ported: "stores issues to the cache" — modules/platform/github/issue.spec.ts line 20
+    // Ported: "stores issues to the cache" — lib/modules/platform/github/issue.spec.ts line 20
     #[test]
     fn issue_cache_stores_issues() {
         let mut cache = GithubIssueCache::new();
@@ -503,7 +503,7 @@ mod tests {
         assert_eq!(ic["2"]["state"], "closed");
     }
 
-    // Ported: "returns issues from the cache in the correct order" — modules/platform/github/issue.spec.ts line 64
+    // Ported: "returns issues from the cache in the correct order" — lib/modules/platform/github/issue.spec.ts line 64
     #[test]
     fn issue_cache_returns_sorted_by_last_modified_desc() {
         let mut cache = GithubIssueCache::new();
@@ -518,7 +518,7 @@ mod tests {
         assert_eq!(issues[2].number, 1);
     }
 
-    // Ported: "updates particular issue in the cache" — modules/platform/github/issue.spec.ts line 120
+    // Ported: "updates particular issue in the cache" — lib/modules/platform/github/issue.spec.ts line 120
     #[test]
     fn issue_cache_updates_issue() {
         let mut cache = GithubIssueCache::new();
@@ -542,7 +542,7 @@ mod tests {
         assert_eq!(issues[0].title, "new-title-1");
     }
 
-    // Ported: "removes particular issue from the cache" — modules/platform/github/issue.spec.ts line 162
+    // Ported: "removes particular issue from the cache" — lib/modules/platform/github/issue.spec.ts line 162
     #[test]
     fn issue_cache_deletes_issue() {
         let mut cache = GithubIssueCache::new();
@@ -557,7 +557,7 @@ mod tests {
         assert!(cache.get_issues().is_none());
     }
 
-    // Ported: "reconciles cache" — modules/platform/github/issue.spec.ts line 188
+    // Ported: "reconciles cache" — lib/modules/platform/github/issue.spec.ts line 188
     #[test]
     fn issue_cache_reconciles() {
         let mut cache = GithubIssueCache::new();
@@ -582,7 +582,7 @@ mod tests {
         assert_eq!(issues[0].title, "new-title-1");
     }
 
-    // Ported: "resets cache during failed reconciliation" — modules/platform/github/issue.spec.ts line 246
+    // Ported: "resets cache during failed reconciliation" — lib/modules/platform/github/issue.spec.ts line 246
     #[test]
     fn issue_cache_resets_on_failed_reconcile() {
         let mut cache = GithubIssueCache::new();

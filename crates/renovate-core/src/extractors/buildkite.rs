@@ -207,7 +207,7 @@ steps:
       - cache#some-branch: ~
 "#;
 
-    // Ported: "extracts multiple plugins in same file" — buildkite/extract.spec.ts line 22
+    // Ported: "extracts multiple plugins in same file" — lib/modules/manager/buildkite/extract.spec.ts line 22
     #[test]
     fn one_part_plugin() {
         let deps = extract(SAMPLE);
@@ -226,7 +226,7 @@ steps:
         assert!(dcp.skip_reason.is_none());
     }
 
-    // Ported: "extracts simple single plugin" — buildkite/extract.spec.ts line 11
+    // Ported: "extracts simple single plugin" — lib/modules/manager/buildkite/extract.spec.ts line 11
     #[test]
     fn two_part_plugin() {
         let deps = extract(SAMPLE);
@@ -244,7 +244,7 @@ steps:
         );
     }
 
-    // Ported: "extracts git-based plugins" — buildkite/extract.spec.ts line 92
+    // Ported: "extracts git-based plugins" — lib/modules/manager/buildkite/extract.spec.ts line 92
     #[test]
     fn github_url_plugin() {
         let deps = extract(SAMPLE);
@@ -262,7 +262,7 @@ steps:
         );
     }
 
-    // Ported: "adds skipReason" — buildkite/extract.spec.ts line 47
+    // Ported: "adds skipReason" — lib/modules/manager/buildkite/extract.spec.ts line 47
     #[test]
     fn non_semver_version_skipped() {
         let deps = extract(SAMPLE);
@@ -270,13 +270,13 @@ steps:
         assert_eq!(cache.skip_reason, Some(BuildkiteSkipReason::InvalidVersion));
     }
 
-    // Ported: "returns null for empty" — buildkite/extract.spec.ts line 7
+    // Ported: "returns null for empty" — lib/modules/manager/buildkite/extract.spec.ts line 7
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts multiple plugins in same file" — buildkite/extract.spec.ts line 22
+    // Ported: "extracts multiple plugins in same file" — lib/modules/manager/buildkite/extract.spec.ts line 22
     #[test]
     fn multiple_plugins_extracted() {
         let content = "steps:\n  - plugins:\n      docker-compose#v1.3.2:\n        build: app\n  - plugins:\n      docker-compose#v1.3.2:\n        run: app\n";
@@ -285,7 +285,7 @@ steps:
         assert!(deps.iter().any(|d| d.current_value == "v1.3.2"));
     }
 
-    // Ported: "extracts arrays of plugins" — buildkite/extract.spec.ts line 70
+    // Ported: "extracts arrays of plugins" — lib/modules/manager/buildkite/extract.spec.ts line 70
     #[test]
     fn array_plugins_extracted() {
         let content = "steps:\n  - plugins:\n      - docker-login#v2.0.1:\n          username: xyz\n      - docker-compose#v2.5.1:\n          build: app\n";
@@ -293,7 +293,7 @@ steps:
         assert!(!deps.is_empty());
     }
 
-    // Ported: "extracts git-based plugin with .git at the end of its name" — buildkite/extract.spec.ts line 105
+    // Ported: "extracts git-based plugin with .git at the end of its name" — lib/modules/manager/buildkite/extract.spec.ts line 105
     #[test]
     fn github_enterprise_ssh_url_with_git_suffix() {
         let content = "steps:\n  - ssh://git@github.company.com/some-org/some-plugin.git#v3.2.7:\n";
@@ -310,7 +310,7 @@ steps:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts plugins outside plugins sections" — buildkite/extract.spec.ts line 121
+    // Ported: "extracts plugins outside plugins sections" — lib/modules/manager/buildkite/extract.spec.ts line 121
     #[test]
     fn ssh_url_plugin_outside_plugins_section() {
         let content = r#".python3-container: &python3-container
@@ -328,7 +328,7 @@ steps:
         );
     }
 
-    // Ported: "extracts plugin with preceding ?" — buildkite/extract.spec.ts line 140
+    // Ported: "extracts plugin with preceding ?" — lib/modules/manager/buildkite/extract.spec.ts line 140
     #[test]
     fn yaml_question_mark_prefix() {
         let content =
@@ -339,7 +339,7 @@ steps:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts plugin tags from bitbucket" — buildkite/extract.spec.ts line 155
+    // Ported: "extracts plugin tags from bitbucket" — lib/modules/manager/buildkite/extract.spec.ts line 155
     #[test]
     fn bitbucket_plugin_extracted() {
         let content = r#"steps:
@@ -362,7 +362,7 @@ steps:
         );
     }
 
-    // Ported: "extracts plugin tags with quotes" — buildkite/extract.spec.ts line 178
+    // Ported: "extracts plugin tags with quotes" — lib/modules/manager/buildkite/extract.spec.ts line 178
     #[test]
     fn single_quoted_plugin() {
         let content =

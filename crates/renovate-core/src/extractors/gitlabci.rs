@@ -721,7 +721,7 @@ scratch_job:
   image: scratch
 ";
 
-    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
+    // Ported: "extracts multiple image lines" — lib/modules/manager/gitlabci/extract.spec.ts line 75
     #[test]
     fn extracts_top_level_image() {
         let deps = extract(SAMPLE);
@@ -730,7 +730,7 @@ scratch_job:
         assert!(node.dep.skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
+    // Ported: "extracts multiple image lines" — lib/modules/manager/gitlabci/extract.spec.ts line 75
     #[test]
     fn extracts_job_image() {
         let deps = extract(SAMPLE);
@@ -738,7 +738,7 @@ scratch_job:
         assert_eq!(go.dep.tag.as_deref(), Some("1.21"));
     }
 
-    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
+    // Ported: "extracts multiple image lines" — lib/modules/manager/gitlabci/extract.spec.ts line 75
     #[test]
     fn extracts_block_form_image() {
         let deps = extract(SAMPLE);
@@ -746,7 +746,7 @@ scratch_job:
         assert_eq!(py.dep.tag.as_deref(), Some("3.11-slim"));
     }
 
-    // Ported: "extracts named services" — gitlabci/extract.spec.ts line 57
+    // Ported: "extracts named services" — lib/modules/manager/gitlabci/extract.spec.ts line 57
     #[test]
     fn extracts_services() {
         let deps = extract(SAMPLE);
@@ -757,7 +757,7 @@ scratch_job:
         assert_eq!(redis.dep.tag.as_deref(), Some("7-alpine"));
     }
 
-    // Ported: "extracts multiple image lines" — gitlabci/extract.spec.ts line 75
+    // Ported: "extracts multiple image lines" — lib/modules/manager/gitlabci/extract.spec.ts line 75
     #[test]
     fn scratch_image_skipped() {
         let deps = extract(SAMPLE);
@@ -767,13 +767,13 @@ scratch_job:
         assert!(scratch.is_some());
     }
 
-    // Ported: "extracts from empty file" — gitlabci/extract.spec.ts line 22
+    // Ported: "extracts from empty file" — lib/modules/manager/gitlabci/extract.spec.ts line 22
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "skips images with variables" — gitlabci/extract.spec.ts line 118
+    // Ported: "skips images with variables" — lib/modules/manager/gitlabci/extract.spec.ts line 118
     #[test]
     fn variable_image_has_skip_reason() {
         let content = "image: $VARIABLE/renovate/renovate:31.65.1-slim\n";
@@ -782,7 +782,7 @@ scratch_job:
         assert!(deps[0].dep.skip_reason.is_some());
     }
 
-    // Ported: "extracts from multidoc yaml" — gitlabci/extract.spec.ts line 36
+    // Ported: "extracts from multidoc yaml" — lib/modules/manager/gitlabci/extract.spec.ts line 36
     #[test]
     fn multidoc_yaml_extracts_from_all_docs() {
         let content = "image: node:18\n---\nimage: python:3.11\n---\nimage: golang:1.21\n";
@@ -790,7 +790,7 @@ scratch_job:
         assert_eq!(deps.len(), 3);
     }
 
-    // Ported: "extracts multiple image lines with comments" — gitlabci/extract.spec.ts line 94
+    // Ported: "extracts multiple image lines with comments" — lib/modules/manager/gitlabci/extract.spec.ts line 94
     #[test]
     fn extracts_images_with_comment_lines() {
         let content = r#"image:
@@ -813,7 +813,7 @@ services:
         assert!(deps.iter().any(|d| d.dep.image == "other/image"));
     }
 
-    // Ported: "extract images from dependency proxy" — gitlabci/extract.spec.ts line 172
+    // Ported: "extract images from dependency proxy" — lib/modules/manager/gitlabci/extract.spec.ts line 172
     #[test]
     fn dependency_proxy_prefix_stripped() {
         // Inline image with ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX} prefix in block form
@@ -835,7 +835,7 @@ services:
         );
     }
 
-    // Ported: "extract images via registry aliases" — gitlabci/extract.spec.ts line 229
+    // Ported: "extract images via registry aliases" — lib/modules/manager/gitlabci/extract.spec.ts line 229
     #[test]
     fn extract_images_via_registry_aliases() {
         let content = r#"
@@ -887,7 +887,7 @@ services:
         assert_eq!(deps[3].dep_type, "service-image");
     }
 
-    // Ported: "extracts component references via registry aliases" — gitlabci/extract.spec.ts line 299
+    // Ported: "extracts component references via registry aliases" — lib/modules/manager/gitlabci/extract.spec.ts line 299
     #[test]
     fn extracts_component_references_via_registry_aliases() {
         let content = r#"include:
@@ -943,7 +943,7 @@ services:
         assert_eq!(deps[5].registry_url, "https://gitlab.example.com");
     }
 
-    // Ported: "extracts component references" — gitlabci/extract.spec.ts line 377
+    // Ported: "extracts component references" — lib/modules/manager/gitlabci/extract.spec.ts line 377
     #[test]
     fn extracts_component_references() {
         let content = r#"include:
@@ -1002,7 +1002,7 @@ services:
 
     // --- get_gitlab_dep tests ---
 
-    // Ported: "offical image - $name" — gitlabci/utils.spec.ts line 11
+    // Ported: "offical image - $name" — lib/modules/manager/gitlabci/utils.spec.ts line 11
     #[test]
     fn get_gitlab_dep_official_image_no_prefix() {
         let dep = get_gitlab_dep("mariadb:10.4.11", &[]);
@@ -1056,7 +1056,7 @@ services:
         );
     }
 
-    // Ported: "image with organization - $name" — gitlabci/utils.spec.ts line 28
+    // Ported: "image with organization - $name" — lib/modules/manager/gitlabci/utils.spec.ts line 28
     #[test]
     fn get_gitlab_dep_image_with_org_no_prefix() {
         let dep = get_gitlab_dep("renovate/renovate:19.70.8-slim", &[]);
@@ -1083,7 +1083,7 @@ services:
         );
     }
 
-    // Ported: "supports registry aliases - $name" — gitlabci/utils.spec.ts line 48
+    // Ported: "supports registry aliases - $name" — lib/modules/manager/gitlabci/utils.spec.ts line 48
     #[test]
     fn get_gitlab_dep_registry_alias_multiple() {
         let dep = get_gitlab_dep(
@@ -1153,7 +1153,7 @@ services:
         );
     }
 
-    // Ported: "no Docker hub" — gitlabci/utils.spec.ts line 73
+    // Ported: "no Docker hub" — lib/modules/manager/gitlabci/utils.spec.ts line 73
     #[test]
     fn get_gitlab_dep_no_docker_hub() {
         let dep = get_gitlab_dep("quay.io/prometheus/node-exporter:v1.3.1", &[]);
@@ -1169,13 +1169,13 @@ services:
         );
     }
 
-    // Ported: "returns null for empty" — gitlabci/extract.spec.ts line 28
+    // Ported: "returns null for empty" — lib/modules/manager/gitlabci/extract.spec.ts line 28
     #[test]
     fn extract_all_returns_empty_for_empty_content() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts multiple named services" — gitlabci/extract.spec.ts line 66
+    // Ported: "extracts multiple named services" — lib/modules/manager/gitlabci/extract.spec.ts line 66
     #[test]
     fn extracts_multiple_named_services() {
         let content = r#"image:
@@ -1221,7 +1221,7 @@ job2:
         assert!(deps.iter().any(|d| d.dep.image == "tomcat"));
     }
 
-    // Ported: "catches errors" — gitlabci/extract.spec.ts line 110
+    // Ported: "catches errors" — lib/modules/manager/gitlabci/extract.spec.ts line 110
     #[test]
     fn catches_errors_returns_empty() {
         // Invalid YAML with duplicate key and unknown tags — extractor returns empty

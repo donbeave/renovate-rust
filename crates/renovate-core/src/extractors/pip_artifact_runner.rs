@@ -214,7 +214,7 @@ botocore==1.27.46 \\n\
 --hash=sha256:747b7e94aef41498f063fc0be79c5af102d940beea713965179e1ead89c7e9ec \\n\
 --hash=sha256:f66d8305d1f59d83334df9b11b6512bb1e14698ec4d5d6d42f833f39f3304ca7\n";
 
-    // Ported: "returns null if no updatedDeps were provided" — pip_requirements/artifacts.spec.ts line 51
+    // Ported: "returns null if no updatedDeps were provided" — lib/modules/manager/pip_requirements/artifacts.spec.ts line 51
     #[tokio::test]
     async fn returns_null_if_no_updated_deps() {
         let dir = tempdir().unwrap();
@@ -232,7 +232,7 @@ botocore==1.27.46 \\n\
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if no hashes" — pip_requirements/artifacts.spec.ts line 62
+    // Ported: "returns null if no hashes" — lib/modules/manager/pip_requirements/artifacts.spec.ts line 62
     #[tokio::test]
     async fn returns_null_if_no_hashes() {
         let dir = tempdir().unwrap();
@@ -256,7 +256,7 @@ botocore==1.27.46 \\n\
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if unchanged" — pip_requirements/artifacts.spec.ts line 74
+    // Ported: "returns null if unchanged" — lib/modules/manager/pip_requirements/artifacts.spec.ts line 74
     #[tokio::test]
     async fn returns_null_if_unchanged() {
         let dir = tempdir().unwrap();
@@ -299,7 +299,7 @@ botocore==1.27.46 \\n\
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns updated file" — pip_requirements/artifacts.spec.ts line 98
+    // Ported: "returns updated file" — lib/modules/manager/pip_requirements/artifacts.spec.ts line 98
     #[tokio::test]
     async fn returns_updated_file() {
         let dir = tempdir().unwrap();
@@ -354,7 +354,7 @@ botocore==1.27.46 \\n\
         );
     }
 
-    // Ported: "ignores falsy depNames" — pip_requirements/artifacts.spec.ts line 130
+    // Ported: "ignores falsy depNames" — lib/modules/manager/pip_requirements/artifacts.spec.ts line 130
     #[tokio::test]
     async fn ignores_falsy_dep_names() {
         let dir = tempdir().unwrap();
@@ -409,7 +409,7 @@ botocore==1.27.46 \\n\
         assert_eq!(results[0].file.as_ref().unwrap().path, "requirements.txt");
     }
 
-    // Ported: "catches and returns errors" — pip_requirements/artifacts.spec.ts line 162
+    // Ported: "catches and returns errors" — lib/modules/manager/pip_requirements/artifacts.spec.ts line 162
     #[tokio::test]
     async fn catches_and_returns_errors() {
         let dir = tempdir().unwrap();

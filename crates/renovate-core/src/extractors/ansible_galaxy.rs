@@ -327,7 +327,7 @@ collections:
     version: '1.5.4'
 ";
 
-    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
+    // Ported: "extracts multiple dependencies from requirements.yml" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn extracts_github_roles() {
         let deps = extract(SAMPLE);
@@ -342,7 +342,7 @@ collections:
         assert!(apache.skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
+    // Ported: "extracts multiple dependencies from requirements.yml" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn strips_git_suffix() {
         let deps = extract(SAMPLE);
@@ -356,7 +356,7 @@ collections:
         assert_eq!(mysql.current_value, "v4.0.0");
     }
 
-    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
+    // Ported: "extracts multiple dependencies from requirements.yml" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn galaxy_roles_skipped() {
         let deps = extract(SAMPLE);
@@ -367,7 +367,7 @@ collections:
         );
     }
 
-    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
+    // Ported: "extracts multiple dependencies from requirements.yml" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn no_version_skipped() {
         let deps = extract(SAMPLE);
@@ -378,7 +378,7 @@ collections:
         assert_eq!(no_ver.skip_reason, Some(AnsibleGalaxySkipReason::NoVersion));
     }
 
-    // Ported: "check collection style requirements file" — ansible-galaxy/extract.spec.ts line 66
+    // Ported: "check collection style requirements file" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 66
     #[test]
     fn collections_skipped_as_galaxy() {
         let deps = extract(SAMPLE);
@@ -391,13 +391,13 @@ collections:
         );
     }
 
-    // Ported: "returns null for empty" — ansible-galaxy/extract.spec.ts line 15
+    // Ported: "returns null for empty" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 15
     #[test]
     fn empty_content_returns_no_deps() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts dependencies from requirements.yml with a space at the end of line" — ansible-galaxy/extract.spec.ts line 31
+    // Ported: "extracts dependencies from requirements.yml with a space at the end of line" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 31
     #[test]
     fn collections_with_git_url_name_and_version() {
         let content = "collections:\n- name: https://github.com/lowlydba/lowlydba.sqlserver.git\n  type: git\n  version: 1.1.3\n";
@@ -406,7 +406,7 @@ collections:
         assert_eq!(deps[0].current_value, "1.1.3");
     }
 
-    // Ported: "extracts git@ dependencies" — ansible-galaxy/extract.spec.ts line 41
+    // Ported: "extracts git@ dependencies" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 41
     #[test]
     fn collections_with_source_field_and_git_at_url() {
         let content = "collections:\n- name: community.docker\n  source: git@github.com:ansible-collections/community.docker\n  type: git\n  version: 2.7.5\n";
@@ -420,7 +420,7 @@ collections:
         );
     }
 
-    // Ported: "check if a requirements file of other systems returns null" — ansible-galaxy/extract.spec.ts line 61
+    // Ported: "check if a requirements file of other systems returns null" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 61
     #[test]
     fn non_ansible_content_returns_empty() {
         let content = "dependencies:\n- name: nginx\n  version: 1.2.3\n  repository: https://charts.example.com\n";
@@ -428,7 +428,7 @@ collections:
         assert!(deps.is_empty());
     }
 
-    // Ported: "check if an empty file returns null" — ansible-galaxy/extract.spec.ts line 56
+    // Ported: "check if an empty file returns null" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 56
     #[test]
     fn blank_file_returns_no_deps() {
         assert!(extract("\n").is_empty());
@@ -448,7 +448,7 @@ roles:
     version: 2.9.0
 ";
 
-    // Ported: "check collection style requirements file in reverse order and missing empty line" — ansible-galaxy/extract.spec.ts line 73
+    // Ported: "check collection style requirements file in reverse order and missing empty line" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 73
     #[test]
     fn collections_before_roles_extracts_all_four() {
         let deps = extract(COLLECTIONS2);
@@ -459,7 +459,7 @@ roles:
         );
     }
 
-    // Ported: "extracts dependencies from a not beautified requirements file" — ansible-galaxy/extract.spec.ts line 25
+    // Ported: "extracts dependencies from a not beautified requirements file" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 25
     #[test]
     fn non_beautified_requirements_extracts_two_deps() {
         let content = "# from galaxy\n\
@@ -469,7 +469,7 @@ roles:
         assert_eq!(deps.len(), 2);
     }
 
-    // Ported: "extracts multiple dependencies from requirements.yml" — ansible-galaxy/extract.spec.ts line 19
+    // Ported: "extracts multiple dependencies from requirements.yml" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 19
     #[test]
     fn requirements01_extracts_thirteen_deps() {
         // Full requirements01.yml fixture (flat format, no roles:/collections: header).
@@ -557,7 +557,7 @@ roles:
         assert_eq!(test_entry_count, 1);
     }
 
-    // Ported: "check collection style requirements file" — ansible-galaxy/extract.spec.ts line 66
+    // Ported: "check collection style requirements file" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 66
     #[test]
     fn collections1_extracts_fourteen_deps_all_galaxy_hosted() {
         // collections1.yml has roles + collections sections with 14 total entries.
@@ -641,7 +641,7 @@ repository: "https://github.com/foo/bar"
 issues: "https://github.com/foo/bar/issues"
 "#;
 
-    // Ported: "check galaxy definition file" — ansible-galaxy/extract.spec.ts line 79
+    // Ported: "check galaxy definition file" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 79
     #[test]
     fn galaxy_definition_file_extracts_ten_deps() {
         let deps = extract_galaxy_metadata(GALAXY_YML);
@@ -655,25 +655,25 @@ issues: "https://github.com/foo/bar/issues"
         assert_eq!(windows.current_value, ">=1.0.0,<2.0.0");
     }
 
-    // Ported: "negative start number returns -1" — ansible-galaxy/extract.spec.ts line 87
+    // Ported: "negative start number returns -1" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 87
     #[test]
     fn get_slice_end_number_negative_start() {
         assert_eq!(get_slice_end_number(-1, 10, &[5]), -1);
     }
 
-    // Ported: "a start number bigger then number of lines return -1" — ansible-galaxy/extract.spec.ts line 92
+    // Ported: "a start number bigger then number of lines return -1" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 92
     #[test]
     fn get_slice_end_number_start_too_big() {
         assert_eq!(get_slice_end_number(20, 10, &[5]), -1);
     }
 
-    // Ported: "choose first block" — ansible-galaxy/extract.spec.ts line 97
+    // Ported: "choose first block" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 97
     #[test]
     fn get_slice_end_number_first_block() {
         assert_eq!(get_slice_end_number(0, 10, &[5]), 5);
     }
 
-    // Ported: "choose second block" — ansible-galaxy/extract.spec.ts line 102
+    // Ported: "choose second block" — lib/modules/manager/ansible-galaxy/extract.spec.ts line 102
     #[test]
     fn get_slice_end_number_second_block() {
         assert_eq!(get_slice_end_number(5, 10, &[5]), 10);

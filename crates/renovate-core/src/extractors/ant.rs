@@ -802,7 +802,7 @@ fn resolve_property_placeholders(
 mod tests {
     use super::*;
 
-    // Ported: "parses key=value pairs" — ant/properties.spec.ts line 6
+    // Ported: "parses key=value pairs" — lib/modules/manager/ant/properties.spec.ts line 6
     #[test]
     fn properties_file_parses_key_value_pairs() {
         let props = parse_properties_file("key1=value1\nkey2=value2\n");
@@ -815,21 +815,21 @@ mod tests {
         );
     }
 
-    // Ported: "skips comments and blank lines" — ant/properties.spec.ts line 28
+    // Ported: "skips comments and blank lines" — lib/modules/manager/ant/properties.spec.ts line 28
     #[test]
     fn properties_file_skips_comments_and_blank_lines() {
         let props = parse_properties_file("# comment\n\nkey=value\n! another comment\n");
         assert_eq!(props, vec![("key".to_owned(), "value".to_owned())]);
     }
 
-    // Ported: "supports colon separator" — ant/properties.spec.ts line 39
+    // Ported: "supports colon separator" — lib/modules/manager/ant/properties.spec.ts line 39
     #[test]
     fn properties_file_supports_colon_separator() {
         let props = parse_properties_file("key:value\n");
         assert_eq!(props, vec![("key".to_owned(), "value".to_owned())]);
     }
 
-    // Ported: "skips malformed lines without separators" — ant/properties.spec.ts line 46
+    // Ported: "skips malformed lines without separators" — lib/modules/manager/ant/properties.spec.ts line 46
     #[test]
     fn properties_file_skips_malformed_lines_without_separators() {
         let props = parse_properties_file("key=value\nmalformed_line_no_separator\nother=val\n");
@@ -842,14 +842,14 @@ mod tests {
         );
     }
 
-    // Ported: "implements first-definition-wins" — ant/properties.spec.ts line 57
+    // Ported: "implements first-definition-wins" — lib/modules/manager/ant/properties.spec.ts line 57
     #[test]
     fn properties_file_implements_first_definition_wins() {
         let props = parse_properties_file("key=first\nkey=second\n");
         assert_eq!(props, vec![("key".to_owned(), "first".to_owned())]);
     }
 
-    // Ported: "respects pre-existing props (first-definition-wins across sources)" — ant/properties.spec.ts line 64
+    // Ported: "respects pre-existing props (first-definition-wins across sources)" — lib/modules/manager/ant/properties.spec.ts line 64
     #[test]
     fn properties_file_respects_pre_existing_props_across_sources() {
         let mut props = HashMap::from([("key".to_owned(), "existing".to_owned())]);
@@ -860,7 +860,7 @@ mod tests {
         assert_eq!(props.get("key").map(String::as_str), Some("existing"));
     }
 
-    // Ported: "extracts inline version dependencies from build.xml" — ant/extract.spec.ts line 13
+    // Ported: "extracts inline version dependencies from build.xml" — lib/modules/manager/ant/extract.spec.ts line 13
     #[test]
     fn extracts_inline_dependency() {
         let content = r#"
@@ -877,7 +877,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts dependency from 3-part coords attribute" — ant/extract.spec.ts line 764
+    // Ported: "extracts dependency from 3-part coords attribute" — lib/modules/manager/ant/extract.spec.ts line 764
     #[test]
     fn extracts_coords_form() {
         let content = r#"
@@ -892,7 +892,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.7.36");
     }
 
-    // Ported: "skips dependencies with unresolvable property references" — ant/extract.spec.ts line 292
+    // Ported: "skips dependencies with unresolvable property references" — lib/modules/manager/ant/extract.spec.ts line 292
     #[test]
     fn property_ref_skipped() {
         let content = r#"
@@ -906,7 +906,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
     }
 
-    // Ported: "resolves inline property references" — ant/extract.spec.ts line 171
+    // Ported: "resolves inline property references" — lib/modules/manager/ant/extract.spec.ts line 171
     #[test]
     fn resolves_inline_property_references() {
         let content = r#"
@@ -927,7 +927,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "resolves properties from external .properties files" — ant/extract.spec.ts line 197
+    // Ported: "resolves properties from external .properties files" — lib/modules/manager/ant/extract.spec.ts line 197
     #[test]
     fn extract_all_package_files_resolves_external_properties_file() {
         let build_xml = r#"
@@ -953,7 +953,7 @@ mod tests {
         );
     }
 
-    // Ported: "implements first-definition-wins for inline properties" — ant/extract.spec.ts line 232
+    // Ported: "implements first-definition-wins for inline properties" — lib/modules/manager/ant/extract.spec.ts line 232
     #[test]
     fn first_inline_property_definition_wins() {
         let content = r#"
@@ -973,7 +973,7 @@ mod tests {
         );
     }
 
-    // Ported: "inline properties take precedence over file properties" — ant/extract.spec.ts line 258
+    // Ported: "inline properties take precedence over file properties" — lib/modules/manager/ant/extract.spec.ts line 258
     #[test]
     fn extract_all_package_files_inline_properties_override_file_properties() {
         let build_xml = r#"
@@ -998,7 +998,7 @@ mod tests {
         );
     }
 
-    // Ported: "detects circular property references" — ant/extract.spec.ts line 316
+    // Ported: "detects circular property references" — lib/modules/manager/ant/extract.spec.ts line 316
     #[test]
     fn circular_property_reference_is_skipped() {
         let content = r#"
@@ -1017,7 +1017,7 @@ mod tests {
         );
     }
 
-    // Ported: "resolves chained property references" — ant/extract.spec.ts line 342
+    // Ported: "resolves chained property references" — lib/modules/manager/ant/extract.spec.ts line 342
     #[test]
     fn resolves_chained_property_references() {
         let content = r#"
@@ -1039,7 +1039,7 @@ mod tests {
         );
     }
 
-    // Ported: "groups multiple dependencies sharing the same property" — ant/extract.spec.ts line 372
+    // Ported: "groups multiple dependencies sharing the same property" — lib/modules/manager/ant/extract.spec.ts line 372
     #[test]
     fn resolves_shared_property_for_multiple_dependencies() {
         let content = r#"
@@ -1059,7 +1059,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles properties file in subdirectory" — ant/extract.spec.ts line 404
+    // Ported: "handles properties file in subdirectory" — lib/modules/manager/ant/extract.spec.ts line 404
     #[test]
     fn extract_all_package_files_resolves_subdirectory_properties_file() {
         let build_xml = r#"
@@ -1089,7 +1089,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles unreadable properties file gracefully" — ant/extract.spec.ts line 438
+    // Ported: "handles unreadable properties file gracefully" — lib/modules/manager/ant/extract.spec.ts line 438
     #[test]
     fn extract_all_package_files_handles_unreadable_properties_file() {
         let build_xml = r#"
@@ -1109,7 +1109,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns deps with mixed inline and property versions" — ant/extract.spec.ts line 468
+    // Ported: "returns deps with mixed inline and property versions" — lib/modules/manager/ant/extract.spec.ts line 468
     #[test]
     fn returns_mixed_inline_and_property_versions() {
         let content = r#"
@@ -1133,7 +1133,7 @@ mod tests {
         assert!(deps[1].shared_variable_name.is_none());
     }
 
-    // Ported: "ignores dependency without version during property resolution" — ant/extract.spec.ts line 499
+    // Ported: "ignores dependency without version during property resolution" — lib/modules/manager/ant/extract.spec.ts line 499
     #[test]
     fn ignores_dependency_without_version_during_property_resolution() {
         let content = r#"
@@ -1154,7 +1154,7 @@ mod tests {
         );
     }
 
-    // Ported: "skips partial placeholder in version string" — ant/extract.spec.ts line 526
+    // Ported: "skips partial placeholder in version string" — lib/modules/manager/ant/extract.spec.ts line 526
     #[test]
     fn partial_placeholder_version_is_skipped() {
         let content = r#"
@@ -1170,7 +1170,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
     }
 
-    // Ported: "defaults depType to compile when no scope is set" — ant/extract.spec.ts line 72
+    // Ported: "defaults depType to compile when no scope is set" — lib/modules/manager/ant/extract.spec.ts line 72
     #[test]
     fn defaults_dep_type_to_compile_without_scope() {
         let content = r#"
@@ -1185,7 +1185,7 @@ mod tests {
         assert_eq!(deps[0].dep_type, "compile");
     }
 
-    // Ported: "extracts multiple dependencies" — ant/extract.spec.ts line 37
+    // Ported: "extracts multiple dependencies" — lib/modules/manager/ant/extract.spec.ts line 37
     #[test]
     fn multiple_deps_extracted() {
         let content = r#"
@@ -1205,7 +1205,7 @@ mod tests {
         assert_eq!(deps[2].dep_type, "runtime");
     }
 
-    // Ported: "collects registry URLs from remoteRepository elements" — ant/extract.spec.ts line 953
+    // Ported: "collects registry URLs from remoteRepository elements" — lib/modules/manager/ant/extract.spec.ts line 953
     #[test]
     fn remote_repository_collected() {
         let content = r#"
@@ -1220,7 +1220,7 @@ mod tests {
         assert_eq!(deps[0].registry_urls, vec!["https://repo.example.com/"]);
     }
 
-    // Ported: "passes registry URLs to coords-style dependencies" — ant/extract.spec.ts line 983
+    // Ported: "passes registry URLs to coords-style dependencies" — lib/modules/manager/ant/extract.spec.ts line 983
     #[test]
     fn remote_repository_applies_to_coords_dependency() {
         let content = r#"
@@ -1239,7 +1239,7 @@ mod tests {
         );
     }
 
-    // Ported: "collects registry URLs from settingsFile attribute" — ant/extract.spec.ts line 1013
+    // Ported: "collects registry URLs from settingsFile attribute" — lib/modules/manager/ant/extract.spec.ts line 1013
     #[test]
     fn extract_all_package_files_collects_settings_file_registries() {
         let build_xml = r#"
@@ -1268,7 +1268,7 @@ mod tests {
         );
     }
 
-    // Ported: "merges registries from settingsFile and remoteRepository" — ant/extract.spec.ts line 1051
+    // Ported: "merges registries from settingsFile and remoteRepository" — lib/modules/manager/ant/extract.spec.ts line 1051
     #[test]
     fn extract_all_package_files_merges_settings_and_remote_repository_registries() {
         let build_xml = r#"
@@ -1300,7 +1300,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles absolute settingsFile path" — ant/extract.spec.ts line 1093
+    // Ported: "handles absolute settingsFile path" — lib/modules/manager/ant/extract.spec.ts line 1093
     #[test]
     fn extract_all_package_files_resolves_absolute_settings_file() {
         let build_xml = r#"
@@ -1328,7 +1328,7 @@ mod tests {
         );
     }
 
-    // Ported: "logs debug when settingsFile cannot be read" — ant/extract.spec.ts line 1131
+    // Ported: "logs debug when settingsFile cannot be read" — lib/modules/manager/ant/extract.spec.ts line 1131
     #[test]
     fn extract_all_package_files_ignores_missing_settings_file() {
         let build_xml = r#"
@@ -1344,7 +1344,7 @@ mod tests {
         assert!(package_files[0].deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "does not pass registries to dependencies outside the block" — ant/extract.spec.ts line 1159
+    // Ported: "does not pass registries to dependencies outside the block" — lib/modules/manager/ant/extract.spec.ts line 1159
     #[test]
     fn remote_repository_registry_is_scoped_to_dependency_block() {
         let content = r#"
@@ -1366,19 +1366,19 @@ mod tests {
         assert!(deps[1].registry_urls.is_empty());
     }
 
-    // Ported: "returns null for invalid XML" — ant/extract.spec.ts line 94
+    // Ported: "returns null for invalid XML" — lib/modules/manager/ant/extract.spec.ts line 94
     #[test]
     fn invalid_xml_returns_empty() {
         assert!(extract("<<< not xml >>>").is_empty());
     }
 
-    // Ported: "handles unparseable XML returned by readLocalFile" — ant/extract.spec.ts line 553
+    // Ported: "handles unparseable XML returned by readLocalFile" — lib/modules/manager/ant/extract.spec.ts line 553
     #[test]
     fn unparseable_xml_returns_empty() {
         assert!(extract("<<< not xml >>>").is_empty());
     }
 
-    // Ported: "handles absolute path in property file reference" — ant/extract.spec.ts line 561
+    // Ported: "handles absolute path in property file reference" — lib/modules/manager/ant/extract.spec.ts line 561
     #[test]
     fn extract_all_package_files_resolves_absolute_properties_file() {
         let build_xml = r#"
@@ -1404,7 +1404,7 @@ mod tests {
         assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "skips duplicate property file references" — ant/extract.spec.ts line 595
+    // Ported: "skips duplicate property file references" — lib/modules/manager/ant/extract.spec.ts line 595
     #[test]
     fn extract_all_package_files_deduplicates_properties_file_refs() {
         let build_xml = r#"
@@ -1426,7 +1426,7 @@ mod tests {
         assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "follows import file references" — ant/extract.spec.ts line 632
+    // Ported: "follows import file references" — lib/modules/manager/ant/extract.spec.ts line 632
     #[test]
     fn extract_all_package_files_follows_import_file_refs() {
         let build_xml = r#"
@@ -1447,7 +1447,7 @@ mod tests {
         assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "skips missing import files" — ant/extract.spec.ts line 666
+    // Ported: "skips missing import files" — lib/modules/manager/ant/extract.spec.ts line 666
     #[test]
     fn extract_all_package_files_skips_missing_import_files() {
         let build_xml = r#"
@@ -1465,7 +1465,7 @@ mod tests {
         assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "does not loop on self-importing files" — ant/extract.spec.ts line 696
+    // Ported: "does not loop on self-importing files" — lib/modules/manager/ant/extract.spec.ts line 696
     #[test]
     fn extract_all_package_files_does_not_loop_on_self_imports() {
         let build_xml = r#"
@@ -1483,7 +1483,7 @@ mod tests {
         assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "shares properties across imported files" — ant/extract.spec.ts line 726
+    // Ported: "shares properties across imported files" — lib/modules/manager/ant/extract.spec.ts line 726
     #[test]
     fn extract_all_package_files_shares_properties_with_imported_files() {
         let build_xml = r#"
@@ -1509,14 +1509,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for build.xml with no dependencies" — ant/extract.spec.ts line 98
+    // Ported: "returns null for build.xml with no dependencies" — lib/modules/manager/ant/extract.spec.ts line 98
     #[test]
     fn project_without_artifact_dependencies_returns_empty() {
         let content = r#"<project><target name="build" /></project>"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "ignores dependency nodes without version" — ant/extract.spec.ts line 108
+    // Ported: "ignores dependency nodes without version" — lib/modules/manager/ant/extract.spec.ts line 108
     //
     // The TS extractor returns null when no actionable deps are present.
     // Rust returns an empty Vec for the same input — there is no dep
@@ -1534,7 +1534,7 @@ mod tests {
         assert_eq!(actionable, 0);
     }
 
-    // Ported: "extracts dependencies with single-quoted attributes" — ant/extract.spec.ts line 123
+    // Ported: "extracts dependencies with single-quoted attributes" — lib/modules/manager/ant/extract.spec.ts line 123
     #[test]
     fn single_quoted_attributes_extracted() {
         let content = "<project><artifact:dependencies><dependency groupId='junit' artifactId='junit' version='4.13.2' /></artifact:dependencies></project>";
@@ -1544,14 +1544,14 @@ mod tests {
         assert_eq!(deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "returns null for unreadable build.xml" — ant/extract.spec.ts line 139
+    // Ported: "returns null for unreadable build.xml" — lib/modules/manager/ant/extract.spec.ts line 139
     #[test]
     fn extract_all_package_files_ignores_unreadable_build_xml() {
         let files = [("build.xml", None)];
         assert!(extract_all_package_files(&files).is_empty());
     }
 
-    // Ported: "does not revisit the same file" — ant/extract.spec.ts line 147
+    // Ported: "does not revisit the same file" — lib/modules/manager/ant/extract.spec.ts line 147
     #[test]
     fn extract_all_package_files_deduplicates_paths() {
         let content = r#"
@@ -1569,7 +1569,7 @@ mod tests {
         assert_eq!(package_files[0].deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "extracts scope from 4-part coords attribute" — ant/extract.spec.ts line 795
+    // Ported: "extracts scope from 4-part coords attribute" — lib/modules/manager/ant/extract.spec.ts line 795
     #[test]
     fn four_part_coords_with_scope_at_end() {
         let content = r#"
@@ -1585,7 +1585,7 @@ mod tests {
         assert_eq!(deps[0].dep_type, "test");
     }
 
-    // Ported: "resolves property references in coords version" — ant/extract.spec.ts line 863
+    // Ported: "resolves property references in coords version" — lib/modules/manager/ant/extract.spec.ts line 863
     #[test]
     fn resolves_property_references_in_coords_version() {
         let content = r#"
@@ -1606,7 +1606,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "ignores coords with fewer than 3 parts" — ant/extract.spec.ts line 825
+    // Ported: "ignores coords with fewer than 3 parts" — lib/modules/manager/ant/extract.spec.ts line 825
     #[test]
     fn coords_with_fewer_than_3_parts_skipped() {
         let content = r#"
@@ -1618,7 +1618,7 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "ignores coords with empty groupId" — ant/extract.spec.ts line 844
+    // Ported: "ignores coords with empty groupId" — lib/modules/manager/ant/extract.spec.ts line 844
     #[test]
     fn coords_with_empty_groupid_skipped() {
         let content = r#"
@@ -1630,7 +1630,7 @@ mod tests {
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "marks coords dependency with unresolvable property" — ant/extract.spec.ts line 894
+    // Ported: "marks coords dependency with unresolvable property" — lib/modules/manager/ant/extract.spec.ts line 894
     #[test]
     fn coords_with_unresolvable_property_is_skipped() {
         let content = r#"
@@ -1645,7 +1645,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(AntSkipReason::PropertyRef));
     }
 
-    // Ported: "treats last part as version when it is not a known scope" — ant/extract.spec.ts line 923
+    // Ported: "treats last part as version when it is not a known scope" — lib/modules/manager/ant/extract.spec.ts line 923
     #[test]
     fn four_part_coords_last_segment_is_version_when_not_a_scope() {
         // groupId:artifactId:type:version — `jar` is not a Maven scope, so
@@ -1664,7 +1664,7 @@ mod tests {
         assert_eq!(deps[0].dep_type, "compile");
     }
 
-    // Ported: "handles chain referencing undefined property" — ant/extract.spec.ts line 1363
+    // Ported: "handles chain referencing undefined property" — lib/modules/manager/ant/extract.spec.ts line 1363
     #[test]
     fn chain_referencing_undefined_property_is_skipped() {
         let content = r#"
@@ -1701,7 +1701,7 @@ mod tests {
         )
     }
 
-    // Ported: "updates inline XML version attribute" — ant/update.spec.ts line 4
+    // Ported: "updates inline XML version attribute" — lib/modules/manager/ant/update.spec.ts line 4
     #[test]
     fn update_inline_xml_version_attribute() {
         let file_content = r#"<dependency groupId="junit" artifactId="junit" version="4.13.1" />"#;
@@ -1719,7 +1719,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates single-quoted XML version attribute" — ant/update.spec.ts line 23
+    // Ported: "updates single-quoted XML version attribute" — lib/modules/manager/ant/update.spec.ts line 23
     #[test]
     fn update_single_quoted_xml_version_attribute() {
         let file_content = "<dependency groupId='junit' artifactId='junit' version='4.13.1' />";
@@ -1737,7 +1737,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates .properties file value" — ant/update.spec.ts line 42
+    // Ported: "updates .properties file value" — lib/modules/manager/ant/update.spec.ts line 42
     #[test]
     fn update_properties_file_value() {
         let file_content = "junit.version=4.13.1\nother.key=value\n";
@@ -1755,7 +1755,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates .properties value at end of file without trailing newline" — ant/update.spec.ts line 58
+    // Ported: "updates .properties value at end of file without trailing newline" — lib/modules/manager/ant/update.spec.ts line 58
     #[test]
     fn update_properties_value_at_eof_without_trailing_newline() {
         let file_content = "junit.version=4.13.1";
@@ -1770,7 +1770,7 @@ mod tests {
         assert_eq!(result.as_deref(), Some("junit.version=4.13.2"));
     }
 
-    // Ported: "returns fileContent unchanged when already updated" — ant/update.spec.ts line 74
+    // Ported: "returns fileContent unchanged when already updated" — lib/modules/manager/ant/update.spec.ts line 74
     #[test]
     fn update_returns_file_content_unchanged_when_already_updated() {
         let file_content = r#"<dependency groupId="junit" artifactId="junit" version="4.13.2" />"#;
@@ -1785,7 +1785,7 @@ mod tests {
         assert_eq!(result.as_deref(), Some(file_content));
     }
 
-    // Ported: "updates when sharedVariableName is set even if currentValue differs" — ant/update.spec.ts line 91
+    // Ported: "updates when sharedVariableName is set even if currentValue differs" — lib/modules/manager/ant/update.spec.ts line 91
     #[test]
     fn update_shared_variable_even_when_current_value_differs() {
         let file_content = r#"<property name="junit.version" value="4.13.1"/>"#;
@@ -1807,14 +1807,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when fileReplacePosition is undefined" — ant/update.spec.ts line 108
+    // Ported: "returns null when fileReplacePosition is undefined" — lib/modules/manager/ant/update.spec.ts line 108
     #[test]
     fn update_returns_none_when_file_replace_position_is_missing() {
         let result = update(r#"<dependency version="1.0"/>"#, "1.0", "2.0", None);
         assert!(result.is_none());
     }
 
-    // Ported: "updates version within coords attribute" — ant/update.spec.ts line 122
+    // Ported: "updates version within coords attribute" — lib/modules/manager/ant/update.spec.ts line 122
     #[test]
     fn update_version_within_coords_attribute() {
         let file_content = r#"<project><dependency coords="junit:junit:4.13.2" /></project>"#;
@@ -1833,7 +1833,7 @@ mod tests {
         );
     }
 
-    // Ported: "updates version within 4-part coords attribute" — ant/update.spec.ts line 140
+    // Ported: "updates version within 4-part coords attribute" — lib/modules/manager/ant/update.spec.ts line 140
     #[test]
     fn update_version_within_four_part_coords_attribute() {
         let file_content = r#"<project><dependency coords="junit:junit:4.13.2:test" /></project>"#;
@@ -1852,7 +1852,7 @@ mod tests {
         );
     }
 
-    // Ported: "skips property file references with unresolved placeholders in path" — ant/extract.spec.ts line 1195
+    // Ported: "skips property file references with unresolved placeholders in path" — lib/modules/manager/ant/extract.spec.ts line 1195
     #[test]
     fn extract_all_package_files_skips_property_file_with_placeholder_in_path() {
         let build_xml = r#"<project>
@@ -1868,7 +1868,7 @@ mod tests {
         assert_eq!(result[0].deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "skips property file references that resolve outside the repository" — ant/extract.spec.ts line 1227
+    // Ported: "skips property file references that resolve outside the repository" — lib/modules/manager/ant/extract.spec.ts line 1227
     #[test]
     fn extract_all_package_files_skips_property_file_outside_repository() {
         let build_xml = r#"<project>
@@ -1883,7 +1883,7 @@ mod tests {
         assert_eq!(result[0].deps[0].dep_name, "junit:junit");
     }
 
-    // Ported: "skips import file references that resolve outside the repository" — ant/extract.spec.ts line 1262
+    // Ported: "skips import file references that resolve outside the repository" — lib/modules/manager/ant/extract.spec.ts line 1262
     #[test]
     fn extract_all_package_files_skips_import_file_outside_repository() {
         let build_xml = r#"<project>
@@ -1898,7 +1898,7 @@ mod tests {
         assert_eq!(result[0].deps[0].dep_name, "junit:junit");
     }
 
-    // Ported: "skips settingsFile references that resolve outside the repository" — ant/extract.spec.ts line 1297
+    // Ported: "skips settingsFile references that resolve outside the repository" — lib/modules/manager/ant/extract.spec.ts line 1297
     #[test]
     fn extract_all_package_files_skips_settings_file_outside_repository() {
         let build_xml = r#"<project>
@@ -1912,7 +1912,7 @@ mod tests {
         assert_eq!(result[0].deps[0].dep_name, "junit:junit");
     }
 
-    // Ported: "skips import file references with unresolved placeholders in path" — ant/extract.spec.ts line 1331
+    // Ported: "skips import file references with unresolved placeholders in path" — lib/modules/manager/ant/extract.spec.ts line 1331
     #[test]
     fn extract_all_package_files_skips_import_file_with_placeholder_in_path() {
         let build_xml = r#"<project>
@@ -1927,7 +1927,7 @@ mod tests {
         assert_eq!(result[0].deps[0].dep_name, "junit:junit");
     }
 
-    // Ported: "returns null when value at position does not match" — ant/update.spec.ts line 158
+    // Ported: "returns null when value at position does not match" — lib/modules/manager/ant/update.spec.ts line 158
     #[test]
     fn update_returns_none_when_value_at_position_does_not_match() {
         let file_content = r#"<dependency groupId="junit" artifactId="junit" version="9.9.9" />"#;

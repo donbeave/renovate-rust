@@ -39,7 +39,7 @@ pub fn extract_package_file(content: &str) -> Option<Vec<BunVersionDep>> {
 mod tests {
     use super::*;
 
-    // Ported: "returns a result" — bun-version/index.spec.ts line 5
+    // Ported: "returns a result" — lib/modules/manager/bun-version/index.spec.ts line 5
     #[test]
     fn returns_a_result() {
         let deps = extract_package_file("1.1.15\n").unwrap();
@@ -52,25 +52,25 @@ mod tests {
         assert!(dep.skip_reason.is_none());
     }
 
-    // Ported: "handles empty files" — bun-version/index.spec.ts line 17
+    // Ported: "handles empty files" — lib/modules/manager/bun-version/index.spec.ts line 17
     #[test]
     fn handles_empty_files() {
         assert!(extract_package_file("").is_none());
     }
 
-    // Ported: "handles no newline at the end" — bun-version/index.spec.ts line 22
+    // Ported: "handles no newline at the end" — lib/modules/manager/bun-version/index.spec.ts line 22
     #[test]
     fn handles_no_newline_at_end() {
         assert!(extract_package_file("1.1.15").is_some());
     }
 
-    // Ported: "handles multiple lines" — bun-version/index.spec.ts line 27
+    // Ported: "handles multiple lines" — lib/modules/manager/bun-version/index.spec.ts line 27
     #[test]
     fn handles_multiple_lines() {
         assert!(extract_package_file("1.1.15\n1.1.16\n").is_none());
     }
 
-    // Ported: "handles invalid versions" — bun-version/index.spec.ts line 32
+    // Ported: "handles invalid versions" — lib/modules/manager/bun-version/index.spec.ts line 32
     #[test]
     fn handles_invalid_versions() {
         let deps = extract_package_file("notaversion\n").unwrap();
@@ -78,7 +78,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some("invalid-version"));
     }
 
-    // Ported: "handles ranges" — bun-version/index.spec.ts line 45
+    // Ported: "handles ranges" — lib/modules/manager/bun-version/index.spec.ts line 45
     #[test]
     fn handles_ranges() {
         let deps = extract_package_file("1.0\n").unwrap();

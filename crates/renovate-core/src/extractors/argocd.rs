@@ -388,14 +388,14 @@ fn flush_source(
 mod tests {
     use super::*;
 
-    // Ported: "return null for kubernetes manifest" — argocd/extract.spec.ts line 21
+    // Ported: "return null for kubernetes manifest" — lib/modules/manager/argocd/extract.spec.ts line 21
     #[test]
     fn skips_non_argocd_file() {
         let content = "apiVersion: v1\nkind: ConfigMap\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "return null if deps array would be empty" — argocd/extract.spec.ts line 26
+    // Ported: "return null if deps array would be empty" — lib/modules/manager/argocd/extract.spec.ts line 26
     #[test]
     fn skips_missing_revision() {
         let content = r#"
@@ -414,14 +414,14 @@ spec:
         );
     }
 
-    // Ported: "returns null for empty" — argocd/extract.spec.ts line 11
+    // Ported: "returns null for empty" — lib/modules/manager/argocd/extract.spec.ts line 11
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("nothing here").is_empty());
         assert!(extract("").is_empty());
     }
 
-    // Ported: "return result for double quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 34
+    // Ported: "return result for double quoted argoproj.io apiVersion reference" — lib/modules/manager/argocd/extract.spec.ts line 34
     #[test]
     fn double_quoted_apiversion_accepted() {
         let content = r#"
@@ -440,7 +440,7 @@ spec:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "return result for single quoted argoproj.io apiVersion reference" — argocd/extract.spec.ts line 61
+    // Ported: "return result for single quoted argoproj.io apiVersion reference" — lib/modules/manager/argocd/extract.spec.ts line 61
     #[test]
     fn single_quoted_apiversion_accepted() {
         let content = "apiVersion: 'argoproj.io/v1alpha1'\nkind: Application\nspec:\n  source:\n    chart: kube-state-metrics\n    repoURL: https://prometheus-community.github.io/helm-charts\n    targetRevision: 2.4.1\n";
@@ -451,7 +451,7 @@ spec:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "return null if deps array would be empty" — argocd/extract.spec.ts line 26
+    // Ported: "return null if deps array would be empty" — lib/modules/manager/argocd/extract.spec.ts line 26
     #[test]
     fn malformed_applications_return_empty() {
         let content = "---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  target:\n    namespace: testing\n---\napiVersion: argoproj.io/v1alpha1\nkind: Application\n---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  sources: []\n---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  source: null\n";
@@ -459,7 +459,7 @@ spec:
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for invalid" — argocd/extract.spec.ts line 15
+    // Ported: "returns null for invalid" — lib/modules/manager/argocd/extract.spec.ts line 15
     #[test]
     fn invalid_yaml_with_trailing_content_returns_empty() {
         let content = "---\napiVersion: argoproj.io/v1alpha1\nkind: Application\nspec:\n  source: null\n---\n123\n";
@@ -467,7 +467,7 @@ spec:
         assert!(deps.is_empty());
     }
 
-    // Ported: "full test" — argocd/extract.spec.ts line 88
+    // Ported: "full test" — lib/modules/manager/argocd/extract.spec.ts line 88
     #[test]
     fn full_test_helm_source() {
         let content = r#"
@@ -494,7 +494,7 @@ spec:
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "full test" — argocd/extract.spec.ts line 88
+    // Ported: "full test" — lib/modules/manager/argocd/extract.spec.ts line 88
     #[test]
     fn full_test_git_source_dep_name_is_full_url() {
         let content = r#"
@@ -517,7 +517,7 @@ spec:
         );
     }
 
-    // Ported: "full test" — argocd/extract.spec.ts line 88
+    // Ported: "full test" — lib/modules/manager/argocd/extract.spec.ts line 88
     #[test]
     fn full_test_docker_source_no_protocol() {
         let content = r#"
@@ -539,7 +539,7 @@ spec:
         assert!(matches!(deps[0].source, ArgocdSource::Docker { .. }));
     }
 
-    // Ported: "full test" — argocd/extract.spec.ts line 88
+    // Ported: "full test" — lib/modules/manager/argocd/extract.spec.ts line 88
     #[test]
     fn full_test_oci_helm_chart() {
         let content = r#"
@@ -558,7 +558,7 @@ spec:
         assert!(matches!(deps[0].source, ArgocdSource::Docker { .. }));
     }
 
-    // Ported: "full test" — argocd/extract.spec.ts line 88
+    // Ported: "full test" — lib/modules/manager/argocd/extract.spec.ts line 88
     #[test]
     fn full_test_kustomize_images() {
         let content = r#"
@@ -586,7 +586,7 @@ spec:
         assert_eq!(img1.image, "othercontainer.registry.io/other/container");
     }
 
-    // Ported: "supports applicationsets" — argocd/extract.spec.ts line 203
+    // Ported: "supports applicationsets" — lib/modules/manager/argocd/extract.spec.ts line 203
     #[test]
     fn supports_applicationsets() {
         // ApplicationSet fixture: spec.template.spec.source (deeper nesting).

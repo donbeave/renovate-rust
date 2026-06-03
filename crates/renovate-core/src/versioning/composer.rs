@@ -596,21 +596,21 @@ mod tests {
 
     // ── getMajor ─────────────────────────────────────────────────────────────
 
-    // Ported: "getMajor("$version") === $expected" — composer/index.spec.ts line 4
+    // Ported: "getMajor("$version") === $expected" — lib/modules/versioning/composer/index.spec.ts line 4
     #[test]
     fn get_major_cases() {
         assert_eq!(get_major("1.2.0"), Some(1));
         assert_eq!(get_major(""), None);
     }
 
-    // Ported: "getMinor("$version") === $expected" — composer/index.spec.ts line 12
+    // Ported: "getMinor("$version") === $expected" — lib/modules/versioning/composer/index.spec.ts line 12
     #[test]
     fn get_minor_cases() {
         assert_eq!(get_minor("1.2.0"), Some(2));
         assert_eq!(get_minor(""), None);
     }
 
-    // Ported: "getPatch("$version") === $expected" — composer/index.spec.ts line 20
+    // Ported: "getPatch("$version") === $expected" — lib/modules/versioning/composer/index.spec.ts line 20
     #[test]
     fn get_patch_cases() {
         assert_eq!(get_patch("1.2.0"), Some(0));
@@ -619,7 +619,7 @@ mod tests {
 
     // ── equals ───────────────────────────────────────────────────────────────
 
-    // Ported: "equals("$a", "$b") === $expected" — composer/index.spec.ts line 28
+    // Ported: "equals("$a", "$b") === $expected" — lib/modules/versioning/composer/index.spec.ts line 28
     #[test]
     fn equals_cases() {
         assert!(equals("1.2.0", "v1.2"));
@@ -632,7 +632,7 @@ mod tests {
 
     // ── isGreaterThan ────────────────────────────────────────────────────────
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — composer/index.spec.ts line 40
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/composer/index.spec.ts line 40
     #[test]
     fn is_greater_than_cases() {
         assert!(!is_greater_than("1.2.0", "v1.2"));
@@ -648,7 +648,7 @@ mod tests {
 
     // ── isSingleVersion ──────────────────────────────────────────────────────
 
-    // Ported: "isSingleVersion("$version") === $expected" — composer/index.spec.ts line 55
+    // Ported: "isSingleVersion("$version") === $expected" — lib/modules/versioning/composer/index.spec.ts line 55
     #[test]
     fn is_single_version_cases() {
         assert!(is_single_version("v1.2"));
@@ -656,7 +656,7 @@ mod tests {
 
     // ── isStable ─────────────────────────────────────────────────────────────
 
-    // Ported: "isStable("$version") === $expected" — composer/index.spec.ts line 63
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/composer/index.spec.ts line 63
     #[test]
     fn is_stable_cases() {
         assert!(is_stable("v1.2"));
@@ -668,7 +668,7 @@ mod tests {
 
     // ── isValid ──────────────────────────────────────────────────────────────
 
-    // Ported: "isValid("$version") === $expected" — composer/index.spec.ts line 75
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/composer/index.spec.ts line 75
     #[test]
     fn is_valid_cases() {
         assert!(is_valid("1.2.3"));
@@ -695,7 +695,7 @@ mod tests {
 
     // ── isLessThanRange ──────────────────────────────────────────────────────
 
-    // Ported: "isLessThanRange("$a", "$b") === $expected" — composer/index.spec.ts line 108
+    // Ported: "isLessThanRange("$a", "$b") === $expected" — lib/modules/versioning/composer/index.spec.ts line 108
     #[test]
     fn is_less_than_range_cases() {
         assert!(is_less_than_range("0.3.1", "~0.4"));
@@ -704,7 +704,7 @@ mod tests {
 
     // ── getSatisfyingVersion ─────────────────────────────────────────────────
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — composer/index.spec.ts line 116
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/composer/index.spec.ts line 116
     #[test]
     fn get_satisfying_version_cases() {
         assert_eq!(
@@ -748,7 +748,7 @@ mod tests {
 
     // ── minSatisfyingVersion ─────────────────────────────────────────────────
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — composer/index.spec.ts line 131
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/composer/index.spec.ts line 131
     #[test]
     fn min_satisfying_version_cases() {
         assert_eq!(
@@ -767,7 +767,7 @@ mod tests {
 
     // ── sortVersions ────────────────────────────────────────────────────────
 
-    // Ported: "$versions -> sortVersions -> $expected" — composer/index.spec.ts line 256
+    // Ported: "$versions -> sortVersions -> $expected" — lib/modules/versioning/composer/index.spec.ts line 256
     #[test]
     fn sort_versions_cases() {
         let mut v1 = vec![
@@ -806,21 +806,21 @@ mod tests {
 
     // ── isCompatible ────────────────────────────────────────────────────────
 
-    // Ported: "isCompatible("$version") === $expected" — composer/index.spec.ts line 266
+    // Ported: "isCompatible("$version") === $expected" — lib/modules/versioning/composer/index.spec.ts line 266
     #[test]
     fn is_compatible_cases() {
         assert!(is_version("1.2.0"));
         assert!(is_version("1.2.0-p1"));
     }
 
-    // Ported: "matches("$a", "$b") === $expected" — composer/index.spec.ts line 147
+    // Ported: "matches("$a", "$b") === $expected" — lib/modules/versioning/composer/index.spec.ts line 147
     #[test]
     fn matches_cases() {
         assert!(!matches("0.3.1", "~0.4"));
         assert!(matches("0.5.1", "~0.4"));
     }
 
-    // Ported: "subset("$a", "$b") === $expected" — composer/index.spec.ts line 155
+    // Ported: "subset("$a", "$b") === $expected" — lib/modules/versioning/composer/index.spec.ts line 155
     #[test]
     fn subset_cases() {
         assert_eq!(subset("1.0.0", "1.0.0"), Some(true));
@@ -842,7 +842,7 @@ mod tests {
         assert_eq!(subset("^7.0.0", "less than 8"), Some(false));
     }
 
-    // Ported: "intersects("$a", "$b") === $expected" — composer/index.spec.ts line 177
+    // Ported: "intersects("$a", "$b") === $expected" — lib/modules/versioning/composer/index.spec.ts line 177
     #[test]
     fn intersects_cases() {
         assert!(intersects("1.0.0", "1.0.0"));
@@ -864,7 +864,7 @@ mod tests {
         assert!(!intersects("^7.0.0", "less than 8"));
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — composer/index.spec.ts line 199
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/composer/index.spec.ts line 199
     #[test]
     fn get_new_value_cases() {
         let cases: &[(&str, &str, Option<&str>, &str, &str)] = &[
@@ -963,7 +963,7 @@ mod tests {
         }
     }
 
-    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — composer/index.spec.ts line 275
+    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — lib/modules/versioning/composer/index.spec.ts line 275
     #[test]
     fn is_breaking_cases() {
         assert!(is_breaking("0.0.1", "0.0.2"));

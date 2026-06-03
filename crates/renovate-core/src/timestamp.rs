@@ -147,7 +147,7 @@ mod tests {
         as_timestamp(&v)
     }
 
-    // Ported: "$input -> $expected" — util/timestamp.spec.ts line 5
+    // Ported: "$input -> $expected" — lib/util/timestamp.spec.ts line 5
     #[test]
     fn timestamp_valid_iso() {
         assert_eq!(

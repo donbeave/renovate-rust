@@ -1663,19 +1663,19 @@ mod tests {
         }
     }
 
-    // Ported: "returns null for empty string" — github-actions/parse.spec.ts line 11
+    // Ported: "returns null for empty string" — lib/modules/manager/github-actions/parse.spec.ts line 11
     #[test]
     fn parse_action_reference_returns_none_for_empty_string() {
         assert!(parse_action_reference("").is_none());
     }
 
-    // Ported: "returns null for empty docker reference" — github-actions/parse.spec.ts line 16
+    // Ported: "returns null for empty docker reference" — lib/modules/manager/github-actions/parse.spec.ts line 16
     #[test]
     fn parse_action_reference_returns_none_for_empty_docker_reference() {
         assert!(parse_action_reference("docker://").is_none());
     }
 
-    // Ported: "parses docker image with digest" — github-actions/parse.spec.ts line 20
+    // Ported: "parses docker image with digest" — lib/modules/manager/github-actions/parse.spec.ts line 20
     #[test]
     fn parse_action_reference_parses_docker_image_with_digest() {
         assert_eq!(
@@ -1689,7 +1689,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses docker image with tag" — github-actions/parse.spec.ts line 29
+    // Ported: "parses docker image with tag" — lib/modules/manager/github-actions/parse.spec.ts line 29
     #[test]
     fn parse_action_reference_parses_docker_image_with_tag() {
         assert_eq!(
@@ -1703,7 +1703,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses docker image with registry port and tag" — github-actions/parse.spec.ts line 38
+    // Ported: "parses docker image with registry port and tag" — lib/modules/manager/github-actions/parse.spec.ts line 38
     #[test]
     fn parse_action_reference_parses_docker_image_with_registry_port_and_tag() {
         assert_eq!(
@@ -1717,7 +1717,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses docker image without tag or digest" — github-actions/parse.spec.ts line 51
+    // Ported: "parses docker image without tag or digest" — lib/modules/manager/github-actions/parse.spec.ts line 51
     #[test]
     fn parse_action_reference_parses_docker_image_without_tag_or_digest() {
         assert_eq!(
@@ -1731,7 +1731,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses docker image with registry but no tag" — github-actions/parse.spec.ts line 59
+    // Ported: "parses docker image with registry but no tag" — lib/modules/manager/github-actions/parse.spec.ts line 59
     #[test]
     fn parse_action_reference_parses_docker_image_with_registry_but_no_tag() {
         assert_eq!(
@@ -1745,7 +1745,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses ./ local reference" — github-actions/parse.spec.ts line 69
+    // Ported: "parses ./ local reference" — lib/modules/manager/github-actions/parse.spec.ts line 69
     #[test]
     fn parse_action_reference_parses_dot_slash_local_reference() {
         assert_eq!(
@@ -1756,7 +1756,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses ../ local reference" — github-actions/parse.spec.ts line 76
+    // Ported: "parses ../ local reference" — lib/modules/manager/github-actions/parse.spec.ts line 76
     #[test]
     fn parse_action_reference_parses_dot_dot_slash_local_reference() {
         assert_eq!(
@@ -1767,14 +1767,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for invalid format" — github-actions/parse.spec.ts line 85
+    // Ported: "returns null for invalid format" — lib/modules/manager/github-actions/parse.spec.ts line 85
     #[test]
     fn parse_action_reference_returns_none_for_invalid_repository_format() {
         assert!(parse_action_reference("invalid").is_none());
         assert!(parse_action_reference("owner/repo").is_none());
     }
 
-    // Ported: "parses owner/repo@ref with default hostname" — github-actions/parse.spec.ts line 90
+    // Ported: "parses owner/repo@ref with default hostname" — lib/modules/manager/github-actions/parse.spec.ts line 90
     #[test]
     fn parse_action_reference_parses_owner_repo_ref_with_default_hostname() {
         assert_eq!(
@@ -1790,7 +1790,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses owner/repo/path@ref" — github-actions/parse.spec.ts line 102
+    // Ported: "parses owner/repo/path@ref" — lib/modules/manager/github-actions/parse.spec.ts line 102
     #[test]
     fn parse_action_reference_parses_owner_repo_path_ref() {
         assert_eq!(
@@ -1806,7 +1806,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses https://host/owner/repo@ref with explicit hostname" — github-actions/parse.spec.ts line 114
+    // Ported: "parses https://host/owner/repo@ref with explicit hostname" — lib/modules/manager/github-actions/parse.spec.ts line 114
     #[test]
     fn parse_action_reference_parses_https_owner_repo_ref_with_explicit_hostname() {
         assert_eq!(
@@ -1822,7 +1822,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses https://host/owner/repo/path@ref" — github-actions/parse.spec.ts line 128
+    // Ported: "parses https://host/owner/repo/path@ref" — lib/modules/manager/github-actions/parse.spec.ts line 128
     #[test]
     fn parse_action_reference_parses_https_owner_repo_path_ref() {
         assert_eq!(
@@ -1838,7 +1838,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns ratchetExclude for ratchet:exclude" — github-actions/parse.spec.ts line 147
+    // Ported: "returns ratchetExclude for ratchet:exclude" — lib/modules/manager/github-actions/parse.spec.ts line 147
     #[test]
     fn parse_comment_returns_ratchet_exclude_for_ratchet_exclude() {
         assert_eq!(
@@ -1851,7 +1851,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty object for no match" — github-actions/parse.spec.ts line 154
+    // Ported: "returns empty object for no match" — lib/modules/manager/github-actions/parse.spec.ts line 154
     #[test]
     fn parse_comment_returns_empty_object_for_no_match() {
         assert_eq!(parse_comment(""), GithubActionsCommentData::default());
@@ -1861,7 +1861,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses pinned version with tag= prefix" — github-actions/parse.spec.ts line 159
+    // Ported: "parses pinned version with tag= prefix" — lib/modules/manager/github-actions/parse.spec.ts line 159
     #[test]
     fn parse_comment_parses_pinned_version_with_tag_prefix() {
         assert_eq!(
@@ -1870,7 +1870,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses pinned version with pin prefix" — github-actions/parse.spec.ts line 168
+    // Ported: "parses pinned version with pin prefix" — lib/modules/manager/github-actions/parse.spec.ts line 168
     #[test]
     fn parse_comment_parses_pinned_version_with_pin_prefix() {
         assert_eq!(
@@ -1879,7 +1879,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses pinned version with renovate: prefix" — github-actions/parse.spec.ts line 177
+    // Ported: "parses pinned version with renovate: prefix" — lib/modules/manager/github-actions/parse.spec.ts line 177
     #[test]
     fn parse_comment_parses_pinned_version_with_renovate_prefix() {
         assert_eq!(
@@ -1894,7 +1894,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses pinned version with renovate:pin prefix" — github-actions/parse.spec.ts line 186
+    // Ported: "parses pinned version with renovate:pin prefix" — lib/modules/manager/github-actions/parse.spec.ts line 186
     #[test]
     fn parse_comment_parses_pinned_version_with_renovate_pin_prefix() {
         assert_eq!(
@@ -1909,7 +1909,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses bare version" — github-actions/parse.spec.ts line 195
+    // Ported: "parses bare version" — lib/modules/manager/github-actions/parse.spec.ts line 195
     #[test]
     fn parse_comment_parses_bare_version() {
         assert_eq!(
@@ -1918,7 +1918,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses version with @ prefix" — github-actions/parse.spec.ts line 204
+    // Ported: "parses version with @ prefix" — lib/modules/manager/github-actions/parse.spec.ts line 204
     #[test]
     fn parse_comment_parses_version_with_at_prefix() {
         assert_eq!(
@@ -1927,7 +1927,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses ratchet pinned version" — github-actions/parse.spec.ts line 213
+    // Ported: "parses ratchet pinned version" — lib/modules/manager/github-actions/parse.spec.ts line 213
     #[test]
     fn parse_comment_parses_ratchet_pinned_version() {
         assert_eq!(
@@ -1942,7 +1942,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses version without v prefix" — github-actions/parse.spec.ts line 222
+    // Ported: "parses version without v prefix" — lib/modules/manager/github-actions/parse.spec.ts line 222
     #[test]
     fn parse_comment_parses_version_without_v_prefix() {
         assert_eq!(
@@ -1951,7 +1951,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses version with leading whitespace" — github-actions/parse.spec.ts line 231
+    // Ported: "parses version with leading whitespace" — lib/modules/manager/github-actions/parse.spec.ts line 231
     #[test]
     fn parse_comment_parses_version_with_leading_whitespace() {
         assert_eq!(
@@ -1960,7 +1960,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses prefixed version like node/v20" — github-actions/parse.spec.ts line 240
+    // Ported: "parses prefixed version like node/v20" — lib/modules/manager/github-actions/parse.spec.ts line 240
     #[test]
     fn parse_comment_parses_prefixed_version_like_node_v20() {
         assert_eq!(
@@ -1969,7 +1969,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses prerelease version like v2.2-rc.1" — github-actions/parse.spec.ts line 249
+    // Ported: "parses prerelease version like v2.2-rc.1" — lib/modules/manager/github-actions/parse.spec.ts line 249
     #[test]
     fn parse_comment_parses_prerelease_version_like_v2_2_rc_1() {
         assert_eq!(
@@ -1978,7 +1978,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses full semver prerelease version like v2.2.0-rc.1" — github-actions/parse.spec.ts line 258
+    // Ported: "parses full semver prerelease version like v2.2.0-rc.1" — lib/modules/manager/github-actions/parse.spec.ts line 258
     #[test]
     fn parse_comment_parses_full_semver_prerelease_version_like_v2_2_0_rc_1() {
         assert_eq!(
@@ -1993,7 +1993,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses bare non-semver ref" — github-actions/parse.spec.ts line 267
+    // Ported: "parses bare non-semver ref" — lib/modules/manager/github-actions/parse.spec.ts line 267
     #[test]
     fn parse_comment_parses_bare_non_semver_ref() {
         assert_eq!(
@@ -2008,7 +2008,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses bare branch name" — github-actions/parse.spec.ts line 276
+    // Ported: "parses bare branch name" — lib/modules/manager/github-actions/parse.spec.ts line 276
     #[test]
     fn parse_comment_parses_bare_branch_name() {
         assert_eq!(
@@ -2017,7 +2017,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignores multi-word comments" — github-actions/parse.spec.ts line 285
+    // Ported: "ignores multi-word comments" — lib/modules/manager/github-actions/parse.spec.ts line 285
     #[test]
     fn parse_comment_ignores_multi_word_comments() {
         assert_eq!(
@@ -2026,37 +2026,37 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty quote for unquoted string" — github-actions/parse.spec.ts line 291
+    // Ported: "returns empty quote for unquoted string" — lib/modules/manager/github-actions/parse.spec.ts line 291
     #[test]
     fn parse_quote_returns_empty_quote_for_unquoted_string() {
         assert_eq!(parse_quote("value"), quoted_value("value", None));
     }
 
-    // Ported: "returns empty quote for empty string" — github-actions/parse.spec.ts line 295
+    // Ported: "returns empty quote for empty string" — lib/modules/manager/github-actions/parse.spec.ts line 295
     #[test]
     fn parse_quote_returns_empty_quote_for_empty_string() {
         assert_eq!(parse_quote(""), quoted_value("", None));
     }
 
-    // Ported: "returns empty quote for single char" — github-actions/parse.spec.ts line 299
+    // Ported: "returns empty quote for single char" — lib/modules/manager/github-actions/parse.spec.ts line 299
     #[test]
     fn parse_quote_returns_empty_quote_for_single_char() {
         assert_eq!(parse_quote("a"), quoted_value("a", None));
     }
 
-    // Ported: "parses double quoted string" — github-actions/parse.spec.ts line 303
+    // Ported: "parses double quoted string" — lib/modules/manager/github-actions/parse.spec.ts line 303
     #[test]
     fn parse_quote_parses_double_quoted_string() {
         assert_eq!(parse_quote("\"value\""), quoted_value("value", Some('"')));
     }
 
-    // Ported: "parses single quoted string" — github-actions/parse.spec.ts line 307
+    // Ported: "parses single quoted string" — lib/modules/manager/github-actions/parse.spec.ts line 307
     #[test]
     fn parse_quote_parses_single_quoted_string() {
         assert_eq!(parse_quote("'value'"), quoted_value("value", Some('\'')));
     }
 
-    // Ported: "handles whitespace around quotes" — github-actions/parse.spec.ts line 311
+    // Ported: "handles whitespace around quotes" — lib/modules/manager/github-actions/parse.spec.ts line 311
     #[test]
     fn parse_quote_handles_whitespace_around_quotes() {
         assert_eq!(
@@ -2065,20 +2065,20 @@ mod tests {
         );
     }
 
-    // Ported: "returns empty quote for mismatched quotes" — github-actions/parse.spec.ts line 315
+    // Ported: "returns empty quote for mismatched quotes" — lib/modules/manager/github-actions/parse.spec.ts line 315
     #[test]
     fn parse_quote_returns_empty_quote_for_mismatched_quotes() {
         assert_eq!(parse_quote("\"value'"), quoted_value("\"value'", None));
         assert_eq!(parse_quote("'value\""), quoted_value("'value\"", None));
     }
 
-    // Ported: "returns empty quote for only opening quote" — github-actions/parse.spec.ts line 320
+    // Ported: "returns empty quote for only opening quote" — lib/modules/manager/github-actions/parse.spec.ts line 320
     #[test]
     fn parse_quote_returns_empty_quote_for_only_opening_quote() {
         assert_eq!(parse_quote("\"value"), quoted_value("\"value", None));
     }
 
-    // Ported: "returns null for non-uses lines" — github-actions/parse.spec.ts line 326
+    // Ported: "returns null for non-uses lines" — lib/modules/manager/github-actions/parse.spec.ts line 326
     #[test]
     fn parse_uses_line_returns_none_for_non_uses_lines() {
         assert!(parse_uses_line("name: test").is_none());
@@ -2087,13 +2087,13 @@ mod tests {
         assert!(parse_uses_line("uses: value").is_none());
     }
 
-    // Ported: "returns null when value is only a comment" — github-actions/parse.spec.ts line 333
+    // Ported: "returns null when value is only a comment" — lib/modules/manager/github-actions/parse.spec.ts line 333
     #[test]
     fn parse_uses_line_returns_none_when_value_is_only_a_comment() {
         assert!(parse_uses_line("      uses: # only comment").is_none());
     }
 
-    // Ported: "parses simple uses line without comment" — github-actions/parse.spec.ts line 337
+    // Ported: "parses simple uses line without comment" — lib/modules/manager/github-actions/parse.spec.ts line 337
     #[test]
     fn parse_uses_line_parses_simple_uses_line_without_comment() {
         assert_eq!(
@@ -2111,7 +2111,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses uses line with - prefix" — github-actions/parse.spec.ts line 359
+    // Ported: "parses uses line with - prefix" — lib/modules/manager/github-actions/parse.spec.ts line 359
     #[test]
     fn parse_uses_line_parses_uses_line_with_dash_prefix() {
         assert_eq!(
@@ -2129,7 +2129,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses uses line with comment" — github-actions/parse.spec.ts line 381
+    // Ported: "parses uses line with comment" — lib/modules/manager/github-actions/parse.spec.ts line 381
     #[test]
     fn parse_uses_line_parses_uses_line_with_comment() {
         assert_eq!(
@@ -2147,7 +2147,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses uses line with multiple spaces before comment" — github-actions/parse.spec.ts line 407
+    // Ported: "parses uses line with multiple spaces before comment" — lib/modules/manager/github-actions/parse.spec.ts line 407
     #[test]
     fn parse_uses_line_parses_uses_line_with_multiple_spaces_before_comment() {
         assert_eq!(
@@ -2165,7 +2165,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses double quoted value" — github-actions/parse.spec.ts line 435
+    // Ported: "parses double quoted value" — lib/modules/manager/github-actions/parse.spec.ts line 435
     #[test]
     fn parse_uses_line_parses_double_quoted_value() {
         assert_eq!(
@@ -2183,7 +2183,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses single quoted value" — github-actions/parse.spec.ts line 457
+    // Ported: "parses single quoted value" — lib/modules/manager/github-actions/parse.spec.ts line 457
     #[test]
     fn parse_uses_line_parses_single_quoted_value() {
         assert_eq!(
@@ -2201,7 +2201,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses quoted value with comment" — github-actions/parse.spec.ts line 479
+    // Ported: "parses quoted value with comment" — lib/modules/manager/github-actions/parse.spec.ts line 479
     #[test]
     fn parse_uses_line_parses_quoted_value_with_comment() {
         assert_eq!(
@@ -2219,7 +2219,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses docker action" — github-actions/parse.spec.ts line 505
+    // Ported: "parses docker action" — lib/modules/manager/github-actions/parse.spec.ts line 505
     #[test]
     fn parse_uses_line_parses_docker_action() {
         assert_eq!(
@@ -2242,7 +2242,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses local action" — github-actions/parse.spec.ts line 524
+    // Ported: "parses local action" — lib/modules/manager/github-actions/parse.spec.ts line 524
     #[test]
     fn parse_uses_line_parses_local_action() {
         assert_eq!(
@@ -2262,7 +2262,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles ratchet:exclude comment" — github-actions/parse.spec.ts line 541
+    // Ported: "handles ratchet:exclude comment" — lib/modules/manager/github-actions/parse.spec.ts line 541
     #[test]
     fn parse_uses_line_handles_ratchet_exclude_comment() {
         assert_eq!(
@@ -2280,7 +2280,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles unrecognized comment" — github-actions/parse.spec.ts line 567
+    // Ported: "handles unrecognized comment" — lib/modules/manager/github-actions/parse.spec.ts line 567
     #[test]
     fn parse_uses_line_handles_unrecognized_comment() {
         assert_eq!(
@@ -2298,7 +2298,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null actionRef for invalid action" — github-actions/parse.spec.ts line 591
+    // Ported: "returns null actionRef for invalid action" — lib/modules/manager/github-actions/parse.spec.ts line 591
     #[test]
     fn parse_uses_line_returns_none_action_ref_for_invalid_action() {
         assert_eq!(
@@ -2316,7 +2316,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 69
     #[test]
     fn extracts_simple_action() {
         let content = r#"
@@ -2332,7 +2332,7 @@ jobs:
         assert!(deps.contains(&dep("actions/setup-node", "v3")));
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 69
     #[test]
     fn action_with_sub_path_uses_owner_repo() {
         let content = "      - uses: org/repo/subpath@v2\n";
@@ -2342,7 +2342,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v2");
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 69
     #[test]
     fn local_action_skipped() {
         let content = "      - uses: ./.github/actions/my-action\n";
@@ -2354,7 +2354,7 @@ jobs:
         );
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 58
     #[test]
     fn docker_ref_skipped() {
         let content = "      - uses: docker://alpine:3.18\n";
@@ -2366,7 +2366,7 @@ jobs:
         );
     }
 
-    // Ported: "disables naked SHA pins without version comment" — github-actions/extract.spec.ts line 543
+    // Ported: "disables naked SHA pins without version comment" — lib/modules/manager/github-actions/extract.spec.ts line 543
     #[test]
     fn full_sha_pin_skipped() {
         let content = "      - uses: actions/checkout@a81bbbf8298c0fa03ea29cdc473d45769f953675\n";
@@ -2375,7 +2375,7 @@ jobs:
         assert_eq!(deps[0].skip_reason, Some(GithubActionsSkipReason::ShaPin));
     }
 
-    // Ported: "disables naked short SHA pins without version comment" — github-actions/extract.spec.ts line 562
+    // Ported: "disables naked short SHA pins without version comment" — lib/modules/manager/github-actions/extract.spec.ts line 562
     #[test]
     fn short_sha_pin_skipped() {
         let content = "      - uses: actions/checkout@abc1234\n";
@@ -2387,7 +2387,7 @@ jobs:
         );
     }
 
-    // Ported: "does not disable SHA pins with version comment" — github-actions/extract.spec.ts line 581
+    // Ported: "does not disable SHA pins with version comment" — lib/modules/manager/github-actions/extract.spec.ts line 581
     #[test]
     fn full_sha_with_version_comment_not_skipped() {
         let content =
@@ -2399,7 +2399,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "does not disable short SHA pins with version comment" — github-actions/extract.spec.ts line 606
+    // Ported: "does not disable short SHA pins with version comment" — lib/modules/manager/github-actions/extract.spec.ts line 606
     #[test]
     fn short_sha_with_version_comment_not_skipped() {
         let content = "      - uses: actions/checkout@c85c95e # v4\n";
@@ -2410,7 +2410,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts tags in different formats" — github-actions/extract.spec.ts line 368
+    // Ported: "extracts tags in different formats" — lib/modules/manager/github-actions/extract.spec.ts line 368
     #[test]
     fn comment_version_formats() {
         let sha = "1e204e9a9253d643386038d443f96446fa156a97";
@@ -2467,7 +2467,7 @@ jobs:
         }
     }
 
-    // Ported: "extracts non-semver ref automatically" — github-actions/extract.spec.ts line 500
+    // Ported: "extracts non-semver ref automatically" — lib/modules/manager/github-actions/extract.spec.ts line 500
     #[test]
     fn non_semver_ref_extracted() {
         let content = "      - uses: taiki-e/install-action@cargo-llvm-cov\n";
@@ -2478,7 +2478,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts pinned non-semver ref with digest" — github-actions/extract.spec.ts line 520
+    // Ported: "extracts pinned non-semver ref with digest" — lib/modules/manager/github-actions/extract.spec.ts line 520
     #[test]
     fn pinned_non_semver_ref_with_digest() {
         let content = "      - uses: taiki-e/install-action@4b1248585248751e3b12fd020cf7ac91540ca09c # cargo-llvm-cov\n";
@@ -2489,7 +2489,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "maintains quotes" — github-actions/extract.spec.ts line 233
+    // Ported: "maintains quotes" — lib/modules/manager/github-actions/extract.spec.ts line 233
     #[test]
     fn single_and_double_quoted_uses_parsed() {
         let sha = "56337c425554a6be30cdef71bf441f15be286854";
@@ -2508,7 +2508,7 @@ jobs:
         assert_eq!(deps[3].current_value, "v2"); // comment stripped, not used as version
     }
 
-    // Ported: "extracts multiple action tag lines with double quotes and comments" — github-actions/extract.spec.ts line 169
+    // Ported: "extracts multiple action tag lines with double quotes and comments" — lib/modules/manager/github-actions/extract.spec.ts line 169
     #[test]
     fn quoted_action_is_parsed() {
         let content = r#"      - uses: "actions/checkout@v4""#;
@@ -2518,7 +2518,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v4");
     }
 
-    // Ported: "maintains spaces between hash and comment" — github-actions/extract.spec.ts line 315
+    // Ported: "maintains spaces between hash and comment" — lib/modules/manager/github-actions/extract.spec.ts line 315
     #[test]
     fn inline_comment_stripped() {
         let content = "      - uses: actions/checkout@v4 # pinned\n";
@@ -2527,7 +2527,7 @@ jobs:
         assert_eq!(deps[0].current_value, "v4");
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 69
     #[test]
     fn real_workflow_fixture() {
         let content = r#"
@@ -2570,20 +2570,20 @@ jobs:
         assert_eq!(pinned.skip_reason, Some(GithubActionsSkipReason::ShaPin));
     }
 
-    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 46
+    // Ported: "returns null for empty" — lib/modules/manager/github-actions/extract.spec.ts line 46
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for invalid yaml" — github-actions/extract.spec.ts line 52
+    // Ported: "returns null for invalid yaml" — lib/modules/manager/github-actions/extract.spec.ts line 52
     #[test]
     fn invalid_yaml_returns_empty() {
         // Our line-scanner doesn't parse YAML — malformed YAML with no `uses:` lines is empty.
         assert!(extract("nothing here: [").is_empty());
     }
 
-    // Ported: "extracts multiple action tag lines from yaml configuration file" — github-actions/extract.spec.ts line 69
+    // Ported: "extracts multiple action tag lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 69
     #[test]
     fn owner_repo_strips_subpath() {
         assert_eq!(
@@ -2596,7 +2596,7 @@ jobs:
 
     // ── extract_docker_images tests ───────────────────────────────────────────
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 58
     #[test]
     fn docker_container_inline() {
         let content = r#"
@@ -2614,7 +2614,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 58
     #[test]
     fn docker_container_block_form() {
         let content = r#"
@@ -2631,7 +2631,7 @@ jobs:
         assert_eq!(deps[0].tag.as_deref(), Some("16-bullseye"));
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 58
     #[test]
     fn docker_services_block_image() {
         let content = r#"
@@ -2656,7 +2656,7 @@ jobs:
         );
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 58
     #[test]
     fn docker_services_inline_string() {
         let content = r#"
@@ -2672,7 +2672,7 @@ jobs:
         assert_eq!(deps[0].tag.as_deref(), Some("10"));
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 58
     #[test]
     fn docker_mixed_container_and_services() {
         let content = r#"
@@ -2724,7 +2724,7 @@ jobs:
         assert!(deps.is_empty(), "variable references should be skipped");
     }
 
-    // Ported: "returns null for empty" — github-actions/extract.spec.ts line 46
+    // Ported: "returns null for empty" — lib/modules/manager/github-actions/extract.spec.ts line 46
     #[test]
     fn docker_no_container_no_services_returns_empty() {
         let content = r#"
@@ -2737,7 +2737,7 @@ jobs:
         assert!(extract_docker_images(content).is_empty());
     }
 
-    // Ported: "extracts multiple docker image lines from yaml configuration file" — github-actions/extract.spec.ts line 58
+    // Ported: "extracts multiple docker image lines from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 58
     #[test]
     fn docker_workflow_fixture() {
         // Reflects upstream workflow_1.yml fixture from renovatebot/renovate.
@@ -2762,7 +2762,7 @@ jobs:
 
     // ── extract_runner_labels tests ───────────────────────────────────────────
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_simple_ubuntu() {
         let content = "    runs-on: ubuntu-22.04\n";
@@ -2772,7 +2772,7 @@ jobs:
         assert_eq!(runners[0].current_value, "22.04");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_macos_xlarge() {
         let content = "    runs-on: macos-14-xlarge\n";
@@ -2782,7 +2782,7 @@ jobs:
         assert_eq!(runners[0].current_value, "14-xlarge");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_windows() {
         let content = "    runs-on: windows-2022\n";
@@ -2792,28 +2792,28 @@ jobs:
         assert_eq!(runners[0].current_value, "2022");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_latest_skipped() {
         let content = "    runs-on: ubuntu-latest\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_self_hosted_skipped() {
         let content = "    runs-on: self-hosted\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_matrix_variable_skipped() {
         let content = "    runs-on: ${{ matrix.os }}\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_inline_array() {
         let content = "    runs-on: [ubuntu-22.04, self-hosted]\n";
@@ -2822,14 +2822,14 @@ jobs:
         assert_eq!(runners[0].current_value, "22.04");
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn runner_unknown_version_skipped() {
         let content = "    runs-on: ubuntu-99.99\n";
         assert!(extract_runner_labels(content).is_empty());
     }
 
-    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 905
+    // Ported: "handles actions/setup-x without x-version field" — lib/modules/manager/github-actions/extract.spec.ts line 905
     #[test]
     fn setup_x_without_version_returns_only_action_dep() {
         // When actions/setup-node is used without node-version in with:, only the action dep
@@ -2850,7 +2850,7 @@ jobs:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple action runners from yaml configuration file" — github-actions/extract.spec.ts line 689
+    // Ported: "extracts multiple action runners from yaml configuration file" — lib/modules/manager/github-actions/extract.spec.ts line 689
     #[test]
     fn parse_runner_label_splits_correctly() {
         assert_eq!(
@@ -2869,7 +2869,7 @@ jobs:
         assert_eq!(parse_runner_label("nodash"), None);
     }
 
-    // Ported: "extracts actions with fqdn" — github-actions/extract.spec.ts line 630
+    // Ported: "extracts actions with fqdn" — lib/modules/manager/github-actions/extract.spec.ts line 630
     #[test]
     fn extracts_actions_with_fqdn() {
         let content = r#"
@@ -2942,7 +2942,7 @@ jobs:
 
     // ── extract_uses_with tests ───────────────────────────────────────────────
 
-    // Ported: "extracts x-version from actions/setup-x" — github-actions/extract.spec.ts line 773
+    // Ported: "extracts x-version from actions/setup-x" — lib/modules/manager/github-actions/extract.spec.ts line 773
     #[test]
     fn setup_x_extracts_versioned_deps() {
         let content = r#"
@@ -3001,7 +3001,7 @@ jobs:
         assert_eq!(deps[4].current_value.as_deref(), Some("latest"));
     }
 
-    // Ported: "extracts x-version from actions/setup-x in composite action" — github-actions/extract.spec.ts line 923
+    // Ported: "extracts x-version from actions/setup-x in composite action" — lib/modules/manager/github-actions/extract.spec.ts line 923
     #[test]
     fn setup_x_composite_action() {
         let content = r#"
@@ -3023,7 +3023,7 @@ runs:
         assert_eq!(deps[1].current_value.as_deref(), Some("1.23"));
     }
 
-    // Ported: "extract from $step.uses" — github-actions/extract.spec.ts line 1065
+    // Ported: "extract from $step.uses" — lib/modules/manager/github-actions/extract.spec.ts line 1065
     #[test]
     fn community_trivy_unspecified_version() {
         let content = "jobs:\n  build:\n    steps:\n      - uses: aquasecurity/setup-trivy@v0.2.6\n        with: {}\n";
@@ -3171,7 +3171,7 @@ runs:
         assert_eq!(deps[0].skip_reason, Some("unspecified-version"));
     }
 
-    // Ported: "handles actions/setup-x without x-version field" — github-actions/extract.spec.ts line 905
+    // Ported: "handles actions/setup-x without x-version field" — lib/modules/manager/github-actions/extract.spec.ts line 905
     #[test]
     fn setup_x_missing_version_key_emits_unspecified() {
         // When the correct version key is absent, emit unspecified-version.
@@ -3193,7 +3193,7 @@ jobs:
     // Fixture: first action in workflow_2.yml — actions/bin/shellcheck@master
     const WORKFLOW_2_FIRST_ACTION: &str = "steps:\n  - uses: actions/bin/shellcheck@master\n";
 
-    // Ported: "use github.com as registry when no settings provided" — github-actions/extract.spec.ts line 83
+    // Ported: "use github.com as registry when no settings provided" — lib/modules/manager/github-actions/extract.spec.ts line 83
     #[test]
     fn use_github_com_as_registry_when_no_settings_provided() {
         let deps = extract(WORKFLOW_2_FIRST_ACTION);
@@ -3201,7 +3201,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com" — github-actions/extract.spec.ts line 91
+    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com" — lib/modules/manager/github-actions/extract.spec.ts line 91
     #[test]
     fn use_enterprise_registry_when_endpoint_is_enterprise() {
         let ctx = GithubActionsContext {
@@ -3216,7 +3216,7 @@ jobs:
         );
     }
 
-    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3" — github-actions/extract.spec.ts line 106
+    // Ported: "use github.enterprise.com first and then github.com as registry running against github.enterprise.com/api/v3" — lib/modules/manager/github-actions/extract.spec.ts line 106
     #[test]
     fn use_enterprise_registry_when_endpoint_has_api_v3_path() {
         let ctx = GithubActionsContext {
@@ -3231,7 +3231,7 @@ jobs:
         );
     }
 
-    // Ported: "use github.com only as registry when running against non-GitHub" — github-actions/extract.spec.ts line 121
+    // Ported: "use github.com only as registry when running against non-GitHub" — lib/modules/manager/github-actions/extract.spec.ts line 121
     #[test]
     fn use_no_custom_registry_when_platform_is_not_github() {
         let ctx = GithubActionsContext {
@@ -3243,7 +3243,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "use github.com only as registry when running against github.com" — github-actions/extract.spec.ts line 133
+    // Ported: "use github.com only as registry when running against github.com" — lib/modules/manager/github-actions/extract.spec.ts line 133
     #[test]
     fn use_no_custom_registry_when_endpoint_is_github_com() {
         let ctx = GithubActionsContext {
@@ -3255,7 +3255,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "use github.com only as registry when running against api.github.com" — github-actions/extract.spec.ts line 145
+    // Ported: "use github.com only as registry when running against api.github.com" — lib/modules/manager/github-actions/extract.spec.ts line 145
     #[test]
     fn use_no_custom_registry_when_endpoint_is_api_github_com() {
         let ctx = GithubActionsContext {
@@ -3267,7 +3267,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "returns undefined registryUrls when endpoint is invalid URL" — github-actions/extract.spec.ts line 157
+    // Ported: "returns undefined registryUrls when endpoint is invalid URL" — lib/modules/manager/github-actions/extract.spec.ts line 157
     #[test]
     fn returns_no_registry_urls_when_endpoint_is_invalid() {
         let ctx = GithubActionsContext {
@@ -3279,7 +3279,7 @@ jobs:
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "logs unknown schema" — github-actions/extract.spec.ts line 1055
+    // Ported: "logs unknown schema" — lib/modules/manager/github-actions/extract.spec.ts line 1055
     #[test]
     fn logs_unknown_schema_returns_empty() {
         // action.yml with node20 runner has no `uses:` lines → empty result (null in TS)

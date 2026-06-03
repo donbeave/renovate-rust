@@ -494,7 +494,7 @@ fn extract_gitrepo(content: &str) -> FleetDeps {
 mod tests {
     use super::*;
 
-    // Ported: "should return null if a unknown manifest is supplied" — fleet/extract.spec.ts line 30
+    // Ported: "should return null if a unknown manifest is supplied" — lib/modules/manager/fleet/extract.spec.ts line 30
     #[test]
     fn is_fleet_yaml_detects_correctly() {
         assert!(is_fleet_yaml_path("fleet.yaml"));
@@ -503,7 +503,7 @@ mod tests {
         assert!(!is_fleet_yaml_path("fleet-config.yaml"));
     }
 
-    // Ported: "should parse valid configuration" (fleet.yaml) — fleet/extract.spec.ts line 49
+    // Ported: "should parse valid configuration" (fleet.yaml) — lib/modules/manager/fleet/extract.spec.ts line 49
     #[test]
     fn extracts_helm_dep_from_fleet_yaml() {
         let content = r#"
@@ -521,7 +521,7 @@ helm:
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "should support registryAlias configuration" — fleet/extract.spec.ts line 88
+    // Ported: "should support registryAlias configuration" — lib/modules/manager/fleet/extract.spec.ts line 88
     #[test]
     fn supports_registry_alias_configuration() {
         let content = r#"
@@ -573,7 +573,7 @@ helm:
         assert_eq!(deps[1].pin_digests, Some(false));
     }
 
-    // Ported: "should parse valid configuration with target customization" — fleet/extract.spec.ts line 132
+    // Ported: "should parse valid configuration with target customization" — lib/modules/manager/fleet/extract.spec.ts line 132
     #[test]
     fn extracts_target_customizations() {
         let content = r#"
@@ -599,7 +599,7 @@ targetCustomizations:
         assert_eq!(custom.customization_name.as_deref(), Some("prod"));
     }
 
-    // Ported: "should parse parse invalid configurations" — fleet/extract.spec.ts line 208
+    // Ported: "should parse parse invalid configurations" — lib/modules/manager/fleet/extract.spec.ts line 208
     #[test]
     fn missing_chart_sets_skip_reason() {
         let content = r#"
@@ -615,7 +615,7 @@ helm:
         );
     }
 
-    // Ported: "should parse parse invalid configurations" — fleet/extract.spec.ts line 208
+    // Ported: "should parse parse invalid configurations" — lib/modules/manager/fleet/extract.spec.ts line 208
     #[test]
     fn no_version_sets_skip_reason() {
         let content = r#"
@@ -631,7 +631,7 @@ helm:
         );
     }
 
-    // Ported: "should parse valid configuration" (GitRepo) — fleet/extract.spec.ts line 254
+    // Ported: "should parse valid configuration" (GitRepo) — lib/modules/manager/fleet/extract.spec.ts line 254
     #[test]
     fn extracts_gitrepo_dep() {
         let content = r#"
@@ -650,7 +650,7 @@ spec:
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "should parse invalid configuration" — fleet/extract.spec.ts line 276
+    // Ported: "should parse invalid configuration" — lib/modules/manager/fleet/extract.spec.ts line 276
     #[test]
     fn gitrepo_missing_revision_sets_skip_reason() {
         let content = r#"
@@ -666,7 +666,7 @@ spec:
         );
     }
 
-    // Ported: "should parse invalid configuration" — fleet/extract.spec.ts line 276
+    // Ported: "should parse invalid configuration" — lib/modules/manager/fleet/extract.spec.ts line 276
     #[test]
     fn non_gitrepo_yaml_returns_empty() {
         let content = r#"
@@ -679,7 +679,7 @@ spec:
         assert!(deps.git_deps.is_empty());
     }
 
-    // Ported: "should return null if empty content" — fleet/extract.spec.ts line 24
+    // Ported: "should return null if empty content" — lib/modules/manager/fleet/extract.spec.ts line 24
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract("", true);
@@ -688,7 +688,7 @@ spec:
         assert!(deps.git_deps.is_empty());
     }
 
-    // Ported: "should return null if a unknown manifest is supplied" — fleet/extract.spec.ts line 30
+    // Ported: "should return null if a unknown manifest is supplied" — lib/modules/manager/fleet/extract.spec.ts line 30
     #[test]
     fn unknown_manifest_returns_empty() {
         let content = "apiVersion: v1\nkind: Service\nspec:\n  selector: {}\n";
@@ -696,7 +696,7 @@ spec:
         assert!(deps.git_deps.is_empty());
     }
 
-    // Ported: "should return null if content is a malformed YAML" — fleet/extract.spec.ts line 37
+    // Ported: "should return null if content is a malformed YAML" — lib/modules/manager/fleet/extract.spec.ts line 37
     #[test]
     fn malformed_fleet_yaml_returns_empty() {
         let content = "apiVersion: v1\nkind: Fleet\n< ";
@@ -705,7 +705,7 @@ spec:
         assert!(deps.git_deps.is_empty());
     }
 
-    // Ported: "should return null if content is a malformed YAML" — fleet/extract.spec.ts line 242
+    // Ported: "should return null if content is a malformed YAML" — lib/modules/manager/fleet/extract.spec.ts line 242
     #[test]
     fn malformed_gitrepo_yaml_returns_empty() {
         // TS uses real YAML parser → returns null; Rust line parser sees "kind: GitRepo" (trimmed)

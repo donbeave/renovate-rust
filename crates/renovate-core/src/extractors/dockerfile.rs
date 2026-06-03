@@ -807,14 +807,14 @@ mod tests {
 
     // ── basic FROM parsing ────────────────────────────────────────────────────
 
-    // Ported: "handles no FROM" — dockerfile/extract.spec.ts line 14
+    // Ported: "handles no FROM" — lib/modules/manager/dockerfile/extract.spec.ts line 14
     #[test]
     fn no_from_returns_empty() {
         let deps = extract_ok("no from!");
         assert!(deps.is_empty());
     }
 
-    // Ported: "is case insensitive" — dockerfile/extract.spec.ts line 72
+    // Ported: "is case insensitive" — lib/modules/manager/dockerfile/extract.spec.ts line 72
     #[test]
     fn from_is_case_insensitive() {
         let deps = extract_ok("From node\n");
@@ -823,7 +823,7 @@ mod tests {
         assert!(deps[0].tag.is_none());
     }
 
-    // Ported: "handles tag" — dockerfile/extract.spec.ts line 89
+    // Ported: "handles tag" — lib/modules/manager/dockerfile/extract.spec.ts line 89
     #[test]
     fn extracts_image_and_tag() {
         let deps = extract_ok("FROM ubuntu:22.04");
@@ -833,7 +833,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles naked dep" — dockerfile/extract.spec.ts line 19
+    // Ported: "handles naked dep" — lib/modules/manager/dockerfile/extract.spec.ts line 19
     #[test]
     fn extracts_image_without_tag() {
         let deps = extract_ok("FROM ubuntu");
@@ -841,7 +841,7 @@ mod tests {
         assert!(deps[0].tag.is_none());
     }
 
-    // Ported: "handles digest" — dockerfile/extract.spec.ts line 106
+    // Ported: "handles digest" — lib/modules/manager/dockerfile/extract.spec.ts line 106
     #[test]
     fn extracts_image_with_digest_only() {
         let deps = extract_ok(
@@ -855,7 +855,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles tag and digest" — dockerfile/extract.spec.ts line 129
+    // Ported: "handles tag and digest" — lib/modules/manager/dockerfile/extract.spec.ts line 129
     #[test]
     fn extracts_image_with_digest() {
         let deps = extract_ok("FROM ubuntu:22.04@sha256:abc123");
@@ -864,7 +864,7 @@ mod tests {
         assert_eq!(deps[0].digest.as_deref(), Some("sha256:abc123"));
     }
 
-    // Ported: "handles custom hosts with namespace" — dockerfile/extract.spec.ts line 312
+    // Ported: "handles custom hosts with namespace" — lib/modules/manager/dockerfile/extract.spec.ts line 312
     #[test]
     fn extracts_scoped_image() {
         let deps = extract_ok("FROM ghcr.io/owner/image:1.0");
@@ -872,7 +872,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("1.0"));
     }
 
-    // Ported: "handles custom hosts" — dockerfile/extract.spec.ts line 194
+    // Ported: "handles custom hosts" — lib/modules/manager/dockerfile/extract.spec.ts line 194
     #[test]
     fn extracts_image_with_custom_host() {
         let deps = extract_ok("FROM registry2.something.info/node:8\n");
@@ -880,7 +880,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("8"));
     }
 
-    // Ported: "handles custom hosts and suffix" — dockerfile/extract.spec.ts line 215
+    // Ported: "handles custom hosts and suffix" — lib/modules/manager/dockerfile/extract.spec.ts line 215
     #[test]
     fn custom_host_with_suffix_in_tag() {
         let deps = extract_ok("FROM registry2.something.info/node:8-alpine\n");
@@ -888,7 +888,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("8-alpine"));
     }
 
-    // Ported: "handles custom hosts with port without tag" — dockerfile/extract.spec.ts line 257
+    // Ported: "handles custom hosts with port without tag" — lib/modules/manager/dockerfile/extract.spec.ts line 257
     #[test]
     fn custom_host_with_port_no_tag() {
         let deps = extract_ok("FROM registry2.something.info:5005/node\n");
@@ -896,7 +896,7 @@ mod tests {
         assert!(deps[0].tag.is_none());
     }
 
-    // Ported: "handles namespaced images" — dockerfile/extract.spec.ts line 295
+    // Ported: "handles namespaced images" — lib/modules/manager/dockerfile/extract.spec.ts line 295
     #[test]
     fn extracts_namespaced_image() {
         let deps = extract_ok("FROM mynamespace/node:8\n");
@@ -904,7 +904,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("8"));
     }
 
-    // Ported: "handles custom hosts with port" — dockerfile/extract.spec.ts line 236
+    // Ported: "handles custom hosts with port" — lib/modules/manager/dockerfile/extract.spec.ts line 236
     #[test]
     fn registry_port_not_confused_with_tag() {
         // `host:5000/image:tag` — colon before `/` is the registry port
@@ -913,7 +913,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("1.2.3"));
     }
 
-    // Ported: "handles abnormal spacing" — dockerfile/extract.spec.ts line 333
+    // Ported: "handles abnormal spacing" — lib/modules/manager/dockerfile/extract.spec.ts line 333
     #[test]
     fn abnormal_spacing_after_from() {
         let deps = extract_ok("FROM    registry.allmine.info:5005/node:8.7.0\n\n");
@@ -923,7 +923,7 @@ mod tests {
 
     // ── AS alias and stage references ─────────────────────────────────────────
 
-    // Ported: "handles from as" — dockerfile/extract.spec.ts line 152
+    // Ported: "handles from as" — lib/modules/manager/dockerfile/extract.spec.ts line 152
     #[test]
     fn as_alias_does_not_become_dep() {
         let deps = extract_ok("FROM node:18-alpine AS builder");
@@ -933,7 +933,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "skips named multistage FROM tags" — dockerfile/extract.spec.ts line 412
+    // Ported: "skips named multistage FROM tags" — lib/modules/manager/dockerfile/extract.spec.ts line 412
     #[test]
     fn stage_reference_is_skipped() {
         let content = "FROM node:18 AS builder\nFROM builder AS final";
@@ -948,21 +948,21 @@ mod tests {
 
     // ── skip reasons ──────────────────────────────────────────────────────────
 
-    // Ported: "skips scratches" — dockerfile/extract.spec.ts line 407
+    // Ported: "skips scratches" — lib/modules/manager/dockerfile/extract.spec.ts line 407
     #[test]
     fn scratch_is_skipped() {
         let deps = extract_ok("FROM scratch");
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::Scratch));
     }
 
-    // Ported: "skips depName containing a non default variable at start" — dockerfile/extract.spec.ts line 1574
+    // Ported: "skips depName containing a non default variable at start" — lib/modules/manager/dockerfile/extract.spec.ts line 1574
     #[test]
     fn arg_variable_is_skipped() {
         let deps = extract_ok("FROM $NODE_VERSION");
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
-    // Ported: "skips depName containing a non default variable with brackets at start" — dockerfile/extract.spec.ts line 1585
+    // Ported: "skips depName containing a non default variable with brackets at start" — lib/modules/manager/dockerfile/extract.spec.ts line 1585
     #[test]
     fn arg_braces_variable_is_skipped() {
         let deps = extract_ok("FROM ${BASE_IMAGE}:latest");
@@ -970,7 +970,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
-    // Ported: "handles default environment variable values" — dockerfile/extract.spec.ts line 1501
+    // Ported: "handles default environment variable values" — lib/modules/manager/dockerfile/extract.spec.ts line 1501
     #[test]
     fn default_variable_value_extracted() {
         // ${VAR:-default} — use the default value as the image reference.
@@ -996,21 +996,21 @@ mod tests {
         assert_eq!(dep5.skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
-    // Ported: "skips tag containing a variable" — dockerfile/extract.spec.ts line 1563
+    // Ported: "skips tag containing a variable" — lib/modules/manager/dockerfile/extract.spec.ts line 1563
     #[test]
     fn tag_with_variable_is_skipped() {
         let deps = extract_ok("FROM mcr.microsoft.com/dotnet/sdk:5.0${IMAGESUFFIX}");
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
-    // Ported: "skips depName containing a non default variable" — dockerfile/extract.spec.ts line 1596
+    // Ported: "skips depName containing a non default variable" — lib/modules/manager/dockerfile/extract.spec.ts line 1596
     #[test]
     fn variable_in_image_path_is_skipped() {
         let deps = extract_ok("FROM docker.io/$PREFIX/alpine:3.15");
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
-    // Ported: "skips depName containing a non default variable with brackets" — dockerfile/extract.spec.ts line 1607
+    // Ported: "skips depName containing a non default variable with brackets" — lib/modules/manager/dockerfile/extract.spec.ts line 1607
     #[test]
     fn braced_variable_in_image_path_is_skipped() {
         let deps = extract_ok("FROM docker.io/${PREFIX}/alpine:3.15");
@@ -1019,7 +1019,7 @@ mod tests {
 
     // ── multi-line continuation ───────────────────────────────────────────────
 
-    // Ported: "handles implausible line continuation" — dockerfile/extract.spec.ts line 883
+    // Ported: "handles implausible line continuation" — lib/modules/manager/dockerfile/extract.spec.ts line 883
     #[test]
     fn implausible_continuation_does_not_affect_from() {
         // Trailing `\` on a RUN line should not affect the preceding FROM.
@@ -1030,7 +1030,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("3.5"));
     }
 
-    // Ported: "handles multi-line FROM with space after escape character" — dockerfile/extract.spec.ts line 904
+    // Ported: "handles multi-line FROM with space after escape character" — lib/modules/manager/dockerfile/extract.spec.ts line 904
     #[test]
     fn multiline_from_with_space_after_escape() {
         let deps = extract_ok("FROM \\ \nnginx:1.20\n");
@@ -1038,7 +1038,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("1.20"));
     }
 
-    // Ported: "handles multi-line FROM with space after escape character" — dockerfile/extract.spec.ts line 904
+    // Ported: "handles multi-line FROM with space after escape character" — lib/modules/manager/dockerfile/extract.spec.ts line 904
     #[test]
     fn continuation_joined_correctly() {
         let content = "FROM node:18-alpine \\\n  AS builder";
@@ -1047,7 +1047,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("18-alpine"));
     }
 
-    // Ported: "handles multi-line FROM with space after escape character" — dockerfile/extract.spec.ts line 904
+    // Ported: "handles multi-line FROM with space after escape character" — lib/modules/manager/dockerfile/extract.spec.ts line 904
     #[test]
     fn continuation_with_comment() {
         // Fixture from Renovate 2.Dockerfile:
@@ -1060,7 +1060,7 @@ mod tests {
         assert_eq!(deps[0].digest.as_deref(), Some("sha256:abcdef"));
     }
 
-    // Ported: "handles FROM without ARG default value" — dockerfile/extract.spec.ts line 921
+    // Ported: "handles FROM without ARG default value" — lib/modules/manager/dockerfile/extract.spec.ts line 921
     #[test]
     fn from_with_arg_variable_is_skipped() {
         let deps = extract_ok("ARG img_base\nFROM $img_base\n");
@@ -1068,7 +1068,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::ArgVariable));
     }
 
-    // Ported: "handles FROM with empty ARG default value" — dockerfile/extract.spec.ts line 939
+    // Ported: "handles FROM with empty ARG default value" — lib/modules/manager/dockerfile/extract.spec.ts line 939
     #[test]
     fn from_with_empty_arg_defaults_extracts_literal_image() {
         let deps = extract_ok("ARG patch1=\"\"\nARG patch2=\nFROM nginx:1.20${patch1}$patch2\n");
@@ -1078,7 +1078,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles FROM with version in ARG value" — dockerfile/extract.spec.ts line 960
+    // Ported: "handles FROM with version in ARG value" — lib/modules/manager/dockerfile/extract.spec.ts line 960
     #[test]
     fn from_with_version_in_arg_value() {
         let deps = extract_ok("ARG\tVARIANT=\"1.60.0-bullseye\" \nFROM\trust:${VARIANT}\n");
@@ -1088,7 +1088,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles FROM with version in ARG default value" — dockerfile/extract.spec.ts line 981
+    // Ported: "handles FROM with version in ARG default value" — lib/modules/manager/dockerfile/extract.spec.ts line 981
     #[test]
     fn from_with_version_in_arg_default_value() {
         let deps = extract_ok(
@@ -1100,7 +1100,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles FROM with digest in ARG default value" — dockerfile/extract.spec.ts line 1002
+    // Ported: "handles FROM with digest in ARG default value" — lib/modules/manager/dockerfile/extract.spec.ts line 1002
     #[test]
     fn from_with_digest_in_arg_value() {
         let digest = "sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f";
@@ -1113,7 +1113,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles FROM with overwritten ARG value" — dockerfile/extract.spec.ts line 1026
+    // Ported: "handles FROM with overwritten ARG value" — lib/modules/manager/dockerfile/extract.spec.ts line 1026
     #[test]
     fn from_with_overwritten_arg_value() {
         let deps = extract_ok(
@@ -1126,7 +1126,7 @@ mod tests {
         assert_eq!(deps[1].tag.as_deref(), Some("1.20"));
     }
 
-    // Ported: "handles FROM with multiple ARG values" — dockerfile/extract.spec.ts line 1058
+    // Ported: "handles FROM with multiple ARG values" — lib/modules/manager/dockerfile/extract.spec.ts line 1058
     #[test]
     fn from_with_multiple_arg_values() {
         let deps = extract_ok(
@@ -1138,7 +1138,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "skips scratch if provided in ARG value" — dockerfile/extract.spec.ts line 1079
+    // Ported: "skips scratch if provided in ARG value" — lib/modules/manager/dockerfile/extract.spec.ts line 1079
     #[test]
     fn scratch_from_arg_value_is_skipped() {
         let deps = extract_ok("ARG img=\"scratch\"\nFROM $img as base\n");
@@ -1146,7 +1146,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(DockerfileSkipReason::Scratch));
     }
 
-    // Ported: "extracts images from multi-line ARG statements" — dockerfile/extract.spec.ts line 1088
+    // Ported: "extracts images from multi-line ARG statements" — lib/modules/manager/dockerfile/extract.spec.ts line 1088
     #[test]
     fn extracts_images_from_multiline_arg_statements() {
         let content = r#" ARG \
@@ -1177,7 +1177,7 @@ FROM $nginx_version as stage2
         assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
     }
 
-    // Ported: "handles FROM with version in ARG default value and quotes" — dockerfile/extract.spec.ts line 1227
+    // Ported: "handles FROM with version in ARG default value and quotes" — lib/modules/manager/dockerfile/extract.spec.ts line 1227
     #[test]
     fn from_with_quoted_arg_default_value() {
         let deps = extract_ok(
@@ -1190,7 +1190,7 @@ FROM $nginx_version as stage2
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles version in ARG and digest in FROM with CRLF linefeed" — dockerfile/extract.spec.ts line 1249
+    // Ported: "handles version in ARG and digest in FROM with CRLF linefeed" — lib/modules/manager/dockerfile/extract.spec.ts line 1249
     #[test]
     fn from_with_arg_tag_and_digest_with_crlf() {
         let deps = extract_ok(
@@ -1203,7 +1203,7 @@ FROM $nginx_version as stage2
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles updates of multiple ARG values" — dockerfile/extract.spec.ts line 1272
+    // Ported: "handles updates of multiple ARG values" — lib/modules/manager/dockerfile/extract.spec.ts line 1272
     #[test]
     fn from_with_multiple_arg_components() {
         let deps = extract_ok(
@@ -1219,7 +1219,7 @@ FROM $nginx_version as stage2
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles same argument multiple times" — dockerfile/extract.spec.ts line 1308
+    // Ported: "handles same argument multiple times" — lib/modules/manager/dockerfile/extract.spec.ts line 1308
     #[test]
     fn same_arg_used_multiple_times() {
         let deps = extract_ok("ARG DOCKER=docker\nFROM ${DOCKER}.io/library/${DOCKER}:29.1.1-dind");
@@ -1231,7 +1231,7 @@ FROM $nginx_version as stage2
 
     // ── BOM marker ───────────────────────────────────────────────────────────
 
-    // Ported: "extracts tags from Dockerfile which begins with a BOM marker" — dockerfile/extract.spec.ts line 386
+    // Ported: "extracts tags from Dockerfile which begins with a BOM marker" — lib/modules/manager/dockerfile/extract.spec.ts line 386
     #[test]
     fn bom_marker_stripped() {
         let content = "\u{FEFF}FROM node:6.12.3 as frontend\n\n";
@@ -1243,7 +1243,7 @@ FROM $nginx_version as stage2
 
     // ── non-FROM instructions are ignored ─────────────────────────────────────
 
-    // Ported: "extracts multiple FROM tags" — dockerfile/extract.spec.ts line 354
+    // Ported: "extracts multiple FROM tags" — lib/modules/manager/dockerfile/extract.spec.ts line 354
     #[test]
     fn only_from_instructions_extracted() {
         let content = "FROM node:18\nRUN apt-get install\nCOPY . /app\nFROM nginx:1.25";
@@ -1253,7 +1253,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[1].image, "nginx");
     }
 
-    // Ported: "handles comments" — dockerfile/extract.spec.ts line 173
+    // Ported: "handles comments" — lib/modules/manager/dockerfile/extract.spec.ts line 173
     #[test]
     fn commented_from_ignored() {
         let deps = extract_ok("# FROM ubuntu:22.04\nFROM nginx:1.25");
@@ -1263,7 +1263,7 @@ FROM $nginx_version as stage2
 
     // ── platform flag ──────────────────────────────────────────────────────────
 
-    // Ported: "extracts multiple FROM tags" — dockerfile/extract.spec.ts line 354
+    // Ported: "extracts multiple FROM tags" — lib/modules/manager/dockerfile/extract.spec.ts line 354
     #[test]
     fn platform_flag_stripped() {
         let deps = extract_ok("FROM --platform=linux/amd64 ubuntu:22.04");
@@ -1273,7 +1273,7 @@ FROM $nginx_version as stage2
 
     // ── image naming variants ─────────────────────────────────────────────────
 
-    // Ported: "handles calico/node" — dockerfile/extract.spec.ts line 733
+    // Ported: "handles calico/node" — lib/modules/manager/dockerfile/extract.spec.ts line 733
     #[test]
     fn namespaced_image_without_tag() {
         let deps = extract_ok("FROM calico/node\n");
@@ -1282,7 +1282,7 @@ FROM $nginx_version as stage2
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles ubuntu" — dockerfile/extract.spec.ts line 750
+    // Ported: "handles ubuntu" — lib/modules/manager/dockerfile/extract.spec.ts line 750
     #[test]
     fn ubuntu_with_version_tag() {
         let deps = extract_ok("FROM ubuntu:18.04\n");
@@ -1290,7 +1290,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].tag.as_deref(), Some("18.04"));
     }
 
-    // Ported: "handles debian with codename" — dockerfile/extract.spec.ts line 768
+    // Ported: "handles debian with codename" — lib/modules/manager/dockerfile/extract.spec.ts line 768
     #[test]
     fn debian_with_codename_tag() {
         let deps = extract_ok("FROM debian:buster\n");
@@ -1298,7 +1298,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].tag.as_deref(), Some("buster"));
     }
 
-    // Ported: "handles debian with regular tag" — dockerfile/extract.spec.ts line 786
+    // Ported: "handles debian with regular tag" — lib/modules/manager/dockerfile/extract.spec.ts line 786
     #[test]
     fn debian_with_version_tag() {
         let deps = extract_ok("FROM debian:11.4-slim\n");
@@ -1306,7 +1306,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].tag.as_deref(), Some("11.4-slim"));
     }
 
-    // Ported: "handles debian with prefixes" — dockerfile/extract.spec.ts line 803
+    // Ported: "handles debian with prefixes" — lib/modules/manager/dockerfile/extract.spec.ts line 803
     #[test]
     fn debian_with_platform_prefix() {
         let deps = extract_with_registry_aliases("FROM amd64/debian:10\n", &[]).unwrap();
@@ -1322,7 +1322,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].versioning, Some("debian"));
     }
 
-    // Ported: "handles debian with prefixes and registries" — dockerfile/extract.spec.ts line 821
+    // Ported: "handles debian with prefixes and registries" — lib/modules/manager/dockerfile/extract.spec.ts line 821
     #[test]
     fn debian_with_registry_prefix() {
         let deps = extract_ok("FROM docker.io/library/debian:10\n");
@@ -1330,7 +1330,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].tag.as_deref(), Some("10"));
     }
 
-    // Ported: "handles prefixes" — dockerfile/extract.spec.ts line 843
+    // Ported: "handles prefixes" — lib/modules/manager/dockerfile/extract.spec.ts line 843
     #[test]
     fn ubuntu_with_platform_prefix() {
         let deps = extract_with_registry_aliases("FROM amd64/ubuntu:18.04\n", &[]).unwrap();
@@ -1346,7 +1346,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].versioning, Some("ubuntu"));
     }
 
-    // Ported: "handles prefixes with registries" — dockerfile/extract.spec.ts line 861
+    // Ported: "handles prefixes with registries" — lib/modules/manager/dockerfile/extract.spec.ts line 861
     #[test]
     fn registry_with_namespace_prefix() {
         let deps = extract_ok("FROM public.ecr.aws/ubuntu/ubuntu:18.04\n");
@@ -1354,7 +1354,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].tag.as_deref(), Some("18.04"));
     }
 
-    // Ported: "ignores parser directives in wrong order" — dockerfile/extract.spec.ts line 1131
+    // Ported: "ignores parser directives in wrong order" — lib/modules/manager/dockerfile/extract.spec.ts line 1131
     #[test]
     fn parser_directives_in_wrong_order_ignored() {
         // `# escape = \`` must be the FIRST line to change the escape char;
@@ -1366,7 +1366,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].tag.as_deref(), Some("1.20"));
     }
 
-    // Ported: "handles an alternative escape character" — dockerfile/extract.spec.ts line 1152
+    // Ported: "handles an alternative escape character" — lib/modules/manager/dockerfile/extract.spec.ts line 1152
     #[test]
     fn alternative_escape_character() {
         let content = r#"#  syntax=docker/dockerfile:1
@@ -1416,7 +1416,7 @@ FROM $nginx_version as stage2
 
     // ── RUN --mount=from ──────────────────────────────────────────────────────
 
-    // Ported: "handles run --mount=from" — dockerfile/extract.spec.ts line 36
+    // Ported: "handles run --mount=from" — lib/modules/manager/dockerfile/extract.spec.ts line 36
     #[test]
     fn run_mount_from_extracts_external_images() {
         let content = "FROM scratch as build\n\
@@ -1437,7 +1437,7 @@ FROM $nginx_version as stage2
 
     // ── COPY --from ───────────────────────────────────────────────────────────
 
-    // Ported: "handles COPY --from" — dockerfile/extract.spec.ts line 433
+    // Ported: "handles COPY --from" — lib/modules/manager/dockerfile/extract.spec.ts line 433
     #[test]
     fn copy_from_extracts_external_image() {
         let content = "FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n";
@@ -1450,7 +1450,7 @@ FROM $nginx_version as stage2
         assert!(deps[1].skip_reason.is_none());
     }
 
-    // Ported: "handles COPY --from with digest" — dockerfile/extract.spec.ts line 454
+    // Ported: "handles COPY --from with digest" — lib/modules/manager/dockerfile/extract.spec.ts line 454
     #[test]
     fn copy_from_with_digest() {
         let content = "FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d /usr/bin/skaffold /usr/bin/skaffold\n";
@@ -1463,7 +1463,7 @@ FROM $nginx_version as stage2
         );
     }
 
-    // Ported: "handles COPY --link --from" — dockerfile/extract.spec.ts line 481
+    // Ported: "handles COPY --link --from" — lib/modules/manager/dockerfile/extract.spec.ts line 481
     #[test]
     fn copy_link_from_extracts_image() {
         let content = "FROM scratch\nCOPY --link --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n";
@@ -1472,7 +1472,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[1].tag.as_deref(), Some("v0.11.0"));
     }
 
-    // Ported: "skips named multistage COPY --from tags" — dockerfile/extract.spec.ts line 507
+    // Ported: "skips named multistage COPY --from tags" — lib/modules/manager/dockerfile/extract.spec.ts line 507
     #[test]
     fn copy_from_stage_name_is_skipped() {
         let content = "FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=frontend /usr/bin/node /usr/bin/node\n";
@@ -1482,7 +1482,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].image, "node");
     }
 
-    // Ported: "skips index reference COPY --from tags" — dockerfile/extract.spec.ts line 528
+    // Ported: "skips index reference COPY --from tags" — lib/modules/manager/dockerfile/extract.spec.ts line 528
     #[test]
     fn copy_from_index_is_skipped() {
         let content = "FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=0 /usr/bin/node /usr/bin/node\n";
@@ -1491,7 +1491,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[0].image, "node");
     }
 
-    // Ported: "detects ["stage"] and ["final"] deps of docker multi-stage build." — dockerfile/extract.spec.ts line 549
+    // Ported: "detects ["stage"] and ["final"] deps of docker multi-stage build." — lib/modules/manager/dockerfile/extract.spec.ts line 549
     #[test]
     fn multistage_build_with_copy_from_stage() {
         let content = "FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.23.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD [\"./app\"]\n";
@@ -1508,7 +1508,7 @@ FROM $nginx_version as stage2
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
     }
 
-    // Ported: "handles registry alias" — dockerfile/extract.spec.ts line 1352
+    // Ported: "handles registry alias" — lib/modules/manager/dockerfile/extract.spec.ts line 1352
     #[test]
     fn handles_registry_alias() {
         let deps = extract_with_registry_aliases(
@@ -1535,7 +1535,7 @@ FROM $nginx_version as stage2
         );
     }
 
-    // Ported: "replaces registry alias from start only" — dockerfile/extract.spec.ts line 1380
+    // Ported: "replaces registry alias from start only" — lib/modules/manager/dockerfile/extract.spec.ts line 1380
     #[test]
     fn registry_alias_matches_start_only() {
         let deps = extract_with_registry_aliases(
@@ -1558,7 +1558,7 @@ FROM $nginx_version as stage2
         );
     }
 
-    // Ported: "supports registry aliases - $name" — dockerfile/extract.spec.ts line 1623
+    // Ported: "supports registry aliases - $name" — lib/modules/manager/dockerfile/extract.spec.ts line 1623
     #[test]
     fn supports_get_dep_registry_alias_table() {
         let cases = [
@@ -1647,7 +1647,7 @@ FROM $nginx_version as stage2
         }
     }
 
-    // Ported: "handles empty registry" — dockerfile/extract.spec.ts line 1407
+    // Ported: "handles empty registry" — lib/modules/manager/dockerfile/extract.spec.ts line 1407
     #[test]
     fn namespaced_image_without_registry_extracted_normally() {
         // When no registryAlias matches, a namespace/image ref is extracted as-is.
@@ -1659,7 +1659,7 @@ FROM $nginx_version as stage2
 
     // ── # syntax directives ───────────────────────────────────────────────────
 
-    // Ported: "handles # syntax statements" — dockerfile/extract.spec.ts line 1435
+    // Ported: "handles # syntax statements" — lib/modules/manager/dockerfile/extract.spec.ts line 1435
     #[test]
     fn syntax_directive_extracted() {
         let content = "# syntax=docker/dockerfile:1.1.7\nFROM alpine:3.13.5\n";
@@ -1671,7 +1671,7 @@ FROM $nginx_version as stage2
         assert_eq!(deps[1].tag.as_deref(), Some("3.13.5"));
     }
 
-    // Ported: "ignores # syntax statements after first line" — dockerfile/extract.spec.ts line 1469
+    // Ported: "ignores # syntax statements after first line" — lib/modules/manager/dockerfile/extract.spec.ts line 1469
     #[test]
     fn syntax_directive_after_from_ignored() {
         let content = "FROM alpine:3.13.5\n# syntax=docker/dockerfile:1.1.7\n";
@@ -1683,7 +1683,7 @@ FROM $nginx_version as stage2
 
     // ── real-world fixture from Renovate ─────────────────────────────────────
 
-    // Ported: "extracts images on adjacent lines" — dockerfile/extract.spec.ts line 598
+    // Ported: "extracts images on adjacent lines" — lib/modules/manager/dockerfile/extract.spec.ts line 598
     #[test]
     fn renovate_fixture_1() {
         let content = "FROM node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d AS node\nFROM buildkite/puppeteer:1.1.1 AS puppeteer\nFROM node AS production";
@@ -1698,7 +1698,7 @@ FROM $nginx_version as stage2
         );
     }
 
-    // Ported: "extracts images from all sorts of (maybe multiline) FROM and COPY --from statements" — dockerfile/extract.spec.ts line 628
+    // Ported: "extracts images from all sorts of (maybe multiline) FROM and COPY --from statements" — lib/modules/manager/dockerfile/extract.spec.ts line 628
     #[test]
     fn renovate_fixture_2_multiline() {
         let content = include_str!("../../tests/fixtures/dockerfile/2.Dockerfile");
@@ -1753,7 +1753,7 @@ FROM $nginx_version as stage2
         assert_eq!(img7.digest.as_deref(), Some("sha256:abcdef"));
     }
 
-    // Ported: "handles quay hosts with port" — dockerfile/extract.spec.ts line 278
+    // Ported: "handles quay hosts with port" — lib/modules/manager/dockerfile/extract.spec.ts line 278
     #[test]
     fn quay_host_with_port_no_tag() {
         let deps = extract_ok("FROM quay.io:1234/node\n");
@@ -1763,7 +1763,7 @@ FROM $nginx_version as stage2
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "handles empty optional parameters" — dockerfile/extract.spec.ts line 1329
+    // Ported: "handles empty optional parameters" — lib/modules/manager/dockerfile/extract.spec.ts line 1329
     #[test]
     fn handles_empty_optional_parameters() {
         let deps = extract_ok("FROM quay.io/myName/myPackage:0.6.2\n");
@@ -1775,14 +1775,14 @@ FROM $nginx_version as stage2
 
     // ── getDep() / classify_image_ref() ──────────────────────────────────────
 
-    // Ported: "rejects null" — dockerfile/extract.spec.ts line 1493
+    // Ported: "rejects null" — lib/modules/manager/dockerfile/extract.spec.ts line 1493
     #[test]
     fn get_dep_rejects_null() {
         let dep = classify_image_ref("");
         assert_eq!(dep.skip_reason, Some(DockerfileSkipReason::InvalidValue));
     }
 
-    // Ported: "rejects empty or whitespace" — dockerfile/extract.spec.ts line 1497
+    // Ported: "rejects empty or whitespace" — lib/modules/manager/dockerfile/extract.spec.ts line 1497
     #[test]
     fn get_dep_rejects_empty_or_whitespace() {
         let dep = classify_image_ref("   ");
@@ -1791,13 +1791,13 @@ FROM $nginx_version as stage2
 
     // ── extractVariables() ───────────────────────────────────────────────────
 
-    // Ported: "handles no variable" — dockerfile/extract.spec.ts line 1651
+    // Ported: "handles no variable" — lib/modules/manager/dockerfile/extract.spec.ts line 1651
     #[test]
     fn extract_variables_handles_no_variable() {
         assert!(extract_variables("nginx:latest").is_empty());
     }
 
-    // Ported: "handles simple variable" — dockerfile/extract.spec.ts line 1655
+    // Ported: "handles simple variable" — lib/modules/manager/dockerfile/extract.spec.ts line 1655
     #[test]
     fn extract_variables_handles_simple_variable() {
         let vars = extract_variables("nginx:$version");
@@ -1805,7 +1805,7 @@ FROM $nginx_version as stage2
         assert_eq!(vars.len(), 1);
     }
 
-    // Ported: "handles escaped variable" — dockerfile/extract.spec.ts line 1661
+    // Ported: "handles escaped variable" — lib/modules/manager/dockerfile/extract.spec.ts line 1661
     #[test]
     fn extract_variables_handles_escaped_variable() {
         let vars = extract_variables(r"nginx:\$version");
@@ -1813,7 +1813,7 @@ FROM $nginx_version as stage2
         assert_eq!(vars.len(), 1);
     }
 
-    // Ported: "handles complex variable" — dockerfile/extract.spec.ts line 1667
+    // Ported: "handles complex variable" — lib/modules/manager/dockerfile/extract.spec.ts line 1667
     #[test]
     fn extract_variables_handles_complex_variable() {
         let vars = extract_variables("ubuntu:${ubuntu_version}");
@@ -1824,7 +1824,7 @@ FROM $nginx_version as stage2
         assert_eq!(vars.len(), 1);
     }
 
-    // Ported: "handles complex variable with static default value" — dockerfile/extract.spec.ts line 1673
+    // Ported: "handles complex variable with static default value" — lib/modules/manager/dockerfile/extract.spec.ts line 1673
     #[test]
     fn extract_variables_handles_complex_variable_with_static_default() {
         let vars = extract_variables("${var1:-nginx}:latest");
@@ -1832,7 +1832,7 @@ FROM $nginx_version as stage2
         assert_eq!(vars.len(), 1);
     }
 
-    // Ported: "handles complex variable with other variable as default value" — dockerfile/extract.spec.ts line 1679
+    // Ported: "handles complex variable with other variable as default value" — lib/modules/manager/dockerfile/extract.spec.ts line 1679
     #[test]
     fn extract_variables_handles_complex_variable_with_variable_default() {
         let vars = extract_variables("${VAR1:-$var2}:latest");
@@ -1840,7 +1840,7 @@ FROM $nginx_version as stage2
         assert_eq!(vars.len(), 1);
     }
 
-    // Ported: "handles multiple variables" — dockerfile/extract.spec.ts line 1685
+    // Ported: "handles multiple variables" — lib/modules/manager/dockerfile/extract.spec.ts line 1685
     #[test]
     fn extract_variables_handles_multiple_variables() {
         let vars = extract_variables("${var1:-$var2}:$version");

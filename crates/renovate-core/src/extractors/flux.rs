@@ -806,7 +806,7 @@ fn trim_yaml_scalar(value: &str) -> String {
 mod tests {
     use super::*;
 
-    // Ported: "extracts version and components from system manifest at $filepath" — flux/extract.spec.ts line 72
+    // Ported: "extracts version and components from system manifest at $filepath" — lib/modules/manager/flux/extract.spec.ts line 72
     #[test]
     fn extracts_version_with_components() {
         let content = "# Flux Version: v2.2.3\n# Components: source-controller,kustomize-controller,helm-controller\napiVersion: v1\n";
@@ -818,7 +818,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts multiple resources" — flux/extract.spec.ts line 27
+    // Ported: "extracts multiple resources" — lib/modules/manager/flux/extract.spec.ts line 27
     #[test]
     fn extracts_multiple_resources() {
         let deps = extract_package_file(MULTIDOC);
@@ -843,7 +843,7 @@ mod tests {
                     && dep.package_name == "ghcr.io/kyverno/manifests/kyverno"));
     }
 
-    // Ported: "considers components optional in system manifests" — flux/extract.spec.ts line 102
+    // Ported: "considers components optional in system manifests" — lib/modules/manager/flux/extract.spec.ts line 102
     #[test]
     fn extracts_version_without_components() {
         let content = "# Flux Version: v2.1.0\napiVersion: v1\n";
@@ -860,14 +860,14 @@ mod tests {
         assert_eq!(dep.version, "v2.0.1");
     }
 
-    // Ported: "ignores system manifests without a version" — flux/extract.spec.ts line 111
+    // Ported: "ignores system manifests without a version" — lib/modules/manager/flux/extract.spec.ts line 111
     #[test]
     fn no_header_returns_none() {
         let content = "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: flux-system\n";
         assert!(extract(content).is_none());
     }
 
-    // Ported: "extracts releases without repositories" — flux/extract.spec.ts line 119
+    // Ported: "extracts releases without repositories" — lib/modules/manager/flux/extract.spec.ts line 119
     #[test]
     fn extracts_helm_release_without_repository() {
         let deps = extract_helm_releases(HELM_RELEASE);
@@ -884,7 +884,7 @@ mod tests {
         );
     }
 
-    // Ported: "falls back to unknown-registry when registryAliases has no matching HelmRelease sourceRef name" — flux/extract.spec.ts line 136
+    // Ported: "falls back to unknown-registry when registryAliases has no matching HelmRelease sourceRef name" — lib/modules/manager/flux/extract.spec.ts line 136
     #[test]
     fn helm_release_registry_alias_without_source_match_is_unknown() {
         let deps = extract_helm_releases_with_registry_aliases(
@@ -895,7 +895,7 @@ mod tests {
         assert!(deps[0].registry_urls.is_empty());
     }
 
-    // Ported: "uses registryAliases to resolve HelmRelease sourceRef name when repository is missing" — flux/extract.spec.ts line 158
+    // Ported: "uses registryAliases to resolve HelmRelease sourceRef name when repository is missing" — lib/modules/manager/flux/extract.spec.ts line 158
     #[test]
     fn helm_release_registry_alias_resolves_source_name() {
         let deps = extract_helm_releases_with_registry_aliases(
@@ -907,7 +907,7 @@ mod tests {
         assert_eq!(deps[0].registry_urls, vec!["https://example.com/charts"]);
     }
 
-    // Ported: "uses registryAliases with an OCI URL for HelmRelease sourceRef name" — flux/extract.spec.ts line 180
+    // Ported: "uses registryAliases with an OCI URL for HelmRelease sourceRef name" — lib/modules/manager/flux/extract.spec.ts line 180
     #[test]
     fn helm_release_registry_alias_oci_url_uses_docker() {
         let deps = extract_helm_releases_with_registry_aliases(
@@ -922,19 +922,19 @@ mod tests {
         );
     }
 
-    // Ported: "ignores HelmRelease resources without an apiVersion" — flux/extract.spec.ts line 202
+    // Ported: "ignores HelmRelease resources without an apiVersion" — lib/modules/manager/flux/extract.spec.ts line 202
     #[test]
     fn ignores_helm_release_without_api_version() {
         assert!(extract_helm_releases("kind: HelmRelease").is_empty());
     }
 
-    // Ported: "ignores HelmRepository resources without an apiVersion" — flux/extract.spec.ts line 207
+    // Ported: "ignores HelmRepository resources without an apiVersion" — lib/modules/manager/flux/extract.spec.ts line 207
     #[test]
     fn ignores_helm_repository_without_api_version() {
         assert!(extract_helm_releases("kind: HelmRepository").is_empty());
     }
 
-    // Ported: "ignores HelmRepository resources without metadata" — flux/extract.spec.ts line 212
+    // Ported: "ignores HelmRepository resources without metadata" — lib/modules/manager/flux/extract.spec.ts line 212
     #[test]
     fn ignores_helm_repository_without_metadata() {
         let content = format!(
@@ -945,7 +945,7 @@ mod tests {
         assert_eq!(deps[0].dep_name, "sealed-secrets");
     }
 
-    // Ported: "ignores HelmRelease resources without any chart reference" — flux/extract.spec.ts line 234
+    // Ported: "ignores HelmRelease resources without any chart reference" — lib/modules/manager/flux/extract.spec.ts line 234
     #[test]
     fn ignores_helm_release_without_chart_reference() {
         let content = r#"
@@ -960,7 +960,7 @@ spec:
         assert!(extract_helm_releases(content).is_empty());
     }
 
-    // Ported: "ignores HelmRelease resources without a chart name" — flux/extract.spec.ts line 250
+    // Ported: "ignores HelmRelease resources without a chart name" — lib/modules/manager/flux/extract.spec.ts line 250
     #[test]
     fn ignores_helm_release_without_chart_name() {
         let content = r#"
@@ -980,7 +980,7 @@ spec:
         assert!(extract_helm_releases(content).is_empty());
     }
 
-    // Ported: "skip HelmRelease with local chart" — flux/extract.spec.ts line 271
+    // Ported: "skip HelmRelease with local chart" — lib/modules/manager/flux/extract.spec.ts line 271
     #[test]
     fn skips_helm_release_with_local_chart() {
         let content = r#"
@@ -1011,7 +1011,7 @@ spec:
         );
     }
 
-    // Ported: "does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace" — flux/extract.spec.ts line 299
+    // Ported: "does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace" — lib/modules/manager/flux/extract.spec.ts line 299
     #[test]
     fn does_not_match_release_without_namespace_to_repository_without_namespace() {
         let content = r#"
@@ -1036,7 +1036,7 @@ spec:
         assert!(extract_helm_releases(content).is_empty());
     }
 
-    // Ported: "does not match HelmRelease resources without a sourceRef" — flux/extract.spec.ts line 325
+    // Ported: "does not match HelmRelease resources without a sourceRef" — lib/modules/manager/flux/extract.spec.ts line 325
     #[test]
     fn release_without_source_ref_is_unknown_registry() {
         let content = format!(
@@ -1047,7 +1047,7 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::UnknownRegistry));
     }
 
-    // Ported: "does not match HelmRelease resources without a namespace" — flux/extract.spec.ts line 355
+    // Ported: "does not match HelmRelease resources without a namespace" — lib/modules/manager/flux/extract.spec.ts line 355
     #[test]
     fn does_not_match_release_without_namespace() {
         let content = format!(
@@ -1056,7 +1056,7 @@ spec:
         assert!(extract_helm_releases(&content).is_empty());
     }
 
-    // Ported: "ignores HelmRepository resources without a namespace" — flux/extract.spec.ts line 376
+    // Ported: "ignores HelmRepository resources without a namespace" — lib/modules/manager/flux/extract.spec.ts line 376
     #[test]
     fn ignores_helm_repository_without_namespace() {
         let content = format!(
@@ -1067,7 +1067,7 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::UnknownRegistry));
     }
 
-    // Ported: "ignores HelmRepository resources without a URL" — flux/extract.spec.ts line 400
+    // Ported: "ignores HelmRepository resources without a URL" — lib/modules/manager/flux/extract.spec.ts line 400
     #[test]
     fn ignores_helm_repository_without_url() {
         let content = format!(
@@ -1078,7 +1078,7 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::UnknownRegistry));
     }
 
-    // Ported: "ignores HelmRelease resources using an invalid chartRef" — flux/extract.spec.ts line 425
+    // Ported: "ignores HelmRelease resources using an invalid chartRef" — lib/modules/manager/flux/extract.spec.ts line 425
     #[test]
     fn ignores_helm_release_with_invalid_chart_ref() {
         let content = r#"
@@ -1097,7 +1097,7 @@ spec:
         assert!(extract_helm_releases(content).is_empty());
     }
 
-    // Ported: "ignores HelmRelease resources using a chartRef targetting a HelmChart" — flux/extract.spec.ts line 433
+    // Ported: "ignores HelmRelease resources using a chartRef targetting a HelmChart" — lib/modules/manager/flux/extract.spec.ts line 433
     #[test]
     fn ignores_release_chart_ref_and_extracts_helm_chart() {
         let content =
@@ -1116,7 +1116,7 @@ spec:
         );
     }
 
-    // Ported: "ignores HelmRelease resources using a chartRef targetting an OCIRepository" — flux/extract.spec.ts line 457
+    // Ported: "ignores HelmRelease resources using a chartRef targetting an OCIRepository" — lib/modules/manager/flux/extract.spec.ts line 457
     #[test]
     fn ignores_release_chart_ref_and_extracts_oci_repository() {
         let content = format!(
@@ -1128,7 +1128,7 @@ spec:
         assert_eq!(deps[0].current_value.as_deref(), Some("v1.8.2"));
     }
 
-    // Ported: "extracts HelmChart version" — flux/extract.spec.ts line 492
+    // Ported: "extracts HelmChart version" — lib/modules/manager/flux/extract.spec.ts line 492
     #[test]
     fn extracts_helm_chart_version() {
         let content = format!("{HELM_REPOSITORY}\n---\n{HELM_CHART}");
@@ -1142,7 +1142,7 @@ spec:
         );
     }
 
-    // Ported: "does not match HelmChart resources without a namespace" — flux/extract.spec.ts line 513
+    // Ported: "does not match HelmChart resources without a namespace" — lib/modules/manager/flux/extract.spec.ts line 513
     #[test]
     fn helm_chart_without_namespace_is_unknown_registry() {
         let content = format!(
@@ -1153,7 +1153,7 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::UnknownRegistry));
     }
 
-    // Ported: "falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name" — flux/extract.spec.ts line 544
+    // Ported: "falls back to unknown-registry when registryAliases has no matching HelmChart sourceRef name" — lib/modules/manager/flux/extract.spec.ts line 544
     #[test]
     fn helm_chart_registry_alias_without_source_match_is_unknown() {
         let deps = extract_helm_releases_with_registry_aliases(
@@ -1164,7 +1164,7 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::UnknownRegistry));
     }
 
-    // Ported: "uses registryAliases to resolve HelmChart sourceRef name when repository is missing" — flux/extract.spec.ts line 566
+    // Ported: "uses registryAliases to resolve HelmChart sourceRef name when repository is missing" — lib/modules/manager/flux/extract.spec.ts line 566
     #[test]
     fn helm_chart_registry_alias_resolves_source_name() {
         let deps = extract_helm_releases_with_registry_aliases(
@@ -1176,7 +1176,7 @@ spec:
         assert_eq!(deps[0].registry_urls, vec!["https://example.com/charts"]);
     }
 
-    // Ported: "ignores HelmChart resources using git sources" — flux/extract.spec.ts line 588
+    // Ported: "ignores HelmChart resources using git sources" — lib/modules/manager/flux/extract.spec.ts line 588
     #[test]
     fn ignores_helm_chart_using_git_source() {
         let content = r#"
@@ -1195,7 +1195,7 @@ spec:
         assert!(extract_helm_releases(content).is_empty());
     }
 
-    // Ported: "ignores HelmChart resources using bucket sources" — flux/extract.spec.ts line 608
+    // Ported: "ignores HelmChart resources using bucket sources" — lib/modules/manager/flux/extract.spec.ts line 608
     #[test]
     fn helm_chart_using_bucket_source_is_unsupported() {
         let content = r#"
@@ -1235,7 +1235,7 @@ spec:
         );
     }
 
-    // Ported: "ignores GitRepository without a tag nor a commit" — flux/extract.spec.ts line 645
+    // Ported: "ignores GitRepository without a tag nor a commit" — lib/modules/manager/flux/extract.spec.ts line 645
     #[test]
     fn ignores_git_repository_without_tag_or_commit() {
         let deps = extract_git_repositories(
@@ -1256,7 +1256,7 @@ spec:
         );
     }
 
-    // Ported: "extracts GitRepository with a commit" — flux/extract.spec.ts line 665
+    // Ported: "extracts GitRepository with a commit" — lib/modules/manager/flux/extract.spec.ts line 665
     #[test]
     fn extracts_git_repository_with_commit() {
         let deps = extract_git_repositories(
@@ -1272,7 +1272,7 @@ spec:
         assert_eq!(deps[0].replace_string.as_deref(), Some("c93154b"));
     }
 
-    // Ported: "extracts GitRepository with a tag from github with ssh" — flux/extract.spec.ts line 694
+    // Ported: "extracts GitRepository with a tag from github with ssh" — lib/modules/manager/flux/extract.spec.ts line 694
     #[test]
     fn extracts_git_repository_tag_from_github_ssh() {
         let deps = extract_git_repositories(
@@ -1290,7 +1290,7 @@ spec:
         );
     }
 
-    // Ported: "extracts GitRepository with a tag from github" — flux/extract.spec.ts line 722
+    // Ported: "extracts GitRepository with a tag from github" — lib/modules/manager/flux/extract.spec.ts line 722
     #[test]
     fn extracts_git_repository_tag_from_github() {
         let deps = extract_git_repositories(GIT_REPOSITORY);
@@ -1303,7 +1303,7 @@ spec:
         );
     }
 
-    // Ported: "extracts GitRepository with a tag from gitlab" — flux/extract.spec.ts line 750
+    // Ported: "extracts GitRepository with a tag from gitlab" — lib/modules/manager/flux/extract.spec.ts line 750
     #[test]
     fn extracts_git_repository_tag_from_gitlab() {
         let deps = extract_git_repositories(
@@ -1317,7 +1317,7 @@ spec:
         );
     }
 
-    // Ported: "extracts GitRepository with a tag from bitbucket" — flux/extract.spec.ts line 778
+    // Ported: "extracts GitRepository with a tag from bitbucket" — lib/modules/manager/flux/extract.spec.ts line 778
     #[test]
     fn extracts_git_repository_tag_from_bitbucket() {
         let deps = extract_git_repositories(
@@ -1331,7 +1331,7 @@ spec:
         );
     }
 
-    // Ported: "extracts GitRepository with a tag from an unkown domain" — flux/extract.spec.ts line 806
+    // Ported: "extracts GitRepository with a tag from an unkown domain" — lib/modules/manager/flux/extract.spec.ts line 806
     #[test]
     fn extracts_git_repository_tag_from_unknown_domain() {
         let deps = extract_git_repositories(
@@ -1345,7 +1345,7 @@ spec:
         );
     }
 
-    // Ported: "ignores OCIRepository with no tag and no digest" — flux/extract.spec.ts line 834
+    // Ported: "ignores OCIRepository with no tag and no digest" — lib/modules/manager/flux/extract.spec.ts line 834
     #[test]
     fn oci_repository_without_tag_or_digest_is_unversioned() {
         let deps = extract_oci_repositories(
@@ -1365,7 +1365,7 @@ spec:
         );
     }
 
-    // Ported: "extracts OCIRepository with a tag" — flux/extract.spec.ts line 861
+    // Ported: "extracts OCIRepository with a tag" — lib/modules/manager/flux/extract.spec.ts line 861
     #[test]
     fn extracts_oci_repository_with_tag() {
         let deps = extract_oci_repositories_with_registry_aliases(
@@ -1383,7 +1383,7 @@ spec:
         assert_eq!(deps[0].replace_string.as_deref(), Some("v1.8.2"));
     }
 
-    // Ported: "extracts OCIRepository with a digest" — flux/extract.spec.ts line 897
+    // Ported: "extracts OCIRepository with a digest" — lib/modules/manager/flux/extract.spec.ts line 897
     #[test]
     fn extracts_oci_repository_with_digest() {
         let deps = extract_oci_repositories(
@@ -1397,7 +1397,7 @@ spec:
         assert_eq!(deps[0].current_value, None);
     }
 
-    // Ported: "extracts OCIRepository with a tag that contains a digest" — flux/extract.spec.ts line 925
+    // Ported: "extracts OCIRepository with a tag that contains a digest" — lib/modules/manager/flux/extract.spec.ts line 925
     #[test]
     fn extracts_oci_repository_with_tag_containing_digest() {
         let deps = extract_oci_repositories(
@@ -1415,7 +1415,7 @@ spec:
         );
     }
 
-    // Ported: "extracts OCIRepository with a digest and tag" — flux/extract.spec.ts line 958
+    // Ported: "extracts OCIRepository with a digest and tag" — lib/modules/manager/flux/extract.spec.ts line 958
     #[test]
     fn extracts_oci_repository_with_digest_and_tag() {
         let deps = extract_oci_repositories(
@@ -1432,7 +1432,7 @@ spec:
         }));
     }
 
-    // Ported: "extracts OCIRepository with quoted digest and tag" — flux/extract.spec.ts line 994
+    // Ported: "extracts OCIRepository with quoted digest and tag" — lib/modules/manager/flux/extract.spec.ts line 994
     #[test]
     fn extracts_oci_repository_with_quoted_digest_and_tag() {
         let deps = extract_oci_repositories(
@@ -1446,7 +1446,7 @@ spec:
         );
     }
 
-    // Ported: "extracts OCIRepository with quoted keys" — flux/extract.spec.ts line 1030
+    // Ported: "extracts OCIRepository with quoted keys" — lib/modules/manager/flux/extract.spec.ts line 1030
     #[test]
     fn extracts_oci_repository_with_quoted_keys() {
         let deps = extract_oci_repositories(
@@ -1460,7 +1460,7 @@ spec:
         );
     }
 
-    // Ported: "extracts OCIRepository when ref key is quoted" — flux/extract.spec.ts line 1063
+    // Ported: "extracts OCIRepository when ref key is quoted" — lib/modules/manager/flux/extract.spec.ts line 1063
     #[test]
     fn extracts_oci_repository_with_quoted_ref_key() {
         let deps = extract_oci_repositories(
@@ -1474,7 +1474,7 @@ spec:
         );
     }
 
-    // Ported: "skips OCIRepository when tag value is a YAML alias" — flux/extract.spec.ts line 1098
+    // Ported: "skips OCIRepository when tag value is a YAML alias" — lib/modules/manager/flux/extract.spec.ts line 1098
     #[test]
     fn skips_oci_repository_when_tag_value_is_yaml_alias() {
         let deps = extract_oci_repositories(
@@ -1489,7 +1489,7 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(FluxSkipReason::InvalidValue));
     }
 
-    // Ported: "extracts OCIRepository with tag and digest preceded by other document types" — flux/extract.spec.ts line 1129
+    // Ported: "extracts OCIRepository with tag and digest preceded by other document types" — lib/modules/manager/flux/extract.spec.ts line 1129
     #[test]
     fn extracts_oci_repository_after_other_document_types() {
         let content = format!(
@@ -1507,7 +1507,7 @@ spec:
         );
     }
 
-    // Ported: "extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref" — flux/extract.spec.ts line 1195
+    // Ported: "extracts OCIRepository with tag and digest when preceded by same-named resource with scalar ref" — lib/modules/manager/flux/extract.spec.ts line 1195
     #[test]
     fn extracts_oci_repository_after_same_name_scalar_ref() {
         let content = format!(
@@ -1522,7 +1522,7 @@ spec:
         );
     }
 
-    // Ported: "extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec" — flux/extract.spec.ts line 1241
+    // Ported: "extracts OCIRepository with tag and digest when preceded by same-named resource with scalar spec" — lib/modules/manager/flux/extract.spec.ts line 1241
     #[test]
     fn extracts_oci_repository_after_same_name_scalar_spec() {
         let content = format!(
@@ -1537,7 +1537,7 @@ spec:
         );
     }
 
-    // Ported: "extracts OCIRepository with tag and digest when ref contains a non-scalar key" — flux/extract.spec.ts line 1285
+    // Ported: "extracts OCIRepository with tag and digest when ref contains a non-scalar key" — lib/modules/manager/flux/extract.spec.ts line 1285
     #[test]
     fn extracts_oci_repository_when_ref_contains_non_scalar_key() {
         let deps = extract_oci_repositories(
@@ -1551,7 +1551,7 @@ spec:
         );
     }
 
-    // Ported: "extracts Kustomization" — flux/extract.spec.ts line 1323
+    // Ported: "extracts Kustomization" — lib/modules/manager/flux/extract.spec.ts line 1323
     #[test]
     fn extracts_kustomization_images() {
         let deps = extract_kustomizations(
@@ -1602,7 +1602,7 @@ spec:
         );
     }
 
-    // Ported: "ignores resources of an unknown kind" — flux/extract.spec.ts line 1389
+    // Ported: "ignores resources of an unknown kind" — lib/modules/manager/flux/extract.spec.ts line 1389
     #[test]
     fn ignores_resources_of_unknown_kind() {
         let content = "kind: SomethingElse\napiVersion: helm.toolkit.fluxcd.io/v2beta1\n";
@@ -1612,7 +1612,7 @@ spec:
         assert!(extract_kustomizations(content).is_empty());
     }
 
-    // Ported: "ignores resources without a kind" — flux/extract.spec.ts line 1400
+    // Ported: "ignores resources without a kind" — lib/modules/manager/flux/extract.spec.ts line 1400
     #[test]
     fn ignores_resources_without_kind() {
         let content = "apiVersion: helm.toolkit.fluxcd.io/v2beta1";
@@ -1622,7 +1622,7 @@ spec:
         assert!(extract_kustomizations(content).is_empty());
     }
 
-    // Ported: "ignores bad manifests" — flux/extract.spec.ts line 1408
+    // Ported: "ignores bad manifests" — lib/modules/manager/flux/extract.spec.ts line 1408
     #[test]
     fn ignores_bad_manifests() {
         let content = "\"bad YAML";
@@ -1632,7 +1632,7 @@ spec:
         assert!(extract_kustomizations(content).is_empty());
     }
 
-    // Ported: "ignores null resources" — flux/extract.spec.ts line 1413
+    // Ported: "ignores null resources" — lib/modules/manager/flux/extract.spec.ts line 1413
     #[test]
     fn ignores_null_resources() {
         let content = "null";
@@ -1642,7 +1642,7 @@ spec:
         assert!(extract_kustomizations(content).is_empty());
     }
 
-    // Ported: "extracts multiple files" — flux/extract.spec.ts line 1420
+    // Ported: "extracts multiple files" — lib/modules/manager/flux/extract.spec.ts line 1420
     #[test]
     fn extract_all_package_files_extracts_multiple_files() {
         let files = [
@@ -1685,14 +1685,14 @@ spec:
         assert!(matches!(&result[3].deps[0], FluxDep::System(dep) if dep.version == "v0.24.1"));
     }
 
-    // Ported: "ignores files that do not exist" — flux/extract.spec.ts line 1535
+    // Ported: "ignores files that do not exist" — lib/modules/manager/flux/extract.spec.ts line 1535
     #[test]
     fn extract_all_package_files_ignores_missing_files() {
         let files = [("lib/modules/manager/flux/__fixtures__/bogus.yaml", None)];
         assert!(extract_all_package_files(&files).is_empty());
     }
 
-    // Ported: "ignores system manifest files without valid Flux version header" — flux/extract.spec.ts line 1542
+    // Ported: "ignores system manifest files without valid Flux version header" — lib/modules/manager/flux/extract.spec.ts line 1542
     #[test]
     fn extract_all_package_files_ignores_invalid_system_manifest() {
         let files = [(
@@ -1702,7 +1702,7 @@ spec:
         assert!(extract_all_package_files(&files).is_empty());
     }
 
-    // Ported: "should handle HelmRepository with type OCI" — flux/extract.spec.ts line 1486
+    // Ported: "should handle HelmRepository with type OCI" — lib/modules/manager/flux/extract.spec.ts line 1486
     #[test]
     fn extract_all_package_files_handles_helm_repository_type_oci() {
         let files = [
@@ -1731,7 +1731,7 @@ spec:
                     && dep.package_name.as_deref() == Some("ghcr.proxy.test/some/path/actions/actions-runner-controller-charts/gha-runner-scale-set")));
     }
 
-    // Ported: "should handle HelmRepository w/o type oci and url starts with oci" — flux/extract.spec.ts line 1514
+    // Ported: "should handle HelmRepository w/o type oci and url starts with oci" — lib/modules/manager/flux/extract.spec.ts line 1514
     #[test]
     fn extract_all_package_files_handles_helm_repository_oci_url_without_type() {
         let files = [
@@ -1757,7 +1757,7 @@ spec:
                     && dep.package_name.as_deref() == Some("ghcr.io/kyverno/charts/kyverno")));
     }
 
-    // Ported: "should pick correct package file when using HelmRepository with chartRef" — flux/extract.spec.ts line 1549
+    // Ported: "should pick correct package file when using HelmRepository with chartRef" — lib/modules/manager/flux/extract.spec.ts line 1549
     #[test]
     fn extract_all_package_files_picks_helm_chart_package_file_for_chart_ref() {
         let files = [

@@ -197,7 +197,7 @@ class MyConan(ConanFile):
     build_requires = "cmake/3.25.3"
 "#;
 
-    // Ported: "extracts multiple image lines from conanfile.txt" — conan/extract.spec.ts line 14
+    // Ported: "extracts multiple image lines from conanfile.txt" — lib/modules/manager/conan/extract.spec.ts line 14
     #[test]
     fn extracts_txt_requires() {
         let deps = extract_txt(SAMPLE_TXT);
@@ -207,7 +207,7 @@ class MyConan(ConanFile):
         assert!(zlib.current_digest.is_none());
     }
 
-    // Ported: "extracts multiple image lines from conanfile.txt" — conan/extract.spec.ts line 14
+    // Ported: "extracts multiple image lines from conanfile.txt" — lib/modules/manager/conan/extract.spec.ts line 14
     #[test]
     fn extracts_txt_build_requires() {
         let deps = extract_txt(SAMPLE_TXT);
@@ -216,7 +216,7 @@ class MyConan(ConanFile):
         assert_eq!(cmake.current_value, "3.25.3");
     }
 
-    // Ported: "extracts multiple image lines from conanfile.txt" — conan/extract.spec.ts line 14
+    // Ported: "extracts multiple image lines from conanfile.txt" — lib/modules/manager/conan/extract.spec.ts line 14
     #[test]
     fn standard_channel_kept() {
         let deps = extract_txt(SAMPLE_TXT);
@@ -225,7 +225,7 @@ class MyConan(ConanFile):
         assert_eq!(boost.package_name, "boost/1.79.0@_/_");
     }
 
-    // Ported: "extracts multiple image lines from conanfile.py" — conan/extract.spec.ts line 134
+    // Ported: "extracts multiple image lines from conanfile.py" — lib/modules/manager/conan/extract.spec.ts line 134
     #[test]
     fn extracts_py_requires() {
         let deps = extract_py(SAMPLE_PY);
@@ -239,14 +239,14 @@ class MyConan(ConanFile):
         );
     }
 
-    // Ported: "returns null for empty" — conan/extract.spec.ts line 10
+    // Ported: "returns null for empty" — lib/modules/manager/conan/extract.spec.ts line 10
     #[test]
     fn empty_returns_empty() {
         assert!(extract_txt("").is_empty());
         assert!(extract_py("").is_empty());
     }
 
-    // Ported: "extracts multiple image lines from conanfile.txt" — conan/extract.spec.ts line 14
+    // Ported: "extracts multiple image lines from conanfile.txt" — lib/modules/manager/conan/extract.spec.ts line 14
     #[test]
     fn extracts_full_conanfile_txt_fixture() {
         let content = "[requires]\n\
@@ -325,7 +325,7 @@ class MyConan(ConanFile):
         );
     }
 
-    // Ported: "extracts multiple 0 lines from conanfile.txt" — conan/extract.spec.ts line 129
+    // Ported: "extracts multiple 0 lines from conanfile.txt" — lib/modules/manager/conan/extract.spec.ts line 129
     #[test]
     fn conanfile_without_requires_section_returns_empty() {
         // conanfile2.txt has only [generators], [options], [imports] — no [requires]
@@ -334,13 +334,13 @@ class MyConan(ConanFile):
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns same if not auto" — modules/manager/conan/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/conan/range.spec.ts line 5
     #[test]
     fn conan_range_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("widen"), "widen");
     }
 
-    // Ported: "defaults to bump" — modules/manager/conan/range.spec.ts line 10
+    // Ported: "defaults to bump" — lib/modules/manager/conan/range.spec.ts line 10
     #[test]
     fn conan_range_defaults_to_bump() {
         assert_eq!(get_range_strategy("auto"), "bump");

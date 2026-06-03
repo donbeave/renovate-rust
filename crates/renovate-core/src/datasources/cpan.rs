@@ -221,7 +221,7 @@ mod tests {
 
     // ── Schema tests (ported from cpan/schema.spec.ts) ────────────────────────
 
-    // Ported: "filters out entries with empty module arrays" — datasource/cpan/schema.spec.ts line 5
+    // Ported: "filters out entries with empty module arrays" — lib/modules/datasource/cpan/schema.spec.ts line 5
     #[test]
     fn schema_filters_empty_module_array() {
         let source = SourceEntry {
@@ -235,7 +235,7 @@ mod tests {
         assert!(parse_release(source).is_none());
     }
 
-    // Ported: "filters out entries where module has no version" — datasource/cpan/schema.spec.ts line 26
+    // Ported: "filters out entries where module has no version" — lib/modules/datasource/cpan/schema.spec.ts line 26
     #[test]
     fn schema_filters_empty_version() {
         let source = SourceEntry {
@@ -251,7 +251,7 @@ mod tests {
         assert!(parse_release(source).is_none());
     }
 
-    // Ported: "includes valid entries" — datasource/cpan/schema.spec.ts line 47
+    // Ported: "includes valid entries" — lib/modules/datasource/cpan/schema.spec.ts line 47
     #[test]
     fn schema_includes_valid_entries() {
         let source = SourceEntry {
@@ -274,7 +274,7 @@ mod tests {
 
     // ── HTTP tests ────────────────────────────────────────────────────────────
 
-    // Ported: "returns null for empty result" — datasource/cpan/index.spec.ts line 11
+    // Ported: "returns null for empty result" — lib/modules/datasource/cpan/index.spec.ts line 11
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let fixture = include_str!(
@@ -294,7 +294,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for 404" — datasource/cpan/index.spec.ts line 27
+    // Ported: "returns null for 404" — lib/modules/datasource/cpan/index.spec.ts line 27
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -311,7 +311,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 5xx" — datasource/cpan/index.spec.ts line 37
+    // Ported: "throws for 5xx" — lib/modules/datasource/cpan/index.spec.ts line 37
     #[tokio::test]
     async fn throws_for_5xx() {
         let server = MockServer::start().await;
@@ -326,7 +326,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null for unknown error" — datasource/cpan/index.spec.ts line 47
+    // Ported: "returns null for unknown error" — lib/modules/datasource/cpan/index.spec.ts line 47
     #[tokio::test]
     async fn returns_null_for_unknown_error() {
         let server = MockServer::start().await;
@@ -343,7 +343,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — datasource/cpan/index.spec.ts line 57
+    // Ported: "processes real data" — lib/modules/datasource/cpan/index.spec.ts line 57
     #[tokio::test]
     async fn processes_real_data() {
         let fixture = include_str!(

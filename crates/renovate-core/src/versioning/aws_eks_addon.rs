@@ -152,7 +152,7 @@ pub fn get_satisfying_version<'a>(versions: &[&'a str], range: &str) -> Option<&
 mod tests {
     use super::*;
 
-    // Ported: "should return 1.23.7 and release version" — versioning/aws-eks-addon/index.spec.ts line 5
+    // Ported: "should return 1.23.7 and release version" — lib/modules/versioning/aws-eks-addon/index.spec.ts line 5
     #[test]
     fn get_major_minor_patch_matches_renovate_aws_eks_addon_index_spec() {
         assert_eq!(get_major("v1.20.7-eksbuild.1"), Some(1));
@@ -160,7 +160,7 @@ mod tests {
         assert_eq!(get_patch("v1.20.7-eksbuild.1"), Some(7));
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/aws-eks-addon/index.spec.ts line 13
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/aws-eks-addon/index.spec.ts line 13
     #[test]
     fn is_valid_matches_renovate_aws_eks_addon_index_spec() {
         let cases = [
@@ -189,7 +189,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/aws-eks-addon/index.spec.ts line 41
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/aws-eks-addon/index.spec.ts line 41
     #[test]
     fn is_version_matches_renovate_aws_eks_addon_index_spec() {
         // isVersion has identical behavior to isValid for this module
@@ -217,7 +217,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible("$input") === $expected" — versioning/aws-eks-addon/index.spec.ts line 67
+    // Ported: "isCompatible("$input") === $expected" — lib/modules/versioning/aws-eks-addon/index.spec.ts line 67
     #[test]
     fn is_compatible_single_arg_matches_renovate_aws_eks_addon_index_spec() {
         let cases = [
@@ -246,7 +246,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible($version, $current) === $expected" — versioning/aws-eks-addon/index.spec.ts line 91
+    // Ported: "isCompatible($version, $current) === $expected" — lib/modules/versioning/aws-eks-addon/index.spec.ts line 91
     #[test]
     fn is_compatible_two_args_matches_renovate_aws_eks_addon_index_spec() {
         let cases = [
@@ -267,7 +267,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($version, $other) === $expected" — versioning/aws-eks-addon/index.spec.ts line 110
+    // Ported: "isGreaterThan($version, $other) === $expected" — lib/modules/versioning/aws-eks-addon/index.spec.ts line 110
     #[test]
     fn is_greater_than_matches_renovate_aws_eks_addon_index_spec() {
         let cases = [
@@ -289,7 +289,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion" — versioning/aws-eks-addon/index.spec.ts line 129
+    // Ported: "getSatisfyingVersion" — lib/modules/versioning/aws-eks-addon/index.spec.ts line 129
     #[test]
     fn get_satisfying_version_matches_renovate_aws_eks_addon_index_spec() {
         assert_eq!(
@@ -316,7 +316,7 @@ mod tests {
         );
     }
 
-    // Ported: "safeParse(\"$input\") === $expected" — datasource/aws-eks-addon/schema.spec.ts line 5
+    // Ported: "safeParse(\"$input\") === $expected" — lib/modules/datasource/aws-eks-addon/schema.spec.ts line 5
     #[test]
     fn eks_addons_filter_safe_parse() {
         let cases: &[(&str, bool)] = &[

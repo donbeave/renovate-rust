@@ -167,7 +167,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "parses real data" — ruby-version/index.spec.ts line 10
+    // Ported: "parses real data" — lib/modules/datasource/ruby-version/index.spec.ts line 10
     #[tokio::test]
     async fn parses_real_data() {
         let html = include_str!(
@@ -210,7 +210,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for empty result" — ruby-version/index.spec.ts line 22
+    // Ported: "returns null for empty result" — lib/modules/datasource/ruby-version/index.spec.ts line 22
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -225,7 +225,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws for 404" — ruby-version/index.spec.ts line 34
+    // Ported: "throws for 404" — lib/modules/datasource/ruby-version/index.spec.ts line 34
     #[tokio::test]
     async fn throws_for_404() {
         let server = MockServer::start().await;

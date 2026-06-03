@@ -275,7 +275,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "encodeCase" — modules/datasource/go/releases-goproxy.spec.ts line 27
+    // Ported: "encodeCase" — lib/modules/datasource/go/releases-goproxy.spec.ts line 27
     #[test]
     fn encode_module_path_all_lowercase() {
         assert_eq!(
@@ -284,7 +284,7 @@ mod tests {
         );
     }
 
-    // Ported: "encodeCase" — modules/datasource/go/releases-goproxy.spec.ts line 27
+    // Ported: "encodeCase" — lib/modules/datasource/go/releases-goproxy.spec.ts line 27
     #[test]
     fn encode_module_path_capital_letters() {
         assert_eq!(
@@ -337,7 +337,7 @@ mod tests {
 
     // ── get_source_url ────────────────────────────────────────────────────────
 
-    // Ported: "($datasource, $packageName) => $expected" — datasource/go/common.spec.ts line 5
+    // Ported: "($datasource, $packageName) => $expected" — lib/modules/datasource/go/common.spec.ts line 5
     #[test]
     fn get_source_url_maps_datasource_to_url() {
         assert_eq!(

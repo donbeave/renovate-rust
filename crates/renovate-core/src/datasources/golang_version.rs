@@ -225,7 +225,7 @@ var Releases = []*Release{
 }
 "#;
 
-    // Ported: "parses real data" — golang-version/index.spec.ts line 19
+    // Ported: "parses real data" — lib/modules/datasource/golang-version/index.spec.ts line 19
     #[test]
     fn parse_skips_future_releases() {
         let releases = parse_releases(SAMPLE).unwrap();
@@ -249,14 +249,14 @@ var Releases = []*Release{
         assert_eq!(result, Some("1.18.1".into()));
     }
 
-    // Ported: "throws ExternalHostError for invalid release with no versions" — golang-version/index.spec.ts line 56
+    // Ported: "throws ExternalHostError for invalid release with no versions" — lib/modules/datasource/golang-version/index.spec.ts line 56
     #[test]
     fn error_on_no_releases_section() {
         let err = parse_releases("no releases here").unwrap_err();
         assert!(err.to_string().contains("could not find Releases section"));
     }
 
-    // Ported: "throws ExternalHostError for invalid release with wrong termination" — golang-version/index.spec.ts line 69
+    // Ported: "throws ExternalHostError for invalid release with wrong termination" — lib/modules/datasource/golang-version/index.spec.ts line 69
     #[test]
     fn error_on_block_with_no_version() {
         let input = r#"var Releases = []*Release{
@@ -268,7 +268,7 @@ var Releases = []*Release{
         assert!(err.to_string().contains("no version"), "unexpected: {err}");
     }
 
-    // Ported: "throws ExternalHostError for zero releases extracted" — golang-version/index.spec.ts line 92
+    // Ported: "throws ExternalHostError for zero releases extracted" — lib/modules/datasource/golang-version/index.spec.ts line 92
     #[test]
     fn error_on_zero_releases_extracted() {
         let input = r#"var Releases = []*Release{
@@ -284,7 +284,7 @@ var Releases = []*Release{
         );
     }
 
-    // Ported: "throws ExternalHostError for invalid release semver" — golang-version/index.spec.ts line 102
+    // Ported: "throws ExternalHostError for invalid release semver" — lib/modules/datasource/golang-version/index.spec.ts line 102
     #[test]
     fn error_on_overflow_version_number() {
         let content = include_str!(
@@ -298,7 +298,7 @@ var Releases = []*Release{
         );
     }
 
-    // Ported: "throws ExternalHostError for invalid release format beginning" — golang-version/index.spec.ts line 122
+    // Ported: "throws ExternalHostError for invalid release format beginning" — lib/modules/datasource/golang-version/index.spec.ts line 122
     #[test]
     fn error_on_block_start_inside_block() {
         let content = include_str!(
@@ -311,7 +311,7 @@ var Releases = []*Release{
         );
     }
 
-    // Ported: "throws ExternalHostError for invalid release format" — golang-version/index.spec.ts line 132
+    // Ported: "throws ExternalHostError for invalid release format" — lib/modules/datasource/golang-version/index.spec.ts line 132
     #[test]
     fn error_on_extra_block_terminator() {
         let content = include_str!(
@@ -324,7 +324,7 @@ var Releases = []*Release{
         );
     }
 
-    // Ported: "returns null for error 404" — golang-version/index.spec.ts line 112
+    // Ported: "returns null for error 404" — lib/modules/datasource/golang-version/index.spec.ts line 112
     #[tokio::test]
     async fn fetch_releases_returns_none_for_404() {
         let server = MockServer::start().await;
@@ -339,7 +339,7 @@ var Releases = []*Release{
         assert!(result.is_none());
     }
 
-    // Ported: "supports custom registry URL" — golang-version/index.spec.ts line 36
+    // Ported: "supports custom registry URL" — lib/modules/datasource/golang-version/index.spec.ts line 36
     #[tokio::test]
     async fn fetch_releases_supports_custom_registry_url() {
         let server = MockServer::start().await;
@@ -358,7 +358,7 @@ var Releases = []*Release{
         assert_eq!(res.releases[1].version, "1.17.5");
     }
 
-    // Ported: "throws ExternalHostError for empty result" — golang-version/index.spec.ts line 82
+    // Ported: "throws ExternalHostError for empty result" — lib/modules/datasource/golang-version/index.spec.ts line 82
     #[tokio::test]
     async fn fetch_releases_errors_on_empty_response() {
         let server = MockServer::start().await;

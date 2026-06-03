@@ -69,7 +69,7 @@ pub fn match_pr_state(pr_state: &str, filter: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "should correctly map the scm-manager type of a PR with the $scmPrState to the Renovate PR type" — modules/platform/scm-manager/mapper.spec.ts line 5
+    // Ported: "should correctly map the scm-manager type of a PR with the $scmPrState to the Renovate PR type" — lib/modules/platform/scm-manager/mapper.spec.ts line 5
     //         — modules/platform/scm-manager/mapper.spec.ts line 5
     #[test]
     fn map_pr_state_all_cases() {
@@ -79,7 +79,7 @@ mod tests {
         assert_eq!(map_pr_state(ScmPrState::Merged), ("merged", false));
     }
 
-    // Ported: "map merge strategy $strategy on PR merge method $method" — modules/platform/scm-manager/utils.spec.ts line 16
+    // Ported: "map merge strategy $strategy on PR merge method $method" — lib/modules/platform/scm-manager/utils.spec.ts line 16
     //         — modules/platform/scm-manager/utils.spec.ts line 16
     #[test]
     fn get_scm_merge_method_all_cases() {
@@ -97,14 +97,14 @@ mod tests {
         assert_eq!(get_scm_merge_method(Some("squash")), Some("SQUASH"));
     }
 
-    // Ported: "adjust $body to smart link $result" — modules/platform/scm-manager/utils.spec.ts line 39
+    // Ported: "adjust $body to smart link $result" — lib/modules/platform/scm-manager/utils.spec.ts line 39
     #[test]
     fn smart_links_replaces_pull_links() {
         assert_eq!(smart_links(""), "");
         assert_eq!(smart_links("](../pull/"), "](pulls/");
     }
 
-    // Ported: "match scm pr state $pr.state to renovate pr state $state" — modules/platform/scm-manager/utils.spec.ts line 61
+    // Ported: "match scm pr state $pr.state to renovate pr state $state" — lib/modules/platform/scm-manager/utils.spec.ts line 61
     //         — modules/platform/scm-manager/utils.spec.ts line 61
     #[test]
     fn match_pr_state_all_cases() {
@@ -211,7 +211,7 @@ mod get_repo_url_tests {
     const GIT_HTTP: &str = "http://localhost:8081/scm/repo/default/repo";
     const GIT_SSH: &str = "ssh://localhost:2222/scm/repo/default/repo";
 
-    // Ported: "should use the provided ssh link" — scm-manager/utils.spec.ts line 158
+    // Ported: "should use the provided ssh link" — lib/modules/platform/scm-manager/utils.spec.ts line 158
     #[test]
     fn get_repo_url_uses_ssh_link() {
         let links = vec![link("http", GIT_HTTP), link("ssh", GIT_SSH)];
@@ -219,7 +219,7 @@ mod get_repo_url_tests {
         assert_eq!(result, GIT_SSH);
     }
 
-    // Ported: "should throw error because of missing SSH link" — scm-manager/utils.spec.ts line 132
+    // Ported: "should throw error because of missing SSH link" — lib/modules/platform/scm-manager/utils.spec.ts line 132
     #[test]
     fn get_repo_url_errors_missing_ssh() {
         let links = vec![link("http", GIT_HTTP)];
@@ -227,7 +227,7 @@ mod get_repo_url_tests {
         assert_eq!(err, GetRepoUrlError::MissingSshLink);
     }
 
-    // Ported: "should throw error for option $gitUrl, because protocol links are missing" — scm-manager/utils.spec.ts line 117
+    // Ported: "should throw error for option $gitUrl, because protocol links are missing" — lib/modules/platform/scm-manager/utils.spec.ts line 117
     #[test]
     fn get_repo_url_errors_no_http_link() {
         let links = vec![link("ssh", GIT_SSH)]; // no http link
@@ -235,7 +235,7 @@ mod get_repo_url_tests {
         assert_eq!(err, GetRepoUrlError::MissingHttpLink);
     }
 
-    // Ported: "should throw error because of malformed HTTP link with option $gitUrl" — scm-manager/utils.spec.ts line 192
+    // Ported: "should throw error because of malformed HTTP link with option $gitUrl" — lib/modules/platform/scm-manager/utils.spec.ts line 192
     #[test]
     fn get_repo_url_errors_malformed_http_link() {
         let links = vec![link("http", "invalid url")];
@@ -243,7 +243,7 @@ mod get_repo_url_tests {
         assert_eq!(err, GetRepoUrlError::MalformedHttpLink);
     }
 
-    // Ported: "should use empty string, because username was not provided with option $gitUrl" — scm-manager/utils.spec.ts line 213
+    // Ported: "should use empty string, because username was not provided with option $gitUrl" — lib/modules/platform/scm-manager/utils.spec.ts line 213
     #[test]
     fn get_repo_url_no_username_gives_plain_url() {
         let links = vec![link("http", GIT_HTTP)];
@@ -251,7 +251,7 @@ mod get_repo_url_tests {
         assert_eq!(result, GIT_HTTP);
     }
 
-    // Ported: "should provide the HTTP link with username, for option $gitUrl" — scm-manager/utils.spec.ts line 258
+    // Ported: "should provide the HTTP link with username, for option $gitUrl" — lib/modules/platform/scm-manager/utils.spec.ts line 258
     #[test]
     fn get_repo_url_with_username_and_token() {
         let links = vec![link("http", GIT_HTTP)];

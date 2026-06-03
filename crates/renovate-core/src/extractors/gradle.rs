@@ -1644,7 +1644,7 @@ mod tests {
 
     // ── build file tests ──────────────────────────────────────────────────────
 
-    // Ported: "extracts from cross-referenced files" — gradle/extract.spec.ts line 97
+    // Ported: "extracts from cross-referenced files" — lib/modules/manager/gradle/extract.spec.ts line 97
     #[test]
     fn extracts_implementation_single_quote() {
         let content = "implementation 'com.google.guava:guava:31.0-jre'\n";
@@ -1655,7 +1655,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "resolves versions in build.gradle.kts" — gradle/extract.spec.ts line 125
+    // Ported: "resolves versions in build.gradle.kts" — lib/modules/manager/gradle/extract.spec.ts line 125
     #[test]
     fn extracts_implementation_double_quote_parens() {
         let content = r#"implementation("com.google.guava:guava:31.0-jre")"#;
@@ -1664,7 +1664,7 @@ mod tests {
         assert_eq!(deps[0].dep_name, "com.google.guava:guava");
     }
 
-    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
+    // Ported: "ensures depType is assigned" — lib/modules/manager/gradle/extract.spec.ts line 385
     #[test]
     fn extracts_multiple_configs() {
         let content = r#"
@@ -1689,7 +1689,7 @@ dependencies {
         );
     }
 
-    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
+    // Ported: "skips versions composed from multiple variables" — lib/modules/manager/gradle/extract.spec.ts line 71
     #[test]
     fn skips_variable_references() {
         let content = r#"implementation "com.example:mylib:$version""#;
@@ -1701,7 +1701,7 @@ dependencies {
         );
     }
 
-    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
+    // Ported: "skips versions composed from multiple variables" — lib/modules/manager/gradle/extract.spec.ts line 71
     #[test]
     fn skips_dynamic_versions() {
         let content = "implementation 'org.example:mylib:1.+'\n";
@@ -1710,7 +1710,7 @@ dependencies {
         assert_eq!(deps[0].skip_reason, Some(GradleSkipReason::DynamicVersion));
     }
 
-    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
+    // Ported: "skips versions composed from multiple variables" — lib/modules/manager/gradle/extract.spec.ts line 71
     #[test]
     fn skips_snapshot_versions() {
         let content = "implementation 'com.example:mylib:1.0.0-SNAPSHOT'\n";
@@ -1719,7 +1719,7 @@ dependencies {
         assert_eq!(deps[0].skip_reason, Some(GradleSkipReason::DynamicVersion));
     }
 
-    // Ported: "extracts from cross-referenced files" — gradle/extract.spec.ts line 97
+    // Ported: "extracts from cross-referenced files" — lib/modules/manager/gradle/extract.spec.ts line 97
     #[test]
     fn strips_classifier() {
         let content = "implementation 'junit:junit:4.13.2@jar'\n";
@@ -1729,7 +1729,7 @@ dependencies {
         assert_eq!(deps[0].current_value, "4.13.2");
     }
 
-    // Ported: "filters duplicate dependency findings" — gradle/extract.spec.ts line 341
+    // Ported: "filters duplicate dependency findings" — lib/modules/manager/gradle/extract.spec.ts line 341
     #[test]
     fn deduplicates_same_dep() {
         let content = r#"
@@ -1740,7 +1740,7 @@ testImplementation 'junit:junit:4.13.2'
         assert_eq!(deps.len(), 1);
     }
 
-    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
+    // Ported: "ensures depType is assigned" — lib/modules/manager/gradle/extract.spec.ts line 385
     #[test]
     fn classpath_dependency() {
         let content = "classpath 'com.android.tools.build:gradle:7.4.0'\n";
@@ -1751,7 +1751,7 @@ testImplementation 'junit:junit:4.13.2'
 
     // ── plugins {} block tests ────────────────────────────────────────────────
 
-    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
+    // Ported: "ensures depType is assigned" — lib/modules/manager/gradle/extract.spec.ts line 385
     #[test]
     fn plugins_block_single_quote() {
         let content = r#"
@@ -1769,7 +1769,7 @@ plugins {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "resolves versions in build.gradle.kts" — gradle/extract.spec.ts line 125
+    // Ported: "resolves versions in build.gradle.kts" — lib/modules/manager/gradle/extract.spec.ts line 125
     #[test]
     fn plugins_block_double_quote_parens() {
         let content = r#"
@@ -1787,7 +1787,7 @@ plugins {
             && d.current_value == "1.9.20"));
     }
 
-    // Ported: "ensures depType is assigned" — gradle/extract.spec.ts line 385
+    // Ported: "ensures depType is assigned" — lib/modules/manager/gradle/extract.spec.ts line 385
     #[test]
     fn plugins_and_deps_in_same_file() {
         let content = r#"
@@ -1805,7 +1805,7 @@ dependencies {
         assert!(deps.iter().any(|d| d.dep_name == "com.google.guava:guava"));
     }
 
-    // Ported: "skips versions composed from multiple variables" — gradle/extract.spec.ts line 71
+    // Ported: "skips versions composed from multiple variables" — lib/modules/manager/gradle/extract.spec.ts line 71
     #[test]
     fn plugins_block_variable_version_skipped() {
         let content = r#"plugins { id 'org.example.plugin' version "$pluginVersion" }"#;
@@ -1819,7 +1819,7 @@ dependencies {
 
     // ── version catalog tests ─────────────────────────────────────────────────
 
-    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
+    // Ported: "supports versions declared as single string" — lib/modules/manager/gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_inline_string_form() {
         let content = r#"
@@ -1836,7 +1836,7 @@ junit = "junit:junit:4.13.2"
         assert_eq!(guava.current_value, "31.0-jre");
     }
 
-    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
+    // Ported: "supports versions declared as single string" — lib/modules/manager/gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_table_form_inline_version() {
         let content = r#"
@@ -1849,7 +1849,7 @@ commons-io = { module = "org.apache.commons:commons-io", version = "2.11.0" }
         assert_eq!(deps[0].current_value, "2.11.0");
     }
 
-    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
+    // Ported: "supports versions declared as single string" — lib/modules/manager/gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_table_form_version_ref() {
         let content = r#"
@@ -1865,7 +1865,7 @@ guava = { module = "com.google.guava:guava", version.ref = "guava" }
         assert_eq!(deps[0].current_value, "31.0-jre");
     }
 
-    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
+    // Ported: "supports versions declared as single string" — lib/modules/manager/gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_plugins_section_table_version_ref() {
         let content = r#"
@@ -1896,7 +1896,7 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
         );
     }
 
-    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
+    // Ported: "supports versions declared as single string" — lib/modules/manager/gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_plugins_section_string_form() {
         let content = r#"
@@ -1912,7 +1912,7 @@ spring-boot = "org.springframework.boot:3.2.0"
         assert_eq!(deps[0].current_value, "3.2.0");
     }
 
-    // Ported: "supports versions declared as single string" — gradle/extract/catalog.spec.ts line 5
+    // Ported: "supports versions declared as single string" — lib/modules/manager/gradle/extract/catalog.spec.ts line 5
     #[test]
     fn catalog_plugins_section_table_inline_version() {
         let content = r#"
@@ -1928,14 +1928,14 @@ dependency-management = { id = "io.spring.dependency-management", version = "1.1
         assert_eq!(deps[0].current_value, "1.1.4");
     }
 
-    // Ported: "ignores empty TOML file" — gradle/extract/catalog.spec.ts line 180
+    // Ported: "ignores empty TOML file" — lib/modules/manager/gradle/extract/catalog.spec.ts line 180
     #[test]
     fn catalog_empty_toml_returns_empty() {
         let deps = extract_version_catalog("");
         assert!(deps.is_empty());
     }
 
-    // Ported: "skips version entries with no resolvable literal value" — gradle/extract/catalog.spec.ts line 185
+    // Ported: "skips version entries with no resolvable literal value" — lib/modules/manager/gradle/extract/catalog.spec.ts line 185
     #[test]
     fn catalog_skips_non_literal_versions() {
         let content = r#"
@@ -1948,7 +1948,7 @@ bad = { reject = "1.0.0" }
         assert!(deps.is_empty());
     }
 
-    // Ported: "deletes commit message for plugins with version reference" — gradle/extract/catalog.spec.ts line 134
+    // Ported: "deletes commit message for plugins with version reference" — lib/modules/manager/gradle/extract/catalog.spec.ts line 134
     #[test]
     fn catalog_plugin_version_ref_deletes_commit_message() {
         let content = r#"[versions]
@@ -1996,7 +1996,7 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
         assert_eq!(plugin.shared_variable_name.as_deref(), Some("detekt"));
     }
 
-    // Ported: "changes the dependency version, not the comment version" — gradle/extract/catalog.spec.ts line 203
+    // Ported: "changes the dependency version, not the comment version" — lib/modules/manager/gradle/extract/catalog.spec.ts line 203
     #[test]
     fn catalog_version_position_ignores_comments() {
         let content = r#"[versions]
@@ -2048,7 +2048,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(mocha_dep.file_replace_position, Some(82));
     }
 
-    // Ported: "supports templated toml" — gradle/extract/catalog.spec.ts line 254
+    // Ported: "supports templated toml" — lib/modules/manager/gradle/extract/catalog.spec.ts line 254
     #[test]
     fn catalog_templated_toml() {
         let content = r#"[versions]
@@ -2103,35 +2103,35 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(mocha_dep.file_replace_position, Some(82));
     }
 
-    // Ported: "returns null" — gradle/extract.spec.ts line 37
+    // Ported: "returns null" — lib/modules/manager/gradle/extract.spec.ts line 37
     #[test]
     fn empty_returns_empty() {
         assert!(extract_build_file("").is_empty());
         assert!(extract_version_catalog("").is_empty());
     }
 
-    // Ported: "replaces" — modules/manager/gradle/update.spec.ts line 4
+    // Ported: "replaces" — lib/modules/manager/gradle/update.spec.ts line 4
     #[test]
     fn gradle_update_replaces_version() {
         let result = update_dependency("###1.2.3###", 3, "1.2.3", "1.2.4", None, None);
         assert_eq!(result.as_deref(), Some("###1.2.4###"));
     }
 
-    // Ported: "groups" — modules/manager/gradle/update.spec.ts line 20
+    // Ported: "groups" — lib/modules/manager/gradle/update.spec.ts line 20
     #[test]
     fn gradle_update_groups_shared_variable() {
         let result = update_dependency("###1.2.4###", 3, "1.2.3", "1.2.5", Some("group"), None);
         assert_eq!(result.as_deref(), Some("###1.2.5###"));
     }
 
-    // Ported: "returns same content" — modules/manager/gradle/update.spec.ts line 37
+    // Ported: "returns same content" — lib/modules/manager/gradle/update.spec.ts line 37
     #[test]
     fn gradle_update_returns_same_when_already_updated() {
         let result = update_dependency("###1.2.4###", 3, "1.2.3", "1.2.4", None, None);
         assert_eq!(result.as_deref(), Some("###1.2.4###"));
     }
 
-    // Ported: "returns null" — modules/manager/gradle/update.spec.ts line 54
+    // Ported: "returns null" — lib/modules/manager/gradle/update.spec.ts line 54
     #[test]
     fn gradle_update_returns_null_for_wrong_position() {
         // Version at offset doesn't match current_value or new_value
@@ -2142,14 +2142,14 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(r2.is_none());
     }
 
-    // Ported: "should return null for replacement" — modules/manager/gradle/update.spec.ts line 84
+    // Ported: "should return null for replacement" — lib/modules/manager/gradle/update.spec.ts line 84
     #[test]
     fn gradle_update_returns_null_for_replacement() {
         let result = update_dependency("", 0, "", "", None, Some("replacement"));
         assert!(result.is_none());
     }
 
-    // Ported: "extracts the actual version" — modules/manager/gradle/utils.spec.ts line 23
+    // Ported: "extracts the actual version" — lib/modules/manager/gradle/utils.spec.ts line 23
     #[test]
     fn gradle_version_like_substring_valid_versions() {
         let inputs = [
@@ -2170,7 +2170,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         }
     }
 
-    // Ported: "returns null for invalid inputs" — modules/manager/gradle/utils.spec.ts line 41
+    // Ported: "returns null for invalid inputs" — lib/modules/manager/gradle/utils.spec.ts line 41
     #[test]
     fn gradle_version_like_substring_invalid_inputs() {
         let invalid = ["", "foobar", "latest", "[1.6.0, ]  ,  abc"];
@@ -2183,7 +2183,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         }
     }
 
-    // Ported: "$input" (isDependencyString it.each) — modules/manager/gradle/utils.spec.ts line 57
+    // Ported: "$input" (isDependencyString it.each) — lib/modules/manager/gradle/utils.spec.ts line 57
     #[test]
     fn gradle_is_dependency_string() {
         // Valid
@@ -2214,7 +2214,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(!is_gradle_dependency_string("foo:bar:1.2.3@zip@foo"));
     }
 
-    // Ported: "$input" (parseDependencyString it.each) — modules/manager/gradle/utils.spec.ts line 85
+    // Ported: "$input" (parseDependencyString it.each) — lib/modules/manager/gradle/utils.spec.ts line 85
     #[test]
     fn gradle_parse_dependency_string() {
         let p = |i: &str| parse_gradle_dependency_string(i);
@@ -2272,7 +2272,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(p("-Xep:ParameterName:OFF"), None);
     }
 
-    // Ported: "filetype checks" — modules/manager/gradle/utils.spec.ts line 105
+    // Ported: "filetype checks" — lib/modules/manager/gradle/utils.spec.ts line 105
     #[test]
     fn gradle_filetype_checks() {
         assert!(is_gradle_script_file("/a/Somefile.gradle.kts"));
@@ -2289,7 +2289,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(is_toml_file("/a/Somefile.toml"));
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
+    // Ported: "reorderFiles" — lib/modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_basic() {
         assert_eq!(
@@ -2310,7 +2310,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
+    // Ported: "reorderFiles" — lib/modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_nested() {
         assert_eq!(
@@ -2337,7 +2337,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
+    // Ported: "reorderFiles" — lib/modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_alphabetical() {
         assert_eq!(
@@ -2364,7 +2364,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
+    // Ported: "reorderFiles" — lib/modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_independent_subfolders() {
         assert_eq!(
@@ -2407,7 +2407,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "reorderFiles" — modules/manager/gradle/utils.spec.ts line 120
+    // Ported: "reorderFiles" — lib/modules/manager/gradle/utils.spec.ts line 120
     #[test]
     fn gradle_reorder_files_nested_props_and_build() {
         assert_eq!(
@@ -2440,7 +2440,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "getVars" — modules/manager/gradle/utils.spec.ts line 250
+    // Ported: "getVars" — lib/modules/manager/gradle/utils.spec.ts line 250
     #[test]
     fn gradle_get_vars() {
         let mut registry: VariableRegistry = HashMap::new();
@@ -2534,7 +2534,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(res.len(), 4);
     }
 
-    // Ported: "empty registry" — modules/manager/gradle/utils.spec.ts line 276
+    // Ported: "empty registry" — lib/modules/manager/gradle/utils.spec.ts line 276
     #[test]
     fn gradle_update_vars_empty_registry() {
         let mut registry: VariableRegistry = HashMap::new();
@@ -2554,7 +2554,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(registry["/foo/bar/baz"]["qux"].value, "qux");
     }
 
-    // Ported: "updates the registry" — modules/manager/gradle/utils.spec.ts line 285
+    // Ported: "updates the registry" — lib/modules/manager/gradle/utils.spec.ts line 285
     #[test]
     fn gradle_update_vars_merges() {
         let mut registry: VariableRegistry = HashMap::new();
@@ -2604,7 +2604,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(res.get("qux").map(|v| v.value.as_str()), Some("qux"));
     }
 
-    // Ported: "no default catalog file" — modules/manager/gradle/utils.spec.ts line 306
+    // Ported: "no default catalog file" — lib/modules/manager/gradle/utils.spec.ts line 306
     #[test]
     fn gradle_update_vars_from_default_catalog_no_catalog() {
         let mut registry: VariableRegistry = HashMap::new();
@@ -2617,7 +2617,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(registry.is_empty());
     }
 
-    // Ported: "adds variables with default \"libs\" prefix" — modules/manager/gradle/utils.spec.ts line 317
+    // Ported: "adds variables with default \"libs\" prefix" — lib/modules/manager/gradle/utils.spec.ts line 317
     #[test]
     fn gradle_update_vars_from_default_catalog_default_prefix() {
         let mut registry: VariableRegistry = HashMap::new();
@@ -2662,7 +2662,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(res.len(), 2);
     }
 
-    // Ported: "adds variables with custom libraries extension name" — modules/manager/gradle/utils.spec.ts line 357
+    // Ported: "adds variables with custom libraries extension name" — lib/modules/manager/gradle/utils.spec.ts line 357
     #[test]
     fn gradle_update_vars_from_default_catalog_custom_prefix() {
         let mut registry: VariableRegistry = HashMap::new();
@@ -2729,7 +2729,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
 
     // ── GCV consistent-versions-plugin tests ─────────────────────────────────
 
-    // Ported: "works for sub folders" — gradle/extract/consistent-versions-plugin.spec.ts line 10
+    // Ported: "works for sub folders" — lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts line 10
     #[test]
     fn gcv_uses_gcv_sub_folders() {
         let mut files = std::collections::HashMap::new();
@@ -2748,7 +2748,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(!uses_gcv("othersub/versions.props", &files));
     }
 
-    // Ported: "detects lock file header introduced with gradle-consistent-versions version 2.20.0" — consistent-versions-plugin.spec.ts line 24
+    // Ported: "detects lock file header introduced with gradle-consistent-versions version 2.20.0" — lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts line 24
     #[test]
     fn gcv_uses_gcv_header_2_20() {
         let mut files = std::collections::HashMap::new();
@@ -2759,7 +2759,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(uses_gcv("versions.props", &files));
     }
 
-    // Ported: "detects lock file header introduced with gradle-consistent-versions version 2.23.0" — consistent-versions-plugin.spec.ts line 36
+    // Ported: "detects lock file header introduced with gradle-consistent-versions version 2.23.0" — lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts line 36
     #[test]
     fn gcv_uses_gcv_header_2_23() {
         let mut files = std::collections::HashMap::new();
@@ -2770,7 +2770,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(uses_gcv("versions.props", &files));
     }
 
-    // Ported: "correct position for CRLF and LF" — consistent-versions-plugin.spec.ts line 48
+    // Ported: "correct position for CRLF and LF" — lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts line 48
     #[test]
     fn gcv_parse_props_file_positions() {
         // CRLF: "a.b:c.d=1\r\na.b:c.e=2" → filePos of a.b:c.e=2 is at char 19
@@ -2789,7 +2789,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(exact_lf["a.b:c.e"].file_pos, 18);
     }
 
-    // Ported: "test bogus input lines" — consistent-versions-plugin.spec.ts line 60
+    // Ported: "test bogus input lines" — lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts line 60
     #[test]
     fn gcv_parse_bogus_input() {
         let props_input = "# comment:foo.bar = 1\n123.foo:bar = 2\nthis has:spaces = 3\n starts.with:space = 4\ncontains(special):chars = 5\na* = 6\nthis.is:valid.dep = 7\nvalid.glob:* = 8\n";
@@ -2845,7 +2845,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         }
     }
 
-    // Ported: "$input | $output" — gradle/extract.spec.ts line 568
+    // Ported: "$input | $output" — lib/modules/manager/gradle/extract.spec.ts line 568
     #[test]
     fn content_descriptor_simple_matches() {
         let cases: Vec<(&str, bool, Option<Vec<ContentDescriptorSpec>>)> = vec![
@@ -3077,7 +3077,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         }
     }
 
-    // Ported: "if both includes and excludes exist, dep must match include and not match exclude" — gradle/extract.spec.ts line 609
+    // Ported: "if both includes and excludes exist, dep must match include and not match exclude" — lib/modules/manager/gradle/extract.spec.ts line 609
     #[test]
     fn content_descriptor_both_includes_and_excludes() {
         let dep = cd_dep("foo:bar:1.2.3");
@@ -3121,7 +3121,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(!result);
     }
 
-    // Ported: "if only includes exist, dep must match at least one include" — gradle/extract.spec.ts line 635
+    // Ported: "if only includes exist, dep must match at least one include" — lib/modules/manager/gradle/extract.spec.ts line 635
     #[test]
     fn content_descriptor_only_includes() {
         let dep = cd_dep("foo:bar:1.2.3");
@@ -3171,7 +3171,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(!result);
     }
 
-    // Ported: "if only excludes exist, dep must match not match any exclude" — gradle/extract.spec.ts line 653
+    // Ported: "if only excludes exist, dep must match not match any exclude" — lib/modules/manager/gradle/extract.spec.ts line 653
     #[test]
     fn content_descriptor_only_excludes() {
         let dep = cd_dep("foo:bar:1.2.3");
@@ -3221,7 +3221,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert!(result);
     }
 
-    // Ported: "deduplicates registry urls" — gradle/extract.spec.ts line 414
+    // Ported: "deduplicates registry urls" — lib/modules/manager/gradle/extract.spec.ts line 414
     #[test]
     fn registry_urls_deduplicate() {
         let registries = vec![
@@ -3280,7 +3280,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "supports separate registry URLs for plugins" — gradle/extract.spec.ts line 507
+    // Ported: "supports separate registry URLs for plugins" — lib/modules/manager/gradle/extract.spec.ts line 507
     #[test]
     fn registry_urls_separate_plugin_scopes() {
         let registries = vec![
@@ -3327,7 +3327,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         );
     }
 
-    // Ported: "exclusiveContent" — gradle/extract.spec.ts line 775
+    // Ported: "exclusiveContent" — lib/modules/manager/gradle/extract.spec.ts line 775
     #[test]
     fn registry_urls_exclusive_content() {
         let registries = vec![
@@ -3366,7 +3366,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
         assert_eq!(urls, vec!["https://dl.google.com/android/maven2/"]);
     }
 
-    // Ported: "exclusiveContent with repeated repository definition" — gradle/extract.spec.ts line 823
+    // Ported: "exclusiveContent with repeated repository definition" — lib/modules/manager/gradle/extract.spec.ts line 823
     #[test]
     fn registry_urls_exclusive_content_repeated_repo() {
         let registries = vec![
@@ -3404,7 +3404,7 @@ mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.r
     }
 }
 
-// Ported: "supports multiple levels of glob" — consistent-versions-plugin.spec.ts line 97
+// Ported: "supports multiple levels of glob" — lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts line 97
 #[test]
 fn gcv_supports_multiple_glob_levels() {
     let props = "org.apache.* = 4\norg.apache.lucene:* = 3\norg.apache.lucene:a.* = 2\norg.apache.lucene:a.b = 1\norg.apache.foo*:* = 5\n";

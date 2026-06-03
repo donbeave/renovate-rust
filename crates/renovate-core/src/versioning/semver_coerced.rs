@@ -233,68 +233,68 @@ pub fn sort_versions(a: &str, b: &str) -> Ordering {
 mod tests {
     use super::*;
 
-    // Ported: "should return true for strictly equal versions" — versioning/semver-coerced/index.spec.ts line 5
+    // Ported: "should return true for strictly equal versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 5
     #[test]
     fn equals_returns_true_for_strictly_equal_versions() {
         assert!(equals("1.0.0", "1.0.0"));
     }
 
-    // Ported: "should return true for non-strictly equal versions" — versioning/semver-coerced/index.spec.ts line 9
+    // Ported: "should return true for non-strictly equal versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 9
     #[test]
     fn equals_returns_true_for_non_strictly_equal_versions() {
         assert!(equals("v1.0", "1.0.0"));
         assert!(equals("v1.0", "v1.x"));
     }
 
-    // Ported: "should return false for non-equal versions" — versioning/semver-coerced/index.spec.ts line 14
+    // Ported: "should return false for non-equal versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 14
     #[test]
     fn equals_returns_false_for_non_equal_versions() {
         assert!(!equals("2.0.1", "2.3.0"));
     }
 
-    // Ported: "invalid version" — versioning/semver-coerced/index.spec.ts line 18
+    // Ported: "invalid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 18
     #[test]
     fn equals_returns_false_for_invalid_version() {
         assert!(!equals("xxx", "1.2.3"));
     }
 
-    // Ported: "should return major version number for strict semver" — versioning/semver-coerced/index.spec.ts line 24
+    // Ported: "should return major version number for strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 24
     #[test]
     fn get_major_returns_major_for_strict_semver() {
         assert_eq!(get_major("1.0.2"), Some(1));
     }
 
-    // Ported: "should return major version number for non-strict semver" — versioning/semver-coerced/index.spec.ts line 28
+    // Ported: "should return major version number for non-strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 28
     #[test]
     fn get_major_returns_major_for_non_strict_semver() {
         assert_eq!(get_major("v3.1"), Some(3));
     }
 
-    // Ported: "invalid version" — versioning/semver-coerced/index.spec.ts line 32
+    // Ported: "invalid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 32
     #[test]
     fn get_major_returns_none_for_invalid_version() {
         assert_eq!(get_major("xxx"), None);
     }
 
-    // Ported: "should return minor version number for strict semver" — versioning/semver-coerced/index.spec.ts line 38
+    // Ported: "should return minor version number for strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 38
     #[test]
     fn get_minor_returns_minor_for_strict_semver() {
         assert_eq!(get_minor("1.0.2"), Some(0));
     }
 
-    // Ported: "should return minor version number for non-strict semver" — versioning/semver-coerced/index.spec.ts line 42
+    // Ported: "should return minor version number for non-strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 42
     #[test]
     fn get_minor_returns_minor_for_non_strict_semver() {
         assert_eq!(get_minor("v3.1"), Some(1));
     }
 
-    // Ported: "invalid version" — versioning/semver-coerced/index.spec.ts line 46
+    // Ported: "invalid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 46
     #[test]
     fn get_minor_returns_none_for_invalid_version() {
         assert_eq!(get_minor("xxx"), None);
     }
 
-    // Ported: "getPatch(\"$version\") === $expected" — versioning/semver-coerced/index.spec.ts line 52
+    // Ported: "getPatch(\"$version\") === $expected" — lib/modules/versioning/semver-coerced/index.spec.ts line 52
     #[test]
     fn get_patch_matches_renovate_semver_coerced_spec() {
         let cases = [
@@ -321,111 +321,111 @@ mod tests {
         }
     }
 
-    // Ported: "should return false for patch updates" — versioning/semver-coerced/index.spec.ts line 76
+    // Ported: "should return false for patch updates" — lib/modules/versioning/semver-coerced/index.spec.ts line 76
     #[test]
     fn is_breaking_returns_false_for_patch_updates() {
         assert!(!is_breaking("1.0", "1.0.1"));
     }
 
-    // Ported: "should return false for minor updates" — versioning/semver-coerced/index.spec.ts line 80
+    // Ported: "should return false for minor updates" — lib/modules/versioning/semver-coerced/index.spec.ts line 80
     #[test]
     fn is_breaking_returns_false_for_minor_updates() {
         assert!(!is_breaking("1.0", "1.1"));
     }
 
-    // Ported: "should return true for major updates" — versioning/semver-coerced/index.spec.ts line 84
+    // Ported: "should return true for major updates" — lib/modules/versioning/semver-coerced/index.spec.ts line 84
     #[test]
     fn is_breaking_returns_true_for_major_updates() {
         assert!(is_breaking("1.0.0", "2"));
     }
 
-    // Ported: "should return true for major updates from v0.x" — versioning/semver-coerced/index.spec.ts line 88
+    // Ported: "should return true for major updates from v0.x" — lib/modules/versioning/semver-coerced/index.spec.ts line 88
     #[test]
     fn is_breaking_returns_true_for_major_updates_from_v0() {
         assert!(is_breaking("0.0.0", "1.0.0"));
     }
 
-    // Ported: "should return true for major updates within v0.x" — versioning/semver-coerced/index.spec.ts line 92
+    // Ported: "should return true for major updates within v0.x" — lib/modules/versioning/semver-coerced/index.spec.ts line 92
     #[test]
     fn is_breaking_returns_true_for_major_updates_within_v0() {
         assert!(is_breaking("0.1", "0.2.1"));
     }
 
-    // Ported: "should return true for strict semver" — versioning/semver-coerced/index.spec.ts line 98
+    // Ported: "should return true for strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 98
     #[test]
     fn is_compatible_returns_true_for_strict_semver() {
         assert!(is_compatible("1.0.2"));
     }
 
-    // Ported: "should return true for non-strict semver" — versioning/semver-coerced/index.spec.ts line 102
+    // Ported: "should return true for non-strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 102
     #[test]
     fn is_compatible_returns_true_for_non_strict_semver() {
         assert!(is_compatible("v3.1.2-foo"));
     }
 
-    // Ported: "should return false for non-semver" — versioning/semver-coerced/index.spec.ts line 106
+    // Ported: "should return false for non-semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 106
     #[test]
     fn is_compatible_returns_false_for_non_semver() {
         assert!(!is_compatible("foo"));
     }
 
-    // Ported: "should return true for a greater version in strict semver" — versioning/semver-coerced/index.spec.ts line 112
+    // Ported: "should return true for a greater version in strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 112
     #[test]
     fn is_greater_than_returns_true_for_greater_strict_semver() {
         assert!(is_greater_than("1.0.2", "1.0.0"));
     }
 
-    // Ported: "should return false for lower version in strict semver" — versioning/semver-coerced/index.spec.ts line 116
+    // Ported: "should return false for lower version in strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 116
     #[test]
     fn is_greater_than_returns_false_for_lower_strict_semver() {
         assert!(!is_greater_than("3.1.2", "4.1.0"));
     }
 
-    // Ported: "should return false if version cannot be coerced" — versioning/semver-coerced/index.spec.ts line 120
+    // Ported: "should return false if version cannot be coerced" — lib/modules/versioning/semver-coerced/index.spec.ts line 120
     #[test]
     fn is_greater_than_returns_false_if_version_cannot_be_coerced() {
         assert!(!is_greater_than("e.e.e", "4.1.0"));
     }
 
-    // Ported: "should return true for a lower version in strict semver" — versioning/semver-coerced/index.spec.ts line 126
+    // Ported: "should return true for a lower version in strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 126
     #[test]
     fn is_less_than_range_returns_true_for_lower_strict_semver() {
         assert!(is_less_than_range("1.0.2", "~2.0"));
     }
 
-    // Ported: "should return false for in-range version in strict semver" — versioning/semver-coerced/index.spec.ts line 130
+    // Ported: "should return false for in-range version in strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 130
     #[test]
     fn is_less_than_range_returns_false_for_in_range_strict_semver() {
         assert!(!is_less_than_range("3.0.2", "~3.0"));
     }
 
-    // Ported: "invalid version" — versioning/semver-coerced/index.spec.ts line 134
+    // Ported: "invalid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 134
     #[test]
     fn is_less_than_range_returns_false_for_invalid_version() {
         assert!(!is_less_than_range("xxx", "1.2.3"));
     }
 
-    // Ported: "returns true if naked version" — versioning/semver-coerced/index.spec.ts line 140
+    // Ported: "returns true if naked version" — lib/modules/versioning/semver-coerced/index.spec.ts line 140
     #[test]
     fn is_single_version_returns_true_for_naked_version() {
         assert!(is_single_version("1.2.3"));
         assert!(is_single_version("1.2.3-alpha.1"));
     }
 
-    // Ported: "returns false if equals" — versioning/semver-coerced/index.spec.ts line 145
+    // Ported: "returns false if equals" — lib/modules/versioning/semver-coerced/index.spec.ts line 145
     #[test]
     fn is_single_version_returns_false_if_equals() {
         assert!(!is_single_version("=1.2.3"));
         assert!(!is_single_version("= 1.2.3"));
     }
 
-    // Ported: "returns false when not version" — versioning/semver-coerced/index.spec.ts line 150
+    // Ported: "returns false when not version" — lib/modules/versioning/semver-coerced/index.spec.ts line 150
     #[test]
     fn is_single_version_returns_false_when_not_version() {
         assert!(!is_single_version("~1.0"));
     }
 
-    // Ported: "isStable(\"$version\") === $expected" — versioning/semver-coerced/index.spec.ts line 156
+    // Ported: "isStable(\"$version\") === $expected" — lib/modules/versioning/semver-coerced/index.spec.ts line 156
     #[test]
     fn is_stable_matches_renovate_semver_coerced_spec() {
         let cases = [
@@ -451,37 +451,37 @@ mod tests {
         }
     }
 
-    // Ported: "should return null for non-digit version strings" — versioning/semver-coerced/index.spec.ts line 179
+    // Ported: "should return null for non-digit version strings" — lib/modules/versioning/semver-coerced/index.spec.ts line 179
     #[test]
     fn is_valid_returns_false_for_non_digit_version_strings() {
         assert!(!is_valid("version two"));
     }
 
-    // Ported: "should return null for irregular version strings" — versioning/semver-coerced/index.spec.ts line 183
+    // Ported: "should return null for irregular version strings" — lib/modules/versioning/semver-coerced/index.spec.ts line 183
     #[test]
     fn is_valid_returns_false_for_irregular_version_strings() {
         assert!(!is_valid("17.04.0"));
     }
 
-    // Ported: "should support strict semver" — versioning/semver-coerced/index.spec.ts line 187
+    // Ported: "should support strict semver" — lib/modules/versioning/semver-coerced/index.spec.ts line 187
     #[test]
     fn is_valid_supports_strict_semver() {
         assert!(is_valid("1.2.3"));
     }
 
-    // Ported: "should treat semver with dash as a valid version" — versioning/semver-coerced/index.spec.ts line 191
+    // Ported: "should treat semver with dash as a valid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 191
     #[test]
     fn is_valid_treats_semver_with_dash_as_valid_version() {
         assert!(is_valid("1.2.3-foo"));
     }
 
-    // Ported: "should treat semver without dash as a valid version" — versioning/semver-coerced/index.spec.ts line 195
+    // Ported: "should treat semver without dash as a valid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 195
     #[test]
     fn is_valid_treats_semver_without_dash_as_valid_version() {
         assert!(is_valid("1.2.3foo"));
     }
 
-    // Ported: "should treat ranges as valid versions" — versioning/semver-coerced/index.spec.ts line 199
+    // Ported: "should treat ranges as valid versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 199
     #[test]
     fn is_valid_treats_ranges_as_valid_versions() {
         assert!(is_valid("~1.2.3"));
@@ -489,7 +489,7 @@ mod tests {
         assert!(is_valid(">1.2.3"));
     }
 
-    // Ported: "should reject github repositories" — versioning/semver-coerced/index.spec.ts line 205
+    // Ported: "should reject github repositories" — lib/modules/versioning/semver-coerced/index.spec.ts line 205
     #[test]
     fn is_valid_rejects_github_repositories() {
         assert!(!is_valid("renovatebot/renovate"));
@@ -497,49 +497,49 @@ mod tests {
         assert!(!is_valid("https://github.com/renovatebot/renovate.git"));
     }
 
-    // Ported: "should return null for non-digit versions" — versioning/semver-coerced/index.spec.ts line 215
+    // Ported: "should return null for non-digit versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 215
     #[test]
     fn is_version_returns_false_for_non_digit_versions() {
         assert!(!is_version("version one"));
     }
 
-    // Ported: "should support strict semver versions" — versioning/semver-coerced/index.spec.ts line 219
+    // Ported: "should support strict semver versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 219
     #[test]
     fn is_version_supports_strict_semver_versions() {
         assert!(is_version("1.2.3"));
     }
 
-    // Ported: "should support non-strict versions" — versioning/semver-coerced/index.spec.ts line 223
+    // Ported: "should support non-strict versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 223
     #[test]
     fn is_version_supports_non_strict_versions() {
         assert!(is_version("v1.2"));
     }
 
-    // Ported: "should return true when version is in range" — versioning/semver-coerced/index.spec.ts line 229
+    // Ported: "should return true when version is in range" — lib/modules/versioning/semver-coerced/index.spec.ts line 229
     #[test]
     fn matches_returns_true_when_version_is_in_range() {
         assert!(matches("1.0.0", "1.0.0 || 1.0.1"));
     }
 
-    // Ported: "should return true with non-strict version in range" — versioning/semver-coerced/index.spec.ts line 233
+    // Ported: "should return true with non-strict version in range" — lib/modules/versioning/semver-coerced/index.spec.ts line 233
     #[test]
     fn matches_returns_true_with_non_strict_version_in_range() {
         assert!(matches("v1.0", "1.0.0 || 1.0.1"));
     }
 
-    // Ported: "should return false when version is not in range" — versioning/semver-coerced/index.spec.ts line 237
+    // Ported: "should return false when version is not in range" — lib/modules/versioning/semver-coerced/index.spec.ts line 237
     #[test]
     fn matches_returns_false_when_version_is_not_in_range() {
         assert!(!matches("1.2.3", "1.4.1 || 1.4.2"));
     }
 
-    // Ported: "invalid version" — versioning/semver-coerced/index.spec.ts line 241
+    // Ported: "invalid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 241
     #[test]
     fn matches_returns_false_for_invalid_version() {
         assert!(!matches("xxx", "1.2.3"));
     }
 
-    // Ported: "should return max satisfying version in range" — versioning/semver-coerced/index.spec.ts line 247
+    // Ported: "should return max satisfying version in range" — lib/modules/versioning/semver-coerced/index.spec.ts line 247
     #[test]
     fn get_satisfying_version_returns_max_satisfying_version_in_range() {
         assert_eq!(
@@ -548,7 +548,7 @@ mod tests {
         );
     }
 
-    // Ported: "should support coercion" — versioning/semver-coerced/index.spec.ts line 253
+    // Ported: "should support coercion" — lib/modules/versioning/semver-coerced/index.spec.ts line 253
     #[test]
     fn get_satisfying_version_supports_coercion() {
         assert_eq!(
@@ -557,7 +557,7 @@ mod tests {
         );
     }
 
-    // Ported: "should return min satisfying version in range" — versioning/semver-coerced/index.spec.ts line 261
+    // Ported: "should return min satisfying version in range" — lib/modules/versioning/semver-coerced/index.spec.ts line 261
     #[test]
     fn min_satisfying_version_returns_min_satisfying_version_in_range() {
         assert_eq!(
@@ -566,7 +566,7 @@ mod tests {
         );
     }
 
-    // Ported: "should support coercion" — versioning/semver-coerced/index.spec.ts line 267
+    // Ported: "should support coercion" — lib/modules/versioning/semver-coerced/index.spec.ts line 267
     #[test]
     fn min_satisfying_version_supports_coercion() {
         assert_eq!(
@@ -575,7 +575,7 @@ mod tests {
         );
     }
 
-    // Ported: "uses newVersion" — versioning/semver-coerced/index.spec.ts line 275
+    // Ported: "uses newVersion" — lib/modules/versioning/semver-coerced/index.spec.ts line 275
     #[test]
     fn get_new_value_uses_new_version() {
         assert_eq!(get_new_value("=1.0.0", "1.0.0", "1.1.0"), "1.1.0");
@@ -583,31 +583,31 @@ mod tests {
         assert_eq!(get_new_value("1.0.0", "v1.0.0", "1.1.0"), "1.1.0");
     }
 
-    // Ported: "should return zero for equal versions" — versioning/semver-coerced/index.spec.ts line 304
+    // Ported: "should return zero for equal versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 304
     #[test]
     fn sort_versions_returns_zero_for_equal_versions() {
         assert_eq!(sort_versions("1.0.0", "1.0.0"), Ordering::Equal);
     }
 
-    // Ported: "should return -1 for a < b" — versioning/semver-coerced/index.spec.ts line 308
+    // Ported: "should return -1 for a < b" — lib/modules/versioning/semver-coerced/index.spec.ts line 308
     #[test]
     fn sort_versions_returns_less_for_a_less_than_b() {
         assert_eq!(sort_versions("1.0.0", "1.0.1"), Ordering::Less);
     }
 
-    // Ported: "should return 1 for a > b" — versioning/semver-coerced/index.spec.ts line 312
+    // Ported: "should return 1 for a > b" — lib/modules/versioning/semver-coerced/index.spec.ts line 312
     #[test]
     fn sort_versions_returns_greater_for_a_greater_than_b() {
         assert_eq!(sort_versions("1.0.1", "1.0.0"), Ordering::Greater);
     }
 
-    // Ported: "should return zero for equal non-strict versions" — versioning/semver-coerced/index.spec.ts line 316
+    // Ported: "should return zero for equal non-strict versions" — lib/modules/versioning/semver-coerced/index.spec.ts line 316
     #[test]
     fn sort_versions_returns_zero_for_equal_non_strict_versions() {
         assert_eq!(sort_versions("v1.0", "1.x"), Ordering::Equal);
     }
 
-    // Ported: "works with invalid version" — versioning/semver-coerced/index.spec.ts line 320
+    // Ported: "works with invalid version" — lib/modules/versioning/semver-coerced/index.spec.ts line 320
     #[test]
     fn sort_versions_works_with_invalid_version() {
         assert_eq!(sort_versions("v1.0", "xx"), Ordering::Equal);

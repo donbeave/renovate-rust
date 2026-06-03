@@ -2561,11 +2561,11 @@ mod tests {
 
     use super::*;
 
-    // Ported: "should support default endpoint with email" — modules/platform/github/index.spec.ts line 345
-    // Ported: "should support default endpoint no email access" — modules/platform/github/index.spec.ts line 133
-    // Ported: "should support default endpoint no email result" — modules/platform/github/index.spec.ts line 145
-    // Ported: "should support gitAuthor and username" — modules/platform/github/index.spec.ts line 157
-    // Ported: "no warning is shown" — modules/platform/github/index.spec.ts line 217
+    // Ported: "should support default endpoint with email" — lib/modules/platform/github/index.spec.ts line 345
+    // Ported: "should support default endpoint no email access" — lib/modules/platform/github/index.spec.ts line 133
+    // Ported: "should support default endpoint no email result" — lib/modules/platform/github/index.spec.ts line 145
+    // Ported: "should support gitAuthor and username" — lib/modules/platform/github/index.spec.ts line 157
+    // Ported: "no warning is shown" — lib/modules/platform/github/index.spec.ts line 217
     #[tokio::test]
     async fn get_current_user_returns_login() {
         let server = MockServer::start().await;
@@ -2584,7 +2584,7 @@ mod tests {
         assert_eq!(user.login, "renovate-bot");
     }
 
-    // Ported: "should throw 401" — modules/platform/github/index.spec.ts line 1211
+    // Ported: "should throw 401" — lib/modules/platform/github/index.spec.ts line 1211
     #[tokio::test]
     async fn get_current_user_returns_unauthorized_on_401() {
         let server = MockServer::start().await;
@@ -2599,8 +2599,8 @@ mod tests {
         assert!(matches!(err, PlatformError::Unauthorized));
     }
 
-    // Ported: "should support custom endpoint" — modules/platform/github/index.spec.ts line 563
-    // Ported: "if on GitHub.com, a warning is shown" — modules/platform/github/index.spec.ts line 170
+    // Ported: "should support custom endpoint" — lib/modules/platform/github/index.spec.ts line 563
+    // Ported: "if on GitHub.com, a warning is shown" — lib/modules/platform/github/index.spec.ts line 170
     #[tokio::test]
     async fn get_current_user_sends_bearer_auth_header() {
         let server = MockServer::start().await;
@@ -2618,8 +2618,8 @@ mod tests {
         client.get_current_user().await.unwrap();
     }
 
-    // Ported: "should support custom endpoint without version" — modules/platform/github/index.spec.ts line 587
-    // Ported: "if on GitHub Enterprise, a warning is not shown" — modules/platform/github/index.spec.ts line 195
+    // Ported: "should support custom endpoint without version" — lib/modules/platform/github/index.spec.ts line 587
+    // Ported: "if on GitHub Enterprise, a warning is not shown" — lib/modules/platform/github/index.spec.ts line 195
     #[tokio::test]
     async fn github_enterprise_custom_endpoint() {
         let server = MockServer::start().await;
@@ -2636,7 +2636,7 @@ mod tests {
         assert_eq!(user.login, "ghe-user");
     }
 
-    // Ported: "returns file content" — modules/platform/github/index.spec.ts line 5393
+    // Ported: "returns file content" — lib/modules/platform/github/index.spec.ts line 5393
     #[tokio::test]
     async fn get_raw_file_returns_decoded_content() {
         let server = MockServer::start().await;
@@ -2662,7 +2662,7 @@ mod tests {
         assert!(file.content.contains("config:recommended"));
     }
 
-    // Ported: "ensures trailing slash" — util/github/url.spec.ts line 5
+    // Ported: "ensures trailing slash" — lib/util/github/url.spec.ts line 5
     #[test]
     fn github_get_source_url_base_trailing_slash() {
         assert_eq!(
@@ -2671,13 +2671,13 @@ mod tests {
         );
     }
 
-    // Ported: "defaults to github.com" — util/github/url.spec.ts line 10
+    // Ported: "defaults to github.com" — lib/util/github/url.spec.ts line 10
     #[test]
     fn github_get_source_url_base_default() {
         assert_eq!(get_source_url_base(None), "https://github.com/");
     }
 
-    // Ported: "maps to api.github.com" — util/github/url.spec.ts line 17
+    // Ported: "maps to api.github.com" — lib/util/github/url.spec.ts line 17
     #[test]
     fn github_get_api_base_url_maps_to_api() {
         assert_eq!(
@@ -2686,7 +2686,7 @@ mod tests {
         );
     }
 
-    // Ported: "supports local github installations" — util/github/url.spec.ts line 22
+    // Ported: "supports local github installations" — lib/util/github/url.spec.ts line 22
     #[test]
     fn github_get_api_base_url_local_install() {
         assert_eq!(
@@ -2699,9 +2699,9 @@ mod tests {
         );
     }
 
-    // Ported: "returns null" — modules/platform/github/index.spec.ts line 2389
-    // Ported: "returns null if pre-commit phase has failed" — modules/platform/github/index.spec.ts line 5482
-    // Ported: "throws not-found" — modules/platform/github/index.spec.ts line 1060
+    // Ported: "returns null" — lib/modules/platform/github/index.spec.ts line 2389
+    // Ported: "returns null if pre-commit phase has failed" — lib/modules/platform/github/index.spec.ts line 5482
+    // Ported: "throws not-found" — lib/modules/platform/github/index.spec.ts line 1060
     #[tokio::test]
     async fn get_raw_file_returns_none_on_404() {
         let server = MockServer::start().await;
@@ -2719,7 +2719,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return an array of repos" — modules/platform/github/index.spec.ts line 613
+    // Ported: "should return an array of repos" — lib/modules/platform/github/index.spec.ts line 613
     #[tokio::test]
     async fn get_file_list_returns_blobs() {
         let server = MockServer::start().await;
@@ -2746,8 +2746,8 @@ mod tests {
         assert!(files.contains(&"Cargo.toml".to_owned()));
     }
 
-    // Ported: "should create and return a PR object" — modules/platform/github/index.spec.ts line 3769
-    // Ported: "should use defaultBranch" — modules/platform/github/index.spec.ts line 3791
+    // Ported: "should create and return a PR object" — lib/modules/platform/github/index.spec.ts line 3769
+    // Ported: "should use defaultBranch" — lib/modules/platform/github/index.spec.ts line 3791
     #[tokio::test]
     async fn create_pr_returns_pr_number() {
         let server = MockServer::start().await;
@@ -2781,7 +2781,7 @@ mod tests {
         assert_eq!(pr_number, Some(42));
     }
 
-    // Ported: "should handle REST API errors" — modules/platform/github/index.spec.ts line 4131
+    // Ported: "should handle REST API errors" — lib/modules/platform/github/index.spec.ts line 4131
     #[tokio::test]
     async fn create_pr_returns_none_on_validation_error() {
         let server = MockServer::start().await;
@@ -2806,8 +2806,8 @@ mod tests {
         assert_eq!(pr_number, None);
     }
 
-    // Ported: "should update the PR" — modules/platform/github/index.spec.ts line 4591
-    // Ported: "should update target branch" — modules/platform/github/index.spec.ts line 4620
+    // Ported: "should update the PR" — lib/modules/platform/github/index.spec.ts line 4591
+    // Ported: "should update target branch" — lib/modules/platform/github/index.spec.ts line 4620
     #[tokio::test]
     async fn update_pr_succeeds() {
         let server = MockServer::start().await;
@@ -2824,7 +2824,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "skips update if unchanged" — modules/platform/github/index.spec.ts line 2991
+    // Ported: "skips update if unchanged" — lib/modules/platform/github/index.spec.ts line 2991
     #[tokio::test]
     async fn update_pr_no_op_when_nothing_to_update() {
         let server = MockServer::start().await;
@@ -2836,9 +2836,9 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "should pass through success" — modules/platform/github/index.spec.ts line 2188
-    // Ported: "should not consider internal statuses as success" — modules/platform/github/index.spec.ts line 2204
-    // Ported: "should detect strict required status checks ruleset" — modules/platform/github/index.spec.ts line 1269
+    // Ported: "should pass through success" — lib/modules/platform/github/index.spec.ts line 2188
+    // Ported: "should not consider internal statuses as success" — lib/modules/platform/github/index.spec.ts line 2204
+    // Ported: "should detect strict required status checks ruleset" — lib/modules/platform/github/index.spec.ts line 1269
     #[tokio::test]
     async fn get_branch_status_returns_combined_state() {
         let server = MockServer::start().await;
@@ -2935,7 +2935,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "should throw if user failure" — modules/platform/github/index.spec.ts line 128
+    // Ported: "should throw if user failure" — lib/modules/platform/github/index.spec.ts line 128
     #[tokio::test]
     async fn get_current_user_throws_on_server_error() {
         let server = MockServer::start().await;
@@ -2952,7 +2952,7 @@ mod tests {
         );
     }
 
-    // Ported: "should pass through failed" — modules/platform/github/index.spec.ts line 2226
+    // Ported: "should pass through failed" — lib/modules/platform/github/index.spec.ts line 2226
     #[tokio::test]
     async fn get_branch_status_returns_failure() {
         let server = MockServer::start().await;
@@ -2983,8 +2983,8 @@ mod tests {
         assert_eq!(status.state, CombinedBranchState::Failure);
     }
 
-    // Ported: "defaults to pending" — modules/platform/github/index.spec.ts line 2242
-    // Ported: "should return false when no force rebase rules found" — modules/platform/github/index.spec.ts line 1337
+    // Ported: "defaults to pending" — lib/modules/platform/github/index.spec.ts line 2242
+    // Ported: "should return false when no force rebase rules found" — lib/modules/platform/github/index.spec.ts line 1337
     #[tokio::test]
     async fn get_branch_status_returns_pending() {
         let server = MockServer::start().await;
@@ -3015,7 +3015,7 @@ mod tests {
         assert_eq!(status.state, CombinedBranchState::Pending);
     }
 
-    // Ported: "should update and close the PR" — modules/platform/github/index.spec.ts line 4605
+    // Ported: "should update and close the PR" — lib/modules/platform/github/index.spec.ts line 4605
     #[tokio::test]
     async fn update_pr_closes_pr() {
         let server = MockServer::start().await;
@@ -3033,8 +3033,8 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1036
-    // Ported: "should handle GraphQL errors" — modules/platform/github/index.spec.ts line 4118
+    // Ported: "should throw error if archived" — lib/modules/platform/github/index.spec.ts line 1036
+    // Ported: "should handle GraphQL errors" — lib/modules/platform/github/index.spec.ts line 4118
     #[tokio::test]
     async fn create_pr_throws_on_server_error() {
         let server = MockServer::start().await;
@@ -3061,7 +3061,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns file content in json5 format" — modules/platform/github/index.spec.ts line 5405
+    // Ported: "returns file content in json5 format" — lib/modules/platform/github/index.spec.ts line 5405
     #[tokio::test]
     async fn get_raw_file_returns_json5_content() {
         let server = MockServer::start().await;
@@ -3086,7 +3086,7 @@ mod tests {
         assert!(file.content.contains("config:recommended"));
     }
 
-    // Ported: "returns file content from given repo" — modules/platform/github/index.spec.ts line 5422
+    // Ported: "returns file content from given repo" — lib/modules/platform/github/index.spec.ts line 5422
     #[tokio::test]
     async fn get_raw_file_from_given_repo() {
         let server = MockServer::start().await;
@@ -3110,7 +3110,7 @@ mod tests {
         assert_eq!(file.content, "hello from other repo");
     }
 
-    // Ported: "should filters repositories by topics" — modules/platform/github/index.spec.ts line 636
+    // Ported: "should filters repositories by topics" — lib/modules/platform/github/index.spec.ts line 636
     #[tokio::test]
     async fn get_file_list_filters_non_blobs() {
         let server = MockServer::start().await;
@@ -3135,7 +3135,7 @@ mod tests {
         assert!(files.contains(&"src/main.rs".to_owned()));
     }
 
-    // Ported: "should handle 404" — modules/platform/github/index.spec.ts line 1185
+    // Ported: "should handle 404" — lib/modules/platform/github/index.spec.ts line 1185
     #[tokio::test]
     async fn get_branch_status_handles_404() {
         let server = MockServer::start().await;
@@ -3155,7 +3155,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle 403" — modules/platform/github/index.spec.ts line 1198
+    // Ported: "should handle 403" — lib/modules/platform/github/index.spec.ts line 1198
     #[tokio::test]
     async fn get_branch_status_handles_403() {
         let server = MockServer::start().await;
@@ -3175,7 +3175,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw 401" — modules/platform/github/index.spec.ts line 1211
+    // Ported: "should throw 401" — lib/modules/platform/github/index.spec.ts line 1211
     #[tokio::test]
     async fn get_branch_status_handles_401() {
         let server = MockServer::start().await;
@@ -3197,7 +3197,7 @@ mod tests {
 
     // ── decode_github_content ────────────────────────────────────────────────
 
-    // Ported: "returns null" — modules/platform/github/index.spec.ts line 2389
+    // Ported: "returns null" — lib/modules/platform/github/index.spec.ts line 2389
     #[test]
     fn decode_github_content_empty() {
         let content = GithubContent {
@@ -3208,7 +3208,7 @@ mod tests {
         assert_eq!(result, "");
     }
 
-    // Ported: "throws on malformed JSON" — modules/platform/github/index.spec.ts line 5446
+    // Ported: "throws on malformed JSON" — lib/modules/platform/github/index.spec.ts line 5446
     #[test]
     fn decode_github_content_invalid_base64() {
         let content = GithubContent {
@@ -3219,7 +3219,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
 
-    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 5456
+    // Ported: "throws on errors" — lib/modules/platform/github/index.spec.ts line 5456
     #[test]
     fn decode_github_content_unsupported_encoding() {
         let content = GithubContent {
@@ -3230,7 +3230,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
 
-    // Ported: "should fail if a check run has failed" — modules/platform/github/index.spec.ts line 2257
+    // Ported: "should fail if a check run has failed" — lib/modules/platform/github/index.spec.ts line 2257
     #[tokio::test]
     async fn get_branch_status_check_run_failed() {
         let server = MockServer::start().await;
@@ -3261,7 +3261,7 @@ mod tests {
         assert_eq!(status.state, CombinedBranchState::Failure);
     }
 
-    // Ported: "should succeed if no status and all passed check runs" — modules/platform/github/index.spec.ts line 2289
+    // Ported: "should succeed if no status and all passed check runs" — lib/modules/platform/github/index.spec.ts line 2289
     #[tokio::test]
     async fn get_branch_status_no_status_all_passed() {
         let server = MockServer::start().await;
@@ -3290,7 +3290,7 @@ mod tests {
         assert_eq!(status.state, CombinedBranchState::Success);
     }
 
-    // Ported: "should fail if a check run is pending" — modules/platform/github/index.spec.ts line 2327
+    // Ported: "should fail if a check run is pending" — lib/modules/platform/github/index.spec.ts line 2327
     #[tokio::test]
     async fn get_branch_status_check_run_pending() {
         let server = MockServer::start().await;
@@ -3518,7 +3518,7 @@ mod tests {
         assert_eq!(status.state, CombinedBranchState::Failure);
     }
 
-    // Ported: "should return an array of repos when using GitHub App Installation Token" — modules/platform/github/index.spec.ts line 690
+    // Ported: "should return an array of repos when using GitHub App Installation Token" — lib/modules/platform/github/index.spec.ts line 690
     #[tokio::test]
     async fn get_file_list_empty_repo() {
         let server = MockServer::start().await;
@@ -3539,7 +3539,7 @@ mod tests {
 
     // ── is_date_expired ───────────────────────────────────────────────────────
 
-    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — util/github/graphql/util.spec.ts line 35
+    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — lib/util/github/graphql/util.spec.ts line 35
 
     #[test]
     fn is_date_expired_hourly_cases() {
@@ -3563,7 +3563,7 @@ mod tests {
         assert!(is_date_expired(t4, initial, one_hour));
     }
 
-    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — util/github/graphql/util.spec.ts line 35
+    // Ported: "isDateExpired($currentTime, $initialTimestamp, $duration) === $expected" — lib/util/github/graphql/util.spec.ts line 35
     #[test]
     fn is_date_expired_daily_cases() {
         let initial = "2022-11-24T15:00:00Z";
@@ -3588,8 +3588,8 @@ mod tests {
 
     // ── massage-markdown-links ────────────────────────────────────────────────
 
-    // Ported: "returns updated pr body" — modules/platform/github/index.spec.ts line 4963
-    // Ported: "performs multiple replacements" — modules/platform/github/massage-markdown-links.spec.ts line 4
+    // Ported: "returns updated pr body" — lib/modules/platform/github/index.spec.ts line 4963
+    // Ported: "performs multiple replacements" — lib/modules/platform/github/massage-markdown-links.spec.ts line 4
     #[test]
     fn massage_markdown_links_performs_multiple_replacements() {
         let input = "Link [foo/bar#1](https://github.com/foo/bar/pull/1) points to https://github.com/foo/bar/pull/1.";
@@ -3597,8 +3597,8 @@ mod tests {
         assert_eq!(massage_markdown_links(input), expected);
     }
 
-    // Ported: "returns not-updated pr body for GHE" — modules/platform/github/index.spec.ts line 4969
-    // Ported: "Unchanged: $input" — modules/platform/github/massage-markdown-links.spec.ts line 18
+    // Ported: "returns not-updated pr body for GHE" — lib/modules/platform/github/index.spec.ts line 4969
+    // Ported: "Unchanged: $input" — lib/modules/platform/github/massage-markdown-links.spec.ts line 18
     #[test]
     fn massage_markdown_links_unchanged_non_item_urls() {
         let unchanged = [
@@ -3632,7 +3632,7 @@ mod tests {
         }
     }
 
-    // Ported: "$input -> $output" — modules/platform/github/massage-markdown-links.spec.ts line 60
+    // Ported: "$input -> $output" — lib/modules/platform/github/massage-markdown-links.spec.ts line 60
     #[test]
     fn massage_markdown_links_transforms_item_urls() {
         let cases = [
@@ -3672,7 +3672,7 @@ mod tests {
 
     // ── branches-query-adapter ────────────────────────────────────────────────
 
-    // Ported: "transforms Commit type" — util/github/graphql/query-adapters/branches-query-adapter.spec.ts line 5
+    // Ported: "transforms Commit type" — lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts line 5
     #[test]
     fn transform_github_branch_commit_type_returns_item() {
         let result = transform_github_branch("main", "Commit", "abc123", "2022-09-24");
@@ -3687,7 +3687,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for invalid input" — util/github/graphql/query-adapters/branches-query-adapter.spec.ts line 23
+    // Ported: "returns null for invalid input" — lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts line 23
     #[test]
     fn transform_github_branch_non_commit_type_returns_none() {
         assert_eq!(transform_github_branch("main", "Blob", "abc123", ""), None);
@@ -3697,7 +3697,7 @@ mod tests {
 
     // ── get_json_file ─────────────────────────────────────────────────────────
 
-    // Ported: "returns null" — modules/platform/github/index.spec.ts line 5382
+    // Ported: "returns null" — lib/modules/platform/github/index.spec.ts line 5382
     #[tokio::test]
     async fn get_json_file_returns_null_for_empty_content() {
         let server = MockServer::start().await;
@@ -3718,7 +3718,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns file content" — modules/platform/github/index.spec.ts line 5393
+    // Ported: "returns file content" — lib/modules/platform/github/index.spec.ts line 5393
     #[tokio::test]
     async fn get_json_file_returns_parsed_content() {
         let server = MockServer::start().await;
@@ -3741,7 +3741,7 @@ mod tests {
         assert_eq!(result, Some(data));
     }
 
-    // Ported: "returns file content in json5 format" — modules/platform/github/index.spec.ts line 5405
+    // Ported: "returns file content in json5 format" — lib/modules/platform/github/index.spec.ts line 5405
     #[tokio::test]
     async fn get_json_file_parses_json5() {
         let server = MockServer::start().await;
@@ -3764,7 +3764,7 @@ mod tests {
         assert_eq!(result, Some(serde_json::json!({"foo": "bar"})));
     }
 
-    // Ported: "returns file content from given repo" — modules/platform/github/index.spec.ts line 5422
+    // Ported: "returns file content from given repo" — lib/modules/platform/github/index.spec.ts line 5422
     #[tokio::test]
     async fn get_json_file_from_given_repo() {
         let server = MockServer::start().await;
@@ -3787,7 +3787,7 @@ mod tests {
         assert_eq!(result, Some(data));
     }
 
-    // Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 5434
+    // Ported: "returns file content from branch or tag" — lib/modules/platform/github/index.spec.ts line 5434
     #[tokio::test]
     async fn get_json_file_from_branch_or_tag() {
         let server = MockServer::start().await;
@@ -3811,7 +3811,7 @@ mod tests {
         assert_eq!(result, Some(data));
     }
 
-    // Ported: "throws on malformed JSON" — modules/platform/github/index.spec.ts line 5446
+    // Ported: "throws on malformed JSON" — lib/modules/platform/github/index.spec.ts line 5446
     #[tokio::test]
     async fn get_json_file_throws_on_malformed_json() {
         let server = MockServer::start().await;
@@ -3833,7 +3833,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(_)));
     }
 
-    // Ported: "throws on errors" — modules/platform/github/index.spec.ts line 5456
+    // Ported: "throws on errors" — lib/modules/platform/github/index.spec.ts line 5456
     #[tokio::test]
     async fn get_json_file_throws_on_http_error() {
         let server = MockServer::start().await;
@@ -3855,7 +3855,7 @@ mod tests {
 
     // ── get_pr / list_prs ─────────────────────────────────────────────────────
 
-    // Ported: "should return null if no prNo is passed" — modules/platform/github/index.spec.ts line 4381
+    // Ported: "should return null if no prNo is passed" — lib/modules/platform/github/index.spec.ts line 4381
     #[tokio::test]
     async fn get_pr_returns_null_for_zero() {
         let server = MockServer::start().await;
@@ -3864,8 +3864,8 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "should return PR" — modules/platform/github/index.spec.ts line 4386
-    // Ported: "should cache and return the PR object" — modules/platform/github/index.spec.ts line 2021
+    // Ported: "should return PR" — lib/modules/platform/github/index.spec.ts line 4386
+    // Ported: "should cache and return the PR object" — lib/modules/platform/github/index.spec.ts line 2021
     #[tokio::test]
     async fn get_pr_returns_open_pr() {
         let server = MockServer::start().await;
@@ -3890,7 +3890,7 @@ mod tests {
         assert_eq!(pr.state, "open");
     }
 
-    // Ported: "should return closed PR" — modules/platform/github/index.spec.ts line 4429
+    // Ported: "should return closed PR" — lib/modules/platform/github/index.spec.ts line 4429
     #[tokio::test]
     async fn get_pr_returns_closed_pr() {
         let server = MockServer::start().await;
@@ -3914,7 +3914,7 @@ mod tests {
         assert_eq!(pr.state, "closed");
     }
 
-    // Ported: "should return merged PR" — modules/platform/github/index.spec.ts line 4454
+    // Ported: "should return merged PR" — lib/modules/platform/github/index.spec.ts line 4454
     #[tokio::test]
     async fn get_pr_returns_merged_pr() {
         let server = MockServer::start().await;
@@ -3940,7 +3940,7 @@ mod tests {
         assert_eq!(pr.state, "merged");
     }
 
-    // Ported: "should return null if no PR is returned from GitHub" — modules/platform/github/index.spec.ts line 4480
+    // Ported: "should return null if no PR is returned from GitHub" — lib/modules/platform/github/index.spec.ts line 4480
     #[tokio::test]
     async fn get_pr_returns_null_on_404() {
         let server = MockServer::start().await;
@@ -3955,7 +3955,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "should return a PR object - 0" — modules/platform/github/index.spec.ts line 4495
+    // Ported: "should return a PR object - 0" — lib/modules/platform/github/index.spec.ts line 4495
     #[tokio::test]
     async fn get_pr_returns_pr_object_0() {
         let server = MockServer::start().await;
@@ -3981,7 +3981,7 @@ mod tests {
         assert_eq!(pr.state, "closed");
     }
 
-    // Ported: "should return a PR object - 1" — modules/platform/github/index.spec.ts line 4521
+    // Ported: "should return a PR object - 1" — lib/modules/platform/github/index.spec.ts line 4521
     #[tokio::test]
     async fn get_pr_returns_pr_object_1() {
         let server = MockServer::start().await;
@@ -4007,7 +4007,7 @@ mod tests {
         assert_eq!(pr.state, "open");
     }
 
-    // Ported: "should return a PR object - 2" — modules/platform/github/index.spec.ts line 4557
+    // Ported: "should return a PR object - 2" — lib/modules/platform/github/index.spec.ts line 4557
     #[tokio::test]
     async fn get_pr_returns_pr_object_2() {
         let server = MockServer::start().await;
@@ -4032,8 +4032,8 @@ mod tests {
         assert_eq!(pr.state, "open");
     }
 
-    // Ported: "finds PR by branch name" — modules/platform/github/index.spec.ts line 3540
-    // Ported: "fetches single page" — modules/platform/github/index.spec.ts line 1459
+    // Ported: "finds PR by branch name" — lib/modules/platform/github/index.spec.ts line 3540
+    // Ported: "fetches single page" — lib/modules/platform/github/index.spec.ts line 1459
     #[tokio::test]
     async fn list_prs_finds_pr_by_branch() {
         let server = MockServer::start().await;
@@ -4061,7 +4061,7 @@ mod tests {
         assert_eq!(prs[0].head.ref_name, "renovate/deps");
     }
 
-    // Ported: "finds PR with non-open state" — modules/platform/github/index.spec.ts line 3582
+    // Ported: "finds PR with non-open state" — lib/modules/platform/github/index.spec.ts line 3582
     #[tokio::test]
     async fn list_prs_finds_closed_pr() {
         let server = MockServer::start().await;
@@ -4092,7 +4092,7 @@ mod tests {
         assert_eq!(prs[0].state, "closed");
     }
 
-    // Ported: "skips PR with non-matching state" — modules/platform/github/index.spec.ts line 3611
+    // Ported: "skips PR with non-matching state" — lib/modules/platform/github/index.spec.ts line 3611
     #[tokio::test]
     async fn list_prs_filters_by_state() {
         let server = MockServer::start().await;
@@ -4122,7 +4122,7 @@ mod tests {
         assert!(prs.iter().all(|p| p.state == "open"));
     }
 
-    // Ported: "skips PRs from forks" — modules/platform/github/index.spec.ts line 3637
+    // Ported: "skips PRs from forks" — lib/modules/platform/github/index.spec.ts line 3637
     #[tokio::test]
     async fn list_prs_skips_forks() {
         let server = MockServer::start().await;
@@ -4169,7 +4169,7 @@ mod tests {
         assert_eq!(own_prs[0].number, 2);
     }
 
-    // Ported: "skips PR with non-matching title" — modules/platform/github/index.spec.ts line 3662
+    // Ported: "skips PR with non-matching title" — lib/modules/platform/github/index.spec.ts line 3662
     #[tokio::test]
     async fn list_prs_filters_by_title() {
         let server = MockServer::start().await;
@@ -4198,7 +4198,7 @@ mod tests {
         );
     }
 
-    // Ported: "caches pr list" — modules/platform/github/index.spec.ts line 3687
+    // Ported: "caches pr list" — lib/modules/platform/github/index.spec.ts line 3687
     #[tokio::test]
     async fn list_prs_returns_cached_results() {
         let server = MockServer::start().await;
@@ -4227,7 +4227,7 @@ mod tests {
         assert_eq!(prs1[0].number, prs2[0].number);
     }
 
-    // Ported: "finds pr from other authors" — modules/platform/github/index.spec.ts line 3722
+    // Ported: "finds pr from other authors" — lib/modules/platform/github/index.spec.ts line 3722
     #[tokio::test]
     async fn list_prs_finds_from_other_authors() {
         let server = MockServer::start().await;
@@ -4257,7 +4257,7 @@ mod tests {
 
     // ── get_issue / list_issues ───────────────────────────────────────────────
 
-    // Ported: "returns null if issues disabled" — modules/platform/github/index.spec.ts line 2505
+    // Ported: "returns null if issues disabled" — lib/modules/platform/github/index.spec.ts line 2505
     #[tokio::test]
     async fn get_issue_returns_null_on_404() {
         let server = MockServer::start().await;
@@ -4272,7 +4272,7 @@ mod tests {
         assert!(issue.is_none());
     }
 
-    // Ported: "returns issue" — modules/platform/github/index.spec.ts line 2513
+    // Ported: "returns issue" — lib/modules/platform/github/index.spec.ts line 2513
     #[tokio::test]
     async fn get_issue_returns_issue() {
         let server = MockServer::start().await;
@@ -4300,7 +4300,7 @@ mod tests {
         assert_eq!(issue.title, "Bug report");
     }
 
-    // Ported: "returns null if issue not found" — modules/platform/github/index.spec.ts line 2533
+    // Ported: "returns null if issue not found" — lib/modules/platform/github/index.spec.ts line 2533
     #[tokio::test]
     async fn get_issue_returns_null_on_410() {
         let server = MockServer::start().await;
@@ -4315,7 +4315,7 @@ mod tests {
         assert!(issue.is_none());
     }
 
-    // Ported: "returns null if no issue" — modules/platform/github/index.spec.ts line 2557
+    // Ported: "returns null if no issue" — lib/modules/platform/github/index.spec.ts line 2557
     #[tokio::test]
     async fn list_issues_returns_empty() {
         let server = MockServer::start().await;
@@ -4330,7 +4330,7 @@ mod tests {
         assert!(issues.is_empty());
     }
 
-    // Ported: "finds issue" — modules/platform/github/index.spec.ts line 2594
+    // Ported: "finds issue" — lib/modules/platform/github/index.spec.ts line 2594
     #[tokio::test]
     async fn list_issues_finds_issue() {
         let server = MockServer::start().await;
@@ -4356,7 +4356,7 @@ mod tests {
 
     // ── create_issue / update_issue ───────────────────────────────────────────
 
-    // Ported: "creates issue" — modules/platform/github/index.spec.ts line 2647
+    // Ported: "creates issue" — lib/modules/platform/github/index.spec.ts line 2647
     #[tokio::test]
     async fn create_issue_returns_issue_number() {
         let server = MockServer::start().await;
@@ -4380,7 +4380,7 @@ mod tests {
         assert_eq!(number, 42);
     }
 
-    // Ported: "creates issue with labels" — modules/platform/github/index.spec.ts line 2783
+    // Ported: "creates issue with labels" — lib/modules/platform/github/index.spec.ts line 2783
     #[tokio::test]
     async fn create_issue_with_labels() {
         let server = MockServer::start().await;
@@ -4411,7 +4411,7 @@ mod tests {
         assert_eq!(number, 42);
     }
 
-    // Ported: "updates issue" — modules/platform/github/index.spec.ts line 2872
+    // Ported: "updates issue" — lib/modules/platform/github/index.spec.ts line 2872
     #[tokio::test]
     async fn update_issue_succeeds() {
         let server = MockServer::start().await;
@@ -4436,7 +4436,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "updates issue with labels" — modules/platform/github/index.spec.ts line 2931
+    // Ported: "updates issue with labels" — lib/modules/platform/github/index.spec.ts line 2931
     #[tokio::test]
     async fn update_issue_with_labels() {
         let server = MockServer::start().await;
@@ -4461,7 +4461,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "closes issue" — modules/platform/github/index.spec.ts line 3179
+    // Ported: "closes issue" — lib/modules/platform/github/index.spec.ts line 3179
     #[tokio::test]
     async fn update_issue_closes_issue() {
         let server = MockServer::start().await;
@@ -4478,7 +4478,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "swallows 404 Not Found when the issue was deleted on the platform" — modules/platform/github/index.spec.ts line 3254
+    // Ported: "swallows 404 Not Found when the issue was deleted on the platform" — lib/modules/platform/github/index.spec.ts line 3254
     #[tokio::test]
     async fn get_issue_swallows_404() {
         let server = MockServer::start().await;
@@ -4493,7 +4493,7 @@ mod tests {
         assert!(issue.is_none());
     }
 
-    // Ported: "swallows 410 Gone when the issue was deleted on the platform" — modules/platform/github/index.spec.ts line 3223
+    // Ported: "swallows 410 Gone when the issue was deleted on the platform" — lib/modules/platform/github/index.spec.ts line 3223
     #[tokio::test]
     async fn get_issue_swallows_410() {
         let server = MockServer::start().await;
@@ -4508,7 +4508,7 @@ mod tests {
         assert!(issue.is_none());
     }
 
-    // Ported: "rethrows non-deletion errors" — modules/platform/github/index.spec.ts line 3285
+    // Ported: "rethrows non-deletion errors" — lib/modules/platform/github/index.spec.ts line 3285
     #[tokio::test]
     async fn get_issue_rethrows_non_deletion_errors() {
         let server = MockServer::start().await;
@@ -4527,7 +4527,7 @@ mod tests {
 
     // ── create_comment / update_comment / delete_comment ──────────────────────
 
-    // Ported: "add comment if not found" — modules/platform/github/index.spec.ts line 3398
+    // Ported: "add comment if not found" — lib/modules/platform/github/index.spec.ts line 3398
     #[tokio::test]
     async fn create_comment_adds_comment() {
         let server = MockServer::start().await;
@@ -4548,7 +4548,7 @@ mod tests {
         assert_eq!(id, 123);
     }
 
-    // Ported: "add updates comment if necessary" — modules/platform/github/index.spec.ts line 3445
+    // Ported: "add updates comment if necessary" — lib/modules/platform/github/index.spec.ts line 3445
     #[tokio::test]
     async fn update_comment_updates_body() {
         let server = MockServer::start().await;
@@ -4565,7 +4565,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "deletes comment by topic if found" — modules/platform/github/index.spec.ts line 3500
+    // Ported: "deletes comment by topic if found" — lib/modules/platform/github/index.spec.ts line 3500
     #[tokio::test]
     async fn delete_comment_succeeds() {
         let server = MockServer::start().await;
@@ -4581,7 +4581,7 @@ mod tests {
 
     // ── remote_branch_exists ──────────────────────────────────────────────────
 
-    // Ported: "should return true if the branch exists" — modules/platform/github/branch.spec.ts line 5
+    // Ported: "should return true if the branch exists" — lib/modules/platform/github/branch.spec.ts line 5
     #[tokio::test]
     async fn remote_branch_exists_returns_true() {
         let server = MockServer::start().await;
@@ -4603,7 +4603,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should return false if the branch does not exist" — modules/platform/github/branch.spec.ts line 16
+    // Ported: "should return false if the branch does not exist" — lib/modules/platform/github/branch.spec.ts line 16
     #[tokio::test]
     async fn remote_branch_exists_returns_false() {
         let server = MockServer::start().await;
@@ -4623,7 +4623,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should throw an error for nested branches" — modules/platform/github/branch.spec.ts line 27
+    // Ported: "should throw an error for nested branches" — lib/modules/platform/github/branch.spec.ts line 27
     #[tokio::test]
     async fn remote_branch_exists_throws_for_nested() {
         let server = MockServer::start().await;
@@ -4647,7 +4647,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg.contains("nested branch")));
     }
 
-    // Ported: "should throw an error if the request fails for any other reason" — modules/platform/github/branch.spec.ts line 44
+    // Ported: "should throw an error if the request fails for any other reason" — lib/modules/platform/github/branch.spec.ts line 44
     #[tokio::test]
     async fn remote_branch_exists_throws_on_server_error() {
         let server = MockServer::start().await;
@@ -4671,7 +4671,7 @@ mod tests {
 
     // ── get_branch_status_check ───────────────────────────────────────────────
 
-    // Ported: "returns state if found" — modules/platform/github/index.spec.ts line 2360
+    // Ported: "returns state if found" — lib/modules/platform/github/index.spec.ts line 2360
     #[tokio::test]
     async fn get_branch_status_check_returns_state() {
         let server = MockServer::start().await;
@@ -4695,7 +4695,7 @@ mod tests {
         assert_eq!(result, Some("yellow".to_owned()));
     }
 
-    // Ported: "returns null" — modules/platform/github/index.spec.ts line 2389
+    // Ported: "returns null" — lib/modules/platform/github/index.spec.ts line 2389
     #[tokio::test]
     async fn get_branch_status_check_returns_null_when_not_found() {
         let server = MockServer::start().await;
@@ -4717,7 +4717,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns yellow if state not present in context object" — modules/platform/github/index.spec.ts line 2415
+    // Ported: "returns yellow if state not present in context object" — lib/modules/platform/github/index.spec.ts line 2415
     #[tokio::test]
     async fn get_branch_status_check_returns_yellow_for_missing_state() {
         let server = MockServer::start().await;
@@ -4739,7 +4739,7 @@ mod tests {
 
     // ── get_branch_force_rebase ──────────────────────────────────────────────
 
-    // Ported: "should detect repoForceRebase" — modules/platform/github/index.spec.ts line 1151
+    // Ported: "should detect repoForceRebase" — lib/modules/platform/github/index.spec.ts line 1151
     #[tokio::test]
     async fn get_branch_force_rebase_detects_from_protection() {
         let server = MockServer::start().await;
@@ -4766,7 +4766,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should handle 404" — modules/platform/github/index.spec.ts line 1185
+    // Ported: "should handle 404" — lib/modules/platform/github/index.spec.ts line 1185
     #[tokio::test]
     async fn get_branch_force_rebase_handles_404() {
         let server = MockServer::start().await;
@@ -4789,7 +4789,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should handle 403" — modules/platform/github/index.spec.ts line 1198
+    // Ported: "should handle 403" — lib/modules/platform/github/index.spec.ts line 1198
     #[tokio::test]
     async fn get_branch_force_rebase_handles_403() {
         let server = MockServer::start().await;
@@ -4812,7 +4812,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should throw 401" — modules/platform/github/index.spec.ts line 1211
+    // Ported: "should throw 401" — lib/modules/platform/github/index.spec.ts line 1211
     #[tokio::test]
     async fn get_branch_force_rebase_throws_on_401() {
         let server = MockServer::start().await;
@@ -4837,7 +4837,7 @@ mod tests {
         );
     }
 
-    // Ported: "should ignore non_fast_forward ruleset for determining rebase" — modules/platform/github/index.spec.ts line 1245
+    // Ported: "should ignore non_fast_forward ruleset for determining rebase" — lib/modules/platform/github/index.spec.ts line 1245
     #[tokio::test]
     async fn get_branch_force_rebase_ignores_non_fast_forward_ruleset() {
         let server = MockServer::start().await;
@@ -4864,7 +4864,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should detect strict required status checks ruleset" — modules/platform/github/index.spec.ts line 1269
+    // Ported: "should detect strict required status checks ruleset" — lib/modules/platform/github/index.spec.ts line 1269
     #[tokio::test]
     async fn get_branch_force_rebase_detects_strict_ruleset() {
         let server = MockServer::start().await;
@@ -4890,7 +4890,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should continue if no expected rulesets have been found" — modules/platform/github/index.spec.ts line 1288
+    // Ported: "should continue if no expected rulesets have been found" — lib/modules/platform/github/index.spec.ts line 1288
     #[tokio::test]
     async fn get_branch_force_rebase_continues_past_unexpected_rulesets() {
         let server = MockServer::start().await;
@@ -4917,7 +4917,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should abort and throws on internal error" — modules/platform/github/index.spec.ts line 1309
+    // Ported: "should abort and throws on internal error" — lib/modules/platform/github/index.spec.ts line 1309
     #[tokio::test]
     async fn get_branch_force_rebase_throws_on_internal_error() {
         let server = MockServer::start().await;
@@ -4937,7 +4937,7 @@ mod tests {
         );
     }
 
-    // Ported: "should fallback to legacy branch protection when rulesets not found" — modules/platform/github/index.spec.ts line 1320
+    // Ported: "should fallback to legacy branch protection when rulesets not found" — lib/modules/platform/github/index.spec.ts line 1320
     #[tokio::test]
     async fn get_branch_force_rebase_fallback_to_branch_protection() {
         let server = MockServer::start().await;
@@ -4962,7 +4962,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should return false when no force rebase rules found" — modules/platform/github/index.spec.ts line 1337
+    // Ported: "should return false when no force rebase rules found" — lib/modules/platform/github/index.spec.ts line 1337
     #[tokio::test]
     async fn get_branch_force_rebase_returns_false_when_no_strict_checks() {
         let server = MockServer::start().await;
@@ -4995,7 +4995,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should return cached result on subsequent calls" — modules/platform/github/index.spec.ts line 1360
+    // Ported: "should return cached result on subsequent calls" — lib/modules/platform/github/index.spec.ts line 1360
     #[tokio::test]
     async fn get_branch_force_rebase_returns_cached_result() {
         let server = MockServer::start().await;
@@ -5027,7 +5027,7 @@ mod tests {
         assert!(result2);
     }
 
-    // Ported: "should return cached false result on subsequent calls" — modules/platform/github/index.spec.ts line 1385
+    // Ported: "should return cached false result on subsequent calls" — lib/modules/platform/github/index.spec.ts line 1385
     #[tokio::test]
     async fn get_branch_force_rebase_returns_cached_false_result() {
         let server = MockServer::start().await;
@@ -5057,7 +5057,7 @@ mod tests {
         assert!(!result2);
     }
 
-    // Ported: "should return empty object when parentRepo is set" — modules/platform/github/index.spec.ts line 1225
+    // Ported: "should return empty object when parentRepo is set" — lib/modules/platform/github/index.spec.ts line 1225
     #[tokio::test]
     async fn get_branch_force_rebase_returns_false_when_parent_repo_set() {
         let client = GithubClient::with_endpoint("token", "https://api.github.com").unwrap();
@@ -5070,7 +5070,7 @@ mod tests {
 
     // ── set_branch_status ─────────────────────────────────────────────────────
 
-    // Ported: "returns if already set" — modules/platform/github/index.spec.ts line 2434
+    // Ported: "returns if already set" — lib/modules/platform/github/index.spec.ts line 2434
     #[tokio::test]
     async fn set_branch_status_returns_if_already_set() {
         let server = MockServer::start().await;
@@ -5098,7 +5098,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "sets branch status" — modules/platform/github/index.spec.ts line 2459
+    // Ported: "sets branch status" — lib/modules/platform/github/index.spec.ts line 2459
     #[tokio::test]
     async fn set_branch_status_posts_new_status() {
         let server = MockServer::start().await;
@@ -5141,8 +5141,8 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "should return an array of repos when using Github App endpoint" — modules/platform/github/index.spec.ts line 663
-    // Ported: "should be parse directory response" — modules/platform/github/schema.spec.ts line 6
+    // Ported: "should return an array of repos when using Github App endpoint" — lib/modules/platform/github/index.spec.ts line 663
+    // Ported: "should be parse directory response" — lib/modules/platform/github/schema.spec.ts line 6
     #[test]
     fn github_content_response_directory() {
         let input = serde_json::json!([
@@ -5153,8 +5153,8 @@ mod tests {
         assert!(validate_github_content_response(&input).is_ok());
     }
 
-    // Ported: "returns file content from branch or tag" — modules/platform/github/index.spec.ts line 5434
-    // Ported: "should parse response for single file" — modules/platform/github/schema.spec.ts line 88
+    // Ported: "returns file content from branch or tag" — lib/modules/platform/github/index.spec.ts line 5434
+    // Ported: "should parse response for single file" — lib/modules/platform/github/schema.spec.ts line 88
     #[test]
     fn github_content_response_single_file() {
         let input = serde_json::json!({
@@ -5174,8 +5174,8 @@ mod tests {
         assert!(validate_github_content_response(&input).is_ok());
     }
 
-    // Ported: "calls logger.debug with only items that include securityVulnerability" — modules/platform/github/index.spec.ts line 5191
-    // Ported: "should skip vulnerability alerts with unsupported ecosystems" — modules/platform/github/schema.spec.ts line 112
+    // Ported: "calls logger.debug with only items that include securityVulnerability" — lib/modules/platform/github/index.spec.ts line 5191
+    // Ported: "should skip vulnerability alerts with unsupported ecosystems" — lib/modules/platform/github/schema.spec.ts line 112
     #[test]
     fn github_vulnerability_alerts_filter_unsupported_ecosystem() {
         let input = serde_json::json!([
@@ -5200,8 +5200,8 @@ mod tests {
         );
     }
 
-    // Ported: "returns array if found" — modules/platform/github/index.spec.ts line 5113
-    // Ported: "should parse severity and cvss_severities fields" — modules/platform/github/schema.spec.ts line 207
+    // Ported: "returns array if found" — lib/modules/platform/github/index.spec.ts line 5113
+    // Ported: "should parse severity and cvss_severities fields" — lib/modules/platform/github/schema.spec.ts line 207
     #[test]
     fn github_vulnerability_alerts_parse_severity_fields() {
         let input = serde_json::json!([{
@@ -5240,7 +5240,7 @@ mod tests {
     // dotnet ecosystem alert is filtered out (returns empty), same behavior as the
     // "skip unsupported ecosystems" test which already covers this parse path.
 
-    // Ported: "should log vulnerability alerts with parse errors" — modules/platform/github/schema.spec.ts line 153
+    // Ported: "should log vulnerability alerts with parse errors" — lib/modules/platform/github/schema.spec.ts line 153
     #[test]
     fn github_vulnerability_alerts_logs_parse_errors_dotnet_filtered() {
         let input = serde_json::json!([{
@@ -5252,7 +5252,7 @@ mod tests {
         assert!(result.is_empty());
     }
 
-    // Ported: "should filter vulnerability alerts with missing security_vulnerability" — modules/platform/github/schema.spec.ts line 182
+    // Ported: "should filter vulnerability alerts with missing security_vulnerability" — lib/modules/platform/github/schema.spec.ts line 182
     #[test]
     fn github_vulnerability_alerts_filters_missing_security_vulnerability() {
         let input = serde_json::json!([{
@@ -5267,21 +5267,21 @@ mod tests {
 
     // ── Additional validate_github_content_response tests (index.spec.ts) ───────
 
-    // Ported: "throws unexpected graphql errors" — modules/platform/github/index.spec.ts line 1067
+    // Ported: "throws unexpected graphql errors" — lib/modules/platform/github/index.spec.ts line 1067
     #[test]
     fn validate_github_content_missing_type() {
         let input = serde_json::json!({"name": "foo", "path": "foo"});
         assert!(validate_github_content_response(&input).is_err());
     }
 
-    // Ported: "throws not-found" — modules/platform/github/index.spec.ts line 1060
+    // Ported: "throws not-found" — lib/modules/platform/github/index.spec.ts line 1060
     #[test]
     fn validate_github_content_unknown_type() {
         let input = serde_json::json!({"type": "unknown", "name": "foo", "path": "foo"});
         assert!(validate_github_content_response(&input).is_err());
     }
 
-    // Ported: "should throw error if renamed" — modules/platform/github/index.spec.ts line 1101
+    // Ported: "should throw error if renamed" — lib/modules/platform/github/index.spec.ts line 1101
     #[test]
     fn validate_github_content_not_array_or_object() {
         let input = serde_json::json!("string");
@@ -5290,7 +5290,7 @@ mod tests {
 
     // ── Additional parse_github_vulnerability_alerts tests (index.spec.ts) ──────
 
-    // Ported: "avoids fetching if repo has vulnerability alerts disabled" — modules/platform/github/index.spec.ts line 5090
+    // Ported: "avoids fetching if repo has vulnerability alerts disabled" — lib/modules/platform/github/index.spec.ts line 5090
     #[test]
     fn parse_vulnerability_alerts_empty_array() {
         let input = serde_json::json!([]);
@@ -5298,7 +5298,7 @@ mod tests {
         assert!(result.is_empty());
     }
 
-    // Ported: "returns empty if disabled" — modules/platform/github/index.spec.ts line 5163
+    // Ported: "returns empty if disabled" — lib/modules/platform/github/index.spec.ts line 5163
     #[test]
     fn parse_vulnerability_alerts_null_input() {
         let input = serde_json::Value::Null;
@@ -5306,7 +5306,7 @@ mod tests {
         assert!(result.is_empty());
     }
 
-    // Ported: "handles network error" — modules/platform/github/index.spec.ts line 5177
+    // Ported: "handles network error" — lib/modules/platform/github/index.spec.ts line 5177
     #[test]
     fn parse_vulnerability_alerts_missing_ecosystem() {
         let input = serde_json::json!([{
@@ -5319,7 +5319,7 @@ mod tests {
         assert!(result.is_empty());
     }
 
-    // Ported: "returns normalized names for PIP ecosystem" — modules/platform/github/index.spec.ts line 5247
+    // Ported: "returns normalized names for PIP ecosystem" — lib/modules/platform/github/index.spec.ts line 5247
     #[test]
     fn parse_vulnerability_alerts_pip_ecosystem() {
         let input = serde_json::json!([{
@@ -5340,7 +5340,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles pagination correctly" — modules/platform/github/index.spec.ts line 5283
+    // Ported: "handles pagination correctly" — lib/modules/platform/github/index.spec.ts line 5283
     #[test]
     fn parse_vulnerability_alerts_pagination() {
         let alerts: Vec<serde_json::Value> = (0..100)
@@ -5356,7 +5356,7 @@ mod tests {
         assert_eq!(result.len(), 100);
     }
 
-    // Ported: "returns empty if error" — modules/platform/github/index.spec.ts line 5100
+    // Ported: "returns empty if error" — lib/modules/platform/github/index.spec.ts line 5100
     #[test]
     fn parse_vulnerability_alerts_returns_empty_for_unexpected_format() {
         let input = serde_json::json!({"data": {"repository": {}}});
@@ -5366,7 +5366,7 @@ mod tests {
 
     // ── get_vulnerability_alerts ──────────────────────────────────────────────
 
-    // Ported: "returns empty if error" — modules/platform/github/index.spec.ts line 5100
+    // Ported: "returns empty if error" — lib/modules/platform/github/index.spec.ts line 5100
     #[tokio::test]
     async fn get_vulnerability_alerts_returns_empty_on_error() {
         let server = MockServer::start().await;
@@ -5384,7 +5384,7 @@ mod tests {
         assert!(alerts.is_empty());
     }
 
-    // Ported: "returns array if found" — modules/platform/github/index.spec.ts line 5113
+    // Ported: "returns array if found" — lib/modules/platform/github/index.spec.ts line 5113
     #[tokio::test]
     async fn get_vulnerability_alerts_returns_array_if_found() {
         let server = MockServer::start().await;
@@ -5432,7 +5432,7 @@ mod tests {
         assert_eq!(alerts.len(), 1);
     }
 
-    // Ported: "returns empty if disabled" — modules/platform/github/index.spec.ts line 5163
+    // Ported: "returns empty if disabled" — lib/modules/platform/github/index.spec.ts line 5163
     #[tokio::test]
     async fn get_vulnerability_alerts_returns_empty_if_disabled() {
         let server = MockServer::start().await;
@@ -5452,7 +5452,7 @@ mod tests {
         assert!(alerts.is_empty());
     }
 
-    // Ported: "handles network error" — modules/platform/github/index.spec.ts line 5177
+    // Ported: "handles network error" — lib/modules/platform/github/index.spec.ts line 5177
     #[tokio::test]
     async fn get_vulnerability_alerts_handles_network_error() {
         let server = MockServer::start().await;
@@ -5472,7 +5472,7 @@ mod tests {
 
     // ── delete_label ──────────────────────────────────────────────────────────
 
-    // Ported: "should delete the label" — modules/platform/github/index.spec.ts line 3318
+    // Ported: "should delete the label" — lib/modules/platform/github/index.spec.ts line 3318
     #[tokio::test]
     async fn delete_label_succeeds() {
         let server = MockServer::start().await;
@@ -5491,7 +5491,7 @@ mod tests {
 
     // ── add_assignees ─────────────────────────────────────────────────────────
 
-    // Ported: "should add the given assignees to the issue" — modules/platform/github/index.spec.ts line 3328
+    // Ported: "should add the given assignees to the issue" — lib/modules/platform/github/index.spec.ts line 3328
     #[tokio::test]
     async fn add_assignees_succeeds() {
         let server = MockServer::start().await;
@@ -5516,7 +5516,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "should retry on 404 and succeed" — modules/platform/github/index.spec.ts line 3344
+    // Ported: "should retry on 404 and succeed" — lib/modules/platform/github/index.spec.ts line 3344
     #[tokio::test]
     async fn add_assignees_retries_on_404_and_succeeds() {
         let server = MockServer::start().await;
@@ -5542,7 +5542,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "should throw after 3 consecutive 404 responses" — modules/platform/github/index.spec.ts line 3364
+    // Ported: "should throw after 3 consecutive 404 responses" — lib/modules/platform/github/index.spec.ts line 3364
     #[tokio::test]
     async fn add_assignees_throws_after_three_consecutive_404s() {
         let server = MockServer::start().await;
@@ -5564,7 +5564,7 @@ mod tests {
 
     // ── add_reviewers ─────────────────────────────────────────────────────────
 
-    // Ported: "should add the given reviewers to the PR" — modules/platform/github/index.spec.ts line 3386
+    // Ported: "should add the given reviewers to the PR" — lib/modules/platform/github/index.spec.ts line 3386
     #[tokio::test]
     async fn add_reviewers_succeeds() {
         let server = MockServer::start().await;
@@ -5590,7 +5590,7 @@ mod tests {
 
     // ── find_pr ───────────────────────────────────────────────────────────────
 
-    // Ported: "finds PR by branch name" — modules/platform/github/index.spec.ts line 3540
+    // Ported: "finds PR by branch name" — lib/modules/platform/github/index.spec.ts line 3540
     #[tokio::test]
     async fn find_pr_by_branch_name() {
         let server = MockServer::start().await;
@@ -5631,7 +5631,7 @@ mod tests {
         assert_eq!(pr.source_branch, "branch-a");
     }
 
-    // Ported: "finds PR with non-open state" — modules/platform/github/index.spec.ts line 3582
+    // Ported: "finds PR with non-open state" — lib/modules/platform/github/index.spec.ts line 3582
     #[tokio::test]
     async fn find_pr_with_non_open_state() {
         let server = MockServer::start().await;
@@ -5662,7 +5662,7 @@ mod tests {
         assert_eq!(pr.state, "closed");
     }
 
-    // Ported: "skips PR with non-matching state" — modules/platform/github/index.spec.ts line 3611
+    // Ported: "skips PR with non-matching state" — lib/modules/platform/github/index.spec.ts line 3611
     #[tokio::test]
     async fn find_pr_skips_non_matching_state() {
         let server = MockServer::start().await;
@@ -5691,7 +5691,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "skips PRs from forks" — modules/platform/github/index.spec.ts line 3637
+    // Ported: "skips PRs from forks" — lib/modules/platform/github/index.spec.ts line 3637
     #[tokio::test]
     async fn find_pr_skips_forks() {
         let server = MockServer::start().await;
@@ -5720,7 +5720,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "skips PR with non-matching title" — modules/platform/github/index.spec.ts line 3662
+    // Ported: "skips PR with non-matching title" — lib/modules/platform/github/index.spec.ts line 3662
     #[tokio::test]
     async fn find_pr_skips_non_matching_title() {
         let server = MockServer::start().await;
@@ -5749,7 +5749,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "finds pr from other authors" — modules/platform/github/index.spec.ts line 3722
+    // Ported: "finds pr from other authors" — lib/modules/platform/github/index.spec.ts line 3722
     #[tokio::test]
     async fn find_pr_from_other_authors() {
         let server = MockServer::start().await;
@@ -5781,8 +5781,8 @@ mod tests {
         assert_eq!(pr.number, 1);
     }
 
-    // Ported: "returns null if no pr found - (includeOtherAuthors)" — modules/platform/github/index.spec.ts line 3752
-    // Ported: "should return null if no PR exists" — modules/platform/github/index.spec.ts line 2007
+    // Ported: "returns null if no pr found - (includeOtherAuthors)" — lib/modules/platform/github/index.spec.ts line 3752
+    // Ported: "should return null if no PR exists" — lib/modules/platform/github/index.spec.ts line 2007
     #[tokio::test]
     async fn find_pr_returns_null_when_not_found() {
         let server = MockServer::start().await;
@@ -5800,7 +5800,7 @@ mod tests {
         assert!(pr.is_none());
     }
 
-    // Ported: "should return null if no PR exists" — modules/platform/github/index.spec.ts line 2007
+    // Ported: "should return null if no PR exists" — lib/modules/platform/github/index.spec.ts line 2007
     #[tokio::test]
     async fn list_prs_returns_empty_when_no_prs() {
         let server = MockServer::start().await;
@@ -5815,7 +5815,7 @@ mod tests {
         assert!(prs.is_empty());
     }
 
-    // Ported: "fetches single page" — modules/platform/github/index.spec.ts line 1459
+    // Ported: "fetches single page" — lib/modules/platform/github/index.spec.ts line 1459
     #[tokio::test]
     async fn list_prs_fetches_single_page() {
         let server = MockServer::start().await;
@@ -5842,7 +5842,7 @@ mod tests {
         assert_eq!(prs[0].number, 1);
     }
 
-    // Ported: "fetches multiple pages" — modules/platform/github/index.spec.ts line 1470
+    // Ported: "fetches multiple pages" — lib/modules/platform/github/index.spec.ts line 1470
     #[tokio::test]
     async fn list_prs_fetches_multiple_pages() {
         let server = MockServer::start().await;
@@ -5892,7 +5892,7 @@ mod tests {
         assert_eq!(prs[1].number, 2);
     }
 
-    // Ported: "should not be case sensitive" — modules/platform/github/index.spec.ts line 1124
+    // Ported: "should not be case sensitive" — lib/modules/platform/github/index.spec.ts line 1124
     #[tokio::test]
     async fn find_pr_not_case_sensitive() {
         let server = MockServer::start().await;
@@ -5923,7 +5923,7 @@ mod tests {
         assert_eq!(pr.source_branch, "Branch-A");
     }
 
-    // Ported: "should create a draftPR if set in the settings" — modules/platform/github/index.spec.ts line 3809
+    // Ported: "should create a draftPR if set in the settings" — lib/modules/platform/github/index.spec.ts line 3809
     #[tokio::test]
     async fn create_pr_with_draft() {
         let server = MockServer::start().await;
@@ -5959,8 +5959,8 @@ mod tests {
 
     // ── init_platform ─────────────────────────────────────────────────────────
 
-    // Ported: "should throw if no token" — modules/platform/github/index.spec.ts line 64
-    // Ported: "no token" — modules/platform/github/index.spec.ts line 809
+    // Ported: "should throw if no token" — lib/modules/platform/github/index.spec.ts line 64
+    // Ported: "no token" — lib/modules/platform/github/index.spec.ts line 809
     #[tokio::test]
     async fn init_platform_throws_if_no_token() {
         let server = MockServer::start().await;
@@ -5971,7 +5971,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw if user failure" — modules/platform/github/index.spec.ts line 128
+    // Ported: "should throw if user failure" — lib/modules/platform/github/index.spec.ts line 128
     #[tokio::test]
     async fn init_platform_throws_on_user_failure() {
         let server = MockServer::start().await;
@@ -5986,14 +5986,14 @@ mod tests {
         assert!(matches!(err, PlatformError::Http(_)));
     }
 
-    // Ported: "should throw if endpoint is invalid URL" — modules/platform/github/index.spec.ts line 70
+    // Ported: "should throw if endpoint is invalid URL" — lib/modules/platform/github/index.spec.ts line 70
     #[test]
     fn init_platform_throws_if_endpoint_invalid() {
         let err = GithubClient::with_endpoint("token", "https://[invalid").unwrap_err();
         assert!(matches!(err, HttpError::Parse(_)));
     }
 
-    // Ported: "should use public email from user profile when available" — modules/platform/github/index.spec.ts line 361
+    // Ported: "should use public email from user profile when available" — lib/modules/platform/github/index.spec.ts line 361
     #[tokio::test]
     async fn init_platform_uses_public_email() {
         let server = MockServer::start().await;
@@ -6012,7 +6012,7 @@ mod tests {
         assert_eq!(email, Some("user@domain.com".to_owned()));
     }
 
-    // Ported: "should fall back to user/emails when there is no public email" — modules/platform/github/index.spec.ts line 375
+    // Ported: "should fall back to user/emails when there is no public email" — lib/modules/platform/github/index.spec.ts line 375
     #[tokio::test]
     async fn init_platform_falls_back_to_user_emails() {
         let server = MockServer::start().await;
@@ -6037,7 +6037,7 @@ mod tests {
         assert_eq!(email, Some("fallback@domain.com".to_owned()));
     }
 
-    // Ported: "should fall back gracefully when user/emails returns an error (no user:email scope)" — modules/platform/github/index.spec.ts line 394
+    // Ported: "should fall back gracefully when user/emails returns an error (no user:email scope)" — lib/modules/platform/github/index.spec.ts line 394
     #[tokio::test]
     async fn init_platform_falls_back_gracefully_on_email_error() {
         let server = MockServer::start().await;
@@ -6060,7 +6060,7 @@ mod tests {
         assert_eq!(email, None);
     }
 
-    // Ported: "should support default endpoint no email access" — modules/platform/github/index.spec.ts line 133
+    // Ported: "should support default endpoint no email access" — lib/modules/platform/github/index.spec.ts line 133
     #[tokio::test]
     async fn init_platform_supports_no_email_access() {
         let server = MockServer::start().await;
@@ -6083,7 +6083,7 @@ mod tests {
         assert_eq!(email, None);
     }
 
-    // Ported: "should support default endpoint no email result" — modules/platform/github/index.spec.ts line 145
+    // Ported: "should support default endpoint no email result" — lib/modules/platform/github/index.spec.ts line 145
     #[tokio::test]
     async fn init_platform_supports_empty_email_result() {
         let server = MockServer::start().await;
@@ -6106,7 +6106,7 @@ mod tests {
         assert_eq!(email, None);
     }
 
-    // Ported: "should throw if using fine-grained token with GHE <3.10" — modules/platform/github/index.spec.ts line 79
+    // Ported: "should throw if using fine-grained token with GHE <3.10" — lib/modules/platform/github/index.spec.ts line 79
     #[tokio::test]
     async fn init_platform_throws_on_fine_grained_token_with_old_ghe() {
         let server = MockServer::start().await;
@@ -6128,7 +6128,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw if using fine-grained token with GHE unknown version" — modules/platform/github/index.spec.ts line 94
+    // Ported: "should throw if using fine-grained token with GHE unknown version" — lib/modules/platform/github/index.spec.ts line 94
     #[tokio::test]
     async fn init_platform_throws_on_fine_grained_token_with_unknown_ghe_version() {
         let server = MockServer::start().await;
@@ -6148,7 +6148,7 @@ mod tests {
         );
     }
 
-    // Ported: "should support fine-grained token with GHE >=3.10" — modules/platform/github/index.spec.ts line 106
+    // Ported: "should support fine-grained token with GHE >=3.10" — lib/modules/platform/github/index.spec.ts line 106
     #[tokio::test]
     async fn init_platform_allows_fine_grained_token_with_recent_ghe() {
         let server = MockServer::start().await;
@@ -6176,8 +6176,8 @@ mod tests {
 
     // ── get_repos ─────────────────────────────────────────────────────────────
 
-    // Ported: "should return an array of repos" — modules/platform/github/index.spec.ts line 613
-    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1036
+    // Ported: "should return an array of repos" — lib/modules/platform/github/index.spec.ts line 613
+    // Ported: "should throw error if archived" — lib/modules/platform/github/index.spec.ts line 1036
     #[tokio::test]
     async fn get_repos_returns_array_of_repos() {
         let server = MockServer::start().await;
@@ -6197,7 +6197,7 @@ mod tests {
         assert_eq!(repos, vec!["a/b", "c/d"]);
     }
 
-    // Ported: "should filters repositories by topics" — modules/platform/github/index.spec.ts line 636
+    // Ported: "should filters repositories by topics" — lib/modules/platform/github/index.spec.ts line 636
     #[tokio::test]
     async fn get_repos_filters_by_topics() {
         let server = MockServer::start().await;
@@ -6220,7 +6220,7 @@ mod tests {
         assert_eq!(repos, vec!["c/d"]);
     }
 
-    // Ported: "should return an array of repos when using Github App endpoint" — modules/platform/github/index.spec.ts line 663
+    // Ported: "should return an array of repos when using Github App endpoint" — lib/modules/platform/github/index.spec.ts line 663
     #[tokio::test]
     async fn get_repos_using_github_app_endpoint() {
         let server = MockServer::start().await;
@@ -6241,8 +6241,8 @@ mod tests {
         assert_eq!(repos, vec!["a/b", "c/d"]);
     }
 
-    // Ported: "should return an array of repos when using GitHub App Installation Token" — modules/platform/github/index.spec.ts line 690
-    // Ported: "app token" — modules/platform/github/index.spec.ts line 817
+    // Ported: "should return an array of repos when using GitHub App Installation Token" — lib/modules/platform/github/index.spec.ts line 690
+    // Ported: "app token" — lib/modules/platform/github/index.spec.ts line 817
     #[tokio::test]
     async fn get_repos_using_github_app_installation_token() {
         let server = MockServer::start().await;
@@ -6266,7 +6266,7 @@ mod tests {
 
     // ── create_pr extensions ──────────────────────────────────────────────────
 
-    // Ported: "should allow maintainer edits if explicitly enabled via options" — modules/platform/github/index.spec.ts line 3849
+    // Ported: "should allow maintainer edits if explicitly enabled via options" — lib/modules/platform/github/index.spec.ts line 3849
     #[tokio::test]
     async fn create_pr_allows_maintainer_edits_explicitly_enabled() {
         let server = MockServer::start().await;
@@ -6303,7 +6303,7 @@ mod tests {
         assert_eq!(pr_number, Some(123));
     }
 
-    // Ported: "should allow maintainer edits if not explicitly set" — modules/platform/github/index.spec.ts line 3873
+    // Ported: "should allow maintainer edits if not explicitly set" — lib/modules/platform/github/index.spec.ts line 3873
     #[tokio::test]
     async fn create_pr_allows_maintainer_edits_not_explicitly_set() {
         let server = MockServer::start().await;
@@ -6340,7 +6340,7 @@ mod tests {
         assert_eq!(pr_number, Some(123));
     }
 
-    // Ported: "should disallow maintainer edits if explicitly disabled" — modules/platform/github/index.spec.ts line 3894
+    // Ported: "should disallow maintainer edits if explicitly disabled" — lib/modules/platform/github/index.spec.ts line 3894
     #[tokio::test]
     async fn create_pr_disallows_maintainer_edits_explicitly_disabled() {
         let server = MockServer::start().await;
@@ -6377,7 +6377,7 @@ mod tests {
         assert_eq!(pr_number, Some(123));
     }
 
-    // Ported: "should set the milestone on the PR" — modules/platform/github/index.spec.ts line 4287
+    // Ported: "should set the milestone on the PR" — lib/modules/platform/github/index.spec.ts line 4287
     #[tokio::test]
     async fn create_pr_sets_milestone() {
         let server = MockServer::start().await;
@@ -6420,7 +6420,7 @@ mod tests {
         assert_eq!(pr_number, Some(123));
     }
 
-    // Ported: "should log a warning but not throw on error" — modules/platform/github/index.spec.ts line 4319
+    // Ported: "should log a warning but not throw on error" — lib/modules/platform/github/index.spec.ts line 4319
     #[tokio::test]
     async fn create_pr_warns_but_does_not_throw_on_milestone_error() {
         let server = MockServer::start().await;
@@ -6466,7 +6466,7 @@ mod tests {
         assert_eq!(pr_number, Some(123));
     }
 
-    // Ported: "should squash" — modules/platform/github/index.spec.ts line 801
+    // Ported: "should squash" — lib/modules/platform/github/index.spec.ts line 801
     #[tokio::test]
     async fn get_repo_merge_methods_prefers_squash() {
         let server = MockServer::start().await;
@@ -6491,7 +6491,7 @@ mod tests {
         assert_eq!(method, Some("squash".to_owned()));
     }
 
-    // Ported: "should merge" — modules/platform/github/index.spec.ts line 960
+    // Ported: "should merge" — lib/modules/platform/github/index.spec.ts line 960
     #[tokio::test]
     async fn get_repo_merge_methods_prefers_merge() {
         let server = MockServer::start().await;
@@ -6516,7 +6516,7 @@ mod tests {
         assert_eq!(method, Some("merge".to_owned()));
     }
 
-    // Ported: "should rebase" — modules/platform/github/index.spec.ts line 989
+    // Ported: "should rebase" — lib/modules/platform/github/index.spec.ts line 989
     #[tokio::test]
     async fn get_repo_merge_methods_prefers_rebase() {
         let server = MockServer::start().await;
@@ -6541,7 +6541,7 @@ mod tests {
         assert_eq!(method, Some("rebase".to_owned()));
     }
 
-    // Ported: "should not guess at merge" — modules/platform/github/index.spec.ts line 1016
+    // Ported: "should not guess at merge" — lib/modules/platform/github/index.spec.ts line 1016
     #[tokio::test]
     async fn get_repo_merge_methods_returns_none_when_all_disabled() {
         let server = MockServer::start().await;
@@ -6568,7 +6568,7 @@ mod tests {
 
     // ── update_pr_labels ──────────────────────────────────────────────────────
 
-    // Ported: "should add and remove labels" — modules/platform/github/index.spec.ts line 4636
+    // Ported: "should add and remove labels" — lib/modules/platform/github/index.spec.ts line 4636
     #[tokio::test]
     async fn update_pr_labels_adds_labels() {
         let server = MockServer::start().await;
@@ -6587,7 +6587,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "warns if adding labels failed" — modules/platform/github/index.spec.ts line 4676
+    // Ported: "warns if adding labels failed" — lib/modules/platform/github/index.spec.ts line 4676
     #[tokio::test]
     async fn update_pr_labels_warns_on_failure() {
         let server = MockServer::start().await;
@@ -6609,7 +6609,7 @@ mod tests {
 
     // ── ensure_comment ────────────────────────────────────────────────────────
 
-    // Ported: "adds comment if found in closed PR list" — modules/platform/github/index.spec.ts line 3417
+    // Ported: "adds comment if found in closed PR list" — lib/modules/platform/github/index.spec.ts line 3417
     #[tokio::test]
     async fn ensure_comment_adds_if_found_in_closed_pr_list() {
         let server = MockServer::start().await;
@@ -6644,7 +6644,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "deletes comment by topic if found" — modules/platform/github/index.spec.ts line 3500
+    // Ported: "deletes comment by topic if found" — lib/modules/platform/github/index.spec.ts line 3500
     #[tokio::test]
     async fn ensure_comment_deletes_by_topic_if_found() {
         let server = MockServer::start().await;
@@ -6668,7 +6668,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "deletes comment by content if found" — modules/platform/github/index.spec.ts line 3519
+    // Ported: "deletes comment by content if found" — lib/modules/platform/github/index.spec.ts line 3519
     #[tokio::test]
     async fn ensure_comment_deletes_by_content_if_found() {
         let server = MockServer::start().await;
@@ -6692,7 +6692,7 @@ mod tests {
             .unwrap();
     }
 
-    // Ported: "skips comment" — modules/platform/github/index.spec.ts line 3464
+    // Ported: "skips comment" — lib/modules/platform/github/index.spec.ts line 3464
     #[tokio::test]
     async fn ensure_comment_skips_when_already_up_to_date() {
         let server = MockServer::start().await;
@@ -6712,7 +6712,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "add comment if not found" — modules/platform/github/index.spec.ts line 3398
+    // Ported: "add comment if not found" — lib/modules/platform/github/index.spec.ts line 3398
     #[tokio::test]
     async fn ensure_comment_creates_if_not_found() {
         let server = MockServer::start().await;
@@ -6738,7 +6738,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "add updates comment if necessary" — modules/platform/github/index.spec.ts line 3445
+    // Ported: "add updates comment if necessary" — lib/modules/platform/github/index.spec.ts line 3445
     #[tokio::test]
     async fn ensure_comment_updates_if_necessary() {
         let server = MockServer::start().await;
@@ -6763,7 +6763,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "handles comment with no description" — modules/platform/github/index.spec.ts line 3481
+    // Ported: "handles comment with no description" — lib/modules/platform/github/index.spec.ts line 3481
     #[tokio::test]
     async fn ensure_comment_handles_no_topic() {
         let server = MockServer::start().await;
@@ -6785,8 +6785,8 @@ mod tests {
 
     // ── ensure_issue ──────────────────────────────────────────────────────────
 
-    // Ported: "creates issue if not ensuring only once" — modules/platform/github/index.spec.ts line 2697
-    // Ported: "does not create issue if ensuring only once" — modules/platform/github/index.spec.ts line 2741
+    // Ported: "creates issue if not ensuring only once" — lib/modules/platform/github/index.spec.ts line 2697
+    // Ported: "does not create issue if ensuring only once" — lib/modules/platform/github/index.spec.ts line 2741
     #[tokio::test]
     async fn ensure_issue_does_not_create_if_ensuring_only_once() {
         let server = MockServer::start().await;
@@ -6821,7 +6821,7 @@ mod tests {
         assert_eq!(number, None);
     }
 
-    // Ported: "closes others if ensuring only once" — modules/platform/github/index.spec.ts line 2819
+    // Ported: "closes others if ensuring only once" — lib/modules/platform/github/index.spec.ts line 2819
     #[tokio::test]
     async fn ensure_issue_closes_others_if_ensuring_only_once() {
         let server = MockServer::start().await;
@@ -6868,7 +6868,7 @@ mod tests {
         assert_eq!(number, None);
     }
 
-    // Ported: "deletes if duplicate" — modules/platform/github/index.spec.ts line 3035
+    // Ported: "deletes if duplicate" — lib/modules/platform/github/index.spec.ts line 3035
     #[tokio::test]
     async fn ensure_issue_deletes_if_duplicate() {
         let server = MockServer::start().await;
@@ -6903,7 +6903,7 @@ mod tests {
         assert_eq!(number, None);
     }
 
-    // Ported: "creates issue if reopen flag false and issue is not open" — modules/platform/github/index.spec.ts line 3079
+    // Ported: "creates issue if reopen flag false and issue is not open" — lib/modules/platform/github/index.spec.ts line 3079
     #[tokio::test]
     async fn ensure_issue_creates_if_reopen_false_and_not_open() {
         let server = MockServer::start().await;
@@ -6947,7 +6947,7 @@ mod tests {
         assert_eq!(number, Some(42));
     }
 
-    // Ported: "does not create issue if reopen flag false and issue is already open" — modules/platform/github/index.spec.ts line 3132
+    // Ported: "does not create issue if reopen flag false and issue is already open" — lib/modules/platform/github/index.spec.ts line 3132
     #[tokio::test]
     async fn ensure_issue_does_not_create_if_reopen_false_and_already_open() {
         let server = MockServer::start().await;
@@ -6984,7 +6984,7 @@ mod tests {
 
     // ── get_issue additional coverage ─────────────────────────────────────────
 
-    // Ported: "logs debug message if issue deleted" — modules/platform/github/index.spec.ts line 2542
+    // Ported: "logs debug message if issue deleted" — lib/modules/platform/github/index.spec.ts line 2542
     #[tokio::test]
     async fn get_issue_logs_debug_if_deleted() {
         let server = MockServer::start().await;
@@ -7001,7 +7001,7 @@ mod tests {
 
     // ── create_issue additional coverage ──────────────────────────────────────
 
-    // Ported: "creates issue if not ensuring only once" — modules/platform/github/index.spec.ts line 2697
+    // Ported: "creates issue if not ensuring only once" — lib/modules/platform/github/index.spec.ts line 2697
     #[tokio::test]
     async fn create_issue_if_not_ensuring_only_once() {
         let server = MockServer::start().await;
@@ -7027,8 +7027,8 @@ mod tests {
 
     // ── merge_pr ──────────────────────────────────────────────────────────────
 
-    // Ported: "should merge the PR" — modules/platform/github/index.spec.ts line 4820
-    // Ported: "should set automatic merge" — modules/platform/github/index.spec.ts line 4780
+    // Ported: "should merge the PR" — lib/modules/platform/github/index.spec.ts line 4820
+    // Ported: "should set automatic merge" — lib/modules/platform/github/index.spec.ts line 4780
     #[tokio::test]
     async fn merge_pr_succeeds() {
         let server = MockServer::start().await;
@@ -7050,9 +7050,9 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should handle merge error" — modules/platform/github/index.spec.ts line 4852
-    // Ported: "handles unknown error" — modules/platform/github/index.spec.ts line 4798
-    // Ported: "should handle merge error" — modules/platform/github/index.spec.ts line 4852
+    // Ported: "should handle merge error" — lib/modules/platform/github/index.spec.ts line 4852
+    // Ported: "handles unknown error" — lib/modules/platform/github/index.spec.ts line 4798
+    // Ported: "should handle merge error" — lib/modules/platform/github/index.spec.ts line 4852
     #[tokio::test]
     async fn merge_pr_returns_false_on_error() {
         let server = MockServer::start().await;
@@ -7070,7 +7070,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should handle merge block" — modules/platform/github/index.spec.ts line 4873
+    // Ported: "should handle merge block" — lib/modules/platform/github/index.spec.ts line 4873
     #[tokio::test]
     async fn merge_pr_returns_false_on_merge_block() {
         let server = MockServer::start().await;
@@ -7090,7 +7090,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should handle approvers required" — modules/platform/github/index.spec.ts line 4895
+    // Ported: "should handle approvers required" — lib/modules/platform/github/index.spec.ts line 4895
     #[tokio::test]
     async fn merge_pr_returns_false_on_approvers_required() {
         let server = MockServer::start().await;
@@ -7110,7 +7110,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should use configured automergeStrategy" — modules/platform/github/index.spec.ts line 4936
+    // Ported: "should use configured automergeStrategy" — lib/modules/platform/github/index.spec.ts line 4936
     #[tokio::test]
     async fn merge_pr_uses_configured_strategy() {
         let server = MockServer::start().await;
@@ -7129,7 +7129,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should warn if automergeStrategy is not supported" — modules/platform/github/index.spec.ts line 4917
+    // Ported: "should warn if automergeStrategy is not supported" — lib/modules/platform/github/index.spec.ts line 4917
     #[tokio::test]
     async fn merge_pr_warns_on_unsupported_strategy() {
         let server = MockServer::start().await;
@@ -7148,7 +7148,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should try squash first" — modules/platform/github/index.spec.ts line 4996
+    // Ported: "should try squash first" — lib/modules/platform/github/index.spec.ts line 4996
     #[tokio::test]
     async fn merge_pr_autodetect_tries_squash_first() {
         let server = MockServer::start().await;
@@ -7171,7 +7171,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should try merge after squash" — modules/platform/github/index.spec.ts line 5015
+    // Ported: "should try merge after squash" — lib/modules/platform/github/index.spec.ts line 5015
     #[tokio::test]
     async fn merge_pr_autodetect_tries_merge_after_squash_fails() {
         let server = MockServer::start().await;
@@ -7205,7 +7205,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should try rebase after merge" — modules/platform/github/index.spec.ts line 5036
+    // Ported: "should try rebase after merge" — lib/modules/platform/github/index.spec.ts line 5036
     #[tokio::test]
     async fn merge_pr_autodetect_tries_rebase_after_merge_fails() {
         let server = MockServer::start().await;
@@ -7250,7 +7250,7 @@ mod tests {
         assert!(result);
     }
 
-    // Ported: "should give up" — modules/platform/github/index.spec.ts line 5061
+    // Ported: "should give up" — lib/modules/platform/github/index.spec.ts line 5061
     #[tokio::test]
     async fn merge_pr_autodetect_gives_up() {
         let server = MockServer::start().await;
@@ -7271,7 +7271,7 @@ mod tests {
         assert!(!result);
     }
 
-    // Ported: "should skip automerge if disabled in repo settings" — modules/platform/github/index.spec.ts line 4009
+    // Ported: "should skip automerge if disabled in repo settings" — lib/modules/platform/github/index.spec.ts line 4009
     #[tokio::test]
     async fn create_pr_without_automerge() {
         let server = MockServer::start().await;
@@ -7298,7 +7298,7 @@ mod tests {
         assert_eq!(pr_number, Some(123));
     }
 
-    // Ported: "should throw immediately on non-404 errors" — modules/platform/github/index.spec.ts line 3374
+    // Ported: "should throw immediately on non-404 errors" — lib/modules/platform/github/index.spec.ts line 3374
     #[tokio::test]
     async fn add_assignees_throws_on_non_404() {
         let server = MockServer::start().await;
@@ -7318,7 +7318,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null on REST error" — modules/platform/github/index.spec.ts line 5502
+    // Ported: "returns null on REST error" — lib/modules/platform/github/index.spec.ts line 5502
     #[tokio::test]
     async fn get_file_list_returns_error_on_rest_error() {
         let server = MockServer::start().await;
@@ -7380,7 +7380,7 @@ mod tests {
         assert!(!result.repo_fingerprint.is_empty());
     }
 
-    // Ported: "should throw error if archived" — modules/platform/github/index.spec.ts line 1036
+    // Ported: "should throw error if archived" — lib/modules/platform/github/index.spec.ts line 1036
     #[tokio::test]
     async fn init_repo_throws_if_archived() {
         let server = MockServer::start().await;
@@ -7417,7 +7417,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_ARCHIVED"));
     }
 
-    // Ported: "should throw error if renamed" — modules/platform/github/index.spec.ts line 1101
+    // Ported: "should throw error if renamed" — lib/modules/platform/github/index.spec.ts line 1101
     #[tokio::test]
     async fn init_repo_throws_if_renamed() {
         let server = MockServer::start().await;
@@ -7454,7 +7454,7 @@ mod tests {
         assert!(matches!(err, PlatformError::Unexpected(msg) if msg == "REPOSITORY_RENAMED"));
     }
 
-    // Ported: "throws not-found" — modules/platform/github/index.spec.ts line 1060
+    // Ported: "throws not-found" — lib/modules/platform/github/index.spec.ts line 1060
     #[tokio::test]
     async fn init_repo_throws_not_found() {
         let server = MockServer::start().await;
@@ -7530,7 +7530,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle GraphQL errors" — modules/platform/github/index.spec.ts line 4118
+    // Ported: "should handle GraphQL errors" — lib/modules/platform/github/index.spec.ts line 4118
     #[tokio::test]
     async fn init_repo_handles_graphql_errors() {
         let server = MockServer::start().await;

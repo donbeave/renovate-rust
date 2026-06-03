@@ -235,7 +235,7 @@ pub fn get_patch(version: &str) -> Option<u64> {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/rpm/index.spec.ts line 4
+    // Ported: "isValid(\"$version\") === $expected" — lib/modules/versioning/rpm/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_rpm_spec() {
         let cases = [
@@ -298,7 +298,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals(\"$a\", \"$b\") === $expected" — versioning/rpm/index.spec.ts line 62
+    // Ported: "equals(\"$a\", \"$b\") === $expected" — lib/modules/versioning/rpm/index.spec.ts line 62
     #[test]
     fn equals_matches_renovate_rpm_spec() {
         let cases = [
@@ -336,7 +336,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/rpm/index.spec.ts line 95
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — lib/modules/versioning/rpm/index.spec.ts line 95
     #[test]
     fn is_greater_than_matches_renovate_rpm_spec() {
         let cases = [
@@ -397,7 +397,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor(\"$version\") === $expected" — versioning/rpm/index.spec.ts line 151
+    // Ported: "getMajor(\"$version\") === $expected" — lib/modules/versioning/rpm/index.spec.ts line 151
     #[test]
     fn get_major_matches_renovate_rpm_spec() {
         let cases = [
@@ -415,7 +415,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMinor(\"$version\") === $expected" — versioning/rpm/index.spec.ts line 164
+    // Ported: "getMinor(\"$version\") === $expected" — lib/modules/versioning/rpm/index.spec.ts line 164
     #[test]
     fn get_minor_matches_renovate_rpm_spec() {
         let cases = [
@@ -433,7 +433,7 @@ mod tests {
         }
     }
 
-    // Ported: "getPatch(\"$version\") === $expected" — versioning/rpm/index.spec.ts line 177
+    // Ported: "getPatch(\"$version\") === $expected" — lib/modules/versioning/rpm/index.spec.ts line 177
     #[test]
     fn get_patch_matches_renovate_rpm_spec() {
         let cases = [

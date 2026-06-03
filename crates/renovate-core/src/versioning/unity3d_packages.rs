@@ -130,7 +130,7 @@ pub fn is_greater_than(a: &str, b: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/unity3d-packages/index.spec.ts line 4
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/unity3d-packages/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_unity3d_packages_spec() {
         let cases = [
@@ -147,7 +147,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$input\") === $expected" — versioning/unity3d-packages/index.spec.ts line 18
+    // Ported: "isStable(\"$input\") === $expected" — lib/modules/versioning/unity3d-packages/index.spec.ts line 18
     #[test]
     fn is_stable_matches_renovate_unity3d_packages_spec() {
         let cases = [
@@ -162,7 +162,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/unity3d-packages/index.spec.ts line 29
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/unity3d-packages/index.spec.ts line 29
     #[test]
     fn equals_matches_renovate_unity3d_packages_spec() {
         let cases = [
@@ -177,7 +177,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/unity3d-packages/index.spec.ts line 40
+    // Ported: "isGreaterThan($a, $b) === $expected" — lib/modules/versioning/unity3d-packages/index.spec.ts line 40
     #[test]
     fn is_greater_than_matches_renovate_unity3d_packages_spec() {
         let cases = [

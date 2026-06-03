@@ -1315,7 +1315,7 @@ mod tests {
         }
     }
 
-    // Ported: "should return true" — util/package-rules/managers.spec.ts line 7
+    // Ported: "should return true" — lib/util/package-rules/managers.spec.ts line 7
     #[test]
     fn managers_matcher_returns_true_for_matching_manager() {
         let rule = rule_with_managers(&["npm", "regex"]);
@@ -1323,7 +1323,7 @@ mod tests {
         assert!(rule.manager_matches("npm"));
     }
 
-    // Ported: "should return false for no match" — util/package-rules/managers.spec.ts line 19
+    // Ported: "should return false for no match" — lib/util/package-rules/managers.spec.ts line 19
     #[test]
     fn managers_matcher_returns_false_for_no_match() {
         let rule = rule_with_managers(&["docker"]);
@@ -1331,7 +1331,7 @@ mod tests {
         assert!(!rule.manager_matches("npm"));
     }
 
-    // Ported: "should return null if matchManagers is undefined" — util/package-rules/managers.spec.ts line 31
+    // Ported: "should return null if matchManagers is undefined" — lib/util/package-rules/managers.spec.ts line 31
     #[test]
     fn managers_matcher_without_patterns_is_not_a_constraint() {
         let rule = PackageRule::default();
@@ -1339,7 +1339,7 @@ mod tests {
         assert!(rule.manager_matches("npm"));
     }
 
-    // Ported: "should return false if no manager" — util/package-rules/managers.spec.ts line 41
+    // Ported: "should return false if no manager" — lib/util/package-rules/managers.spec.ts line 41
     #[test]
     fn managers_matcher_returns_false_if_no_manager() {
         let rule = rule_with_managers(&["npm"]);
@@ -1348,7 +1348,7 @@ mod tests {
         assert!(!rule.matches_context(&ctx));
     }
 
-    // Ported: "should match custom managers" — util/package-rules/managers.spec.ts line 51
+    // Ported: "should match custom managers" — lib/util/package-rules/managers.spec.ts line 51
     #[test]
     fn managers_matcher_matches_custom_managers() {
         let rule = rule_with_managers(&["custom.regex"]);
@@ -1356,7 +1356,7 @@ mod tests {
         assert!(rule.manager_matches("regex"));
     }
 
-    // Ported: "should return false if packageFile is not defined" — util/package-rules/dep-names.spec.ts line 7
+    // Ported: "should return false if packageFile is not defined" — lib/util/package-rules/dep-names.spec.ts line 7
     #[test]
     fn dep_name_matcher_returns_false_if_dep_name_is_empty() {
         let rule = rule_with_dep_names(&["@opentelemetry/http"]);
@@ -1364,7 +1364,7 @@ mod tests {
         assert!(!rule.dep_name_matches(""));
     }
 
-    // Ported: "should return false if depName is excluded prefix" — util/package-rules/dep-names.spec.ts line 19
+    // Ported: "should return false if depName is excluded prefix" — lib/util/package-rules/dep-names.spec.ts line 19
     #[test]
     fn dep_name_matcher_returns_false_if_dep_name_is_excluded_prefix() {
         let regex_rule = rule_with_dep_names(&["!/^@opentelemetry/"]);
@@ -1374,7 +1374,7 @@ mod tests {
         assert!(!glob_rule.dep_name_matches("@opentelemetry/http"));
     }
 
-    // Ported: "should return true if depName is included prefix" — util/package-rules/dep-names.spec.ts line 42
+    // Ported: "should return true if depName is included prefix" — lib/util/package-rules/dep-names.spec.ts line 42
     #[test]
     fn dep_name_matcher_returns_true_if_dep_name_is_included_prefix() {
         let regex_rule = rule_with_dep_names(&["/^@opentelemetry/"]);
@@ -1384,7 +1384,7 @@ mod tests {
         assert!(glob_rule.dep_name_matches("@opentelemetry/http"));
     }
 
-    // Ported: "should return false if for wrong prefix" — util/package-rules/dep-names.spec.ts line 65
+    // Ported: "should return false if for wrong prefix" — lib/util/package-rules/dep-names.spec.ts line 65
     #[test]
     fn dep_name_matcher_returns_false_for_wrong_prefix() {
         let rule = rule_with_dep_names(&["@opentelemetry**"]);
@@ -1392,7 +1392,7 @@ mod tests {
         assert!(!rule.dep_name_matches("@opentelemetry/http"));
     }
 
-    // Ported: "return true for exact match" — util/package-rules/current-value.spec.ts line 7
+    // Ported: "return true for exact match" — lib/util/package-rules/current-value.spec.ts line 7
     #[test]
     fn current_value_matcher_returns_true_for_exact_match() {
         let rule = rule_with_current_value("1.1.0");
@@ -1400,7 +1400,7 @@ mod tests {
         assert!(rule.current_value_matches("1.1.0"));
     }
 
-    // Ported: "return true for glob match" — util/package-rules/current-value.spec.ts line 19
+    // Ported: "return true for glob match" — lib/util/package-rules/current-value.spec.ts line 19
     #[test]
     fn current_value_matcher_returns_true_for_glob_match() {
         let rule = rule_with_current_value("1.2.*");
@@ -1408,7 +1408,7 @@ mod tests {
         assert!(rule.current_value_matches("1.2.3"));
     }
 
-    // Ported: "return false for glob non match" — util/package-rules/current-value.spec.ts line 31
+    // Ported: "return false for glob non match" — lib/util/package-rules/current-value.spec.ts line 31
     #[test]
     fn current_value_matcher_returns_false_for_glob_non_match() {
         let rule = rule_with_current_value("1.3.*");
@@ -1416,7 +1416,7 @@ mod tests {
         assert!(!rule.current_value_matches("1.2.3"));
     }
 
-    // Ported: "return false for regex version non match" — util/package-rules/current-value.spec.ts line 43
+    // Ported: "return false for regex version non match" — lib/util/package-rules/current-value.spec.ts line 43
     #[test]
     fn current_value_matcher_returns_false_for_regex_version_non_match() {
         let rule = rule_with_current_value("/^v/");
@@ -1424,7 +1424,7 @@ mod tests {
         assert!(!rule.current_value_matches("\"~> 1.1.0\""));
     }
 
-    // Ported: "case insensitive match" — util/package-rules/current-value.spec.ts line 55
+    // Ported: "case insensitive match" — lib/util/package-rules/current-value.spec.ts line 55
     #[test]
     fn current_value_matcher_is_case_insensitive_for_i_regex_flag() {
         let rule = rule_with_current_value("/^\"v/i");
@@ -1432,7 +1432,7 @@ mod tests {
         assert!(rule.current_value_matches("\"V1.1.0\""));
     }
 
-    // Ported: "return true for regex version match" — util/package-rules/current-value.spec.ts line 67
+    // Ported: "return true for regex version match" — lib/util/package-rules/current-value.spec.ts line 67
     #[test]
     fn current_value_matcher_returns_true_for_regex_version_match() {
         let rule = rule_with_current_value("/^\"/");
@@ -1440,7 +1440,7 @@ mod tests {
         assert!(rule.current_value_matches("\"~> 0.1.0\""));
     }
 
-    // Ported: "return false for now value" — util/package-rules/current-value.spec.ts line 79
+    // Ported: "return false for now value" — lib/util/package-rules/current-value.spec.ts line 79
     #[test]
     fn current_value_matcher_returns_false_for_missing_value() {
         let rule = rule_with_current_value("/^v?[~ -]?0/");
@@ -1449,7 +1449,7 @@ mod tests {
         assert!(!rule.matches_context(&ctx));
     }
 
-    // Ported: "return true for exact match" — util/package-rules/new-value.spec.ts line 7
+    // Ported: "return true for exact match" — lib/util/package-rules/new-value.spec.ts line 7
     #[test]
     fn new_value_matcher_returns_true_for_exact_match() {
         let rule = rule_with_new_value("1.1.0");
@@ -1457,7 +1457,7 @@ mod tests {
         assert!(rule.new_value_matches("1.1.0"));
     }
 
-    // Ported: "return true for glob match" — util/package-rules/new-value.spec.ts line 19
+    // Ported: "return true for glob match" — lib/util/package-rules/new-value.spec.ts line 19
     #[test]
     fn new_value_matcher_returns_true_for_glob_match() {
         let rule = rule_with_new_value("1.2.*");
@@ -1465,7 +1465,7 @@ mod tests {
         assert!(rule.new_value_matches("1.2.3"));
     }
 
-    // Ported: "return false for glob non match" — util/package-rules/new-value.spec.ts line 31
+    // Ported: "return false for glob non match" — lib/util/package-rules/new-value.spec.ts line 31
     #[test]
     fn new_value_matcher_returns_false_for_glob_non_match() {
         let rule = rule_with_new_value("1.3.*");
@@ -1473,7 +1473,7 @@ mod tests {
         assert!(!rule.new_value_matches("1.2.3"));
     }
 
-    // Ported: "return false for regex version non match" — util/package-rules/new-value.spec.ts line 43
+    // Ported: "return false for regex version non match" — lib/util/package-rules/new-value.spec.ts line 43
     #[test]
     fn new_value_matcher_returns_false_for_regex_version_non_match() {
         let rule = rule_with_new_value("/^v/");
@@ -1481,7 +1481,7 @@ mod tests {
         assert!(!rule.new_value_matches("\"~> 1.1.0\""));
     }
 
-    // Ported: "case insensitive match" — util/package-rules/new-value.spec.ts line 55
+    // Ported: "case insensitive match" — lib/util/package-rules/new-value.spec.ts line 55
     #[test]
     fn new_value_matcher_is_case_insensitive_for_i_regex_flag() {
         let rule = rule_with_new_value("/^\"v/i");
@@ -1489,7 +1489,7 @@ mod tests {
         assert!(rule.new_value_matches("\"V1.1.0\""));
     }
 
-    // Ported: "return true for regex version match" — util/package-rules/new-value.spec.ts line 67
+    // Ported: "return true for regex version match" — lib/util/package-rules/new-value.spec.ts line 67
     #[test]
     fn new_value_matcher_returns_true_for_regex_version_match() {
         let rule = rule_with_new_value("/^\"/");
@@ -1497,7 +1497,7 @@ mod tests {
         assert!(rule.new_value_matches("\"~> 0.1.0\""));
     }
 
-    // Ported: "return false for now value" — util/package-rules/new-value.spec.ts line 79
+    // Ported: "return false for now value" — lib/util/package-rules/new-value.spec.ts line 79
     #[test]
     fn new_value_matcher_returns_false_for_missing_value() {
         let rule = rule_with_new_value("/^v?[~ -]?0/");
@@ -1506,7 +1506,7 @@ mod tests {
         assert!(!rule.matches_context(&ctx));
     }
 
-    // Ported: "should return false if packageName is not defined" — util/package-rules/package-names.spec.ts line 7
+    // Ported: "should return false if packageName is not defined" — lib/util/package-rules/package-names.spec.ts line 7
     #[test]
     fn package_name_matcher_returns_false_if_package_name_is_empty() {
         let rule = rule_with_package_names(&["@opentelemetry/http"]);
@@ -1514,7 +1514,7 @@ mod tests {
         assert!(!rule.name_matches(""));
     }
 
-    // Ported: "should return false if not matching" — util/package-rules/package-names.spec.ts line 19
+    // Ported: "should return false if not matching" — lib/util/package-rules/package-names.spec.ts line 19
     #[test]
     fn package_name_matcher_returns_false_if_not_matching() {
         let rule = rule_with_package_names(&["ghi"]);
@@ -1522,7 +1522,7 @@ mod tests {
         assert!(!rule.name_matches("def"));
     }
 
-    // Ported: "should matchPackageName" — util/package-rules/package-names.spec.ts line 32
+    // Ported: "should matchPackageName" — lib/util/package-rules/package-names.spec.ts line 32
     #[test]
     fn package_name_matcher_matches_package_name() {
         let rule = rule_with_package_names(&["def", "ghi"]);
@@ -1530,7 +1530,7 @@ mod tests {
         assert!(rule.name_matches("def"));
     }
 
-    // Ported: "should match pattern" — util/package-rules/package-names.spec.ts line 44
+    // Ported: "should match pattern" — lib/util/package-rules/package-names.spec.ts line 44
     #[test]
     fn package_name_matcher_matches_regex_pattern() {
         let rule = rule_with_package_names(&["/b/"]);
@@ -1538,7 +1538,7 @@ mod tests {
         assert!(rule.name_matches("b"));
     }
 
-    // Ported: "should return false if packageFile is not defined" — util/package-rules/files.spec.ts line 7
+    // Ported: "should return false if packageFile is not defined" — lib/util/package-rules/files.spec.ts line 7
     #[test]
     fn file_names_matcher_returns_false_if_package_file_is_missing() {
         let rule = rule_with_file_names(&["frontend/package.json"]);
@@ -1547,7 +1547,7 @@ mod tests {
         assert!(!rule.matches_context(&ctx));
     }
 
-    // Ported: "returns false if release is older" — util/package-rules/current-age.spec.ts line 18
+    // Ported: "returns false if release is older" — lib/util/package-rules/current-age.spec.ts line 18
     #[test]
     fn current_age_matcher_returns_false_if_release_is_older() {
         let rule = rule_with_current_age("< 1 year");
@@ -1555,7 +1555,7 @@ mod tests {
         assert!(!rule.current_age_matches(Some("2020-01-01")));
     }
 
-    // Ported: "returns false if release is younger" — util/package-rules/current-age.spec.ts line 30
+    // Ported: "returns false if release is younger" — lib/util/package-rules/current-age.spec.ts line 30
     #[test]
     fn current_age_matcher_returns_false_if_release_is_younger() {
         let rule = rule_with_current_age("> 10 years");
@@ -1563,7 +1563,7 @@ mod tests {
         assert!(!rule.current_age_matches(Some("2020-01-01")));
     }
 
-    // Ported: "returns null if release invalid" — util/package-rules/current-age.spec.ts line 42
+    // Ported: "returns null if release invalid" — lib/util/package-rules/current-age.spec.ts line 42
     #[test]
     fn current_age_matcher_returns_false_if_release_invalid() {
         let rule = rule_with_current_age("> 2 days");
@@ -1571,7 +1571,7 @@ mod tests {
         assert!(!rule.current_age_matches(Some("abc")));
     }
 
-    // Ported: "returns false if release undefined" — util/package-rules/current-age.spec.ts line 54
+    // Ported: "returns false if release undefined" — lib/util/package-rules/current-age.spec.ts line 54
     #[test]
     fn current_age_matcher_returns_false_if_release_undefined() {
         let rule = rule_with_current_age("> 2 days");
@@ -1579,7 +1579,7 @@ mod tests {
         assert!(!rule.current_age_matches(None));
     }
 
-    // Ported: "returns true if age matches" — util/package-rules/current-age.spec.ts line 66
+    // Ported: "returns true if age matches" — lib/util/package-rules/current-age.spec.ts line 66
     #[test]
     fn current_age_matcher_returns_true_if_age_matches() {
         let rule = rule_with_current_age("> 3 years");
@@ -1587,7 +1587,7 @@ mod tests {
         assert!(rule.current_age_matches(Some("2020-01-01")));
     }
 
-    // Ported: "should return null if match repositories is not defined" — util/package-rules/repositories.spec.ts line 7
+    // Ported: "should return null if match repositories is not defined" — lib/util/package-rules/repositories.spec.ts line 7
     #[test]
     fn repositories_matcher_without_patterns_is_not_a_constraint() {
         let rule = PackageRule::default();
@@ -1595,7 +1595,7 @@ mod tests {
         assert!(rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return false if repository is not defined" — util/package-rules/repositories.spec.ts line 19
+    // Ported: "should return false if repository is not defined" — lib/util/package-rules/repositories.spec.ts line 19
     #[test]
     fn repositories_matcher_returns_false_if_repository_is_missing() {
         let rule = rule_with_repositories(&["org/repo"]);
@@ -1604,7 +1604,7 @@ mod tests {
         assert!(!rule.matches_context(&ctx));
     }
 
-    // Ported: "should return true if repository matches regex pattern" — util/package-rules/repositories.spec.ts line 31
+    // Ported: "should return true if repository matches regex pattern" — lib/util/package-rules/repositories.spec.ts line 31
     #[test]
     fn repositories_matcher_returns_true_for_regex_pattern() {
         let rule = rule_with_repositories(&["/^org/repo$/"]);
@@ -1612,7 +1612,7 @@ mod tests {
         assert!(rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return false if repository has invalid regex pattern" — util/package-rules/repositories.spec.ts line 43
+    // Ported: "should return false if repository has invalid regex pattern" — lib/util/package-rules/repositories.spec.ts line 43
     #[test]
     fn repositories_matcher_returns_false_for_invalid_regex_pattern() {
         let rule = rule_with_repositories(&["/[/"]);
@@ -1620,7 +1620,7 @@ mod tests {
         assert!(!rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return false if repository does not match regex pattern" — util/package-rules/repositories.spec.ts line 55
+    // Ported: "should return false if repository does not match regex pattern" — lib/util/package-rules/repositories.spec.ts line 55
     #[test]
     fn repositories_matcher_returns_false_for_non_matching_regex_pattern() {
         let rule = rule_with_repositories(&["/^org/other-repo$/"]);
@@ -1628,7 +1628,7 @@ mod tests {
         assert!(!rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return true if repository matches minimatch pattern" — util/package-rules/repositories.spec.ts line 67
+    // Ported: "should return true if repository matches minimatch pattern" — lib/util/package-rules/repositories.spec.ts line 67
     #[test]
     fn repositories_matcher_returns_true_for_minimatch_pattern() {
         let rule = rule_with_repositories(&["org/**"]);
@@ -1636,7 +1636,7 @@ mod tests {
         assert!(rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return false if repository does not match minimatch pattern" — util/package-rules/repositories.spec.ts line 79
+    // Ported: "should return false if repository does not match minimatch pattern" — lib/util/package-rules/repositories.spec.ts line 79
     #[test]
     fn repositories_matcher_returns_false_for_non_matching_minimatch_pattern() {
         let rule = rule_with_repositories(&["other-org/**"]);
@@ -1644,7 +1644,7 @@ mod tests {
         assert!(!rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return true if repository matches at least one pattern" — util/package-rules/repositories.spec.ts line 91
+    // Ported: "should return true if repository matches at least one pattern" — lib/util/package-rules/repositories.spec.ts line 91
     #[test]
     fn repositories_matcher_returns_true_if_any_pattern_matches() {
         let rule = rule_with_repositories(&["/^org/repo$/", "**/*-archived"]);
@@ -1652,7 +1652,7 @@ mod tests {
         assert!(rule.repository_matches("org/repo-archived"));
     }
 
-    // Ported: "should return false if exclude repository is not defined" — util/package-rules/repositories.spec.ts line 105
+    // Ported: "should return false if exclude repository is not defined" — lib/util/package-rules/repositories.spec.ts line 105
     #[test]
     fn repositories_matcher_returns_false_if_exclude_repository_is_missing() {
         let rule = rule_with_repositories(&["!org/repo"]);
@@ -1661,7 +1661,7 @@ mod tests {
         assert!(!rule.matches_context(&ctx));
     }
 
-    // Ported: "should return false if exclude repository matches regex pattern" — util/package-rules/repositories.spec.ts line 117
+    // Ported: "should return false if exclude repository matches regex pattern" — lib/util/package-rules/repositories.spec.ts line 117
     #[test]
     fn repositories_matcher_returns_false_if_exclude_regex_matches() {
         let rule = rule_with_repositories(&["!/^org/repo$/"]);
@@ -1669,7 +1669,7 @@ mod tests {
         assert!(!rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return true if exclude repository has invalid regex pattern" — util/package-rules/repositories.spec.ts line 129
+    // Ported: "should return true if exclude repository has invalid regex pattern" — lib/util/package-rules/repositories.spec.ts line 129
     #[test]
     fn repositories_matcher_returns_true_if_exclude_regex_is_invalid() {
         let rule = rule_with_repositories(&["!/[/"]);
@@ -1677,7 +1677,7 @@ mod tests {
         assert!(rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return true if exclude repository does not match regex pattern" — util/package-rules/repositories.spec.ts line 141
+    // Ported: "should return true if exclude repository does not match regex pattern" — lib/util/package-rules/repositories.spec.ts line 141
     #[test]
     fn repositories_matcher_returns_true_if_exclude_regex_does_not_match() {
         let rule = rule_with_repositories(&["!/^org/other-repo$/"]);
@@ -1685,7 +1685,7 @@ mod tests {
         assert!(rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return false if exclude repository matches minimatch pattern" — util/package-rules/repositories.spec.ts line 153
+    // Ported: "should return false if exclude repository matches minimatch pattern" — lib/util/package-rules/repositories.spec.ts line 153
     #[test]
     fn repositories_matcher_returns_false_if_exclude_minimatch_matches() {
         let rule = rule_with_repositories(&["!org/**"]);
@@ -1693,7 +1693,7 @@ mod tests {
         assert!(!rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return true if exclude repository does not match minimatch pattern" — util/package-rules/repositories.spec.ts line 165
+    // Ported: "should return true if exclude repository does not match minimatch pattern" — lib/util/package-rules/repositories.spec.ts line 165
     #[test]
     fn repositories_matcher_returns_true_if_exclude_minimatch_does_not_match() {
         let rule = rule_with_repositories(&["!other-org/**"]);
@@ -1701,7 +1701,7 @@ mod tests {
         assert!(rule.repository_matches("org/repo"));
     }
 
-    // Ported: "should return false if exclude repository matches at least one pattern" — util/package-rules/repositories.spec.ts line 177
+    // Ported: "should return false if exclude repository matches at least one pattern" — lib/util/package-rules/repositories.spec.ts line 177
     #[test]
     fn repositories_matcher_returns_false_if_any_exclude_pattern_matches() {
         let rule = rule_with_repositories(&["!/^org/repo$/", "!**/*-archived"]);
@@ -1709,7 +1709,7 @@ mod tests {
         assert!(!rule.repository_matches("org/repo-archived"));
     }
 
-    // Ported: "returns true for null versioning" — util/package-rules/current-version.spec.ts line 8
+    // Ported: "returns true for null versioning" — lib/util/package-rules/current-version.spec.ts line 8
     #[test]
     fn current_version_matcher_returns_true_for_null_versioning_equivalent() {
         let rule = rule_with_current_version("1.2.3");
@@ -1717,7 +1717,7 @@ mod tests {
         assert!(rule.current_version_matches("1.2.3", None, None));
     }
 
-    // Ported: "return true for a valid match" — util/package-rules/current-version.spec.ts line 39
+    // Ported: "return true for a valid match" — lib/util/package-rules/current-version.spec.ts line 39
     #[test]
     fn current_version_matcher_pep440_four_component_range() {
         // pep440: 1.2.3 < 1.2.3.5 (4-component version, semver rejects but pep440 handles)
@@ -1725,7 +1725,7 @@ mod tests {
         assert!(rule.current_version_matches("1.2.3", None, None));
     }
 
-    // Ported: "return false if no version could be found" — util/package-rules/current-version.spec.ts line 52
+    // Ported: "return false if no version could be found" — lib/util/package-rules/current-version.spec.ts line 52
     #[test]
     fn current_version_matcher_returns_false_if_no_version_found() {
         let rule = rule_with_current_version("bbbbbb");
@@ -1733,7 +1733,7 @@ mod tests {
         assert!(!rule.current_version_matches("aaaaaa", None, Some("bbbbbb")));
     }
 
-    // Ported: "case insensitive match" — util/package-rules/current-version.spec.ts line 66
+    // Ported: "case insensitive match" — lib/util/package-rules/current-version.spec.ts line 66
     #[test]
     fn current_version_matcher_regex_is_case_insensitive() {
         let rule = rule_with_current_version("/BBB.*/i");
@@ -1741,7 +1741,7 @@ mod tests {
         assert!(rule.current_version_matches("bbbbbb", None, None));
     }
 
-    // Ported: "return false for regex version non match" — util/package-rules/current-version.spec.ts line 79
+    // Ported: "return false for regex version non match" — lib/util/package-rules/current-version.spec.ts line 79
     #[test]
     fn current_version_matcher_returns_false_for_regex_version_non_match() {
         let rule = rule_with_current_version("/^v?[~ -]?0/");
@@ -1749,7 +1749,7 @@ mod tests {
         assert!(!rule.current_version_matches("\"~> 1.1.0\"", None, Some("1.1.4")));
     }
 
-    // Ported: "return true for regex version match" — util/package-rules/current-version.spec.ts line 93
+    // Ported: "return true for regex version match" — lib/util/package-rules/current-version.spec.ts line 93
     #[test]
     fn current_version_matcher_returns_true_for_regex_version_match() {
         let rule = rule_with_current_version("/^v?[~ -]?0/");
@@ -1757,7 +1757,7 @@ mod tests {
         assert!(rule.current_version_matches("\"~> 0.1.0\"", None, Some("0.1.0")));
     }
 
-    // Ported: "return false for regex value match" — util/package-rules/current-version.spec.ts line 107
+    // Ported: "return false for regex value match" — lib/util/package-rules/current-version.spec.ts line 107
     #[test]
     fn current_version_matcher_returns_false_for_regex_value_match_without_version() {
         let rule = rule_with_current_version("/^v?[~ -]?0/");
@@ -1765,7 +1765,7 @@ mod tests {
         assert!(!rule.current_version_matches("\"~> 0.1.0\"", None, None));
     }
 
-    // Ported: "return true for same-major verisioning if version lies in expected range" — util/package-rules/current-version.spec.ts line 120
+    // Ported: "return true for same-major verisioning if version lies in expected range" — lib/util/package-rules/current-version.spec.ts line 120
     #[test]
     fn current_version_matcher_same_major_in_range() {
         // matchCurrentVersion='6.0.400', currentValue='6.0.300'
@@ -1774,7 +1774,7 @@ mod tests {
         assert!(rule.current_version_matches("6.0.300", None, None));
     }
 
-    // Ported: "return false for same-major verisioning if version lies outside of expected range" — util/package-rules/current-version.spec.ts line 133
+    // Ported: "return false for same-major verisioning if version lies outside of expected range" — lib/util/package-rules/current-version.spec.ts line 133
     #[test]
     fn current_version_matcher_same_major_out_of_range() {
         // matchCurrentVersion='6.0.100', currentValue='6.0.300'

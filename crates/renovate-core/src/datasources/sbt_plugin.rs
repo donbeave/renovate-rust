@@ -334,7 +334,7 @@ mod tests {
     use super::*;
     use crate::datasources::sbt_package::extract_page_links;
 
-    // Ported: "parses Maven index directory" — datasource/sbt-plugin/index.spec.ts line 15
+    // Ported: "parses Maven index directory" — lib/modules/datasource/sbt-plugin/index.spec.ts line 15
     #[test]
     fn parses_maven_index_directory() {
         let html = include_str!("testdata/sbt/maven-index.html");
@@ -351,7 +351,7 @@ mod tests {
         assert!(!result.iter().any(|s| s.starts_with('.')));
     }
 
-    // Ported: "parses sbt index directory" — datasource/sbt-plugin/index.spec.ts line 23
+    // Ported: "parses sbt index directory" — lib/modules/datasource/sbt-plugin/index.spec.ts line 23
     #[test]
     fn parses_sbt_index_directory() {
         let html = include_str!("testdata/sbt/sbt-plugins-index.html");
@@ -367,7 +367,7 @@ mod tests {
         assert!(!result.iter().any(|s| s.starts_with('.')));
     }
 
-    // Ported: "returns null in case of errors" — datasource/sbt-plugin/index.spec.ts line 40
+    // Ported: "returns null in case of errors" — lib/modules/datasource/sbt-plugin/index.spec.ts line 40
     #[tokio::test]
     async fn returns_null_in_case_of_errors() {
         let server = MockServer::start().await;
@@ -396,7 +396,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "fetches sbt plugins" — datasource/sbt-plugin/index.spec.ts line 88
+    // Ported: "fetches sbt plugins" — lib/modules/datasource/sbt-plugin/index.spec.ts line 88
     #[tokio::test]
     async fn fetches_sbt_plugins() {
         let server = MockServer::start().await;
@@ -451,7 +451,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "0.5.5");
     }
 
-    // Ported: "fetches sbt plugins 2" — datasource/sbt-plugin/index.spec.ts line 157
+    // Ported: "fetches sbt plugins 2" — lib/modules/datasource/sbt-plugin/index.spec.ts line 157
     #[tokio::test]
     async fn fetches_sbt_plugins_2() {
         let server = MockServer::start().await;
@@ -505,7 +505,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "0.5.5");
     }
 
-    // Ported: "extracts URL from Maven POM file" — datasource/sbt-plugin/index.spec.ts line 226
+    // Ported: "extracts URL from Maven POM file" — lib/modules/datasource/sbt-plugin/index.spec.ts line 226
     #[tokio::test]
     async fn extracts_url_from_maven_pom_file() {
         let server = MockServer::start().await;
@@ -606,7 +606,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles absolute and root relative paths" — datasource/sbt-plugin/index.spec.ts line 312
+    // Ported: "handles absolute and root relative paths" — lib/modules/datasource/sbt-plugin/index.spec.ts line 312
     #[tokio::test]
     async fn handles_absolute_and_root_relative_paths() {
         let server = MockServer::start().await;

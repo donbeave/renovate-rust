@@ -773,32 +773,32 @@ mod tests {
 
     // ── New extract_package_file() tests ───────────────────────────────────────
 
-    // Ported: "returns null for empty file" — renovate-config/extract.spec.ts line 7
+    // Ported: "returns null for empty file" — lib/modules/manager/renovate-config/extract.spec.ts line 7
     #[test]
     fn epf_returns_null_for_empty_file() {
         assert_eq!(extract_package_file(""), None);
     }
 
-    // Ported: "returns null for invalid file" — renovate-config/extract.spec.ts line 11
+    // Ported: "returns null for invalid file" — lib/modules/manager/renovate-config/extract.spec.ts line 11
     #[test]
     fn epf_returns_null_for_invalid_file() {
         assert_eq!(extract_package_file("this-is-not-json-object"), None);
     }
 
-    // Ported: "returns null for a config file without presets" — renovate-config/extract.spec.ts line 18
+    // Ported: "returns null for a config file without presets" — lib/modules/manager/renovate-config/extract.spec.ts line 18
     #[test]
     fn epf_returns_null_without_presets() {
         assert_eq!(extract_package_file(r#"{ "draftPR": true }"#), None);
     }
 
-    // Ported: "returns null for a config file only contains built-in presets" — renovate-config/extract.spec.ts line 34
+    // Ported: "returns null for a config file only contains built-in presets" — lib/modules/manager/renovate-config/extract.spec.ts line 34
     #[test]
     fn epf_returns_null_for_only_builtin_presets() {
         let content = r#"{ "extends": ["config:recommended", ":label(test)", "helpers:pinGitHubActionDigests"] }"#;
         assert_eq!(extract_package_file(content), None);
     }
 
-    // Ported: "provides skipReason for unsupported preset sources" — renovate-config/extract.spec.ts line 50
+    // Ported: "provides skipReason for unsupported preset sources" — lib/modules/manager/renovate-config/extract.spec.ts line 50
     #[test]
     fn epf_skip_reason_for_unsupported_preset_sources() {
         let content = r#"{
@@ -824,7 +824,7 @@ mod tests {
         assert_eq!(deps[3].skip_reason, Some("unsupported-datasource"));
     }
 
-    // Ported: "provides skipReason for presets without versions" — renovate-config/extract.spec.ts line 88
+    // Ported: "provides skipReason for presets without versions" — lib/modules/manager/renovate-config/extract.spec.ts line 88
     #[test]
     fn epf_skip_reason_for_presets_without_versions() {
         let content = r#"{
@@ -844,7 +844,7 @@ mod tests {
         assert_eq!(deps[2].skip_reason, Some("unspecified-version"));
     }
 
-    // Ported: "extracts from a config file with GitHub hosted presets" — renovate-config/extract.spec.ts line 120
+    // Ported: "extracts from a config file with GitHub hosted presets" — lib/modules/manager/renovate-config/extract.spec.ts line 120
     #[test]
     fn epf_extracts_github_presets() {
         let content = r#"{
@@ -868,7 +868,7 @@ mod tests {
         assert_eq!(deps[3].dep_name, "cde/bar");
     }
 
-    // Ported: "extracts from a config file with GitLab hosted presets" — renovate-config/extract.spec.ts line 161
+    // Ported: "extracts from a config file with GitLab hosted presets" — lib/modules/manager/renovate-config/extract.spec.ts line 161
     #[test]
     fn epf_extracts_gitlab_presets() {
         let content = r#"{
@@ -891,7 +891,7 @@ mod tests {
         assert_eq!(deps[3].dep_name, "cde/bar");
     }
 
-    // Ported: "extracts from a config file with Gitea hosted presets" — renovate-config/extract.spec.ts line 202
+    // Ported: "extracts from a config file with Gitea hosted presets" — lib/modules/manager/renovate-config/extract.spec.ts line 202
     #[test]
     fn epf_extracts_gitea_presets() {
         let content = r#"{
@@ -914,7 +914,7 @@ mod tests {
         assert_eq!(deps[3].dep_name, "cde/bar");
     }
 
-    // Ported: "supports JSON5" (presets) — renovate-config/extract.spec.ts line 243
+    // Ported: "supports JSON5" (presets) — lib/modules/manager/renovate-config/extract.spec.ts line 243
     #[test]
     fn epf_supports_json5_presets() {
         let content = r#"{
@@ -930,19 +930,19 @@ mod tests {
         assert_eq!(deps[0].current_value.as_deref(), Some("1.2.3"));
     }
 
-    // Ported: "returns null for a config file without constraints" — renovate-config/extract.spec.ts line 269
+    // Ported: "returns null for a config file without constraints" — lib/modules/manager/renovate-config/extract.spec.ts line 269
     #[test]
     fn epf_returns_null_without_constraints() {
         assert_eq!(extract_package_file(r#"{ "draftPR": true }"#), None);
     }
 
-    // Ported: "returns null for a config file has an empty constraints" — renovate-config/extract.spec.ts line 282
+    // Ported: "returns null for a config file has an empty constraints" — lib/modules/manager/renovate-config/extract.spec.ts line 282
     #[test]
     fn epf_returns_null_for_empty_constraints() {
         assert_eq!(extract_package_file(r#"{ "constraints": {} }"#), None);
     }
 
-    // Ported: "extracts known `ToolName`s with explicit versions" — renovate-config/extract.spec.ts line 295
+    // Ported: "extracts known `ToolName`s with explicit versions" — lib/modules/manager/renovate-config/extract.spec.ts line 295
     #[test]
     fn epf_extracts_known_toolnames_explicit_versions() {
         let content = r#"{ "constraints": { "bazelisk": "1.2.3", "maven": "4.0.0" } }"#;
@@ -968,7 +968,7 @@ mod tests {
         assert_eq!(deps[1].dep_type, Some("tool-constraint"));
     }
 
-    // Ported: "extracts known `ToolName`s with ranges versions" — renovate-config/extract.spec.ts line 332
+    // Ported: "extracts known `ToolName`s with ranges versions" — lib/modules/manager/renovate-config/extract.spec.ts line 332
     #[test]
     fn epf_extracts_known_toolnames_range_versions() {
         let content = r#"{ "constraints": { "bazelisk": ">= 1.2.3", "maven": "< 4.0.0" } }"#;
@@ -978,7 +978,7 @@ mod tests {
         assert_eq!(deps[1].current_value.as_deref(), Some("< 4.0.0"));
     }
 
-    // Ported: "extracts `ToolName`s from packageRules" — renovate-config/extract.spec.ts line 369
+    // Ported: "extracts `ToolName`s from packageRules" — lib/modules/manager/renovate-config/extract.spec.ts line 369
     #[test]
     fn epf_extracts_toolnames_from_package_rules() {
         let content = r#"{
@@ -1020,7 +1020,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles no `constraints` in packageRules" — renovate-config/extract.spec.ts line 421
+    // Ported: "handles no `constraints` in packageRules" — lib/modules/manager/renovate-config/extract.spec.ts line 421
     #[test]
     fn epf_handles_no_constraints_in_package_rules() {
         let content = r#"{
@@ -1032,7 +1032,7 @@ mod tests {
         assert_eq!(deps[0].dep_name, "golang");
     }
 
-    // Ported: "sets skipReason=unsupported for a constraint that is not a tool" — renovate-config/extract.spec.ts line 451
+    // Ported: "sets skipReason=unsupported for a constraint that is not a tool" — lib/modules/manager/renovate-config/extract.spec.ts line 451
     #[test]
     fn epf_skip_reason_unsupported_for_unknown_constraint() {
         let content = r#"{ "constraints": { "gomodMod": "1.2.0" } }"#;
@@ -1048,7 +1048,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts known `ToolName`s with ranges versions" (second) — renovate-config/extract.spec.ts line 476
+    // Ported: "extracts known `ToolName`s with ranges versions" (second) — lib/modules/manager/renovate-config/extract.spec.ts line 476
     #[test]
     fn epf_extracts_toolnames_range_versions_476() {
         let content = r#"{ "constraints": { "bazelisk": ">= 1.2.3", "maven": "< 4.0.0" } }"#;
@@ -1060,7 +1060,7 @@ mod tests {
         assert_eq!(deps[1].current_value.as_deref(), Some("< 4.0.0"));
     }
 
-    // Ported: "supports JSON5" (constraints) — renovate-config/extract.spec.ts line 513
+    // Ported: "supports JSON5" (constraints) — lib/modules/manager/renovate-config/extract.spec.ts line 513
     #[test]
     fn epf_supports_json5_constraints() {
         let content = r#"{
@@ -1080,7 +1080,7 @@ mod tests {
         assert_eq!(deps[0].dep_type, Some("tool-constraint"));
     }
 
-    // Ported: "extracts all types of configuration" — renovate-config/extract.spec.ts line 543
+    // Ported: "extracts all types of configuration" — lib/modules/manager/renovate-config/extract.spec.ts line 543
     #[test]
     fn epf_extracts_all_types_of_configuration() {
         let content = r#"{
@@ -1114,7 +1114,7 @@ mod tests {
 
     // ── Ported parse_preset() tests from config/presets/parse.spec.ts ──────────
 
-    // Ported: "returns default package name" — config/presets/parse.spec.ts line 6
+    // Ported: "returns default package name" — lib/config/presets/parse.spec.ts line 6
     #[test]
     fn pp_returns_default_package_name() {
         let p = parse_preset(":base");
@@ -1127,7 +1127,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github" — config/presets/parse.spec.ts line 17
+    // Ported: "parses github" — lib/config/presets/parse.spec.ts line 17
     #[test]
     fn pp_parses_github() {
         let p = parse_preset("github>some/repo");
@@ -1140,7 +1140,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "handles special chars" — config/presets/parse.spec.ts line 28
+    // Ported: "handles special chars" — lib/config/presets/parse.spec.ts line 28
     #[test]
     fn pp_handles_special_chars() {
         let p = parse_preset("github>some/repo:foo+bar");
@@ -1152,7 +1152,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github subfiles" — config/presets/parse.spec.ts line 39
+    // Ported: "parses github subfiles" — lib/config/presets/parse.spec.ts line 39
     #[test]
     fn pp_parses_github_subfiles() {
         let p = parse_preset("github>some/repo:somefile");
@@ -1164,7 +1164,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github subfiles with preset name" — config/presets/parse.spec.ts line 50
+    // Ported: "parses github subfiles with preset name" — lib/config/presets/parse.spec.ts line 50
     #[test]
     fn pp_parses_github_subfiles_with_preset_name() {
         let p = parse_preset("github>some/repo:somefile/somepreset");
@@ -1176,7 +1176,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github file with preset name with .json extension" — config/presets/parse.spec.ts line 61
+    // Ported: "parses github file with preset name with .json extension" — lib/config/presets/parse.spec.ts line 61
     #[test]
     fn pp_parses_github_file_with_json_extension() {
         let p = parse_preset("github>some/repo:somefile.json");
@@ -1189,7 +1189,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github file with preset name with .json5 extension" — config/presets/parse.spec.ts line 73
+    // Ported: "parses github file with preset name with .json5 extension" — lib/config/presets/parse.spec.ts line 73
     #[test]
     fn pp_parses_github_file_with_json5_extension() {
         let p = parse_preset("github>some/repo:somefile.json5");
@@ -1202,7 +1202,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github subfiles with preset name with .json extension" — config/presets/parse.spec.ts line 85
+    // Ported: "parses github subfiles with preset name with .json extension" — lib/config/presets/parse.spec.ts line 85
     #[test]
     fn pp_parses_github_subfiles_with_json_extension() {
         let p = parse_preset("github>some/repo:somefile.json/somepreset");
@@ -1215,7 +1215,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github subfiles with preset name with .json5 extension" — config/presets/parse.spec.ts line 97
+    // Ported: "parses github subfiles with preset name with .json5 extension" — lib/config/presets/parse.spec.ts line 97
     #[test]
     fn pp_parses_github_subfiles_with_json5_extension() {
         let p = parse_preset("github>some/repo:somefile.json5/somepreset");
@@ -1228,7 +1228,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github subfiles with preset and sub-preset name" — config/presets/parse.spec.ts line 111
+    // Ported: "parses github subfiles with preset and sub-preset name" — lib/config/presets/parse.spec.ts line 111
     #[test]
     fn pp_parses_github_subfiles_with_sub_preset_name() {
         let p = parse_preset("github>some/repo:somefile/somepreset/somesubpreset");
@@ -1240,7 +1240,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github subdirectories" — config/presets/parse.spec.ts line 124
+    // Ported: "parses github subdirectories" — lib/config/presets/parse.spec.ts line 124
     #[test]
     fn pp_parses_github_subdirectories() {
         let p = parse_preset("github>some/repo//somepath/somesubpath/somefile");
@@ -1252,7 +1252,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses github toplevel file using subdirectory syntax" — config/presets/parse.spec.ts line 137
+    // Ported: "parses github toplevel file using subdirectory syntax" — lib/config/presets/parse.spec.ts line 137
     #[test]
     fn pp_parses_github_toplevel_file_subdirectory_syntax() {
         let p = parse_preset("github>some/repo//somefile");
@@ -1264,7 +1264,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses gitlab" — config/presets/parse.spec.ts line 148
+    // Ported: "parses gitlab" — lib/config/presets/parse.spec.ts line 148
     #[test]
     fn pp_parses_gitlab() {
         let p = parse_preset("gitlab>some/repo");
@@ -1276,7 +1276,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses gitea" — config/presets/parse.spec.ts line 159
+    // Ported: "parses gitea" — lib/config/presets/parse.spec.ts line 159
     #[test]
     fn pp_parses_gitea() {
         let p = parse_preset("gitea>some/repo");
@@ -1288,7 +1288,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses forgejo" — config/presets/parse.spec.ts line 170
+    // Ported: "parses forgejo" — lib/config/presets/parse.spec.ts line 170
     #[test]
     fn pp_parses_forgejo() {
         let p = parse_preset("forgejo>some/repo");
@@ -1300,7 +1300,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local" — config/presets/parse.spec.ts line 181
+    // Ported: "parses local" — lib/config/presets/parse.spec.ts line 181
     #[test]
     fn pp_parses_local() {
         let p = parse_preset("local>some/repo");
@@ -1312,7 +1312,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local with spaces" — config/presets/parse.spec.ts line 192
+    // Ported: "parses local with spaces" — lib/config/presets/parse.spec.ts line 192
     #[test]
     fn pp_parses_local_with_spaces() {
         let p = parse_preset("local>A2B CD/A2B_Renovate");
@@ -1324,7 +1324,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local with subdirectory" — config/presets/parse.spec.ts line 203
+    // Ported: "parses local with subdirectory" — lib/config/presets/parse.spec.ts line 203
     #[test]
     fn pp_parses_local_with_subdirectory() {
         let p = parse_preset("local>some-group/some-repo//some-dir/some-file");
@@ -1336,7 +1336,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local with spaces and subdirectory" — config/presets/parse.spec.ts line 216
+    // Ported: "parses local with spaces and subdirectory" — lib/config/presets/parse.spec.ts line 216
     #[test]
     fn pp_parses_local_with_spaces_and_subdirectory() {
         let p = parse_preset("local>A2B CD/A2B_Renovate//some-dir/some-file");
@@ -1348,7 +1348,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local with sub preset and tag" — config/presets/parse.spec.ts line 229
+    // Ported: "parses local with sub preset and tag" — lib/config/presets/parse.spec.ts line 229
     #[test]
     fn pp_parses_local_with_sub_preset_and_tag() {
         let p = parse_preset("local>some-group/some-repo:some-file/subpreset#1.2.3");
@@ -1361,7 +1361,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local with subdirectory and tag" — config/presets/parse.spec.ts line 243
+    // Ported: "parses local with subdirectory and tag" — lib/config/presets/parse.spec.ts line 243
     #[test]
     fn pp_parses_local_with_subdirectory_and_tag() {
         let p = parse_preset("local>some-group/some-repo//some-dir/some-file#1.2.3");
@@ -1374,7 +1374,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local with subdirectory and branch/tag with a slash" — config/presets/parse.spec.ts line 257
+    // Ported: "parses local with subdirectory and branch/tag with a slash" — lib/config/presets/parse.spec.ts line 257
     #[test]
     fn pp_parses_local_with_subdirectory_and_slash_tag() {
         let p = parse_preset("local>PROJECT/repository//path/to/preset#feature/branch");
@@ -1387,7 +1387,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local with sub preset and branch/tag with a slash" — config/presets/parse.spec.ts line 271
+    // Ported: "parses local with sub preset and branch/tag with a slash" — lib/config/presets/parse.spec.ts line 271
     #[test]
     fn pp_parses_local_with_sub_preset_and_slash_tag() {
         let p = parse_preset("local>PROJECT/repository:preset/subpreset#feature/branch");
@@ -1400,7 +1400,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local repo with presetPath with URL-encoded characters" — config/presets/parse.spec.ts line 285
+    // Ported: "parses local repo with presetPath with URL-encoded characters" — lib/config/presets/parse.spec.ts line 285
     #[test]
     fn pp_parses_local_url_encoded_with_preset_path() {
         let p = parse_preset("local>some%20group/some%20repo//some-dir/some-file");
@@ -1412,7 +1412,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local repo with URL-encoded characters" — config/presets/parse.spec.ts line 298
+    // Ported: "parses local repo with URL-encoded characters" — lib/config/presets/parse.spec.ts line 298
     #[test]
     fn pp_parses_local_url_encoded() {
         let p = parse_preset("local>some%20group/some%20repo//some-file");
@@ -1424,7 +1424,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses no prefix as local" — config/presets/parse.spec.ts line 309
+    // Ported: "parses no prefix as local" — lib/config/presets/parse.spec.ts line 309
     #[test]
     fn pp_parses_no_prefix_as_local() {
         let p = parse_preset("some/repo");
@@ -1436,7 +1436,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local Bitbucket user repo with preset name" — config/presets/parse.spec.ts line 320
+    // Ported: "parses local Bitbucket user repo with preset name" — lib/config/presets/parse.spec.ts line 320
     #[test]
     fn pp_parses_local_bitbucket_user_repo_with_preset_name() {
         let p = parse_preset("local>~john_doe/repo//somefile");
@@ -1448,7 +1448,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses local Bitbucket user repo" — config/presets/parse.spec.ts line 331
+    // Ported: "parses local Bitbucket user repo" — lib/config/presets/parse.spec.ts line 331
     #[test]
     fn pp_parses_local_bitbucket_user_repo() {
         let p = parse_preset("local>~john_doe/renovate-config");
@@ -1460,7 +1460,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns default package name with params" — config/presets/parse.spec.ts line 342
+    // Ported: "returns default package name with params" — lib/config/presets/parse.spec.ts line 342
     #[test]
     fn pp_returns_default_package_name_with_params() {
         let p = parse_preset(":group(packages/eslint, eslint)");
@@ -1475,7 +1475,7 @@ mod tests {
         assert_eq!(p.raw_params, Some("packages/eslint, eslint".to_owned()));
     }
 
-    // Ported: "returns simple scope" — config/presets/parse.spec.ts line 354
+    // Ported: "returns simple scope" — lib/config/presets/parse.spec.ts line 354
     #[test]
     fn pp_returns_simple_scope() {
         let p = parse_preset("@somescope");
@@ -1487,7 +1487,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns simple scope and params" — config/presets/parse.spec.ts line 365
+    // Ported: "returns simple scope and params" — lib/config/presets/parse.spec.ts line 365
     #[test]
     fn pp_returns_simple_scope_and_params() {
         let p = parse_preset("@somescope(param1)");
@@ -1499,7 +1499,7 @@ mod tests {
         assert_eq!(p.raw_params, Some("param1".to_owned()));
     }
 
-    // Ported: "returns scope with repo and default" — config/presets/parse.spec.ts line 376
+    // Ported: "returns scope with repo and default" — lib/config/presets/parse.spec.ts line 376
     #[test]
     fn pp_returns_scope_with_repo_and_default() {
         let p = parse_preset("@somescope/somepackagename");
@@ -1511,7 +1511,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns scope with repo and params and default" — config/presets/parse.spec.ts line 387
+    // Ported: "returns scope with repo and params and default" — lib/config/presets/parse.spec.ts line 387
     #[test]
     fn pp_returns_scope_with_repo_and_params_and_default() {
         let p = parse_preset("@somescope/somepackagename(param1, param2, param3)");
@@ -1530,7 +1530,7 @@ mod tests {
         assert_eq!(p.raw_params, Some("param1, param2, param3".to_owned()));
     }
 
-    // Ported: "returns scope with presetName" — config/presets/parse.spec.ts line 400
+    // Ported: "returns scope with presetName" — lib/config/presets/parse.spec.ts line 400
     #[test]
     fn pp_returns_scope_with_preset_name() {
         let p = parse_preset("@somescope:somePresetName");
@@ -1542,7 +1542,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns scope with presetName and params" — config/presets/parse.spec.ts line 411
+    // Ported: "returns scope with presetName and params" — lib/config/presets/parse.spec.ts line 411
     #[test]
     fn pp_returns_scope_with_preset_name_and_params() {
         let p = parse_preset("@somescope:somePresetName(param1)");
@@ -1554,7 +1554,7 @@ mod tests {
         assert_eq!(p.raw_params, Some("param1".to_owned()));
     }
 
-    // Ported: "returns scope with repo and presetName" — config/presets/parse.spec.ts line 422
+    // Ported: "returns scope with repo and presetName" — lib/config/presets/parse.spec.ts line 422
     #[test]
     fn pp_returns_scope_with_repo_and_preset_name() {
         let p = parse_preset("@somescope/somepackagename:somePresetName");
@@ -1566,7 +1566,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns scope with repo and presetName and params" — config/presets/parse.spec.ts line 433
+    // Ported: "returns scope with repo and presetName and params" — lib/config/presets/parse.spec.ts line 433
     #[test]
     fn pp_returns_scope_with_repo_and_preset_name_and_params() {
         let p = parse_preset("@somescope/somepackagename:somePresetName(param1, param2)");
@@ -1581,7 +1581,7 @@ mod tests {
         assert_eq!(p.raw_params, Some("param1, param2".to_owned()));
     }
 
-    // Ported: "returns non-scoped default" — config/presets/parse.spec.ts line 449
+    // Ported: "returns non-scoped default" — lib/config/presets/parse.spec.ts line 449
     #[test]
     fn pp_returns_non_scoped_default() {
         let p = parse_preset("somepackage");
@@ -1593,7 +1593,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns non-scoped package name" — config/presets/parse.spec.ts line 460
+    // Ported: "returns non-scoped package name" — lib/config/presets/parse.spec.ts line 460
     #[test]
     fn pp_returns_non_scoped_package_name() {
         let p = parse_preset("somepackage:webapp");
@@ -1605,7 +1605,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns non-scoped package name full" — config/presets/parse.spec.ts line 471
+    // Ported: "returns non-scoped package name full" — lib/config/presets/parse.spec.ts line 471
     #[test]
     fn pp_returns_non_scoped_package_name_full() {
         let p = parse_preset("renovate-config-somepackage:webapp");
@@ -1617,7 +1617,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "returns non-scoped package name with params" — config/presets/parse.spec.ts line 482
+    // Ported: "returns non-scoped package name with params" — lib/config/presets/parse.spec.ts line 482
     #[test]
     fn pp_returns_non_scoped_package_name_with_params() {
         let p = parse_preset("somepackage:webapp(param1)");
@@ -1629,7 +1629,7 @@ mod tests {
         assert_eq!(p.raw_params, Some("param1".to_owned()));
     }
 
-    // Ported: "parses HTTPS URLs for gitea" — config/presets/parse.spec.ts line 493
+    // Ported: "parses HTTPS URLs for gitea" — lib/config/presets/parse.spec.ts line 493
     #[test]
     fn pp_parses_https_urls_for_gitea() {
         let p =
@@ -1645,7 +1645,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses HTTPS URLs for forgejo" — config/presets/parse.spec.ts line 508
+    // Ported: "parses HTTPS URLs for forgejo" — lib/config/presets/parse.spec.ts line 508
     #[test]
     fn pp_parses_https_urls_for_forgejo() {
         let p =
@@ -1661,7 +1661,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses HTTP URLs" — config/presets/parse.spec.ts line 523
+    // Ported: "parses HTTP URLs" — lib/config/presets/parse.spec.ts line 523
     #[test]
     fn pp_parses_http_urls() {
         let p = parse_preset(
@@ -1678,7 +1678,7 @@ mod tests {
         assert_eq!(p.raw_params, None);
     }
 
-    // Ported: "parses HTTPS URLs with parameters for gitea" — config/presets/parse.spec.ts line 538
+    // Ported: "parses HTTPS URLs with parameters for gitea" — lib/config/presets/parse.spec.ts line 538
     #[test]
     fn pp_parses_https_urls_with_params_for_gitea() {
         let p = parse_preset(
@@ -1695,7 +1695,7 @@ mod tests {
         assert_eq!(p.raw_params, Some("param1".to_owned()));
     }
 
-    // Ported: "parses HTTPS URLs with parameters for forgejo" — config/presets/parse.spec.ts line 553
+    // Ported: "parses HTTPS URLs with parameters for forgejo" — lib/config/presets/parse.spec.ts line 553
     #[test]
     fn pp_parses_https_urls_with_params_for_forgejo() {
         let p = parse_preset(

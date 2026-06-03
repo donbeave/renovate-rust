@@ -239,7 +239,7 @@ mod tests {
             .await;
     }
 
-    // Ported: "returns null for empty result" — datasource/repology/index.spec.ts line 69
+    // Ported: "returns null for empty result" — lib/modules/datasource/repology/index.spec.ts line 69
     #[tokio::test]
     async fn returns_null_for_empty_result() {
         let server = MockServer::start().await;
@@ -269,7 +269,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null for missing repository or package" — datasource/repology/index.spec.ts line 88
+    // Ported: "returns null for missing repository or package" — lib/modules/datasource/repology/index.spec.ts line 88
     #[tokio::test]
     async fn returns_null_for_missing_repository_or_package() {
         let server = MockServer::start().await;
@@ -283,7 +283,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws error on unexpected API response" — datasource/repology/index.spec.ts line 105
+    // Ported: "throws error on unexpected API response" — lib/modules/datasource/repology/index.spec.ts line 105
     #[tokio::test]
     async fn throws_error_on_unexpected_api_response() {
         let server = MockServer::start().await;
@@ -304,7 +304,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws error on unexpected Resolver response with binary package" — datasource/repology/index.spec.ts line 124
+    // Ported: "throws error on unexpected Resolver response with binary package" — lib/modules/datasource/repology/index.spec.ts line 124
     #[tokio::test]
     async fn throws_error_on_unexpected_resolver_response_binary() {
         let server = MockServer::start().await;
@@ -315,7 +315,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws error on unexpected Resolver response with source package" — datasource/repology/index.spec.ts line 138
+    // Ported: "throws error on unexpected Resolver response with source package" — lib/modules/datasource/repology/index.spec.ts line 138
     #[tokio::test]
     async fn throws_error_on_unexpected_resolver_response_source() {
         let server = MockServer::start().await;
@@ -335,7 +335,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws error on API request timeout" — datasource/repology/index.spec.ts line 156
+    // Ported: "throws error on API request timeout" — lib/modules/datasource/repology/index.spec.ts line 156
     #[tokio::test]
     async fn throws_error_on_api_request_timeout() {
         let server = MockServer::start().await;
@@ -357,7 +357,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws error on Resolver request timeout" — datasource/repology/index.spec.ts line 175
+    // Ported: "throws error on Resolver request timeout" — lib/modules/datasource/repology/index.spec.ts line 175
     #[tokio::test]
     async fn throws_error_on_resolver_request_timeout() {
         let server = MockServer::start().await;
@@ -368,7 +368,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "returns null on Resolver ambiguous binary package" — datasource/repology/index.spec.ts line 189
+    // Ported: "returns null on Resolver ambiguous binary package" — lib/modules/datasource/repology/index.spec.ts line 189
     #[tokio::test]
     async fn returns_null_on_resolver_ambiguous_binary_package() {
         let server = MockServer::start().await;
@@ -381,7 +381,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "throws without repository and package name" — datasource/repology/index.spec.ts line 204
+    // Ported: "throws without repository and package name" — lib/modules/datasource/repology/index.spec.ts line 204
     #[tokio::test]
     async fn throws_without_repository_and_package_name() {
         let http = HttpClient::new().unwrap();
@@ -389,7 +389,7 @@ mod tests {
         assert!(matches!(result, Err(RepologyError::InvalidPackageName)));
     }
 
-    // Ported: "returns correct version for binary package" — datasource/repology/index.spec.ts line 225
+    // Ported: "returns correct version for binary package" — lib/modules/datasource/repology/index.spec.ts line 225
     #[tokio::test]
     async fn returns_correct_version_for_binary_package() {
         let server = MockServer::start().await;
@@ -413,7 +413,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "1.14.2-2+deb10u1");
     }
 
-    // Ported: "returns correct version for source package" — datasource/repology/index.spec.ts line 241
+    // Ported: "returns correct version for source package" — lib/modules/datasource/repology/index.spec.ts line 241
     #[tokio::test]
     async fn returns_correct_version_for_source_package() {
         let server = MockServer::start().await;
@@ -446,7 +446,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "1.181");
     }
 
-    // Ported: "returns correct version for api package" — datasource/repology/index.spec.ts line 260
+    // Ported: "returns correct version for api package" — lib/modules/datasource/repology/index.spec.ts line 260
     #[tokio::test]
     async fn returns_correct_version_for_api_package() {
         let server = MockServer::start().await;
@@ -471,7 +471,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "1.181");
     }
 
-    // Ported: "returns correct version for multi-package project with same name" — datasource/repology/index.spec.ts line 276
+    // Ported: "returns correct version for multi-package project with same name" — lib/modules/datasource/repology/index.spec.ts line 276
     #[tokio::test]
     async fn returns_correct_version_for_multi_package_same_name() {
         let server = MockServer::start().await;
@@ -495,7 +495,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "9.3.0-r2");
     }
 
-    // Ported: "returns correct version for multi-package project with different name" — datasource/repology/index.spec.ts line 292
+    // Ported: "returns correct version for multi-package project with different name" — lib/modules/datasource/repology/index.spec.ts line 292
     #[tokio::test]
     async fn returns_correct_version_for_multi_package_different_name() {
         let server = MockServer::start().await;
@@ -519,7 +519,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "12.2-4+deb10u1");
     }
 
-    // Ported: "returns multiple versions if they are present in repository" — datasource/repology/index.spec.ts line 308
+    // Ported: "returns multiple versions if they are present in repository" — lib/modules/datasource/repology/index.spec.ts line 308
     #[tokio::test]
     async fn returns_multiple_versions_if_present() {
         let server = MockServer::start().await;
@@ -545,7 +545,7 @@ mod tests {
         assert_eq!(result.releases[5].version, "1:11.0.9.11-3.el8_3");
     }
 
-    // Ported: "returns null for scenario when repo is not in package results" — datasource/repology/index.spec.ts line 328
+    // Ported: "returns null for scenario when repo is not in package results" — lib/modules/datasource/repology/index.spec.ts line 328
     #[tokio::test]
     async fn returns_null_when_repo_not_in_results() {
         let server = MockServer::start().await;
@@ -560,7 +560,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns correct package types for api_call" — datasource/repology/index.spec.ts line 354
+    // Ported: "returns correct package types for api_call" — lib/modules/datasource/repology/index.spec.ts line 354
     #[tokio::test]
     async fn returns_correct_package_types_for_api_call() {
         let server = MockServer::start().await;
@@ -593,7 +593,7 @@ mod tests {
         assert!(versions.contains(&"4.0.0"));
     }
 
-    // Ported: "returns correct package versions for multi-package project" — datasource/repology/index.spec.ts line 443
+    // Ported: "returns correct package versions for multi-package project" — lib/modules/datasource/repology/index.spec.ts line 443
     #[tokio::test]
     async fn returns_correct_package_versions_for_multi_package_project() {
         let server = MockServer::start().await;

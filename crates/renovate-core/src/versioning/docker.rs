@@ -156,7 +156,7 @@ mod tests {
     use super::*;
     use std::cmp::Ordering;
 
-    // Ported: "isValid("$version") === $expected" — versioning/docker/index.spec.ts line 5
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/docker/index.spec.ts line 5
     #[test]
     fn is_valid_matches_renovate_docker_index_spec() {
         let cases = [
@@ -181,7 +181,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor, getMinor, getPatch for "$version"" — versioning/docker/index.spec.ts line 27
+    // Ported: "getMajor, getMinor, getPatch for "$version"" — lib/modules/versioning/docker/index.spec.ts line 27
     #[test]
     #[allow(clippy::type_complexity)]
     fn get_major_minor_patch_matches_renovate_docker_index_spec() {
@@ -199,7 +199,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan($a, $b) === $expected" — versioning/docker/index.spec.ts line 43
+    // Ported: "isGreaterThan($a, $b) === $expected" — lib/modules/versioning/docker/index.spec.ts line 43
     #[test]
     fn is_greater_than_matches_renovate_docker_index_spec() {
         let cases = [
@@ -218,7 +218,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange($version, $range) === $expected" — versioning/docker/index.spec.ts line 54
+    // Ported: "isLessThanRange($version, $range) === $expected" — lib/modules/versioning/docker/index.spec.ts line 54
     #[test]
     fn is_less_than_range_matches_renovate_docker_index_spec() {
         let cases = [
@@ -237,7 +237,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/docker/index.spec.ts line 68
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/docker/index.spec.ts line 68
     #[test]
     fn equals_matches_renovate_docker_index_spec() {
         let cases = [
@@ -252,7 +252,7 @@ mod tests {
         }
     }
 
-    // Ported: "satisfying for $version -> $expected" — versioning/docker/index.spec.ts line 92
+    // Ported: "satisfying for $version -> $expected" — lib/modules/versioning/docker/index.spec.ts line 92
     #[test]
     fn satisfying_matches_renovate_docker_index_spec() {
         let versions = &[
@@ -279,7 +279,7 @@ mod tests {
         }
     }
 
-    // Ported: "docker.sortVersions("$a", "$b") === semver.sortVersions("$a", "$b")" — versioning/docker/index.spec.ts line 108
+    // Ported: "docker.sortVersions("$a", "$b") === semver.sortVersions("$a", "$b")" — lib/modules/versioning/docker/index.spec.ts line 108
     #[test]
     fn sort_versions_semver_matches_renovate_docker_index_spec() {
         let cases = [
@@ -303,7 +303,7 @@ mod tests {
         }
     }
 
-    // Ported: "sorts unstable" — versioning/docker/index.spec.ts line 123
+    // Ported: "sorts unstable" — lib/modules/versioning/docker/index.spec.ts line 123
     #[test]
     fn sort_unstable_matches_renovate_docker_index_spec() {
         let mut versions = vec![
@@ -336,13 +336,13 @@ mod tests {
         );
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/docker/index.spec.ts line 148
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — lib/modules/versioning/docker/index.spec.ts line 148
     #[test]
     fn get_new_value_matches_renovate_docker_index_spec() {
         assert_eq!(get_new_value(None, None, "1.2.3"), "1.2.3");
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/docker/index.spec.ts line 164
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/docker/index.spec.ts line 164
     #[test]
     fn is_stable_matches_renovate_docker_index_spec() {
         let cases = [
@@ -358,7 +358,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible("$version") === $expected" — versioning/docker/index.spec.ts line 177
+    // Ported: "isCompatible("$version") === $expected" — lib/modules/versioning/docker/index.spec.ts line 177
     #[test]
     fn is_compatible_matches_renovate_docker_index_spec() {
         let cases = [
@@ -384,7 +384,7 @@ mod tests {
         }
     }
 
-    // Ported: "valueToVersion("$value") === $expected" — versioning/docker/index.spec.ts line 199
+    // Ported: "valueToVersion("$value") === $expected" — lib/modules/versioning/docker/index.spec.ts line 199
     #[test]
     fn value_to_version_matches_renovate_docker_index_spec() {
         let cases = [

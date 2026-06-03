@@ -268,7 +268,7 @@ mod tests {
             })
     }
 
-    // Ported: "returns releases for Ubuntu" — datasource/github-runners/index.spec.ts line 6
+    // Ported: "returns releases for Ubuntu" — lib/modules/datasource/github-runners/index.spec.ts line 6
     #[test]
     fn github_runners_returns_releases_for_ubuntu() {
         assert_eq!(
@@ -285,7 +285,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns releases for macOS" — datasource/github-runners/index.spec.ts line 26
+    // Ported: "returns releases for macOS" — lib/modules/datasource/github-runners/index.spec.ts line 26
     #[test]
     fn github_runners_returns_releases_for_macos() {
         assert_eq!(
@@ -310,7 +310,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns releases for Windows" — datasource/github-runners/index.spec.ts line 54
+    // Ported: "returns releases for Windows" — lib/modules/datasource/github-runners/index.spec.ts line 54
     #[test]
     fn github_runners_returns_releases_for_windows() {
         assert_eq!(
@@ -324,7 +324,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if package is unknown" — datasource/github-runners/index.spec.ts line 72
+    // Ported: "returns null if package is unknown" — lib/modules/datasource/github-runners/index.spec.ts line 72
     #[test]
     fn github_runners_returns_none_for_unknown_package() {
         assert!(release_rows("unknown").is_none());

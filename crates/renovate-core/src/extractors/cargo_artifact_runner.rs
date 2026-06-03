@@ -371,7 +371,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns null if no Cargo.lock found" — cargo/artifacts.spec.ts line 44
+    // Ported: "returns null if no Cargo.lock found" — lib/modules/manager/cargo/artifacts.spec.ts line 44
     #[tokio::test]
     async fn returns_null_if_no_cargo_lock_found() {
         let dir = tempdir().unwrap();
@@ -397,7 +397,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if updatedDeps is empty" — cargo/artifacts.spec.ts line 62
+    // Ported: "returns null if updatedDeps is empty" — lib/modules/manager/cargo/artifacts.spec.ts line 62
     #[tokio::test]
     async fn returns_null_if_updated_deps_is_empty() {
         let dir = tempdir().unwrap();
@@ -416,7 +416,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns updated Cargo.lock" — cargo/artifacts.spec.ts line 98
+    // Ported: "returns updated Cargo.lock" — lib/modules/manager/cargo/artifacts.spec.ts line 98
     #[tokio::test]
     async fn returns_updated_cargo_lock() {
         let dir = tempdir().unwrap();
@@ -483,7 +483,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns updated Cargo.lock with precise version update" — cargo/artifacts.spec.ts line 122
+    // Ported: "returns updated Cargo.lock with precise version update" — lib/modules/manager/cargo/artifacts.spec.ts line 122
     #[tokio::test]
     async fn returns_updated_cargo_lock_with_precise_version_update() {
         let dir = tempdir().unwrap();
@@ -543,7 +543,7 @@ mod tests {
         assert_eq!(results[0].file.as_ref().unwrap().path, "Cargo.lock");
     }
 
-    // Ported: "skips precise update when manifest range has changed" — cargo/artifacts.spec.ts line 164
+    // Ported: "skips precise update when manifest range has changed" — lib/modules/manager/cargo/artifacts.spec.ts line 164
     #[tokio::test]
     async fn skips_precise_update_when_manifest_range_has_changed() {
         let dir = tempdir().unwrap();
@@ -598,7 +598,7 @@ mod tests {
         assert_eq!(results[0].file.as_ref().unwrap().path, "Cargo.lock");
     }
 
-    // Ported: "returns an artifact error when cargo update fails" — cargo/artifacts.spec.ts line 247
+    // Ported: "returns an artifact error when cargo update fails" — lib/modules/manager/cargo/artifacts.spec.ts line 247
     #[tokio::test]
     async fn returns_an_artifact_error_when_cargo_update_fails() {
         let dir = tempdir().unwrap();
@@ -655,7 +655,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns updated Cargo.lock for lockfile maintenance" — cargo/artifacts.spec.ts line 488
+    // Ported: "returns updated Cargo.lock for lockfile maintenance" — lib/modules/manager/cargo/artifacts.spec.ts line 488
     #[tokio::test]
     async fn returns_updated_cargo_lock_for_lockfile_maintenance() {
         let dir = tempdir().unwrap();

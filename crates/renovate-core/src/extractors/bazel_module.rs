@@ -1942,7 +1942,7 @@ mod tests {
         }
     }
 
-    // Ported: "parse($a)" — bazel-module/bazelrc.spec.ts line 35
+    // Ported: "parse($a)" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 35
     #[test]
     fn bazelrc_option_parse_cases() {
         let cases = [
@@ -1966,7 +1966,7 @@ mod tests {
         }
     }
 
-    // Ported: "getOption" — bazel-module/bazelrc.spec.ts line 51
+    // Ported: "getOption" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 51
     #[test]
     fn bazelrc_command_entry_get_option() {
         let opt0 = bazelrc_option("show_timestamps", None);
@@ -1979,7 +1979,7 @@ mod tests {
         assert_eq!(cmd_entry.get_option(&opt2.name), Some(&opt2));
     }
 
-    // Ported: "parse" — bazel-module/bazelrc.spec.ts line 62
+    // Ported: "parse" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 62
     #[test]
     fn bazelrc_parse_entries() {
         let input = r#"
@@ -2030,7 +2030,7 @@ mod tests {
         );
     }
 
-    // Ported: "should return original value if no workspace path" — bazel-module/bazelrc.spec.ts line 304
+    // Ported: "should return original value if no workspace path" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 304
     #[test]
     fn bazelrc_expand_workspace_path_returns_original_without_workspace_path() {
         assert_eq!(
@@ -2039,7 +2039,7 @@ mod tests {
         );
     }
 
-    // Ported: "should expand valid workspace path" — bazel-module/bazelrc.spec.ts line 310
+    // Ported: "should expand valid workspace path" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 310
     #[test]
     fn bazelrc_expand_workspace_path_expands_valid_workspace_path() {
         assert_eq!(
@@ -2050,7 +2050,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw error for invalid workspace path" — bazel-module/bazelrc.spec.ts line 320
+    // Ported: "should throw error for invalid workspace path" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 320
     #[test]
     fn bazelrc_expand_workspace_path_returns_none_for_invalid_workspace_path() {
         assert_eq!(
@@ -2059,7 +2059,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle options without values" — bazel-module/bazelrc.spec.ts line 328
+    // Ported: "should handle options without values" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 328
     #[test]
     fn bazelrc_sanitize_options_handles_options_without_values() {
         let options = vec![bazelrc_option("build", None)];
@@ -2069,7 +2069,7 @@ mod tests {
         );
     }
 
-    // Ported: "should expand valid workspace paths" — bazel-module/bazelrc.spec.ts line 333
+    // Ported: "should expand valid workspace paths" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 333
     #[test]
     fn bazelrc_sanitize_options_expands_valid_workspace_paths() {
         let options = vec![
@@ -2090,7 +2090,7 @@ mod tests {
         );
     }
 
-    // Ported: "should throw error for invalid workspace paths" — bazel-module/bazelrc.spec.ts line 352
+    // Ported: "should throw error for invalid workspace paths" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 352
     #[test]
     fn bazelrc_sanitize_options_drops_invalid_workspace_paths() {
         let options = vec![
@@ -2114,7 +2114,7 @@ mod tests {
         }
     }
 
-    // Ported: "when .bazelrc does not exist" — bazel-module/bazelrc.spec.ts line 103
+    // Ported: "when .bazelrc does not exist" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 103
     #[test]
     fn bazelrc_read_bazelrc_not_exist() {
         let files: &[(&str, Option<&str>)] = &[(".bazelrc", None)];
@@ -2123,7 +2123,7 @@ mod tests {
         assert!(result.is_empty());
     }
 
-    // Ported: "when .bazelrc has invalid lines" — bazel-module/bazelrc.spec.ts line 110
+    // Ported: "when .bazelrc has invalid lines" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 110
     #[test]
     fn bazelrc_read_invalid_lines_ignored() {
         let content =
@@ -2144,7 +2144,7 @@ mod tests {
         );
     }
 
-    // Ported: "when .bazelrc has no imports" — bazel-module/bazelrc.spec.ts line 128
+    // Ported: "when .bazelrc has no imports" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 128
     #[test]
     fn bazelrc_read_no_imports() {
         let content = "# This comment should be ignored\nbuild --show_timestamps --keep_going --jobs 600\nbuild --color=yes";
@@ -2167,7 +2167,7 @@ mod tests {
         );
     }
 
-    // Ported: "when .bazelrc has import and try-import, try-import exists" — bazel-module/bazelrc.spec.ts line 148
+    // Ported: "when .bazelrc has import and try-import, try-import exists" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 148
     #[test]
     fn bazelrc_read_import_and_try_import_both_exist() {
         let files = &[
@@ -2189,7 +2189,7 @@ mod tests {
         );
     }
 
-    // Ported: "when .bazelrc has import and try-import, try-import does not exist" — bazel-module/bazelrc.spec.ts line 173
+    // Ported: "when .bazelrc has import and try-import, try-import does not exist" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 173
     #[test]
     fn bazelrc_read_try_import_not_exist_skipped() {
         let files = &[
@@ -2204,7 +2204,7 @@ mod tests {
         assert_eq!(result, vec![cmd("build", &[("jobs", Some("600"))])]);
     }
 
-    // Ported: "when .bazelrc multi-level import" — bazel-module/bazelrc.spec.ts line 188
+    // Ported: "when .bazelrc multi-level import" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 188
     #[test]
     fn bazelrc_read_multi_level_import() {
         let files = &[
@@ -2226,7 +2226,7 @@ mod tests {
         );
     }
 
-    // Ported: "when bazlerc files recursively import each other" — bazel-module/bazelrc.spec.ts line 213
+    // Ported: "when bazlerc files recursively import each other" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 213
     #[test]
     fn bazelrc_read_cycle_returns_error() {
         let files = &[
@@ -2245,7 +2245,7 @@ mod tests {
         );
     }
 
-    // Ported: "when .bazelrc refers to a non-local file" — bazel-module/bazelrc.spec.ts line 239
+    // Ported: "when .bazelrc refers to a non-local file" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 239
     #[test]
     fn bazelrc_read_non_local_import_skipped() {
         let files = &[(
@@ -2257,7 +2257,7 @@ mod tests {
         assert_eq!(result, vec![cmd("build", &[("jobs", Some("600"))])]);
     }
 
-    // Ported: "when bazelrc has %workspace% paths in options" — bazel-module/bazelrc.spec.ts line 255
+    // Ported: "when bazelrc has %workspace% paths in options" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 255
     #[test]
     fn bazelrc_read_workspace_paths_in_options() {
         let workspace_dir = "/tmp/workspace";
@@ -2274,7 +2274,7 @@ mod tests {
         );
     }
 
-    // Ported: "when bazelrc has %workspace% paths in imported files" — bazel-module/bazelrc.spec.ts line 274
+    // Ported: "when bazelrc has %workspace% paths in imported files" — lib/modules/manager/bazel-module/bazelrc.spec.ts line 274
     #[test]
     fn bazelrc_read_workspace_paths_in_imported_files() {
         let workspace_dir = "/tmp/workspace";
@@ -2312,7 +2312,7 @@ mod tests {
         );
     }
 
-    // Ported: ".string()" — bazel-module/parser/fragments.spec.ts line 13
+    // Ported: ".string()" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 13
     #[test]
     fn fragment_string_constructor() {
         assert_eq!(
@@ -2324,7 +2324,7 @@ mod tests {
         );
     }
 
-    // Ported: ".boolean()" — bazel-module/parser/fragments.spec.ts line 19
+    // Ported: ".boolean()" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 19
     #[test]
     fn fragment_boolean_constructor() {
         assert_eq!(
@@ -2336,7 +2336,7 @@ mod tests {
         );
     }
 
-    // Ported: ".rule()" — bazel-module/parser/fragments.spec.ts line 25
+    // Ported: ".rule()" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 25
     #[test]
     fn fragment_rule_constructor() {
         let children = BTreeMap::from([("name".to_owned(), fragment_string("bar"))]);
@@ -2350,7 +2350,7 @@ mod tests {
         );
     }
 
-    // Ported: ".extensionTag()" — bazel-module/parser/fragments.spec.ts line 37
+    // Ported: ".extensionTag()" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 37
     #[test]
     fn fragment_extension_tag_constructor() {
         let children = BTreeMap::from([("name".to_owned(), fragment_string("bar"))]);
@@ -2368,7 +2368,7 @@ mod tests {
         );
     }
 
-    // Ported: ".preparedExtensionTag()" — bazel-module/parser/fragments.spec.ts line 56
+    // Ported: ".preparedExtensionTag()" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 56
     #[test]
     fn fragment_prepared_extension_tag_constructor() {
         assert_eq!(
@@ -2382,7 +2382,7 @@ mod tests {
         );
     }
 
-    // Ported: ".attribute()" — bazel-module/parser/fragments.spec.ts line 65
+    // Ported: ".attribute()" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 65
     #[test]
     fn fragment_attribute_constructor() {
         assert_eq!(
@@ -2395,7 +2395,7 @@ mod tests {
         );
     }
 
-    // Ported: ".array()" — bazel-module/parser/fragments.spec.ts line 73
+    // Ported: ".array()" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 73
     #[test]
     fn fragment_array_constructor() {
         assert_eq!(
@@ -2407,7 +2407,7 @@ mod tests {
         );
     }
 
-    // Ported: ".isValue($a)" — bazel-module/parser/fragments.spec.ts line 80
+    // Ported: ".isValue($a)" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 80
     #[test]
     fn fragment_is_value_matches_renovate_value_fragments() {
         let cases = [
@@ -2427,7 +2427,7 @@ mod tests {
         }
     }
 
-    // Ported: ".isPrimitive($a)" — bazel-module/parser/fragments.spec.ts line 92
+    // Ported: ".isPrimitive($a)" — lib/modules/manager/bazel-module/parser/fragments.spec.ts line 92
     #[test]
     fn fragment_is_primitive_matches_renovate_primitive_fragments() {
         let cases = [
@@ -2447,7 +2447,7 @@ mod tests {
         }
     }
 
-    // Ported: "throws if there is no current" — bazel-module/parser/context.spec.ts line 7
+    // Ported: "throws if there is no current" — lib/modules/manager/bazel-module/parser/context.spec.ts line 7
     #[test]
     fn bazel_ctx_start_extension_tag_errors_without_current() {
         let mut ctx = BazelCtx::new("");
@@ -2457,7 +2457,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws if the current is not a prepared extension tag" — bazel-module/parser/context.spec.ts line 13
+    // Ported: "throws if the current is not a prepared extension tag" — lib/modules/manager/bazel-module/parser/context.spec.ts line 13
     #[test]
     fn bazel_ctx_start_extension_tag_errors_for_wrong_current() {
         let mut ctx = BazelCtx::new("");
@@ -2470,7 +2470,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws if the current is not an extension tag" — bazel-module/parser/context.spec.ts line 23
+    // Ported: "throws if the current is not an extension tag" — lib/modules/manager/bazel-module/parser/context.spec.ts line 23
     #[test]
     fn bazel_ctx_end_extension_tag_errors_for_wrong_current() {
         let mut ctx = BazelCtx::new("");
@@ -2483,7 +2483,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws on missing current" — bazel-module/parser/context.spec.ts line 30
+    // Ported: "throws on missing current" — lib/modules/manager/bazel-module/parser/context.spec.ts line 30
     #[test]
     fn bazel_ctx_end_rule_errors_without_current() {
         let mut ctx = BazelCtx::new("");
@@ -2493,7 +2493,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws on unbalanced endRule" — bazel-module/parser/context.spec.ts line 37
+    // Ported: "throws on unbalanced endRule" — lib/modules/manager/bazel-module/parser/context.spec.ts line 37
     #[test]
     fn bazel_ctx_end_rule_errors_when_current_is_array() {
         let mut ctx = BazelCtx::new("");
@@ -2507,7 +2507,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws on unbalanced endArray" — bazel-module/parser/context.spec.ts line 44
+    // Ported: "throws on unbalanced endArray" — lib/modules/manager/bazel-module/parser/context.spec.ts line 44
     #[test]
     fn bazel_ctx_end_array_errors_when_current_is_rule() {
         let mut ctx = BazelCtx::new("");
@@ -2521,7 +2521,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws if add an attribute without a parent" — bazel-module/parser/context.spec.ts line 51
+    // Ported: "throws if add an attribute without a parent" — lib/modules/manager/bazel-module/parser/context.spec.ts line 51
     #[test]
     fn bazel_ctx_add_string_to_parentless_attribute_errors() {
         let mut ctx = BazelCtx::new("");
@@ -2535,7 +2535,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws if current use repo rule does not exist" — bazel-module/parser/context.spec.ts line 60
+    // Ported: "throws if current use repo rule does not exist" — lib/modules/manager/bazel-module/parser/context.spec.ts line 60
     #[test]
     fn bazel_ctx_end_use_repo_rule_errors_for_wrong_current() {
         let mut ctx = BazelCtx::new("");
@@ -2548,7 +2548,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws if current repo rule call does not exist" — bazel-module/parser/context.spec.ts line 67
+    // Ported: "throws if current repo rule call does not exist" — lib/modules/manager/bazel-module/parser/context.spec.ts line 67
     #[test]
     fn bazel_ctx_end_repo_rule_call_errors_for_wrong_current() {
         let mut ctx = BazelCtx::new("");
@@ -2561,7 +2561,7 @@ mod tests {
         );
     }
 
-    // Ported: "creates CtxProcessingError with parent type" — bazel-module/parser/context.spec.ts line 74
+    // Ported: "creates CtxProcessingError with parent type" — lib/modules/manager/bazel-module/parser/context.spec.ts line 74
     #[test]
     fn bazel_ctx_processing_error_records_current_and_parent_type() {
         let current = fragment_attribute("name", None, false);
@@ -2576,7 +2576,7 @@ mod tests {
         assert_eq!(error.parent, Some(parent));
     }
 
-    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
+    // Ported: "returns bazel_dep and git_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 54
     #[test]
     fn extracts_bazel_dep() {
         let content = r#"
@@ -2590,7 +2590,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
+    // Ported: "returns bazel_dep and git_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 54
     #[test]
     fn extracts_dev_dependency() {
         let content = r#"bazel_dep(name = "gazelle", version = "0.32.0", dev_dependency = True)"#;
@@ -2599,7 +2599,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")
         assert!(deps[0].dev_dependency);
     }
 
-    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
+    // Ported: "returns bazel_dep and git_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 54
     #[test]
     fn extracts_multiline_dep() {
         let content = r#"
@@ -2614,7 +2614,7 @@ bazel_dep(
         assert_eq!(deps[0].current_value, "0.24.0");
     }
 
-    // Ported: "returns bazel_dep and git_override dependencies" — bazel-module/extract.spec.ts line 54
+    // Ported: "returns bazel_dep and git_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 54
     #[test]
     fn multiple_deps() {
         let content = r#"
@@ -2627,7 +2627,7 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         assert_eq!(deps[1].name, "gazelle");
     }
 
-    // Ported: "returns bazel_dep with no version and git_override" — bazel-module/extract.spec.ts line 95
+    // Ported: "returns bazel_dep with no version and git_override" — lib/modules/manager/bazel-module/extract.spec.ts line 95
     #[test]
     fn dep_without_version_skipped() {
         let content = r#"bazel_dep(name = "rules_go")"#;
@@ -2639,7 +2639,7 @@ bazel_dep(name = "gazelle", version = "0.32.0")
         );
     }
 
-    // Ported: "returns crate.spec dependencies" — bazel-module/extract.spec.ts line 377
+    // Ported: "returns crate.spec dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 377
     #[test]
     fn extracts_crate_spec_dependencies() {
         let input = r#"
@@ -2694,7 +2694,7 @@ crate.spec(
         );
     }
 
-    // Ported: "returns maven.install and maven.artifact dependencies" — bazel-module/extract.spec.ts line 453
+    // Ported: "returns maven.install and maven.artifact dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 453
     #[test]
     fn extracts_maven_install_and_artifact_dependencies() {
         let input = r#"
@@ -2742,7 +2742,7 @@ maven.install(
         );
     }
 
-    // Ported: "returns oci.pull dependencies" — bazel-module/extract.spec.ts line 507
+    // Ported: "returns oci.pull dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 507
     #[test]
     fn extracts_oci_pull_dependency() {
         let input = r#"
@@ -2767,7 +2767,7 @@ oci.pull(
         );
     }
 
-    // Ported: "returns oci.pull dependencies without tags" — bazel-module/extract.spec.ts line 544
+    // Ported: "returns oci.pull dependencies without tags" — lib/modules/manager/bazel-module/extract.spec.ts line 544
     #[test]
     fn extracts_oci_pull_dependency_without_tag() {
         let input = r#"
@@ -2789,7 +2789,7 @@ oci.pull(
         );
     }
 
-    // Ported: "returns oci.pull dependencies with tag only (no digest)" — bazel-module/extract.spec.ts line 578
+    // Ported: "returns oci.pull dependencies with tag only (no digest)" — lib/modules/manager/bazel-module/extract.spec.ts line 578
     #[test]
     fn extracts_oci_pull_dependency_with_tag_only() {
         let input = r#"
@@ -2808,7 +2808,7 @@ oci.pull(
         assert_eq!(deps[0].current_digest, None);
     }
 
-    // Ported: "returns oci.pull dependencies without tag or digest" — bazel-module/extract.spec.ts line 611
+    // Ported: "returns oci.pull dependencies without tag or digest" — lib/modules/manager/bazel-module/extract.spec.ts line 611
     #[test]
     fn extracts_oci_pull_dependency_without_tag_or_digest() {
         let input = r#"
@@ -2826,7 +2826,7 @@ oci.pull(
         assert_eq!(deps[0].current_digest, None);
     }
 
-    // Ported: "returns oci.pull dependencies with registryAliases" — bazel-module/extract.spec.ts line 641
+    // Ported: "returns oci.pull dependencies with registryAliases" — lib/modules/manager/bazel-module/extract.spec.ts line 641
     #[test]
     fn extracts_oci_pull_dependency_with_registry_alias() {
         let input = r#"
@@ -2855,7 +2855,7 @@ oci.pull(
         );
     }
 
-    // Ported: "returns oci.pull dependencies with registryAliases with multiple segments" — bazel-module/extract.spec.ts line 682
+    // Ported: "returns oci.pull dependencies with registryAliases with multiple segments" — lib/modules/manager/bazel-module/extract.spec.ts line 682
     #[test]
     fn extracts_oci_pull_dependency_with_multisegment_registry_alias() {
         let input = r#"
@@ -2881,7 +2881,7 @@ oci.pull(
         );
     }
 
-    // Ported: "returns maven.install and bazel_dep dependencies together" — bazel-module/extract.spec.ts line 723
+    // Ported: "returns maven.install and bazel_dep dependencies together" — lib/modules/manager/bazel-module/extract.spec.ts line 723
     #[test]
     fn extracts_maven_install_and_bazel_dep_together() {
         let input = r#"
@@ -2926,7 +2926,7 @@ maven.install(
         );
     }
 
-    // Ported: "returns git_repository dependencies with digest" — bazel-module/extract.spec.ts line 772
+    // Ported: "returns git_repository dependencies with digest" — lib/modules/manager/bazel-module/extract.spec.ts line 772
     #[test]
     fn extracts_git_repository_dependency_with_digest() {
         let input = r#"
@@ -2949,7 +2949,7 @@ git_repository(
         );
     }
 
-    // Ported: "returns git_repository dependencies with tag" — bazel-module/extract.spec.ts line 796
+    // Ported: "returns git_repository dependencies with tag" — lib/modules/manager/bazel-module/extract.spec.ts line 796
     #[test]
     fn extracts_git_repository_dependency_with_tag() {
         let input = r#"
@@ -2969,7 +2969,7 @@ git_repository(
         assert_eq!(deps[0].current_digest, None);
     }
 
-    // Ported: "returns new_git_repository dependencies" — bazel-module/extract.spec.ts line 820
+    // Ported: "returns new_git_repository dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 820
     #[test]
     fn extracts_new_git_repository_dependency() {
         let input = r#"
@@ -2993,7 +2993,7 @@ new_git_repository(
         );
     }
 
-    // Ported: "handles a real-world MODULE.bazel file (rules_sh)" — bazel-module/extract.spec.ts line 846
+    // Ported: "handles a real-world MODULE.bazel file (rules_sh)" — lib/modules/manager/bazel-module/extract.spec.ts line 846
     #[test]
     fn extracts_rules_sh_real_world_module_bazel() {
         let input = r#"
@@ -3026,7 +3026,7 @@ register_toolchains("@local_posix_config//...")
         assert!(deps.iter().all(|dep| dep.skip_reason.is_none()));
     }
 
-    // Ported: "returns dependencies and custom registry URLs when specified in a bazelrc" — bazel-module/extract.spec.ts line 125
+    // Ported: "returns dependencies and custom registry URLs when specified in a bazelrc" — lib/modules/manager/bazel-module/extract.spec.ts line 125
     #[test]
     fn extracts_bazelrc_registry_urls_for_module() {
         let module_bazel = r#"bazel_dep(name = "rules_foo", version = "1.2.3")"#;
@@ -3085,7 +3085,7 @@ build --color=yes
         );
     }
 
-    // Ported: "returns rules_img pull dependencies" — bazel-module/extract.spec.ts line 1005
+    // Ported: "returns rules_img pull dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 1005
     #[test]
     fn extracts_rules_img_pull_dependency() {
         let input = r#"
@@ -3118,7 +3118,7 @@ pull(
         assert_eq!(image_deps[0].registry_urls, vec!["https://index.docker.io"]);
     }
 
-    // Ported: "returns rules_img pull dependencies with custom registry" — bazel-module/extract.spec.ts line 1051
+    // Ported: "returns rules_img pull dependencies with custom registry" — lib/modules/manager/bazel-module/extract.spec.ts line 1051
     #[test]
     fn extracts_rules_img_pull_dependency_with_custom_registry() {
         let input = r#"
@@ -3139,7 +3139,7 @@ pull(
         assert_eq!(deps[0].registry_urls, vec!["https://my.registry.com"]);
     }
 
-    // Ported: "returns rules_img pull dependencies with multiple pulls" — bazel-module/extract.spec.ts line 1086
+    // Ported: "returns rules_img pull dependencies with multiple pulls" — lib/modules/manager/bazel-module/extract.spec.ts line 1086
     #[test]
     fn extracts_multiple_rules_img_pull_dependencies() {
         let input = r#"
@@ -3172,7 +3172,7 @@ pull(
         );
     }
 
-    // Ported: "ignores rules_img pull without required fields" — bazel-module/extract.spec.ts line 1141
+    // Ported: "ignores rules_img pull without required fields" — lib/modules/manager/bazel-module/extract.spec.ts line 1141
     #[test]
     fn ignores_rules_img_pull_without_required_fields() {
         let input = r#"
@@ -3191,7 +3191,7 @@ pull(
         assert!(extract_rules_img_pull_deps(input).is_empty());
     }
 
-    // Ported: "handles rules_img with renamed variable" — bazel-module/extract.spec.ts line 1161
+    // Ported: "handles rules_img with renamed variable" — lib/modules/manager/bazel-module/extract.spec.ts line 1161
     #[test]
     fn extracts_rules_img_pull_dependency_with_renamed_variable() {
         let input = r#"
@@ -3209,7 +3209,7 @@ my_pull(
         assert_eq!(deps[0].current_value.as_deref(), Some("24.04"));
     }
 
-    // Ported: "ignores non-rules_img repo rules" — bazel-module/extract.spec.ts line 1193
+    // Ported: "ignores non-rules_img repo rules" — lib/modules/manager/bazel-module/extract.spec.ts line 1193
     #[test]
     fn ignores_non_rules_img_repo_rules() {
         let input = r#"
@@ -3229,7 +3229,7 @@ other_rule(
         assert!(extract_rules_img_pull_deps(input).is_empty());
     }
 
-    // Ported: "handles every method available in MODULE.bazel files" — bazel-module/extract.spec.ts line 887
+    // Ported: "handles every method available in MODULE.bazel files" — lib/modules/manager/bazel-module/extract.spec.ts line 887
     #[test]
     fn extracts_every_supported_module_bazel_method() {
         let input = r#"
@@ -3322,7 +3322,7 @@ my_repo_rule(
         assert_eq!(image_deps[0].registry_urls, vec!["https://index.docker.io"]);
     }
 
-    // Ported: "returns bazel_dep and archive_override dependencies" — bazel-module/extract.spec.ts line 148
+    // Ported: "returns bazel_dep and archive_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 148
     #[test]
     fn extracts_archive_override_with_bazel_dep_version() {
         let content = r#"
@@ -3348,7 +3348,7 @@ archive_override(
         );
     }
 
-    // Ported: "returns bazel_dep with no version and archive_override dependencies" — bazel-module/extract.spec.ts line 179
+    // Ported: "returns bazel_dep with no version and archive_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 179
     #[test]
     fn extracts_archive_override_with_unversioned_bazel_dep() {
         let content = r#"
@@ -3374,7 +3374,7 @@ archive_override(
         );
     }
 
-    // Ported: "returns bazel_dep and local_path_override dependencies" — bazel-module/extract.spec.ts line 209
+    // Ported: "returns bazel_dep and local_path_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 209
     #[test]
     fn extracts_local_path_override_with_bazel_dep_version() {
         let content = r#"
@@ -3398,7 +3398,7 @@ local_path_override(
         );
     }
 
-    // Ported: "returns bazel_dep with no version and local_path_override dependencies" — bazel-module/extract.spec.ts line 238
+    // Ported: "returns bazel_dep with no version and local_path_override dependencies" — lib/modules/manager/bazel-module/extract.spec.ts line 238
     #[test]
     fn extracts_local_path_override_with_unversioned_bazel_dep() {
         let content = r#"
@@ -3422,7 +3422,7 @@ local_path_override(
         );
     }
 
-    // Ported: "returns bazel_dep and single_version_override dependencies if a version is specified" — bazel-module/extract.spec.ts line 266
+    // Ported: "returns bazel_dep and single_version_override dependencies if a version is specified" — lib/modules/manager/bazel-module/extract.spec.ts line 266
     #[test]
     fn extracts_single_version_override_with_bazel_dep_version() {
         let content = r#"
@@ -3453,7 +3453,7 @@ single_version_override(
         );
     }
 
-    // Ported: "returns bazel_dep with no version and single_version_override dependencies if a version is specified" — bazel-module/extract.spec.ts line 299
+    // Ported: "returns bazel_dep with no version and single_version_override dependencies if a version is specified" — lib/modules/manager/bazel-module/extract.spec.ts line 299
     #[test]
     fn extracts_single_version_override_with_unversioned_bazel_dep() {
         let content = r#"
@@ -3480,7 +3480,7 @@ single_version_override(
         assert_eq!(deps[1].skip_reason, Some(BazelSkipReason::Ignored));
     }
 
-    // Ported: "returns bazel_dep dependency if single_version_override does not have a version" — bazel-module/extract.spec.ts line 331
+    // Ported: "returns bazel_dep dependency if single_version_override does not have a version" — lib/modules/manager/bazel-module/extract.spec.ts line 331
     #[test]
     fn single_version_override_without_version_only_adds_registry_to_versioned_bazel_dep() {
         let content = r#"
@@ -3502,7 +3502,7 @@ single_version_override(
         );
     }
 
-    // Ported: "returns bazel_dep with no version dependency if single_version_override does not have a version" — bazel-module/extract.spec.ts line 355
+    // Ported: "returns bazel_dep with no version dependency if single_version_override does not have a version" — lib/modules/manager/bazel-module/extract.spec.ts line 355
     #[test]
     fn single_version_override_without_version_keeps_unversioned_bazel_dep_skipped() {
         let content = r#"
@@ -3527,19 +3527,19 @@ single_version_override(
         );
     }
 
-    // Ported: "returns null if file is empty" — bazel-module/extract.spec.ts line 41
+    // Ported: "returns null if file is empty" — lib/modules/manager/bazel-module/extract.spec.ts line 41
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null if fails to parse" — bazel-module/extract.spec.ts line 25
+    // Ported: "returns null if fails to parse" — lib/modules/manager/bazel-module/extract.spec.ts line 25
     #[test]
     fn malformed_content_returns_empty() {
         assert!(extract("blahhhhh:foo:@what\n").is_empty());
     }
 
-    // Ported: "returns null if something throws an error" — bazel-module/extract.spec.ts line 33
+    // Ported: "returns null if something throws an error" — lib/modules/manager/bazel-module/extract.spec.ts line 33
     #[test]
     fn unexpected_parser_input_returns_empty() {
         // TS test mocks parser.parse to throw; Rust handles all errors via Result.
@@ -3547,7 +3547,7 @@ single_version_override(
         assert!(extract("content").is_empty());
     }
 
-    // Ported: "returns null if file has unrecognized declarations" — bazel-module/extract.spec.ts line 46
+    // Ported: "returns null if file has unrecognized declarations" — lib/modules/manager/bazel-module/extract.spec.ts line 46
     #[test]
     fn comment_lines_stripped() {
         let content = r#"
@@ -3559,13 +3559,13 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert_eq!(deps[0].name, "rules_go");
     }
 
-    // Ported: "returns null if file has unrecognized declarations" — bazel-module/extract.spec.ts line 46
+    // Ported: "returns null if file has unrecognized declarations" — lib/modules/manager/bazel-module/extract.spec.ts line 46
     #[test]
     fn empty_file_returns_empty() {
         assert!(extract("module(name = \"mymodule\", version = \"1.0.0\")\n").is_empty());
     }
 
-    // Ported: "ignores repo rule calls that are not rules_img" — modules/manager/bazel-module/rules-img.spec.ts line 5
+    // Ported: "ignores repo rule calls that are not rules_img" — lib/modules/manager/bazel-module/rules-img.spec.ts line 5
     #[test]
     fn rules_img_ignores_non_rules_img() {
         let frags = vec![
@@ -3592,7 +3592,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert!(result.is_empty());
     }
 
-    // Ported: "handles valid rules_img pull call" — modules/manager/bazel-module/rules-img.spec.ts line 32
+    // Ported: "handles valid rules_img pull call" — lib/modules/manager/bazel-module/rules-img.spec.ts line 32
     #[test]
     fn rules_img_handles_valid_pull_call() {
         let frags = vec![
@@ -3625,7 +3625,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert_eq!(result[0].dep_type, "rules_img_pull");
     }
 
-    // Ported: "skips repo rule calls without corresponding use_repo_rule" — modules/manager/bazel-module/rules-img.spec.ts line 72
+    // Ported: "skips repo rule calls without corresponding use_repo_rule" — lib/modules/manager/bazel-module/rules-img.spec.ts line 72
     #[test]
     fn rules_img_skips_unknown_function() {
         let frags = vec![serde_json::json!({
@@ -3642,7 +3642,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert!(result.is_empty());
     }
 
-    // Ported: "skips malformed repo rule calls" — modules/manager/bazel-module/rules-img.spec.ts line 91
+    // Ported: "skips malformed repo rule calls" — lib/modules/manager/bazel-module/rules-img.spec.ts line 91
     #[test]
     fn rules_img_skips_malformed_call() {
         let frags = vec![
@@ -3668,14 +3668,14 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert!(result.is_empty());
     }
 
-    // Ported: ".asBoolean($a)" (it.each True/False) — modules/manager/bazel-module/parser/starlark.spec.ts line 4
+    // Ported: ".asBoolean($a)" (it.each True/False) — lib/modules/manager/bazel-module/parser/starlark.spec.ts line 4
     #[test]
     fn starlark_boolean_parsing() {
         assert_eq!(starlark_as_boolean("True"), Ok(true));
         assert_eq!(starlark_as_boolean("False"), Ok(false));
     }
 
-    // Ported: "asBoolean" (throws) — modules/manager/bazel-module/parser/starlark.spec.ts line 12
+    // Ported: "asBoolean" (throws) — lib/modules/manager/bazel-module/parser/starlark.spec.ts line 12
     #[test]
     fn starlark_boolean_invalid_throws() {
         let result = starlark_as_boolean("bad");
@@ -3696,7 +3696,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
 
     // ── bazel-module/parser/index.spec.ts ───────────────────────────────────
 
-    // Ported: "returns empty string if invalid content" — bazel-module/parser/index.spec.ts line 7
+    // Ported: "returns empty string if invalid content" — lib/modules/manager/bazel-module/parser/index.spec.ts line 7
     #[test]
     fn parse_module_bazel_invalid_content_returns_empty() {
         let input = "// This is invalid\na + 1\n<<<<<<<";
@@ -3704,7 +3704,7 @@ bazel_dep(name = "rules_go", version = "0.41.0")  # inline comment
         assert!(res.is_empty());
     }
 
-    // Ported: "finds simple bazel_dep" — bazel-module/parser/index.spec.ts line 17
+    // Ported: "finds simple bazel_dep" — lib/modules/manager/bazel-module/parser/index.spec.ts line 17
     #[test]
     fn parse_module_bazel_finds_simple_bazel_dep() {
         let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -3715,7 +3715,7 @@ bazel_dep(name = "rules_bar", version = "1.0.0", dev_dependency = True)"#;
         assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "bazel_dep"));
     }
 
-    // Ported: "finds the git_override" — bazel-module/parser/index.spec.ts line 44
+    // Ported: "finds the git_override" — lib/modules/manager/bazel-module/parser/index.spec.ts line 44
     #[test]
     fn parse_module_bazel_finds_git_override() {
         let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -3730,7 +3730,7 @@ git_override(
         assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "git_override"));
     }
 
-    // Ported: "finds archive_override" — bazel-module/parser/index.spec.ts line 85
+    // Ported: "finds archive_override" — lib/modules/manager/bazel-module/parser/index.spec.ts line 85
     #[test]
     fn parse_module_bazel_finds_archive_override() {
         let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -3746,7 +3746,7 @@ archive_override(
         assert!(matches!(&res[1], BazelFragment::Rule { rule, .. } if rule == "archive_override"));
     }
 
-    // Ported: "finds local_path_override" — bazel-module/parser/index.spec.ts line 119
+    // Ported: "finds local_path_override" — lib/modules/manager/bazel-module/parser/index.spec.ts line 119
     #[test]
     fn parse_module_bazel_finds_local_path_override() {
         let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -3762,7 +3762,7 @@ local_path_override(
         );
     }
 
-    // Ported: "finds single_version_override" — bazel-module/parser/index.spec.ts line 148
+    // Ported: "finds single_version_override" — lib/modules/manager/bazel-module/parser/index.spec.ts line 148
     #[test]
     fn parse_module_bazel_finds_single_version_override() {
         let input = r#"bazel_dep(name = "rules_foo", version = "1.2.3")
@@ -3779,7 +3779,7 @@ single_version_override(
         );
     }
 
-    // Ported: "finds maven.artifact" — bazel-module/parser/index.spec.ts line 179
+    // Ported: "finds maven.artifact" — lib/modules/manager/bazel-module/parser/index.spec.ts line 179
     #[test]
     fn parse_module_bazel_finds_maven_artifact() {
         let input = r#"maven.artifact(
@@ -3795,7 +3795,7 @@ single_version_override(
         );
     }
 
-    // Ported: "finds maven.install and maven.artifact" — bazel-module/parser/index.spec.ts line 248
+    // Ported: "finds maven.install and maven.artifact" — lib/modules/manager/bazel-module/parser/index.spec.ts line 248
     #[test]
     fn parse_module_bazel_finds_maven_install_and_artifact() {
         let input = r#"maven.install(
@@ -3823,7 +3823,7 @@ maven.artifact(
         );
     }
 
-    // Ported: "finds oci.pull" — bazel-module/parser/index.spec.ts line 335
+    // Ported: "finds oci.pull" — lib/modules/manager/bazel-module/parser/index.spec.ts line 335
     #[test]
     fn parse_module_bazel_finds_oci_pull() {
         let input = r#"oci.pull(
@@ -3840,7 +3840,7 @@ maven.artifact(
         );
     }
 
-    // Ported: "finds the git_repository" — bazel-module/parser/index.spec.ts line 376
+    // Ported: "finds the git_repository" — lib/modules/manager/bazel-module/parser/index.spec.ts line 376
     #[test]
     fn parse_module_bazel_finds_git_repository() {
         let input = r#"git_repository(
@@ -3853,7 +3853,7 @@ maven.artifact(
         assert!(matches!(&res[0], BazelFragment::Rule { rule, .. } if rule == "git_repository"));
     }
 
-    // Ported: "finds use_repo_rule and repo rule call" — bazel-module/parser/index.spec.ts line 408
+    // Ported: "finds use_repo_rule and repo rule call" — lib/modules/manager/bazel-module/parser/index.spec.ts line 408
     #[test]
     fn parse_module_bazel_finds_use_repo_rule_and_repo_rule_call() {
         let input = r#"pull = use_repo_rule("@rules_img//img:pull.bzl", "pull")
@@ -3868,7 +3868,7 @@ pull(name = "nginx", tag = "1.27.1")"#;
         );
     }
 
-    // Ported: "ignores use_repo_rule with insufficient args" — bazel-module/parser/index.spec.ts line 420
+    // Ported: "ignores use_repo_rule with insufficient args" — lib/modules/manager/bazel-module/parser/index.spec.ts line 420
     #[test]
     fn parse_module_bazel_ignores_use_repo_rule_with_insufficient_args() {
         let input = r#"pull = use_repo_rule("only_one_arg")"#;

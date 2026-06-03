@@ -41,7 +41,7 @@ pub fn is_greater_than(_version: &str, _other: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "should return 1.0.0" — versioning/aws-machine-image/index.spec.ts line 5
+    // Ported: "should return 1.0.0" — lib/modules/versioning/aws-machine-image/index.spec.ts line 5
     #[test]
     fn parse_returns_fixed_components() {
         assert_eq!(get_major("ami-00e1b2c30011d4e5f"), 1);
@@ -49,55 +49,55 @@ mod tests {
         assert_eq!(get_patch("ami-00e1b2c30011d4e5f"), 0);
     }
 
-    // Ported: "should return true" — versioning/aws-machine-image/index.spec.ts line 13
+    // Ported: "should return true" — lib/modules/versioning/aws-machine-image/index.spec.ts line 13
     #[test]
     fn is_valid_returns_true_for_ami_id() {
         assert!(is_valid("ami-00e1b2c30011d4e5f"));
     }
 
-    // Ported: "should return false" — versioning/aws-machine-image/index.spec.ts line 17
+    // Ported: "should return false" — lib/modules/versioning/aws-machine-image/index.spec.ts line 17
     #[test]
     fn is_valid_returns_false_for_short_ami_id() {
         assert!(!is_valid("ami-1"));
     }
 
-    // Ported: "should return true" — versioning/aws-machine-image/index.spec.ts line 23
+    // Ported: "should return true" — lib/modules/versioning/aws-machine-image/index.spec.ts line 23
     #[test]
     fn is_version_returns_true_for_ami_id() {
         assert!(is_version("ami-00e1b2c30011d4e5f"));
     }
 
-    // Ported: "should return false" — versioning/aws-machine-image/index.spec.ts line 27
+    // Ported: "should return false" — lib/modules/versioning/aws-machine-image/index.spec.ts line 27
     #[test]
     fn is_version_returns_false_for_short_ami_id() {
         assert!(!is_version("ami-1"));
     }
 
-    // Ported: "should return true" — versioning/aws-machine-image/index.spec.ts line 33
+    // Ported: "should return true" — lib/modules/versioning/aws-machine-image/index.spec.ts line 33
     #[test]
     fn is_compatible_returns_true_for_ami_id_without_range() {
         assert!(is_compatible("ami-00e1b2c30011d4e5f", None));
     }
 
-    // Ported: "should return false" — versioning/aws-machine-image/index.spec.ts line 37
+    // Ported: "should return false" — lib/modules/versioning/aws-machine-image/index.spec.ts line 37
     #[test]
     fn is_compatible_returns_false_for_short_ami_id_without_range() {
         assert!(!is_compatible("ami-1", None));
     }
 
-    // Ported: "should return true" — versioning/aws-machine-image/index.spec.ts line 43
+    // Ported: "should return true" — lib/modules/versioning/aws-machine-image/index.spec.ts line 43
     #[test]
     fn is_compatible_returns_true_for_ami_id_with_range() {
         assert!(is_compatible("ami-00e1b2c30011d4e5f", Some("anything")));
     }
 
-    // Ported: "should return false" — versioning/aws-machine-image/index.spec.ts line 49
+    // Ported: "should return false" — lib/modules/versioning/aws-machine-image/index.spec.ts line 49
     #[test]
     fn is_compatible_returns_false_for_short_ami_id_with_range() {
         assert!(!is_compatible("ami-1", Some("anything")));
     }
 
-    // Ported: "should return true" — versioning/aws-machine-image/index.spec.ts line 55
+    // Ported: "should return true" — lib/modules/versioning/aws-machine-image/index.spec.ts line 55
     #[test]
     fn is_greater_than_returns_true_for_any_ami_pair() {
         assert!(is_greater_than("ami-00", "ami-99"));

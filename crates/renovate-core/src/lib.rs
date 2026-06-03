@@ -158,7 +158,7 @@ mod tests {
         .unwrap();
     }
 
-    // Ported: "keys are sorted alphabetically" — data/index.spec.ts line 55
+    // Ported: "keys are sorted alphabetically" — lib/data/index.spec.ts line 55
     #[test]
     fn embedded_data_keys_are_sorted_alphabetically() {
         assert_json_keys_sorted("monorepo.json", include_str!("../data/monorepo.json"), &[]);

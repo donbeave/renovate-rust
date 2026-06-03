@@ -58,7 +58,7 @@ pub fn extract(content: &str) -> Vec<BicepDep> {
 mod tests {
     use super::*;
 
-    // Ported: "should extract a normal resource" — bicep/extract.spec.ts line 5
+    // Ported: "should extract a normal resource" — lib/modules/manager/bicep/extract.spec.ts line 5
     #[test]
     fn extracts_resource_declaration() {
         let content = r#"
@@ -75,7 +75,7 @@ resource cluster 'Microsoft.ContainerService/managedClusters@2024-01-01' = {
         assert_eq!(deps[0].current_value, "2024-01-01");
     }
 
-    // Ported: "should extract a normal resource" — bicep/extract.spec.ts line 5
+    // Ported: "should extract a normal resource" — lib/modules/manager/bicep/extract.spec.ts line 5
     #[test]
     fn extracts_multiple_resources() {
         let content = r#"
@@ -88,7 +88,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {}
         assert_eq!(deps[1].dep_name, "Microsoft.Network/networkSecurityGroups");
     }
 
-    // Ported: "should not extract a commented out resource" — bicep/extract.spec.ts line 37
+    // Ported: "should not extract a commented out resource" — lib/modules/manager/bicep/extract.spec.ts line 37
     #[test]
     fn comment_lines_skipped() {
         let content = r#"
@@ -100,13 +100,13 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert_eq!(deps[0].dep_name, "Microsoft.Network/virtualNetworks");
     }
 
-    // Ported: "should not extract a commented out resource" — bicep/extract.spec.ts line 37
+    // Ported: "should not extract a commented out resource" — lib/modules/manager/bicep/extract.spec.ts line 37
     #[test]
     fn no_resources_returns_empty() {
         assert!(extract("param location string = 'eastus'").is_empty());
     }
 
-    // Ported: "should extract a normal resource" — bicep/extract.spec.ts line 5
+    // Ported: "should extract a normal resource" — lib/modules/manager/bicep/extract.spec.ts line 5
     #[test]
     fn preview_version_captured() {
         let content =
@@ -116,7 +116,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert_eq!(deps[0].current_value, "2023-05-01-preview");
     }
 
-    // Ported: "should extract a conditional resource" — bicep/extract.spec.ts line 58
+    // Ported: "should extract a conditional resource" — lib/modules/manager/bicep/extract.spec.ts line 58
     #[test]
     fn extracts_conditional_resource() {
         let content = "resource s 'Microsoft.Storage/storageAccounts@2022-09-01' = if(0 == 1) {}";
@@ -126,7 +126,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert_eq!(deps[0].current_value, "2022-09-01");
     }
 
-    // Ported: "should extract a existing resource" — bicep/extract.spec.ts line 90
+    // Ported: "should extract a existing resource" — lib/modules/manager/bicep/extract.spec.ts line 90
     #[test]
     fn extracts_existing_resource() {
         let content = "resource s 'Microsoft.Storage/storageAccounts@2022-09-01' existing = {}";
@@ -135,7 +135,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert_eq!(deps[0].current_value, "2022-09-01");
     }
 
-    // Ported: "should extract a loop resource" — bicep/extract.spec.ts line 149
+    // Ported: "should extract a loop resource" — lib/modules/manager/bicep/extract.spec.ts line 149
     #[test]
     fn extracts_loop_resource() {
         let content =
@@ -145,7 +145,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert_eq!(deps[0].current_value, "2022-09-01");
     }
 
-    // Ported: "should extract a conditional loop resource" — bicep/extract.spec.ts line 117
+    // Ported: "should extract a conditional loop resource" — lib/modules/manager/bicep/extract.spec.ts line 117
     #[test]
     fn extracts_conditional_loop_resource() {
         // `[for x in [...]: if(...) {}]` should still expose the resource on
@@ -157,7 +157,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert_eq!(deps[0].current_value, "2022-09-01");
     }
 
-    // Ported: "should not extract a nested unversioned resource" — bicep/extract.spec.ts line 181
+    // Ported: "should not extract a nested unversioned resource" — lib/modules/manager/bicep/extract.spec.ts line 181
     #[test]
     fn nested_unversioned_resource_skipped() {
         // 'blobServices' has no dot → doesn't match depName pattern
@@ -165,7 +165,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should not extract a nested versioned resource" — bicep/extract.spec.ts line 217
+    // Ported: "should not extract a nested versioned resource" — lib/modules/manager/bicep/extract.spec.ts line 217
     #[test]
     fn nested_versioned_resource_skipped() {
         // 'blobServices@2022-09-01' has no dot → doesn't match depName pattern
@@ -173,7 +173,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {}
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should extract a sub resource" — bicep/extract.spec.ts line 253
+    // Ported: "should extract a sub resource" — lib/modules/manager/bicep/extract.spec.ts line 253
     #[test]
     fn extracts_sub_resource_with_multiple_slashes() {
         let content = "resource s 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {}";

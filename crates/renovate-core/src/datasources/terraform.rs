@@ -493,7 +493,7 @@ mod terraform_module_utils_tests {
             .collect()
     }
 
-    // Ported: "returns URL with relative SD for modules" — terraform-module/utils.spec.ts line 7
+    // Ported: "returns URL with relative SD for modules" — lib/modules/datasource/terraform-module/utils.spec.ts line 7
     #[test]
     fn create_sd_backend_url_relative_modules() {
         let result = create_sd_backend_url(
@@ -508,7 +508,7 @@ mod terraform_module_utils_tests {
         );
     }
 
-    // Ported: "returns URL with relative SD for providers" — terraform-module/utils.spec.ts line 21
+    // Ported: "returns URL with relative SD for providers" — lib/modules/datasource/terraform-module/utils.spec.ts line 21
     #[test]
     fn create_sd_backend_url_relative_providers() {
         let result = create_sd_backend_url(
@@ -523,7 +523,7 @@ mod terraform_module_utils_tests {
         );
     }
 
-    // Ported: "returns URL with absolute SD for modules" — terraform-module/utils.spec.ts line 35
+    // Ported: "returns URL with absolute SD for modules" — lib/modules/datasource/terraform-module/utils.spec.ts line 35
     #[test]
     fn create_sd_backend_url_absolute_modules() {
         let result = create_sd_backend_url(
@@ -538,7 +538,7 @@ mod terraform_module_utils_tests {
         );
     }
 
-    // Ported: "returns URL with absolute SD for providers and missing trailing slash" — terraform-module/utils.spec.ts line 49
+    // Ported: "returns URL with absolute SD for providers and missing trailing slash" — lib/modules/datasource/terraform-module/utils.spec.ts line 49
     #[test]
     fn create_sd_backend_url_absolute_no_trailing_slash() {
         let result = create_sd_backend_url(
@@ -553,7 +553,7 @@ mod terraform_module_utils_tests {
         );
     }
 
-    // Ported: "returns URL with with empty SD" — terraform-module/utils.spec.ts line 63
+    // Ported: "returns URL with with empty SD" — lib/modules/datasource/terraform-module/utils.spec.ts line 63
     #[test]
     fn create_sd_backend_url_empty_sd() {
         let result = create_sd_backend_url(
@@ -565,7 +565,7 @@ mod terraform_module_utils_tests {
         assert_eq!(result, "https://registry.example.com/hashicorp/azure");
     }
 
-    // Ported: "returns URL with with missing SD" — terraform-module/utils.spec.ts line 75
+    // Ported: "returns URL with with missing SD" — lib/modules/datasource/terraform-module/utils.spec.ts line 75
     #[test]
     fn create_sd_backend_url_missing_sd() {
         let result = create_sd_backend_url(
@@ -577,7 +577,7 @@ mod terraform_module_utils_tests {
         assert_eq!(result, "https://registry.example.com/hashicorp/azure");
     }
 
-    // Ported: "uses the configured registry URL for standard package names" — terraform-module/utils.spec.ts line 87
+    // Ported: "uses the configured registry URL for standard package names" — lib/modules/datasource/terraform-module/utils.spec.ts line 87
     #[test]
     fn get_registry_repository_standard() {
         let (registry, repo) = get_registry_repository(
@@ -588,7 +588,7 @@ mod terraform_module_utils_tests {
         assert_eq!(repo, "hashicorp/consul/aws");
     }
 
-    // Ported: "extracts the registry from packageName when it is embedded" — terraform-module/utils.spec.ts line 99
+    // Ported: "extracts the registry from packageName when it is embedded" — lib/modules/datasource/terraform-module/utils.spec.ts line 99
     #[test]
     fn get_registry_repository_embedded() {
         let (registry, repo) =
@@ -597,7 +597,7 @@ mod terraform_module_utils_tests {
         assert_eq!(repo, "hashicorp/consul/aws");
     }
 
-    // Ported: "normalizes an embedded registry without a scheme" — terraform-module/utils.spec.ts line 111
+    // Ported: "normalizes an embedded registry without a scheme" — lib/modules/datasource/terraform-module/utils.spec.ts line 111
     #[test]
     fn get_registry_repository_no_scheme() {
         let (registry, repo) =

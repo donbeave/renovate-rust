@@ -165,7 +165,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/puppet-forge/__fixtures__/puppetforge-no-releases.json"
     );
 
-    // Ported: "should use default forge if no other provided" — datasource/puppet-forge/index.spec.ts line 12
+    // Ported: "should use default forge if no other provided" — lib/modules/datasource/puppet-forge/index.spec.ts line 12
     #[tokio::test]
     async fn uses_default_forge() {
         let server = MockServer::start().await;
@@ -188,7 +188,7 @@ mod tests {
         assert_eq!(result.releases[3].version, "7.0.0");
     }
 
-    // Ported: "parses real data" — datasource/puppet-forge/index.spec.ts line 34
+    // Ported: "parses real data" — lib/modules/datasource/puppet-forge/index.spec.ts line 34
     #[tokio::test]
     async fn parses_real_data() {
         let server = MockServer::start().await;
@@ -232,7 +232,7 @@ mod tests {
         assert!(result.deprecation_message.is_none());
     }
 
-    // Ported: "has a deprecated for reason" — datasource/puppet-forge/index.spec.ts line 79
+    // Ported: "has a deprecated for reason" — lib/modules/datasource/puppet-forge/index.spec.ts line 79
     #[tokio::test]
     async fn has_deprecated_for_reason() {
         let server = MockServer::start().await;
@@ -257,7 +257,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "7.0.0");
     }
 
-    // Ported: "should return null if lookup fails 400" — datasource/puppet-forge/index.spec.ts line 107
+    // Ported: "should return null if lookup fails 400" — lib/modules/datasource/puppet-forge/index.spec.ts line 107
     #[tokio::test]
     async fn returns_null_for_400() {
         let server = MockServer::start().await;
@@ -275,7 +275,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return null if lookup fails" — datasource/puppet-forge/index.spec.ts line 123
+    // Ported: "should return null if lookup fails" — lib/modules/datasource/puppet-forge/index.spec.ts line 123
     #[tokio::test]
     async fn returns_null_for_404() {
         let server = MockServer::start().await;
@@ -293,7 +293,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should fetch package info from custom registry" — datasource/puppet-forge/index.spec.ts line 137
+    // Ported: "should fetch package info from custom registry" — lib/modules/datasource/puppet-forge/index.spec.ts line 137
     #[tokio::test]
     async fn fetches_from_custom_registry() {
         let server = MockServer::start().await;
@@ -323,7 +323,7 @@ mod tests {
         );
     }
 
-    // Ported: "load all possible null values" — datasource/puppet-forge/index.spec.ts line 182
+    // Ported: "load all possible null values" — lib/modules/datasource/puppet-forge/index.spec.ts line 182
     #[tokio::test]
     async fn loads_null_values() {
         let server = MockServer::start().await;
@@ -349,7 +349,7 @@ mod tests {
         assert!(result.deprecation_message.is_none());
     }
 
-    // Ported: "no releases available -> return null" — datasource/puppet-forge/index.spec.ts line 208
+    // Ported: "no releases available -> return null" — lib/modules/datasource/puppet-forge/index.spec.ts line 208
     #[tokio::test]
     async fn returns_null_for_no_releases() {
         let server = MockServer::start().await;

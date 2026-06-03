@@ -26,7 +26,7 @@ pub fn is_greater_than(_a: &str, _b: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/git/index.spec.ts line 4
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/git/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_git_spec() {
         let cases = [
@@ -47,7 +47,7 @@ mod tests {
         }
     }
 
-    // Ported: "isCompatible(\"$version\") === $expected" — versioning/git/index.spec.ts line 20
+    // Ported: "isCompatible(\"$version\") === $expected" — lib/modules/versioning/git/index.spec.ts line 20
     #[test]
     fn is_compatible_matches_renovate_git_spec() {
         let cases = [("", "", false), ("1234567890aBcDeF", "", true)];
@@ -61,7 +61,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/git/index.spec.ts line 32
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — lib/modules/versioning/git/index.spec.ts line 32
     #[test]
     fn is_greater_than_matches_renovate_git_spec() {
         let cases = [

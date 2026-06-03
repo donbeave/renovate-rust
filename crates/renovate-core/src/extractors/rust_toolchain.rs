@@ -95,7 +95,7 @@ mod tests {
 
     // ── schema.spec.ts tests ──────────────────────────────────────────────────
 
-    // Ported: "parses valid TOML with channel" — manager/rust-toolchain/schema.spec.ts line 6
+    // Ported: "parses valid TOML with channel" — lib/modules/manager/rust-toolchain/schema.spec.ts line 6
     #[test]
     fn schema_parses_valid_toml_with_channel() {
         assert_eq!(
@@ -104,44 +104,44 @@ mod tests {
         );
     }
 
-    // Ported: "parses TOML with additional fields" — manager/rust-toolchain/schema.spec.ts line 21
+    // Ported: "parses TOML with additional fields" — lib/modules/manager/rust-toolchain/schema.spec.ts line 21
     #[test]
     fn schema_parses_toml_with_additional_fields() {
         let toml = "[toolchain]\nchannel = \"1.89.1\"\ncomponents = [\"rustfmt\", \"clippy\"]\n";
         assert_eq!(parse_toml_channel(toml), Some("1.89.1".into()));
     }
 
-    // Ported: "throws error for invalid TOML" — manager/rust-toolchain/schema.spec.ts line 38
+    // Ported: "throws error for invalid TOML" — lib/modules/manager/rust-toolchain/schema.spec.ts line 38
     #[test]
     fn schema_rejects_invalid_toml() {
         assert!(parse_toml_channel("this is not valid toml [").is_none());
     }
 
-    // Ported: "throws error for missing toolchain section" — manager/rust-toolchain/schema.spec.ts line 44
+    // Ported: "throws error for missing toolchain section" — lib/modules/manager/rust-toolchain/schema.spec.ts line 44
     #[test]
     fn schema_rejects_missing_toolchain_section() {
         assert!(parse_toml_channel("[other]\nchannel = \"1.89.1\"\n").is_none());
     }
 
-    // Ported: "throws error for missing channel field" — manager/rust-toolchain/schema.spec.ts line 53
+    // Ported: "throws error for missing channel field" — lib/modules/manager/rust-toolchain/schema.spec.ts line 53
     #[test]
     fn schema_rejects_missing_channel_field() {
         assert!(parse_toml_channel("[toolchain]\ncomponents = [\"rustfmt\"]\n").is_none());
     }
 
-    // Ported: "throws error for non-string channel" — manager/rust-toolchain/schema.spec.ts line 62
+    // Ported: "throws error for non-string channel" — lib/modules/manager/rust-toolchain/schema.spec.ts line 62
     #[test]
     fn schema_rejects_non_string_channel() {
         assert!(parse_toml_channel("[toolchain]\nchannel = 123\n").is_none());
     }
 
-    // Ported: "throws error for empty channel" — manager/rust-toolchain/schema.spec.ts line 71
+    // Ported: "throws error for empty channel" — lib/modules/manager/rust-toolchain/schema.spec.ts line 71
     #[test]
     fn schema_rejects_empty_channel() {
         assert!(parse_toml_channel("[toolchain]\nchannel = \"\"\n").is_none());
     }
 
-    // Ported: "parses nightly channel" — manager/rust-toolchain/schema.spec.ts line 80
+    // Ported: "parses nightly channel" — lib/modules/manager/rust-toolchain/schema.spec.ts line 80
     #[test]
     fn schema_parses_nightly_channel() {
         assert_eq!(
@@ -150,7 +150,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses stable keyword" — manager/rust-toolchain/schema.spec.ts line 95
+    // Ported: "parses stable keyword" — lib/modules/manager/rust-toolchain/schema.spec.ts line 95
     #[test]
     fn schema_parses_stable_keyword() {
         assert_eq!(
@@ -161,7 +161,7 @@ mod tests {
 
     // ── extract.spec.ts tests ─────────────────────────────────────────────────
 
-    // Ported: "extracts major.minor.patch versions" — manager/rust-toolchain/extract.spec.ts line 7
+    // Ported: "extracts major.minor.patch versions" — lib/modules/manager/rust-toolchain/extract.spec.ts line 7
     #[test]
     fn extract_major_minor_patch_version() {
         assert_eq!(
@@ -170,7 +170,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts major.minor ranges" — manager/rust-toolchain/extract.spec.ts line 27
+    // Ported: "extracts major.minor ranges" — lib/modules/manager/rust-toolchain/extract.spec.ts line 27
     #[test]
     fn extract_major_minor_range() {
         assert_eq!(
@@ -179,7 +179,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts beta channel" — manager/rust-toolchain/extract.spec.ts line 47
+    // Ported: "extracts beta channel" — lib/modules/manager/rust-toolchain/extract.spec.ts line 47
     #[test]
     fn extract_beta_channel() {
         assert_eq!(
@@ -188,7 +188,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts nightly channel" — manager/rust-toolchain/extract.spec.ts line 67
+    // Ported: "extracts nightly channel" — lib/modules/manager/rust-toolchain/extract.spec.ts line 67
     #[test]
     fn extract_nightly_channel() {
         assert_eq!(
@@ -200,7 +200,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts dated nightly channel" — manager/rust-toolchain/extract.spec.ts line 87
+    // Ported: "extracts dated nightly channel" — lib/modules/manager/rust-toolchain/extract.spec.ts line 87
     #[test]
     fn extract_dated_nightly_channel() {
         assert_eq!(
@@ -212,7 +212,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for invalid TOML" — manager/rust-toolchain/extract.spec.ts line 107
+    // Ported: "returns null for invalid TOML" — lib/modules/manager/rust-toolchain/extract.spec.ts line 107
     #[test]
     fn extract_returns_none_for_invalid_toml() {
         assert_eq!(
@@ -221,7 +221,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when [toolchain] section is absent" — manager/rust-toolchain/extract.spec.ts line 115
+    // Ported: "returns null when [toolchain] section is absent" — lib/modules/manager/rust-toolchain/extract.spec.ts line 115
     #[test]
     fn extract_returns_none_when_no_toolchain_section() {
         assert_eq!(
@@ -230,7 +230,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null when channel is absent" — manager/rust-toolchain/extract.spec.ts line 123
+    // Ported: "returns null when channel is absent" — lib/modules/manager/rust-toolchain/extract.spec.ts line 123
     #[test]
     fn extract_returns_none_when_channel_absent() {
         assert_eq!(
@@ -242,7 +242,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for unparseable channel value" — manager/rust-toolchain/extract.spec.ts line 134
+    // Ported: "returns null for unparseable channel value" — lib/modules/manager/rust-toolchain/extract.spec.ts line 134
     #[test]
     fn extract_returns_none_for_invalid_channel() {
         assert_eq!(
@@ -254,33 +254,33 @@ mod tests {
         );
     }
 
-    // Ported: "can handle additional fields" — manager/rust-toolchain/extract.spec.ts line 145
+    // Ported: "can handle additional fields" — lib/modules/manager/rust-toolchain/extract.spec.ts line 145
     #[test]
     fn extract_handles_additional_fields() {
         let toml = "[toolchain]\nchannel = \"1.89.1\"\ncomponents = [\"rustfmt\", \"clippy\"]\n";
         assert_eq!(extract(toml, "rust-toolchain.toml"), dep("1.89.1"));
     }
 
-    // Ported: "can read from legacy filename" — manager/rust-toolchain/extract.spec.ts line 167
+    // Ported: "can read from legacy filename" — lib/modules/manager/rust-toolchain/extract.spec.ts line 167
     #[test]
     fn extract_reads_from_legacy_filename() {
         let toml = "[toolchain]\nchannel = \"1.89.1\"\n";
         assert_eq!(extract(toml, "rust-toolchain"), dep("1.89.1"));
     }
 
-    // Ported: "returns null for empty legacy file" — manager/rust-toolchain/extract.spec.ts line 187
+    // Ported: "returns null for empty legacy file" — lib/modules/manager/rust-toolchain/extract.spec.ts line 187
     #[test]
     fn extract_returns_none_for_empty_legacy_file() {
         assert_eq!(extract("", "rust-toolchain"), None);
     }
 
-    // Ported: "extracts from legacy format" — manager/rust-toolchain/extract.spec.ts line 192
+    // Ported: "extracts from legacy format" — lib/modules/manager/rust-toolchain/extract.spec.ts line 192
     #[test]
     fn extract_from_legacy_format() {
         assert_eq!(extract("1.89.1\n", "rust-toolchain"), dep("1.89.1"));
     }
 
-    // Ported: "returns null for multiline legacy files" — manager/rust-toolchain/extract.spec.ts line 206
+    // Ported: "returns null for multiline legacy files" — lib/modules/manager/rust-toolchain/extract.spec.ts line 206
     #[test]
     fn extract_returns_none_for_multiline_legacy() {
         assert_eq!(

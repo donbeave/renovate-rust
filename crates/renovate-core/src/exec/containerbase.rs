@@ -288,7 +288,7 @@ pub async fn generate_install_commands(
 mod tests {
     use super::*;
 
-    // Ported: "returns config for a known tool" — util/exec/containerbase.spec.ts line 51
+    // Ported: "returns config for a known tool" — lib/util/exec/containerbase.spec.ts line 51
     #[test]
     fn get_tool_config_node() {
         let config = get_tool_config("node").unwrap();
@@ -296,13 +296,13 @@ mod tests {
         assert_eq!(config.package_name, "containerbase/node-prebuild");
     }
 
-    // Ported: "returns undefined for an unknown tool" — util/exec/containerbase.spec.ts line 60
+    // Ported: "returns undefined for an unknown tool" — lib/util/exec/containerbase.spec.ts line 60
     #[test]
     fn get_tool_config_unknown() {
         assert!(get_tool_config("unknown-tool").is_none());
     }
 
-    // Ported: "returns true if supported tools" — util/exec/containerbase.spec.ts line 42
+    // Ported: "returns true if supported tools" — lib/util/exec/containerbase.spec.ts line 42
     #[test]
     fn supports_dynamic_install_known() {
         assert!(supports_dynamic_install("node"));
@@ -311,13 +311,13 @@ mod tests {
         assert!(supports_dynamic_install("rust"));
     }
 
-    // Ported: "returns false if any unsupported tools" — util/exec/containerbase.spec.ts line 31
+    // Ported: "returns false if any unsupported tools" — lib/util/exec/containerbase.spec.ts line 31
     #[test]
     fn supports_dynamic_install_unknown() {
         assert!(!supports_dynamic_install("foobar"));
     }
 
-    // Ported: "returns false if binarySource is not install" — util/exec/containerbase.spec.ts line 22
+    // Ported: "returns false if binarySource is not install" — lib/util/exec/containerbase.spec.ts line 22
     #[test]
     fn is_dynamic_install_requires_install_source() {
         let tc = vec![ToolConstraint {
@@ -328,7 +328,7 @@ mod tests {
         assert!(!is_dynamic_install(&BinarySource::Docker, &tc));
     }
 
-    // Ported: "returns false if not containerbase" — util/exec/containerbase.spec.ts line 26
+    // Ported: "returns false if not containerbase" — lib/util/exec/containerbase.spec.ts line 26
     #[test]
     fn is_dynamic_install_requires_containerbase_env() {
         let tc = vec![ToolConstraint {
@@ -341,7 +341,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns false if any unsupported tools" — util/exec/containerbase.spec.ts line 31
+    // Ported: "returns false if any unsupported tools" — lib/util/exec/containerbase.spec.ts line 31
     #[test]
     fn is_dynamic_install_false_if_any_unsupported() {
         let tc = vec![
@@ -357,7 +357,7 @@ mod tests {
         assert!(!is_dynamic_install(&BinarySource::Install, &tc));
     }
 
-    // Ported: "returns from config" — util/exec/containerbase.spec.ts line 67
+    // Ported: "returns from config" — lib/util/exec/containerbase.spec.ts line 67
     #[tokio::test]
     async fn resolve_constraint_exact() {
         let tc = ToolConstraint {
@@ -368,7 +368,7 @@ mod tests {
         assert_eq!(version, "18.0.0");
     }
 
-    // Ported: "returns from config" — util/exec/containerbase.spec.ts line 67
+    // Ported: "returns from config" — lib/util/exec/containerbase.spec.ts line 67
     #[tokio::test]
     async fn resolve_constraint_range() {
         let tc = ToolConstraint {
@@ -379,7 +379,7 @@ mod tests {
         assert_eq!(version, ">=16");
     }
 
-    // Ported: "returns from config" — util/exec/containerbase.spec.ts line 67
+    // Ported: "returns from config" — lib/util/exec/containerbase.spec.ts line 67
     #[tokio::test]
     async fn resolve_constraint_none() {
         let tc = ToolConstraint {
@@ -390,7 +390,7 @@ mod tests {
         assert_eq!(version, "latest");
     }
 
-    // Ported: "removes pep440 ==" — util/exec/containerbase.spec.ts line 184
+    // Ported: "removes pep440 ==" — lib/util/exec/containerbase.spec.ts line 184
     #[tokio::test]
     async fn resolve_constraint_removes_pep440_eq() {
         let tc = ToolConstraint {
@@ -401,7 +401,7 @@ mod tests {
         assert_eq!(version, "2020.8.13");
     }
 
-    // Ported: "returns install commands" — util/exec/containerbase.spec.ts line 269
+    // Ported: "returns install commands" — lib/util/exec/containerbase.spec.ts line 269
     #[tokio::test]
     async fn generate_install_commands_returns_install_commands() {
         let tc = vec![ToolConstraint {
@@ -428,7 +428,7 @@ mod tests {
         assert!(cmds.is_empty());
     }
 
-    // Ported: "returns false if not containerbase" — util/exec/containerbase.spec.ts line 26
+    // Ported: "returns false if not containerbase" — lib/util/exec/containerbase.spec.ts line 26
     #[tokio::test]
     async fn generate_install_commands_empty_when_not_containerbase() {
         let tc = vec![ToolConstraint {
@@ -442,7 +442,7 @@ mod tests {
         assert!(cmds.is_empty());
     }
 
-    // Ported: "returns false if any unsupported tools" — util/exec/containerbase.spec.ts line 31
+    // Ported: "returns false if any unsupported tools" — lib/util/exec/containerbase.spec.ts line 31
     #[tokio::test]
     async fn generate_install_commands_empty_when_unsupported_tools() {
         let tc = vec![ToolConstraint {
@@ -455,7 +455,7 @@ mod tests {
         assert!(cmds.is_empty());
     }
 
-    // Ported: "returns config for a known tool" — util/exec/containerbase.spec.ts line 51
+    // Ported: "returns config for a known tool" — lib/util/exec/containerbase.spec.ts line 51
     #[test]
     fn get_tool_config_rust() {
         let config = get_tool_config("rust").unwrap();
@@ -464,7 +464,7 @@ mod tests {
         assert_eq!(config.versioning, "semver");
     }
 
-    // Ported: "returns config for a known tool" — util/exec/containerbase.spec.ts line 51
+    // Ported: "returns config for a known tool" — lib/util/exec/containerbase.spec.ts line 51
     #[test]
     fn get_tool_config_python() {
         let config = get_tool_config("python").unwrap();
@@ -472,7 +472,7 @@ mod tests {
         assert_eq!(config.package_name, "containerbase/python-prebuild");
     }
 
-    // Ported: "returns from config" — util/exec/containerbase.spec.ts line 67
+    // Ported: "returns from config" — lib/util/exec/containerbase.spec.ts line 67
     #[tokio::test]
     async fn resolve_constraint_no_constraint_returns_latest() {
         let tc = ToolConstraint {
@@ -483,7 +483,7 @@ mod tests {
         assert_eq!(version, "latest");
     }
 
-    // Ported: "returns from config" — util/exec/containerbase.spec.ts line 67
+    // Ported: "returns from config" — lib/util/exec/containerbase.spec.ts line 67
     #[tokio::test]
     async fn resolve_constraint_with_equals_prefix() {
         let tc = ToolConstraint {
@@ -494,25 +494,25 @@ mod tests {
         assert_eq!(version, "16.0.0");
     }
 
-    // Ported: "returns true if supported tools" — util/exec/containerbase.spec.ts line 42
+    // Ported: "returns true if supported tools" — lib/util/exec/containerbase.spec.ts line 42
     #[test]
     fn supports_dynamic_install_npm() {
         assert!(supports_dynamic_install("npm"));
     }
 
-    // Ported: "returns true if supported tools" — util/exec/containerbase.spec.ts line 42
+    // Ported: "returns true if supported tools" — lib/util/exec/containerbase.spec.ts line 42
     #[test]
     fn supports_dynamic_install_pnpm() {
         assert!(supports_dynamic_install("pnpm"));
     }
 
-    // Ported: "returns true if supported tools" — util/exec/containerbase.spec.ts line 42
+    // Ported: "returns true if supported tools" — lib/util/exec/containerbase.spec.ts line 42
     #[test]
     fn supports_dynamic_install_yarn() {
         assert!(supports_dynamic_install("yarn"));
     }
 
-    // Ported: "returns true if supported tools" — util/exec/containerbase.spec.ts line 42
+    // Ported: "returns true if supported tools" — lib/util/exec/containerbase.spec.ts line 42
     #[test]
     fn supports_dynamic_install_bun() {
         assert!(supports_dynamic_install("bun"));

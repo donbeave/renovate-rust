@@ -117,7 +117,7 @@ pub fn validate_decrypted_value(decrypted_obj_str: &str, repository: &str) -> Op
 mod tests {
     use super::*;
 
-    // Ported: "equals("$str", "$repo") === $expected" (platforms non azure) — config/decrypt.spec.ts line 68
+    // Ported: "equals("$str", "$repo") === $expected" (platforms non azure) — lib/config/decrypt.spec.ts line 68
     #[test]
     fn validate_decrypted_value_platforms_non_azure() {
         let cases: &[(&str, &str, Option<&str>)] = &[
@@ -229,7 +229,7 @@ mod tests {
     }
 }
 
-// Ported: "equals("$str", "$repo") === $expected" (azure with dev.azure.com) — config/decrypt.spec.ts line 93
+// Ported: "equals("$str", "$repo") === $expected" (azure with dev.azure.com) — lib/config/decrypt.spec.ts line 93
 #[test]
 fn validate_decrypted_value_azure_dev() {
     let endpoint = "https://dev.azure.com/az123";
@@ -298,7 +298,7 @@ fn validate_decrypted_value_azure_dev() {
     }
 }
 
-// Ported: "equals("$str", "$repo") === $expected" (azure with tfs self-hosted) — config/decrypt.spec.ts line 129
+// Ported: "equals("$str", "$repo") === $expected" (azure with tfs self-hosted) — lib/config/decrypt.spec.ts line 129
 #[test]
 fn validate_decrypted_value_azure_tfs() {
     let endpoint = "http://your-server-name:8080/tfs/az123";
@@ -335,7 +335,7 @@ fn validate_decrypted_value_azure_tfs() {
     }
 }
 
-// Ported: "endpoint URL invalid" — config/decrypt.spec.ts line 164
+// Ported: "endpoint URL invalid" — lib/config/decrypt.spec.ts line 164
 #[test]
 fn validate_decrypted_value_azure_invalid_endpoint() {
     let endpoint = "ht tps://dev.az ure.com/az123"; // invalid URL
@@ -375,7 +375,7 @@ fn validate_decrypted_value_azure_invalid_endpoint() {
     );
 }
 
-// Ported: "endpoint URL without collection" — config/decrypt.spec.ts line 196
+// Ported: "endpoint URL without collection" — lib/config/decrypt.spec.ts line 196
 #[test]
 fn validate_decrypted_value_azure_no_collection() {
     let endpoint = "https://dev.azure.com/";
@@ -415,19 +415,19 @@ fn validate_decrypted_value_azure_no_collection() {
     );
 }
 
-// Ported: "no pathname and url ends with slash" — config/decrypt.spec.ts line 235
+// Ported: "no pathname and url ends with slash" — lib/config/decrypt.spec.ts line 235
 #[test]
 fn get_azure_collection_no_pathname_slash() {
     assert_eq!(get_azure_collection("https://dev.azure.com/"), None);
 }
 
-// Ported: "no pathname and no slash at end of URL" — config/decrypt.spec.ts line 243
+// Ported: "no pathname and no slash at end of URL" — lib/config/decrypt.spec.ts line 243
 #[test]
 fn get_azure_collection_no_pathname_no_slash() {
     assert_eq!(get_azure_collection("https://dev.azure.com"), None);
 }
 
-// Ported: "pathname no slash at end" — config/decrypt.spec.ts line 251
+// Ported: "pathname no slash at end" — lib/config/decrypt.spec.ts line 251
 #[test]
 fn get_azure_collection_pathname_no_slash() {
     assert_eq!(
@@ -436,7 +436,7 @@ fn get_azure_collection_pathname_no_slash() {
     );
 }
 
-// Ported: "pathname with slash at end" — config/decrypt.spec.ts line 259
+// Ported: "pathname with slash at end" — lib/config/decrypt.spec.ts line 259
 #[test]
 fn get_azure_collection_pathname_with_slash() {
     assert_eq!(
@@ -445,7 +445,7 @@ fn get_azure_collection_pathname_with_slash() {
     );
 }
 
-// Ported: "pathname 2 levels no slash at end" — config/decrypt.spec.ts line 267
+// Ported: "pathname 2 levels no slash at end" — lib/config/decrypt.spec.ts line 267
 #[test]
 fn get_azure_collection_pathname_2_levels_no_slash() {
     assert_eq!(
@@ -454,7 +454,7 @@ fn get_azure_collection_pathname_2_levels_no_slash() {
     );
 }
 
-// Ported: "pathname 2 levels with slash at end" — config/decrypt.spec.ts line 275
+// Ported: "pathname 2 levels with slash at end" — lib/config/decrypt.spec.ts line 275
 #[test]
 fn get_azure_collection_pathname_2_levels_with_slash() {
     assert_eq!(

@@ -1046,7 +1046,7 @@ mod tests {
 mod renovate_compat_tests {
     use super::*;
 
-    // Ported: "matches("$version", "$range") === "$expected"" — cargo/index.spec.ts line 4
+    // Ported: "matches("$version", "$range") === "$expected"" — lib/modules/versioning/cargo/index.spec.ts line 4
     #[test]
     fn matches_cases() {
         let cases: &[(&str, &str, bool)] = &[
@@ -1073,7 +1073,7 @@ mod renovate_compat_tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 26
+    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — lib/modules/versioning/cargo/index.spec.ts line 26
     #[test]
     fn get_satisfying_version_cases() {
         let v1: Vec<&str> = vec!["4.2.1", "0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"];
@@ -1082,7 +1082,7 @@ mod renovate_compat_tests {
         assert_eq!(get_satisfying_version(&v2, "5.0, > 5.0.0"), Some("5.0.3"));
     }
 
-    // Ported: "isValid("$version") === $expected" — cargo/index.spec.ts line 37
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/cargo/index.spec.ts line 37
     #[test]
     fn is_valid_cases() {
         assert!(is_valid("1"));
@@ -1095,7 +1095,7 @@ mod renovate_compat_tests {
         assert!(is_valid("< 3.0, >= 1.0.0 <= 2.0.0, = 5.1.2"));
     }
 
-    // Ported: "isVersion("$version") === $expected" — cargo/index.spec.ts line 51
+    // Ported: "isVersion("$version") === $expected" — lib/modules/versioning/cargo/index.spec.ts line 51
     #[test]
     fn is_version_cases() {
         assert!(!is_version("1"));
@@ -1103,14 +1103,14 @@ mod renovate_compat_tests {
         assert!(is_version("1.2.3"));
     }
 
-    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — cargo/index.spec.ts line 60
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — lib/modules/versioning/cargo/index.spec.ts line 60
     #[test]
     fn is_less_than_range_cases() {
         assert!(is_less_than_range("0.9.0", ">= 1.0.0 <= 2.0.0"));
         assert!(!is_less_than_range("1.9.0", ">= 1.0.0 <= 2.0.0"));
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — cargo/index.spec.ts line 71
+    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — lib/modules/versioning/cargo/index.spec.ts line 71
     #[test]
     fn min_satisfying_version_cases() {
         let v1: Vec<&str> = vec!["0.4.0", "0.5.0", "4.2.0", "4.3.0", "5.0.0"];
@@ -1126,7 +1126,7 @@ mod renovate_compat_tests {
         assert_eq!(min_satisfying_version(&v2, "6.2.0, 3.*"), None);
     }
 
-    // Ported: "isSingleVersion("$version") === $expected" — cargo/index.spec.ts line 85
+    // Ported: "isSingleVersion("$version") === $expected" — lib/modules/versioning/cargo/index.spec.ts line 85
     #[test]
     fn is_single_version_cases() {
         assert!(!is_single_version("1.2.3"));
@@ -1141,13 +1141,13 @@ mod renovate_compat_tests {
         assert!(!is_single_version("1.2.*"));
     }
 
-    // Ported: "returns a pinned value" — cargo/index.spec.ts line 101
+    // Ported: "returns a pinned value" — lib/modules/versioning/cargo/index.spec.ts line 101
     #[test]
     fn get_pinned_value_case() {
         assert_eq!(get_pinned_value("1.2.3"), "=1.2.3");
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 105
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/cargo/index.spec.ts line 105
     #[test]
     fn get_new_value_cases() {
         let cases: &[(&str, RangeStrategy, &str, &str, Option<&str>)] = &[
@@ -1359,7 +1359,7 @@ mod renovate_compat_tests {
         }
     }
 
-    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — cargo/index.spec.ts line 163
+    // Ported: "isBreaking("$currentVersion", "$newVersion") === $expected" — lib/modules/versioning/cargo/index.spec.ts line 163
     #[test]
     fn is_breaking_cases() {
         let cases: &[(&str, &str, bool)] = &[
@@ -1387,7 +1387,7 @@ mod renovate_compat_tests {
     }
 
     // null currentValue case from spec
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — cargo/index.spec.ts line 105
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/cargo/index.spec.ts line 105
     #[test]
     fn get_new_value_null_returns_none() {
         assert_eq!(
@@ -1398,19 +1398,19 @@ mod renovate_compat_tests {
 
     // ── get_range_strategy ───────────────────────────────────────────────────
 
-    // Ported: "returns same if not auto" — modules/manager/cargo/range.spec.ts line 5
+    // Ported: "returns same if not auto" — lib/modules/manager/cargo/range.spec.ts line 5
     #[test]
     fn range_strategy_returns_same_if_not_auto() {
         assert_eq!(get_range_strategy("widen", None), "widen");
     }
 
-    // Ported: "returns widen if current value includes <" — modules/manager/cargo/range.spec.ts line 10
+    // Ported: "returns widen if current value includes <" — lib/modules/manager/cargo/range.spec.ts line 10
     #[test]
     fn range_strategy_returns_widen_if_current_value_has_lt() {
         assert_eq!(get_range_strategy("auto", Some("<1.0.0")), "widen");
     }
 
-    // Ported: "defaults to update-lockfile" — modules/manager/cargo/range.spec.ts line 18
+    // Ported: "defaults to update-lockfile" — lib/modules/manager/cargo/range.spec.ts line 18
     #[test]
     fn range_strategy_defaults_to_update_lockfile() {
         assert_eq!(get_range_strategy("auto", Some("1.0.0")), "update-lockfile");
@@ -1418,7 +1418,7 @@ mod renovate_compat_tests {
 
     // ── parseLockFile tests ──────────────────────────────────────────────────
 
-    // Ported: "parses v1 lockfile string into an object" — modules/manager/cargo/locked-version.spec.ts line 51
+    // Ported: "parses v1 lockfile string into an object" — lib/modules/manager/cargo/locked-version.spec.ts line 51
     #[test]
     fn parse_lock_file_v1() {
         let content = include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v1.lock");
@@ -1438,7 +1438,7 @@ mod renovate_compat_tests {
         );
     }
 
-    // Ported: "parses v2 lockfile string into an object" — modules/manager/cargo/locked-version.spec.ts line 70
+    // Ported: "parses v2 lockfile string into an object" — lib/modules/manager/cargo/locked-version.spec.ts line 70
     #[test]
     fn parse_lock_file_v2() {
         let content = include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v2.lock");
@@ -1455,7 +1455,7 @@ mod renovate_compat_tests {
         assert!(result.package[1].source.is_none());
     }
 
-    // Ported: "parses v3 lockfile string into an object" — modules/manager/cargo/locked-version.spec.ts line 88
+    // Ported: "parses v3 lockfile string into an object" — lib/modules/manager/cargo/locked-version.spec.ts line 88
     #[test]
     fn parse_lock_file_v3() {
         let content = include_str!("../../tests/fixtures/cargo/lockfile-parsing/Cargo.v3.lock");
@@ -1467,32 +1467,32 @@ mod renovate_compat_tests {
         assert_eq!(result.package[1].version, "7.0.1");
     }
 
-    // Ported: "can deal with invalid lockfiles" — modules/manager/cargo/locked-version.spec.ts line 106
+    // Ported: "can deal with invalid lockfiles" — lib/modules/manager/cargo/locked-version.spec.ts line 106
     #[test]
     fn parse_lock_file_invalid() {
         assert!(parse_lock_file("foo").is_none());
     }
 
-    // Ported: "returns null for missing lock file" — modules/manager/cargo/locked-version.spec.ts line 19
+    // Ported: "returns null for missing lock file" — lib/modules/manager/cargo/locked-version.spec.ts line 19
     #[test]
     fn extract_versions_missing_file_returns_none() {
         assert!(extract_lock_file_versions(None).is_none());
     }
 
-    // Ported: "returns null for invalid lock file" — modules/manager/cargo/locked-version.spec.ts line 23
+    // Ported: "returns null for invalid lock file" — lib/modules/manager/cargo/locked-version.spec.ts line 23
     #[test]
     fn extract_versions_invalid_content_returns_none() {
         assert!(extract_lock_file_content_versions("foo").is_none());
     }
 
-    // Ported: "returns empty map for lock file without packages" — modules/manager/cargo/locked-version.spec.ts line 28
+    // Ported: "returns empty map for lock file without packages" — lib/modules/manager/cargo/locked-version.spec.ts line 28
     #[test]
     fn extract_versions_no_packages_returns_empty() {
         let result = extract_lock_file_content_versions("[metadata]").unwrap();
         assert!(result.is_empty());
     }
 
-    // Ported: "returns a map of package versions" — modules/manager/cargo/locked-version.spec.ts line 33
+    // Ported: "returns a map of package versions" — lib/modules/manager/cargo/locked-version.spec.ts line 33
     #[test]
     fn extract_versions_returns_map_of_package_versions() {
         let content = include_str!("../../tests/fixtures/cargo/lockfile-update/Cargo.1.lock");
@@ -1511,7 +1511,7 @@ mod renovate_compat_tests {
         assert_eq!(syn.len(), 2);
     }
 
-    // Ported: "detects already updated" — modules/manager/cargo/update-locked.spec.ts line 9
+    // Ported: "detects already updated" — lib/modules/manager/cargo/update-locked.spec.ts line 9
     #[test]
     fn update_locked_detects_already_updated() {
         let lock_file_content =
@@ -1527,7 +1527,7 @@ mod renovate_compat_tests {
         );
     }
 
-    // Ported: "returns unsupported for empty lockfile" — modules/manager/cargo/update-locked.spec.ts line 21
+    // Ported: "returns unsupported for empty lockfile" — lib/modules/manager/cargo/update-locked.spec.ts line 21
     #[test]
     fn update_locked_unsupported_no_lock_file_content() {
         let config = UpdateLockedConfig {
@@ -1538,7 +1538,7 @@ mod renovate_compat_tests {
         assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported for empty depName" — modules/manager/cargo/update-locked.spec.ts line 32
+    // Ported: "returns unsupported for empty depName" — lib/modules/manager/cargo/update-locked.spec.ts line 32
     #[test]
     fn update_locked_unsupported_no_dep_name() {
         let lock_file_content =
@@ -1551,7 +1551,7 @@ mod renovate_compat_tests {
         assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
     }
 
-    // Ported: "returns unsupported" — modules/manager/cargo/update-locked.spec.ts line 44
+    // Ported: "returns unsupported" — lib/modules/manager/cargo/update-locked.spec.ts line 44
     #[test]
     fn update_locked_unsupported_version_not_in_lock() {
         let lock_file_content =
@@ -1564,7 +1564,7 @@ mod renovate_compat_tests {
         assert_eq!(update_locked_dependency(&config).as_str(), "unsupported");
     }
 
-    // Ported: "returns update-failed in case of errors" — modules/manager/cargo/update-locked.spec.ts line 56
+    // Ported: "returns update-failed in case of errors" — lib/modules/manager/cargo/update-locked.spec.ts line 56
     #[test]
     fn update_locked_update_failed_on_invalid_content() {
         let config = UpdateLockedConfig {
@@ -1579,7 +1579,7 @@ mod renovate_compat_tests {
         "[package]\nname = \"test\"\nversion = \"0.0.2\"\n"
     }
 
-    // Ported: "increments" — modules/manager/cargo/update.spec.ts line 12
+    // Ported: "increments" — lib/modules/manager/cargo/update.spec.ts line 12
     #[test]
     fn bump_package_version_increments_patch() {
         let content = cargo_toml_content();
@@ -1587,7 +1587,7 @@ mod renovate_compat_tests {
         assert_eq!(result.bumped_content, content.replace("0.0.2", "0.0.3"));
     }
 
-    // Ported: "no ops" — modules/manager/cargo/update.spec.ts line 22
+    // Ported: "no ops" — lib/modules/manager/cargo/update.spec.ts line 22
     #[test]
     fn bump_package_version_no_ops_when_current_value_mismatch() {
         let content = cargo_toml_content();
@@ -1595,7 +1595,7 @@ mod renovate_compat_tests {
         assert_eq!(result.bumped_content, content);
     }
 
-    // Ported: "updates" — modules/manager/cargo/update.spec.ts line 31
+    // Ported: "updates" — lib/modules/manager/cargo/update.spec.ts line 31
     #[test]
     fn bump_package_version_updates_minor() {
         let content = cargo_toml_content();
@@ -1604,7 +1604,7 @@ mod renovate_compat_tests {
         assert_eq!(result.bumped_content, expected);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/cargo/update.spec.ts line 41
+    // Ported: "returns content if bumping errors" — lib/modules/manager/cargo/update.spec.ts line 41
     #[test]
     fn bump_package_version_returns_content_on_invalid_bump_type() {
         let content = cargo_toml_content();
@@ -1612,7 +1612,7 @@ mod renovate_compat_tests {
         assert_eq!(result.bumped_content, content);
     }
 
-    // Ported: "does not bump version if version is not a semantic version" — modules/manager/cargo/update.spec.ts line 50
+    // Ported: "does not bump version if version is not a semantic version" — lib/modules/manager/cargo/update.spec.ts line 50
     #[test]
     fn bump_package_version_no_bump_if_not_semver() {
         let content = cargo_toml_content();

@@ -157,7 +157,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "returns tags from gitea.com" — gitea-tags/index.spec.ts line 9
+    // Ported: "returns tags from gitea.com" — lib/modules/datasource/gitea-tags/index.spec.ts line 9
     #[tokio::test]
     async fn returns_tags_from_gitea_com() {
         let server = MockServer::start().await;
@@ -203,7 +203,7 @@ mod tests {
         assert!(result.source_url.ends_with("/gitea/helm-chart"));
     }
 
-    // Ported: "returns tags from codeberg.org" — gitea-tags/index.spec.ts line 124
+    // Ported: "returns tags from codeberg.org" — lib/modules/datasource/gitea-tags/index.spec.ts line 124
     #[tokio::test]
     async fn returns_tags_from_codeberg_org() {
         let server = MockServer::start().await;
@@ -238,7 +238,7 @@ mod tests {
         assert!(result.source_url.ends_with("/forgejo-contrib/forgejo-helm"));
     }
 
-    // Ported: "returns commits from codeberg.org" — gitea-tags/index.spec.ts line 209
+    // Ported: "returns commits from codeberg.org" — lib/modules/datasource/gitea-tags/index.spec.ts line 209
     #[tokio::test]
     async fn returns_commits_from_codeberg_org() {
         let server = MockServer::start().await;
@@ -260,7 +260,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns commits from gitea.com" — gitea-tags/index.spec.ts line 256
+    // Ported: "returns commits from gitea.com" — lib/modules/datasource/gitea-tags/index.spec.ts line 256
     #[tokio::test]
     async fn returns_commits_from_gitea_com_empty() {
         let server = MockServer::start().await;
@@ -277,7 +277,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns tags commit hash from gitea.com" — gitea-tags/index.spec.ts line 272
+    // Ported: "returns tags commit hash from gitea.com" — lib/modules/datasource/gitea-tags/index.spec.ts line 272
     #[tokio::test]
     async fn returns_tags_commit_hash_from_gitea_com() {
         let server = MockServer::start().await;

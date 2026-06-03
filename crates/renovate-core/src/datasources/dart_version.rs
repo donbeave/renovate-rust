@@ -121,14 +121,14 @@ pub async fn fetch_releases(
 mod tests {
     use super::*;
 
-    // Ported: "returns null for empty 200 OK" — dart-version/index.spec.ts line 36
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/dart-version/index.spec.ts line 36
     #[test]
     fn empty_prefix_lists_yield_no_releases() {
         let result = version_from_prefix("channels/stable/release//", "stable");
         assert!(result.is_none());
     }
 
-    // Ported: "processes real data" — dart-version/index.spec.ts line 53
+    // Ported: "processes real data" — lib/modules/datasource/dart-version/index.spec.ts line 53
     #[test]
     fn extract_version_from_stable_prefix() {
         let v = version_from_prefix("channels/stable/release/2.17.5/", "stable");

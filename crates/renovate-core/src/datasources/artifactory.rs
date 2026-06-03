@@ -231,7 +231,7 @@ mod tests {
   <a href="1.0.3">1.0.3</a>  06-Feb-2021 09:54    9.0 KB
 </pre></body></html>"#;
 
-    // Ported: "parses real data (folders): with slash at the end" — datasource/artifactory/index.spec.ts line 26
+    // Ported: "parses real data (folders): with slash at the end" — lib/modules/datasource/artifactory/index.spec.ts line 26
     #[test]
     fn parses_real_data_folders_with_slash_at_the_end() {
         let releases = parse_releases(RELEASES_AS_FOLDERS);
@@ -245,7 +245,7 @@ mod tests {
         assert_eq!(releases[3].version, "1.0.3");
     }
 
-    // Ported: "parses real data (files): without slash at the end" — datasource/artifactory/index.spec.ts line 42
+    // Ported: "parses real data (files): without slash at the end" — lib/modules/datasource/artifactory/index.spec.ts line 42
     #[test]
     fn parses_real_data_files_without_slash_at_the_end() {
         let releases = parse_releases(RELEASES_AS_FILES);
@@ -258,7 +258,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses real data (merge strategy with 2 registries)" — datasource/artifactory/index.spec.ts line 58
+    // Ported: "parses real data (merge strategy with 2 registries)" — lib/modules/datasource/artifactory/index.spec.ts line 58
     #[tokio::test]
     async fn parses_real_data_merge_strategy_with_two_registries() {
         let server = MockServer::start().await;
@@ -293,14 +293,14 @@ mod tests {
         assert_eq!(result.releases[4].version, "1.3.0");
     }
 
-    // Ported: "returns null without registryUrl + warning" — datasource/artifactory/index.spec.ts line 80
+    // Ported: "returns null without registryUrl + warning" — lib/modules/datasource/artifactory/index.spec.ts line 80
     #[tokio::test]
     async fn returns_null_without_registry_url() {
         let http = HttpClient::new().unwrap();
         assert!(get_releases(&http, &[], "project").await.unwrap().is_none());
     }
 
-    // Ported: "returns null for empty 200 OK" — datasource/artifactory/index.spec.ts line 94
+    // Ported: "returns null for empty 200 OK" — lib/modules/datasource/artifactory/index.spec.ts line 94
     #[tokio::test]
     async fn returns_null_for_empty_200_ok() {
         let server = MockServer::start().await;
@@ -321,7 +321,7 @@ mod tests {
         );
     }
 
-    // Ported: "404 returns null" — datasource/artifactory/index.spec.ts line 108
+    // Ported: "404 returns null" — lib/modules/datasource/artifactory/index.spec.ts line 108
     #[tokio::test]
     async fn not_found_returns_null() {
         let server = MockServer::start().await;
@@ -340,7 +340,7 @@ mod tests {
         );
     }
 
-    // Ported: "throws for error diff than 404" — datasource/artifactory/index.spec.ts line 128
+    // Ported: "throws for error diff than 404" — lib/modules/datasource/artifactory/index.spec.ts line 128
     #[tokio::test]
     async fn non_404_http_error_returns_external_host_error() {
         let server = MockServer::start().await;
@@ -363,7 +363,7 @@ mod tests {
         ));
     }
 
-    // Ported: "throws no Http error" — datasource/artifactory/index.spec.ts line 139
+    // Ported: "throws no Http error" — lib/modules/datasource/artifactory/index.spec.ts line 139
     #[tokio::test]
     async fn request_error_returns_null() {
         let http = HttpClient::new().unwrap();
@@ -375,7 +375,7 @@ mod tests {
         );
     }
 
-    // Ported: "return releases from nginx directory listing" — datasource/custom/index.spec.ts line 738
+    // Ported: "return releases from nginx directory listing" — lib/modules/datasource/custom/index.spec.ts line 738
     #[test]
     fn parses_nginx_pre_directory_listing_links() {
         let html = r#"<html><body><pre>

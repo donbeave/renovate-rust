@@ -369,7 +369,7 @@ mod tests {
         serde_json::to_string(&values).unwrap()
     }
 
-    // Ported: "returns releases" — datasource/github-releases/index.spec.ts line 20
+    // Ported: "returns releases" — lib/modules/datasource/github-releases/index.spec.ts line 20
     #[tokio::test]
     async fn returns_releases() {
         let server = MockServer::start().await;
@@ -411,7 +411,7 @@ mod tests {
         assert_eq!(res.releases[2].is_stable, Some(false));
     }
 
-    // Ported: "should be independent of the current digest" — datasource/github-releases/index.spec.ts line 116
+    // Ported: "should be independent of the current digest" — lib/modules/datasource/github-releases/index.spec.ts line 116
     #[tokio::test]
     async fn digest_independent_of_current_digest() {
         let server = MockServer::start().await;
@@ -433,7 +433,7 @@ mod tests {
         assert_eq!(digest.as_deref(), Some("sha-of-v15"));
     }
 
-    // Ported: "should be independent of the current value" — datasource/github-releases/index.spec.ts line 128
+    // Ported: "should be independent of the current value" — lib/modules/datasource/github-releases/index.spec.ts line 128
     #[tokio::test]
     async fn digest_independent_of_current_value() {
         let server = MockServer::start().await;
@@ -455,7 +455,7 @@ mod tests {
         assert_eq!(digest.as_deref(), Some("sha-of-v15"));
     }
 
-    // Ported: "returns updated digest in new release" — datasource/github-releases/index.spec.ts line 136
+    // Ported: "returns updated digest in new release" — lib/modules/datasource/github-releases/index.spec.ts line 136
     #[tokio::test]
     async fn returns_updated_digest_in_new_release() {
         let server = MockServer::start().await;
@@ -477,7 +477,7 @@ mod tests {
         assert_eq!(digest.as_deref(), Some("sha-of-v15"));
     }
 
-    // Ported: "returns null if the new value/tag does not exist" — datasource/github-releases/index.spec.ts line 149
+    // Ported: "returns null if the new value/tag does not exist" — lib/modules/datasource/github-releases/index.spec.ts line 149
     #[tokio::test]
     async fn returns_null_for_unknown_tag() {
         let server = MockServer::start().await;

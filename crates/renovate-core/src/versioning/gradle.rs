@@ -738,7 +738,7 @@ mod tests {
         }
     }
 
-    // Ported: "compare("$a", "$b") === $expected" — versioning/gradle/index.spec.ts line 6
+    // Ported: "compare("$a", "$b") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 6
     #[test]
     fn gradle_compare_equal() {
         assert_eq!(cmp("1", "1"), 0);
@@ -766,7 +766,7 @@ mod tests {
         assert_eq!(cmp("___", "..."), 0);
     }
 
-    // Ported: "compare("$a", "$b") === $expected" — versioning/gradle/index.spec.ts line 6
+    // Ported: "compare("$a", "$b") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 6
     #[test]
     fn gradle_compare_less() {
         assert_eq!(cmp("1.1", "1.2"), -1);
@@ -797,7 +797,7 @@ mod tests {
         assert_eq!(cmp("384.vf35b_f26814ec", "400.v35420b_922dcb_"), -1);
     }
 
-    // Ported: "compare("$a", "$b") === $expected" — versioning/gradle/index.spec.ts line 6
+    // Ported: "compare("$a", "$b") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 6
     #[test]
     fn gradle_compare_greater() {
         assert_eq!(cmp("1.2", "1.1"), 1);
@@ -829,7 +829,7 @@ mod tests {
         assert_eq!(cmp("400.v35420b_922dcb_", "384.vf35b_f26814ec"), 1);
     }
 
-    // Ported: "parsePrefixRange("$rangeStr") is null" — versioning/gradle/index.spec.ts line 89
+    // Ported: "parsePrefixRange("$rangeStr") is null" — lib/modules/versioning/gradle/index.spec.ts line 89
     #[test]
     fn gradle_parse_prefix_range_null() {
         assert!(parse_prefix_range("").is_none());
@@ -838,14 +838,14 @@ mod tests {
         assert!(parse_prefix_range("1.2.++").is_none());
     }
 
-    // Ported: "parseMavenBasedRange("$rangeStr") is null" — versioning/gradle/index.spec.ts line 102
+    // Ported: "parseMavenBasedRange("$rangeStr") is null" — lib/modules/versioning/gradle/index.spec.ts line 102
     #[test]
     fn gradle_parse_maven_based_range_null() {
         assert!(parse_maven_based_range("").is_none());
         assert!(parse_maven_based_range("[2,1]").is_none()); // left > right
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/gradle/index.spec.ts line 127
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 127
     #[test]
     fn gradle_is_valid() {
         assert!(is_valid("1.2.3"));
@@ -871,7 +871,7 @@ mod tests {
         assert!(!is_valid("1--"));
     }
 
-    // Ported: "isVersion("$input") === $expected" — versioning/gradle/index.spec.ts line 140
+    // Ported: "isVersion("$input") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 140
     #[test]
     fn gradle_is_version() {
         assert!(is_version("1"));
@@ -898,7 +898,7 @@ mod tests {
         assert!(!is_version("1.2.3.4 s")); // space not in charset
     }
 
-    // Ported: "isStable("$input") === $expected" — versioning/gradle/index.spec.ts line 180
+    // Ported: "isStable("$input") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 180
     #[test]
     fn gradle_is_stable() {
         assert!(!is_stable(""));
@@ -931,7 +931,7 @@ mod tests {
         assert!(!is_stable("1.0-dev"));
     }
 
-    // Ported: ""$input" is represented as [$major, $minor, $patch]" — versioning/gradle/index.spec.ts line 216
+    // Ported: ""$input" is represented as [$major, $minor, $patch]" — lib/modules/versioning/gradle/index.spec.ts line 216
     #[test]
     fn gradle_major_minor_patch() {
         assert_eq!(get_major(""), None);
@@ -975,7 +975,7 @@ mod tests {
         assert_eq!(get_patch("1-rc42-1"), Some(0));
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/gradle/index.spec.ts line 239
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 239
     #[test]
     fn gradle_matches() {
         assert!(!matches_range("1", "[[]]"));
@@ -1001,13 +1001,13 @@ mod tests {
         assert!(!matches_range("1.2.3", "[1.2.4]"));
     }
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/gradle/index.spec.ts line 271
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 271
     #[test]
     fn gradle_is_greater_than() {
         assert!(is_greater_than("1.1", "1"));
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/gradle/index.spec.ts line 280
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 280
     #[test]
     fn gradle_min_satisfying_version() {
         assert_eq!(
@@ -1016,7 +1016,7 @@ mod tests {
         );
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/gradle/index.spec.ts line 292
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/gradle/index.spec.ts line 292
     #[test]
     fn gradle_get_satisfying_version() {
         assert_eq!(
@@ -1025,7 +1025,7 @@ mod tests {
         );
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/gradle/index.spec.ts line 304
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — lib/modules/versioning/gradle/index.spec.ts line 304
     #[test]
     fn gradle_get_new_value() {
         // Plain version → returns new version.

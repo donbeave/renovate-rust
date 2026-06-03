@@ -417,7 +417,7 @@ mod tests {
     }
 }
 
-// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 11
+// Ported: "parses valid input" — lib/modules/datasource/rubygems/schema.spec.ts line 11
 #[test]
 fn marshalled_version_info_parses_valid() {
     let input = serde_json::json!([
@@ -432,7 +432,7 @@ fn marshalled_version_info_parses_valid() {
     assert_eq!(releases[2].version, "3.0.0");
 }
 
-// Ported: "errors on empty input" — modules/datasource/rubygems/schema.spec.ts line 27
+// Ported: "errors on empty input" — lib/modules/datasource/rubygems/schema.spec.ts line 27
 #[test]
 fn marshalled_version_info_errors_on_empty() {
     let result = parse_marshalled_version_info(&serde_json::json!([]));
@@ -444,7 +444,7 @@ fn marshalled_version_info_errors_on_empty() {
     );
 }
 
-// Ported: "parses empty object into undefined fields" — modules/datasource/rubygems/schema.spec.ts line 35
+// Ported: "parses empty object into undefined fields" — lib/modules/datasource/rubygems/schema.spec.ts line 35
 #[test]
 fn gem_metadata_parses_empty_object() {
     let result = parse_gem_metadata(&serde_json::json!({}));
@@ -453,7 +453,7 @@ fn gem_metadata_parses_empty_object() {
     assert_eq!(result.source_url, None);
 }
 
-// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 43
+// Ported: "parses valid input" — lib/modules/datasource/rubygems/schema.spec.ts line 43
 #[test]
 fn gem_metadata_parses_valid_input() {
     let input = serde_json::json!({
@@ -467,7 +467,7 @@ fn gem_metadata_parses_valid_input() {
     assert_eq!(result.source_url.as_deref(), Some("https://example.com"));
 }
 
-// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 59
+// Ported: "parses valid input" — lib/modules/datasource/rubygems/schema.spec.ts line 59
 #[test]
 fn gem_versions_parses_valid_input() {
     let input = serde_json::json!([
@@ -496,7 +496,7 @@ fn gem_versions_parses_valid_input() {
     assert_eq!(c.rubygems.as_deref(), Some(&["3.2.0".to_owned()][..]));
 }
 
-// Ported: "parses valid input" — modules/datasource/rubygems/schema.spec.ts line 137
+// Ported: "parses valid input" — lib/modules/datasource/rubygems/schema.spec.ts line 137
 #[test]
 fn gem_info_parses_valid_input() {
     // codeBlock strips common indent; input matches:
@@ -509,7 +509,7 @@ fn gem_info_parses_valid_input() {
     assert_eq!(releases[2].version, "3.3.3");
 }
 
-// Ported: "errors on empty input" — modules/datasource/rubygems/schema.spec.ts line 154
+// Ported: "errors on empty input" — lib/modules/datasource/rubygems/schema.spec.ts line 154
 #[test]
 fn gem_info_errors_on_empty() {
     let result = parse_gem_info("");

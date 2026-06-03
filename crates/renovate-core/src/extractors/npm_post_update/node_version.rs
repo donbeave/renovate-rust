@@ -109,7 +109,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns from user constraints" — modules/manager/npm/post-update/node-version.spec.ts line 18
+    // Ported: "returns from user constraints" — lib/modules/manager/npm/post-update/node-version.spec.ts line 18
     #[test]
     fn returns_config_constraint() {
         assert_eq!(
@@ -118,7 +118,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns .nvmrc value" — modules/manager/npm/post-update/node-version.spec.ts line 41
+    // Ported: "returns .nvmrc value" — lib/modules/manager/npm/post-update/node-version.spec.ts line 41
     // NOTE: Rust adds .x suffix to numeric nvmrc values; upstream returns raw value.
     #[test]
     fn returns_nvmrc_constraint() {
@@ -128,7 +128,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns .node-version value" — modules/manager/npm/post-update/node-version.spec.ts line 29
+    // Ported: "returns .node-version value" — lib/modules/manager/npm/post-update/node-version.spec.ts line 29
     #[test]
     fn returns_node_version_file() {
         assert_eq!(
@@ -137,7 +137,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns from package.json" — modules/manager/npm/post-update/node-version.spec.ts line 64
+    // Ported: "returns from package.json" — lib/modules/manager/npm/post-update/node-version.spec.ts line 64
     #[test]
     fn returns_package_json_engines_node() {
         let pj = PackageJson::parse(r#"{"engines": {"node": "^12.16.3"}}"#).unwrap();
@@ -182,7 +182,7 @@ mod tests {
         assert_eq!(get_node_update(&upgrades), Some("18.0.0"));
     }
 
-    // Ported: "returns getNodeUpdate" — modules/manager/npm/post-update/node-version.spec.ts line 113
+    // Ported: "returns getNodeUpdate" — lib/modules/manager/npm/post-update/node-version.spec.ts line 113
     #[test]
     fn get_node_tool_constraint_basic() {
         let upgrades = vec![Upgrade {
@@ -195,7 +195,7 @@ mod tests {
         assert_eq!(tc.constraint, Some("16.15.0".to_owned()));
     }
 
-    // Ported: "returns from package.json volta" — modules/manager/npm/post-update/node-version.spec.ts line 74
+    // Ported: "returns from package.json volta" — lib/modules/manager/npm/post-update/node-version.spec.ts line 74
     #[test]
     fn get_node_constraint_from_volta() {
         let pj = PackageJson::parse(r#"{"volta": {"node": "14.17.0"}}"#).unwrap();
@@ -205,7 +205,7 @@ mod tests {
         );
     }
 
-    // Ported: "prefers volta over engines" — modules/manager/npm/post-update/node-version.spec.ts line 84
+    // Ported: "prefers volta over engines" — lib/modules/manager/npm/post-update/node-version.spec.ts line 84
     #[test]
     fn get_node_constraint_prefers_volta_over_engines() {
         let pj = PackageJson::parse(
@@ -218,7 +218,7 @@ mod tests {
         );
     }
 
-    // Ported: "ignores unusable ranges in dotfiles" — modules/manager/npm/post-update/node-version.spec.ts line 52
+    // Ported: "ignores unusable ranges in dotfiles" — lib/modules/manager/npm/post-update/node-version.spec.ts line 52
     // NOTE: Rust does not validate semver ranges; upstream returns null for invalid ranges.
     #[test]
     fn get_node_constraint_ignores_unusable_ranges() {
@@ -229,7 +229,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns getNodeConstraint" — modules/manager/npm/post-update/node-version.spec.ts line 127
+    // Ported: "returns getNodeConstraint" — lib/modules/manager/npm/post-update/node-version.spec.ts line 127
     #[test]
     fn get_node_tool_constraint_returns_config_constraint() {
         let tc = get_node_tool_constraint(&[], Some("^12.16.0"), None, None, None);

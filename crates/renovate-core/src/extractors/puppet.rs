@@ -335,8 +335,8 @@ fn is_recognised_git_url(url: &str) -> bool {
 mod tests {
     use super::*;
 
-    // Ported: "extracts multiple modules from Puppetfile without a forge" — puppet/extract.spec.ts line 14
-    // Ported: "get default forge with null or undefined returns the same" — puppet/puppetfile-parser.spec.ts line 74
+    // Ported: "extracts multiple modules from Puppetfile without a forge" — lib/modules/manager/puppet/extract.spec.ts line 14
+    // Ported: "get default forge with null or undefined returns the same" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 74
     #[test]
     fn extracts_forge_module_with_version() {
         let content = "mod 'puppetlabs/apache', '5.5.0'\n";
@@ -351,7 +351,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts multiple modules from Puppetfile with multiple forges/registries" — puppet/extract.spec.ts line 47
+    // Ported: "extracts multiple modules from Puppetfile with multiple forges/registries" — lib/modules/manager/puppet/extract.spec.ts line 47
     #[test]
     fn extracts_custom_forge() {
         let content = "forge 'https://forge.example.com'\nmod 'myorg/mymod', '1.0.0'\n";
@@ -365,7 +365,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts multiple git tag modules from Puppetfile" — puppet/extract.spec.ts line 100
+    // Ported: "extracts multiple git tag modules from Puppetfile" — lib/modules/manager/puppet/extract.spec.ts line 100
     #[test]
     fn extracts_github_git_module() {
         let content = r#"
@@ -384,7 +384,7 @@ mod 'custom_mod',
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "Git module without a tag should result in a skip reason" — puppet/extract.spec.ts line 162
+    // Ported: "Git module without a tag should result in a skip reason" — lib/modules/manager/puppet/extract.spec.ts line 162
     #[test]
     fn git_no_tag_skipped() {
         let content = "mod 'mymod',\n  :git => 'https://github.com/owner/repo'\n";
@@ -393,7 +393,7 @@ mod 'custom_mod',
         assert_eq!(deps[0].skip_reason, Some(PuppetSkipReason::GitNoTag));
     }
 
-    // Ported: "extracts multiple modules from Puppetfile without a forge" — puppet/extract.spec.ts line 14
+    // Ported: "extracts multiple modules from Puppetfile without a forge" — lib/modules/manager/puppet/extract.spec.ts line 14
     #[test]
     fn multiple_modules() {
         let content = r#"
@@ -427,13 +427,13 @@ mod 'puppetlabs/concat', '7.1.1'
         assert_eq!(deps[0].name, "puppetlabs/apache");
     }
 
-    // Ported: "returns null for empty Puppetfile" — puppet/extract.spec.ts line 10
+    // Ported: "returns null for empty Puppetfile" — lib/modules/manager/puppet/extract.spec.ts line 10
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "Use GithubTagsDatasource only if host is exactly github.com" — puppet/extract.spec.ts line 125
+    // Ported: "Use GithubTagsDatasource only if host is exactly github.com" — lib/modules/manager/puppet/extract.spec.ts line 125
     #[test]
     fn non_github_host_uses_git_tags_datasource() {
         // github.com.example.com is NOT github.com → should use GitTags
@@ -446,7 +446,7 @@ mod 'puppetlabs/concat', '7.1.1'
         assert!(!matches!(deps[0].source, PuppetSource::GitHub { .. }));
     }
 
-    // Ported: "Github url without https is skipped" — puppet/extract.spec.ts line 146
+    // Ported: "Github url without https is skipped" — lib/modules/manager/puppet/extract.spec.ts line 146
     #[test]
     fn http_github_url_marked_invalid_url() {
         let content = "mod 'apache', :git => 'http://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'";
@@ -457,8 +457,8 @@ mod 'puppetlabs/concat', '7.1.1'
         assert!(matches!(deps[0].source, PuppetSource::Git(_)));
     }
 
-    // Ported: "Puppetfile with an invalid module creates PuppetfileModule with skipReason "invalid-config"" — puppet/puppetfile-parser.spec.ts line 58
-    // Ported: "Skip reason should be overwritten by parser" — puppet/extract.spec.ts line 181
+    // Ported: "Puppetfile with an invalid module creates PuppetfileModule with skipReason "invalid-config"" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 58
+    // Ported: "Skip reason should be overwritten by parser" — lib/modules/manager/puppet/extract.spec.ts line 181
     #[test]
     fn malformed_mod_with_three_positional_args_is_invalid_config() {
         let content = "mod 'stdlib', '0.1.0', 'i create a skip reason'\n  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',\n";
@@ -469,7 +469,7 @@ mod 'puppetlabs/concat', '7.1.1'
         assert!(matches!(deps[0].source, PuppetSource::Git(_)));
     }
 
-    // Ported: "GitTagsDatasource" — puppet/extract.spec.ts line 200
+    // Ported: "GitTagsDatasource" — lib/modules/manager/puppet/extract.spec.ts line 200
     //
     // Mirrors the Puppetfile.git_tag fixture — non-github git URLs
     // (gitlab.com, ssh, multi-dir paths) should produce GitTags-style
@@ -517,7 +517,7 @@ mod 'invalid_url',
         assert_eq!(invalid.skip_reason, Some(PuppetSkipReason::InvalidUrl));
     }
 
-    // Ported: "access by index" — modules/manager/puppet/common.spec.ts line 8
+    // Ported: "access by index" — lib/modules/manager/puppet/common.spec.ts line 8
     #[test]
     fn puppet_git_ssh_regex_captures_repository() {
         let cap = GIT_SSH_RE
@@ -526,7 +526,7 @@ mod 'invalid_url',
         assert_eq!(&cap["repository"], "dir1/dir2/project.git");
     }
 
-    // Ported: "access by named group" — modules/manager/puppet/common.spec.ts line 18
+    // Ported: "access by named group" — lib/modules/manager/puppet/common.spec.ts line 18
     #[test]
     fn puppet_git_ssh_regex_captures_named_group() {
         let cap = GIT_SSH_RE
@@ -535,20 +535,20 @@ mod 'invalid_url',
         assert_eq!(&cap["repository"], "dir1/dir2/project.git");
     }
 
-    // Ported: "unable to parse url" — modules/manager/puppet/common.spec.ts line 32
+    // Ported: "unable to parse url" — lib/modules/manager/puppet/common.spec.ts line 32
     #[test]
     fn puppet_parse_git_owner_repo_returns_none_for_invalid() {
         assert!(parse_git_owner_repo("invalid-url-example", false).is_none());
     }
 
-    // Ported: "parseable url" — modules/manager/puppet/common.spec.ts line 36
+    // Ported: "parseable url" — lib/modules/manager/puppet/common.spec.ts line 36
     #[test]
     fn puppet_parse_git_owner_repo_parses_https_url() {
         let result = parse_git_owner_repo("https://gitlab.com/example/example", false);
         assert_eq!(result.as_deref(), Some("example/example"));
     }
 
-    // Ported: "Puppetfile_github_tag" — puppet/puppetfile-parser.spec.ts line 9
+    // Ported: "Puppetfile_github_tag" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 9
     #[test]
     fn puppetfile_github_tag_extracts_two_git_modules() {
         let content = r#"
@@ -576,7 +576,7 @@ mod 'stdlib',
         );
     }
 
-    // Ported: "Puppetfile_github_tag_single_line" — puppet/puppetfile-parser.spec.ts line 31
+    // Ported: "Puppetfile_github_tag_single_line" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 31
     #[test]
     fn puppetfile_github_tag_single_line_extracts_two_git_modules() {
         let content = "mod 'apache', :git => 'https://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'\nmod 'stdlib', :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git', :tag => '5.0.0'\n";
@@ -596,7 +596,7 @@ mod 'stdlib',
         );
     }
 
-    // Ported: "Puppetfile_multiple_forges" — puppet/puppetfile-parser.spec.ts line 88
+    // Ported: "Puppetfile_multiple_forges" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 88
     #[test]
     fn puppetfile_multiple_forges() {
         let content = r#"forge "https://forgeapi.puppetlabs.com"
@@ -637,7 +637,7 @@ mod 'mock/mockpuppetdb', '1.9.0'
         );
     }
 
-    // Ported: "Puppetfile_no_forge" — puppet/puppetfile-parser.spec.ts line 133
+    // Ported: "Puppetfile_no_forge" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 133
     #[test]
     fn puppetfile_no_forge() {
         let content = "mod 'puppetlabs/stdlib', '8.0.0'\nmod 'puppetlabs/apache', '6.5.1'\nmod 'puppetlabs/puppetdb', '7.9.0'\n";
@@ -651,7 +651,7 @@ mod 'mock/mockpuppetdb', '1.9.0'
         assert_eq!(deps[2].current_value, "7.9.0");
     }
 
-    // Ported: "Puppetfile_single_forge" — puppet/puppetfile-parser.spec.ts line 161
+    // Ported: "Puppetfile_single_forge" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 161
     #[test]
     fn puppetfile_single_forge() {
         let content = r#"forge "https://forgeapi.puppetlabs.com"
@@ -671,7 +671,7 @@ mod 'puppetlabs/puppetdb', '7.9.0'
         }
     }
 
-    // Ported: "Puppetfile_with_comments" — puppet/puppetfile-parser.spec.ts line 192
+    // Ported: "Puppetfile_with_comments" — lib/modules/manager/puppet/puppetfile-parser.spec.ts line 192
     #[test]
     fn puppetfile_with_comments() {
         let content = r#"mod 'puppetlabs/stdlib', '8.0.0'

@@ -230,7 +230,7 @@ mod tests {
             .collect()
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn top_level_image() {
         let content = "image: atlassian/default-image:4\n";
@@ -240,7 +240,7 @@ mod tests {
         assert_eq!(deps[0].tag.as_deref(), Some("4"));
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn step_image() {
         let content = r#"
@@ -257,7 +257,7 @@ pipelines:
         assert_eq!(deps[0].tag.as_deref(), Some("18-alpine"));
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn image_object_with_name() {
         let content = r#"
@@ -273,7 +273,7 @@ pipelines:
         assert_eq!(deps[0].tag.as_deref(), Some("latest"));
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn image_object_with_username_and_name() {
         // image: { username: xxxx, name: node:18.15.1 } — scan past username to find name
@@ -284,7 +284,7 @@ pipelines:
         assert_eq!(deps[0].tag.as_deref(), Some("18.15.1"));
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn docker_pipe() {
         let content = "pipelines:\n  default:\n  - step:\n      script:\n      - pipe: docker://alpine/helm:3.12.0\n";
@@ -294,7 +294,7 @@ pipelines:
         assert_eq!(deps[0].tag.as_deref(), Some("3.12.0"));
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn non_docker_pipe_produces_bitbucket_dep() {
         let content = "- pipe: atlassian/aws-s3-deploy:0.2.1\n";
@@ -312,7 +312,7 @@ pipelines:
         }
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn multiple_images() {
         let content = r#"
@@ -332,7 +332,7 @@ pipelines:
         assert!(deps.iter().any(|d| d.image == "golang"));
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn variable_ref_skipped() {
         let content = "image: $BB_IMAGE\n";
@@ -341,20 +341,20 @@ pipelines:
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "returns null for empty" — bitbucket-pipelines/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for malformed" — bitbucket-pipelines/extract.spec.ts line 12
+    // Ported: "returns null for malformed" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 12
     #[test]
     fn malformed_image_object_without_name_returns_empty() {
         let content = "image:\n  username: ccc\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts dependencies" — bitbucket-pipelines/extract.spec.ts line 22
+    // Ported: "extracts dependencies" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 22
     #[test]
     fn extracts_full_fixture_seven_deps() {
         let content = r#"image: node:10.15.1
@@ -432,7 +432,7 @@ pipelines:
         assert_eq!(deps.len(), 7);
     }
 
-    // Ported: "extracts dependencies with registryAlias" — bitbucket-pipelines/extract.spec.ts line 82
+    // Ported: "extracts dependencies with registryAlias" — lib/modules/manager/bitbucket-pipelines/extract.spec.ts line 82
     #[test]
     fn extracts_dependencies_with_registry_alias() {
         let content = r#"image: node:10.15.1

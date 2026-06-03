@@ -552,7 +552,7 @@ mod tests {
 
     // ── FilePackageCache ──────────────────────────────────────────────────
 
-    // Ported: "delegates get to backend" — util/cache/package/index.spec.ts line 41
+    // Ported: "delegates get to backend" — lib/util/cache/package/index.spec.ts line 41
     #[tokio::test]
     async fn file_cache_get_returns_none_for_missing_key() {
         let dir = TempDir::new().unwrap();
@@ -561,7 +561,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "delegates set to backend" — util/cache/package/index.spec.ts line 51
+    // Ported: "delegates set to backend" — lib/util/cache/package/index.spec.ts line 51
     #[tokio::test]
     async fn file_cache_set_and_get_roundtrip() {
         let dir = TempDir::new().unwrap();
@@ -601,7 +601,7 @@ mod tests {
         assert!(!path.exists());
     }
 
-    // Ported: "returns undefined for null cached value" — util/cache/package/impl/file.spec.ts line 65
+    // Ported: "returns undefined for null cached value" — lib/util/cache/package/impl/file.spec.ts line 65
     #[tokio::test]
     async fn file_cache_returns_none_for_null_value() {
         let dir = TempDir::new().unwrap();
@@ -622,7 +622,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns undefined for invalid JSON" — util/cache/package/impl/file.spec.ts line 73
+    // Ported: "returns undefined for invalid JSON" — lib/util/cache/package/impl/file.spec.ts line 73
     #[tokio::test]
     async fn file_cache_returns_none_for_invalid_json() {
         let dir = TempDir::new().unwrap();
@@ -637,7 +637,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns undefined for corrupted cache payload" — util/cache/package/impl/file.spec.ts line 81
+    // Ported: "returns undefined for corrupted cache payload" — lib/util/cache/package/impl/file.spec.ts line 81
     #[tokio::test]
     async fn file_cache_returns_none_for_corrupted_payload() {
         let dir = TempDir::new().unwrap();
@@ -653,7 +653,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns undefined for missing expiry" — util/cache/package/impl/file.spec.ts line 93
+    // Ported: "returns undefined for missing expiry" — lib/util/cache/package/impl/file.spec.ts line 93
     #[tokio::test]
     async fn file_cache_returns_none_for_missing_expiry() {
         let dir = TempDir::new().unwrap();
@@ -669,7 +669,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns undefined for invalid expiry" — util/cache/package/impl/file.spec.ts line 102
+    // Ported: "returns undefined for invalid expiry" — lib/util/cache/package/impl/file.spec.ts line 102
     #[tokio::test]
     async fn file_cache_returns_none_for_invalid_expiry() {
         let dir = TempDir::new().unwrap();
@@ -690,7 +690,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "removes expired and invalid entries" — util/cache/package/impl/file.spec.ts line 127
+    // Ported: "removes expired and invalid entries" — lib/util/cache/package/impl/file.spec.ts line 127
     #[tokio::test]
     async fn file_cache_cleanup_removes_expired_and_invalid() {
         let dir = TempDir::new().unwrap();
@@ -735,7 +735,7 @@ mod tests {
         assert!(!bad_path.exists());
     }
 
-    // Ported: "removes entries with invalid expiry" — util/cache/package/impl/file.spec.ts line 169
+    // Ported: "removes entries with invalid expiry" — lib/util/cache/package/impl/file.spec.ts line 169
     #[tokio::test]
     async fn file_cache_cleanup_removes_invalid_expiry() {
         let dir = TempDir::new().unwrap();
@@ -758,7 +758,7 @@ mod tests {
         assert!(!bad_path.exists());
     }
 
-    // Ported: "keeps entries without expiry field" — util/cache/package/impl/file.spec.ts line 159
+    // Ported: "keeps entries without expiry field" — lib/util/cache/package/impl/file.spec.ts line 159
     #[tokio::test]
     async fn file_cache_cleanup_keeps_entries_without_expiry() {
         let dir = TempDir::new().unwrap();
@@ -776,7 +776,7 @@ mod tests {
         assert!(path.exists());
     }
 
-    // Ported: "continues on cleanup errors" — util/cache/package/impl/file.spec.ts line 182
+    // Ported: "continues on cleanup errors" — lib/util/cache/package/impl/file.spec.ts line 182
     #[tokio::test]
     async fn file_cache_cleanup_continues_on_errors() {
         let dir = TempDir::new().unwrap();
@@ -807,7 +807,7 @@ mod tests {
 
     // ── PackageCache ──────────────────────────────────────────────────────
 
-    // Ported: "returns undefined if not initialized" — util/cache/package/index.spec.ts line 23
+    // Ported: "returns undefined if not initialized" — lib/util/cache/package/index.spec.ts line 23
     #[tokio::test]
     async fn package_cache_get_returns_none_without_backend() {
         let cache = PackageCache::new(); // no backend
@@ -815,7 +815,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "delegates init to backend" — util/cache/package/index.spec.ts line 33
+    // Ported: "delegates init to backend" — lib/util/cache/package/index.spec.ts line 33
     #[tokio::test]
     async fn package_cache_is_initialized_when_backend_set() {
         let cache = PackageCache::new(); // no backend
@@ -826,7 +826,7 @@ mod tests {
         assert!(cache_with_backend.is_initialized());
     }
 
-    // Ported: "delegates getCacheType to backend" — util/cache/package/index.spec.ts line 105
+    // Ported: "delegates getCacheType to backend" — lib/util/cache/package/index.spec.ts line 105
     #[test]
     fn package_cache_type_returns_file_when_backend_set() {
         let cache = PackageCache::new();
@@ -837,7 +837,7 @@ mod tests {
         assert_eq!(cache_with_backend.cache_type(), Some("file"));
     }
 
-    // Ported: "delegates cleanup to backend.destroy" — util/cache/package/index.spec.ts line 99
+    // Ported: "delegates cleanup to backend.destroy" — lib/util/cache/package/index.spec.ts line 99
     #[tokio::test]
     async fn package_cache_cleanup_delegates_to_backend() {
         let dir = TempDir::new().unwrap();
@@ -862,7 +862,7 @@ mod tests {
         assert!(!path.exists());
     }
 
-    // Ported: "deduplicates get via memCache" — util/cache/package/index.spec.ts line 77
+    // Ported: "deduplicates get via memCache" — lib/util/cache/package/index.spec.ts line 77
     #[tokio::test]
     async fn package_cache_deduplicates_via_mem() {
         let dir = TempDir::new().unwrap();
@@ -878,7 +878,7 @@ mod tests {
         assert_eq!(r2, Some("cached-value".to_owned()));
     }
 
-    // Ported: "setWithRawTtl updates memCache" — util/cache/package/index.spec.ts line 89
+    // Ported: "setWithRawTtl updates memCache" — lib/util/cache/package/index.spec.ts line 89
     #[tokio::test]
     async fn set_with_raw_ttl_updates_mem_immediately() {
         let dir = TempDir::new().unwrap();
@@ -897,7 +897,7 @@ mod tests {
         CacheTtlConfig::default()
     }
 
-    // Ported: "caches string result" — util/cache/package/with-cache.spec.ts line 35
+    // Ported: "caches string result" — lib/util/cache/package/with-cache.spec.ts line 35
     #[tokio::test]
     async fn with_cache_caches_string_result() {
         let dir = TempDir::new().unwrap();
@@ -926,7 +926,7 @@ mod tests {
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 1);
     }
 
-    // Ported: "disables cache if cacheable is false" — util/cache/package/with-cache.spec.ts line 57
+    // Ported: "disables cache if cacheable is false" — lib/util/cache/package/with-cache.spec.ts line 57
     #[tokio::test]
     async fn with_cache_disabled_when_cacheable_false() {
         let dir = TempDir::new().unwrap();
@@ -957,7 +957,7 @@ mod tests {
         assert_eq!(r2, "222");
     }
 
-    // Ported: "forces cache if cachePrivatePackages=true" — util/cache/package/with-cache.spec.ts line 83
+    // Ported: "forces cache if cachePrivatePackages=true" — lib/util/cache/package/with-cache.spec.ts line 83
     #[tokio::test]
     async fn with_cache_forced_when_cache_private_packages() {
         let dir = TempDir::new().unwrap();
@@ -989,7 +989,7 @@ mod tests {
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 1);
     }
 
-    // Ported: "does not cache undefined" — util/cache/package/with-cache.spec.ts line 212
+    // Ported: "does not cache undefined" — lib/util/cache/package/with-cache.spec.ts line 212
     #[tokio::test]
     async fn with_cache_does_not_cache_none() {
         let dir = TempDir::new().unwrap();
@@ -1032,7 +1032,7 @@ mod tests {
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 2);
     }
 
-    // Ported: "returns stale result on error" — util/cache/package/with-cache.spec.ts line 375
+    // Ported: "returns stale result on error" — lib/util/cache/package/with-cache.spec.ts line 375
     #[tokio::test]
     async fn with_cache_returns_stale_on_error_when_fallback() {
         let dir = TempDir::new().unwrap();
@@ -1074,7 +1074,7 @@ mod tests {
         assert_eq!(r2, "stale-value");
     }
 
-    // Ported: "caches null values" — util/cache/package/with-cache.spec.ts line 115
+    // Ported: "caches null values" — lib/util/cache/package/with-cache.spec.ts line 115
     #[tokio::test]
     async fn with_cache_caches_null_values() {
         let dir = TempDir::new().unwrap();
@@ -1104,7 +1104,7 @@ mod tests {
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 1);
     }
 
-    // Ported: "ignores cached values rejected by cacheResult predicate" — util/cache/package/with-cache.spec.ts line 170
+    // Ported: "ignores cached values rejected by cacheResult predicate" — lib/util/cache/package/with-cache.spec.ts line 170
     #[tokio::test]
     async fn with_cache_ignores_cached_values_rejected_by_predicate() {
         let dir = TempDir::new().unwrap();
@@ -1148,7 +1148,7 @@ mod tests {
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 2);
     }
 
-    // Ported: "uses custom ttlMinutes" — util/cache/package/with-cache.spec.ts line 232
+    // Ported: "uses custom ttlMinutes" — lib/util/cache/package/with-cache.spec.ts line 232
     #[tokio::test]
     async fn with_cache_uses_custom_ttl_minutes() {
         let dir = TempDir::new().unwrap();
@@ -1173,7 +1173,7 @@ mod tests {
         assert_eq!(r2, "cached"); // still within custom 5-min TTL
     }
 
-    // Ported: "does not return stale values rejected by cacheResult predicate" — util/cache/package/with-cache.spec.ts line 414
+    // Ported: "does not return stale values rejected by cacheResult predicate" — lib/util/cache/package/with-cache.spec.ts line 414
     #[tokio::test]
     async fn with_cache_does_not_return_stale_rejected_by_predicate() {
         let dir = TempDir::new().unwrap();
@@ -1221,7 +1221,7 @@ mod tests {
         assert!(r2.is_err());
     }
 
-    // Ported: "drops stale value after hard TTL expires" — util/cache/package/with-cache.spec.ts line 454
+    // Ported: "drops stale value after hard TTL expires" — lib/util/cache/package/with-cache.spec.ts line 454
     #[tokio::test]
     async fn with_cache_drops_stale_after_hard_ttl_expires() {
         let dir = TempDir::new().unwrap();
@@ -1260,7 +1260,7 @@ mod tests {
         assert!(r2.is_err());
     }
 
-    // Ported: "does not use fallback when fallback=false" — util/cache/package/with-cache.spec.ts line 505
+    // Ported: "does not use fallback when fallback=false" — lib/util/cache/package/with-cache.spec.ts line 505
     #[tokio::test]
     async fn with_cache_no_fallback_when_disabled() {
         let dir = TempDir::new().unwrap();
@@ -1301,7 +1301,7 @@ mod tests {
 
     // ── resolve_ttl_values ────────────────────────────────────────────────
 
-    // Ported: "overrides soft ttl and updates result" — util/cache/package/with-cache.spec.ts line 313
+    // Ported: "overrides soft ttl and updates result" — lib/util/cache/package/with-cache.spec.ts line 313
     #[test]
     fn resolve_ttl_values_applies_override_and_hard_min() {
         let cfg = CacheTtlConfig {
@@ -1325,7 +1325,7 @@ mod tests {
 
     // ── get_ttl_override ─────────────────────────────────────────────────
 
-    // Ported: "returns undefined when no cacheTtlOverride config exists" — util/cache/package/ttl.spec.ts line 12
+    // Ported: "returns undefined when no cacheTtlOverride config exists" — lib/util/cache/package/ttl.spec.ts line 12
     //         — util/cache/package/ttl.spec.ts line 12
     #[test]
     fn get_ttl_override_returns_none_when_empty() {
@@ -1333,7 +1333,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), None);
     }
 
-    // Ported: "returns exact match when namespace exists in config" — util/cache/package/ttl.spec.ts line 30
+    // Ported: "returns exact match when namespace exists in config" — lib/util/cache/package/ttl.spec.ts line 30
     //         — util/cache/package/ttl.spec.ts line 30
     #[test]
     fn get_ttl_override_returns_exact_match() {
@@ -1345,7 +1345,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-docker"), None);
     }
 
-    // Ported: "matches simple glob patterns" — util/cache/package/ttl.spec.ts line 72
+    // Ported: "matches simple glob patterns" — lib/util/cache/package/ttl.spec.ts line 72
     #[test]
     fn get_ttl_override_matches_simple_glob() {
         let cfg = CacheTtlConfig {
@@ -1358,7 +1358,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "changelog-github-notes@v2"), None);
     }
 
-    // Ported: "matches wildcard pattern for all namespaces" — util/cache/package/ttl.spec.ts line 88
+    // Ported: "matches wildcard pattern for all namespaces" — lib/util/cache/package/ttl.spec.ts line 88
     //         — util/cache/package/ttl.spec.ts line 88
     #[test]
     fn get_ttl_override_matches_wildcard_all() {
@@ -1374,7 +1374,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "any-namespace"), Some(45));
     }
 
-    // Ported: "matches complex glob patterns with braces" — util/cache/package/ttl.spec.ts line 108
+    // Ported: "matches complex glob patterns with braces" — lib/util/cache/package/ttl.spec.ts line 108
     //         — util/cache/package/ttl.spec.ts line 108
     #[test]
     fn get_ttl_override_matches_brace_glob() {
@@ -1387,7 +1387,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-maven"), None);
     }
 
-    // Ported: "matches regex patterns" — util/cache/package/ttl.spec.ts line 143
+    // Ported: "matches regex patterns" — lib/util/cache/package/ttl.spec.ts line 143
     #[test]
     fn get_ttl_override_matches_regex_pattern() {
         let cfg = CacheTtlConfig {
@@ -1399,7 +1399,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "changelog-github-notes@v2"), None);
     }
 
-    // Ported: "prioritizes exact match over glob patterns" — util/cache/package/ttl.spec.ts line 179
+    // Ported: "prioritizes exact match over glob patterns" — lib/util/cache/package/ttl.spec.ts line 179
     //         — util/cache/package/ttl.spec.ts line 179
     #[test]
     fn get_ttl_override_exact_beats_glob() {
@@ -1416,7 +1416,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-docker"), Some(90));
     }
 
-    // Ported: "returns longest matching pattern when multiple patterns apply" — util/cache/package/ttl.spec.ts line 195
+    // Ported: "returns longest matching pattern when multiple patterns apply" — lib/util/cache/package/ttl.spec.ts line 195
     //         — util/cache/package/ttl.spec.ts line 195
     #[test]
     fn get_ttl_override_longest_pattern_wins() {
@@ -1432,7 +1432,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(100));
     }
 
-    // Ported: "matches patterns with regex escape sequences" — util/cache/package/ttl.spec.ts line 161
+    // Ported: "matches patterns with regex escape sequences" — lib/util/cache/package/ttl.spec.ts line 161
     #[test]
     fn get_ttl_override_matches_regex_with_escape_sequences() {
         let cfg = CacheTtlConfig {
@@ -1444,7 +1444,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-"), None); // no chars after -
     }
 
-    // Ported: "selects longest matching pattern across all configs" — util/cache/package/ttl.spec.ts line 209
+    // Ported: "selects longest matching pattern across all configs" — lib/util/cache/package/ttl.spec.ts line 209
     #[test]
     fn get_ttl_override_selects_longest_across_4_patterns() {
         let cfg = CacheTtlConfig {
@@ -1461,7 +1461,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npmjs"), Some(30));
     }
 
-    // Ported: "handles negative numbers" — util/cache/package/ttl.spec.ts line 318
+    // Ported: "handles negative numbers" — lib/util/cache/package/ttl.spec.ts line 318
     #[test]
     fn get_ttl_override_handles_negative_values() {
         let cfg = CacheTtlConfig {
@@ -1471,7 +1471,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(-1));
     }
 
-    // Ported: "handles very large numbers" — util/cache/package/ttl.spec.ts line 306
+    // Ported: "handles very large numbers" — lib/util/cache/package/ttl.spec.ts line 306
     #[test]
     fn get_ttl_override_handles_very_large_numbers() {
         let cfg = CacheTtlConfig {
@@ -1481,7 +1481,7 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(999_999_999));
     }
 
-    // Ported: "resolves TTL with glob pattern overrides" — util/cache/package/ttl.spec.ts line 391
+    // Ported: "resolves TTL with glob pattern overrides" — lib/util/cache/package/ttl.spec.ts line 391
     #[test]
     fn resolve_ttl_values_with_glob_override() {
         let cfg = CacheTtlConfig {
@@ -1494,7 +1494,7 @@ mod tests {
         assert_eq!(hard, 2880);
     }
 
-    // Ported: "resolves TTL correctly with multiple overlapping overrides" — util/cache/package/ttl.spec.ts line 407
+    // Ported: "resolves TTL correctly with multiple overlapping overrides" — lib/util/cache/package/ttl.spec.ts line 407
     #[test]
     fn resolve_ttl_values_multi_overlap() {
         let cfg = CacheTtlConfig {
@@ -1512,7 +1512,7 @@ mod tests {
         assert_eq!(hard, 5760);
     }
 
-    // Ported: "handles negative cacheHardTtlMinutes config" — util/cache/package/ttl.spec.ts line 443
+    // Ported: "handles negative cacheHardTtlMinutes config" — lib/util/cache/package/ttl.spec.ts line 443
     #[test]
     fn resolve_ttl_values_negative_hard_ttl() {
         let cfg = CacheTtlConfig {
@@ -1526,7 +1526,7 @@ mod tests {
         assert_eq!(hard, 120);
     }
 
-    // Ported: "handles zero as valid override value" — util/cache/package/ttl.spec.ts line 461
+    // Ported: "handles zero as valid override value" — lib/util/cache/package/ttl.spec.ts line 461
     #[test]
     fn resolve_ttl_values_zero_override() {
         let cfg = CacheTtlConfig {
@@ -1563,7 +1563,7 @@ mod tests {
         assert!(!glob_match("*-namespace", "_test-space"));
     }
 
-    // Ported: "applies patterns consistently regardless of case in config order" — util/cache/package/ttl.spec.ts line 256
+    // Ported: "applies patterns consistently regardless of case in config order" — lib/util/cache/package/ttl.spec.ts line 256
     #[test]
     fn get_ttl_override_case_order_consistency() {
         // When two same-length patterns both match case-insensitively, the first
@@ -1590,7 +1590,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles empty string pattern" — util/cache/package/ttl.spec.ts line 271
+    // Ported: "handles empty string pattern" — lib/util/cache/package/ttl.spec.ts line 271
     #[test]
     fn get_ttl_override_handles_empty_string_pattern() {
         let cfg = CacheTtlConfig {

@@ -558,7 +558,7 @@ libraryDependencies ++= Seq(
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
 "#;
 
-    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
+    // Ported: "extracts deps for generic use-cases" — lib/modules/manager/sbt/extract.spec.ts line 47
     #[test]
     fn extracts_scala_style_deps() {
         let deps = extract(SAMPLE_SBT);
@@ -569,7 +569,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(cats.dep_type, SbtDepType::Library);
     }
 
-    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
+    // Ported: "extracts deps for generic use-cases" — lib/modules/manager/sbt/extract.spec.ts line 47
     #[test]
     fn extracts_java_style_deps() {
         let deps = extract(SAMPLE_SBT);
@@ -582,7 +582,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(commons.style, SbtDepStyle::Java);
     }
 
-    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
+    // Ported: "extracts deps for generic use-cases" — lib/modules/manager/sbt/extract.spec.ts line 47
     #[test]
     fn extracts_plugin() {
         let deps = extract(SAMPLE_SBT);
@@ -594,7 +594,7 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(plugin.current_value, "1.9.16");
     }
 
-    // Ported: "extract addCompilerPlugin" — sbt/extract.spec.ts line 452
+    // Ported: "extract addCompilerPlugin" — lib/modules/manager/sbt/extract.spec.ts line 452
     #[test]
     fn extracts_add_compiler_plugin() {
         let deps = extract(r#"addCompilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.3.0")"#);
@@ -606,14 +606,14 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
         assert_eq!(deps[0].dep_type, SbtDepType::Plugin);
     }
 
-    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
+    // Ported: "extracts deps for generic use-cases" — lib/modules/manager/sbt/extract.spec.ts line 47
     #[test]
     fn comment_line_skipped() {
         let deps = extract(SAMPLE_SBT);
         assert!(!deps.iter().any(|d| d.artifact_id == "skip"));
     }
 
-    // Ported: "extract deps with comment" — sbt/extract.spec.ts line 412
+    // Ported: "extract deps with comment" — lib/modules/manager/sbt/extract.spec.ts line 412
     #[test]
     fn extracts_dependencies_with_trailing_comments() {
         let content = r#"
@@ -642,7 +642,7 @@ libraryDependencies ++= Seq(
         assert_eq!(logback.style, SbtDepStyle::Java);
     }
 
-    // Ported: "extracts deps when scala version is defined in an object" — sbt/extract.spec.ts line 99
+    // Ported: "extracts deps when scala version is defined in an object" — lib/modules/manager/sbt/extract.spec.ts line 99
     #[test]
     fn package_file_resolves_object_variables() {
         let content = r#"
@@ -677,7 +677,7 @@ libraryDependencies += "org.example" % "foo" % versions.example
         );
     }
 
-    // Ported: "skips deps when dotted symbolds do not resolve to anything" — sbt/extract.spec.ts line 136
+    // Ported: "skips deps when dotted symbolds do not resolve to anything" — lib/modules/manager/sbt/extract.spec.ts line 136
     #[test]
     fn package_file_keeps_unresolved_dotted_symbols_without_current_value() {
         let content = r#"
@@ -697,7 +697,7 @@ libraryDependencies += "org.example" % "foo" % versions.example
         assert_eq!(foo.package_name, "org.example:foo");
     }
 
-    // Ported: "extracts deps when scala version is defined in a variable" — sbt/extract.spec.ts line 74
+    // Ported: "extracts deps when scala version is defined in a variable" — lib/modules/manager/sbt/extract.spec.ts line 74
     #[test]
     fn package_file_resolves_scala_version_variable_fixture() {
         let content = r#"
@@ -761,7 +761,7 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
         assert_eq!(plugin.dep_type, SbtDepType::Plugin);
     }
 
-    // Ported: "skips deps when scala version is missing" — sbt/extract.spec.ts line 185
+    // Ported: "skips deps when scala version is missing" — lib/modules/manager/sbt/extract.spec.ts line 185
     #[test]
     fn package_file_extracts_deps_when_scala_version_is_missing() {
         let content = r#"
@@ -798,7 +798,7 @@ addSbtPlugin("com.github.gseitz" % "sbt-release" % sbtReleaseVersion)
         );
     }
 
-    // Ported: "extracts typed variables" — sbt/extract.spec.ts line 170
+    // Ported: "extracts typed variables" — lib/modules/manager/sbt/extract.spec.ts line 170
     #[test]
     fn package_file_resolves_typed_variables() {
         let content = r#"
@@ -815,7 +815,7 @@ libraryDependencies += "foo" % "bar" % version
         assert_eq!(dep.shared_variable_name.as_deref(), Some("version"));
     }
 
-    // Ported: "extract deps from native scala file with variables" — sbt/extract.spec.ts line 213
+    // Ported: "extract deps from native scala file with variables" — lib/modules/manager/sbt/extract.spec.ts line 213
     #[test]
     fn package_file_extracts_native_scala_file_variables() {
         let content = r#"
@@ -861,7 +861,7 @@ object Dependencies {
         }
     }
 
-    // Ported: "extract deps from native scala file with private variables" — sbt/extract.spec.ts line 349
+    // Ported: "extract deps from native scala file with private variables" — lib/modules/manager/sbt/extract.spec.ts line 349
     #[test]
     fn package_file_extracts_native_scala_private_variables() {
         let content = r#"
@@ -899,7 +899,7 @@ object Dependencies {
         assert_eq!(abc.shared_variable_name.as_deref(), Some("abcVersion"));
     }
 
-    // Ported: "extract deps when they are defined in a new line" — sbt/extract.spec.ts line 371
+    // Ported: "extract deps when they are defined in a new line" — lib/modules/manager/sbt/extract.spec.ts line 371
     #[test]
     fn package_file_extracts_deps_defined_in_named_seq() {
         let content = r#"
@@ -934,7 +934,7 @@ libraryDependencies ++= compileDependencies
         );
     }
 
-    // Ported: "extracts packageFileVersion when scala version is defined in a variable" — sbt/extract.spec.ts line 159
+    // Ported: "extracts packageFileVersion when scala version is defined in a variable" — lib/modules/manager/sbt/extract.spec.ts line 159
     #[test]
     fn package_file_resolves_package_file_version_variable() {
         let content = r#"
@@ -946,7 +946,7 @@ libraryDependencies += "foo" % "bar" % "0.0.1"
         assert_eq!(package_file.package_file_version.as_deref(), Some("1.2.3"));
     }
 
-    // Ported: "extracts deps when scala version is defined with a trailing comma" — sbt/extract.spec.ts line 232
+    // Ported: "extracts deps when scala version is defined with a trailing comma" — lib/modules/manager/sbt/extract.spec.ts line 232
     #[test]
     fn package_file_resolves_scala_version_with_trailing_comma() {
         let content = r#"
@@ -966,7 +966,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         );
     }
 
-    // Ported: "extracts deps when scala version is defined in a variable with a trailing comma" — sbt/extract.spec.ts line 253
+    // Ported: "extracts deps when scala version is defined in a variable with a trailing comma" — lib/modules/manager/sbt/extract.spec.ts line 253
     #[test]
     fn package_file_resolves_variable_scala_version_with_trailing_comma() {
         let content = r#"
@@ -986,7 +986,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         );
     }
 
-    // Ported: "extracts deps when scala version is defined with ThisBuild scope" — sbt/extract.spec.ts line 275
+    // Ported: "extracts deps when scala version is defined with ThisBuild scope" — lib/modules/manager/sbt/extract.spec.ts line 275
     #[test]
     fn package_file_resolves_thisbuild_scala_version() {
         let content = r#"
@@ -1003,7 +1003,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         );
     }
 
-    // Ported: "extracts correct scala library when dealing with scala 3" — sbt/extract.spec.ts line 294
+    // Ported: "extracts correct scala library when dealing with scala 3" — lib/modules/manager/sbt/extract.spec.ts line 294
     #[test]
     fn package_file_extracts_scala3_library() {
         let package_file = extract_package_file(r#"scalaVersion := "3.1.1""#).unwrap();
@@ -1016,7 +1016,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         );
     }
 
-    // Ported: "extracts deps correctly when dealing with scala 3" — sbt/extract.spec.ts line 309
+    // Ported: "extracts deps correctly when dealing with scala 3" — lib/modules/manager/sbt/extract.spec.ts line 309
     #[test]
     fn package_file_resolves_scala3_cross_dependencies() {
         let content = r#"
@@ -1033,7 +1033,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.5"
         );
     }
 
-    // Ported: "extracts deps when scala version is defined in a variable with ThisBuild scope" — sbt/extract.spec.ts line 329
+    // Ported: "extracts deps when scala version is defined in a variable with ThisBuild scope" — lib/modules/manager/sbt/extract.spec.ts line 329
     #[test]
     fn package_file_resolves_thisbuild_variable_scala_version() {
         let content = r#"
@@ -1051,7 +1051,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         );
     }
 
-    // Ported: "extracts deps for generic use-cases" — sbt/extract.spec.ts line 47
+    // Ported: "extracts deps for generic use-cases" — lib/modules/manager/sbt/extract.spec.ts line 47
     #[test]
     fn dep_name_formats_correctly() {
         let dep = SbtDep {
@@ -1064,7 +1064,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         assert_eq!(dep.dep_name(), "org.typelevel:cats-core");
     }
 
-    // Ported: "returns null for empty" — sbt/extract.spec.ts line 23
+    // Ported: "returns null for empty" — lib/modules/manager/sbt/extract.spec.ts line 23
     #[test]
     fn build_properties_extraction() {
         let content = "sbt.version=1.9.8\n";
@@ -1073,7 +1073,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         assert_eq!(dep.group_id, "org.scala-sbt");
     }
 
-    // Ported: "returns null for empty" — sbt/extract.spec.ts line 23
+    // Ported: "returns null for empty" — lib/modules/manager/sbt/extract.spec.ts line 23
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
@@ -1081,7 +1081,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         assert!(extract("non-sense").is_empty());
     }
 
-    // Ported: "extract sbt version" — sbt/extract.spec.ts line 469
+    // Ported: "extract sbt version" — lib/modules/manager/sbt/extract.spec.ts line 469
     #[test]
     fn build_properties_extracts_sbt_version() {
         let content = "sbt.version=1.6.0\n";
@@ -1089,7 +1089,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         assert_eq!(dep.current_value, "1.6.0");
     }
 
-    // Ported: "extract sbt version if the file contains other properties" — sbt/extract.spec.ts line 492
+    // Ported: "extract sbt version if the file contains other properties" — lib/modules/manager/sbt/extract.spec.ts line 492
     #[test]
     fn build_properties_with_other_props_extracts_sbt_version() {
         let content = "sbt.version=1.6.0\nanother.conf=1.4.0\n";
@@ -1097,20 +1097,20 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         assert_eq!(dep.current_value, "1.6.0");
     }
 
-    // Ported: "ignores build.properties file if does not contain sbt version" — sbt/extract.spec.ts line 516
+    // Ported: "ignores build.properties file if does not contain sbt version" — lib/modules/manager/sbt/extract.spec.ts line 516
     #[test]
     fn build_properties_without_sbt_version_returns_none() {
         let content = "another.conf=1.4.0\n";
         assert!(extract_build_properties(content).is_none());
     }
 
-    // Ported: "should return empty packagefiles is no content is provided" — sbt/extract.spec.ts line 637
+    // Ported: "should return empty packagefiles is no content is provided" — lib/modules/manager/sbt/extract.spec.ts line 637
     #[test]
     fn extract_all_package_files_empty_content_returns_empty() {
         assert!(extract_all_package_files(&[("build.sbt", "")]).is_empty());
     }
 
-    // Ported: "extracts build properties correctly" — sbt/extract.spec.ts line 643
+    // Ported: "extracts build properties correctly" — lib/modules/manager/sbt/extract.spec.ts line 643
     #[test]
     fn extract_all_package_files_extracts_build_properties() {
         let packages =
@@ -1124,7 +1124,7 @@ libraryDependencies += "org.example" %% "bar" % "0.0.2"
         assert_eq!(dep.current_value.as_deref(), Some("1.6.0"));
     }
 
-    // Ported: "extracts proxy repositories" — sbt/extract.spec.ts line 529
+    // Ported: "extracts proxy repositories" — lib/modules/manager/sbt/extract.spec.ts line 529
     #[test]
     fn extract_all_package_files_extracts_proxy_repositories() {
         let repositories = r#"
@@ -1151,7 +1151,7 @@ libraryDependencies += "com.example" %% "foo" % "0.7.1"
         }
     }
 
-    // Ported: "should include default registryUrls if no repositories file is provided" — sbt/extract.spec.ts line 607
+    // Ported: "should include default registryUrls if no repositories file is provided" — lib/modules/manager/sbt/extract.spec.ts line 607
     #[test]
     fn extract_all_package_files_uses_default_registry_urls_without_repositories_file() {
         let build = r#"
@@ -1202,7 +1202,7 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
     const SBT_CONTENT: &str =
         "name := \"test\"\norganization := \"test-org\"\nversion := \"0.0.2\"\n";
 
-    // Ported: "increments" — modules/manager/sbt/update.spec.ts line 10
+    // Ported: "increments" — lib/modules/manager/sbt/update.spec.ts line 10
     #[test]
     fn sbt_bump_increments_patch() {
         let result = bump_package_version(SBT_CONTENT, "0.0.2", "patch");
@@ -1210,14 +1210,14 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
         assert_ne!(result, SBT_CONTENT);
     }
 
-    // Ported: "no ops" — modules/manager/sbt/update.spec.ts line 21
+    // Ported: "no ops" — lib/modules/manager/sbt/update.spec.ts line 21
     #[test]
     fn sbt_bump_no_op_when_version_mismatch() {
         let result = bump_package_version(SBT_CONTENT, "0.0.1", "patch");
         assert_eq!(result, SBT_CONTENT);
     }
 
-    // Ported: "updates" — modules/manager/sbt/update.spec.ts line 31
+    // Ported: "updates" — lib/modules/manager/sbt/update.spec.ts line 31
     #[test]
     fn sbt_bump_updates_minor() {
         let result = bump_package_version(SBT_CONTENT, "0.0.1", "minor");
@@ -1225,14 +1225,14 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
         assert_ne!(result, SBT_CONTENT);
     }
 
-    // Ported: "returns content if bumping errors" — modules/manager/sbt/update.spec.ts line 41
+    // Ported: "returns content if bumping errors" — lib/modules/manager/sbt/update.spec.ts line 41
     #[test]
     fn sbt_bump_returns_content_on_invalid_bump_type() {
         let result = bump_package_version(SBT_CONTENT, "0.0.2", "not_a_bump");
         assert_eq!(result, SBT_CONTENT);
     }
 
-    // Ported: "places build.sbt first" — modules/manager/sbt/util.spec.ts line 5
+    // Ported: "places build.sbt first" — lib/modules/manager/sbt/util.spec.ts line 5
     #[test]
     fn sbt_sort_package_files_build_sbt_first() {
         let result = sort_package_files(&[
@@ -1250,43 +1250,43 @@ addSbtPlugin("org.example" % "waldo" % "0.0.9")
         );
     }
 
-    // Ported: "does not normalize prior to 2.10" — modules/manager/sbt/util.spec.ts line 20
+    // Ported: "does not normalize prior to 2.10" — lib/modules/manager/sbt/util.spec.ts line 20
     #[test]
     fn sbt_normalize_scala_version_prior_to_2_10() {
         assert_eq!(normalize_scala_version("2.9.3"), "2.9.3");
     }
 
-    // Ported: "normalizes a Scala 2.10 version number" — modules/manager/sbt/util.spec.ts line 25
+    // Ported: "normalizes a Scala 2.10 version number" — lib/modules/manager/sbt/util.spec.ts line 25
     #[test]
     fn sbt_normalize_scala_2_10() {
         assert_eq!(normalize_scala_version("2.10.7"), "2.10");
     }
 
-    // Ported: "normalizes a Scala 2.11 version number" — modules/manager/sbt/util.spec.ts line 30
+    // Ported: "normalizes a Scala 2.11 version number" — lib/modules/manager/sbt/util.spec.ts line 30
     #[test]
     fn sbt_normalize_scala_2_11() {
         assert_eq!(normalize_scala_version("2.11.12"), "2.11");
     }
 
-    // Ported: "normalizes a Scala 2.12 version number" — modules/manager/sbt/util.spec.ts line 35
+    // Ported: "normalizes a Scala 2.12 version number" — lib/modules/manager/sbt/util.spec.ts line 35
     #[test]
     fn sbt_normalize_scala_2_12() {
         assert_eq!(normalize_scala_version("2.12.19"), "2.12");
     }
 
-    // Ported: "normalizes a Scala 2.13 version number" — modules/manager/sbt/util.spec.ts line 40
+    // Ported: "normalizes a Scala 2.13 version number" — lib/modules/manager/sbt/util.spec.ts line 40
     #[test]
     fn sbt_normalize_scala_2_13() {
         assert_eq!(normalize_scala_version("2.13.14"), "2.13");
     }
 
-    // Ported: "normalizes a Scala 3 LTS version number" — modules/manager/sbt/util.spec.ts line 45
+    // Ported: "normalizes a Scala 3 LTS version number" — lib/modules/manager/sbt/util.spec.ts line 45
     #[test]
     fn sbt_normalize_scala_3_lts() {
         assert_eq!(normalize_scala_version("3.3.3"), "3");
     }
 
-    // Ported: "normalizes a Scala 3 current version number" — modules/manager/sbt/util.spec.ts line 50
+    // Ported: "normalizes a Scala 3 current version number" — lib/modules/manager/sbt/util.spec.ts line 50
     #[test]
     fn sbt_normalize_scala_3_current() {
         assert_eq!(normalize_scala_version("3.4.2"), "3");

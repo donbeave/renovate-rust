@@ -700,7 +700,7 @@ mod tests {
         assert!(s.update_available);
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === $expected" — versioning/hashicorp/index.spec.ts line 4
+    // Ported: "matches(\"$version\", \"$range\") === $expected" — lib/modules/versioning/hashicorp/index.spec.ts line 4
     #[test]
     fn matches_matches_renovate_hashicorp_spec() {
         let cases = [
@@ -718,7 +718,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, \"$range\") === $expected" — versioning/hashicorp/index.spec.ts line 17
+    // Ported: "getSatisfyingVersion($versions, \"$range\") === $expected" — lib/modules/versioning/hashicorp/index.spec.ts line 17
     #[test]
     fn get_satisfying_version_matches_renovate_hashicorp_spec() {
         let versions = ["0.4.0", "0.5.0", "4.0.0", "4.2.0", "5.0.0"];
@@ -730,7 +730,7 @@ mod tests {
         );
     }
 
-    // Ported: "isValid(\"$input\") === $expected" — versioning/hashicorp/index.spec.ts line 29
+    // Ported: "isValid(\"$input\") === $expected" — lib/modules/versioning/hashicorp/index.spec.ts line 29
     #[test]
     fn is_valid_matches_renovate_hashicorp_spec() {
         let cases = [
@@ -752,14 +752,14 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange($version, $range) === $expected" — versioning/hashicorp/index.spec.ts line 48
+    // Ported: "isLessThanRange($version, $range) === $expected" — lib/modules/versioning/hashicorp/index.spec.ts line 48
     #[test]
     fn is_less_than_range_matches_renovate_hashicorp_spec() {
         assert!(is_less_than_range("0.9.0", ">= 1.0.0, <= 2.0.0"));
         assert!(!is_less_than_range("1.9.0", ">= 1.0.0, <= 2.0.0"));
     }
 
-    // Ported: "minSatisfyingVersion($versions, \"$range\") === $expected" — versioning/hashicorp/index.spec.ts line 59
+    // Ported: "minSatisfyingVersion($versions, \"$range\") === $expected" — lib/modules/versioning/hashicorp/index.spec.ts line 59
     #[test]
     fn min_satisfying_version_matches_renovate_hashicorp_spec() {
         let v1 = ["0.4.0", "0.5.0", "4.2.0", "5.0.0"];
@@ -773,7 +773,7 @@ mod tests {
         );
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/hashicorp/index.spec.ts line 72
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — lib/modules/versioning/hashicorp/index.spec.ts line 72
     #[test]
     fn get_new_value_matches_renovate_hashicorp_spec() {
         let cases: &[(&str, &str, &str, &str, Option<&str>)] = &[
@@ -871,7 +871,7 @@ mod tests {
         }
     }
 
-    // Ported: "hashicorp2npm(\"$hashicorp\") === $npm && npm2hashicorp(\"$npm\") === $hashicorp" — versioning/hashicorp/convertor.spec.ts line 4
+    // Ported: "hashicorp2npm(\"$hashicorp\") === $npm && npm2hashicorp(\"$npm\") === $hashicorp" — lib/modules/versioning/hashicorp/convertor.spec.ts line 4
     #[test]
     fn hashicorp2npm_and_npm2hashicorp_roundtrip_matches_renovate_hashicorp_convertor_spec() {
         let cases: &[(&str, &str)] = &[
@@ -907,7 +907,7 @@ mod tests {
         }
     }
 
-    // Ported: "hashicorp2npm(\"$version\") === $version && npm2hashicorp(\"$version\") === $version" — versioning/hashicorp/convertor.spec.ts line 32
+    // Ported: "hashicorp2npm(\"$version\") === $version && npm2hashicorp(\"$version\") === $version" — lib/modules/versioning/hashicorp/convertor.spec.ts line 32
     #[test]
     fn hashicorp2npm_and_npm2hashicorp_identity_matches_renovate_hashicorp_convertor_spec() {
         let versions = [
@@ -932,7 +932,7 @@ mod tests {
         }
     }
 
-    // Ported: "hashicorp2npm(\"$hashicorp\") === $npm" — versioning/hashicorp/convertor.spec.ts line 57
+    // Ported: "hashicorp2npm(\"$hashicorp\") === $npm" — lib/modules/versioning/hashicorp/convertor.spec.ts line 57
     #[test]
     fn hashicorp2npm_nonreflective_matches_renovate_hashicorp_convertor_spec() {
         let cases: &[(&str, &str)] = &[
@@ -953,7 +953,7 @@ mod tests {
         }
     }
 
-    // Ported: "npm2hashicorp(\"$npm\") === $hashicorp" — versioning/hashicorp/convertor.spec.ts line 71
+    // Ported: "npm2hashicorp(\"$npm\") === $hashicorp" — lib/modules/versioning/hashicorp/convertor.spec.ts line 71
     #[test]
     fn npm2hashicorp_nonreflective_matches_renovate_hashicorp_convertor_spec() {
         let cases: &[(&str, &str)] = &[
@@ -975,19 +975,19 @@ mod tests {
         }
     }
 
-    // Ported: "hashicorp2npm doesnt support !=" — versioning/hashicorp/convertor.spec.ts line 85
+    // Ported: "hashicorp2npm doesnt support !=" — lib/modules/versioning/hashicorp/convertor.spec.ts line 85
     #[test]
     fn hashicorp2npm_doesnt_support_neq_matches_renovate_hashicorp_convertor_spec() {
         assert_eq!(hashicorp2npm("!= 4"), None);
     }
 
-    // Ported: "hashicorp2npm throws on invalid" — versioning/hashicorp/convertor.spec.ts line 89
+    // Ported: "hashicorp2npm throws on invalid" — lib/modules/versioning/hashicorp/convertor.spec.ts line 89
     #[test]
     fn hashicorp2npm_throws_on_invalid_matches_renovate_hashicorp_convertor_spec() {
         assert_eq!(hashicorp2npm("^4"), None);
     }
 
-    // Ported: "npm2hashicorp throws on unsupported" — versioning/hashicorp/convertor.spec.ts line 93
+    // Ported: "npm2hashicorp throws on unsupported" — lib/modules/versioning/hashicorp/convertor.spec.ts line 93
     #[test]
     fn npm2hashicorp_throws_on_unsupported_matches_renovate_hashicorp_convertor_spec() {
         assert_eq!(npm2hashicorp("4.x.x"), None);

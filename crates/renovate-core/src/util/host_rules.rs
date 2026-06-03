@@ -423,7 +423,7 @@ mod tests {
 
     // ── add() ────────────────────────────────────────────────────────────────
 
-    // Ported: "throws if both domainName and hostName" — util/host-rules.spec.ts line 18
+    // Ported: "throws if both domainName and hostName" — lib/util/host-rules.spec.ts line 18
     #[test]
     fn add_throws_if_both_domain_name_and_host_name() {
         setup();
@@ -441,7 +441,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws if both domainName and baseUrl" — util/host-rules.spec.ts line 28
+    // Ported: "throws if both domainName and baseUrl" — lib/util/host-rules.spec.ts line 28
     #[test]
     fn add_throws_if_both_domain_name_and_base_url() {
         setup();
@@ -459,7 +459,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "throws if both hostName and baseUrl" — util/host-rules.spec.ts line 38
+    // Ported: "throws if both hostName and baseUrl" — lib/util/host-rules.spec.ts line 38
     #[test]
     fn add_throws_if_both_host_name_and_base_url() {
         setup();
@@ -477,7 +477,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "supports baseUrl-only" — util/host-rules.spec.ts line 48
+    // Ported: "supports baseUrl-only" — lib/util/host-rules.spec.ts line 48
     #[test]
     fn add_supports_base_url_only() {
         setup();
@@ -517,7 +517,7 @@ mod tests {
         assert_eq!(result4.username.as_deref(), Some("user1"));
     }
 
-    // Ported: "does not match subpart of hostname" — util/host-rules.spec.ts line 72
+    // Ported: "does not match subpart of hostname" — lib/util/host-rules.spec.ts line 72
     #[test]
     fn add_does_not_match_subpart_of_hostname() {
         setup();
@@ -545,7 +545,7 @@ mod tests {
         );
     }
 
-    // Ported: "massages host url" — util/host-rules.spec.ts line 84
+    // Ported: "massages host url" — lib/util/host-rules.spec.ts line 84
     #[test]
     fn add_massages_host_url() {
         setup();
@@ -579,7 +579,7 @@ mod tests {
 
     // ── find() ───────────────────────────────────────────────────────────────
 
-    // Ported: "warns and returns empty for bad search" — util/host-rules.spec.ts line 111
+    // Ported: "warns and returns empty for bad search" — lib/util/host-rules.spec.ts line 111
     #[test]
     fn find_warns_and_returns_empty_for_bad_search() {
         setup();
@@ -587,7 +587,7 @@ mod tests {
         assert_eq!(result, CombinedHostRule::default());
     }
 
-    // Ported: "needs exact host matches" — util/host-rules.spec.ts line 115
+    // Ported: "needs exact host matches" — lib/util/host-rules.spec.ts line 115
     #[test]
     fn find_needs_exact_host_matches() {
         setup();
@@ -637,7 +637,7 @@ mod tests {
         assert_eq!(r4, CombinedHostRule::default());
     }
 
-    // Ported: "matches on empty rules" — util/host-rules.spec.ts line 135
+    // Ported: "matches on empty rules" — lib/util/host-rules.spec.ts line 135
     #[test]
     fn find_matches_on_empty_rules() {
         setup();
@@ -654,7 +654,7 @@ mod tests {
         assert_eq!(r.enabled, Some(true));
     }
 
-    // Ported: "matches on hostType" — util/host-rules.spec.ts line 144
+    // Ported: "matches on hostType" — lib/util/host-rules.spec.ts line 144
     #[test]
     fn find_matches_on_host_type() {
         setup();
@@ -672,7 +672,7 @@ mod tests {
         assert_eq!(r.token.as_deref(), Some("abc"));
     }
 
-    // Ported: "matches on domainName" — util/host-rules.spec.ts line 154
+    // Ported: "matches on domainName" — lib/util/host-rules.spec.ts line 154
     #[test]
     fn find_matches_on_domain_name() {
         setup();
@@ -719,7 +719,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches on specific path" — util/host-rules.spec.ts line 172
+    // Ported: "matches on specific path" — lib/util/host-rules.spec.ts line 172
     #[test]
     fn find_matches_on_specific_path() {
         setup();
@@ -753,7 +753,7 @@ mod tests {
         assert_eq!(r.token.as_deref(), Some("def"));
     }
 
-    // Ported: "matches for several hostTypes when no hostType rule is configured" — util/host-rules.spec.ts line 199
+    // Ported: "matches for several hostTypes when no hostType rule is configured" — lib/util/host-rules.spec.ts line 199
     #[test]
     fn find_matches_for_several_host_types() {
         setup();
@@ -772,7 +772,7 @@ mod tests {
         assert_eq!(r.token.as_deref(), Some("abc"));
     }
 
-    // Ported: "matches if hostType is configured and host rule is filtered with datasource" — util/host-rules.spec.ts line 218
+    // Ported: "matches if hostType is configured and host rule is filtered with datasource" — lib/util/host-rules.spec.ts line 218
     #[test]
     fn find_matches_if_host_type_filtered_with_datasource() {
         setup();
@@ -799,7 +799,7 @@ mod tests {
         assert_eq!(r.token.as_deref(), Some("def"));
     }
 
-    // Ported: "matches on hostName" — util/host-rules.spec.ts line 237
+    // Ported: "matches on hostName" — lib/util/host-rules.spec.ts line 237
     #[test]
     fn find_matches_on_host_name() {
         setup();
@@ -826,7 +826,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches on matchHost with protocol" — util/host-rules.spec.ts line 247
+    // Ported: "matches on matchHost with protocol" — lib/util/host-rules.spec.ts line 247
     #[test]
     fn find_matches_on_match_host_with_protocol() {
         setup();
@@ -875,7 +875,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches on matchHost without protocol" — util/host-rules.spec.ts line 262
+    // Ported: "matches on matchHost without protocol" — lib/util/host-rules.spec.ts line 262
     #[test]
     fn find_matches_on_match_host_without_protocol() {
         setup();
@@ -916,7 +916,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches on matchHost with dot prefix" — util/host-rules.spec.ts line 272
+    // Ported: "matches on matchHost with dot prefix" — lib/util/host-rules.spec.ts line 272
     #[test]
     fn find_matches_on_match_host_with_dot_prefix() {
         setup();
@@ -956,7 +956,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches on matchHost with port" — util/host-rules.spec.ts line 282
+    // Ported: "matches on matchHost with port" — lib/util/host-rules.spec.ts line 282
     #[test]
     fn find_matches_on_match_host_with_port() {
         setup();
@@ -986,7 +986,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches on hostType and endpoint" — util/host-rules.spec.ts line 292
+    // Ported: "matches on hostType and endpoint" — lib/util/host-rules.spec.ts line 292
     #[test]
     fn find_matches_on_host_type_and_endpoint() {
         setup();
@@ -1005,7 +1005,7 @@ mod tests {
         assert_eq!(r.token.as_deref(), Some("abc"));
     }
 
-    // Ported: "matches on endpoint subresource" — util/host-rules.spec.ts line 304
+    // Ported: "matches on endpoint subresource" — lib/util/host-rules.spec.ts line 304
     #[test]
     fn find_matches_on_endpoint_subresource() {
         setup();
@@ -1024,7 +1024,7 @@ mod tests {
         assert_eq!(r.token.as_deref(), Some("abc"));
     }
 
-    // Ported: "matches shortest matchHost first" — util/host-rules.spec.ts line 318
+    // Ported: "matches shortest matchHost first" — lib/util/host-rules.spec.ts line 318
     #[test]
     fn find_matches_shortest_match_host_first() {
         setup();
@@ -1048,7 +1048,7 @@ mod tests {
         assert_eq!(r.token.as_deref(), Some("longest"));
     }
 
-    // Ported: "matches readOnly requests" — util/host-rules.spec.ts line 334
+    // Ported: "matches readOnly requests" — lib/util/host-rules.spec.ts line 334
     #[test]
     fn find_matches_read_only_requests() {
         setup();
@@ -1076,7 +1076,7 @@ mod tests {
 
     // ── hosts() ──────────────────────────────────────────────────────────────
 
-    // Ported: "returns hosts" — util/host-rules.spec.ts line 355
+    // Ported: "returns hosts" — lib/util/host-rules.spec.ts line 355
     #[test]
     fn hosts_returns_hosts() {
         setup();
@@ -1134,7 +1134,7 @@ mod tests {
 
     // ── findAll() ────────────────────────────────────────────────────────────
 
-    // Ported: "warns and returns empty for bad search" — util/host-rules.spec.ts line 393
+    // Ported: "warns and returns empty for bad search" — lib/util/host-rules.spec.ts line 393
     #[test]
     fn find_all_returns_empty_for_unknown_host_type() {
         setup();
@@ -1142,7 +1142,7 @@ mod tests {
         assert!(result.is_empty());
     }
 
-    // Ported: "needs exact host matches" — util/host-rules.spec.ts line 397
+    // Ported: "needs exact host matches" — lib/util/host-rules.spec.ts line 397
     #[test]
     fn find_all_needs_exact_host_matches() {
         setup();
@@ -1171,7 +1171,7 @@ mod tests {
 
     // ── getAll() ─────────────────────────────────────────────────────────────
 
-    // Ported: "returns all host rules" — util/host-rules.spec.ts line 418
+    // Ported: "returns all host rules" — lib/util/host-rules.spec.ts line 418
     #[test]
     fn get_all_returns_all_rules() {
         setup();
@@ -1199,7 +1199,7 @@ mod tests {
 
     // ── hostType() ───────────────────────────────────────────────────────────
 
-    // Ported: "return hostType" — util/host-rules.spec.ts line 437
+    // Ported: "return hostType" — lib/util/host-rules.spec.ts line 437
     #[test]
     fn host_type_for_url_returns_host_type() {
         setup();
@@ -1230,7 +1230,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null" — util/host-rules.spec.ts line 459
+    // Ported: "returns null" — lib/util/host-rules.spec.ts line 459
     #[test]
     fn host_type_for_url_returns_none_for_no_match() {
         setup();

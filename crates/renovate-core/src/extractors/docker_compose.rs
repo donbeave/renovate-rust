@@ -304,7 +304,7 @@ mod tests {
 
     // ── basic extraction ──────────────────────────────────────────────────────
 
-    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
+    // Ported: "extracts multiple image lines for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_images_from_compose_v3() {
         let content = r#"
@@ -329,7 +329,7 @@ services:
         );
     }
 
-    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
+    // Ported: "extracts multiple image lines for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_quoted_image() {
         let content = r#"
@@ -351,7 +351,7 @@ services:
         );
     }
 
-    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
+    // Ported: "extracts multiple image lines for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_image_with_registry() {
         let content = "services:\n  redis:\n    image: quay.io/something/redis:alpine\n";
@@ -361,7 +361,7 @@ services:
         assert_eq!(deps[0].tag.as_deref(), Some("alpine"));
     }
 
-    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
+    // Ported: "extracts multiple image lines for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 30
     #[test]
     fn extracts_image_with_digest() {
         let content = "services:\n  app:\n    image: nginx:1.25@sha256:abc123\n";
@@ -372,7 +372,7 @@ services:
 
     // ── skip reasons ──────────────────────────────────────────────────────────
 
-    // Ported: "extracts default variable values for version 3" — docker-compose/extract.spec.ts line 42
+    // Ported: "extracts default variable values for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 42
     #[test]
     fn variable_interpolation_is_skipped() {
         let content = "services:\n  redis:\n    image: ${REDIS_IMAGE:-redis:5.0.0}\n";
@@ -380,7 +380,7 @@ services:
         assert_eq!(deps[0].skip_reason, Some(ComposeSkipReason::VariableRef));
     }
 
-    // Ported: "extracts default variable values for version 3" — docker-compose/extract.spec.ts line 42
+    // Ported: "extracts default variable values for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 42
     #[test]
     fn build_service_is_skipped() {
         let content = r#"
@@ -399,7 +399,7 @@ services:
 
     // ── comment lines ─────────────────────────────────────────────────────────
 
-    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
+    // Ported: "extracts multiple image lines for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 30
     #[test]
     fn comment_lines_are_ignored() {
         let content =
@@ -411,7 +411,7 @@ services:
 
     // ── real fixture from Renovate ────────────────────────────────────────────
 
-    // Ported: "extracts multiple image lines for version 1" — docker-compose/extract.spec.ts line 24
+    // Ported: "extracts multiple image lines for version 1" — lib/modules/manager/docker-compose/extract.spec.ts line 24
     #[test]
     fn renovate_fixture_1_v1_format() {
         // v1 format: services at top level (no `services:` key)
@@ -429,7 +429,7 @@ db:
         assert!(deps.iter().any(|d| d.image == "postgres"));
     }
 
-    // Ported: "extracts multiple image lines for version 3" — docker-compose/extract.spec.ts line 30
+    // Ported: "extracts multiple image lines for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 30
     #[test]
     fn no_false_positives_for_non_image_keys() {
         let content = "services:\n  app:\n    imagePath: /tmp/image\n    image: nginx:1.25\n";
@@ -438,28 +438,28 @@ db:
         assert_eq!(deps[0].image, "nginx");
     }
 
-    // Ported: "returns null for empty" — docker-compose/extract.spec.ts line 12
+    // Ported: "returns null for empty" — lib/modules/manager/docker-compose/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_empty() {
         let deps = extract_ok("");
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for non-object YAML" — docker-compose/extract.spec.ts line 16
+    // Ported: "returns null for non-object YAML" — lib/modules/manager/docker-compose/extract.spec.ts line 16
     #[test]
     fn non_object_yaml_returns_empty() {
         let deps = extract_ok("nothing here");
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for malformed YAML" — docker-compose/extract.spec.ts line 20
+    // Ported: "returns null for malformed YAML" — lib/modules/manager/docker-compose/extract.spec.ts line 20
     #[test]
     fn malformed_yaml_returns_empty() {
         let deps = extract_ok("nothing here\n:::::::");
         assert!(deps.is_empty());
     }
 
-    // Ported: "extracts can parse yaml tags for version 3" — docker-compose/extract.spec.ts line 59
+    // Ported: "extracts can parse yaml tags for version 3" — lib/modules/manager/docker-compose/extract.spec.ts line 59
     #[test]
     fn yaml_tags_do_not_break_extraction() {
         let content = r#"web:
@@ -477,7 +477,7 @@ worker:
         assert_eq!(deps[0].tag.as_deref(), Some("20.0.0"));
     }
 
-    // Ported: "extracts image of templated compose file" — docker-compose/extract.spec.ts line 172
+    // Ported: "extracts image of templated compose file" — lib/modules/manager/docker-compose/extract.spec.ts line 172
     #[test]
     fn extracts_image_from_templated_compose_file() {
         // {{ }} template expressions are ignored since they don't contain `image:`
@@ -494,7 +494,7 @@ services:
         assert_eq!(deps[0].tag.as_deref(), Some("0.0.1"));
     }
 
-    // Ported: "extracts image and replaces registry" — docker-compose/extract.spec.ts line 87
+    // Ported: "extracts image and replaces registry" — lib/modules/manager/docker-compose/extract.spec.ts line 87
     #[test]
     fn extracts_image_and_replaces_registry() {
         let content = r#"
@@ -518,7 +518,7 @@ services:
         );
     }
 
-    // Ported: "extracts image but no replacement" — docker-compose/extract.spec.ts line 115
+    // Ported: "extracts image but no replacement" — lib/modules/manager/docker-compose/extract.spec.ts line 115
     #[test]
     fn extracts_image_without_registry_replacement() {
         let content = r#"
@@ -543,7 +543,7 @@ services:
         );
     }
 
-    // Ported: "extracts image and no double replacement" — docker-compose/extract.spec.ts line 143
+    // Ported: "extracts image and no double replacement" — lib/modules/manager/docker-compose/extract.spec.ts line 143
     #[test]
     fn extracts_image_without_double_registry_replacement() {
         let content = r#"
@@ -570,7 +570,7 @@ services:
         );
     }
 
-    // Ported: "extracts multiple image lines for version 3 without set version key" — docker-compose/extract.spec.ts line 36
+    // Ported: "extracts multiple image lines for version 3 without set version key" — lib/modules/manager/docker-compose/extract.spec.ts line 36
     #[test]
     fn no_version_key_extracts_eight_deps() {
         // docker-compose.3-no-version.yml: services format without top-level `version:`.
@@ -607,7 +607,7 @@ services:
         assert!(deps.iter().any(|d| d.image == "dockersamples/visualizer"));
     }
 
-    // Ported: "extract images from fragments" — docker-compose/extract.spec.ts line 198
+    // Ported: "extract images from fragments" — lib/modules/manager/docker-compose/extract.spec.ts line 198
     //
     // Docker compose files can declare a YAML anchor (`&shared_settings`)
     // carrying an `image:` field and reuse it across services via merge keys

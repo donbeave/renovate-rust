@@ -1627,7 +1627,7 @@ mod tests {
   </dependencies>
 </project>"#;
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn extracts_regular_dependencies() {
         let deps = extract_ok(SIMPLE_POM);
@@ -1646,7 +1646,7 @@ mod tests {
         );
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn extracts_parent() {
         let content = r#"<project>
@@ -1670,7 +1670,7 @@ mod tests {
         assert_eq!(parents[0].current_value, "3.1.4");
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn extracts_dependency_management() {
         let content = r#"<project>
@@ -1696,7 +1696,7 @@ mod tests {
         assert_eq!(mgmt[0].current_value, "2.0.0");
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn extracts_build_plugins() {
         let content = r#"<project>
@@ -1723,7 +1723,7 @@ mod tests {
         assert_eq!(plugins[0].current_value, "3.11.0");
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn plugin_default_group_id() {
         let content = r#"<project>
@@ -1748,7 +1748,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for invalid XML" — maven/extract.spec.ts line 471
+    // Ported: "returns null for invalid XML" — lib/modules/manager/maven/extract.spec.ts line 471
     #[test]
     fn settings_registries_invalid_xml_returns_empty() {
         assert!(extract_registries("").is_empty());
@@ -1757,7 +1757,7 @@ mod tests {
         assert!(extract_registries("<settings></settings>").is_empty());
     }
 
-    // Ported: "extract registries from a simple mirror settings file" — maven/extract.spec.ts line 478
+    // Ported: "extract registries from a simple mirror settings file" — lib/modules/manager/maven/extract.spec.ts line 478
     #[test]
     fn settings_registries_extracts_simple_mirror() {
         let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
@@ -1775,7 +1775,7 @@ mod tests {
         );
     }
 
-    // Ported: "extract registries from a simple profile settings file" — maven/extract.spec.ts line 485
+    // Ported: "extract registries from a simple profile settings file" — lib/modules/manager/maven/extract.spec.ts line 485
     #[test]
     fn settings_registries_extracts_simple_profile_repository() {
         let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
@@ -1797,7 +1797,7 @@ mod tests {
         );
     }
 
-    // Ported: "extract registries from a complex profile settings file" — maven/extract.spec.ts line 492
+    // Ported: "extract registries from a complex profile settings file" — lib/modules/manager/maven/extract.spec.ts line 492
     #[test]
     fn settings_registries_extracts_complex_settings() {
         let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
@@ -1854,7 +1854,7 @@ mod tests {
         );
     }
 
-    // Ported: "extract registries from a settings file that uses a newer schema" — maven/extract.spec.ts line 503
+    // Ported: "extract registries from a settings file that uses a newer schema" — lib/modules/manager/maven/extract.spec.ts line 503
     #[test]
     fn settings_registries_extracts_newer_schema() {
         let content = r#"<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1876,7 +1876,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for invalid xml files" — maven/extract.spec.ts line 527
+    // Ported: "returns null for invalid xml files" — lib/modules/manager/maven/extract.spec.ts line 527
     #[test]
     fn extensions_invalid_xml_returns_none() {
         assert!(extract_extensions("").is_none());
@@ -1891,19 +1891,19 @@ mod tests {
         );
     }
 
-    // Ported: "should return empty if package has no content" — maven/extract.spec.ts line 548
+    // Ported: "should return empty if package has no content" — lib/modules/manager/maven/extract.spec.ts line 548
     #[test]
     fn extract_all_package_files_empty_content_returns_empty() {
         assert!(extract_all_package_files(&[("random.pom.xml", "")]).is_empty());
     }
 
-    // Ported: "should return empty for packages with invalid content" — maven/extract.spec.ts line 554
+    // Ported: "should return empty for packages with invalid content" — lib/modules/manager/maven/extract.spec.ts line 554
     #[test]
     fn extract_all_package_files_invalid_content_returns_empty() {
         assert!(extract_all_package_files(&[("random.pom.xml", "invalid content")]).is_empty());
     }
 
-    // Ported: "should return packages with urls from a settings file" — maven/extract.spec.ts line 560
+    // Ported: "should return packages with urls from a settings file" — lib/modules/manager/maven/extract.spec.ts line 560
     #[test]
     fn extract_all_package_files_applies_settings_registry_urls() {
         let settings = r#"<settings>
@@ -1939,7 +1939,7 @@ mod tests {
         assert_eq!(packages[0][0].registry_urls, expected);
     }
 
-    // Ported: "should include registryUrls in the correct order" — maven/extract.spec.ts line 791
+    // Ported: "should include registryUrls in the correct order" — lib/modules/manager/maven/extract.spec.ts line 791
     #[test]
     fn extract_all_package_files_preserves_settings_registry_url_order() {
         let pom = r#"<project>
@@ -1979,7 +1979,7 @@ mod tests {
         assert_eq!(packages[0][0].registry_urls, expected);
     }
 
-    // Ported: "should return package files info" — maven/extract.spec.ts line 812
+    // Ported: "should return package files info" — lib/modules/manager/maven/extract.spec.ts line 812
     #[test]
     fn extract_all_package_file_infos_returns_package_file_metadata() {
         let pom = r#"<project>
@@ -2037,7 +2037,7 @@ mod tests {
         assert_eq!(quux.shared_variable_name.as_deref(), Some("quuxVersion"));
     }
 
-    // Ported: "should include registryUrls from parent pom files" — maven/extract.spec.ts line 581
+    // Ported: "should include registryUrls from parent pom files" — lib/modules/manager/maven/extract.spec.ts line 581
     #[test]
     fn extract_all_package_files_includes_registry_urls_from_parent_poms() {
         let parent = r#"<project>
@@ -2090,7 +2090,7 @@ mod tests {
         }
     }
 
-    // Ported: "should extract from .mvn/extensions.xml file" — maven/extract.spec.ts line 888
+    // Ported: "should extract from .mvn/extensions.xml file" — lib/modules/manager/maven/extract.spec.ts line 888
     #[test]
     fn extract_all_package_files_extracts_extensions_xml() {
         let content = r#"<extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -2111,7 +2111,7 @@ mod tests {
         assert_eq!(packages[0][0].dep_type, MavenDepType::Extension);
     }
 
-    // Ported: "should return empty array if extensions file is invalid or empty" — maven/extract.spec.ts line 998
+    // Ported: "should return empty array if extensions file is invalid or empty" — lib/modules/manager/maven/extract.spec.ts line 998
     #[test]
     fn extract_all_package_files_invalid_extensions_return_empty() {
         assert!(
@@ -2123,7 +2123,7 @@ mod tests {
         );
     }
 
-    // Ported: "should skip root pom.xml" — maven/extract.spec.ts line 1011
+    // Ported: "should skip root pom.xml" — lib/modules/manager/maven/extract.spec.ts line 1011
     #[test]
     fn extract_all_package_files_marks_child_parent_as_parent_root() {
         let root = r#"<project>
@@ -2152,7 +2152,7 @@ mod tests {
         assert_eq!(packages[1][0].renovate_dep_type(), "parent-root");
     }
 
-    // Ported: "should skip root pom.xml when it has an external parent" — maven/extract.spec.ts line 1045
+    // Ported: "should skip root pom.xml when it has an external parent" — lib/modules/manager/maven/extract.spec.ts line 1045
     #[test]
     fn extract_all_package_files_keeps_external_root_parent() {
         let root = r#"<project>
@@ -2185,7 +2185,7 @@ mod tests {
         assert_eq!(packages[1][0].dep_type, MavenDepType::ParentRoot);
     }
 
-    // Ported: "handles cross-referencing" — maven/extract.spec.ts line 1087
+    // Ported: "handles cross-referencing" — lib/modules/manager/maven/extract.spec.ts line 1087
     #[test]
     fn extract_all_package_files_handles_cross_referencing_modules() {
         let foo = r#"<project>
@@ -2223,7 +2223,7 @@ mod tests {
         assert_eq!(packages[1][0].skip_reason, None);
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn extracts_build_extensions() {
         let content = r#"<project>
@@ -2247,7 +2247,7 @@ mod tests {
         assert_eq!(exts[0].current_value, "1.0");
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn property_ref_skipped_when_not_defined() {
         // No <properties> section — ${spring.version} cannot be resolved.
@@ -2265,7 +2265,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(MavenSkipReason::PropertyRef));
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn property_resolved_from_properties_section() {
         let content = r#"<project>
@@ -2315,7 +2315,7 @@ mod tests {
         assert_eq!(unknown.skip_reason, Some(MavenSkipReason::PropertyRef));
     }
 
-    // Ported: "should apply props recursively" — maven/extract.spec.ts line 418
+    // Ported: "should apply props recursively" — lib/modules/manager/maven/extract.spec.ts line 418
     #[test]
     fn recursive_property_resolution() {
         // ${alias} = ${actual}, ${actual} = 1.2.3 — two-level indirection.
@@ -2338,7 +2338,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn pdm_style_pom_with_properties() {
         // Based on the simple.pom.xml fixture from the Renovate test suite.
@@ -2379,7 +2379,7 @@ mod tests {
         assert_eq!(quuz.current_value, "1.2.3");
     }
 
-    // Ported: "should detect props infinitely recursing props" — manager/maven/extract.spec.ts line 448
+    // Ported: "should detect props infinitely recursing props" — lib/modules/manager/maven/extract.spec.ts line 448
     #[test]
     fn substitute_props_handles_unknown_key() {
         let mut props = HashMap::new();
@@ -2388,7 +2388,7 @@ mod tests {
         assert_eq!(result, "1.0-${unknown}");
     }
 
-    // Ported: "should detect props infinitely recursing props" — manager/maven/extract.spec.ts line 448
+    // Ported: "should detect props infinitely recursing props" — lib/modules/manager/maven/extract.spec.ts line 448
     #[test]
     fn substitute_props_unclosed_brace() {
         let props = HashMap::new();
@@ -2396,7 +2396,7 @@ mod tests {
         assert_eq!(result, "${unclosed");
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn plugin_nested_dependencies_not_captured_as_regular() {
         // Dependencies nested inside a <plugin> block should not appear as
@@ -2429,7 +2429,7 @@ mod tests {
         );
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn profile_dependencies_extracted() {
         let content = r#"<project>
@@ -2455,7 +2455,7 @@ mod tests {
         assert_eq!(profile[0].dep_name, "org.example:profile-artifact");
     }
 
-    // Ported: "returns null for invalid XML" — maven/extract.spec.ts line 22
+    // Ported: "returns null for invalid XML" — lib/modules/manager/maven/extract.spec.ts line 22
     #[test]
     fn empty_pom_returns_empty() {
         let content = r#"<project>
@@ -2465,7 +2465,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "extract dependencies from any XML position" — maven/extract.spec.ts line 29
+    // Ported: "extract dependencies from any XML position" — lib/modules/manager/maven/extract.spec.ts line 29
     #[test]
     fn multiline_element_values_trimmed() {
         let content = r#"<project>
@@ -2491,7 +2491,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.0.0");
     }
 
-    // Ported: "extract dependencies with windows line endings" — maven/extract.spec.ts line 237
+    // Ported: "extract dependencies with windows line endings" — lib/modules/manager/maven/extract.spec.ts line 237
     #[test]
     fn windows_line_endings_are_tolerated() {
         let content = "<project>\r\n  <dependencies>\r\n    <dependency>\r\n      <groupId>org.example</groupId>\r\n      <artifactId>demo</artifactId>\r\n      <version>1.2.3</version>\r\n    </dependency>\r\n  </dependencies>\r\n</project>\r\n";
@@ -2501,7 +2501,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.2.3");
     }
 
-    // Ported: "extracts builder and buildpack images from spring-boot plugin" — maven/extract.spec.ts line 279
+    // Ported: "extracts builder and buildpack images from spring-boot plugin" — lib/modules/manager/maven/extract.spec.ts line 279
     #[test]
     fn spring_boot_plugin_extracts_builder_run_image_and_buildpacks() {
         let content = r#"<project>
@@ -2590,7 +2590,7 @@ mod tests {
         );
     }
 
-    // Ported: "extracts only builder if defaults are used in spring-boot plugin" — maven/extract.spec.ts line 370
+    // Ported: "extracts only builder if defaults are used in spring-boot plugin" — lib/modules/manager/maven/extract.spec.ts line 370
     #[test]
     fn spring_boot_plugin_extracts_only_configured_builder() {
         let content = r#"<project>
@@ -2616,7 +2616,7 @@ mod tests {
         assert_eq!(cnb_deps[0].current_value, "0.4.316");
     }
 
-    // Ported: "returns no buildpack dependencies when image tag is missing in spring boot plugin configuration" — maven/extract.spec.ts line 398
+    // Ported: "returns no buildpack dependencies when image tag is missing in spring boot plugin configuration" — lib/modules/manager/maven/extract.spec.ts line 398
     #[test]
     fn spring_boot_plugin_skips_missing_image_tag() {
         let content = r#"<project>
@@ -2636,7 +2636,7 @@ mod tests {
         assert!(cnb_deps(&deps).is_empty());
     }
 
-    // Ported: "returns no buildpack dependencies when dependencies are invalid in spring boot plugin" — maven/extract.spec.ts line 407
+    // Ported: "returns no buildpack dependencies when dependencies are invalid in spring boot plugin" — lib/modules/manager/maven/extract.spec.ts line 407
     #[test]
     fn spring_boot_plugin_skips_invalid_buildpack_dependencies() {
         let content = r#"<project>
@@ -2722,7 +2722,7 @@ mod tests {
         assert_eq!(dep.renovate_dep_type(), "compile");
     }
 
-    // Ported: "returns null for invalid XML" — maven/extract.spec.ts line 22
+    // Ported: "returns null for invalid XML" — lib/modules/manager/maven/extract.spec.ts line 22
     #[test]
     fn invalid_xml_returns_empty() {
         // Empty string, invalid XML, and documents with wrong root element all
@@ -2733,7 +2733,7 @@ mod tests {
         assert!(extract_ok("<project></project>").is_empty());
     }
 
-    // Ported: "tries minimum manifests" — maven/extract.spec.ts line 249
+    // Ported: "tries minimum manifests" — lib/modules/manager/maven/extract.spec.ts line 249
     #[test]
     fn minimum_manifest_returns_empty_deps() {
         // A minimal valid POM with modelVersion and version but no dependencies.
@@ -2747,7 +2747,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "tries minimum snapshot manifests" — maven/extract.spec.ts line 264
+    // Ported: "tries minimum snapshot manifests" — lib/modules/manager/maven/extract.spec.ts line 264
     #[test]
     fn minimum_snapshot_manifest_returns_empty_deps() {
         let content = r#"<project>
@@ -2760,7 +2760,7 @@ mod tests {
         assert!(deps.is_empty());
     }
 
-    // Ported: "should apply props multiple times" — maven/extract.spec.ts line 433
+    // Ported: "should apply props multiple times" — lib/modules/manager/maven/extract.spec.ts line 433
     #[test]
     fn props_applied_with_multiple_usages() {
         // ${lucene.version} used in both groupId-like suffix and version.
@@ -2782,7 +2782,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "should extract from pom.template.xml file" — maven/extract.spec.ts line 917
+    // Ported: "should extract from pom.template.xml file" — lib/modules/manager/maven/extract.spec.ts line 917
     #[test]
     fn extracts_from_pom_template_xml_file() {
         let content = r#"<?xml version="1.0" encoding="UTF-8"?>
@@ -2833,7 +2833,7 @@ mod tests {
         assert!(scala.unwrap().skip_reason.is_some());
     }
 
-    // Ported: "should detect props infinitely recursing props" — maven/extract.spec.ts line 448
+    // Ported: "should detect props infinitely recursing props" — lib/modules/manager/maven/extract.spec.ts line 448
     #[test]
     fn infinite_recursing_props_left_as_placeholder() {
         // foo -> bar -> foo: circular reference — apply_props caps at 3 passes.
@@ -2906,7 +2906,7 @@ mod tests {
         result
     }
 
-    // Ported: "should update version" — maven/update.spec.ts line 15
+    // Ported: "should update version" — lib/modules/manager/maven/update.spec.ts line 15
     #[test]
     fn maven_update_dep_version() {
         let upgrade = MavenUpdateUpgrade {
@@ -2930,7 +2930,7 @@ mod tests {
         assert_eq!(value.as_deref(), Some("0.0.2"));
     }
 
-    // Ported: "should do simple replacement" — maven/update.spec.ts line 36
+    // Ported: "should do simple replacement" — lib/modules/manager/maven/update.spec.ts line 36
     #[test]
     fn maven_update_dep_simple_replacement() {
         let upgrade = MavenUpdateUpgrade {
@@ -2955,7 +2955,7 @@ mod tests {
         assert_eq!(group_id.as_deref(), Some("org.example.new"));
     }
 
-    // Ported: "should do full replacement" — maven/update.spec.ts line 58
+    // Ported: "should do full replacement" — lib/modules/manager/maven/update.spec.ts line 58
     #[test]
     fn maven_update_dep_full_replacement() {
         let upgrade = MavenUpdateUpgrade {
@@ -3002,7 +3002,7 @@ mod tests {
         assert_eq!(version.as_deref(), Some("0.0.2"));
     }
 
-    // Ported: "should do replacement if version is first" — maven/update.spec.ts line 90
+    // Ported: "should do replacement if version is first" — lib/modules/manager/maven/update.spec.ts line 90
     #[test]
     fn maven_update_dep_replacement_version_first() {
         let content = "<project xmlns=\"http://maven.apache.org/POM/4.0.0\">\n  <dependencyManagement>\n    <dependencies>\n      <dependency>\n        <version>0.0.1</version>\n        <artifactId>foo</artifactId>\n        <groupId>org.example</groupId>\n      </dependency>\n    </dependencies>\n  </dependencyManagement>\n</project>\n";
@@ -3044,7 +3044,7 @@ mod tests {
         assert_eq!(artifact_id.as_deref(), Some("bar"));
     }
 
-    // Ported: "should ignore replacement if name does not match" — maven/update.spec.ts line 134
+    // Ported: "should ignore replacement if name does not match" — lib/modules/manager/maven/update.spec.ts line 134
     #[test]
     fn maven_update_dep_ignore_mismatched_name() {
         let upgrade = MavenUpdateUpgrade {
@@ -3073,7 +3073,7 @@ mod tests {
         assert_eq!(group_id.as_deref(), Some("org.example"));
     }
 
-    // Ported: "should update a cloud native buildpack version" — maven/update.spec.ts line 151
+    // Ported: "should update a cloud native buildpack version" — lib/modules/manager/maven/update.spec.ts line 151
     #[test]
     fn maven_update_dep_cnb_version() {
         let upgrade = MavenUpdateUpgrade {
@@ -3088,7 +3088,7 @@ mod tests {
         assert!(result.contains("paketo-buildpacks/nodejs@6.1.2"));
     }
 
-    // Ported: "should update a cloud native buildpack digest" — maven/update.spec.ts line 173
+    // Ported: "should update a cloud native buildpack digest" — lib/modules/manager/maven/update.spec.ts line 173
     #[test]
     fn maven_update_dep_cnb_digest() {
         let upgrade = MavenUpdateUpgrade {
@@ -3111,7 +3111,7 @@ mod tests {
 
     // ── maven bumpPackageVersion tests ─────────────────────────────────────
 
-    // Ported: "bumps pom.xml version" — maven/update.spec.ts line 215
+    // Ported: "bumps pom.xml version" — lib/modules/manager/maven/update.spec.ts line 215
     #[test]
     fn maven_bump_version_patch() {
         let result = maven_bump_package_version(SIMPLE_POM_FULL, "0.0.1", "patch");
@@ -3119,7 +3119,7 @@ mod tests {
         assert_eq!(version.as_deref(), Some("0.0.2"));
     }
 
-    // Ported: "bumps pom.xml version keeping SNAPSHOT" — maven/update.spec.ts line 226
+    // Ported: "bumps pom.xml version keeping SNAPSHOT" — lib/modules/manager/maven/update.spec.ts line 226
     #[test]
     fn maven_bump_version_snapshot_patch() {
         let result = maven_bump_package_version(MINIMUM_SNAPSHOT_POM, "0.0.1-SNAPSHOT", "patch");
@@ -3127,7 +3127,7 @@ mod tests {
         assert_eq!(version.as_deref(), Some("0.0.2-SNAPSHOT"));
     }
 
-    // Ported: "bumps pom.xml minor version keeping SNAPSHOT" — maven/update.spec.ts line 237
+    // Ported: "bumps pom.xml minor version keeping SNAPSHOT" — lib/modules/manager/maven/update.spec.ts line 237
     #[test]
     fn maven_bump_version_snapshot_minor() {
         let result = maven_bump_package_version(MINIMUM_SNAPSHOT_POM, "0.0.1-SNAPSHOT", "minor");
@@ -3135,7 +3135,7 @@ mod tests {
         assert_eq!(version.as_deref(), Some("0.1.0-SNAPSHOT"));
     }
 
-    // Ported: "bumps pom.xml major version keeping SNAPSHOT" — maven/update.spec.ts line 248
+    // Ported: "bumps pom.xml major version keeping SNAPSHOT" — lib/modules/manager/maven/update.spec.ts line 248
     #[test]
     fn maven_bump_version_snapshot_major() {
         let result = maven_bump_package_version(MINIMUM_SNAPSHOT_POM, "0.0.1-SNAPSHOT", "major");
@@ -3143,7 +3143,7 @@ mod tests {
         assert_eq!(version.as_deref(), Some("1.0.0-SNAPSHOT"));
     }
 
-    // Ported: "bumps pom.xml version keeping qualifier with -SNAPSHOT" — maven/update.spec.ts line 259
+    // Ported: "bumps pom.xml version keeping qualifier with -SNAPSHOT" — lib/modules/manager/maven/update.spec.ts line 259
     #[test]
     fn maven_bump_version_qualified_snapshot() {
         let content = MINIMUM_SNAPSHOT_POM.replace("0.0.1-SNAPSHOT", "0.0.1-qualified-SNAPSHOT");
@@ -3152,7 +3152,7 @@ mod tests {
         assert_eq!(version.as_deref(), Some("0.0.2-qualified-SNAPSHOT"));
     }
 
-    // Ported: "does not bump version twice" — maven/update.spec.ts line 273
+    // Ported: "does not bump version twice" — lib/modules/manager/maven/update.spec.ts line 273
     #[test]
     fn maven_bump_version_not_twice() {
         let result1 = maven_bump_package_version(SIMPLE_POM_FULL, "0.0.1", "patch");
@@ -3162,7 +3162,7 @@ mod tests {
         assert_eq!(result2.bumped_content, *bumped);
     }
 
-    // Ported: "does not bump version if version is not a semantic version" — maven/update.spec.ts line 288
+    // Ported: "does not bump version if version is not a semantic version" — lib/modules/manager/maven/update.spec.ts line 288
     #[test]
     fn maven_bump_version_non_semver() {
         let result = maven_bump_package_version(MINIMUM_POM, "1", "patch");
@@ -3171,14 +3171,14 @@ mod tests {
         assert_eq!(version.as_deref(), Some("1"));
     }
 
-    // Ported: "does not bump version if pom.xml has no version" — maven/update.spec.ts line 299
+    // Ported: "does not bump version if pom.xml has no version" — lib/modules/manager/maven/update.spec.ts line 299
     #[test]
     fn maven_bump_version_no_version() {
         let result = maven_bump_package_version(MINIMUM_POM, "", "patch");
         assert_eq!(result.bumped_content, MINIMUM_POM);
     }
 
-    // Ported: "returns content if bumping errors" — maven/update.spec.ts line 305
+    // Ported: "returns content if bumping errors" — lib/modules/manager/maven/update.spec.ts line 305
     #[test]
     fn maven_bump_version_error_returns_content() {
         // Invalid bump_version → returns original content
@@ -3186,7 +3186,7 @@ mod tests {
         assert_eq!(result.bumped_content, SIMPLE_POM_FULL);
     }
 
-    // Ported: "bumps pom.xml version to SNAPSHOT with prerelease" — maven/update.spec.ts line 314
+    // Ported: "bumps pom.xml version to SNAPSHOT with prerelease" — lib/modules/manager/maven/update.spec.ts line 314
     #[test]
     fn maven_bump_version_prerelease_adds_snapshot() {
         let result = maven_bump_package_version(SIMPLE_POM_FULL, "0.0.1", "prerelease");
@@ -3194,7 +3194,7 @@ mod tests {
         assert_eq!(version.as_deref(), Some("0.0.2-SNAPSHOT"));
     }
 
-    // Ported: "bumps pom.xml version with prerelease semver level" — maven/update.spec.ts line 325
+    // Ported: "bumps pom.xml version with prerelease semver level" — lib/modules/manager/maven/update.spec.ts line 325
     #[test]
     fn maven_bump_version_prerelease_increment() {
         let result = maven_bump_package_version(PRERELEASE_POM, "1.0.0-1", "prerelease");
@@ -3229,7 +3229,7 @@ mod tests {
 
     // ── Ported from maven/index.spec.ts ───────────────────────────────────────
 
-    // Ported: "should update an existing dependency" — maven/index.spec.ts line 26
+    // Ported: "should update an existing dependency" — lib/modules/manager/maven/index.spec.ts line 26
     #[test]
     fn maven_index_update_existing_dependency() {
         let new_value = "9.9.9.9-final";
@@ -3254,7 +3254,7 @@ mod tests {
         assert_eq!(updated_dep.current_value, new_value);
     }
 
-    // Ported: "should not touch content if new and old versions are equal" — maven/index.spec.ts line 67
+    // Ported: "should not touch content if new and old versions are equal" — lib/modules/manager/maven/index.spec.ts line 67
     #[test]
     fn maven_index_no_touch_when_equal() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();
@@ -3273,7 +3273,7 @@ mod tests {
         assert_eq!(updated.as_deref(), Some(SIMPLE_POM_FULL));
     }
 
-    // Ported: "should return null if current versions in content and upgrade are not same" — maven/index.spec.ts line 150
+    // Ported: "should return null if current versions in content and upgrade are not same" — lib/modules/manager/maven/index.spec.ts line 150
     #[test]
     fn maven_index_returns_none_when_current_mismatch() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();
@@ -3292,7 +3292,7 @@ mod tests {
         assert!(updated.is_none());
     }
 
-    // Ported: "should update ranges" — maven/index.spec.ts line 162
+    // Ported: "should update ranges" — lib/modules/manager/maven/index.spec.ts line 162
     #[test]
     fn maven_index_update_ranges() {
         let new_value = "[1.2.3]";
@@ -3317,7 +3317,7 @@ mod tests {
         assert_eq!(updated_dep.current_value, new_value);
     }
 
-    // Ported: "should preserve ranges" — maven/index.spec.ts line 181
+    // Ported: "should preserve ranges" — lib/modules/manager/maven/index.spec.ts line 181
     #[test]
     fn maven_index_preserve_ranges() {
         let deps = extract(SIMPLE_POM_FULL).unwrap();
@@ -3355,7 +3355,7 @@ mod tests {
         assert!(updated.contains("2.0.0"));
     }
 
-    // Ported: "should update existing dependency defined via properties" — maven/index.spec.ts line 43
+    // Ported: "should update existing dependency defined via properties" — lib/modules/manager/maven/index.spec.ts line 43
     #[test]
     fn maven_index_update_property_based_dependency() {
         let parent = include_str!("../../tests/fixtures/maven/parent.pom.xml");
@@ -3372,7 +3372,7 @@ mod tests {
         assert!(updated.contains("9.9.9.9-final"));
     }
 
-    // Ported: "should update to version of the latest dep in implicit group" — maven/index.spec.ts line 79
+    // Ported: "should update to version of the latest dep in implicit group" — lib/modules/manager/maven/index.spec.ts line 79
     #[test]
     fn maven_index_update_implicit_group_latest_version() {
         let grouping = include_str!("../../tests/fixtures/maven/grouping.pom.xml");
@@ -3417,7 +3417,7 @@ mod tests {
         assert!(updated2_orig.contains("<foo.version>1.0.3</foo.version>"));
     }
 
-    // Ported: "should return null for ungrouped deps if content was updated outside" — maven/index.spec.ts line 135
+    // Ported: "should return null for ungrouped deps if content was updated outside" — lib/modules/manager/maven/index.spec.ts line 135
     #[test]
     fn maven_index_returns_none_when_ungrouped_dep_updated_outside() {
         let grouping = include_str!("../../tests/fixtures/maven/grouping.pom.xml");

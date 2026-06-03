@@ -349,7 +349,7 @@ mod tests {
         assert_eq!(result, None);
     }
 
-    // Ported: "returns tags from custom registry" — datasource/gitlab-tags/index.spec.ts line 9
+    // Ported: "returns tags from custom registry" — lib/modules/datasource/gitlab-tags/index.spec.ts line 9
     #[tokio::test]
     async fn returns_tags_from_custom_registry() {
         let server = MockServer::start().await;
@@ -380,7 +380,7 @@ mod tests {
         assert!(result.releases[2].release_timestamp.is_none());
     }
 
-    // Ported: "returns tags from custom registry in sub path" — datasource/gitlab-tags/index.spec.ts line 38
+    // Ported: "returns tags from custom registry in sub path" — lib/modules/datasource/gitlab-tags/index.spec.ts line 38
     #[tokio::test]
     async fn returns_tags_from_custom_registry_in_sub_path() {
         let server = MockServer::start().await;
@@ -406,7 +406,7 @@ mod tests {
         assert_eq!(result.releases.len(), 3);
     }
 
-    // Ported: "returns tags with default registry" — datasource/gitlab-tags/index.spec.ts line 67
+    // Ported: "returns tags with default registry" — lib/modules/datasource/gitlab-tags/index.spec.ts line 67
     #[tokio::test]
     async fn returns_tags_with_default_registry() {
         let server = MockServer::start().await;
@@ -429,7 +429,7 @@ mod tests {
         assert_eq!(result.releases.len(), 2);
     }
 
-    // Ported: "returns commits from gitlab installation" — datasource/gitlab-tags/index.spec.ts line 83
+    // Ported: "returns commits from gitlab installation" — lib/modules/datasource/gitlab-tags/index.spec.ts line 83
     #[tokio::test]
     async fn returns_commits_from_gitlab_installation() {
         let server = MockServer::start().await;
@@ -448,7 +448,7 @@ mod tests {
         assert_eq!(result.as_deref(), Some(digest));
     }
 
-    // Ported: "returns commits from gitlab installation for a specific branch" — datasource/gitlab-tags/index.spec.ts line 102
+    // Ported: "returns commits from gitlab installation for a specific branch" — lib/modules/datasource/gitlab-tags/index.spec.ts line 102
     #[tokio::test]
     async fn returns_commits_for_specific_branch() {
         let server = MockServer::start().await;
@@ -469,7 +469,7 @@ mod tests {
         assert_eq!(result.as_deref(), Some(digest));
     }
 
-    // Ported: "returns null from gitlab installation with no commits" — datasource/gitlab-tags/index.spec.ts line 122
+    // Ported: "returns null from gitlab installation with no commits" — lib/modules/datasource/gitlab-tags/index.spec.ts line 122
     #[tokio::test]
     async fn returns_null_with_no_commits() {
         let server = MockServer::start().await;
@@ -486,7 +486,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null from gitlab installation with unknown branch" — datasource/gitlab-tags/index.spec.ts line 135
+    // Ported: "returns null from gitlab installation with unknown branch" — lib/modules/datasource/gitlab-tags/index.spec.ts line 135
     #[tokio::test]
     async fn returns_null_for_unknown_branch() {
         let server = MockServer::start().await;
@@ -526,7 +526,7 @@ mod tests {
         assert_eq!(s.latest.as_deref(), Some("2.0.0"));
     }
 
-    // Ported: "works" — datasource/gitlab-tags/util.spec.ts line 5
+    // Ported: "works" — lib/modules/datasource/gitlab-tags/util.spec.ts line 5
     #[test]
     fn get_dep_host_works() {
         assert_eq!(get_dep_host("https://gitlab.com"), "https://gitlab.com");
@@ -540,7 +540,7 @@ mod tests {
         );
     }
 
-    // Ported: "works" — datasource/gitlab-tags/util.spec.ts line 17
+    // Ported: "works" — lib/modules/datasource/gitlab-tags/util.spec.ts line 17
     #[test]
     fn get_source_url_works() {
         assert_eq!(

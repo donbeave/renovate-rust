@@ -258,7 +258,7 @@ mod tests {
         host_rules_from_env(env)
     }
 
-    // Ported: "supports docker username/password" — workers/global/config/parse/host-rules-from-env.spec.ts line 5
+    // Ported: "supports docker username/password" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 5
     #[test]
     fn host_rules_docker_user_pass() {
         let e = env(&[
@@ -272,7 +272,7 @@ mod tests {
         assert_eq!(r[0]["password"], "some-password");
     }
 
-    // Ported: "supports password-only" — workers/global/config/parse/host-rules-from-env.spec.ts line 19
+    // Ported: "supports password-only" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 19
     #[test]
     fn host_rules_npm_password_only() {
         let e = env(&[("NPM_PASSWORD", "some-password")]);
@@ -282,7 +282,7 @@ mod tests {
         assert_eq!(r[0]["password"], "some-password");
     }
 
-    // Ported: "supports domain and host names with case insensitivity" — workers/global/config/parse/host-rules-from-env.spec.ts line 28
+    // Ported: "supports domain and host names with case insensitivity" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 28
     #[test]
     fn host_rules_domain_and_host() {
         let e = env(&[
@@ -300,7 +300,7 @@ mod tests {
         assert_eq!(pypi_rule["password"], "some-password");
     }
 
-    // Ported: "regression test for #10937" — workers/global/config/parse/host-rules-from-env.spec.ts line 40
+    // Ported: "regression test for #10937" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 40
     #[test]
     fn host_rules_regression_10937() {
         let e = env(&[
@@ -318,7 +318,7 @@ mod tests {
         assert_eq!(r[0]["password"], "some-password");
     }
 
-    // Ported: "support RENOVATE_ prefixed host rules" — workers/global/config/parse/host-rules-from-env.spec.ts line 55
+    // Ported: "support RENOVATE_ prefixed host rules" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 55
     #[test]
     fn host_rules_renovate_prefix() {
         let e = env(&[("RENOVATE_GITHUB__TAGS_GITHUB_COM_TOKEN", "some-token")]);
@@ -328,7 +328,7 @@ mod tests {
         assert_eq!(r[0]["token"], "some-token");
     }
 
-    // Ported: "supports renovate in the env variable" — workers/global/config/parse/host-rules-from-env.spec.ts line 65
+    // Ported: "supports renovate in the env variable" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 65
     #[test]
     fn host_rules_renovate_in_var() {
         let e = env(&[
@@ -347,7 +347,7 @@ mod tests {
         assert_eq!(docker_rule["password"], "docker-password");
     }
 
-    // Ported: "support https authentication options" — workers/global/config/parse/host-rules-from-env.spec.ts line 77
+    // Ported: "support https authentication options" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 77
     #[test]
     fn host_rules_https_auth() {
         let e = env(&[
@@ -373,7 +373,7 @@ mod tests {
         assert_eq!(r[0]["httpsCertificateAuthority"], "certificate-authority");
     }
 
-    // Ported: "make sure {{PLATFORM}}_TOKEN will not be picked up" — workers/global/config/parse/host-rules-from-env.spec.ts line 95
+    // Ported: "make sure {{PLATFORM}}_TOKEN will not be picked up" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 95
     #[test]
     fn host_rules_platform_token_skipped() {
         let e = env(&[("GITHUB_TOKEN", "private-key")]);
@@ -381,7 +381,7 @@ mod tests {
         assert_eq!(r.len(), 0);
     }
 
-    // Ported: "supports datasource env token" — workers/global/config/parse/host-rules-from-env.spec.ts line 106
+    // Ported: "supports datasource env token" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 106
     #[test]
     fn host_rules_datasource_token() {
         let e = env(&[("PYPI_TOKEN", "some-token")]);
@@ -391,7 +391,7 @@ mod tests {
         assert_eq!(r[0]["token"], "some-token");
     }
 
-    // Ported: "supports platform env token" — workers/global/config/parse/host-rules-from-env.spec.ts line 115
+    // Ported: "supports platform env token" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 115
     #[test]
     fn host_rules_platform_token() {
         let e = env(&[
@@ -405,7 +405,7 @@ mod tests {
         assert_eq!(r[0]["token"], "some-token");
     }
 
-    // Ported: "rejects incomplete datasource env token" — workers/global/config/parse/host-rules-from-env.spec.ts line 130
+    // Ported: "rejects incomplete datasource env token" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 130
     #[test]
     fn host_rules_incomplete_token() {
         let e = env(&[("PYPI_FOO_TOKEN", "some-token")]);
@@ -413,7 +413,7 @@ mod tests {
         assert_eq!(r.len(), 0); // single middle part → warn + skip
     }
 
-    // Ported: "rejects npm env" — workers/global/config/parse/host-rules-from-env.spec.ts line 137
+    // Ported: "rejects npm env" — lib/workers/global/config/parse/host-rules-from-env.spec.ts line 137
     #[test]
     fn host_rules_npm_env_skipped() {
         let e = env(&[(

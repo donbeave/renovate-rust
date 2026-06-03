@@ -218,7 +218,7 @@ impl BzlmodVersion {
 mod tests {
     use super::*;
 
-    // Ported: "when all digits" — versioning/bazel-module/bzlmod-version.spec.ts line 5
+    // Ported: "when all digits" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 5
     #[test]
     fn identifier_when_all_digits() {
         let ident = Identifier::new("123").unwrap();
@@ -227,7 +227,7 @@ mod tests {
         assert!(ident.is_digits_only);
     }
 
-    // Ported: "when not all digits" — versioning/bazel-module/bzlmod-version.spec.ts line 12
+    // Ported: "when not all digits" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 12
     #[test]
     fn identifier_when_not_all_digits() {
         let ident = Identifier::new("foo123").unwrap();
@@ -236,7 +236,7 @@ mod tests {
         assert!(!ident.is_digits_only);
     }
 
-    // Ported: "$a equals $b" — versioning/bazel-module/bzlmod-version.spec.ts line 19
+    // Ported: "$a equals $b" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 19
     #[test]
     fn identifier_equals_table() {
         let cases = [
@@ -253,7 +253,7 @@ mod tests {
         }
     }
 
-    // Ported: "$a is isLessThan $b" — versioning/bazel-module/bzlmod-version.spec.ts line 32
+    // Ported: "$a is isLessThan $b" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 32
     #[test]
     fn identifier_is_less_than_table() {
         let cases = [
@@ -272,7 +272,7 @@ mod tests {
         }
     }
 
-    // Ported: "VersionPart.create(...$a}" — versioning/bazel-module/bzlmod-version.spec.ts line 49
+    // Ported: "VersionPart.create(...$a}" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 49
     #[test]
     fn version_part_create() {
         let vp = VersionPart::create(&[]).unwrap();
@@ -284,7 +284,7 @@ mod tests {
         assert_eq!(vp2.as_string(), "1.0");
     }
 
-    // Ported: ".asString" — versioning/bazel-module/bzlmod-version.spec.ts line 59
+    // Ported: ".asString" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 59
     #[test]
     fn version_part_as_string() {
         assert_eq!(VersionPart::create(&[]).unwrap().as_string(), "");
@@ -294,7 +294,7 @@ mod tests {
         );
     }
 
-    // Ported: ".major" — versioning/bazel-module/bzlmod-version.spec.ts line 68
+    // Ported: ".major" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 68
     #[test]
     fn version_part_major() {
         assert_eq!(VersionPart::create(&[]).unwrap().major(), 0);
@@ -302,21 +302,21 @@ mod tests {
         assert_eq!(VersionPart::create(&["1", "2", "3"]).unwrap().major(), 1);
     }
 
-    // Ported: ".minor" — versioning/bazel-module/bzlmod-version.spec.ts line 78
+    // Ported: ".minor" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 78
     #[test]
     fn version_part_minor() {
         assert_eq!(VersionPart::create(&[]).unwrap().minor(), 0);
         assert_eq!(VersionPart::create(&["1", "2", "3"]).unwrap().minor(), 2);
     }
 
-    // Ported: ".patch" — versioning/bazel-module/bzlmod-version.spec.ts line 87
+    // Ported: ".patch" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 87
     #[test]
     fn version_part_patch() {
         assert_eq!(VersionPart::create(&[]).unwrap().patch(), 0);
         assert_eq!(VersionPart::create(&["1", "2", "3"]).unwrap().patch(), 3);
     }
 
-    // Ported: "$a equals $b" — versioning/bazel-module/bzlmod-version.spec.ts line 96
+    // Ported: "$a equals $b" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 96
     #[test]
     fn version_part_equals_table() {
         let cases: Vec<(Vec<&str>, Vec<&str>, bool)> = vec![
@@ -331,7 +331,7 @@ mod tests {
         }
     }
 
-    // Ported: "$a is isLessThan $b" — versioning/bazel-module/bzlmod-version.spec.ts line 107
+    // Ported: "$a is isLessThan $b" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 107
     #[test]
     fn version_part_is_less_than_table() {
         let cases: Vec<(Vec<&str>, Vec<&str>, bool)> = vec![
@@ -353,7 +353,7 @@ mod tests {
         }
     }
 
-    // Ported: ".isEmpty" — versioning/bazel-module/bzlmod-version.spec.ts line 125
+    // Ported: ".isEmpty" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 125
     #[test]
     fn version_part_is_empty() {
         assert!(VersionPart::create(&[]).unwrap().is_empty());
@@ -361,7 +361,7 @@ mod tests {
         assert!(!VersionPart::create(&["1", "0"]).unwrap().is_empty());
     }
 
-    // Ported: "constructor($v)" — versioning/bazel-module/bzlmod-version.spec.ts line 137
+    // Ported: "constructor($v)" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 137
     #[test]
     fn bzlmod_version_constructor() {
         let cases = [
@@ -384,7 +384,7 @@ mod tests {
         }
     }
 
-    // Ported: "bad versions $a" — versioning/bazel-module/bzlmod-version.spec.ts line 153
+    // Ported: "bad versions $a" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 153
     #[test]
     fn bzlmod_version_bad_versions() {
         let bad = [
@@ -401,7 +401,7 @@ mod tests {
         }
     }
 
-    // Ported: "$a equals $b" — versioning/bazel-module/bzlmod-version.spec.ts line 168
+    // Ported: "$a equals $b" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 168
     #[test]
     fn bzlmod_version_equals_table() {
         let cases: Vec<(&str, &str, Option<bool>, bool)> = vec![
@@ -440,7 +440,7 @@ mod tests {
         }
     }
 
-    // Ported: "$a is isLessThan $b" — versioning/bazel-module/bzlmod-version.spec.ts line 188
+    // Ported: "$a is isLessThan $b" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 188
     #[test]
     fn bzlmod_version_is_less_than_table() {
         let cases = [
@@ -472,7 +472,7 @@ mod tests {
         }
     }
 
-    // Ported: "$a isGreaterThan $b" — versioning/bazel-module/bzlmod-version.spec.ts line 208
+    // Ported: "$a isGreaterThan $b" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 208
     #[test]
     fn bzlmod_version_is_greater_than_table() {
         let cases = [
@@ -487,7 +487,7 @@ mod tests {
         }
     }
 
-    // Ported: "defaultCompare($a, $b)" — versioning/bazel-module/bzlmod-version.spec.ts line 221
+    // Ported: "defaultCompare($a, $b)" — lib/modules/versioning/bazel-module/bzlmod-version.spec.ts line 221
     #[test]
     fn bzlmod_version_default_compare_table() {
         let cases = [

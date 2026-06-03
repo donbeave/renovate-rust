@@ -185,7 +185,7 @@ mod tests {
         "../../../../../renovate/lib/modules/datasource/glasskube-packages/__fixtures__/package_no_references.yaml"
     );
 
-    // Ported: "should handle error response on versions request" — datasource/glasskube-packages/index.spec.ts line 27
+    // Ported: "should handle error response on versions request" — lib/modules/datasource/glasskube-packages/index.spec.ts line 27
     #[tokio::test]
     async fn error_on_versions_request() {
         let server = MockServer::start().await;
@@ -200,7 +200,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "should handle empty response on versions request" — datasource/glasskube-packages/index.spec.ts line 41
+    // Ported: "should handle empty response on versions request" — lib/modules/datasource/glasskube-packages/index.spec.ts line 41
     #[tokio::test]
     async fn empty_versions_response() {
         let server = MockServer::start().await;
@@ -217,7 +217,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should handle error response on manifest request" — datasource/glasskube-packages/index.spec.ts line 54
+    // Ported: "should handle error response on manifest request" — lib/modules/datasource/glasskube-packages/index.spec.ts line 54
     #[tokio::test]
     async fn error_on_manifest_request() {
         let server = MockServer::start().await;
@@ -237,7 +237,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "should handle empty response on manifest request" — datasource/glasskube-packages/index.spec.ts line 72
+    // Ported: "should handle empty response on manifest request" — lib/modules/datasource/glasskube-packages/index.spec.ts line 72
     #[tokio::test]
     async fn empty_manifest_response() {
         let server = MockServer::start().await;
@@ -259,7 +259,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should handle package manifest without references" — datasource/glasskube-packages/index.spec.ts line 89
+    // Ported: "should handle package manifest without references" — lib/modules/datasource/glasskube-packages/index.spec.ts line 89
     #[tokio::test]
     async fn manifest_without_references() {
         let server = MockServer::start().await;
@@ -294,7 +294,7 @@ mod tests {
         assert!(result.homepage.is_none());
     }
 
-    // Ported: "should handle package manifest with references and default url" — datasource/glasskube-packages/index.spec.ts line 110
+    // Ported: "should handle package manifest with references and default url" — lib/modules/datasource/glasskube-packages/index.spec.ts line 110
     #[tokio::test]
     async fn manifest_with_references_default_url() {
         let server = MockServer::start().await;
@@ -333,7 +333,7 @@ mod tests {
         );
     }
 
-    // Ported: "should handle package manifest with references and custom url" — datasource/glasskube-packages/index.spec.ts line 132
+    // Ported: "should handle package manifest with references and custom url" — lib/modules/datasource/glasskube-packages/index.spec.ts line 132
     #[tokio::test]
     async fn manifest_with_references_custom_url() {
         let server = MockServer::start().await;

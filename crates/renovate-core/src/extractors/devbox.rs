@@ -103,7 +103,7 @@ fn make_dep(name: String, version: &str) -> DevboxDep {
 mod tests {
     use super::*;
 
-    // Ported: "returns a package dependency when the devbox JSON file has a single package" — devbox/extract.spec.ts line 21
+    // Ported: "returns a package dependency when the devbox JSON file has a single package" — lib/modules/manager/devbox/extract.spec.ts line 21
     #[test]
     fn array_form() {
         let content = r#"{"packages": ["node@18", "python@3.11.5"]}"#;
@@ -116,7 +116,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns a package dependency when the devbox JSON file has multiple packages with in a packages object" — devbox/extract.spec.ts line 115
+    // Ported: "returns a package dependency when the devbox JSON file has multiple packages with in a packages object" — lib/modules/manager/devbox/extract.spec.ts line 115
     #[test]
     fn object_form() {
         let content = r#"{"packages": {"node": "18", "python": "3.11.5"}}"#;
@@ -126,7 +126,7 @@ mod tests {
         assert!(deps.iter().any(|d| d.name == "python"));
     }
 
-    // Ported: "returns a package dependency when the devbox JSON file has a single package with a version object" — devbox/extract.spec.ts line 42
+    // Ported: "returns a package dependency when the devbox JSON file has a single package with a version object" — lib/modules/manager/devbox/extract.spec.ts line 42
     #[test]
     fn object_with_version_field() {
         let content = r#"{"packages": {"node": {"version": "18.0"}}}"#;
@@ -135,26 +135,26 @@ mod tests {
         assert_eq!(deps[0].version, "18.0");
     }
 
-    // Ported: "returns null when the devbox JSON file has no packages" — devbox/extract.spec.ts line 16
+    // Ported: "returns null when the devbox JSON file has no packages" — lib/modules/manager/devbox/extract.spec.ts line 16
     #[test]
     fn no_packages_key_returns_empty() {
         let content = r#"{"name": "myproject"}"#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null when the devbox JSON file is malformed" — devbox/extract.spec.ts line 11
+    // Ported: "returns null when the devbox JSON file is malformed" — lib/modules/manager/devbox/extract.spec.ts line 11
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("not json").is_empty());
     }
 
-    // Ported: "returns null when the devbox JSON file is empty" — devbox/extract.spec.ts line 6
+    // Ported: "returns null when the devbox JSON file is empty" — lib/modules/manager/devbox/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns invalid-version when the devbox JSON file has a single package with an invalid version" — devbox/extract.spec.ts line 65
+    // Ported: "returns invalid-version when the devbox JSON file has a single package with an invalid version" — lib/modules/manager/devbox/extract.spec.ts line 65
     #[test]
     fn invalid_semver_range_flagged() {
         let content = r#"{"packages": {"nodejs": "^20.1.8"}}"#;
@@ -165,7 +165,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(DevboxSkipReason::InvalidVersion));
     }
 
-    // Ported: "returns a package dependency when the devbox JSON file has multiple packages" — devbox/extract.spec.ts line 89
+    // Ported: "returns a package dependency when the devbox JSON file has multiple packages" — lib/modules/manager/devbox/extract.spec.ts line 89
     #[test]
     fn valid_versions_have_no_skip_reason() {
         let content = r#"{"packages": ["nodejs@20.1.8", "yarn@1.22.10"]}"#;
@@ -174,7 +174,7 @@ mod tests {
         assert!(deps.iter().all(|d| d.skip_reason.is_none()));
     }
 
-    // Ported: "returns invalid dependencies" — devbox/extract.spec.ts line 177
+    // Ported: "returns invalid dependencies" — lib/modules/manager/devbox/extract.spec.ts line 177
     #[test]
     fn mixed_valid_and_invalid_versions() {
         let content =
@@ -188,7 +188,7 @@ mod tests {
         // simple check is only for operator prefixes.
     }
 
-    // Ported: "returns a package dependency when the devbox JSON file has multiple packages with package objects" — devbox/extract.spec.ts line 144
+    // Ported: "returns a package dependency when the devbox JSON file has multiple packages with package objects" — lib/modules/manager/devbox/extract.spec.ts line 144
     #[test]
     fn object_form_with_nested_version() {
         let content =
@@ -202,7 +202,7 @@ mod tests {
         assert_eq!(yarn.version, "1.22.10");
     }
 
-    // Ported: "returns invalid dependencies with package objects" — devbox/extract.spec.ts line 213
+    // Ported: "returns invalid dependencies with package objects" — lib/modules/manager/devbox/extract.spec.ts line 213
     #[test]
     fn object_form_mixed_valid_invalid() {
         let content = r#"{"packages": {"nodejs": "20.1.8", "yarn": "1.22.10", "invalid": {"version": "invalid"}}}"#;
@@ -213,7 +213,7 @@ mod tests {
         assert_eq!(invalid.version, "invalid");
     }
 
-    // Ported: "returns invalid dependencies from the packages array" — devbox/extract.spec.ts line 251
+    // Ported: "returns invalid dependencies from the packages array" — lib/modules/manager/devbox/extract.spec.ts line 251
     #[test]
     fn array_form_with_invalid_and_no_version() {
         // TypeScript: "invalid@invalid" → skipReason invalid-version; "invalid2" → skipReason not-a-version
@@ -237,7 +237,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null if there are no dependencies" — devbox/extract.spec.ts line 288
+    // Ported: "returns null if there are no dependencies" — lib/modules/manager/devbox/extract.spec.ts line 288
     #[test]
     fn empty_packages_array_returns_empty() {
         assert!(extract(r#"{"packages": []}"#).is_empty());

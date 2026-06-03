@@ -172,7 +172,7 @@ mod tests {
         }
     ]"#;
 
-    // Ported: "processes real data" — datasource/typst/index.spec.ts line 7
+    // Ported: "processes real data" — lib/modules/datasource/typst/index.spec.ts line 7
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -211,7 +211,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for unsupported namespace" — datasource/typst/index.spec.ts line 74
+    // Ported: "returns null for unsupported namespace" — lib/modules/datasource/typst/index.spec.ts line 74
     #[tokio::test]
     async fn returns_null_for_unsupported_namespace() {
         let http = HttpClient::new().unwrap();
@@ -221,7 +221,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null when package not found in registry" — datasource/typst/index.spec.ts line 83
+    // Ported: "returns null when package not found in registry" — lib/modules/datasource/typst/index.spec.ts line 83
     #[tokio::test]
     async fn returns_null_when_package_not_found() {
         let server = MockServer::start().await;
@@ -241,7 +241,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles multiple versions of the same package" — datasource/typst/index.spec.ts line 111
+    // Ported: "handles multiple versions of the same package" — lib/modules/datasource/typst/index.spec.ts line 111
     #[tokio::test]
     async fn handles_multiple_versions() {
         let server = MockServer::start().await;
@@ -270,7 +270,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles registry fetch errors" — datasource/typst/index.spec.ts line 163
+    // Ported: "handles registry fetch errors" — lib/modules/datasource/typst/index.spec.ts line 163
     #[tokio::test]
     async fn handles_registry_fetch_errors() {
         let server = MockServer::start().await;
@@ -288,7 +288,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles empty registry response" — datasource/typst/index.spec.ts line 179
+    // Ported: "handles empty registry response" — lib/modules/datasource/typst/index.spec.ts line 179
     #[tokio::test]
     async fn handles_empty_registry_response() {
         let server = MockServer::start().await;

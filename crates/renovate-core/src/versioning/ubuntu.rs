@@ -630,7 +630,7 @@ pub fn debian_is_eol_lts_at(input: &str, now_date: &str, ignore_eol: bool) -> bo
 mod tests {
     use super::*;
 
-    // Ported: "isValid(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 7
+    // Ported: "isValid(\"$version\") === $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 7
     #[test]
     fn is_valid_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -720,7 +720,7 @@ mod tests {
         assert!(!is_valid(None));
     }
 
-    // Ported: "isCompatible(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 94
+    // Ported: "isCompatible(\"$version\") === $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 94
     #[test]
     fn is_compatible_matches_renovate_ubuntu_spec() {
         for (version, expected) in [
@@ -735,7 +735,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 110
+    // Ported: "isSingleVersion(\"$version\") === $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 110
     #[test]
     fn is_single_version_matches_renovate_ubuntu_spec() {
         for (version, expected) in [
@@ -748,7 +748,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 121
+    // Ported: "isStable(\"$version\") === $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 121
     #[test]
     fn is_stable_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -836,7 +836,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion(\"$version\") === $expected" — versioning/ubuntu/index.spec.ts line 202
+    // Ported: "isVersion(\"$version\") === $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 202
     #[test]
     fn is_version_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -893,7 +893,7 @@ mod tests {
         }
     }
 
-    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — versioning/ubuntu/index.spec.ts line 255
+    // Ported: "getMajor, getMinor, getPatch for \"$version\"" — lib/modules/versioning/ubuntu/index.spec.ts line 255
     #[test]
     fn component_accessors_match_renovate_ubuntu_spec() {
         let cases = [
@@ -917,7 +917,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals($a, $b) === $expected" — versioning/ubuntu/index.spec.ts line 278
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 278
     #[test]
     fn equals_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -943,7 +943,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — versioning/ubuntu/index.spec.ts line 299
+    // Ported: "isGreaterThan(\"$a\", \"$b\") === $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 299
     #[test]
     fn is_greater_than_matches_renovate_ubuntu_spec() {
         let cases = [
@@ -983,7 +983,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 336
+    // Ported: "getSatisfyingVersion($versions, \"$range\") === \"$expected\"" — lib/modules/versioning/ubuntu/index.spec.ts line 336
     #[test]
     fn get_satisfying_version_matches_renovate_ubuntu_spec() {
         let numeric = ["18.10", "19.04", "19.10", "20.04"];
@@ -1000,7 +1000,7 @@ mod tests {
         assert_eq!(get_satisfying_version(&names, "warty"), None);
     }
 
-    // Ported: "minSatisfyingVersion($versions, \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 355
+    // Ported: "minSatisfyingVersion($versions, \"$range\") === \"$expected\"" — lib/modules/versioning/ubuntu/index.spec.ts line 355
     #[test]
     fn min_satisfying_version_matches_renovate_ubuntu_spec() {
         let numeric = ["18.10", "19.04", "19.10", "20.04"];
@@ -1017,7 +1017,7 @@ mod tests {
         assert_eq!(min_satisfying_version(&names, "warty"), None);
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 374
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — lib/modules/versioning/ubuntu/index.spec.ts line 374
     #[test]
     fn get_new_value_matches_renovate_ubuntu_spec() {
         assert_eq!(get_new_value(None, "foobar"), "foobar");
@@ -1027,7 +1027,7 @@ mod tests {
         assert_eq!(get_new_value(Some("16.04"), "focal"), "20.04");
     }
 
-    // Ported: "$versions -> sortVersions -> $expected" — versioning/ubuntu/index.spec.ts line 395
+    // Ported: "$versions -> sortVersions -> $expected" — lib/modules/versioning/ubuntu/index.spec.ts line 395
     #[test]
     fn sort_versions_matches_renovate_ubuntu_spec() {
         let mut numeric = ["17.03", "18.04", "18.04", "6.10", "19.10"];
@@ -1042,7 +1042,7 @@ mod tests {
         );
     }
 
-    // Ported: "matches(\"$version\", \"$range\") === \"$expected\"" — versioning/ubuntu/index.spec.ts line 403
+    // Ported: "matches(\"$version\", \"$range\") === \"$expected\"" — lib/modules/versioning/ubuntu/index.spec.ts line 403
     #[test]
     fn matches_matches_renovate_ubuntu_spec() {
         assert!(!matches("20.04", "2020.04"));
@@ -1052,7 +1052,7 @@ mod tests {
 
     // ── distro.spec.ts — Ubuntu DistroInfo ────────────────────────────────
 
-    // Ported: "isCodename("$version") === $expected" — versioning/distro.spec.ts line 12
+    // Ported: "isCodename("$version") === $expected" — lib/modules/versioning/distro.spec.ts line 12
     #[test]
     fn distro_is_codename() {
         assert!(is_codename("jammy"));
@@ -1066,7 +1066,7 @@ mod tests {
         assert!(!is_codename("Yakkety")); // capitalized
     }
 
-    // Ported: "getVersionByCodename("$version") === $expected" — versioning/distro.spec.ts line 27
+    // Ported: "getVersionByCodename("$version") === $expected" — lib/modules/versioning/distro.spec.ts line 27
     #[test]
     fn distro_get_version_by_codename() {
         assert_eq!(version_by_codename("jammy"), "22.04");
@@ -1080,7 +1080,7 @@ mod tests {
         assert_eq!(version_by_codename("16.06"), "16.06");
     }
 
-    // Ported: "getCodenameByVersion("$version") === $expected" — versioning/distro.spec.ts line 44
+    // Ported: "getCodenameByVersion("$version") === $expected" — lib/modules/versioning/distro.spec.ts line 44
     #[test]
     fn distro_get_codename_by_version() {
         assert_eq!(codename_by_version("22.04"), "jammy");
@@ -1094,8 +1094,8 @@ mod tests {
         assert_eq!(codename_by_version("16.06"), "16.06");
     }
 
-    // Ported: "retrieves focal release schedule" — versioning/distro.spec.ts line 151
-    // Ported: "retrieves non-existent release schedule" — versioning/distro.spec.ts line 158
+    // Ported: "retrieves focal release schedule" — lib/modules/versioning/distro.spec.ts line 151
+    // Ported: "retrieves non-existent release schedule" — lib/modules/versioning/distro.spec.ts line 158
     #[test]
     fn distro_get_schedule() {
         // focal → version 20.04, codename focal, release 2020-04-23
@@ -1107,7 +1107,7 @@ mod tests {
         assert!(get_schedule("20.06").is_none());
     }
 
-    // Ported: "isReleased("$version") === $expected" — versioning/distro.spec.ts line 98
+    // Ported: "isReleased("$version") === $expected" — lib/modules/versioning/distro.spec.ts line 98
     // Fixed date: 2021-03-20
     // DistroInfo.isReleased() resolves codenames first via getVersionByCodename().
     #[test]
@@ -1131,7 +1131,7 @@ mod tests {
         assert!(!check("24.04")); // not in releases list
     }
 
-    // Ported: "exists("$version") === $expected" — versioning/distro.spec.ts line 61
+    // Ported: "exists("$version") === $expected" — lib/modules/versioning/distro.spec.ts line 61
     #[test]
     fn distro_exists() {
         assert!(exists("jammy"));
@@ -1148,12 +1148,12 @@ mod tests {
         assert!(!exists("Jellyfish"));
     }
 
-    // Ported: "retrieves schedule of the previous previous release" — versioning/distro.spec.ts line 115
-    // Ported: "retrieves schedule of the previous release" — versioning/distro.spec.ts line 122
-    // Ported: "retrieves schedule of the most recent release" — versioning/distro.spec.ts line 129
-    // Ported: "sends a float as an argument" — versioning/distro.spec.ts line 136
-    // Ported: "sends an out of bound argument" — versioning/distro.spec.ts line 143
-    // Ported: "sends another out of bound argument" — versioning/distro.spec.ts line 147
+    // Ported: "retrieves schedule of the previous previous release" — lib/modules/versioning/distro.spec.ts line 115
+    // Ported: "retrieves schedule of the previous release" — lib/modules/versioning/distro.spec.ts line 122
+    // Ported: "retrieves schedule of the most recent release" — lib/modules/versioning/distro.spec.ts line 129
+    // Ported: "sends a float as an argument" — lib/modules/versioning/distro.spec.ts line 136
+    // Ported: "sends an out of bound argument" — lib/modules/versioning/distro.spec.ts line 143
+    // Ported: "sends another out of bound argument" — lib/modules/versioning/distro.spec.ts line 147
     // Fixed date: 2021-03-20
     #[test]
     fn distro_get_n_latest() {
@@ -1202,7 +1202,7 @@ mod tests {
     }
 }
 
-// Ported: "isEolLts(\"$version\") === $expected" — versioning/distro.spec.ts line 80
+// Ported: "isEolLts(\"$version\") === $expected" — lib/modules/versioning/distro.spec.ts line 80
 // Fixed date: 2021-03-20 (matches test's vi.useFakeTimers({ now: '2021-03-20' }))
 #[test]
 fn distro_is_eol_lts() {
@@ -1221,7 +1221,7 @@ fn distro_is_eol_lts() {
     assert!(!is_eol_lts_at("22.04", now));
 }
 
-// Ported: "works with debian" — versioning/distro.spec.ts line 162
+// Ported: "works with debian" — lib/modules/versioning/distro.spec.ts line 162
 // Note: TypeScript test deletes eol_lts and eol from trixie's schedule before checking.
 // We simulate this with the `ignore_eol=true` parameter.
 // Fixed date: 2021-03-20

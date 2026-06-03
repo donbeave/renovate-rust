@@ -208,7 +208,7 @@ mod tests {
         format!("{}{}", server.uri(), INDEX_PATH)
     }
 
-    // Ported: "should return null when no version is found" — datasource/azure-bicep-resource/index.spec.ts line 10
+    // Ported: "should return null when no version is found" — lib/modules/datasource/azure-bicep-resource/index.spec.ts line 10
     #[tokio::test]
     async fn should_return_null_when_no_version_is_found() {
         let server = MockServer::start().await;
@@ -221,7 +221,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return null when package is a function" — datasource/azure-bicep-resource/index.spec.ts line 32
+    // Ported: "should return null when package is a function" — lib/modules/datasource/azure-bicep-resource/index.spec.ts line 32
     #[tokio::test]
     async fn should_return_null_when_package_is_a_function() {
         let server = MockServer::start().await;
@@ -235,7 +235,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "should return versions when package is a resource" — datasource/azure-bicep-resource/index.spec.ts line 67
+    // Ported: "should return versions when package is a resource" — lib/modules/datasource/azure-bicep-resource/index.spec.ts line 67
     #[tokio::test]
     async fn should_return_versions_when_package_is_a_resource() {
         let server = MockServer::start().await;
@@ -263,7 +263,7 @@ mod tests {
         });
     }
 
-    // Ported: "should return versions when package is a resource and a function" — datasource/azure-bicep-resource/index.spec.ts line 109
+    // Ported: "should return versions when package is a resource and a function" — lib/modules/datasource/azure-bicep-resource/index.spec.ts line 109
     #[tokio::test]
     async fn should_return_versions_when_package_is_a_resource_and_a_function() {
         let server = MockServer::start().await;

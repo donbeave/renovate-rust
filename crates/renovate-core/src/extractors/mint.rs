@@ -81,13 +81,13 @@ pub fn extract(content: &str) -> Vec<MintDep> {
 mod tests {
     use super::*;
 
-    // Ported: "returns null for empty" — mint/extract.spec.ts line 6
+    // Ported: "returns null for empty" — lib/modules/manager/mint/extract.spec.ts line 6
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "Mintfile With Version Description" — mint/extract.spec.ts line 10
+    // Ported: "Mintfile With Version Description" — lib/modules/manager/mint/extract.spec.ts line 10
     #[test]
     fn extracts_deps_with_version() {
         let content = "SwiftGen/SwiftGen@6.6.1\nyonaskolb/xcodegen@2.30.0\nrealm/SwiftLint @ 0.48.0\n#realm/SwiftLint @ 0.48.0\n";
@@ -106,7 +106,7 @@ mod tests {
         );
     }
 
-    // Ported: "Mintfile Without Version Description" — mint/extract.spec.ts line 41
+    // Ported: "Mintfile Without Version Description" — lib/modules/manager/mint/extract.spec.ts line 41
     #[test]
     fn extracts_deps_without_version_as_skipped() {
         let content = "yonaskolb/xcodegen\nrealm/SwiftLint\n";
@@ -118,7 +118,7 @@ mod tests {
         );
     }
 
-    // Ported: "Complex Mintfile" — mint/extract.spec.ts line 60
+    // Ported: "Complex Mintfile" — lib/modules/manager/mint/extract.spec.ts line 60
     #[test]
     fn complex_mintfile_mixed() {
         let content = "SwiftGen/SwiftGen@6.6.1\nyonaskolb/xcodegen\nrealm/SwiftLint @ 0.48.0\n";
@@ -133,7 +133,7 @@ mod tests {
         assert!(swift.skip_reason.is_none());
     }
 
-    // Ported: "Mintfile Includes Commented Out" — mint/extract.spec.ts line 88
+    // Ported: "Mintfile Includes Commented Out" — lib/modules/manager/mint/extract.spec.ts line 88
     #[test]
     fn comment_lines_skipped() {
         let content = "SwiftGen/SwiftGen@6.6.1\n\nyonaskolb/xcodegen\n#yonaskolb/xcodegen\nrealm/SwiftLint@0.48.0 #commented out\n";

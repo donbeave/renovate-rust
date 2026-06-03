@@ -77,7 +77,7 @@ pub fn extract(content: &str) -> Vec<Unity3dDep> {
 mod tests {
     use super::*;
 
-    // Ported: "handles $packageName" — unity3d/extract.spec.ts line 14
+    // Ported: "handles $packageName" — lib/modules/manager/unity3d/extract.spec.ts line 14
     #[test]
     fn extracts_plain_version() {
         let deps = extract("m_EditorVersion: 2022.3.19f1\n");
@@ -90,7 +90,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles $packageName" — unity3d/extract.spec.ts line 14
+    // Ported: "handles $packageName" — lib/modules/manager/unity3d/extract.spec.ts line 14
     #[test]
     fn extracts_with_revision_version() {
         let deps = extract("m_EditorVersionWithRevision: 2022.3.19f1 (30acc77e9b6b)\n");
@@ -103,7 +103,7 @@ mod tests {
         );
     }
 
-    // Ported: "handles no version" — unity3d/extract.spec.ts line 5
+    // Ported: "handles no version" — lib/modules/manager/unity3d/extract.spec.ts line 5
     #[test]
     fn returns_none_for_empty() {
         assert!(extract("").is_empty());
@@ -112,7 +112,7 @@ mod tests {
         assert!(extract("something: else\n").is_empty());
     }
 
-    // Ported: "handles $type versions" — unity3d/extract.spec.ts line 39
+    // Ported: "handles $type versions" — lib/modules/manager/unity3d/extract.spec.ts line 39
     #[test]
     fn extracts_alpha_beta_and_stable_versions_with_revisions() {
         let cases = [

@@ -186,7 +186,7 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
 2d138c34e4c6939d0a8686943e851c6528aa04db\trefs/tags/v1.0.5
 6d7a933c2e6b7b39e992b1f93b6b42de083b28f0\trefs/tags/v1.0.5^{}";
 
-    // Ported: "returns nil if response is wrong" — datasource/git-refs/index.spec.ts line 38
+    // Ported: "returns nil if response is wrong" — lib/modules/datasource/git-refs/index.spec.ts line 38
     #[test]
     fn returns_nil_if_response_is_wrong() {
         // Empty string is falsy in JS → None
@@ -194,7 +194,7 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         assert!(result.is_none());
     }
 
-    // Ported: "returns nil if response is malformed" — datasource/git-refs/index.spec.ts line 48
+    // Ported: "returns nil if response is malformed" — lib/modules/datasource/git-refs/index.spec.ts line 48
     #[test]
     fn returns_nil_if_response_is_malformed() {
         // Non-empty but unparseable → Some with empty releases
@@ -206,7 +206,7 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         assert!(result.releases.is_empty());
     }
 
-    // Ported: "returns nil if remote call throws exception" — datasource/git-refs/index.spec.ts line 58
+    // Ported: "returns nil if remote call throws exception" — lib/modules/datasource/git-refs/index.spec.ts line 58
     #[test]
     fn returns_nil_if_remote_call_throws_exception() {
         // None represents subprocess failure → None
@@ -214,7 +214,7 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         assert!(result.is_none());
     }
 
-    // Ported: "returns versions filtered from tags" — datasource/git-refs/index.spec.ts line 68
+    // Ported: "returns versions filtered from tags" — lib/modules/datasource/git-refs/index.spec.ts line 68
     #[test]
     fn returns_versions_filtered_from_tags() {
         let result =
@@ -257,14 +257,14 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         );
     }
 
-    // Ported: "returns null if not found" — datasource/git-refs/index.spec.ts line 82
+    // Ported: "returns null if not found" — lib/modules/datasource/git-refs/index.spec.ts line 82
     #[test]
     fn returns_null_if_not_found() {
         let digest = get_digest(Some(LS_REMOTE_1), Some("v2.0.0"));
         assert!(digest.is_none());
     }
 
-    // Ported: "returns digest for tag" — datasource/git-refs/index.spec.ts line 92
+    // Ported: "returns digest for tag" — lib/modules/datasource/git-refs/index.spec.ts line 92
     #[test]
     fn returns_digest_for_tag() {
         // Annotated tag: should return the ^{} dereferenced commit hash
@@ -272,7 +272,7 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         assert_eq!(digest, "3ed9e7d7094fd4ee7751c24a3e6b706060f461ff");
     }
 
-    // Ported: "ignores refs/for/" — datasource/git-refs/index.spec.ts line 104
+    // Ported: "ignores refs/for/" — lib/modules/datasource/git-refs/index.spec.ts line 104
     #[test]
     fn ignores_refs_for() {
         // refs/for/master has hash 46fd703d… but refs/heads/master has a9920c01…
@@ -281,7 +281,7 @@ e173183f932ba8a31d0e4f23cc1070e8ebfa59d6\trefs/tags/v1.0.1^{}
         assert_eq!(digest, "a9920c014aebc28dc1b23e7efcc006d0455cc710");
     }
 
-    // Ported: "returns digest for HEAD" — datasource/git-refs/index.spec.ts line 114
+    // Ported: "returns digest for HEAD" — lib/modules/datasource/git-refs/index.spec.ts line 114
     #[test]
     fn returns_digest_for_head() {
         let digest = get_digest(Some(LS_REMOTE_1), None).unwrap();

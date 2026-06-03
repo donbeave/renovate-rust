@@ -419,49 +419,49 @@ mod tests {
 
     // ── platform/local/scm.spec.ts ───────────────────────────────────────────
 
-    // Ported: "behindBaseBranch" — platform/local/scm.spec.ts line 20
+    // Ported: "behindBaseBranch" — lib/modules/platform/local/scm.spec.ts line 20
     #[tokio::test]
     async fn local_scm_is_branch_behind_base_returns_false() {
         let scm = LocalScm::new(".");
         assert!(!scm.is_branch_behind_base("", "").await);
     }
 
-    // Ported: "isBranchModified" — platform/local/scm.spec.ts line 24
+    // Ported: "isBranchModified" — lib/modules/platform/local/scm.spec.ts line 24
     #[tokio::test]
     async fn local_scm_is_branch_modified_returns_false() {
         let scm = LocalScm::new(".");
         assert!(!scm.is_branch_modified("", "").await);
     }
 
-    // Ported: "isBranchConflicted" — platform/local/scm.spec.ts line 28
+    // Ported: "isBranchConflicted" — lib/modules/platform/local/scm.spec.ts line 28
     #[tokio::test]
     async fn local_scm_is_branch_conflicted_returns_false() {
         let scm = LocalScm::new(".");
         assert!(!scm.is_branch_conflicted("", "").await);
     }
 
-    // Ported: "branchExists" — platform/local/scm.spec.ts line 32
+    // Ported: "branchExists" — lib/modules/platform/local/scm.spec.ts line 32
     #[tokio::test]
     async fn local_scm_branch_exists_returns_true() {
         let scm = LocalScm::new(".");
         assert!(scm.branch_exists("").await);
     }
 
-    // Ported: "getBranchCommit" — platform/local/scm.spec.ts line 36
+    // Ported: "getBranchCommit" — lib/modules/platform/local/scm.spec.ts line 36
     #[tokio::test]
     async fn local_scm_get_branch_commit_returns_none() {
         let scm = LocalScm::new(".");
         assert_eq!(scm.get_branch_commit("").await, None);
     }
 
-    // Ported: "deleteBranch" — platform/local/scm.spec.ts line 44
+    // Ported: "deleteBranch" — lib/modules/platform/local/scm.spec.ts line 44
     #[tokio::test]
     async fn local_scm_delete_branch_returns_ok() {
         let scm = LocalScm::new(".");
         assert!(matches!(scm.delete_branch("").await, ScmResult::Ok(_)));
     }
 
-    // Ported: "commitAndPush" — platform/local/scm.spec.ts line 48
+    // Ported: "commitAndPush" — lib/modules/platform/local/scm.spec.ts line 48
     #[tokio::test]
     async fn local_scm_commit_and_push_returns_ok() {
         let scm = LocalScm::new(".");
@@ -477,14 +477,14 @@ mod tests {
         ));
     }
 
-    // Ported: "checkoutBranch" — platform/local/scm.spec.ts line 52
+    // Ported: "checkoutBranch" — lib/modules/platform/local/scm.spec.ts line 52
     #[tokio::test]
     async fn local_scm_checkout_branch_returns_ok() {
         let scm = LocalScm::new(".");
         assert!(matches!(scm.checkout_branch("").await, ScmResult::Ok(_)));
     }
 
-    // Ported: "should return file list using git" — platform/local/scm.spec.ts line 58
+    // Ported: "should return file list using git" — lib/modules/platform/local/scm.spec.ts line 58
     #[tokio::test]
     async fn local_scm_get_file_list_uses_git() {
         let scm = LocalScm::new(".");
@@ -493,7 +493,7 @@ mod tests {
         assert!(!files.is_empty() || files.is_empty());
     }
 
-    // Ported: "mergeAndPush" — platform/local/scm.spec.ts line 82
+    // Ported: "mergeAndPush" — lib/modules/platform/local/scm.spec.ts line 82
     #[tokio::test]
     async fn local_scm_merge_and_push_returns_ok() {
         let scm = LocalScm::new(".");
@@ -503,14 +503,14 @@ mod tests {
         ));
     }
 
-    // Ported: "getBranchUpdateDate" — platform/local/scm.spec.ts line 40
+    // Ported: "getBranchUpdateDate" — lib/modules/platform/local/scm.spec.ts line 40
     #[tokio::test]
     async fn local_scm_get_branch_update_date_returns_null() {
         let scm = LocalScm::new(".");
         assert!(scm.get_branch_update_date("main").await.is_none());
     }
 
-    // Ported: "should return file list using glob" — platform/local/scm.spec.ts line 73
+    // Ported: "should return file list using glob" — lib/modules/platform/local/scm.spec.ts line 73
     #[tokio::test]
     async fn local_scm_get_file_list_uses_glob_in_non_git_dir() {
         let tmp = tempfile::tempdir().unwrap();
@@ -523,7 +523,7 @@ mod tests {
         assert!(files.contains(&"bar.txt".to_owned()));
     }
 
-    // Ported: "mergeBranch" — platform/local/scm.spec.ts line 86
+    // Ported: "mergeBranch" — lib/modules/platform/local/scm.spec.ts line 86
     #[tokio::test]
     async fn local_scm_merge_branch_returns_ok() {
         let scm = LocalScm::new(".");

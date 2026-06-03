@@ -173,7 +173,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns releases from custom repository" — datasource/clojure/index.spec.ts line 93
+    // Ported: "returns releases from custom repository" — lib/modules/datasource/clojure/index.spec.ts line 93
     #[tokio::test]
     async fn returns_releases_from_custom_repository() {
         let server = MockServer::start().await;
@@ -201,7 +201,7 @@ mod tests {
         );
     }
 
-    // Ported: "collects releases from all registry urls" — datasource/clojure/index.spec.ts line 101
+    // Ported: "collects releases from all registry urls" — lib/modules/datasource/clojure/index.spec.ts line 101
     #[tokio::test]
     async fn collects_releases_from_all_registry_urls() {
         let server1 = MockServer::start().await;
@@ -239,7 +239,7 @@ mod tests {
         );
     }
 
-    // Ported: "falls back to next registry url" — datasource/clojure/index.spec.ts line 129
+    // Ported: "falls back to next registry url" — lib/modules/datasource/clojure/index.spec.ts line 129
     #[tokio::test]
     async fn falls_back_to_next_registry_url() {
         let fail_server = MockServer::start().await;
@@ -271,7 +271,7 @@ mod tests {
         assert_eq!(result.registry_url, good_server.uri().trim_end_matches('/'));
     }
 
-    // Ported: "ignores unsupported protocols" — datasource/clojure/index.spec.ts line 160
+    // Ported: "ignores unsupported protocols" — lib/modules/datasource/clojure/index.spec.ts line 160
     #[tokio::test]
     async fn ignores_unsupported_protocols() {
         let server = MockServer::start().await;
@@ -290,7 +290,7 @@ mod tests {
         assert_eq!(result.releases[0], "0.0.1");
     }
 
-    // Ported: "skips registry with invalid metadata structure" — datasource/clojure/index.spec.ts line 173
+    // Ported: "skips registry with invalid metadata structure" — lib/modules/datasource/clojure/index.spec.ts line 173
     #[tokio::test]
     async fn skips_registry_with_invalid_metadata_structure() {
         let bad_server = MockServer::start().await;
@@ -318,7 +318,7 @@ mod tests {
         assert_eq!(result.registry_url, good_server.uri().trim_end_matches('/'));
     }
 
-    // Ported: "skips registry with invalid XML" — datasource/clojure/index.spec.ts line 192
+    // Ported: "skips registry with invalid XML" — lib/modules/datasource/clojure/index.spec.ts line 192
     #[tokio::test]
     async fn skips_registry_with_invalid_xml() {
         let bad_server = MockServer::start().await;
@@ -345,7 +345,7 @@ mod tests {
         assert_eq!(result.registry_url, good_server.uri().trim_end_matches('/'));
     }
 
-    // Ported: "handles optional slash at the end of registry url" — datasource/clojure/index.spec.ts line 208
+    // Ported: "handles optional slash at the end of registry url" — lib/modules/datasource/clojure/index.spec.ts line 208
     #[tokio::test]
     async fn handles_optional_slash_at_end_of_registry_url() {
         let server = MockServer::start().await;
@@ -373,7 +373,7 @@ mod tests {
         assert_eq!(res_a.releases, res_b.releases);
     }
 
-    // Ported: "returns null for invalid registryUrls" — datasource/clojure/index.spec.ts line 218
+    // Ported: "returns null for invalid registryUrls" — lib/modules/datasource/clojure/index.spec.ts line 218
     #[tokio::test]
     async fn returns_null_for_invalid_registry_urls() {
         let http = HttpClient::new().unwrap();
@@ -386,7 +386,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "supports scm.url values prefixed with \"scm:\"" — datasource/clojure/index.spec.ts line 227
+    // Ported: "supports scm.url values prefixed with \"scm:\"" — lib/modules/datasource/clojure/index.spec.ts line 227
     #[tokio::test]
     async fn supports_scm_url_values_prefixed_with_scm() {
         let server = MockServer::start().await;

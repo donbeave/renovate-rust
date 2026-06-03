@@ -222,7 +222,7 @@ mod tests {
         NaiveDate::parse_from_str(s, "%Y-%m-%d").unwrap()
     }
 
-    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — versioning/node/index.spec.ts line 15
+    // Ported: "getNewValue($currentValue, $rangeStrategy, $currentVersion, $newVersion, $expected) === $expected" — lib/modules/versioning/node/index.spec.ts line 15
     #[test]
     fn get_new_value_matches_renovate_node_index_spec() {
         let cases = [
@@ -243,7 +243,7 @@ mod tests {
         }
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/node/index.spec.ts line 39
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/node/index.spec.ts line 39
     #[test]
     fn is_stable_matches_renovate_node_index_spec() {
         let t1 = d("2020-09-01");
@@ -272,7 +272,7 @@ mod tests {
         }
     }
 
-    // Ported: "isValid("$version") === $expected" — versioning/node/index.spec.ts line 60
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/node/index.spec.ts line 60
     #[test]
     fn is_valid_matches_renovate_node_index_spec() {
         let cases = [
@@ -288,7 +288,7 @@ mod tests {
         }
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/node/index.spec.ts line 72
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/node/index.spec.ts line 72
     #[test]
     fn matches_matches_renovate_node_index_spec() {
         let cases = [("16.0.0", "gallium", true), ("16.0.0", "fermium", false)];
@@ -301,7 +301,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion("$versions", "$range") === $expected" — versioning/node/index.spec.ts line 85
+    // Ported: "getSatisfyingVersion("$versions", "$range") === $expected" — lib/modules/versioning/node/index.spec.ts line 85
     #[test]
     fn get_satisfying_version_matches_renovate_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[
@@ -318,7 +318,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion("$versions", "$range") === $expected" — versioning/node/index.spec.ts line 99
+    // Ported: "minSatisfyingVersion("$versions", "$range") === $expected" — lib/modules/versioning/node/index.spec.ts line 99
     #[test]
     fn min_satisfying_version_matches_renovate_node_index_spec() {
         let cases: &[(&[&str], &str, Option<&str>)] = &[

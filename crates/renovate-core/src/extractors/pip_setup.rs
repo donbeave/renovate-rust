@@ -121,7 +121,7 @@ fn extract_balanced(s: &str) -> Option<&str> {
 mod tests {
     use super::*;
 
-    // Ported: "returns found deps" — pip_setup/extract.spec.ts line 11
+    // Ported: "returns found deps" — lib/modules/manager/pip_setup/extract.spec.ts line 11
     #[test]
     fn extracts_install_requires() {
         let content = r#"
@@ -168,7 +168,7 @@ setup(
         assert!(deps.iter().any(|d| d.name == "black"));
     }
 
-    // Ported: "returns nothing" — pip_setup/extract.spec.ts line 41
+    // Ported: "returns nothing" — lib/modules/manager/pip_setup/extract.spec.ts line 41
     //
     // The TS spec passes empty content; Rust covers the equivalent
     // no-install_requires-key behaviour, which the TS extractor would

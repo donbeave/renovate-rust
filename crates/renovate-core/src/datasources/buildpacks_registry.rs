@@ -154,7 +154,7 @@ mod tests {
         ]
     }"#;
 
-    // Ported: "processes real data" — datasource/buildpacks-registry/index.spec.ts line 9
+    // Ported: "processes real data" — lib/modules/datasource/buildpacks-registry/index.spec.ts line 9
     #[tokio::test]
     async fn processes_real_data() {
         let server = MockServer::start().await;
@@ -180,7 +180,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null on empty result" — datasource/buildpacks-registry/index.spec.ts line 48
+    // Ported: "returns null on empty result" — lib/modules/datasource/buildpacks-registry/index.spec.ts line 48
     #[tokio::test]
     async fn returns_null_on_empty_result() {
         let server = MockServer::start().await;
@@ -197,7 +197,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles not found" — datasource/buildpacks-registry/index.spec.ts line 57
+    // Ported: "handles not found" — lib/modules/datasource/buildpacks-registry/index.spec.ts line 57
     #[tokio::test]
     async fn handles_not_found() {
         let server = MockServer::start().await;
@@ -214,7 +214,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "parses buildpack-registry schema" — datasource/buildpacks-registry/schema.spec.ts line 4
+    // Ported: "parses buildpack-registry schema" — lib/modules/datasource/buildpacks-registry/schema.spec.ts line 4
     #[test]
     fn parses_buildpack_registry_schema() {
         let json = r#"{

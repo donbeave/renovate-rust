@@ -7145,7 +7145,7 @@ mod tests {
         AnyPlatformClient::Github(GithubClient::with_endpoint("token", server_uri).unwrap())
     }
 
-    // Ported: "adds user configured filenames to list" — config/app-strings.spec.ts line 8
+    // Ported: "adds user configured filenames to list" — lib/config/app-strings.spec.ts line 8
     #[test]
     fn config_file_names_include_user_configured_names() {
         let filenames = config_file_names(None, &[]);
@@ -7158,7 +7158,7 @@ mod tests {
         assert!(filenames.iter().any(|filename| filename == "def"));
     }
 
-    // Ported: "expands brace patterns for json, jsonc and json5 filenames" — config/app-strings.spec.ts line 20
+    // Ported: "expands brace patterns for json, jsonc and json5 filenames" — lib/config/app-strings.spec.ts line 20
     #[test]
     fn config_file_names_expand_json_and_json5_patterns() {
         let filenames = config_file_names(None, &[]);
@@ -7187,7 +7187,7 @@ mod tests {
         assert!(!filenames.iter().any(|filename| filename == "package.json5"));
     }
 
-    // Ported: "filters based on platform" — config/app-strings.spec.ts line 36
+    // Ported: "filters based on platform" — lib/config/app-strings.spec.ts line 36
     #[test]
     fn config_file_names_filter_platform_specific_names() {
         let gitea = config_file_names(Some("gitea"), &[]);
@@ -7210,7 +7210,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not allow the local platform to have an associated filename" — config/app-strings.spec.ts line 55
+    // Ported: "does not allow the local platform to have an associated filename" — lib/config/app-strings.spec.ts line 55
     #[test]
     fn config_file_names_do_not_add_local_platform_names() {
         let filenames = config_file_names(Some("local"), &[]);
@@ -7345,7 +7345,7 @@ mod tests {
             .unwrap()
     }
 
-    // Ported: "finds and parse renovate.json5" — workers/repository/init/merge.spec.ts line 215
+    // Ported: "finds and parse renovate.json5" — lib/workers/repository/init/merge.spec.ts line 215
     #[tokio::test]
     async fn discover_finds_and_parses_renovate_json5() {
         let result = discover_with_config_file(
@@ -7362,7 +7362,7 @@ mod tests {
         assert_eq!(config.ignore_deps, vec!["lodash"]);
     }
 
-    // Ported: "finds .github/renovate.json" — workers/repository/init/merge.spec.ts line 227
+    // Ported: "finds .github/renovate.json" — lib/workers/repository/init/merge.spec.ts line 227
     #[tokio::test]
     async fn discover_finds_github_renovate_json() {
         let result =
@@ -7377,7 +7377,7 @@ mod tests {
         assert_eq!(config.ignore_deps, vec!["lodash"]);
     }
 
-    // Ported: "finds .gitlab/renovate.json" — workers/repository/init/merge.spec.ts line 239
+    // Ported: "finds .gitlab/renovate.json" — lib/workers/repository/init/merge.spec.ts line 239
     #[tokio::test]
     async fn discover_finds_gitlab_renovate_json() {
         let result =
@@ -7392,7 +7392,7 @@ mod tests {
         assert_eq!(config.ignore_deps, vec!["lodash"]);
     }
 
-    // Ported: "finds .renovaterc.json" — workers/repository/init/merge.spec.ts line 251
+    // Ported: "finds .renovaterc.json" — lib/workers/repository/init/merge.spec.ts line 251
     #[tokio::test]
     async fn discover_finds_renovaterc_json() {
         let result =
@@ -7406,7 +7406,7 @@ mod tests {
         assert_eq!(config.ignore_deps, vec!["lodash"]);
     }
 
-    // Ported: "finds .renovaterc.json5" — workers/repository/init/merge.spec.ts line 267
+    // Ported: "finds .renovaterc.json5" — lib/workers/repository/init/merge.spec.ts line 267
     #[tokio::test]
     async fn discover_finds_renovaterc_json5() {
         let result =
@@ -7451,7 +7451,7 @@ mod tests {
         assert!(matches!(result, RepoConfigResult::NeedsOnboarding));
     }
 
-    // Ported: "returns config if not found" — workers/repository/init/merge.spec.ts line 76
+    // Ported: "returns config if not found" — lib/workers/repository/init/merge.spec.ts line 76
     #[tokio::test]
     async fn returns_not_found_when_optional() {
         use crate::config::RequireConfig;
@@ -7467,7 +7467,7 @@ mod tests {
         assert!(matches!(result, RepoConfigResult::NotFound));
     }
 
-    // Ported: "uses package.json config if found" — workers/repository/init/merge.spec.ts line 153
+    // Ported: "uses package.json config if found" — lib/workers/repository/init/merge.spec.ts line 153
     #[tokio::test]
     async fn discovers_renovate_key_in_package_json() {
         let server = MockServer::start().await;
@@ -7552,7 +7552,7 @@ mod tests {
         assert_eq!(c.ignore_deps, vec!["lodash"]);
     }
 
-    // Ported: "massages package.json renovate string" — workers/repository/init/merge.spec.ts line 174
+    // Ported: "massages package.json renovate string" — lib/workers/repository/init/merge.spec.ts line 174
     #[test]
     fn parse_from_package_json_converts_string_to_extends() {
         let pkg = r#"{"name":"app","renovate":"github>renovatebot/renovate"}"#;
@@ -7725,7 +7725,7 @@ mod tests {
         assert_eq!(c.ignore_deps, vec!["jest"]);
     }
 
-    // Ported: "empty rules" — util/package-rules/index.spec.ts line 1211
+    // Ported: "empty rules" — lib/util/package-rules/index.spec.ts line 1211
     #[test]
     fn package_rules_null_is_treated_as_empty_rules() {
         let c = RepoConfig::parse(r#"{"packageRules": null}"#);
@@ -7753,7 +7753,7 @@ mod tests {
         assert!(!c.is_dep_ignored("react"));
     }
 
-    // Ported: "sets skipReason=package-rules if enabled=false" — util/package-rules/index.spec.ts line 169
+    // Ported: "sets skipReason=package-rules if enabled=false" — lib/util/package-rules/index.spec.ts line 169
     #[test]
     fn enabled_false_rule_blocks_dependency() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -7764,7 +7764,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true" — util/package-rules/index.spec.ts line 202
+    // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true" — lib/util/package-rules/index.spec.ts line 202
     #[test]
     fn force_enabled_true_overrides_enabled_false() {
         // index.spec.ts line 202 — vulnerability alert scenario
@@ -7788,7 +7788,7 @@ mod tests {
         );
     }
 
-    // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false" — util/package-rules/index.spec.ts line 292
+    // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false" — lib/util/package-rules/index.spec.ts line 292
     #[test]
     fn force_enabled_false_overrides_enabled_true() {
         // index.spec.ts line 292
@@ -7815,7 +7815,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn force_enabled_true_also_overrides_config_level_disabled() {
-        // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)" — util/package-rules/index.spec.ts line 223
+        // Ported: "does not set skipReason=package-rules if the last packageRule has force.enabled=true (if config.enabled=false)" — lib/util/package-rules/index.spec.ts line 223
         let c = RepoConfig::parse(
             r#"{
             "packageRules": [
@@ -7834,7 +7834,7 @@ mod tests {
         );
     }
 
-    // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false)" — util/package-rules/index.spec.ts line 267
+    // Ported: "sets skipReason=package-rules if the last packageRule has force.enabled=false (if config.force.enabled=false)" — lib/util/package-rules/index.spec.ts line 267
     #[test]
     fn force_enabled_false_overrides_prior_force_enabled_true() {
         let c = RepoConfig::parse(
@@ -7855,7 +7855,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)" — util/package-rules/index.spec.ts line 245
+    // Ported: "does not set skipReason=package-rules if the last packageRule has enabled=true (if config.force.enabled=false)" — lib/util/package-rules/index.spec.ts line 245
     #[test]
     fn force_enabled_true_on_ctx_clears_block() {
         // index.spec.ts line 245 — two rules: enabled:false, then force:enabled:true (via effects)
@@ -7875,7 +7875,7 @@ mod tests {
         assert_eq!(effects.force_enabled, Some(true));
     }
 
-    // Ported: "skips skipReason=package-rules if enabled=true" — util/package-rules/index.spec.ts line 312
+    // Ported: "skips skipReason=package-rules if enabled=true" — lib/util/package-rules/index.spec.ts line 312
     #[test]
     fn enabled_false_without_skip_stage_keeps_blocked_state_only() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"enabled": false}]}"#);
@@ -8037,7 +8037,7 @@ mod tests {
         assert!(!c.is_dep_ignored("babel-loader"));
     }
 
-    // Ported: "matches anything if missing inclusive rules" — util/package-rules/index.spec.ts line 326
+    // Ported: "matches anything if missing inclusive rules" — lib/util/package-rules/index.spec.ts line 326
     #[test]
     fn match_package_names_negation() {
         // "!lodash" in matchPackageNames excludes lodash, allows others
@@ -8048,7 +8048,7 @@ mod tests {
         assert!(c.is_dep_ignored("express"));
     }
 
-    // Ported: "supports inclusive or" — util/package-rules/index.spec.ts line 348
+    // Ported: "supports inclusive or" — lib/util/package-rules/index.spec.ts line 348
     #[test]
     fn match_package_names_supports_inclusive_or() {
         let c = RepoConfig::parse(
@@ -8194,7 +8194,7 @@ mod tests {
         assert!(!rule.manager_matches("npm"));
     }
 
-    // Ported: "filters managers with matching manager" — util/package-rules/index.spec.ts line 426
+    // Ported: "filters managers with matching manager" — lib/util/package-rules/index.spec.ts line 426
     #[test]
     fn match_managers_matching_manager_applies_rule() {
         let c = RepoConfig::parse(
@@ -8209,7 +8209,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
-    // Ported: "filters managers with non-matching manager" — util/package-rules/index.spec.ts line 446
+    // Ported: "filters managers with non-matching manager" — lib/util/package-rules/index.spec.ts line 446
     #[test]
     fn match_managers_non_matching_manager_skips_rule() {
         let c = RepoConfig::parse(
@@ -8285,7 +8285,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_managers_renovate_config_presets_migrated_to_renovate_config() {
-        // Ported: "migrates old custom manager syntax to new one" — config/migrations/custom/match-managers-migration.spec.ts line 4
+        // Ported: "migrates old custom manager syntax to new one" — lib/config/migrations/custom/match-managers-migration.spec.ts line 4
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchManagers": ["renovate-config-presets"], "automerge": true}]}"#,
         );
@@ -8298,7 +8298,7 @@ mod tests {
 
     #[test]
     fn extend_whitesource_merge_confidence_preset_normalized() {
-        // Ported: "migrate merge confidence config preset to internal preset" — config/migrations/custom/extends-migration.spec.ts line 76
+        // Ported: "migrate merge confidence config preset to internal preset" — lib/config/migrations/custom/extends-migration.spec.ts line 76
         let c = RepoConfig::parse(r#"{"extends": ["github>whitesource/merge-confidence:beta"]}"#);
         // The preset should be normalized (and since we don't expand mergeConfidence:all-badges
         // further, it should remain in extends)
@@ -8364,7 +8364,7 @@ mod tests {
 
     // ── Ported from Renovate index.spec.ts matchDepTypes ─────────────────────
 
-    // Ported: "filters requested depType" — util/package-rules/index.spec.ts line 370
+    // Ported: "filters requested depType" — lib/util/package-rules/index.spec.ts line 370
     #[test]
     fn match_dep_types_multiple_types_in_list() {
         // matches dep with depType: 'dependencies'.
@@ -8383,7 +8383,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns false if no depTypes" — util/package-rules/index.spec.ts line 408
+    // Ported: "returns false if no depTypes" — lib/util/package-rules/index.spec.ts line 408
     #[test]
     fn match_dep_types_no_dep_type_rule_does_not_fire() {
         let c = RepoConfig::parse(
@@ -8463,7 +8463,7 @@ mod tests {
         );
     }
 
-    // Ported: "filters from list of requested depTypes" — util/package-rules/index.spec.ts line 389
+    // Ported: "filters from list of requested depTypes" — lib/util/package-rules/index.spec.ts line 389
     #[test]
     fn match_dep_types_plural_array_any_matches() {
         // index.spec.ts line ~389 — dep has depTypes: ['build', 'test'], rule matchDepTypes: ['test']
@@ -8504,7 +8504,7 @@ mod tests {
         );
     }
 
-    // Ported: "filters naked depType" — util/package-rules/index.spec.ts line 950
+    // Ported: "filters naked depType" — lib/util/package-rules/index.spec.ts line 950
     #[test]
     fn match_dep_types_naked_dep_type_matches() {
         // dep has plain dep_type: "dependencies", matchDepTypes: ["dependencies", "peerDependencies"]
@@ -8523,7 +8523,7 @@ mod tests {
         );
     }
 
-    // Ported: "filters out unrequested depType" — util/package-rules/index.spec.ts line 968
+    // Ported: "filters out unrequested depType" — lib/util/package-rules/index.spec.ts line 968
     #[test]
     fn match_dep_types_out_of_requested_does_not_match() {
         // dep_type: "devDependencies", matchDepTypes: ["dependencies", "peerDependencies"] → no match
@@ -8542,7 +8542,7 @@ mod tests {
         );
     }
 
-    // Ported: "applies" — util/package-rules/index.spec.ts line 38
+    // Ported: "applies" — lib/util/package-rules/index.spec.ts line 38
     #[test]
     fn applies_comprehensive_integration() {
         // packageName='a', updateType='minor', isBump=true, currentValue='1.0.0'
@@ -8578,13 +8578,13 @@ mod tests {
         );
     }
 
-    // Ported: "applies both rules for a" — util/package-rules/index.spec.ts line 71
-    // Ported: "applies both rules for b" — util/package-rules/index.spec.ts line 81
-    // Ported: "applies the second rule" — util/package-rules/index.spec.ts line 91
-    // Ported: "applies matchPackageNames" — util/package-rules/index.spec.ts line 101
-    // Ported: "applies the second second rule" — util/package-rules/index.spec.ts line 109
-    // Ported: "excludes package name" — util/package-rules/index.spec.ts line 118
-    // Ported: "excludes package pattern" — util/package-rules/index.spec.ts line 127
+    // Ported: "applies both rules for a" — lib/util/package-rules/index.spec.ts line 71
+    // Ported: "applies both rules for b" — lib/util/package-rules/index.spec.ts line 81
+    // Ported: "applies the second rule" — lib/util/package-rules/index.spec.ts line 91
+    // Ported: "applies matchPackageNames" — lib/util/package-rules/index.spec.ts line 101
+    // Ported: "applies the second second rule" — lib/util/package-rules/index.spec.ts line 109
+    // Ported: "excludes package name" — lib/util/package-rules/index.spec.ts line 118
+    // Ported: "excludes package pattern" — lib/util/package-rules/index.spec.ts line 127
     #[test]
     fn package_rules_index_fixture_name_matching_cases() {
         let c = RepoConfig::parse(
@@ -8627,7 +8627,7 @@ mod tests {
         }
     }
 
-    // Ported: "ignores patterns if lock file maintenance" — util/package-rules/index.spec.ts line 136
+    // Ported: "ignores patterns if lock file maintenance" — lib/util/package-rules/index.spec.ts line 136
     #[test]
     fn lock_file_maintenance_without_package_name_ignores_negative_name_pattern() {
         let c = RepoConfig::parse(
@@ -8641,7 +8641,7 @@ mod tests {
         );
     }
 
-    // Ported: "do apply rule with matchPackageName" — util/package-rules/index.spec.ts line 152
+    // Ported: "do apply rule with matchPackageName" — lib/util/package-rules/index.spec.ts line 152
     #[test]
     fn lock_file_maintenance_match_package_name_requires_package_name() {
         let c = RepoConfig::parse(
@@ -8688,7 +8688,7 @@ mod tests {
         assert!(!rule.datasource_matches("docker"));
     }
 
-    // Ported: "filters datasources with matching datasource" — util/package-rules/index.spec.ts line 529
+    // Ported: "filters datasources with matching datasource" — lib/util/package-rules/index.spec.ts line 529
     #[test]
     fn match_datasources_matching_datasource_applies_rule() {
         let c = RepoConfig::parse(
@@ -8709,7 +8709,7 @@ mod tests {
         assert!(effects.labels.is_empty());
     }
 
-    // Ported: "filters datasources with non-matching datasource" — util/package-rules/index.spec.ts line 573
+    // Ported: "filters datasources with non-matching datasource" — lib/util/package-rules/index.spec.ts line 573
     #[test]
     fn match_datasources_missing_datasource_skips_rule() {
         let c = RepoConfig::parse(
@@ -8845,7 +8845,7 @@ mod tests {
         assert!(!rule2.update_type_matches(UpdateType::Minor, true));
     }
 
-    // Ported: "filters updateType" — util/package-rules/index.spec.ts line 647
+    // Ported: "filters updateType" — lib/util/package-rules/index.spec.ts line 647
     #[test]
     fn match_update_types_patch_matches_patch_minor_rule_only() {
         let c = RepoConfig::parse(
@@ -8931,7 +8931,7 @@ mod tests {
         );
     }
 
-    // Ported: "unsets skipReason=package-rules if enabled=true" — util/package-rules/index.spec.ts line 184
+    // Ported: "unsets skipReason=package-rules if enabled=true" — lib/util/package-rules/index.spec.ts line 184
     #[test]
     fn enabled_true_later_rule_overrides_earlier_enabled_false() {
         // Renovate: last matching rule wins for enabled field.
@@ -9111,7 +9111,7 @@ mod tests {
         assert!(!c.is_update_blocked("pkg", "0.9.0", UpdateType::Major, "cargo"));
     }
 
-    // Ported: "checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap" — util/package-rules/index.spec.ts line 987
+    // Ported: "checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap" — lib/util/package-rules/index.spec.ts line 987
     #[test]
     fn match_current_version_range_uses_current_version_field() {
         // Mirrors: "satisfies the condition on range overlap" — when currentVersion is set,
@@ -9231,7 +9231,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_current_version_regex_prefers_locked_version() {
-        // Ported: "return true for regex version match" — util/package-rules/current-version.spec.ts line 93
+        // Ported: "return true for regex version match" — lib/util/package-rules/current-version.spec.ts line 93
         // When lockedVersion is set, regex matchCurrentVersion tests against it.
         // ruby: currentValue='"~> 0.1.0"', lockedVersion='0.1.0'
         // Pattern: /^v?[~ -]?0/ → tests against "0.1.0" → matches (starts with "0").
@@ -9245,7 +9245,7 @@ mod tests {
 
     #[test]
     fn match_current_version_regex_false_without_locked_version() {
-        // Ported: "return false for regex value match" — util/package-rules/current-version.spec.ts line 107
+        // Ported: "return false for regex value match" — lib/util/package-rules/current-version.spec.ts line 107
         // When lockedVersion is absent, falls back to currentValue='"~> 0.1.0"'.
         // Pattern: /^v?[~ -]?0/ against '"~> 0.1.0"' → doesn't match (starts with '"').
         let c = RepoConfig::parse(
@@ -9287,7 +9287,7 @@ mod tests {
 
     // ── Ported from Renovate index.spec.ts (matchCurrentVersion) ─────────────
 
-    // Ported: "checks if matchCurrentVersion selector works with regular expressions" — util/package-rules/index.spec.ts line 1087
+    // Ported: "checks if matchCurrentVersion selector works with regular expressions" — lib/util/package-rules/index.spec.ts line 1087
     #[test]
     fn match_current_version_index_spec_regex_matches() {
         let c = RepoConfig::parse(
@@ -9311,7 +9311,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx2).automerge, None);
     }
 
-    // Ported: "checks if matchCurrentVersion selector works with negated regular expressions" — util/package-rules/index.spec.ts line 1114
+    // Ported: "checks if matchCurrentVersion selector works with negated regular expressions" — lib/util/package-rules/index.spec.ts line 1114
     #[test]
     fn match_current_version_index_spec_negated_regex() {
         let c = RepoConfig::parse(
@@ -9335,7 +9335,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx2).automerge, Some(true));
     }
 
-    // Ported: "checks if matchCurrentVersion selector works with static values" — util/package-rules/index.spec.ts line 1067
+    // Ported: "checks if matchCurrentVersion selector works with static values" — lib/util/package-rules/index.spec.ts line 1067
     #[test]
     fn match_current_version_index_spec_static_value() {
         // matchCurrentVersion is a plain version → checks if it satisfies currentValue range.
@@ -9352,7 +9352,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
-    // Ported: "checks if matchCurrentVersion selector is a version and matches if currentValue is a range" — util/package-rules/index.spec.ts line 1041
+    // Ported: "checks if matchCurrentVersion selector is a version and matches if currentValue is a range" — lib/util/package-rules/index.spec.ts line 1041
     #[test]
     fn match_current_version_index_spec_version_matches_range() {
         // matchCurrentVersion='2.1.0' is a version → is it within currentValue range?
@@ -9383,7 +9383,7 @@ mod tests {
         );
     }
 
-    // Ported: "checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap" — util/package-rules/index.spec.ts line 1020
+    // Ported: "checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap" — lib/util/package-rules/index.spec.ts line 1020
     #[test]
     fn match_current_version_index_spec_pinned_satisfies_range() {
         let c = RepoConfig::parse(
@@ -9431,7 +9431,7 @@ mod tests {
         ));
     }
 
-    // Ported: "matches packageFiles" — util/package-rules/index.spec.ts line 1141
+    // Ported: "matches packageFiles" — lib/util/package-rules/index.spec.ts line 1141
     #[test]
     fn match_file_names_exact_match() {
         let c = RepoConfig::parse(
@@ -9579,7 +9579,7 @@ mod tests {
 
     // ── matchDepNames ────────────────────────────────────────────────────────
 
-    // Ported: "matches matchDepNames(depName)" — util/package-rules/index.spec.ts line 1339
+    // Ported: "matches matchDepNames(depName)" — lib/util/package-rules/index.spec.ts line 1339
     #[test]
     fn match_dep_names_exact_disables_dep() {
         let c = RepoConfig::parse(
@@ -9594,7 +9594,7 @@ mod tests {
         assert!(!c.is_dep_ignored("express"));
     }
 
-    // Ported: "matches if there are no matchers" — util/package-rules/index.spec.ts line 1364
+    // Ported: "matches if there are no matchers" — lib/util/package-rules/index.spec.ts line 1364
     #[test]
     fn package_rule_without_matchers_applies_to_any_dep() {
         let c = RepoConfig::parse(r#"{"packageRules": [{"automerge": true}]}"#);
@@ -9602,7 +9602,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
-    // Ported: "propagates fetchChangeLogs from matching packageRule" — util/package-rules/index.spec.ts line 1442
+    // Ported: "propagates fetchChangeLogs from matching packageRule" — lib/util/package-rules/index.spec.ts line 1442
     #[test]
     fn package_rule_fetch_change_logs_applies_when_rule_matches() {
         let c = RepoConfig::parse(
@@ -9619,7 +9619,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not set fetchChangeLogs when packageRule does not match" — util/package-rules/index.spec.ts line 1457
+    // Ported: "does not set fetchChangeLogs when packageRule does not match" — lib/util/package-rules/index.spec.ts line 1457
     #[test]
     fn package_rule_fetch_change_logs_skipped_when_rule_does_not_match() {
         let c = RepoConfig::parse(
@@ -9633,7 +9633,7 @@ mod tests {
         assert_eq!(c.collect_rule_effects(&ctx).fetch_change_logs, None);
     }
 
-    // Ported: "compiles sourceUrl with template helper functions" — util/package-rules/index.spec.ts line 1472
+    // Ported: "compiles sourceUrl with template helper functions" — lib/util/package-rules/index.spec.ts line 1472
     #[test]
     fn package_rule_source_url_template_replace_helper() {
         let c = RepoConfig::parse(
@@ -9654,7 +9654,7 @@ mod tests {
         );
     }
 
-    // Ported: "compiles sourceUrl with template variables" — util/package-rules/index.spec.ts line 1491
+    // Ported: "compiles sourceUrl with template variables" — lib/util/package-rules/index.spec.ts line 1491
     #[test]
     fn package_rule_source_url_template_package_name_variable() {
         let c = RepoConfig::parse(
@@ -9680,7 +9680,7 @@ mod tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_dep_names_undefined_dep_name_does_not_fire() {
-        // Ported: "should return false if packageFile is not defined" — util/package-rules/dep-names.spec.ts line 7
+        // Ported: "should return false if packageFile is not defined" — lib/util/package-rules/dep-names.spec.ts line 7
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchDepNames": ["@opentelemetry/http"], "automerge": true}]}"#,
         );
@@ -9873,14 +9873,14 @@ mod tests {
 
     // ── Ported from migration.spec.ts schedule migration ─────────────────────
 
-    // Ported: "migrates every friday" — config/migration.spec.ts line 205
+    // Ported: "migrates every friday" — lib/config/migration.spec.ts line 205
     #[test]
     fn schedule_every_friday_migrated_to_on_friday() {
         let c = RepoConfig::parse(r#"{"schedule": "every friday"}"#);
         assert_eq!(c.schedule, vec!["on friday"]);
     }
 
-    // Ported: "does not migrate every weekday" — config/migration.spec.ts line 226
+    // Ported: "does not migrate every weekday" — lib/config/migration.spec.ts line 226
     #[test]
     fn schedule_every_weekday_not_migrated() {
         let c = RepoConfig::parse(r#"{"schedule": "every weekday"}"#);
@@ -9901,7 +9901,7 @@ mod tests {
         assert!(c.schedule.is_empty());
     }
 
-    // Ported: "migrates before and after schedules" — config/migration.spec.ts line 184
+    // Ported: "migrates before and after schedules" — lib/config/migration.spec.ts line 184
     #[test]
     fn schedule_before_after_migration_matches_renovate_cases() {
         let c = RepoConfig::parse(
@@ -9950,7 +9950,7 @@ mod tests {
         );
     }
 
-    // Ported: "does not migrate hour range" — config/migration.spec.ts line 247
+    // Ported: "does not migrate hour range" — lib/config/migration.spec.ts line 247
     #[test]
     fn schedule_compound_non_straddling_not_split() {
         // "after 1:00pm and before 5:00pm" — 13:00 < 17:00 → not straddling → no split
@@ -9958,7 +9958,7 @@ mod tests {
         assert_eq!(c.schedule, vec!["after 1:00pm and before 5:00pm"]);
     }
 
-    // Ported: "does not migrate config" — config/migration.spec.ts line 297
+    // Ported: "does not migrate config" — lib/config/migration.spec.ts line 297
     #[test]
     fn non_deprecated_config_fields_parse_without_migration_effects() {
         let c = RepoConfig::parse(r#"{"enabled": true, "separateMinorPatch": true}"#);
@@ -9968,7 +9968,7 @@ mod tests {
         assert!(c.extends.is_empty());
     }
 
-    // Ported: "migrates config" — config/migration.spec.ts line 17
+    // Ported: "migrates config" — lib/config/migration.spec.ts line 17
     #[test]
     fn broad_config_migration_covers_representable_fields() {
         let c = RepoConfig::parse(
@@ -10067,7 +10067,7 @@ mod tests {
         assert_eq!(c.schedule, vec!["every weekday"]);
     }
 
-    // Ported: "does not migrate multi days" — config/migration.spec.ts line 236
+    // Ported: "does not migrate multi days" — lib/config/migration.spec.ts line 236
     #[test]
     fn schedule_multi_day_expression_not_migrated() {
         let c = RepoConfig::parse(r#"{"schedule": "after 5:00pm on wednesday and thursday"}"#);
@@ -10095,14 +10095,14 @@ mod tests {
         assert!(c.automerge);
     }
 
-    // Ported: "should migrate none" — config/migrations/custom/automerge-migration.spec.ts line 4
+    // Ported: "should migrate none" — lib/config/migrations/custom/automerge-migration.spec.ts line 4
     #[test]
     fn automerge_legacy_none_string_migrated_to_false() {
         let c = RepoConfig::parse(r#"{"automerge": "none"}"#);
         assert!(!c.automerge, "automerge: 'none' must migrate to false");
     }
 
-    // Ported: "should migrate any" — config/migrations/custom/automerge-migration.spec.ts line 50
+    // Ported: "should migrate any" — lib/config/migrations/custom/automerge-migration.spec.ts line 50
     #[test]
     fn automerge_legacy_any_string_migrated_to_true() {
         let c = RepoConfig::parse(r#"{"automerge": "any"}"#);
@@ -10131,7 +10131,7 @@ mod tests {
         );
     }
 
-    // Ported: "migrates semantic prefix with no scope" — config/migration.spec.ts line 215
+    // Ported: "migrates semantic prefix with no scope" — lib/config/migration.spec.ts line 215
     #[test]
     fn semantic_prefix_without_scope_migrates_to_type_and_empty_scope() {
         let c = RepoConfig::parse(r#"{"semanticPrefix": "fix"}"#);
@@ -10252,7 +10252,7 @@ mod tests {
         assert_eq!(c.base_branches, vec!["main", "develop"]);
     }
 
-    // Ported: "migrates baseBranches and baseBranch" — config/migration.spec.ts line 835
+    // Ported: "migrates baseBranches and baseBranch" — lib/config/migration.spec.ts line 835
     #[test]
     fn base_branches_and_base_branch_migrated_to_patterns() {
         let c = RepoConfig::parse(r#"{"baseBranches": ["main", "dev"]}"#);
@@ -10726,7 +10726,7 @@ mod tests {
         assert!(!c.platform_automerge);
     }
 
-    // Ported: "migrates azureAutoComplete" — config/migration.spec.ts line 762
+    // Ported: "migrates azureAutoComplete" — lib/config/migration.spec.ts line 762
     #[test]
     fn azure_auto_complete_migrated_to_platform_automerge() {
         let c = RepoConfig::parse(r#"{"azureAutoComplete": true}"#);
@@ -10735,7 +10735,7 @@ mod tests {
         assert!(!c2.platform_automerge);
     }
 
-    // Ported: "migrates gitLabAutomerge" — config/migration.spec.ts line 791
+    // Ported: "migrates gitLabAutomerge" — lib/config/migration.spec.ts line 791
     #[test]
     fn git_lab_automerge_migrated_to_platform_automerge() {
         let c = RepoConfig::parse(r#"{"gitLabAutomerge": true}"#);
@@ -10744,7 +10744,7 @@ mod tests {
         assert!(!c2.platform_automerge);
     }
 
-    // Ported: "migrates empty requiredStatusChecks" — config/migration.spec.ts line 751
+    // Ported: "migrates empty requiredStatusChecks" — lib/config/migration.spec.ts line 751
     #[test]
     fn empty_required_status_checks_is_removed() {
         let c = RepoConfig::parse(r#"{"requiredStatusChecks": []}"#);
@@ -11639,7 +11639,7 @@ mod schedule_preset_tests {
 
     // ── Ported from migration.spec.ts extends migration ───────────────────────
 
-    // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+    // Ported: "migrates preset strings to array" — lib/config/migration.spec.ts line 419
     #[test]
     fn extends_string_coerced_to_array() {
         let c = RepoConfig::parse(r#"{"extends": "foo"}"#);
@@ -11647,7 +11647,7 @@ mod schedule_preset_tests {
         assert!(c.minimum_release_age.is_none()); // sanity check: no minimumReleaseAge
     }
 
-    // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+    // Ported: "migrates preset strings to array" — lib/config/migration.spec.ts line 419
     #[test]
     fn extends_string_js_app_shorthand_normalized() {
         let c = RepoConfig::parse(r#"{"extends": ":js-app"}"#);
@@ -11661,7 +11661,7 @@ mod schedule_preset_tests {
         );
     }
 
-    // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+    // Ported: "migrates preset strings to array" — lib/config/migration.spec.ts line 419
     #[test]
     fn extends_mixed_array_js_app_shorthand_normalized() {
         let c = RepoConfig::parse(r#"{"extends": ["foo", ":js-app", "bar"]}"#);
@@ -11675,8 +11675,8 @@ mod schedule_preset_tests {
         );
     }
 
-    // Ported: "migrates presets" — config/migration.spec.ts line 655
-    // Ported: "migrates presets" — migrations/custom/extends-migration.spec.ts line 58
+    // Ported: "migrates presets" — lib/config/migration.spec.ts line 655
+    // Ported: "migrates presets" — lib/config/migrations/custom/extends-migration.spec.ts line 58
     #[test]
     fn migrate_presets_rewrites_extends_and_drops_empty_replacements() {
         let migrate_presets = std::collections::BTreeMap::from([
@@ -11693,7 +11693,7 @@ mod schedule_preset_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn extends_js_app_shorthand_normalized() {
-        // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+        // Ported: "migrates preset strings to array" — lib/config/migration.spec.ts line 419
         let c = RepoConfig::parse(r#"{"extends": [":js-app"]}"#);
         // config:js-app injects a rangeStrategy:pin rule — verify that preset was recognized.
         let has_pin_rule = c
@@ -11708,7 +11708,7 @@ mod schedule_preset_tests {
 
     #[test]
     fn extends_base_shorthand_normalized() {
-        // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+        // Ported: "migrates preset strings to array" — lib/config/migration.spec.ts line 419
         let c = RepoConfig::parse(r#"{"extends": [":base"]}"#);
         // config:recommended injects workarounds and other rules — just verify it was recognized.
         assert!(
@@ -11719,7 +11719,7 @@ mod schedule_preset_tests {
 
     #[test]
     fn extends_master_issue_normalized() {
-        // Ported: "migrates preset strings to array" — config/migration.spec.ts line 419
+        // Ported: "migrates preset strings to array" — lib/config/migration.spec.ts line 419
         let c = RepoConfig::parse(r#"{"extends": [":masterIssue"]}"#);
         assert!(
             c.dependency_dashboard,
@@ -11727,7 +11727,7 @@ mod schedule_preset_tests {
         );
     }
 
-    // Ported: "migrates npm:unpublishSafe" — config/migration.spec.ts line 532
+    // Ported: "migrates npm:unpublishSafe" — lib/config/migration.spec.ts line 532
     #[test]
     fn extends_npm_unpublish_safe_normalized() {
         let c = RepoConfig::parse(r#"{"extends": ["npm:unpublishSafe"]}"#);
@@ -11741,7 +11741,7 @@ mod schedule_preset_tests {
         );
     }
 
-    // Ported: "migrates npm:unpublishSafe" — config/migration.spec.ts line 532
+    // Ported: "migrates npm:unpublishSafe" — lib/config/migration.spec.ts line 532
     #[test]
     fn extends_npm_unpublish_safe_normalized_after_existing_preset() {
         let c = RepoConfig::parse(r#"{"extends": ["foo", "npm:unpublishSafe"]}"#);
@@ -12085,8 +12085,8 @@ mod schedule_preset_tests {
 mod source_url_tests {
     use super::*;
 
-    // Ported: "matches matchSourceUrls" — util/package-rules/index.spec.ts line 740
-    // Ported: "non-matches matchSourceUrls" — util/package-rules/index.spec.ts line 763
+    // Ported: "matches matchSourceUrls" — lib/util/package-rules/index.spec.ts line 740
+    // Ported: "non-matches matchSourceUrls" — lib/util/package-rules/index.spec.ts line 763
     #[test]
     fn match_source_urls_exact_disables_dep() {
         let c = RepoConfig::parse(
@@ -12111,8 +12111,8 @@ mod source_url_tests {
 
     // ── Ported from Renovate index.spec.ts matchSourceUrls tests ─────────────
 
-    // Ported: "matches matchSourceUrls with glob" — util/package-rules/index.spec.ts line 672
-    // Ported: "non-matches matchSourceUrls with globs" — util/package-rules/index.spec.ts line 695
+    // Ported: "matches matchSourceUrls with glob" — lib/util/package-rules/index.spec.ts line 672
+    // Ported: "non-matches matchSourceUrls with globs" — lib/util/package-rules/index.spec.ts line 695
     #[test]
     fn match_source_urls_with_double_star_glob() {
         // 'https://github.com/renovatebot/**' matches sub-repos.
@@ -12125,8 +12125,8 @@ mod source_url_tests {
         assert!(!rule.source_url_matches("https://github.com/vuejs/vue"));
     }
 
-    // Ported: "matches matchSourceUrls with patterns (case-insensitive)" — util/package-rules/index.spec.ts line 1239
-    // Ported: "matches matchSourceUrls(case-insensitive)" — util/package-rules/index.spec.ts line 1262
+    // Ported: "matches matchSourceUrls with patterns (case-insensitive)" — lib/util/package-rules/index.spec.ts line 1239
+    // Ported: "matches matchSourceUrls(case-insensitive)" — lib/util/package-rules/index.spec.ts line 1262
     #[test]
     fn match_source_urls_case_insensitive() {
         // Glob matching is case-insensitive (Renovate: minimatch nocase:true).
@@ -12137,7 +12137,7 @@ mod source_url_tests {
         assert!(rule.source_url_matches("https://github.com/renovatebot/Presets"));
     }
 
-    // Ported: "handles matchSourceUrls when missing sourceUrl" — util/package-rules/index.spec.ts line 718
+    // Ported: "handles matchSourceUrls when missing sourceUrl" — lib/util/package-rules/index.spec.ts line 718
     #[test]
     fn match_source_urls_missing_returns_false() {
         // rule with matchSourceUrls set must NOT fire.
@@ -12176,7 +12176,7 @@ mod source_url_tests {
         assert!(rule.source_url_matches("https://example.com/pkg"));
     }
 
-    // Ported: "matches matchConfidence" — util/package-rules/index.spec.ts line 865
+    // Ported: "matches matchConfidence" — lib/util/package-rules/index.spec.ts line 865
     #[test]
     fn match_confidence_matches() {
         let c = RepoConfig::parse(
@@ -12190,7 +12190,7 @@ mod source_url_tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, Some(true));
     }
 
-    // Ported: "non-matches matchConfidence" — util/package-rules/index.spec.ts line 884
+    // Ported: "non-matches matchConfidence" — lib/util/package-rules/index.spec.ts line 884
     #[test]
     fn match_confidence_non_matches() {
         let c = RepoConfig::parse(
@@ -12204,7 +12204,7 @@ mod source_url_tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, None);
     }
 
-    // Ported: "does not match matchConfidence when there is no mergeConfidenceLevel" — util/package-rules/index.spec.ts line 903
+    // Ported: "does not match matchConfidence when there is no mergeConfidenceLevel" — lib/util/package-rules/index.spec.ts line 903
     #[test]
     fn match_confidence_no_level_no_match() {
         let c = RepoConfig::parse(
@@ -12218,7 +12218,7 @@ mod source_url_tests {
         assert_eq!(c.collect_rule_effects(&ctx).automerge, None);
     }
 
-    // Ported: "throws when unauthenticated" — util/package-rules/index.spec.ts line 922
+    // Ported: "throws when unauthenticated" — lib/util/package-rules/index.spec.ts line 922
     // Note: The upstream test verifies that missing API credentials throw MISSING_API_CREDENTIALS.
     // In Rust, matchConfidence matching is purely local (no network). The upstream behavior of
     // checking hostRules for a merge-confidence token is a TS-specific side effect. We verify
@@ -12309,7 +12309,7 @@ mod source_url_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_current_value_undefined_returns_false() {
-        // Ported: "return false for now value" — util/package-rules/current-value.spec.ts line 79
+        // Ported: "return false for now value" — lib/util/package-rules/current-value.spec.ts line 79
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchCurrentValue": "/^v?[~ -]?0/", "enabled": false}]}"#,
         );
@@ -12320,7 +12320,7 @@ mod source_url_tests {
 
     #[test]
     fn match_current_value_glob_match() {
-        // Ported: "return true for glob match" — util/package-rules/current-value.spec.ts line 19
+        // Ported: "return true for glob match" — lib/util/package-rules/current-value.spec.ts line 19
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchCurrentValue": "1.2.*", "enabled": false}]}"#,
         );
@@ -12344,7 +12344,7 @@ mod source_url_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn match_new_value_glob_match() {
-        // Ported: "return true for glob match" — util/package-rules/new-value.spec.ts line 19
+        // Ported: "return true for glob match" — lib/util/package-rules/new-value.spec.ts line 19
         let c = RepoConfig::parse(
             r#"{"packageRules": [{"matchNewValue": "1.2.*", "enabled": false}]}"#,
         );
@@ -12389,7 +12389,7 @@ mod source_url_tests {
 
     // ── Ported from Renovate index.spec.ts "matches lock files" ──────────────
 
-    // Ported: "matches lock files" — util/package-rules/index.spec.ts line 1165
+    // Ported: "matches lock files" — lib/util/package-rules/index.spec.ts line 1165
     #[test]
     fn match_file_names_matches_lock_files() {
         // Rule matchFileNames: ['yarn.lock'] should fire when lockFiles contains 'yarn.lock'.
@@ -12409,7 +12409,7 @@ mod source_url_tests {
         );
     }
 
-    // Ported: "matches paths" — util/package-rules/index.spec.ts line 1181
+    // Ported: "matches paths" — lib/util/package-rules/index.spec.ts line 1181
     #[test]
     fn match_file_names_matches_paths() {
         let c = RepoConfig::parse(
@@ -12547,8 +12547,8 @@ mod categories_base_branch_tests {
         assert!(rule.base_branch_matches("release/1.0"));
     }
 
-    // Ported: "filters branches with matching branch" — util/package-rules/index.spec.ts line 554
-    // Ported: "filters branches with non-matching branch" — util/package-rules/index.spec.ts line 591
+    // Ported: "filters branches with matching branch" — lib/util/package-rules/index.spec.ts line 554
+    // Ported: "filters branches with non-matching branch" — lib/util/package-rules/index.spec.ts line 591
     #[test]
     fn match_base_branches_multiple_entries() {
         let c = RepoConfig::parse(
@@ -12560,8 +12560,8 @@ mod categories_base_branch_tests {
         assert!(!rule.base_branch_matches("feature/foo"));
     }
 
-    // Ported: "filters branches with matching branch regex" — util/package-rules/index.spec.ts line 609
-    // Ported: "filters branches with non-matching branch regex" — util/package-rules/index.spec.ts line 628
+    // Ported: "filters branches with matching branch regex" — lib/util/package-rules/index.spec.ts line 609
+    // Ported: "filters branches with non-matching branch regex" — lib/util/package-rules/index.spec.ts line 628
     #[test]
     fn match_base_branches_regex_matches_release_branch_only() {
         let c = RepoConfig::parse(
@@ -12574,7 +12574,7 @@ mod categories_base_branch_tests {
 
     // ── Ported from Renovate index.spec.ts ───────────────────────────────────
 
-    // Ported: "needs baseBranch to match" — util/package-rules/index.spec.ts line 1303
+    // Ported: "needs baseBranch to match" — lib/util/package-rules/index.spec.ts line 1303
     #[test]
     fn needs_base_branch_to_match_rule_does_not_fire_without_it() {
         // and matchBaseBranches is set, the rule must not fire.
@@ -12593,7 +12593,7 @@ mod categories_base_branch_tests {
         );
     }
 
-    // Ported: "needs manager to match" — util/package-rules/index.spec.ts line 1321
+    // Ported: "needs manager to match" — lib/util/package-rules/index.spec.ts line 1321
     #[test]
     fn needs_manager_to_match_rule_does_not_fire_without_it() {
         // and matchManagers is set, the rule must not fire.
@@ -12612,8 +12612,8 @@ mod categories_base_branch_tests {
         );
     }
 
-    // Ported: "filters categories with undefined category" — util/package-rules/index.spec.ts line 510
-    // Ported: "needs language to match" — util/package-rules/index.spec.ts line 1285
+    // Ported: "filters categories with undefined category" — lib/util/package-rules/index.spec.ts line 510
+    // Ported: "needs language to match" — lib/util/package-rules/index.spec.ts line 1285
     #[test]
     fn needs_categories_to_match_rule_does_not_fire_without_it() {
         // but matchCategories is set, rule must not fire.
@@ -12632,7 +12632,7 @@ mod categories_base_branch_tests {
         );
     }
 
-    // Ported: "filters categories with matching category" — util/package-rules/index.spec.ts line 468
+    // Ported: "filters categories with matching category" — lib/util/package-rules/index.spec.ts line 468
     #[test]
     fn match_categories_dep_provided_categories_override_manager_derived() {
         // Dep provides explicit categories: ['javascript', 'node']; rule matches 'node'.
@@ -12653,7 +12653,7 @@ mod categories_base_branch_tests {
         );
     }
 
-    // Ported: "filters categories with non-matching category" — util/package-rules/index.spec.ts line 489
+    // Ported: "filters categories with non-matching category" — lib/util/package-rules/index.spec.ts line 489
     #[test]
     fn match_categories_dep_provided_categories_non_matching() {
         // Dep has categories: ['python'], rule requires 'docker' → must not fire.
@@ -12700,8 +12700,8 @@ mod registry_url_repository_tests {
 
     // ── matchRegistryUrls ────────────────────────────────────────────────────
 
-    // Ported: "matches matchRegistryUrls" — util/package-rules/index.spec.ts line 808
-    // Ported: "non-matches matchRegistryUrls" — util/package-rules/index.spec.ts line 831
+    // Ported: "matches matchRegistryUrls" — lib/util/package-rules/index.spec.ts line 808
+    // Ported: "non-matches matchRegistryUrls" — lib/util/package-rules/index.spec.ts line 831
     #[test]
     fn match_registry_urls_exact_hit() {
         let c = RepoConfig::parse(
@@ -12746,7 +12746,7 @@ mod registry_url_repository_tests {
         assert!(rule.registry_url_matches(&[]));
     }
 
-    // Ported: "handles matchRegistryUrls when missing registryUrls" — util/package-rules/index.spec.ts line 786
+    // Ported: "handles matchRegistryUrls when missing registryUrls" — lib/util/package-rules/index.spec.ts line 786
     #[test]
     fn match_registry_urls_no_dep_urls_fails_when_constraint_set() {
         let c = RepoConfig::parse(
@@ -13317,7 +13317,7 @@ mod rule_effects_tests {
 
     // ── Ported from Renovate migration.spec.ts "migrates packageRules" ────────
 
-    // Ported: "migrates packageRules" — config/migration.spec.ts line 551
+    // Ported: "migrates packageRules" — lib/config/migration.spec.ts line 551
     #[test]
     fn migrates_package_rules_all_deprecated_fields() {
         // Verifies that all deprecated packageRule fields are migrated correctly.
@@ -13388,7 +13388,7 @@ mod rule_effects_tests {
         assert!(rule.match_update_types.contains(&UpdateType::Major));
     }
 
-    // Ported: "migrates in order of precedence" — config/migration.spec.ts line 593
+    // Ported: "migrates in order of precedence" — lib/config/migration.spec.ts line 593
     #[test]
     fn deprecated_match_file_aliases_obey_precedence() {
         let c = RepoConfig::parse(
@@ -13404,7 +13404,7 @@ mod rule_effects_tests {
         assert_eq!(c.package_rules[1].match_file_names, vec!["matchPaths"]);
     }
 
-    // Ported: "migrates nested packageRules" — config/migration.spec.ts line 624
+    // Ported: "migrates nested packageRules" — lib/config/migration.spec.ts line 624
     #[test]
     fn nested_package_rules_are_flattened_with_parent_fields() {
         let c = RepoConfig::parse(
@@ -13498,7 +13498,7 @@ mod rule_effects_tests {
 
     // ── Ported from migration.spec.ts "migrates packages" ────────────────────
 
-    // Ported: "migrates packages" — config/migration.spec.ts line 257
+    // Ported: "migrates packages" — lib/config/migration.spec.ts line 257
     #[test]
     fn deprecated_packages_field_merged_into_package_rules() {
         // Old `packages: [{...}]` → merged into `packageRules`.
@@ -13525,7 +13525,7 @@ mod rule_effects_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn deprecated_path_rules_field_merged_into_package_rules() {
-        // Ported: "should migrate to packageRules" — config/migrations/custom/path-rules-migration.spec.ts line 4
+        // Ported: "should migrate to packageRules" — lib/config/migrations/custom/path-rules-migration.spec.ts line 4
         let c = RepoConfig::parse(
             r#"{
                 "pathRules": [
@@ -13546,7 +13546,7 @@ mod rule_effects_tests {
     // Rust-specific: repo config behavior test
     #[test]
     fn path_rules_concat_with_existing_package_rules() {
-        // Ported: "should concat with existing package rules" — config/migrations/custom/path-rules-migration.spec.ts line 56
+        // Ported: "should concat with existing package rules" — lib/config/migrations/custom/path-rules-migration.spec.ts line 56
         let c = RepoConfig::parse(
             r#"{
                 "packageRules": [{"matchPackageNames": ["guava"], "enabled": false}],
@@ -13603,7 +13603,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_true_injects_minimum_release_age_preset() {
         let c = RepoConfig::parse(r#"{"unpublishSafe": true}"#);
@@ -13621,7 +13621,7 @@ mod rule_effects_tests {
 
     // ── Ported from migration.spec.ts unpublishSafe tests ────────────────────
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_true_with_existing_extends_appends_preset() {
         let c = RepoConfig::parse(r#"{"unpublishSafe": true, "extends": ["foo"]}"#);
@@ -13635,7 +13635,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_true_with_empty_extends_injects_preset() {
         let c = RepoConfig::parse(r#"{"unpublishSafe": true, "extends": []}"#);
@@ -13646,7 +13646,7 @@ mod rule_effects_tests {
         assert!(has_npm_age);
     }
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_true_with_multiple_extends_appends_preset() {
         let c = RepoConfig::parse(r#"{"unpublishSafe": true, "extends": ["foo", "bar"]}"#);
@@ -13657,7 +13657,7 @@ mod rule_effects_tests {
         assert!(has_npm_age);
     }
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_false_does_not_inject() {
         let c = RepoConfig::parse(r#"{"unpublishSafe": false, "extends": ["foo", "bar"]}"#);
@@ -13671,7 +13671,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_with_unpublish_safe_preset_already_in_extends_does_not_duplicate() {
         let c = RepoConfig::parse(
@@ -13692,7 +13692,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_with_default_unpublish_safe_preset_does_not_duplicate() {
         let c = RepoConfig::parse(
@@ -13709,7 +13709,7 @@ mod rule_effects_tests {
         assert_eq!(npm_age_rules_count, 1);
     }
 
-    // Ported: "migrates unpublishSafe" — config/migration.spec.ts line 441
+    // Ported: "migrates unpublishSafe" — lib/config/migration.spec.ts line 441
     #[test]
     fn unpublish_safe_true_with_disabled_preset_still_injects_preset() {
         let c =
@@ -13985,7 +13985,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "creates groupSlug if necessary" — util/package-rules/index.spec.ts line 1220
+    // Ported: "creates groupSlug if necessary" — lib/util/package-rules/index.spec.ts line 1220
     #[test]
     fn group_slug_auto_generated_from_group_name_when_prior_slug_exists() {
         // Two rules both match '*':
@@ -14929,7 +14929,7 @@ mod rule_effects_tests {
         }
     }
 
-    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 13
+    // Ported: "versioning(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 13
     #[test]
     fn workaround_bitnami_docker_image_versioning_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:bitnamiDockerImageVersioning", 0);
@@ -14949,7 +14949,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 28
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 28
     #[test]
     fn workaround_bitnami_docker_image_match_current_value_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:bitnamiDockerImageVersioning", 0);
@@ -14969,7 +14969,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 49
+    // Ported: "versioning(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 49
     #[test]
     fn workaround_clamav_docker_image_versioning_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:clamavDockerImageVersioning", 0);
@@ -14994,7 +14994,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 80
+    // Ported: "versioning(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 80
     #[test]
     fn workaround_liberica_jdk_lite_versioning_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 0);
@@ -15014,7 +15014,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 95
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 95
     #[test]
     fn workaround_liberica_jdk_lite_match_current_value_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 0);
@@ -15034,7 +15034,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 118
+    // Ported: "versioning(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 118
     #[test]
     fn workaround_liberica_jdk_versioning_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 1);
@@ -15054,7 +15054,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 133
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 133
     #[test]
     fn workaround_liberica_jdk_match_current_value_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 1);
@@ -15074,7 +15074,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "versioning(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 156
+    // Ported: "versioning(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 156
     #[test]
     fn workaround_liberica_jre_versioning_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 2);
@@ -15094,7 +15094,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 171
+    // Ported: "matchCurrentValue(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 171
     #[test]
     fn workaround_liberica_jre_match_current_value_matches_upstream_cases() {
         let rule = workaround_rule("workarounds:libericaJdkDockerVersioning", 2);
@@ -15114,7 +15114,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "allowedVersisons(\"$input\") == \"$expected\"" — config/presets/internal/workarounds.spec.ts line 196
+    // Ported: "allowedVersisons(\"$input\") == \"$expected\"" — lib/config/presets/internal/workarounds.spec.ts line 196
     #[test]
     fn workaround_java_lts_liberica_runtime_allowed_versions_match_upstream_cases() {
         let rule = workaround_rule("workarounds:javaLTSVersions", 2);
@@ -15349,7 +15349,7 @@ mod rule_effects_tests {
         assert_eq!(effects.override_package_name.as_deref(), Some("right-pad"));
     }
 
-    // Ported: "overrides" — util/package-rules/index.spec.ts line 1382
+    // Ported: "overrides" — lib/util/package-rules/index.spec.ts line 1382
     #[test]
     fn package_rule_identity_overrides_cascade_to_later_rules() {
         let c = RepoConfig::parse(
@@ -15392,7 +15392,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "overrides with templates" — util/package-rules/index.spec.ts line 1425
+    // Ported: "overrides with templates" — lib/util/package-rules/index.spec.ts line 1425
     #[test]
     fn package_rule_override_dep_name_template_uses_current_dep_name() {
         let c = RepoConfig::parse(
@@ -15566,7 +15566,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].current_value, "20.0.0");
     }
 
-    // Ported: "sets registryUrls when registryUrl group is a valid URL" — custom/regex/utils.spec.ts line 27
+    // Ported: "sets registryUrls when registryUrl group is a valid URL" — lib/modules/manager/custom/regex/utils.spec.ts line 27
     #[test]
     fn custom_manager_sets_registry_urls_when_valid_url() {
         let cm = CustomManager {
@@ -15587,7 +15587,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "warns and skips registryUrls when registryUrl group is an invalid URL" — custom/regex/utils.spec.ts line 39
+    // Ported: "warns and skips registryUrls when registryUrl group is an invalid URL" — lib/modules/manager/custom/regex/utils.spec.ts line 39
     #[test]
     fn custom_manager_skips_registry_url_when_invalid() {
         let cm = CustomManager {
@@ -15606,7 +15606,7 @@ mod rule_effects_tests {
         assert!(deps[0].registry_url.is_none());
     }
 
-    // Ported: "sets datasource when datasource group is provided" — custom/regex/utils.spec.ts line 55
+    // Ported: "sets datasource when datasource group is provided" — lib/modules/manager/custom/regex/utils.spec.ts line 55
     #[test]
     fn custom_manager_sets_datasource_from_capture_group() {
         let cm = CustomManager {
@@ -15623,7 +15623,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].datasource, "npm");
     }
 
-    // Ported: "sets indentation when indentation group is whitespace" — custom/regex/utils.spec.ts line 67
+    // Ported: "sets indentation when indentation group is whitespace" — lib/modules/manager/custom/regex/utils.spec.ts line 67
     #[test]
     fn custom_manager_sets_indentation_from_whitespace_group() {
         let cm = CustomManager {
@@ -15641,7 +15641,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].indentation.as_deref(), Some("  "));
     }
 
-    // Ported: "sets empty indentation when indentation group is non-whitespace" — custom/regex/utils.spec.ts line 79
+    // Ported: "sets empty indentation when indentation group is non-whitespace" — lib/modules/manager/custom/regex/utils.spec.ts line 79
     #[test]
     fn custom_manager_sets_empty_indentation_for_non_whitespace_group() {
         let cm = CustomManager {
@@ -15659,7 +15659,7 @@ mod rule_effects_tests {
         assert_eq!(deps[0].indentation.as_deref(), Some(""));
     }
 
-    // Ported: "sets depName via default branch" — custom/regex/utils.spec.ts line 91
+    // Ported: "sets depName via default branch" — lib/modules/manager/custom/regex/utils.spec.ts line 91
     #[test]
     fn custom_manager_sets_dep_name_from_capture_group() {
         let cm = CustomManager {
@@ -15716,7 +15716,7 @@ mod rule_effects_tests {
         );
     }
 
-    // Ported: "migrates customManagers" — config/migration.spec.ts line 671
+    // Ported: "migrates customManagers" — lib/config/migration.spec.ts line 671
     #[test]
     fn custom_manager_deprecated_lookup_name_fields_migrate() {
         let c = RepoConfig::parse(

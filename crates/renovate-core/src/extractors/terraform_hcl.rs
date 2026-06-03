@@ -323,7 +323,7 @@ mod tests {
         assert_eq!(ws["test"].terraform_version.as_deref(), Some("1.6.0"));
     }
 
-    // Ported: "should return flat modules" — terraform/hcl/index.spec.ts line 11
+    // Ported: "should return flat modules" — lib/modules/manager/terraform/hcl/index.spec.ts line 11
     #[test]
     fn parse_hcl_returns_flat_modules() {
         let hcl = r#"
@@ -370,7 +370,7 @@ module "consul" {
         assert_eq!(modules["consul"][0].version.as_deref(), Some("0.1.0"));
     }
 
-    // Ported: "should return nested terraform block" — terraform/hcl/index.spec.ts line 53
+    // Ported: "should return nested terraform block" — lib/modules/manager/terraform/hcl/index.spec.ts line 53
     #[test]
     fn parse_hcl_returns_nested_terraform_block() {
         let hcl = r#"
@@ -399,7 +399,7 @@ terraform {
         assert!(rp.contains_key("kubernetes"));
     }
 
-    // Ported: "should return resource blocks" — terraform/hcl/index.spec.ts line 70
+    // Ported: "should return resource blocks" — lib/modules/manager/terraform/hcl/index.spec.ts line 70
     #[test]
     fn parse_hcl_returns_resource_blocks() {
         let hcl = r#"
@@ -439,7 +439,7 @@ resource "docker_service" "foo" {
         assert!(svc.get("foo").is_some());
     }
 
-    // Ported: "should parse json" — terraform/hcl/index.spec.ts line 101
+    // Ported: "should parse json" — lib/modules/manager/terraform/hcl/index.spec.ts line 101
     #[test]
     fn parse_json_returns_resources() {
         let json = r#"{

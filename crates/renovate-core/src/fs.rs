@@ -232,8 +232,8 @@ mod tests {
     use super::*;
     use tempfile::tempdir;
 
-    // Ported: "ensureLocalPath('$path', '$fullPath')" — util/fs/util.spec.ts line 14
-    // Ported: "ensureCachePath('$path', '$fullPath')" — util/fs/util.spec.ts line 33
+    // Ported: "ensureLocalPath('$path', '$fullPath')" — lib/util/fs/util.spec.ts line 14
+    // Ported: "ensureCachePath('$path', '$fullPath')" — lib/util/fs/util.spec.ts line 33
     #[test]
     fn ensure_base_path_resolves_relative_paths() {
         let local_dir = "/foo";
@@ -252,8 +252,8 @@ mod tests {
         );
     }
 
-    // Ported: "ensureLocalPath('$path', '${localDir}') - throws" — util/fs/util.spec.ts line 22
-    // Ported: "ensureCachePath('$path', '${cacheDir}') - throws" — util/fs/util.spec.ts line 41
+    // Ported: "ensureLocalPath('$path', '${localDir}') - throws" — lib/util/fs/util.spec.ts line 22
+    // Ported: "ensureCachePath('$path', '${cacheDir}') - throws" — lib/util/fs/util.spec.ts line 41
     #[test]
     fn ensure_base_path_rejects_escaping_paths() {
         let local_dir = "/foo";
@@ -296,7 +296,7 @@ mod tests {
         );
     }
 
-    // Ported: "isValidPath($value) == $expected" — util/fs/util.spec.ts line 53
+    // Ported: "isValidPath($value) == $expected" — lib/util/fs/util.spec.ts line 53
     #[test]
     fn is_valid_path_cases() {
         let base = "/bar";
@@ -335,7 +335,7 @@ mod tests {
         }
     }
 
-    // Ported: "('$dir') -> '$expected'" — util/fs/index.spec.ts line 78
+    // Ported: "('$dir') -> '$expected'" — lib/util/fs/index.spec.ts line 78
     #[test]
     fn get_parent_dir_cases() {
         let cases = [
@@ -363,7 +363,7 @@ mod tests {
         }
     }
 
-    // Ported: "('$file', '$sibling') -> '$expected'" — util/fs/index.spec.ts line 99
+    // Ported: "('$file', '$sibling') -> '$expected'" — lib/util/fs/index.spec.ts line 99
     #[test]
     fn get_sibling_file_name_cases() {
         let cases = [
@@ -385,9 +385,9 @@ mod tests {
         }
     }
 
-    // Ported: "reads buffer" — util/fs/index.spec.ts line 113
-    // Ported: "reads string" — util/fs/index.spec.ts line 119
-    // Ported: "returns null if file is not found" — util/fs/index.spec.ts line 125
+    // Ported: "reads buffer" — lib/util/fs/index.spec.ts line 113
+    // Ported: "reads string" — lib/util/fs/index.spec.ts line 119
+    // Ported: "returns null if file is not found" — lib/util/fs/index.spec.ts line 125
     #[test]
     fn local_file_read_cases() {
         let dir = tempdir().unwrap();
@@ -406,9 +406,9 @@ mod tests {
         assert_eq!(read_local_file(dir.path(), "missing.txt").unwrap(), None);
     }
 
-    // Ported: "outputs file" — util/fs/index.spec.ts line 204
-    // Ported: "deletes file" — util/fs/index.spec.ts line 219
-    // Ported: "renames file" — util/fs/index.spec.ts line 230
+    // Ported: "outputs file" — lib/util/fs/index.spec.ts line 204
+    // Ported: "deletes file" — lib/util/fs/index.spec.ts line 219
+    // Ported: "renames file" — lib/util/fs/index.spec.ts line 230
     #[test]
     fn local_file_write_delete_and_rename() {
         let dir = tempdir().unwrap();
@@ -426,10 +426,10 @@ mod tests {
         assert!(!dir.path().join("foo/bar/renamed.txt").exists());
     }
 
-    // Ported: "creates directory" — util/fs/index.spec.ts line 259
-    // Ported: "creates local directory" — util/fs/index.spec.ts line 269
-    // Ported: "prefers environment variables over global config" — util/fs/index.spec.ts line 279
-    // Ported: "returns cache dir" — util/fs/index.spec.ts line 288
+    // Ported: "creates directory" — lib/util/fs/index.spec.ts line 259
+    // Ported: "creates local directory" — lib/util/fs/index.spec.ts line 269
+    // Ported: "prefers environment variables over global config" — lib/util/fs/index.spec.ts line 279
+    // Ported: "returns cache dir" — lib/util/fs/index.spec.ts line 288
     #[test]
     fn directory_and_cache_helpers() {
         let local = tempdir().unwrap();
@@ -451,11 +451,11 @@ mod tests {
         );
     }
 
-    // Ported: "returns true for file" — util/fs/index.spec.ts line 295
-    // Ported: "returns true for directory" — util/fs/index.spec.ts line 301
-    // Ported: "returns false" — util/fs/index.spec.ts line 305
-    // Ported: "returns true for valid local path" — util/fs/index.spec.ts line 311
-    // Ported: "returns false" — util/fs/index.spec.ts line 305
+    // Ported: "returns true for file" — lib/util/fs/index.spec.ts line 295
+    // Ported: "returns true for directory" — lib/util/fs/index.spec.ts line 301
+    // Ported: "returns false" — lib/util/fs/index.spec.ts line 305
+    // Ported: "returns true for valid local path" — lib/util/fs/index.spec.ts line 311
+    // Ported: "returns false" — lib/util/fs/index.spec.ts line 305
     #[test]
     fn local_path_status_helpers() {
         let dir = tempdir().unwrap();
@@ -471,9 +471,9 @@ mod tests {
         assert!(!is_valid_path("/file.txt", &dir.path().to_string_lossy()));
     }
 
-    // Ported: "reads symlink" — util/fs/index.spec.ts line 321
-    // Ported: "return null when link not exists" — util/fs/index.spec.ts line 333
-    // Ported: "returns true for symlink" — util/fs/index.spec.ts line 486
+    // Ported: "reads symlink" — lib/util/fs/index.spec.ts line 321
+    // Ported: "return null when link not exists" — lib/util/fs/index.spec.ts line 333
+    // Ported: "returns true for symlink" — lib/util/fs/index.spec.ts line 486
     #[cfg(unix)]
     #[test]
     fn local_symlink_helpers() {
@@ -501,8 +501,8 @@ mod tests {
         assert!(!local_path_is_symbolic_link(dir.path(), "missing").unwrap());
     }
 
-    // Ported: "returns path for file" — util/fs/index.spec.ts line 347
-    // Ported: "immediately returns null when either path is absolute" — util/fs/index.spec.ts line 371
+    // Ported: "returns path for file" — lib/util/fs/index.spec.ts line 347
+    // Ported: "immediately returns null when either path is absolute" — lib/util/fs/index.spec.ts line 371
     #[test]
     fn find_local_sibling_or_parent_cases() {
         let dir = tempdir().unwrap();
@@ -538,9 +538,9 @@ mod tests {
         );
     }
 
-    // Ported: "returns dir content" — util/fs/index.spec.ts line 378
-    // Ported: "return empty array for non existing directory" — util/fs/index.spec.ts line 396
-    // Ported: "return empty array for a existing but empty directory" — util/fs/index.spec.ts line 400
+    // Ported: "returns dir content" — lib/util/fs/index.spec.ts line 378
+    // Ported: "return empty array for non existing directory" — lib/util/fs/index.spec.ts line 396
+    // Ported: "return empty array for a existing but empty directory" — lib/util/fs/index.spec.ts line 400
     #[test]
     fn read_local_directory_cases() {
         let dir = tempdir().unwrap();

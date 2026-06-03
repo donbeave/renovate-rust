@@ -680,7 +680,7 @@ mod tests {
             .collect()
     }
 
-    // Ported: "returns empty env" — workers/global/config/parse/env.spec.ts line 11
+    // Ported: "returns empty env" — lib/workers/global/config/parse/env.spec.ts line 11
     #[test]
     fn empty_env_returns_default_config() {
         let config = build_from_env(&env(&[])).unwrap();
@@ -688,14 +688,14 @@ mod tests {
         assert_eq!(config, renovate_core::config::GlobalConfig::default());
     }
 
-    // Ported: "supports boolean true" — workers/global/config/parse/env.spec.ts line 15
+    // Ported: "supports boolean true" — lib/workers/global/config/parse/env.spec.ts line 15
     #[test]
     fn config_migration_true_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_CONFIG_MIGRATION", "true")])).unwrap();
         assert!(config.config_migration);
     }
 
-    // Ported: "supports boolean false" — workers/global/config/parse/env.spec.ts line 20
+    // Ported: "supports boolean false" — lib/workers/global/config/parse/env.spec.ts line 20
     #[test]
     fn config_migration_false_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_CONFIG_MIGRATION", "false")])).unwrap();
@@ -779,7 +779,7 @@ mod tests {
         assert!(config.host_rules.is_empty());
     }
 
-    // Ported: "throws exception for invalid boolean value" — workers/global/config/parse/env.spec.ts line 27
+    // Ported: "throws exception for invalid boolean value" — lib/workers/global/config/parse/env.spec.ts line 27
     #[test]
     fn config_migration_invalid_boolean_is_rejected() {
         let err = build_from_env(&env(&[("RENOVATE_CONFIG_MIGRATION", "badvalue")])).unwrap_err();
@@ -789,21 +789,21 @@ mod tests {
         );
     }
 
-    // Ported: "supports list single" — workers/global/config/parse/env.spec.ts line 40
+    // Ported: "supports list single" — lib/workers/global/config/parse/env.spec.ts line 40
     #[test]
     fn labels_single_value_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_LABELS", "a")])).unwrap();
         assert_eq!(config.labels, vec!["a"]);
     }
 
-    // Ported: "supports list multiple" — workers/global/config/parse/env.spec.ts line 45
+    // Ported: "supports list multiple" — lib/workers/global/config/parse/env.spec.ts line 45
     #[test]
     fn labels_multiple_values_are_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_LABELS", "a,b,c")])).unwrap();
         assert_eq!(config.labels, vec!["a", "b", "c"]);
     }
 
-    // Ported: "supports list multiple without blank items" — workers/global/config/parse/env.spec.ts line 50
+    // Ported: "supports list multiple without blank items" — lib/workers/global/config/parse/env.spec.ts line 50
     #[test]
     fn labels_ignore_blank_items() {
         let config = build_from_env(&env(&[("RENOVATE_LABELS", "a, b, c,")])).unwrap();
@@ -825,14 +825,14 @@ mod tests {
         assert_eq!(config.repositories, vec!["foo", "bar"]);
     }
 
-    // Ported: "supports string" — workers/global/config/parse/env.spec.ts line 55
+    // Ported: "supports string" — lib/workers/global/config/parse/env.spec.ts line 55
     #[test]
     fn token_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_TOKEN", "a")])).unwrap();
         assert_eq!(config.token.as_deref(), Some("a"));
     }
 
-    // Ported: "coerces string newlines" — workers/global/config/parse/env.spec.ts line 60
+    // Ported: "coerces string newlines" — lib/workers/global/config/parse/env.spec.ts line 60
     #[test]
     fn string_newlines_are_coerced() {
         let config = build_from_env(&env(&[("RENOVATE_GIT_PRIVATE_KEY", r"abc\ndef")])).unwrap();
@@ -885,7 +885,7 @@ mod tests {
         assert_eq!(config.http_cache_ttl_days, Some(45));
     }
 
-    // Ported: "supports custom prefixes" — workers/global/config/parse/env.spec.ts line 67
+    // Ported: "supports custom prefixes" — lib/workers/global/config/parse/env.spec.ts line 67
     #[test]
     fn custom_prefix_is_supported() {
         let config =
@@ -893,14 +893,14 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("abc"));
     }
 
-    // Ported: "supports json" — workers/global/config/parse/env.spec.ts line 76
+    // Ported: "supports json" — lib/workers/global/config/parse/env.spec.ts line 76
     #[test]
     fn lock_file_maintenance_json_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_LOCK_FILE_MAINTENANCE", "{}")])).unwrap();
         assert!(config.lock_file_maintenance.is_empty());
     }
 
-    // Ported: "supports arrays of objects" — workers/global/config/parse/env.spec.ts line 83
+    // Ported: "supports arrays of objects" — lib/workers/global/config/parse/env.spec.ts line 83
     #[test]
     fn host_rules_array_is_parsed() {
         let config =
@@ -909,7 +909,7 @@ mod tests {
         assert_eq!(config.host_rules[0]["foo"], "bar");
     }
 
-    // Ported: "\"$envArg\" -> $config" — workers/global/config/parse/env.spec.ts line 91
+    // Ported: "\"$envArg\" -> $config" — lib/workers/global/config/parse/env.spec.ts line 91
     #[test]
     fn recreate_env_aliases_are_parsed() {
         let cases = [
@@ -926,7 +926,7 @@ mod tests {
         }
     }
 
-    // Ported: "skips misconfigured arrays" — workers/global/config/parse/env.spec.ts line 103
+    // Ported: "skips misconfigured arrays" — lib/workers/global/config/parse/env.spec.ts line 103
     #[test]
     fn host_rules_string_value_is_skipped() {
         let config = build_from_env(&env(&[("RENOVATE_HOST_RULES", r#""foobar""#)])).unwrap();
@@ -944,14 +944,14 @@ mod tests {
         assert!(config.host_rules.is_empty());
     }
 
-    // Ported: "skips garbage array values" — workers/global/config/parse/env.spec.ts line 117
+    // Ported: "skips garbage array values" — lib/workers/global/config/parse/env.spec.ts line 117
     #[test]
     fn host_rules_garbage_value_is_skipped() {
         let config = build_from_env(&env(&[("RENOVATE_HOST_RULES", "!@#")])).unwrap();
         assert!(config.host_rules.is_empty());
     }
 
-    // Ported: "supports GitHub token" — workers/global/config/parse/env.spec.ts line 131
+    // Ported: "supports GitHub token" — lib/workers/global/config/parse/env.spec.ts line 131
     #[test]
     fn github_token_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_TOKEN", "github.com token")])).unwrap();
@@ -959,7 +959,7 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("github.com token"));
     }
 
-    // Ported: "supports GitHub custom endpoint" — workers/global/config/parse/env.spec.ts line 140
+    // Ported: "supports GitHub custom endpoint" — lib/workers/global/config/parse/env.spec.ts line 140
     #[test]
     fn github_endpoint_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_ENDPOINT", "a ghe endpoint")])).unwrap();
@@ -967,7 +967,7 @@ mod tests {
         assert_eq!(config.endpoint.as_deref(), Some("a ghe endpoint"));
     }
 
-    // Ported: "supports GitHub custom endpoint and github.com" — workers/global/config/parse/env.spec.ts line 149
+    // Ported: "supports GitHub custom endpoint and github.com" — lib/workers/global/config/parse/env.spec.ts line 149
     #[test]
     fn github_com_token_becomes_host_rule_with_custom_endpoint() {
         let config = build_from_env(&env(&[
@@ -984,7 +984,7 @@ mod tests {
         assert_eq!(config.host_rules[0]["token"], "a github.com token");
     }
 
-    // Ported: "supports GitHub fine-grained PATs" — workers/global/config/parse/env.spec.ts line 168
+    // Ported: "supports GitHub fine-grained PATs" — lib/workers/global/config/parse/env.spec.ts line 168
     #[test]
     fn github_fine_grained_pat_becomes_host_rule() {
         let config = build_from_env(&env(&[
@@ -996,7 +996,7 @@ mod tests {
         assert_eq!(config.host_rules[0]["token"], "github_pat_XXXXXX");
     }
 
-    // Ported: "supports RENOVATE_ prefixed github com token" — workers/global/config/parse/env.spec.ts line 185
+    // Ported: "supports RENOVATE_ prefixed github com token" — lib/workers/global/config/parse/env.spec.ts line 185
     #[test]
     fn renovate_prefixed_github_com_token_becomes_host_rule() {
         let config = build_from_env(&env(&[
@@ -1007,7 +1007,7 @@ mod tests {
         assert_eq!(config.host_rules[0]["token"], "github_pat_XXXXXX");
     }
 
-    // Ported: "GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN" — workers/global/config/parse/env.spec.ts line 202
+    // Ported: "GITHUB_COM_TOKEN takes precedence over RENOVATE_GITHUB_COM_TOKEN" — lib/workers/global/config/parse/env.spec.ts line 202
     #[test]
     fn github_com_token_takes_precedence_over_renovate_prefixed_token() {
         let config = build_from_env(&env(&[
@@ -1019,7 +1019,7 @@ mod tests {
         assert_eq!(config.host_rules[0]["token"], "github_pat_XXXXXX");
     }
 
-    // Ported: "supports GitHub custom endpoint and gitlab.com" — workers/global/config/parse/env.spec.ts line 220
+    // Ported: "supports GitHub custom endpoint and gitlab.com" — lib/workers/global/config/parse/env.spec.ts line 220
     #[test]
     fn github_custom_endpoint_without_github_com_token_has_no_host_rule() {
         let config = build_from_env(&env(&[
@@ -1032,7 +1032,7 @@ mod tests {
         assert!(config.host_rules.is_empty());
     }
 
-    // Ported: "supports GitLab token" — workers/global/config/parse/env.spec.ts line 231
+    // Ported: "supports GitLab token" — lib/workers/global/config/parse/env.spec.ts line 231
     #[test]
     fn gitlab_token_is_parsed() {
         let config = build_from_env(&env(&[
@@ -1044,7 +1044,7 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("a gitlab.com token"));
     }
 
-    // Ported: "supports GitLab custom endpoint" — workers/global/config/parse/env.spec.ts line 242
+    // Ported: "supports GitLab custom endpoint" — lib/workers/global/config/parse/env.spec.ts line 242
     #[test]
     fn gitlab_custom_endpoint_is_parsed() {
         let config = build_from_env(&env(&[
@@ -1058,7 +1058,7 @@ mod tests {
         assert_eq!(config.endpoint.as_deref(), Some("a gitlab endpoint"));
     }
 
-    // Ported: "supports Azure DevOps" — workers/global/config/parse/env.spec.ts line 255
+    // Ported: "supports Azure DevOps" — lib/workers/global/config/parse/env.spec.ts line 255
     #[test]
     fn azure_devops_config_is_parsed() {
         let config = build_from_env(&env(&[
@@ -1072,7 +1072,7 @@ mod tests {
         assert_eq!(config.endpoint.as_deref(), Some("an Azure DevOps endpoint"));
     }
 
-    // Ported: "supports Bitbucket token" — workers/global/config/parse/env.spec.ts line 268
+    // Ported: "supports Bitbucket token" — lib/workers/global/config/parse/env.spec.ts line 268
     #[test]
     fn bitbucket_token_config_is_parsed() {
         let config = build_from_env(&env(&[
@@ -1088,7 +1088,7 @@ mod tests {
         assert_eq!(config.password.as_deref(), Some("app-password"));
     }
 
-    // Ported: "supports Bitbucket username/password" — workers/global/config/parse/env.spec.ts line 283
+    // Ported: "supports Bitbucket username/password" — lib/workers/global/config/parse/env.spec.ts line 283
     #[test]
     fn bitbucket_username_password_config_is_parsed() {
         let config = build_from_env(&env(&[
@@ -1105,7 +1105,7 @@ mod tests {
         assert_eq!(config.password.as_deref(), Some("app-password"));
     }
 
-    // Ported: "merges full config from env" — workers/global/config/parse/env.spec.ts line 299
+    // Ported: "merges full config from env" — lib/workers/global/config/parse/env.spec.ts line 299
     #[test]
     fn renovate_config_merges_with_explicit_env() {
         let config = build_from_env(&env(&[
@@ -1129,7 +1129,7 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("foo"));
     }
 
-    // Ported: "massages converted experimental env vars" — workers/global/config/parse/env.spec.ts line 309
+    // Ported: "massages converted experimental env vars" — lib/workers/global/config/parse/env.spec.ts line 309
     #[test]
     fn experimental_env_vars_are_massaged() {
         let config = build_from_env(&env(&[
@@ -1199,7 +1199,7 @@ mod tests {
         assert_eq!(config.repository_cache_force_local, Some(true));
     }
 
-    // Ported: "massages converted experimental env vars" — workers/global/config/parse/env.spec.ts line 309
+    // Ported: "massages converted experimental env vars" — lib/workers/global/config/parse/env.spec.ts line 309
     #[test]
     fn converted_experimental_env_current_names_are_parsed() {
         let config = build_from_env(&env(&[
@@ -1222,21 +1222,21 @@ mod tests {
         assert_eq!(config.repository_cache_force_local, Some(false));
     }
 
-    // Ported: "does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL" — workers/global/config/parse/env.spec.ts line 336
+    // Ported: "does not migrate empty RENOVATE_X_REPO_CACHE_FORCE_LOCAL" — lib/workers/global/config/parse/env.spec.ts line 336
     #[test]
     fn empty_repo_cache_force_local_is_not_migrated() {
         let config = build_from_env(&env(&[("RENOVATE_X_REPO_CACHE_FORCE_LOCAL", "")])).unwrap();
         assert_eq!(config.repository_cache_force_local, None);
     }
 
-    // Ported: "crashes" — workers/global/config/parse/env.spec.ts line 357
+    // Ported: "crashes" — lib/workers/global/config/parse/env.spec.ts line 357
     #[test]
     fn invalid_renovate_config_is_rejected() {
         let err = build_from_env(&env(&[("RENOVATE_CONFIG", "!@#")])).unwrap_err();
         assert_eq!(err, "Invalid RENOVATE_CONFIG: '!@#'");
     }
 
-    // Ported: "migrates RENOVATE_CONFIG" — workers/global/config/parse/env.spec.ts line 367
+    // Ported: "migrates RENOVATE_CONFIG" — lib/workers/global/config/parse/env.spec.ts line 367
     #[test]
     fn renovate_config_automerge_any_is_migrated() {
         let config = build_from_env(&env(&[(
@@ -1248,14 +1248,14 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("foo"));
     }
 
-    // Ported: "renames migrated variables" — workers/global/config/parse/env.spec.ts line 386
+    // Ported: "renames migrated variables" — lib/workers/global/config/parse/env.spec.ts line 386
     #[test]
     fn git_lab_automerge_env_sets_platform_automerge() {
         let config = build_from_env(&env(&[("RENOVATE_GIT_LAB_AUTOMERGE", "true")])).unwrap();
         assert!(config.platform_automerge);
     }
 
-    // Ported: "renames migrated variables" — workers/global/config/parse/env.spec.ts line 386
+    // Ported: "renames migrated variables" — lib/workers/global/config/parse/env.spec.ts line 386
     #[test]
     fn renamed_env_vars_map_to_current_options() {
         let config = build_from_env(&env(&[
@@ -1577,35 +1577,35 @@ mod tests {
         );
     }
 
-    // Ported: "dryRun boolean true" — workers/global/config/parse/env.spec.ts line 441
+    // Ported: "dryRun boolean true" — lib/workers/global/config/parse/env.spec.ts line 441
     #[test]
     fn dry_run_true_maps_to_full() {
         let config = build_from_env(&env(&[("RENOVATE_DRY_RUN", "true")])).unwrap();
         assert_eq!(config.dry_run, Some(DryRun::Full));
     }
 
-    // Ported: "dryRun boolean false" — workers/global/config/parse/env.spec.ts line 449
+    // Ported: "dryRun boolean false" — lib/workers/global/config/parse/env.spec.ts line 449
     #[test]
     fn dry_run_false_disables_dry_run() {
         let config = build_from_env(&env(&[("RENOVATE_DRY_RUN", "false")])).unwrap();
         assert_eq!(config.dry_run, None);
     }
 
-    // Ported: "dryRun null" — workers/global/config/parse/env.spec.ts line 457
+    // Ported: "dryRun null" — lib/workers/global/config/parse/env.spec.ts line 457
     #[test]
     fn dry_run_null_disables_dry_run() {
         let config = build_from_env(&env(&[("RENOVATE_DRY_RUN", "null")])).unwrap();
         assert_eq!(config.dry_run, None);
     }
 
-    // Ported: "requireConfig boolean true" — workers/global/config/parse/env.spec.ts line 465
+    // Ported: "requireConfig boolean true" — lib/workers/global/config/parse/env.spec.ts line 465
     #[test]
     fn require_config_true_maps_to_required() {
         let config = build_from_env(&env(&[("RENOVATE_REQUIRE_CONFIG", "true")])).unwrap();
         assert_eq!(config.require_config, RequireConfig::Required);
     }
 
-    // Ported: "requireConfig boolean false" — workers/global/config/parse/env.spec.ts line 473
+    // Ported: "requireConfig boolean false" — lib/workers/global/config/parse/env.spec.ts line 473
     #[test]
     fn require_config_false_maps_to_optional() {
         let config = build_from_env(&env(&[("RENOVATE_REQUIRE_CONFIG", "false")])).unwrap();
@@ -1657,14 +1657,14 @@ mod tests {
         );
     }
 
-    // Ported: "platformCommit boolean true" — workers/global/config/parse/env.spec.ts line 481
+    // Ported: "platformCommit boolean true" — lib/workers/global/config/parse/env.spec.ts line 481
     #[test]
     fn platform_commit_true_maps_to_enabled() {
         let config = build_from_env(&env(&[("RENOVATE_PLATFORM_COMMIT", "true")])).unwrap();
         assert_eq!(config.platform_commit.as_deref(), Some("enabled"));
     }
 
-    // Ported: "platformCommit boolean false" — workers/global/config/parse/env.spec.ts line 489
+    // Ported: "platformCommit boolean false" — lib/workers/global/config/parse/env.spec.ts line 489
     #[test]
     fn platform_commit_false_maps_to_disabled() {
         let config = build_from_env(&env(&[("RENOVATE_PLATFORM_COMMIT", "false")])).unwrap();
@@ -1684,7 +1684,7 @@ mod tests {
         }
     }
 
-    // Ported: "has no duplicate env names across options" — workers/global/config/parse/env.spec.ts line 396
+    // Ported: "has no duplicate env names across options" — lib/workers/global/config/parse/env.spec.ts line 396
     // Verifies that no two config fields share the same RENOVATE_* env var name.
     #[test]
     fn no_duplicate_env_names_across_options() {

@@ -315,7 +315,7 @@ pub fn get_patch(version: &str) -> Option<i64> {
 mod tests {
     use super::*;
 
-    // Ported: "isValid("$version") === $expected" — versioning/deb/index.spec.ts line 4
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/deb/index.spec.ts line 4
     #[test]
     fn deb_is_valid() {
         let valid = [
@@ -380,7 +380,7 @@ mod tests {
         }
     }
 
-    // Ported: "equals("$a", "$b") === $expected" — versioning/deb/index.spec.ts line 60
+    // Ported: "equals("$a", "$b") === $expected" — lib/modules/versioning/deb/index.spec.ts line 60
     #[test]
     fn deb_equals() {
         let cases: &[(&str, &str, bool)] = &[
@@ -408,7 +408,7 @@ mod tests {
         }
     }
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/deb/index.spec.ts line 84
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/deb/index.spec.ts line 84
     #[test]
     fn deb_is_greater_than() {
         let cases: &[(&str, &str, bool)] = &[
@@ -460,14 +460,14 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion("$version") === $expected" — versioning/deb/index.spec.ts line 128
+    // Ported: "isSingleVersion("$version") === $expected" — lib/modules/versioning/deb/index.spec.ts line 128
     #[test]
     fn deb_is_single_version() {
         assert!(is_single_version("1.2.0"));
         assert!(!is_single_version("^1.2.0")); // ^ not valid in deb charset
     }
 
-    // Ported: "getMajor("$version") === $expected" — versioning/deb/index.spec.ts line 136
+    // Ported: "getMajor("$version") === $expected" — lib/modules/versioning/deb/index.spec.ts line 136
     #[test]
     fn deb_get_major() {
         assert_eq!(get_major("v1.3.0"), Some(1));
@@ -479,7 +479,7 @@ mod tests {
         assert_eq!(get_major("1.0"), Some(1));
     }
 
-    // Ported: "getMinor("$version") === $expected" — versioning/deb/index.spec.ts line 149
+    // Ported: "getMinor("$version") === $expected" — lib/modules/versioning/deb/index.spec.ts line 149
     #[test]
     fn deb_get_minor() {
         assert_eq!(get_minor("v1.3.0"), Some(3));
@@ -491,7 +491,7 @@ mod tests {
         assert_eq!(get_minor("1.0"), Some(0));
     }
 
-    // Ported: "getPatch("$version") === $expected" — versioning/deb/index.spec.ts line 162
+    // Ported: "getPatch("$version") === $expected" — lib/modules/versioning/deb/index.spec.ts line 162
     #[test]
     fn deb_get_patch() {
         assert_eq!(get_patch("v1.3.0"), Some(0));
@@ -503,7 +503,7 @@ mod tests {
         assert_eq!(get_patch("1.0"), None);
     }
 
-    // Ported: "isDatedCodeName("$input") === $expected" — versioning/debian/common.spec.ts line 31
+    // Ported: "isDatedCodeName("$input") === $expected" — lib/modules/versioning/debian/common.spec.ts line 31
     #[test]
     fn debian_is_dated_codename() {
         assert!(!is_dated_codename("buster"));
@@ -517,7 +517,7 @@ mod tests {
         assert!(!is_dated_codename("buster-20220101.123"));
     }
 
-    // Ported: "getDatedContainerImageCodename("$input") === $expected" — versioning/debian/common.spec.ts line 48
+    // Ported: "getDatedContainerImageCodename("$input") === $expected" — lib/modules/versioning/debian/common.spec.ts line 48
     #[test]
     fn debian_get_dated_container_image_codename() {
         assert_eq!(
@@ -550,7 +550,7 @@ mod tests {
         assert_eq!(get_dated_container_image_codename("buster-20220101-"), None);
     }
 
-    // Ported: "getDatedContainerImageVersion("$input") === $expected" — versioning/debian/common.spec.ts line 69
+    // Ported: "getDatedContainerImageVersion("$input") === $expected" — lib/modules/versioning/debian/common.spec.ts line 69
     #[test]
     fn debian_get_dated_container_image_version() {
         assert_eq!(
@@ -577,7 +577,7 @@ mod tests {
         assert_eq!(get_dated_container_image_version("buster-2022010"), None);
     }
 
-    // Ported: "getDatedContainerImageSuffix("$input") === $expected" — versioning/debian/common.spec.ts line 87
+    // Ported: "getDatedContainerImageSuffix("$input") === $expected" — lib/modules/versioning/debian/common.spec.ts line 87
     #[test]
     fn debian_get_dated_container_image_suffix() {
         assert_eq!(get_dated_container_image_suffix("buster-20220101"), None);

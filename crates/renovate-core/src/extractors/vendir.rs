@@ -130,7 +130,7 @@ directories:
           url: https://prometheus-community.github.io/helm-charts
 "#;
 
-    // Ported: "multiple charts - extracts helm-chart from vendir.yml correctly" — vendir/extract.spec.ts line 35
+    // Ported: "multiple charts - extracts helm-chart from vendir.yml correctly" — lib/modules/manager/vendir/extract.spec.ts line 35
     #[test]
     fn extracts_helm_charts() {
         let deps = extract(SAMPLE);
@@ -143,7 +143,7 @@ directories:
         );
     }
 
-    // Ported: "multiple charts - extracts helm-chart from vendir.yml correctly" — vendir/extract.spec.ts line 35
+    // Ported: "multiple charts - extracts helm-chart from vendir.yml correctly" — lib/modules/manager/vendir/extract.spec.ts line 35
     #[test]
     fn extracts_second_chart() {
         let deps = extract(SAMPLE);
@@ -151,27 +151,27 @@ directories:
         assert_eq!(prom.version, "25.0.0");
     }
 
-    // Ported: "returns null for empty yaml file content" — vendir/extract.spec.ts line 15
+    // Ported: "returns null for empty yaml file content" — lib/modules/manager/vendir/extract.spec.ts line 15
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for empty directories key" — vendir/extract.spec.ts line 20
+    // Ported: "returns null for empty directories key" — lib/modules/manager/vendir/extract.spec.ts line 20
     #[test]
     fn no_helm_charts_returns_empty() {
         let content = "apiVersion: vendir.k14s.io/v1alpha1\nkind: Config\ndirectories: []\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for invalid yaml file content" — vendir/extract.spec.ts line 10
+    // Ported: "returns null for invalid yaml file content" — lib/modules/manager/vendir/extract.spec.ts line 10
     #[test]
     fn invalid_yaml_returns_empty() {
         // Unclosed bracket is treated as text, parser finds no helmChart entries
         assert!(extract("nothing here: [").is_empty());
     }
 
-    // Ported: "returns null for nonHelmChart key" — vendir/extract.spec.ts line 30
+    // Ported: "returns null for nonHelmChart key" — lib/modules/manager/vendir/extract.spec.ts line 30
     //
     // Mirrors the invalid-contents.yaml fixture: a `contents[]` entry that
     // uses an `invalid:` key instead of `helmChart:`. The extractor only

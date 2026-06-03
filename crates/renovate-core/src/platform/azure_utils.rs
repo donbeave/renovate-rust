@@ -174,26 +174,26 @@ mod tests {
 
     // ── get_azure_pr_state ───────────────────────────────────────────────────
 
-    // Ported: "should be formated (closed)" — modules/platform/azure/util.spec.ts line 91
+    // Ported: "should be formated (closed)" — lib/modules/platform/azure/util.spec.ts line 91
     #[test]
     fn azure_pr_state_closed() {
         assert_eq!(get_azure_pr_state(2), "closed");
     }
 
-    // Ported: "should be formated (closed v2)" — modules/platform/azure/util.spec.ts line 96
+    // Ported: "should be formated (closed v2)" — lib/modules/platform/azure/util.spec.ts line 96
     #[test]
     fn azure_pr_state_merged() {
         assert_eq!(get_azure_pr_state(3), "merged");
     }
 
-    // Ported: "should be formated (not closed)" — modules/platform/azure/util.spec.ts line 101
+    // Ported: "should be formated (not closed)" — lib/modules/platform/azure/util.spec.ts line 101
     #[test]
     fn azure_pr_state_open() {
         assert_eq!(get_azure_pr_state(1), "open");
         assert_eq!(get_azure_pr_state(0), "open"); // unknown → open
     }
 
-    // Ported: "should return undefined if null context passed" (getGitStatusContextCombinedName) — modules/platform/azure/util.spec.ts line 16
+    // Ported: "should return undefined if null context passed" (getGitStatusContextCombinedName) — lib/modules/platform/azure/util.spec.ts line 16
     #[test]
     fn git_status_context_combined_name_none_genre_empty_name() {
         // null → treated as None genre
@@ -201,7 +201,7 @@ mod tests {
         assert_eq!(result, "");
     }
 
-    // Ported: "should combine valid genre and name with slash" — modules/platform/azure/util.spec.ts line 21
+    // Ported: "should combine valid genre and name with slash" — lib/modules/platform/azure/util.spec.ts line 21
     //         — modules/platform/azure/util.spec.ts line 21
     #[test]
     fn git_status_context_combined_name_genre_and_name() {
@@ -209,7 +209,7 @@ mod tests {
         assert_eq!(result, "my-genre/status-name");
     }
 
-    // Ported: "should combine valid empty genre and name without a slash" — modules/platform/azure/util.spec.ts line 29
+    // Ported: "should combine valid empty genre and name without a slash" — lib/modules/platform/azure/util.spec.ts line 29
     //         — modules/platform/azure/util.spec.ts line 29
     #[test]
     fn git_status_context_combined_name_undefined_genre() {
@@ -217,13 +217,13 @@ mod tests {
         assert_eq!(result, "status-name");
     }
 
-    // Ported: "should return undefined if null context passed" (getGitStatusContextFromCombinedName) — modules/platform/azure/util.spec.ts line 39
+    // Ported: "should return undefined if null context passed" (getGitStatusContextFromCombinedName) — lib/modules/platform/azure/util.spec.ts line 39
     #[test]
     fn git_status_context_from_combined_name_empty_returns_none() {
         assert!(get_git_status_context_from_combined_name("").is_none());
     }
 
-    // Ported: "should parse valid genre and name with slash" — modules/platform/azure/util.spec.ts line 44
+    // Ported: "should parse valid genre and name with slash" — lib/modules/platform/azure/util.spec.ts line 44
     //         — modules/platform/azure/util.spec.ts line 44
     #[test]
     fn git_status_context_from_combined_name_slash() {
@@ -234,7 +234,7 @@ mod tests {
         );
     }
 
-    // Ported: "should parse valid genre and name with multiple slashes" — modules/platform/azure/util.spec.ts line 54
+    // Ported: "should parse valid genre and name with multiple slashes" — lib/modules/platform/azure/util.spec.ts line 54
     //         — modules/platform/azure/util.spec.ts line 54
     #[test]
     fn git_status_context_from_combined_name_multiple_slashes() {
@@ -248,7 +248,7 @@ mod tests {
         );
     }
 
-    // Ported: "should parse valid empty genre and name without a slash" — modules/platform/azure/util.spec.ts line 64
+    // Ported: "should parse valid empty genre and name without a slash" — lib/modules/platform/azure/util.spec.ts line 64
     //         — modules/platform/azure/util.spec.ts line 64
     #[test]
     fn git_status_context_from_combined_name_no_slash() {
@@ -256,41 +256,41 @@ mod tests {
         assert_eq!(result, Some((None, "status-name".to_owned())));
     }
 
-    // Ported: "should be renamed" — modules/platform/azure/util.spec.ts line 74
+    // Ported: "should be renamed" — lib/modules/platform/azure/util.spec.ts line 74
     #[test]
     fn branch_name_strips_refs_heads_prefix() {
         let result = get_branch_name_without_refs_heads_prefix("refs/heads/testBB");
         assert_eq!(result, Some("testBB"));
     }
 
-    // Ported: "should log error and return undefined" — modules/platform/azure/util.spec.ts line 79
+    // Ported: "should log error and return undefined" — lib/modules/platform/azure/util.spec.ts line 79
     #[test]
     fn branch_name_empty_returns_none() {
         let result = get_branch_name_without_refs_heads_prefix("");
         assert!(result.is_none());
     }
 
-    // Ported: "should return the input" — modules/platform/azure/util.spec.ts line 84
+    // Ported: "should return the input" — lib/modules/platform/azure/util.spec.ts line 84
     #[test]
     fn branch_name_without_prefix_returns_as_is() {
         let result = get_branch_name_without_refs_heads_prefix("testBB");
         assert_eq!(result, Some("testBB"));
     }
 
-    // Ported: "should be the same" — modules/platform/azure/util.spec.ts line 144
+    // Ported: "should be the same" — lib/modules/platform/azure/util.spec.ts line 144
     #[test]
     fn max4000_chars_short_string_unchanged() {
         assert_eq!(max4000_chars("Hello"), "Hello");
     }
 
-    // Ported: "should be truncated" — modules/platform/azure/util.spec.ts line 149
+    // Ported: "should be truncated" — lib/modules/platform/azure/util.spec.ts line 149
     #[test]
     fn max4000_chars_long_string_truncated() {
         let s: String = "a".repeat(5000);
         assert_eq!(max4000_chars(&s).len(), 3999);
     }
 
-    // Ported: "should return the object with same strings" — modules/platform/azure/util.spec.ts line 160
+    // Ported: "should return the object with same strings" — lib/modules/platform/azure/util.spec.ts line 160
     #[test]
     fn get_project_and_repo_single_name() {
         let (project, repo) = get_project_and_repo("myRepoName").unwrap();
@@ -298,7 +298,7 @@ mod tests {
         assert_eq!(repo, "myRepoName");
     }
 
-    // Ported: "should return the object with project and repo" — modules/platform/azure/util.spec.ts line 165
+    // Ported: "should return the object with project and repo" — lib/modules/platform/azure/util.spec.ts line 165
     #[test]
     fn get_project_and_repo_project_slash_repo() {
         let (project, repo) = get_project_and_repo("prjName/myRepoName").unwrap();
@@ -306,20 +306,20 @@ mod tests {
         assert_eq!(repo, "myRepoName");
     }
 
-    // Ported: "should return an error" — modules/platform/azure/util.spec.ts line 170
+    // Ported: "should return an error" — lib/modules/platform/azure/util.spec.ts line 170
     #[test]
     fn get_project_and_repo_too_many_segments() {
         let result = get_project_and_repo("prjName/myRepoName/blalba");
         assert!(result.is_err());
     }
 
-    // Ported: "returns null when repos array is empty" — modules/platform/azure/util.spec.ts line 180
+    // Ported: "returns null when repos array is empty" — lib/modules/platform/azure/util.spec.ts line 180
     #[test]
     fn get_repo_by_name_empty_list_returns_none() {
         assert!(get_repo_by_name("foo/bar", &[]).is_none());
     }
 
-    // Ported: "returns null when repo is not found" — modules/platform/azure/util.spec.ts line 186
+    // Ported: "returns null when repo is not found" — lib/modules/platform/azure/util.spec.ts line 186
     #[test]
     fn get_repo_by_name_not_found_returns_none() {
         let repos = vec![AzureGitRepo {
@@ -330,7 +330,7 @@ mod tests {
         assert!(get_repo_by_name("foo/foo", &repos).is_none());
     }
 
-    // Ported: "finds repo" — modules/platform/azure/util.spec.ts line 192
+    // Ported: "finds repo" — lib/modules/platform/azure/util.spec.ts line 192
     #[test]
     fn get_repo_by_name_finds_first_match() {
         let repos = vec![
@@ -359,7 +359,7 @@ mod tests {
         assert_eq!(result.id.as_deref(), Some("3"));
     }
 
-    // Ported: "supports shorthand names" — modules/platform/azure/util.spec.ts line 205
+    // Ported: "supports shorthand names" — lib/modules/platform/azure/util.spec.ts line 205
     #[test]
     fn get_repo_by_name_shorthand() {
         let repos = vec![
@@ -378,7 +378,7 @@ mod tests {
         assert_eq!(result.id.as_deref(), Some("2"));
     }
 
-    // Ported: "is case-independent" — modules/platform/azure/util.spec.ts line 214
+    // Ported: "is case-independent" — lib/modules/platform/azure/util.spec.ts line 214
     #[test]
     fn get_repo_by_name_case_insensitive() {
         let repos = vec![
@@ -410,7 +410,7 @@ mod tests {
 
     // ── getStorageExtraCloneOpts ─────────────────────────────────────────────
 
-    // Ported: "should configure basic auth" — modules/platform/azure/util.spec.ts line 122
+    // Ported: "should configure basic auth" — lib/modules/platform/azure/util.spec.ts line 122
     #[test]
     fn storage_extra_clone_opts_basic_auth() {
         use base64::{Engine as _, engine::general_purpose};
@@ -421,7 +421,7 @@ mod tests {
         assert!(c_value.contains(&expected_b64));
     }
 
-    // Ported: "should configure personal access token" — modules/platform/azure/util.spec.ts line 130
+    // Ported: "should configure personal access token" — lib/modules/platform/azure/util.spec.ts line 130
     #[test]
     fn storage_extra_clone_opts_pat() {
         use base64::{Engine as _, engine::general_purpose};
@@ -434,7 +434,7 @@ mod tests {
         assert!(c_value.contains(&expected_b64));
     }
 
-    // Ported: "should configure bearer token" — modules/platform/azure/util.spec.ts line 137
+    // Ported: "should configure bearer token" — lib/modules/platform/azure/util.spec.ts line 137
     #[test]
     fn storage_extra_clone_opts_bearer() {
         let token = "sometoken";
@@ -444,7 +444,7 @@ mod tests {
         assert!(c_value.contains(token));
     }
 
-    // Ported: "throws when repo name is invalid" — modules/platform/azure/util.spec.ts line 224
+    // Ported: "throws when repo name is invalid" — lib/modules/platform/azure/util.spec.ts line 224
     // TypeScript throws; Rust returns None (same observable behavior: lookup fails for invalid name)
     #[test]
     fn get_repo_by_name_three_part_name_returns_none() {
@@ -453,7 +453,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns updated pr body" — modules/platform/azure/index.spec.ts line 1621
+    // Ported: "returns updated pr body" — lib/modules/platform/azure/index.spec.ts line 1621
     #[test]
     fn massage_markdown_returns_updated_pr_body() {
         let pr_body = "\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->plus also [a link](https://github.com/foo/bar/issues/5)";
@@ -463,7 +463,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns updated comment content" — modules/platform/azure/index.spec.ts line 1630
+    // Ported: "returns updated comment content" — lib/modules/platform/azure/index.spec.ts line 1630
     #[test]
     fn massage_markdown_returns_updated_comment_content() {
         let comment = "You can manually request rebase by checking the rebase/retry box above.\n\nplus also [a link](https://github.com/foo/bar/issues/5)";

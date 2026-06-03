@@ -803,7 +803,7 @@ mod tests {
         assert!(!s.update_available);
     }
 
-    // Ported: "isValid(\"$version\") === $isValid" — versioning/npm/index.spec.ts line 4
+    // Ported: "isValid(\"$version\") === $isValid" — lib/modules/versioning/npm/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_npm_spec() {
         let cases = [
@@ -831,7 +831,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion(\"$versions\",\"$range\") === $maxSatisfying" — versioning/npm/index.spec.ts line 30
+    // Ported: "getSatisfyingVersion(\"$versions\",\"$range\") === $maxSatisfying" — lib/modules/versioning/npm/index.spec.ts line 30
     #[test]
     fn get_satisfying_version_matches_renovate_npm_spec() {
         let versions = ["2.3.3.", "2.3.4", "2.4.5", "2.5.1", "3.0.0"];
@@ -848,7 +848,7 @@ mod tests {
         }
     }
 
-    // Ported: "isSingleVersion(\"$version\") === $isSingle" — versioning/npm/index.spec.ts line 46
+    // Ported: "isSingleVersion(\"$version\") === $isSingle" — lib/modules/versioning/npm/index.spec.ts line 46
     #[test]
     fn is_single_version_matches_renovate_npm_spec() {
         for (version, expected) in [
@@ -862,7 +862,7 @@ mod tests {
         }
     }
 
-    // Ported: "subset(\"$a\", \"$b\") === $expected" — versioning/npm/index.spec.ts line 58
+    // Ported: "subset(\"$a\", \"$b\") === $expected" — lib/modules/versioning/npm/index.spec.ts line 58
     #[test]
     fn subset_matches_renovate_npm_spec() {
         let cases = [
@@ -886,7 +886,7 @@ mod tests {
         }
     }
 
-    // Ported: "intersects(\"$a\", \"$b\") === $expected" — versioning/npm/index.spec.ts line 78
+    // Ported: "intersects(\"$a\", \"$b\") === $expected" — lib/modules/versioning/npm/index.spec.ts line 78
     #[test]
     fn intersects_matches_renovate_npm_spec() {
         let cases = [
@@ -910,7 +910,7 @@ mod tests {
         }
     }
 
-    // Ported: "isBreaking(\"$currentVersion\", \"$newVersion\") === $expected" — versioning/npm/index.spec.ts line 98
+    // Ported: "isBreaking(\"$currentVersion\", \"$newVersion\") === $expected" — lib/modules/versioning/npm/index.spec.ts line 98
     #[test]
     fn is_breaking_matches_renovate_npm_spec() {
         let cases = [
@@ -928,7 +928,7 @@ mod tests {
         }
     }
 
-    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — versioning/npm/index.spec.ts line 115
+    // Ported: "getNewValue(\"$currentValue\", \"$rangeStrategy\", \"$currentVersion\", \"$newVersion\") === \"$expected\"" — lib/modules/versioning/npm/index.spec.ts line 115
     #[test]
     fn get_new_value_matches_renovate_npm_spec() {
         let cases = [

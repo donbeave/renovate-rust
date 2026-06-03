@@ -228,7 +228,7 @@ bar
         assert!(extract("").is_empty());
     }
 
-    // Ported: "extracts" — modules/manager/cake/index.spec.ts line 21
+    // Ported: "extracts" — lib/modules/manager/cake/index.spec.ts line 21
     // Note: file:// references (Baz.Baz) are silently dropped in Rust (TS returns them with skipReason)
     #[test]
     fn extracts_build_cake_fixture() {
@@ -291,7 +291,7 @@ bar
         assert!(find("Quux.Quux").is_none());
     }
 
-    // Ported: "extracts dotnet tools from single sdk style build file" — modules/manager/cake/index.spec.ts line 45
+    // Ported: "extracts dotnet tools from single sdk style build file" — lib/modules/manager/cake/index.spec.ts line 45
     #[test]
     fn extracts_install_tools_dotnet() {
         let content = concat!(
@@ -335,7 +335,7 @@ bar
         assert!(find("Should.Not.Match").is_none());
     }
 
-    // Ported: "skips invalid entries in InstallTools" — modules/manager/cake/index.spec.ts line 101
+    // Ported: "skips invalid entries in InstallTools" — lib/modules/manager/cake/index.spec.ts line 101
     #[test]
     fn skips_invalid_install_tools_entries() {
         let content = concat!(

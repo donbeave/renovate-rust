@@ -271,7 +271,7 @@ spec:
         image: busybox:latest
 "#;
 
-    // Ported: "extracts multiple Kubernetes configurations" — manager/kubernetes/extract.spec.ts line 23
+    // Ported: "extracts multiple Kubernetes configurations" — lib/modules/manager/kubernetes/extract.spec.ts line 23
     #[test]
     fn extracts_docker_hub_images() {
         let deps = extract(DEPLOYMENT);
@@ -290,7 +290,7 @@ spec:
         );
     }
 
-    // Ported: "extracts multiple Kubernetes configurations" — manager/kubernetes/extract.spec.ts line 23
+    // Ported: "extracts multiple Kubernetes configurations" — lib/modules/manager/kubernetes/extract.spec.ts line 23
     #[test]
     fn extracts_non_docker_hub_registries() {
         // TypeScript extractor extracts all images regardless of registry — no NonDockerHub skip.
@@ -323,19 +323,19 @@ spec:
         assert!(has_no_ver);
     }
 
-    // Ported: "returns null for empty" — kubernetes/extract.spec.ts line 14
+    // Ported: "returns null for empty" — lib/modules/manager/kubernetes/extract.spec.ts line 14
     #[test]
     fn returns_empty_for_non_k8s() {
         assert!(extract("key: value\nanother: field\n").is_empty());
     }
 
-    // Ported: "returns null for empty" — kubernetes/extract.spec.ts line 14
+    // Ported: "returns null for empty" — lib/modules/manager/kubernetes/extract.spec.ts line 14
     #[test]
     fn returns_empty_for_empty_input() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "handles invalid YAML files" — kubernetes/extract.spec.ts line 125
+    // Ported: "handles invalid YAML files" — lib/modules/manager/kubernetes/extract.spec.ts line 125
     #[test]
     fn handles_invalid_yaml_with_no_images() {
         // apiVersion and kind present but malformed YAML — no image lines → empty
@@ -343,7 +343,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "does not return unknown kind" — kubernetes/extract.spec.ts line 18
+    // Ported: "does not return unknown kind" — lib/modules/manager/kubernetes/extract.spec.ts line 18
     #[test]
     fn configmap_with_no_images_returns_empty() {
         let content =
@@ -351,7 +351,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts image tag when it contains underscores" — kubernetes/extract.spec.ts line 98
+    // Ported: "extracts image tag when it contains underscores" — lib/modules/manager/kubernetes/extract.spec.ts line 98
     #[test]
     fn extracts_image_with_underscore_in_tag() {
         let content = r#"apiVersion: apps/v1
@@ -375,7 +375,7 @@ spec:
         assert!(dep.skip_reason.is_none());
     }
 
-    // Ported: "extracts images and replaces registries" — kubernetes/extract.spec.ts line 133
+    // Ported: "extracts images and replaces registries" — lib/modules/manager/kubernetes/extract.spec.ts line 133
     #[test]
     fn extracts_images_and_replaces_registries() {
         let content = r#"
@@ -400,7 +400,7 @@ spec:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts images but does no replacement" — kubernetes/extract.spec.ts line 155
+    // Ported: "extracts images but does no replacement" — lib/modules/manager/kubernetes/extract.spec.ts line 155
     #[test]
     fn extracts_images_without_registry_replacement() {
         let content = r#"
@@ -424,7 +424,7 @@ spec:
         );
     }
 
-    // Ported: "extracts images and does no double replacements" — kubernetes/extract.spec.ts line 177
+    // Ported: "extracts images and does no double replacements" — lib/modules/manager/kubernetes/extract.spec.ts line 177
     #[test]
     fn extracts_images_without_double_registry_replacement() {
         let content = r#"
@@ -447,7 +447,7 @@ spec:
         assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/node");
     }
 
-    // Ported: "extracts from complex templates" — kubernetes/extract.spec.ts line 200
+    // Ported: "extracts from complex templates" — lib/modules/manager/kubernetes/extract.spec.ts line 200
     #[test]
     fn extracts_from_complex_templates() {
         let content = r#"
@@ -478,7 +478,7 @@ spec:
         assert_eq!(deps[0].skip_reason, Some(KubernetesSkipReason::NoVersion));
     }
 
-    // Ported: "ignores non-Kubernetes YAML files" — kubernetes/extract.spec.ts line 121
+    // Ported: "ignores non-Kubernetes YAML files" — lib/modules/manager/kubernetes/extract.spec.ts line 121
     #[test]
     fn ignores_non_kubernetes_yaml() {
         // GitLab CI YAML has no apiVersion or kind → empty
@@ -486,7 +486,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts image volumes from $kind" — kubernetes/extract.spec.ts line 223
+    // Ported: "extracts image volumes from $kind" — lib/modules/manager/kubernetes/extract.spec.ts line 223
     #[test]
     fn extracts_image_volumes_from_workload_kinds() {
         for (kind, api_version) in [
@@ -522,7 +522,7 @@ spec:
         }
     }
 
-    // Ported: "extracts image volumes from Pod and CronJob" — kubernetes/extract.spec.ts line 265
+    // Ported: "extracts image volumes from Pod and CronJob" — lib/modules/manager/kubernetes/extract.spec.ts line 265
     #[test]
     fn extracts_image_volumes_from_pod_and_cronjob() {
         let content = r#"
@@ -558,7 +558,7 @@ spec:
         assert_eq!(deps[1].current_value, "v2.0.0");
     }
 
-    // Ported: "does not extract image volumes for unsupported kind" — kubernetes/extract.spec.ts line 326
+    // Ported: "does not extract image volumes for unsupported kind" — lib/modules/manager/kubernetes/extract.spec.ts line 326
     #[test]
     fn does_not_extract_image_volumes_for_unsupported_kind() {
         let content = r#"
@@ -575,7 +575,7 @@ spec:
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "skips malformed volume entries and extracts valid ones" — kubernetes/extract.spec.ts line 349
+    // Ported: "skips malformed volume entries and extracts valid ones" — lib/modules/manager/kubernetes/extract.spec.ts line 349
     #[test]
     fn skips_malformed_image_volume_entries_and_extracts_valid_ones() {
         let content = r#"
@@ -599,7 +599,7 @@ spec:
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts image line in a YAML array" — kubernetes/extract.spec.ts line 71
+    // Ported: "extracts image line in a YAML array" — lib/modules/manager/kubernetes/extract.spec.ts line 71
     #[test]
     fn extracts_image_line_in_yaml_array() {
         let content = r#"

@@ -442,7 +442,7 @@ pub fn get_new_value(
 mod tests {
     use super::*;
 
-    // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 6
+    // Ported: "parses "$input" correctly" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 6
     #[test]
     fn parse_channel_names_matches_renovate_rust_release_channel_parse_spec() {
         let s = parse("stable").unwrap();
@@ -457,7 +457,7 @@ mod tests {
         assert!(n.date.is_none());
     }
 
-    // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 17
+    // Ported: "parses "$input" correctly" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 17
     #[test]
     fn parse_full_versions_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.82.0").unwrap();
@@ -494,7 +494,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 28
+    // Ported: "parses "$input" correctly" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 28
     #[test]
     fn parse_partial_versions_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.82").unwrap();
@@ -520,7 +520,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 39
+    // Ported: "parses "$input" correctly" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 39
     #[test]
     fn parse_beta_versions_with_number_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.83.0-beta.5").unwrap();
@@ -552,7 +552,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 50
+    // Ported: "parses "$input" correctly" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 50
     #[test]
     fn parse_beta_ranges_without_number_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("1.83.0-beta").unwrap();
@@ -570,7 +570,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 60
+    // Ported: "parses "$input" correctly" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 60
     #[test]
     fn parse_dated_channels_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("stable-2025-11-24").unwrap();
@@ -616,7 +616,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses "$input" correctly" — versioning/rust-release-channel/parse.spec.ts line 74
+    // Ported: "parses "$input" correctly" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 74
     #[test]
     fn parse_host_triples_matches_renovate_rust_release_channel_parse_spec() {
         let p = parse("stable-x86_64-pc-windows-msvc").unwrap();
@@ -648,7 +648,7 @@ mod tests {
         assert_eq!(p3.host.as_deref(), Some("x86_64-pc-windows-msvc"));
     }
 
-    // Ported: "returns null for "$input" ($reason)" — versioning/rust-release-channel/parse.spec.ts line 87
+    // Ported: "returns null for "$input" ($reason)" — lib/modules/versioning/rust-release-channel/parse.spec.ts line 87
     #[test]
     fn parse_invalid_inputs_matches_renovate_rust_release_channel_parse_spec() {
         assert!(parse("").is_none());
@@ -659,7 +659,7 @@ mod tests {
         assert!(parse("a.b.c").is_none());
     }
 
-    // Ported: "isValid("$input") === $expected" — versioning/rust-release-channel/index.spec.ts line 4
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 4
     #[test]
     fn is_valid_matches_renovate_rust_release_channel_index_spec() {
         assert!(is_valid("stable"));
@@ -677,7 +677,7 @@ mod tests {
         assert!(!is_valid("a.b.c"));
     }
 
-    // Ported: "isVersion("$input") === $expected" — versioning/rust-release-channel/index.spec.ts line 23
+    // Ported: "isVersion("$input") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 23
     #[test]
     fn is_version_matches_renovate_rust_release_channel_index_spec() {
         assert!(is_version("1.82.0"));
@@ -692,7 +692,7 @@ mod tests {
         assert!(!is_version("invalid"));
     }
 
-    // Ported: "isSingleVersion("$input") === $expected" — versioning/rust-release-channel/index.spec.ts line 40
+    // Ported: "isSingleVersion("$input") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 40
     #[test]
     fn is_single_version_matches_renovate_rust_release_channel_index_spec() {
         assert!(is_single_version("1.82.0"));
@@ -705,7 +705,7 @@ mod tests {
         assert!(!is_single_version("1.83.0-beta"));
     }
 
-    // Ported: "isStable("$version") === $expected" — versioning/rust-release-channel/index.spec.ts line 54
+    // Ported: "isStable("$version") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 54
     #[test]
     fn is_stable_matches_renovate_rust_release_channel_index_spec() {
         assert!(is_stable("1.82.0"));
@@ -719,7 +719,7 @@ mod tests {
         assert!(!is_stable("invalid"));
     }
 
-    // Ported: "equals("$a", "$b") === $expected" — versioning/rust-release-channel/index.spec.ts line 69
+    // Ported: "equals("$a", "$b") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 69
     #[test]
     fn equals_matches_renovate_rust_release_channel_index_spec() {
         assert!(equals("1.82", "1.82"));
@@ -734,7 +734,7 @@ mod tests {
         assert!(!equals("nightly-2025-11-24", "nightly-2025-11-23"));
     }
 
-    // Ported: "isGreaterThan("$a", "$b") === $expected" — versioning/rust-release-channel/index.spec.ts line 85
+    // Ported: "isGreaterThan("$a", "$b") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 85
     #[test]
     fn is_greater_than_matches_renovate_rust_release_channel_index_spec() {
         assert!(is_greater_than("nightly-2025-11-24", "1.82.0"));
@@ -761,7 +761,7 @@ mod tests {
         assert!(!is_greater_than("1.99.0", "2.0.0"));
     }
 
-    // Ported: "sortVersions("$a", "$b") === $expected" — versioning/rust-release-channel/index.spec.ts line 113
+    // Ported: "sortVersions("$a", "$b") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 113
     #[test]
     fn sort_versions_matches_renovate_rust_release_channel_index_spec() {
         assert_eq!(sort_versions("1.82.0", "1.82.0"), 0);
@@ -787,7 +787,7 @@ mod tests {
         assert_eq!(sort_versions("bar", "foo"), -1);
     }
 
-    // Ported: "getMajor("$version") === $expected" — versioning/rust-release-channel/index.spec.ts line 137
+    // Ported: "getMajor("$version") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 137
     #[test]
     fn get_major_matches_renovate_rust_release_channel_index_spec() {
         assert_eq!(get_major("1.82.0"), Some(1));
@@ -800,7 +800,7 @@ mod tests {
         assert_eq!(get_major("invalid"), None);
     }
 
-    // Ported: "getMinor("$version") === $expected" — versioning/rust-release-channel/index.spec.ts line 151
+    // Ported: "getMinor("$version") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 151
     #[test]
     fn get_minor_matches_renovate_rust_release_channel_index_spec() {
         assert_eq!(get_minor("1.82.0"), Some(82));
@@ -811,7 +811,7 @@ mod tests {
         assert_eq!(get_minor("invalid"), None);
     }
 
-    // Ported: "getPatch("$version") === $expected" — versioning/rust-release-channel/index.spec.ts line 163
+    // Ported: "getPatch("$version") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 163
     #[test]
     fn get_patch_matches_renovate_rust_release_channel_index_spec() {
         assert_eq!(get_patch("1.82.0"), Some(0));
@@ -823,7 +823,7 @@ mod tests {
         assert_eq!(get_patch("invalid"), None);
     }
 
-    // Ported: "matches("$version", "$range") === $expected" — versioning/rust-release-channel/index.spec.ts line 176
+    // Ported: "matches("$version", "$range") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 176
     #[test]
     fn matches_matches_renovate_rust_release_channel_index_spec() {
         assert!(matches("1.82.0", "stable"));
@@ -847,7 +847,7 @@ mod tests {
         assert!(!matches("1.82.0", "invalid"));
     }
 
-    // Ported: "isCompatible("$version", "$current") === $expected" — versioning/rust-release-channel/index.spec.ts line 204
+    // Ported: "isCompatible("$version", "$current") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 204
     #[test]
     fn is_compatible_matches_renovate_rust_release_channel_index_spec() {
         assert!(is_compatible(
@@ -892,7 +892,7 @@ mod tests {
         ));
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/rust-release-channel/index.spec.ts line 229
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 229
     #[test]
     fn get_satisfying_version_matches_renovate_rust_release_channel_index_spec() {
         assert_eq!(
@@ -933,7 +933,7 @@ mod tests {
         assert_eq!(get_satisfying_version(&[], "stable"), None);
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/rust-release-channel/index.spec.ts line 248
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 248
     #[test]
     fn min_satisfying_version_matches_renovate_rust_release_channel_index_spec() {
         assert_eq!(
@@ -974,7 +974,7 @@ mod tests {
         assert_eq!(min_satisfying_version(&[], "stable"), None);
     }
 
-    // Ported: "getNewValue({ currentValue: "$currentValue", rangeStrategy: "$rangeStrategy", newVersion: "$newVersion" }) === $expected" — versioning/rust-release-channel/index.spec.ts line 267
+    // Ported: "getNewValue({ currentValue: "$currentValue", rangeStrategy: "$rangeStrategy", newVersion: "$newVersion" }) === $expected" — lib/modules/versioning/rust-release-channel/index.spec.ts line 267
     #[test]
     fn get_new_value_matches_renovate_rust_release_channel_index_spec() {
         assert_eq!(

@@ -233,7 +233,7 @@ mod tests {
             .collect()
     }
 
-    // Ported: "should parse a valid azure-pipelines file" — azure-pipelines/extract.spec.ts line 25
+    // Ported: "should parse a valid azure-pipelines file" — lib/modules/manager/azure-pipelines/extract.spec.ts line 25
     #[test]
     fn parses_valid_azure_pipelines_file() {
         // Fixture mirrors __fixtures__/azure-pipelines.yaml (indentation matches extractor)
@@ -259,7 +259,7 @@ mod tests {
         );
     }
 
-    // Ported: "should extract container information" — azure-pipelines/extract.spec.ts line 187
+    // Ported: "should extract container information" — lib/modules/manager/azure-pipelines/extract.spec.ts line 187
     #[test]
     fn extracts_container_image() {
         let content = r#"
@@ -275,7 +275,7 @@ resources:
         assert_eq!(c[0].tag.as_deref(), Some("22.04"));
     }
 
-    // Ported: "should extract repository information" — azure-pipelines/extract.spec.ts line 36
+    // Ported: "should extract repository information" — lib/modules/manager/azure-pipelines/extract.spec.ts line 36
     #[test]
     fn extracts_github_repository_information() {
         let dep = extract_repository(
@@ -293,7 +293,7 @@ resources:
         assert_eq!(dep.datasource, "github-tags");
     }
 
-    // Ported: "should return null when repository type is not github" — azure-pipelines/extract.spec.ts line 52
+    // Ported: "should return null when repository type is not github" — lib/modules/manager/azure-pipelines/extract.spec.ts line 52
     #[test]
     fn non_github_repository_type_returns_none() {
         assert!(
@@ -309,7 +309,7 @@ resources:
         );
     }
 
-    // Ported: "should return null when reference is not defined specified" — azure-pipelines/extract.spec.ts line 65
+    // Ported: "should return null when reference is not defined specified" — lib/modules/manager/azure-pipelines/extract.spec.ts line 65
     #[test]
     fn repository_without_ref_returns_none() {
         assert!(
@@ -318,7 +318,7 @@ resources:
         );
     }
 
-    // Ported: "should return null when reference is invalid tag format" — azure-pipelines/extract.spec.ts line 77
+    // Ported: "should return null when reference is invalid tag format" — lib/modules/manager/azure-pipelines/extract.spec.ts line 77
     #[test]
     fn repository_with_invalid_ref_returns_none() {
         assert!(
@@ -334,7 +334,7 @@ resources:
         );
     }
 
-    // Ported: "should extract Azure repository information if project in name" — azure-pipelines/extract.spec.ts line 90
+    // Ported: "should extract Azure repository information if project in name" — lib/modules/manager/azure-pipelines/extract.spec.ts line 90
     #[test]
     fn extracts_azure_repository_when_project_in_name() {
         let dep = extract_repository(
@@ -353,7 +353,7 @@ resources:
         );
     }
 
-    // Ported: "should extract Azure repository information if project is not in name but is in the config repository" — azure-pipelines/extract.spec.ts line 111
+    // Ported: "should extract Azure repository information if project is not in name but is in the config repository" — lib/modules/manager/azure-pipelines/extract.spec.ts line 111
     #[test]
     fn extracts_azure_repository_project_from_current_repository() {
         let dep = extract_repository(
@@ -372,7 +372,7 @@ resources:
         );
     }
 
-    // Ported: "should return null if repository type is git and project not in name nor in config repository name" — azure-pipelines/extract.spec.ts line 132
+    // Ported: "should return null if repository type is git and project not in name nor in config repository name" — lib/modules/manager/azure-pipelines/extract.spec.ts line 132
     #[test]
     fn azure_repository_without_project_returns_none() {
         assert!(
@@ -388,7 +388,7 @@ resources:
         );
     }
 
-    // Ported: "should return null if repository type is git and currentRepository is undefined" — azure-pipelines/extract.spec.ts line 150
+    // Ported: "should return null if repository type is git and currentRepository is undefined" — lib/modules/manager/azure-pipelines/extract.spec.ts line 150
     #[test]
     fn azure_repository_without_current_repository_returns_none() {
         assert!(
@@ -404,7 +404,7 @@ resources:
         );
     }
 
-    // Ported: "should return null for git repo type if platform not Azure" — azure-pipelines/extract.spec.ts line 168
+    // Ported: "should return null for git repo type if platform not Azure" — lib/modules/manager/azure-pipelines/extract.spec.ts line 168
     #[test]
     fn git_repository_non_azure_platform_returns_none() {
         assert!(
@@ -420,7 +420,7 @@ resources:
         );
     }
 
-    // Ported: "should extract container information" — azure-pipelines/extract.spec.ts line 187
+    // Ported: "should extract container information" — lib/modules/manager/azure-pipelines/extract.spec.ts line 187
     #[test]
     fn extracts_multiple_containers() {
         let content = r#"
@@ -438,7 +438,7 @@ resources:
         assert!(c.iter().any(|d| d.image == "postgres"));
     }
 
-    // Ported: "should extract azure-pipelines task information" — azure-pipelines/extract.spec.ts line 201
+    // Ported: "should extract azure-pipelines task information" — lib/modules/manager/azure-pipelines/extract.spec.ts line 201
     #[test]
     fn extracts_tasks() {
         let content = r#"
@@ -455,7 +455,7 @@ steps:
         assert!(t.iter().any(|d| d.name == "Docker" && d.version == "2"));
     }
 
-    // Ported: "should extract azure-pipelines task information" — azure-pipelines/extract.spec.ts line 201
+    // Ported: "should extract azure-pipelines task information" — lib/modules/manager/azure-pipelines/extract.spec.ts line 201
     #[test]
     fn tasks_in_nested_jobs_stages() {
         let content = r#"
@@ -490,7 +490,7 @@ resources:
         assert!(c[0].skip_reason.is_some());
     }
 
-    // Ported: "should return null for invalid task format" — azure-pipelines/extract.spec.ts line 209
+    // Ported: "should return null for invalid task format" — lib/modules/manager/azure-pipelines/extract.spec.ts line 209
     #[test]
     fn task_without_at_ignored() {
         let content = "steps:\n- task: JustAName\n";
@@ -498,13 +498,13 @@ resources:
         assert!(tasks(&deps).is_empty());
     }
 
-    // Ported: "should return null when there is no dependency found" — azure-pipelines/extract.spec.ts line 245
+    // Ported: "should return null when there is no dependency found" — lib/modules/manager/azure-pipelines/extract.spec.ts line 245
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "should return null when there is no dependency found" — azure-pipelines/extract.spec.ts line 245
+    // Ported: "should return null when there is no dependency found" — lib/modules/manager/azure-pipelines/extract.spec.ts line 245
     #[test]
     fn non_containers_resources_not_extracted() {
         let content = r#"
@@ -518,7 +518,7 @@ resources:
         assert!(containers(&deps).is_empty());
     }
 
-    // Ported: "should extract stages" — azure-pipelines/extract.spec.ts line 447
+    // Ported: "should extract stages" — lib/modules/manager/azure-pipelines/extract.spec.ts line 447
     #[test]
     fn extracts_task_from_nested_stages() {
         let content = r#"stages:
@@ -537,7 +537,7 @@ resources:
         assert_eq!(t[0].version, "3");
     }
 
-    // Ported: "should extract jobs" — azure-pipelines/extract.spec.ts line 470
+    // Ported: "should extract jobs" — lib/modules/manager/azure-pipelines/extract.spec.ts line 470
     #[test]
     fn extracts_task_from_nested_jobs() {
         let content = r#"jobs:
@@ -554,7 +554,7 @@ resources:
         assert_eq!(t[0].version, "3");
     }
 
-    // Ported: "should extract steps" — azure-pipelines/extract.spec.ts line 491
+    // Ported: "should extract steps" — lib/modules/manager/azure-pipelines/extract.spec.ts line 491
     #[test]
     fn extracts_task_from_top_level_steps() {
         let content = r#"steps:
@@ -569,7 +569,7 @@ resources:
         assert_eq!(t[0].version, "3");
     }
 
-    // Ported: "should return null when task alias used" — azure-pipelines/extract.spec.ts line 510
+    // Ported: "should return null when task alias used" — lib/modules/manager/azure-pipelines/extract.spec.ts line 510
     #[test]
     fn task_alias_bash_not_extracted() {
         let content = "steps:\n- bash: 'echo Hello World'\n";
@@ -577,26 +577,26 @@ resources:
         assert!(tasks(&deps).is_empty());
     }
 
-    // Ported: "return null on an invalid file" — azure-pipelines/extract.spec.ts line 30
+    // Ported: "return null on an invalid file" — lib/modules/manager/azure-pipelines/extract.spec.ts line 30
     #[test]
     fn invalid_yaml_returns_empty() {
         assert!(extract("not valid yaml: [").is_empty());
     }
 
-    // Ported: "returns null for invalid azure pipelines files" — azure-pipelines/extract.spec.ts line 215
+    // Ported: "returns null for invalid azure pipelines files" — lib/modules/manager/azure-pipelines/extract.spec.ts line 215
     #[test]
     fn invalid_json_returns_empty() {
         assert!(extract("}").is_empty());
     }
 
-    // Ported: "should return null when there is no dependency found" — azure-pipelines/extract.spec.ts line 245
+    // Ported: "should return null when there is no dependency found" — lib/modules/manager/azure-pipelines/extract.spec.ts line 245
     #[test]
     fn no_tasks_or_containers_returns_empty() {
         let content = "pool:\n  vmImage: ubuntu-latest\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should extract deployment jobs runonce" — azure-pipelines/extract.spec.ts line 253
+    // Ported: "should extract deployment jobs runonce" — lib/modules/manager/azure-pipelines/extract.spec.ts line 253
     #[test]
     fn extracts_task_from_deployment_job_runonce() {
         let content = r#"jobs:
@@ -616,7 +616,7 @@ resources:
         assert_eq!(t[0].version, "3");
     }
 
-    // Ported: "should extract deployment jobs on failure" — azure-pipelines/extract.spec.ts line 277
+    // Ported: "should extract deployment jobs on failure" — lib/modules/manager/azure-pipelines/extract.spec.ts line 277
     #[test]
     fn extracts_task_from_deployment_job_on_failure() {
         let content = r#"jobs:
@@ -637,7 +637,7 @@ resources:
         assert_eq!(t[0].version, "3");
     }
 
-    // Ported: "should extract deployment jobs on success" — azure-pipelines/extract.spec.ts line 302
+    // Ported: "should extract deployment jobs on success" — lib/modules/manager/azure-pipelines/extract.spec.ts line 302
     #[test]
     fn extracts_task_from_deployment_job_on_success() {
         let content = r#"jobs:
@@ -658,7 +658,7 @@ resources:
         assert_eq!(t[0].version, "3");
     }
 
-    // Ported: "should extract deployment jobs postroute" — azure-pipelines/extract.spec.ts line 327
+    // Ported: "should extract deployment jobs postroute" — lib/modules/manager/azure-pipelines/extract.spec.ts line 327
     #[test]
     fn extracts_task_from_deployment_postroute() {
         let content = r#"jobs:
@@ -675,7 +675,7 @@ resources:
         assert_eq!(t[0].name, "Bash");
     }
 
-    // Ported: "should extract deployment jobs predeploy" — azure-pipelines/extract.spec.ts line 351
+    // Ported: "should extract deployment jobs predeploy" — lib/modules/manager/azure-pipelines/extract.spec.ts line 351
     #[test]
     fn extracts_task_from_deployment_predeploy() {
         let content = r#"jobs:
@@ -692,7 +692,7 @@ resources:
         assert_eq!(t[0].name, "Bash");
     }
 
-    // Ported: "should extract deployment jobs route" — azure-pipelines/extract.spec.ts line 375
+    // Ported: "should extract deployment jobs route" — lib/modules/manager/azure-pipelines/extract.spec.ts line 375
     #[test]
     fn extracts_task_from_deployment_route_traffic() {
         let content = r#"jobs:
@@ -709,7 +709,7 @@ resources:
         assert_eq!(t[0].name, "Bash");
     }
 
-    // Ported: "should extract deployment jobs rolling" — azure-pipelines/extract.spec.ts line 399
+    // Ported: "should extract deployment jobs rolling" — lib/modules/manager/azure-pipelines/extract.spec.ts line 399
     #[test]
     fn extracts_task_from_deployment_rolling() {
         let content = r#"jobs:
@@ -726,7 +726,7 @@ resources:
         assert_eq!(t[0].name, "Bash");
     }
 
-    // Ported: "should extract deployment jobs canary" — azure-pipelines/extract.spec.ts line 423
+    // Ported: "should extract deployment jobs canary" — lib/modules/manager/azure-pipelines/extract.spec.ts line 423
     #[test]
     fn extracts_task_from_deployment_canary() {
         let content = r#"jobs:

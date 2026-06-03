@@ -405,7 +405,7 @@ mod tests {
 
     use super::*;
 
-    // Ported: "gets latest version" — datasource/sbt-package/util.spec.ts line 4
+    // Ported: "gets latest version" — lib/modules/datasource/sbt-package/util.spec.ts line 4
     #[test]
     fn gets_latest_version() {
         assert_eq!(
@@ -414,7 +414,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses Maven index directory" — datasource/sbt-package/index.spec.ts line 18
+    // Ported: "parses Maven index directory" — lib/modules/datasource/sbt-package/index.spec.ts line 18
     #[test]
     fn parses_maven_index_directory() {
         let html = include_str!("testdata/sbt/maven-index.html");
@@ -615,7 +615,7 @@ mod tests {
         );
     }
 
-    // Ported: "parses sbt index directory" — datasource/sbt-package/index.spec.ts line 26
+    // Ported: "parses sbt index directory" — lib/modules/datasource/sbt-package/index.spec.ts line 26
     #[test]
     fn parses_sbt_index_directory() {
         let html = include_str!("testdata/sbt/sbt-plugins-index.html");
@@ -976,7 +976,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null in case of errors" — datasource/sbt-package/index.spec.ts line 43
+    // Ported: "returns null in case of errors" — lib/modules/datasource/sbt-package/index.spec.ts line 43
     #[tokio::test]
     async fn returns_null_in_case_of_errors() {
         let server = MockServer::start().await;
@@ -1006,7 +1006,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "returns null if there is no version" — datasource/sbt-package/index.spec.ts line 63
+    // Ported: "returns null if there is no version" — lib/modules/datasource/sbt-package/index.spec.ts line 63
     #[tokio::test]
     async fn returns_null_if_there_is_no_version() {
         let server = MockServer::start().await;
@@ -1045,7 +1045,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "fetches releases from Maven" — datasource/sbt-package/index.spec.ts line 91
+    // Ported: "fetches releases from Maven" — lib/modules/datasource/sbt-package/index.spec.ts line 91
     #[tokio::test]
     async fn fetches_releases_from_maven() {
         let server = MockServer::start().await;
@@ -1115,7 +1115,7 @@ mod tests {
         assert_eq!(versions.len(), 2);
     }
 
-    // Ported: "fetches Maven releases with Scala version" — datasource/sbt-package/index.spec.ts line 142
+    // Ported: "fetches Maven releases with Scala version" — lib/modules/datasource/sbt-package/index.spec.ts line 142
     #[tokio::test]
     async fn fetches_maven_releases_with_scala_version() {
         let server = MockServer::start().await;
@@ -1158,7 +1158,7 @@ mod tests {
         assert_eq!(result.releases[0].version, "1.2.3");
     }
 
-    // Ported: "fetches releases from Confluent" — datasource/sbt-package/index.spec.ts line 171
+    // Ported: "fetches releases from Confluent" — lib/modules/datasource/sbt-package/index.spec.ts line 171
     #[tokio::test]
     async fn fetches_releases_from_confluent() {
         let server = MockServer::start().await;
@@ -1204,7 +1204,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         assert_eq!(result.releases[0].version, "7.0.1");
     }
 
-    // Ported: "extracts URL from Maven POM file" — datasource/sbt-package/index.spec.ts line 211
+    // Ported: "extracts URL from Maven POM file" — lib/modules/datasource/sbt-package/index.spec.ts line 211
     #[tokio::test]
     async fn extracts_url_from_maven_pom_file() {
         let server = MockServer::start().await;
@@ -1250,7 +1250,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         assert_eq!(result.releases[0].version, "1.2.3");
     }
 
-    // Ported: "falls back to Maven for orgarization root folder non-listable repositories" — modules/datasource/sbt-package/index.spec.ts line 245
+    // Ported: "falls back to Maven for orgarization root folder non-listable repositories" — lib/modules/datasource/sbt-package/index.spec.ts line 245
     //         — datasource/sbt-package/index.spec.ts line 245
     #[tokio::test]
     async fn falls_back_to_maven_for_non_listable_repositories() {
@@ -1299,7 +1299,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         assert!(result.is_some(), "expected Some result (maven fallback)");
     }
 
-    // Ported: "extracts URL from Maven POM file" (postprocessRelease) — datasource/sbt-package/index.spec.ts line 366
+    // Ported: "extracts URL from Maven POM file" (postprocessRelease) — lib/modules/datasource/sbt-package/index.spec.ts line 366
     #[tokio::test]
     async fn postprocess_extracts_release_timestamp() {
         let server = MockServer::start().await;
@@ -1319,7 +1319,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         assert_eq!(ts.as_deref(), Some("2015-10-21T07:28:00.000Z"));
     }
 
-    // Ported: "continues when parseUrl returns null for packageRootUrl" — datasource/sbt-package/index.spec.ts line 285
+    // Ported: "continues when parseUrl returns null for packageRootUrl" — lib/modules/datasource/sbt-package/index.spec.ts line 285
     //
     // The TS test mocks `parseUrl` to return null for the group root URL,
     // preventing further URL construction. In Rust, the equivalent is the
@@ -1362,7 +1362,7 @@ xmlns="http://maven.apache.org/POM/4.0.0">
         assert!(result.is_none());
     }
 
-    // Ported: "skips pkgUrl when parseUrl returns null for it" — datasource/sbt-package/index.spec.ts line 323
+    // Ported: "skips pkgUrl when parseUrl returns null for it" — lib/modules/datasource/sbt-package/index.spec.ts line 323
     //
     // The TS test mocks `parseUrl` to return null for the artifact subdir URL.
     // In Rust, the artifact subdir listing returns version links but subsequent

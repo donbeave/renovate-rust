@@ -96,7 +96,7 @@ pub fn get_new_value(current_value: &str, range_strategy: &str, new_version: &st
 mod tests {
     use super::*;
 
-    // Ported: "matches("$version", "$range") === "$expected"" — versioning/go-mod-directive/index.spec.ts line 4
+    // Ported: "matches("$version", "$range") === "$expected"" — lib/modules/versioning/go-mod-directive/index.spec.ts line 4
     #[test]
     fn matches_matches_renovate_go_mod_directive_index_spec() {
         let cases = [
@@ -116,7 +116,7 @@ mod tests {
         }
     }
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — versioning/go-mod-directive/index.spec.ts line 19
+    // Ported: "getSatisfyingVersion($versions, "$range") === "$expected"" — lib/modules/versioning/go-mod-directive/index.spec.ts line 19
     #[test]
     fn get_satisfying_version_matches_renovate_go_mod_directive_index_spec() {
         assert_eq!(
@@ -125,7 +125,7 @@ mod tests {
         );
     }
 
-    // Ported: "isValid("$version") === $expected" — versioning/go-mod-directive/index.spec.ts line 29
+    // Ported: "isValid("$version") === $expected" — lib/modules/versioning/go-mod-directive/index.spec.ts line 29
     #[test]
     fn is_valid_matches_renovate_go_mod_directive_index_spec() {
         let cases = [("1", false), ("1.2", true), ("1.2.3", true)];
@@ -134,7 +134,7 @@ mod tests {
         }
     }
 
-    // Ported: "isVersion("$version") === $expected" — versioning/go-mod-directive/index.spec.ts line 38
+    // Ported: "isVersion("$version") === $expected" — lib/modules/versioning/go-mod-directive/index.spec.ts line 38
     #[test]
     fn is_version_matches_renovate_go_mod_directive_index_spec() {
         let cases = [("1", false), ("1.2", false), ("1.2.3", true)];
@@ -143,7 +143,7 @@ mod tests {
         }
     }
 
-    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — versioning/go-mod-directive/index.spec.ts line 47
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — lib/modules/versioning/go-mod-directive/index.spec.ts line 47
     #[test]
     fn is_less_than_range_matches_renovate_go_mod_directive_index_spec() {
         let cases = [("1.15.0", "1.16", true), ("1.19.0", "1.16", false)];
@@ -156,7 +156,7 @@ mod tests {
         }
     }
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — versioning/go-mod-directive/index.spec.ts line 58
+    // Ported: "minSatisfyingVersion($versions, "$range") === "$expected"" — lib/modules/versioning/go-mod-directive/index.spec.ts line 58
     #[test]
     fn min_satisfying_version_matches_renovate_go_mod_directive_index_spec() {
         assert_eq!(
@@ -169,7 +169,7 @@ mod tests {
         );
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/go-mod-directive/index.spec.ts line 69
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/go-mod-directive/index.spec.ts line 69
     #[test]
     fn get_new_value_matches_renovate_go_mod_directive_index_spec() {
         let cases = [

@@ -188,7 +188,7 @@ mod tests {
         }
     }
 
-    // Ported: "returns null if no pixi.lock found" — pixi/artifacts.spec.ts line 70
+    // Ported: "returns null if no pixi.lock found" — lib/modules/manager/pixi/artifacts.spec.ts line 70
     #[tokio::test]
     async fn returns_null_if_no_pixi_lock_found() {
         let dir = tempdir().unwrap();
@@ -207,7 +207,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if updatedDeps is empty" — pixi/artifacts.spec.ts line 83
+    // Ported: "returns null if updatedDeps is empty" — lib/modules/manager/pixi/artifacts.spec.ts line 83
     #[tokio::test]
     async fn returns_null_if_updated_deps_empty() {
         let dir = tempdir().unwrap();
@@ -225,7 +225,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns null if unchanged" — pixi/artifacts.spec.ts line 96
+    // Ported: "returns null if unchanged" — lib/modules/manager/pixi/artifacts.spec.ts line 96
     #[tokio::test]
     async fn returns_null_if_unchanged() {
         let dir = tempdir().unwrap();
@@ -268,7 +268,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
-    // Ported: "returns updated pixi.lock using docker" — pixi/artifacts.spec.ts line 140
+    // Ported: "returns updated pixi.lock using docker" — lib/modules/manager/pixi/artifacts.spec.ts line 140
     #[tokio::test]
     async fn returns_updated_pixi_lock() {
         let dir = tempdir().unwrap();
@@ -312,7 +312,7 @@ mod tests {
         assert_eq!(results[0].file.as_ref().unwrap().path, "pixi.lock");
     }
 
-    // Ported: "returns updated pixi.lock when doing lockfile maintenance" — pixi/artifacts.spec.ts line 348
+    // Ported: "returns updated pixi.lock when doing lockfile maintenance" — lib/modules/manager/pixi/artifacts.spec.ts line 348
     #[tokio::test]
     async fn performs_lockfile_maintenance() {
         let dir = tempdir().unwrap();
@@ -356,7 +356,7 @@ mod tests {
         assert_eq!(results.len(), 1);
     }
 
-    // Ported: "catches errors" — pixi/artifacts.spec.ts line 328
+    // Ported: "catches errors" — lib/modules/manager/pixi/artifacts.spec.ts line 328
     #[tokio::test]
     async fn catches_errors() {
         let dir = tempdir().unwrap();

@@ -88,7 +88,7 @@ pub fn extract(content: &str) -> Vec<TypstDep> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts single import" — typst/extract.spec.ts line 21
+    // Ported: "extracts single import" — lib/modules/manager/typst/extract.spec.ts line 21
     #[test]
     fn extracts_preview_import() {
         let content = r#"#import "@preview/cetz:0.2.0""#;
@@ -100,7 +100,7 @@ mod tests {
         assert!(deps[0].skip_reason.is_none());
     }
 
-    // Ported: "extracts single import" — typst/extract.spec.ts line 21
+    // Ported: "extracts single import" — lib/modules/manager/typst/extract.spec.ts line 21
     #[test]
     fn extracts_import_with_trailing_colon_import() {
         let content = r#"#import "@preview/fletcher:0.4.5": diagram, node, edge"#;
@@ -110,7 +110,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "0.4.5");
     }
 
-    // Ported: "adds skipReason for non-preview namespaces" — typst/extract.spec.ts line 167
+    // Ported: "adds skipReason for non-preview namespaces" — lib/modules/manager/typst/extract.spec.ts line 167
     #[test]
     fn local_namespace_skipped() {
         let content = r#"#import "@local/mylib:1.0.0""#;
@@ -119,7 +119,7 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(TypstSkipReason::Local));
     }
 
-    // Ported: "adds skipReason for non-preview namespaces" — typst/extract.spec.ts line 167
+    // Ported: "adds skipReason for non-preview namespaces" — lib/modules/manager/typst/extract.spec.ts line 167
     #[test]
     fn unknown_namespace_skipped() {
         let content = r#"#import "@custom/mypkg:2.0.0""#;
@@ -128,14 +128,14 @@ mod tests {
         assert_eq!(deps[0].skip_reason, Some(TypstSkipReason::Unsupported));
     }
 
-    // Ported: "strips JSON comments before parsing" — typst/extract.spec.ts line 98
+    // Ported: "strips JSON comments before parsing" — lib/modules/manager/typst/extract.spec.ts line 98
     #[test]
     fn comment_line_skipped() {
         let content = r#"// #import "@preview/cetz:0.2.0""#;
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts multiple imports" — typst/extract.spec.ts line 36
+    // Ported: "extracts multiple imports" — lib/modules/manager/typst/extract.spec.ts line 36
     #[test]
     fn multiple_imports() {
         let content = r#"
@@ -148,13 +148,13 @@ mod tests {
         assert_eq!(deps[1].package_name, "fletcher");
     }
 
-    // Ported: "returns empty deps when no imports found" — typst/extract.spec.ts line 10
+    // Ported: "returns empty deps when no imports found" — lib/modules/manager/typst/extract.spec.ts line 10
     #[test]
     fn no_imports_returns_empty() {
         assert!(extract("= Hello, World!\n\nThis is a Typst document.").is_empty());
     }
 
-    // Ported: "ignores invalid import formats" — typst/extract.spec.ts line 147
+    // Ported: "ignores invalid import formats" — lib/modules/manager/typst/extract.spec.ts line 147
     #[test]
     fn ignores_invalid_import_formats() {
         let content = "#import \"regular/path\": *\nimport \"@preview/pkg:1.0.0\": *\n#import @preview/pkg:1.0.0: *\n#import \"@preview/valid:1.0.0\": *\n";
@@ -164,7 +164,7 @@ mod tests {
         assert_eq!(deps[0].current_value, "1.0.0");
     }
 
-    // Ported: "adds skipReason for non-preview namespaces" — typst/extract.spec.ts line 167
+    // Ported: "adds skipReason for non-preview namespaces" — lib/modules/manager/typst/extract.spec.ts line 167
     #[test]
     fn non_preview_namespaces_get_skip_reasons() {
         let content = "#import \"@preview/valid:1.0.0\": *\n#import \"@local/local-pkg:2.0.0\": *\n#import \"@custom/custom-pkg:3.0.0\": *\n";
@@ -175,13 +175,13 @@ mod tests {
         assert_eq!(deps[2].skip_reason, Some(TypstSkipReason::Unsupported));
     }
 
-    // Ported: "returns empty deps for empty content" — typst/extract.spec.ts line 5
+    // Ported: "returns empty deps for empty content" — lib/modules/manager/typst/extract.spec.ts line 5
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "handles imports with different version formats" — typst/extract.spec.ts line 67
+    // Ported: "handles imports with different version formats" — lib/modules/manager/typst/extract.spec.ts line 67
     #[test]
     fn prerelease_version_formats_extracted() {
         let content = r#"
@@ -199,7 +199,7 @@ mod tests {
         assert_eq!(deps[2].current_value, "2.1.0-alpha");
     }
 
-    // Ported: "handles multiple imports on same line" — typst/extract.spec.ts line 125
+    // Ported: "handles multiple imports on same line" — lib/modules/manager/typst/extract.spec.ts line 125
     #[test]
     fn multiple_imports_on_same_line() {
         let content = r#"#import "@preview/pkg1:1.0.0": * #import "@preview/pkg2:2.0.0": *"#;

@@ -757,7 +757,7 @@ mod tests {
 
     // ── is_valid ──────────────────────────────────────────────────────────────
 
-    // Ported: "isValid("$input") === $expected" — versioning/pep440/index.spec.ts line 4
+    // Ported: "isValid("$input") === $expected" — lib/modules/versioning/pep440/index.spec.ts line 4
     #[test]
     fn is_valid_table() {
         let cases = [
@@ -783,7 +783,7 @@ mod tests {
 
     // ── is_stable ─────────────────────────────────────────────────────────────
 
-    // Ported: "isStable("$input") === $expected" — versioning/pep440/index.spec.ts line 25
+    // Ported: "isStable("$input") === $expected" — lib/modules/versioning/pep440/index.spec.ts line 25
     #[test]
     fn is_stable_table() {
         assert!(is_stable("1.2.3"));
@@ -793,7 +793,7 @@ mod tests {
 
     // ── equals ────────────────────────────────────────────────────────────────
 
-    // Ported: "equals($a, $b) === $expected" — versioning/pep440/index.spec.ts line 34
+    // Ported: "equals($a, $b) === $expected" — lib/modules/versioning/pep440/index.spec.ts line 34
     #[test]
     fn equals_table() {
         assert!(equals("1.0", "1.0.0"));
@@ -802,7 +802,7 @@ mod tests {
 
     // ── matches ───────────────────────────────────────────────────────────────
 
-    // Ported: "matches($a, $b) === $expected" — versioning/pep440/index.spec.ts line 42
+    // Ported: "matches($a, $b) === $expected" — lib/modules/versioning/pep440/index.spec.ts line 42
     #[test]
     fn matches_table() {
         assert!(matches_range("1.0", ">=1.0.0"));
@@ -814,7 +814,7 @@ mod tests {
 
     // ── is_single_version ─────────────────────────────────────────────────────
 
-    // Ported: "isSingleVersion("$version") === $isSingle" — versioning/pep440/index.spec.ts line 53
+    // Ported: "isSingleVersion("$version") === $isSingle" — lib/modules/versioning/pep440/index.spec.ts line 53
     #[test]
     fn is_single_version_table() {
         assert!(is_single_version("1.2.3"));
@@ -828,7 +828,7 @@ mod tests {
 
     // ── get_satisfying_version ────────────────────────────────────────────────
 
-    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — versioning/pep440/index.spec.ts line 78
+    // Ported: "getSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/pep440/index.spec.ts line 78
     #[test]
     fn get_satisfying_version_table() {
         let versions = &[
@@ -840,7 +840,7 @@ mod tests {
 
     // ── min_satisfying_version ────────────────────────────────────────────────
 
-    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — versioning/pep440/index.spec.ts line 89
+    // Ported: "minSatisfyingVersion($versions, "$range") === $expected" — lib/modules/versioning/pep440/index.spec.ts line 89
     #[test]
     fn min_satisfying_version_table() {
         let versions = &[
@@ -862,7 +862,7 @@ mod tests {
         })
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/pep440/index.spec.ts line 100
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/pep440/index.spec.ts line 100
     #[test]
     fn get_new_value_table() {
         let cases: &[(&str, &str, &str, &str, Option<&str>)] = &[
@@ -1090,7 +1090,7 @@ mod tests {
         })
     }
 
-    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — versioning/pep440/index.spec.ts line 190
+    // Ported: "getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"" — lib/modules/versioning/pep440/index.spec.ts line 190
     #[test]
     fn get_new_value_replacement_table() {
         let cases: &[(&str, &str, &str, &str)] = &[
@@ -1207,7 +1207,7 @@ mod tests {
 
     // ── is_less_than_range ────────────────────────────────────────────────────
 
-    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — versioning/pep440/index.spec.ts line 307
+    // Ported: "isLessThanRange("$version", "$range") === "$expected"" — lib/modules/versioning/pep440/index.spec.ts line 307
     #[test]
     fn is_less_than_range_table() {
         let cases: &[(&str, &str, bool)] = &[
@@ -1245,7 +1245,7 @@ mod tests {
 
     // ── check_range_and_remove_unnecessary_range_limit ────────────────────────
 
-    // Ported: "checkRange("$rangeInput, "$newVersion"") === "$expected"" — versioning/pep440/range.spec.ts line 8
+    // Ported: "checkRange("$rangeInput, "$newVersion"") === "$expected"" — lib/modules/versioning/pep440/range.spec.ts line 8
     #[test]
     fn check_range_table() {
         assert_eq!(
@@ -1262,7 +1262,7 @@ mod tests {
         );
     }
 
-    // Ported: "returns null without warning if new version is excluded from range" — versioning/pep440/range.spec.ts line 24
+    // Ported: "returns null without warning if new version is excluded from range" — lib/modules/versioning/pep440/range.spec.ts line 24
     #[test]
     fn excluded_version_returns_none() {
         let result = get_new_value(&NewValueParams {
@@ -1275,7 +1275,7 @@ mod tests {
         assert!(result.is_none());
     }
 
-    // Ported: "handles v-prefixed version as currentValue" — versioning/pep440/range.spec.ts line 39
+    // Ported: "handles v-prefixed version as currentValue" — lib/modules/versioning/pep440/range.spec.ts line 39
     #[test]
     fn v_prefix_preserved() {
         let result = get_new_value(&NewValueParams {
@@ -1288,7 +1288,7 @@ mod tests {
         assert_eq!(result.as_deref(), Some("v0.8.0"));
     }
 
-    // Ported: "handles bare version that differs from currentVersion without v-prefix" — versioning/pep440/range.spec.ts line 49
+    // Ported: "handles bare version that differs from currentVersion without v-prefix" — lib/modules/versioning/pep440/range.spec.ts line 49
     #[test]
     fn bare_version_differs_from_current() {
         let result = get_new_value(&NewValueParams {

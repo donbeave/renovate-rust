@@ -137,7 +137,7 @@ fn strip_key<'a>(line: &'a str, key: &str) -> Option<&'a str> {
 mod tests {
     use super::*;
 
-    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
+    // Ported: "extracts multiple image lines" — lib/modules/manager/woodpecker/extract.spec.ts line 21
     #[test]
     fn extracts_step_image() {
         let content = r#"
@@ -151,7 +151,7 @@ steps:
         assert_eq!(deps[0].tag.as_deref(), Some("1.21"));
     }
 
-    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
+    // Ported: "extracts multiple image lines" — lib/modules/manager/woodpecker/extract.spec.ts line 21
     #[test]
     fn extracts_service_image() {
         let content = r#"
@@ -164,7 +164,7 @@ services:
         assert_eq!(deps[0].image, "redis");
     }
 
-    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
+    // Ported: "extracts multiple image lines" — lib/modules/manager/woodpecker/extract.spec.ts line 21
     #[test]
     fn multiple_steps_and_services() {
         let content = r#"
@@ -181,7 +181,7 @@ services:
         assert_eq!(deps.len(), 3);
     }
 
-    // Ported: "extracts image and replaces registry" — woodpecker/extract.spec.ts line 129
+    // Ported: "extracts image and replaces registry" — lib/modules/manager/woodpecker/extract.spec.ts line 129
     #[test]
     fn extracts_image_and_replaces_registry() {
         let content = r#"
@@ -202,7 +202,7 @@ pipeline:
         );
     }
 
-    // Ported: "extracts image but no replacement" — woodpecker/extract.spec.ts line 159
+    // Ported: "extracts image but no replacement" — lib/modules/manager/woodpecker/extract.spec.ts line 159
     #[test]
     fn extracts_image_without_registry_replacement() {
         let content = r#"
@@ -223,7 +223,7 @@ pipeline:
         );
     }
 
-    // Ported: "extracts image and no double replacement" — woodpecker/extract.spec.ts line 189
+    // Ported: "extracts image and no double replacement" — lib/modules/manager/woodpecker/extract.spec.ts line 189
     #[test]
     fn extracts_image_without_double_registry_replacement() {
         let content = r#"
@@ -243,7 +243,7 @@ pipeline:
         assert_eq!(deps[0].package_name, "my-quay-mirror.registry.com/nginx");
     }
 
-    // Ported: "extracts multiple image lines" — woodpecker/extract.spec.ts line 21
+    // Ported: "extracts multiple image lines" — lib/modules/manager/woodpecker/extract.spec.ts line 21
     #[test]
     fn variable_ref_skipped() {
         let content = "steps:\n  ci:\n    image: ${CI_IMAGE}\n";
@@ -252,34 +252,34 @@ pipeline:
         assert!(deps[0].skip_reason.is_some());
     }
 
-    // Ported: "returns null for empty" — woodpecker/extract.spec.ts line 8
+    // Ported: "returns null for empty" — lib/modules/manager/woodpecker/extract.spec.ts line 8
     #[test]
     fn empty_returns_empty() {
         assert!(extract("").is_empty());
     }
 
-    // Ported: "returns null for non-object YAML" — woodpecker/extract.spec.ts line 12
+    // Ported: "returns null for non-object YAML" — lib/modules/manager/woodpecker/extract.spec.ts line 12
     #[test]
     fn non_object_yaml_returns_empty() {
         assert!(extract("nothing here").is_empty());
         assert!(extract("clone: null").is_empty());
     }
 
-    // Ported: "return null when no dependencies are provided" — woodpecker/extract.spec.ts line 313
+    // Ported: "return null when no dependencies are provided" — lib/modules/manager/woodpecker/extract.spec.ts line 313
     #[test]
     fn no_steps_or_services_returns_empty() {
         let content = "pipeline: {}\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "returns null for malformed YAML" — woodpecker/extract.spec.ts line 17
+    // Ported: "returns null for malformed YAML" — lib/modules/manager/woodpecker/extract.spec.ts line 17
     #[test]
     fn malformed_yaml_returns_empty() {
         let content = "nothing here\n:::::::\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "extracts the v.1.0.x version" — woodpecker/extract.spec.ts line 220
+    // Ported: "extracts the v.1.0.x version" — lib/modules/manager/woodpecker/extract.spec.ts line 220
     #[test]
     fn steps_section_extracts_image() {
         let content = r#"
@@ -293,7 +293,7 @@ pipeline:
         assert_eq!(deps[0].tag.as_deref(), Some("alpine"));
     }
 
-    // Ported: "should parse multiple sources of dependencies together" — woodpecker/extract.spec.ts line 246
+    // Ported: "should parse multiple sources of dependencies together" — lib/modules/manager/woodpecker/extract.spec.ts line 246
     #[test]
     fn clone_and_steps_both_extracted() {
         let content = r#"
@@ -310,7 +310,7 @@ pipeline:
         assert!(deps.iter().any(|d| d.image == "quay.io/something/redis"));
     }
 
-    // Ported: "return dependency when an plugin-git is cloned" — woodpecker/extract.spec.ts line 286
+    // Ported: "return dependency when an plugin-git is cloned" — lib/modules/manager/woodpecker/extract.spec.ts line 286
     #[test]
     fn clone_section_extracted() {
         let content = r#"

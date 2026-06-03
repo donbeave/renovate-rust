@@ -129,7 +129,7 @@ fn split_image_tag(s: &str) -> (&str, &str) {
 mod tests {
     use super::*;
 
-    // Ported: "full test" — crossplane/extract.spec.ts line 94
+    // Ported: "full test" — lib/modules/manager/crossplane/extract.spec.ts line 94
     #[test]
     fn extracts_provider() {
         let content = r#"
@@ -148,14 +148,14 @@ spec:
         assert!(d.skip_reason.is_none());
     }
 
-    // Ported: "return null for kubernetes manifest" — crossplane/extract.spec.ts line 20
+    // Ported: "return null for kubernetes manifest" — lib/modules/manager/crossplane/extract.spec.ts line 20
     #[test]
     fn skips_non_crossplane_files() {
         let content = "apiVersion: v1\nkind: ConfigMap\n";
         assert!(extract(content).is_empty());
     }
 
-    // Ported: "should work even if there are other resources in the file" — crossplane/extract.spec.ts line 137
+    // Ported: "should work even if there are other resources in the file" — lib/modules/manager/crossplane/extract.spec.ts line 137
     #[test]
     fn handles_multi_document() {
         let content = r#"
@@ -175,7 +175,7 @@ spec:
         assert_eq!(deps[1].kind, "Configuration");
     }
 
-    // Ported: "return no results for invalid resource" — crossplane/extract.spec.ts line 79
+    // Ported: "return no results for invalid resource" — lib/modules/manager/crossplane/extract.spec.ts line 79
     #[test]
     fn reports_missing_package() {
         // No `spec.package` field → no dep produced
@@ -189,20 +189,20 @@ metadata:
         assert!(deps.is_empty());
     }
 
-    // Ported: "returns null for empty" — crossplane/extract.spec.ts line 12
+    // Ported: "returns null for empty" — lib/modules/manager/crossplane/extract.spec.ts line 12
     #[test]
     fn empty_content_returns_empty() {
         assert!(extract("nothing here").is_empty());
     }
 
-    // Ported: "strips invalid templates" — crossplane/extract.spec.ts line 16
+    // Ported: "strips invalid templates" — lib/modules/manager/crossplane/extract.spec.ts line 16
     #[test]
     fn invalid_template_returns_empty() {
         // No `pkg.crossplane.io` in content → empty
         assert!(extract("test: test: 123").is_empty());
     }
 
-    // Ported: "return invalid-value if deps are not valid images and ignore if missing" — crossplane/extract.spec.ts line 25
+    // Ported: "return invalid-value if deps are not valid images and ignore if missing" — lib/modules/manager/crossplane/extract.spec.ts line 25
     #[test]
     fn malformed_packages_produce_invalid_value_dep() {
         // package: null → skipped, package: "" → invalid-value, no spec.package → skipped
@@ -237,7 +237,7 @@ spec:
         );
     }
 
-    // Ported: "full test" — crossplane/extract.spec.ts line 94
+    // Ported: "full test" — lib/modules/manager/crossplane/extract.spec.ts line 94
     #[test]
     fn extracts_valid_packages_full_test() {
         let content = r#"---
@@ -276,7 +276,7 @@ spec:
             && d.skip_reason.is_none()));
     }
 
-    // Ported: "return result for double quoted pkg.crossplane.io apiVersion reference" — crossplane/extract.spec.ts line 37
+    // Ported: "return result for double quoted pkg.crossplane.io apiVersion reference" — lib/modules/manager/crossplane/extract.spec.ts line 37
     #[test]
     fn double_quoted_api_version_extracted() {
         let content = r#"apiVersion: "pkg.crossplane.io/v1"
@@ -289,7 +289,7 @@ spec:
         assert_eq!(deps[0].current_value, "v0.6.0");
     }
 
-    // Ported: "return result for single quoted pkg.crossplane.io apiVersion reference" — crossplane/extract.spec.ts line 58
+    // Ported: "return result for single quoted pkg.crossplane.io apiVersion reference" — lib/modules/manager/crossplane/extract.spec.ts line 58
     #[test]
     fn single_quoted_api_version_extracted() {
         let content = "apiVersion: 'pkg.crossplane.io/v1'\nkind: Configuration\nspec:\n  package: 'xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0'\n";

@@ -119,7 +119,7 @@ pub async fn fetch_releases(
 mod tests {
     use super::*;
 
-    // Ported: "processes real data" — elm-package/index.spec.ts line 97
+    // Ported: "processes real data" — lib/modules/datasource/elm-package/index.spec.ts line 97
     #[test]
     fn processes_real_data() {
         let body = r#"{"1.0.0":1534771622,"1.0.1":1542199511,"1.0.2":1542317893,"1.0.3":1575566216,"1.0.4":1575998397,"1.0.5":1581794195}"#;
@@ -147,14 +147,14 @@ mod tests {
         );
     }
 
-    // Ported: "returns null for empty result" — elm-package/index.spec.ts line 19
+    // Ported: "returns null for empty result" — lib/modules/datasource/elm-package/index.spec.ts line 19
     #[test]
     fn empty_map_returns_none() {
         let resp: ReleasesResponse = serde_json::from_str("{}").unwrap();
         assert!(resp.0.is_empty());
     }
 
-    // Ported: "returns null for invalid schema response" — elm-package/index.spec.ts line 129
+    // Ported: "returns null for invalid schema response" — lib/modules/datasource/elm-package/index.spec.ts line 129
     #[test]
     fn non_numeric_timestamp_fails_deserialization() {
         let result: Result<ReleasesResponse, _> =
@@ -162,7 +162,7 @@ mod tests {
         assert!(result.is_err());
     }
 
-    // Ported: "handles package without slash in name" — elm-package/index.spec.ts line 142
+    // Ported: "handles package without slash in name" — lib/modules/datasource/elm-package/index.spec.ts line 142
     #[test]
     fn package_without_slash_has_no_source_url() {
         let name = "somepackage";
