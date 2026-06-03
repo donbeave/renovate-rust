@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/semver/common.ts full
+//!
 //! Generic semver update-decision logic.
 //!
 //! A shared helper used by datasources that store semver-compatible packages
