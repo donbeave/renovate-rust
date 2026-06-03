@@ -47,6 +47,10 @@ reason = "Type-only declarations and interfaces without a Rust runtime analogue"
 file   = "lib/commander.d.ts"
 reason = "Type declaration shim for Commander typings; no Rust runtime analogue is needed."
 
+[[source]]
+file   = "lib/globals.d.ts"
+reason = "TypeScript ambient declarations for global interfaces and module shims; no Rust runtime analogue."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"

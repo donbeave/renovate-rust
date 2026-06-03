@@ -21,7 +21,6 @@
 //! @parity lib/instrumentation/reporting.ts partial
 //! @parity lib/instrumentation/index.ts partial
 //! @parity lib/instrumentation/detectors.ts partial
-//! @parity lib/globals.d.ts partial
 //! @parity lib/global-config-option-defaults.generated.ts partial
 //! @parity lib/expose.ts partial
 //! @parity lib/datasource-list.generated.ts partial

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 159/159 in-scope files mapped (full=0 partial=159 stub=0 pending=0 out-of-scope=0 opt-out=1) across 15 modules.
+**Coverage:** 158/158 in-scope files mapped (full=0 partial=158 stub=0 pending=0 out-of-scope=0 opt-out=2) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -44,7 +44,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/globals.d.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/globals.d.ts` | opt-out | — | TypeScript ambient declarations for global interfaces and module shims; no Rust runtime analogue. |
 
 ### `manager-default-configs.generated.ts`
 

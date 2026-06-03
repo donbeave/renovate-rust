@@ -5,13 +5,13 @@ Status lives in `@parity` tags in the Rust source; exclusions in `docs/parity/op
 
 Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (tag) · `opt-out` (registry — will never be ported, with a reason).
 
-**Coverage:** 1511/1511 in-scope files mapped (full=257 partial=1254 stub=0 pending=0 out-of-scope=0 opt-out=3). Total upstream files: 1514.
+**Coverage:** 1510/1510 in-scope files mapped (full=257 partial=1253 stub=0 pending=0 out-of-scope=0 opt-out=4). Total upstream files: 1514.
 
 ## By group
 
 | Group | Files | full | partial | stub | pending | oos | opt-out |
 |---|--:|--:|--:|--:|--:|--:|--:|
-| [cli](cli.md) | 160 | 0 | 159 | 0 | 0 | 0 | 1 |
+| [cli](cli.md) | 160 | 0 | 158 | 0 | 0 | 0 | 2 |
 | [config](config.md) | 117 | 18 | 99 | 0 | 0 | 0 | 0 |
 | [datasources](datasources.md) | 227 | 109 | 118 | 0 | 0 | 0 | 0 |
 | [infra](infra.md) | 36 | 0 | 36 | 0 | 0 | 0 | 0 |
@@ -119,7 +119,7 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [`datasource/unity3d-packages`](datasources.md) | 2 | 1 | 1 | 0 | 0 | 0 | 0 |
 | [`expose.ts`](cli.md) | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
 | [`global-config-option-defaults.generated.ts`](cli.md) | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
-| [`globals.d.ts`](cli.md) | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
+| [`globals.d.ts`](cli.md) | 1 | 0 | 0 | 0 | 0 | 0 | 1 |
 | [`instrumentation`](infra.md) | 6 | 0 | 6 | 0 | 0 | 0 | 0 |
 | [`logger`](infra.md) | 13 | 0 | 13 | 0 | 0 | 0 | 0 |
 | [`manager-default-configs.generated.ts`](cli.md) | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
