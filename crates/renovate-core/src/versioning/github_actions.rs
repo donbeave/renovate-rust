@@ -1,7 +1,6 @@
-//! GitHub Actions versioning.
+//! @parity lib/modules/versioning/github-actions/index.ts full
 //!
-//! Renovate reference:
-//! - `lib/modules/versioning/github-actions/index.ts`
+//! GitHub Actions versioning.
 
 use std::cmp::Ordering;
 use std::collections::HashSet;
