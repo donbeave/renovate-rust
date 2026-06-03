@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/aws-eks-addon/index.ts full
 //! AWS EKS Addon versioning.
 //!
 //! Ports `lib/modules/versioning/aws-eks-addon/index.ts`.
