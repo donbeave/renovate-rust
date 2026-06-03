@@ -1,6 +1,6 @@
-//! Same-major versioning.
+//! @parity lib/modules/versioning/same-major/index.ts full
 //!
-//! Ports `lib/modules/versioning/same-major/index.ts`.
+//! Same-major versioning.
 //! Delegates to semver-coerced, converting a version input to `>=X.Y.Z <(major+1)`.
 
 use super::semver_coerced;

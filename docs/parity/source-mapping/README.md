@@ -5,7 +5,7 @@ Status lives in `@parity` tags in the Rust source; exclusions in `docs/parity/op
 
 Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (tag) · `opt-out` (registry — will never be ported, with a reason).
 
-**Coverage:** 8/1514 in-scope files mapped (full=8 partial=0 stub=0 pending=1506 out-of-scope=0 opt-out=0). Total upstream files: 1514.
+**Coverage:** 9/1514 in-scope files mapped (full=9 partial=0 stub=0 pending=1505 out-of-scope=0 opt-out=0). Total upstream files: 1514.
 
 ## By group
 
@@ -18,7 +18,7 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [managers](managers.md) | 628 | 0 | 0 | 0 | 628 | 0 | 0 |
 | [platforms](platforms.md) | 75 | 0 | 0 | 0 | 75 | 0 | 0 |
 | [util](util.md) | 175 | 0 | 0 | 0 | 175 | 0 | 0 |
-| [versioning](versioning.md) | 96 | 8 | 0 | 0 | 88 | 0 | 0 |
+| [versioning](versioning.md) | 96 | 9 | 0 | 0 | 87 | 0 | 0 |
 
 ## By module
 
@@ -317,7 +317,7 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [`versioning/rpm`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | [`versioning/ruby`](versioning.md) | 8 | 0 | 0 | 0 | 8 | 0 | 0 |
 | [`versioning/rust-release-channel`](versioning.md) | 4 | 0 | 0 | 0 | 4 | 0 | 0 |
-| [`versioning/same-major`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
+| [`versioning/same-major`](versioning.md) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | [`versioning/semver`](versioning.md) | 2 | 1 | 0 | 0 | 1 | 0 | 0 |
 | [`versioning/semver-coerced`](versioning.md) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | [`versioning/semver-partial`](versioning.md) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
