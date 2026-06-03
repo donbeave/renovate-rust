@@ -3242,6 +3242,66 @@ pub fn get_missing_module_labels(
         .collect()
 }
 
+/// Format missing module labels into grouped sections by module kind.
+///
+/// Mirrors `formatMissingLabels` from `tools/utils/sync-module-labels.ts`.
+pub fn format_missing_labels(labels: &[GithubLabel]) -> String {
+    let mut sections = std::collections::HashMap::<&str, Vec<&str>>::new();
+    for label in labels {
+        if let Some((kind, name)) = label.name.split_once(':') {
+            if matches!(kind, "datasource" | "manager" | "platform") {
+                sections.entry(kind).or_default().push(name);
+            }
+        }
+    }
+
+    let mut lines = Vec::new();
+    for kind in ["datasource", "manager", "platform"] {
+        let Some(names) = sections.get_mut(kind) else {
+            continue;
+        };
+        let section = kind;
+        names.sort_unstable();
+        names.dedup();
+        lines.push(format!("{section}s ({}):", names.len()));
+        for name in names {
+            lines.push(format!("- {}:{name}", section));
+        }
+    }
+    lines.join("\n")
+}
+
+/// Return expected module labels for datasources, managers, and platforms.
+///
+/// Mirrors `getExpectedModuleLabels` from `tools/utils/sync-module-labels.ts`.
+pub fn get_expected_module_labels() -> Vec<GithubLabel> {
+    let mut labels: Vec<GithubLabel> = Vec::new();
+
+    let mut datasources: Vec<&'static str> = crate::datasources::get_datasource_list();
+    datasources.sort_unstable();
+    datasources.dedup();
+    for datasource in datasources {
+        labels.push(create_module_label("datasource", datasource));
+    }
+
+    let mut managers: Vec<&'static str> = crate::managers::all_manager_ids();
+    managers.sort_unstable();
+    managers.dedup();
+    for manager in managers {
+        labels.push(create_module_label("manager", manager));
+    }
+
+    let mut platforms: Vec<&'static str> = crate::platform_constants::PLATFORM_HOST_TYPES.to_vec();
+    platforms.sort_unstable();
+    platforms.dedup();
+    for platform in platforms {
+        labels.push(create_module_label("platform", platform));
+    }
+
+    labels.sort_by(|a, b| a.name.cmp(&b.name));
+    labels
+}
+
 /// Mirrors `setReconfigureBranchCache` from
 /// `lib/workers/repository/reconfigure/reconfigure-cache.ts`.
 pub fn set_reconfigure_branch_cache(cache: &mut serde_json::Value, sha: &str, is_valid: bool) {
@@ -8399,6 +8459,7 @@ mod tests {
         ));
     }
 
+    // Ported: "creates module labels with the expected metadata" — test/other/sync-module-labels.spec.ts line 11
     #[test]
     fn test_create_module_label() {
         let label = create_module_label("manager", "jsonata");
@@ -8407,6 +8468,7 @@ mod tests {
         assert_eq!(label.name, "manager:jsonata");
     }
 
+    // Ported: "reports missing labels without flagging existing ones" — test/other/sync-module-labels.spec.ts line 19
     #[test]
     fn test_get_missing_module_labels() {
         let expected = vec![
@@ -8421,8 +8483,10 @@ mod tests {
         let missing = get_missing_module_labels(&expected, &existing);
         assert_eq!(missing.len(), 1);
         assert_eq!(missing[0].name, "manager:jsonata");
+        assert!(format_missing_labels(&missing).contains("manager:jsonata"));
     }
 
+    // Ported: "renders stable label creation commands for missing labels" — test/other/sync-module-labels.spec.ts line 36
     #[test]
     fn test_format_create_label_commands() {
         let labels = vec![
@@ -8445,13 +8509,12 @@ mod tests {
         assert!(lines[1].contains("Bob"));
     }
 
+    // Ported: "includes labels for known runtime module ids" — test/other/sync-module-labels.spec.ts line 62
     #[test]
     fn test_get_expected_module_labels_contains_known_ids() {
-        // Build labels from all known managers (same as getExpectedModuleLabels but just managers)
-        let managers = crate::managers::all_manager_ids();
-        let label_names: std::collections::HashSet<String> = managers
-            .iter()
-            .map(|id| format!("manager:{}", id))
+        let label_names: std::collections::HashSet<String> = get_expected_module_labels()
+            .into_iter()
+            .map(|label| label.name)
             .collect();
         assert!(
             label_names.contains("manager:jsonata"),
@@ -8460,6 +8523,14 @@ mod tests {
         assert!(
             label_names.contains("manager:helm-values"),
             "should contain manager:helm-values"
+        );
+        assert!(
+            label_names.contains("datasource:github-digest"),
+            "should contain datasource:github-digest"
+        );
+        assert!(
+            label_names.contains("platform:scm-manager"),
+            "should contain platform:scm-manager"
         );
     }
 
