@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/homeassistant-manifest/extract.spec.ts`](../../lib/modules/manager/homeassistant-manifest/extract.spec.ts.md) | 16 | 16 | 0 | [`crates/renovate-core/src/extractors/homeassistant.rs`](../../../../../crates/renovate-core/src/extractors/homeassistant.rs) | ported |
+| [`lib/modules/manager/homeassistant-manifest/extract.spec.ts`](../../lib/modules/manager/homeassistant-manifest/extract.spec.ts.md) | 16 | 16 | 0 | [`crates/renovate-core/src/extractors/homeassistant.rs:150`](../../../../../crates/renovate-core/src/extractors/homeassistant.rs#L150) | ported |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/fvm/extract.spec.ts`](../../lib/modules/manager/fvm/extract.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/extractors/fvm.rs`](../../../../../crates/renovate-core/src/extractors/fvm.rs) | ported |
+| [`lib/modules/manager/fvm/extract.spec.ts`](../../lib/modules/manager/fvm/extract.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/extractors/fvm.rs:41`](../../../../../crates/renovate-core/src/extractors/fvm.rs#L41) | ported |
 

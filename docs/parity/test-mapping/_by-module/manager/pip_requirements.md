@@ -6,8 +6,8 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/pip_requirements/artifacts.spec.ts`](../../lib/modules/manager/pip_requirements/artifacts.spec.ts.md) | 8 | 6 | 2 | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs`](../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs) | partial |
-| [`lib/modules/manager/pip_requirements/common.spec.ts`](../../lib/modules/manager/pip_requirements/common.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/extractors/pip.rs`](../../../../../crates/renovate-core/src/extractors/pip.rs) | ported |
-| [`lib/modules/manager/pip_requirements/extract.spec.ts`](../../lib/modules/manager/pip_requirements/extract.spec.ts.md) | 22 | 22 | 0 | [`crates/renovate-core/src/extractors/npm.rs`](../../../../../crates/renovate-core/src/extractors/npm.rs)<br>[`crates/renovate-core/src/extractors/pip.rs`](../../../../../crates/renovate-core/src/extractors/pip.rs) | ported |
-| [`lib/modules/manager/pip_requirements/index.spec.ts`](../../lib/modules/manager/pip_requirements/index.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/managers.rs`](../../../../../crates/renovate-core/src/managers.rs) | ported |
+| [`lib/modules/manager/pip_requirements/artifacts.spec.ts`](../../lib/modules/manager/pip_requirements/artifacts.spec.ts.md) | 8 | 6 | 2 | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs:217`](../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs#L217) | partial |
+| [`lib/modules/manager/pip_requirements/common.spec.ts`](../../lib/modules/manager/pip_requirements/common.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/extractors/pip.rs:777`](../../../../../crates/renovate-core/src/extractors/pip.rs#L777) | ported |
+| [`lib/modules/manager/pip_requirements/extract.spec.ts`](../../lib/modules/manager/pip_requirements/extract.spec.ts.md) | 22 | 22 | 0 | [`crates/renovate-core/src/extractors/npm.rs:4055`](../../../../../crates/renovate-core/src/extractors/npm.rs#L4055)<br>[`crates/renovate-core/src/extractors/pip.rs:416`](../../../../../crates/renovate-core/src/extractors/pip.rs#L416) | ported |
+| [`lib/modules/manager/pip_requirements/index.spec.ts`](../../lib/modules/manager/pip_requirements/index.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/managers.rs:1622`](../../../../../crates/renovate-core/src/managers.rs#L1622) | ported |
 

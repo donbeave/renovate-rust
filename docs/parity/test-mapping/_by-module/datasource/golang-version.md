@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/golang-version/index.spec.ts`](../../lib/modules/datasource/golang-version/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/datasources/golang_version.rs`](../../../../../crates/renovate-core/src/datasources/golang_version.rs) | ported |
+| [`lib/modules/datasource/golang-version/index.spec.ts`](../../lib/modules/datasource/golang-version/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/datasources/golang_version.rs:228`](../../../../../crates/renovate-core/src/datasources/golang_version.rs#L228) | ported |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/galaxy-collection/index.spec.ts`](../../lib/modules/datasource/galaxy-collection/index.spec.ts.md) | 15 | 15 | 0 | [`crates/renovate-core/src/datasources/galaxy_collection.rs`](../../../../../crates/renovate-core/src/datasources/galaxy_collection.rs) | ported |
+| [`lib/modules/datasource/galaxy-collection/index.spec.ts`](../../lib/modules/datasource/galaxy-collection/index.spec.ts.md) | 15 | 15 | 0 | [`crates/renovate-core/src/datasources/galaxy_collection.rs:263`](../../../../../crates/renovate-core/src/datasources/galaxy_collection.rs#L263) | ported |
 

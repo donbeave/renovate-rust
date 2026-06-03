@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/xcodegen/extract.spec.ts`](../../lib/modules/manager/xcodegen/extract.spec.ts.md) | 24 | 24 | 0 | [`crates/renovate-core/src/extractors/xcodegen.rs`](../../../../../crates/renovate-core/src/extractors/xcodegen.rs) | ported |
+| [`lib/modules/manager/xcodegen/extract.spec.ts`](../../lib/modules/manager/xcodegen/extract.spec.ts.md) | 24 | 24 | 0 | [`crates/renovate-core/src/extractors/xcodegen.rs:419`](../../../../../crates/renovate-core/src/extractors/xcodegen.rs#L419) | ported |
 

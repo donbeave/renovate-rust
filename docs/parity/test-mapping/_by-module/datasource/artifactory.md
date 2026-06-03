@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/artifactory/index.spec.ts`](../../lib/modules/datasource/artifactory/index.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/datasources/artifactory.rs`](../../../../../crates/renovate-core/src/datasources/artifactory.rs) | ported |
+| [`lib/modules/datasource/artifactory/index.spec.ts`](../../lib/modules/datasource/artifactory/index.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/datasources/artifactory.rs:234`](../../../../../crates/renovate-core/src/datasources/artifactory.rs#L234) | ported |
 

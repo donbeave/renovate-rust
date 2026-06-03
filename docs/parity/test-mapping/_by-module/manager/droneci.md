@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/droneci/extract.spec.ts`](../../lib/modules/manager/droneci/extract.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/extractors/droneci.rs`](../../../../../crates/renovate-core/src/extractors/droneci.rs) | ported |
+| [`lib/modules/manager/droneci/extract.spec.ts`](../../lib/modules/manager/droneci/extract.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/extractors/droneci.rs:174`](../../../../../crates/renovate-core/src/extractors/droneci.rs#L174) | ported |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/hermit/index.spec.ts`](../../lib/modules/datasource/hermit/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/datasources/hermit.rs`](../../../../../crates/renovate-core/src/datasources/hermit.rs) | ported |
+| [`lib/modules/datasource/hermit/index.spec.ts`](../../lib/modules/datasource/hermit/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/datasources/hermit.rs:234`](../../../../../crates/renovate-core/src/datasources/hermit.rs#L234) | ported |
 

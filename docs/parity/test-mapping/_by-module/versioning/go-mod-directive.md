@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/go-mod-directive/index.spec.ts`](../../lib/modules/versioning/go-mod-directive/index.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/versioning/go_mod_directive.rs`](../../../../../crates/renovate-core/src/versioning/go_mod_directive.rs) | ported |
+| [`lib/modules/versioning/go-mod-directive/index.spec.ts`](../../lib/modules/versioning/go-mod-directive/index.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/versioning/go_mod_directive.rs:99`](../../../../../crates/renovate-core/src/versioning/go_mod_directive.rs#L99) | ported |
 

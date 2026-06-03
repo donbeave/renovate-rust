@@ -24,7 +24,7 @@
 //! // Ported: "extracts image lines" — lib/modules/manager/ansible/extract.spec.ts line 16
 //! ```
 
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use std::path::Path;
 
@@ -408,8 +408,9 @@ struct SpecStat<'a> {
     spec: &'a SpecFile,
     ported: usize,
     /// Distinct Rust files holding this spec's ported tests (the migration
-    /// targets). Empty when the spec has no ported tests yet.
-    rust_files: Vec<String>,
+    /// targets), each with the line of its first ported test. Empty when the
+    /// spec has no ported tests yet.
+    rust_files: Vec<(String, usize)>,
 }
 
 #[derive(Clone)]
@@ -435,7 +436,8 @@ struct Analysis<'a> {
 fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
     let resolver = Resolver::new(specs, false);
     let mut covered: HashMap<&str, HashSet<String>> = HashMap::new();
-    let mut rust_by_spec: HashMap<&str, BTreeSet<String>> = HashMap::new();
+    // spec rel -> (rust file -> line of its first ported test).
+    let mut rust_by_spec: HashMap<&str, BTreeMap<String, usize>> = HashMap::new();
     let mut deleted = Vec::new();
 
     for p in ported {
@@ -479,7 +481,9 @@ fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
                     rust_by_spec
                         .entry(spec.rel.as_str())
                         .or_default()
-                        .insert(p.rust_file.clone());
+                        .entry(p.rust_file.clone())
+                        .and_modify(|l| *l = (*l).min(p.rust_line))
+                        .or_insert(p.rust_line);
                 }
             }
         }
@@ -491,7 +495,7 @@ fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
             let n = covered.get(s.rel.as_str()).map_or(0, HashSet::len);
             let rust_files = rust_by_spec
                 .get(s.rel.as_str())
-                .map(|set| set.iter().cloned().collect())
+                .map(|m| m.iter().map(|(f, l)| (f.clone(), *l)).collect())
                 .unwrap_or_default();
             SpecStat {
                 spec: s,
@@ -695,7 +699,7 @@ fn render_module_page(module: &str, grp: &[&SpecStat], mpath: &str) -> String {
         } else {
             s.rust_files
                 .iter()
-                .map(|f| rust_link(mpath, f, None))
+                .map(|(f, l)| rust_link(mpath, f, Some(*l)))
                 .collect::<Vec<_>>()
                 .join("<br>")
         };

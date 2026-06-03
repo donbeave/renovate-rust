@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/docker/index.spec.ts`](../../lib/modules/versioning/docker/index.spec.ts.md) | 12 | 12 | 0 | [`crates/renovate-core/src/versioning/docker.rs`](../../../../../crates/renovate-core/src/versioning/docker.rs) | ported |
+| [`lib/modules/versioning/docker/index.spec.ts`](../../lib/modules/versioning/docker/index.spec.ts.md) | 12 | 12 | 0 | [`crates/renovate-core/src/versioning/docker.rs:159`](../../../../../crates/renovate-core/src/versioning/docker.rs#L159) | ported |
 

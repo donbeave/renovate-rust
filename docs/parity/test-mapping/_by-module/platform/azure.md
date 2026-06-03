@@ -8,6 +8,6 @@
 |---|--:|--:|--:|---|---|
 | [`lib/modules/platform/azure/azure-got-wrapper.spec.ts`](../../lib/modules/platform/azure/azure-got-wrapper.spec.ts.md) | 4 | 0 | 4 | — | pending |
 | [`lib/modules/platform/azure/azure-helper.spec.ts`](../../lib/modules/platform/azure/azure-helper.spec.ts.md) | 19 | 0 | 19 | — | pending |
-| [`lib/modules/platform/azure/index.spec.ts`](../../lib/modules/platform/azure/index.spec.ts.md) | 79 | 2 | 77 | [`crates/renovate-core/src/platform/azure_utils.rs`](../../../../../crates/renovate-core/src/platform/azure_utils.rs) | partial |
-| [`lib/modules/platform/azure/util.spec.ts`](../../lib/modules/platform/azure/util.spec.ts.md) | 29 | 26 | 3 | [`crates/renovate-core/src/platform/azure_utils.rs`](../../../../../crates/renovate-core/src/platform/azure_utils.rs) | partial |
+| [`lib/modules/platform/azure/index.spec.ts`](../../lib/modules/platform/azure/index.spec.ts.md) | 79 | 2 | 77 | [`crates/renovate-core/src/platform/azure_utils.rs:456`](../../../../../crates/renovate-core/src/platform/azure_utils.rs#L456) | partial |
+| [`lib/modules/platform/azure/util.spec.ts`](../../lib/modules/platform/azure/util.spec.ts.md) | 29 | 26 | 3 | [`crates/renovate-core/src/platform/azure_utils.rs:177`](../../../../../crates/renovate-core/src/platform/azure_utils.rs#L177) | partial |
 

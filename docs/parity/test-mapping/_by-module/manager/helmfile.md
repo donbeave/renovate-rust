@@ -7,5 +7,5 @@
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
 | [`lib/modules/manager/helmfile/artifacts.spec.ts`](../../lib/modules/manager/helmfile/artifacts.spec.ts.md) | 9 | 0 | 9 | — | pending |
-| [`lib/modules/manager/helmfile/extract.spec.ts`](../../lib/modules/manager/helmfile/extract.spec.ts.md) | 20 | 20 | 0 | [`crates/renovate-core/src/extractors/helmfile.rs`](../../../../../crates/renovate-core/src/extractors/helmfile.rs) | ported |
+| [`lib/modules/manager/helmfile/extract.spec.ts`](../../lib/modules/manager/helmfile/extract.spec.ts.md) | 20 | 20 | 0 | [`crates/renovate-core/src/extractors/helmfile.rs:559`](../../../../../crates/renovate-core/src/extractors/helmfile.rs#L559) | ported |
 

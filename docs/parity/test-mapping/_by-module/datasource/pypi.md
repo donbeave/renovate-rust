@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/pypi/index.spec.ts`](../../lib/modules/datasource/pypi/index.spec.ts.md) | 39 | 2 | 37 | [`crates/renovate-core/src/datasources/pypi.rs`](../../../../../crates/renovate-core/src/datasources/pypi.rs) | partial |
+| [`lib/modules/datasource/pypi/index.spec.ts`](../../lib/modules/datasource/pypi/index.spec.ts.md) | 39 | 2 | 37 | [`crates/renovate-core/src/datasources/pypi.rs:336`](../../../../../crates/renovate-core/src/datasources/pypi.rs#L336) | partial |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/typst/extract.spec.ts`](../../lib/modules/manager/typst/extract.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/extractors/typst.rs`](../../../../../crates/renovate-core/src/extractors/typst.rs) | ported |
+| [`lib/modules/manager/typst/extract.spec.ts`](../../lib/modules/manager/typst/extract.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/extractors/typst.rs:91`](../../../../../crates/renovate-core/src/extractors/typst.rs#L91) | ported |
 

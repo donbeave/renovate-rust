@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/travis/extract.spec.ts`](../../lib/modules/manager/travis/extract.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/extractors/travis.rs`](../../../../../crates/renovate-core/src/extractors/travis.rs) | ported |
+| [`lib/modules/manager/travis/extract.spec.ts`](../../lib/modules/manager/travis/extract.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/extractors/travis.rs:110`](../../../../../crates/renovate-core/src/extractors/travis.rs#L110) | ported |
 

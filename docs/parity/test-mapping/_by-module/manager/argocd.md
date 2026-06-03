@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/argocd/extract.spec.ts`](../../lib/modules/manager/argocd/extract.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/extractors/argocd.rs`](../../../../../crates/renovate-core/src/extractors/argocd.rs) | ported |
+| [`lib/modules/manager/argocd/extract.spec.ts`](../../lib/modules/manager/argocd/extract.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/extractors/argocd.rs:391`](../../../../../crates/renovate-core/src/extractors/argocd.rs#L391) | ported |
 

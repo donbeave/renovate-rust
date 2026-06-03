@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/gradle-version/index.spec.ts`](../../lib/modules/datasource/gradle-version/index.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/datasources/gradle_version.rs`](../../../../../crates/renovate-core/src/datasources/gradle_version.rs) | ported |
+| [`lib/modules/datasource/gradle-version/index.spec.ts`](../../lib/modules/datasource/gradle-version/index.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/datasources/gradle_version.rs:225`](../../../../../crates/renovate-core/src/datasources/gradle_version.rs#L225) | ported |
 

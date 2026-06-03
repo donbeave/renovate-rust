@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/glasskube/index.spec.ts`](../../lib/modules/versioning/glasskube/index.spec.ts.md) | 4 | 3 | 1 | [`crates/renovate-core/src/versioning/glasskube.rs`](../../../../../crates/renovate-core/src/versioning/glasskube.rs) | partial |
+| [`lib/modules/versioning/glasskube/index.spec.ts`](../../lib/modules/versioning/glasskube/index.spec.ts.md) | 4 | 3 | 1 | [`crates/renovate-core/src/versioning/glasskube.rs:93`](../../../../../crates/renovate-core/src/versioning/glasskube.rs#L93) | partial |
 

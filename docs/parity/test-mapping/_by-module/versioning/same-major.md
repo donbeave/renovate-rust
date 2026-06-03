@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/same-major/index.spec.ts`](../../lib/modules/versioning/same-major/index.spec.ts.md) | 10 | 8 | 2 | [`crates/renovate-core/src/versioning/same_major.rs`](../../../../../crates/renovate-core/src/versioning/same_major.rs) | partial |
+| [`lib/modules/versioning/same-major/index.spec.ts`](../../lib/modules/versioning/same-major/index.spec.ts.md) | 10 | 8 | 2 | [`crates/renovate-core/src/versioning/same_major.rs:47`](../../../../../crates/renovate-core/src/versioning/same_major.rs#L47) | partial |
 

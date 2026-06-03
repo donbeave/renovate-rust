@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/helm-requirements/extract.spec.ts`](../../lib/modules/manager/helm-requirements/extract.spec.ts.md) | 11 | 11 | 0 | [`crates/renovate-core/src/extractors/helm.rs`](../../../../../crates/renovate-core/src/extractors/helm.rs) | ported |
+| [`lib/modules/manager/helm-requirements/extract.spec.ts`](../../lib/modules/manager/helm-requirements/extract.spec.ts.md) | 11 | 11 | 0 | [`crates/renovate-core/src/extractors/helm.rs:562`](../../../../../crates/renovate-core/src/extractors/helm.rs#L562) | ported |
 

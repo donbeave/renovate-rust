@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/sbt-plugin/index.spec.ts`](../../lib/modules/datasource/sbt-plugin/index.spec.ts.md) | 8 | 7 | 1 | [`crates/renovate-core/src/datasources/sbt_plugin.rs`](../../../../../crates/renovate-core/src/datasources/sbt_plugin.rs) | partial |
+| [`lib/modules/datasource/sbt-plugin/index.spec.ts`](../../lib/modules/datasource/sbt-plugin/index.spec.ts.md) | 8 | 7 | 1 | [`crates/renovate-core/src/datasources/sbt_plugin.rs:337`](../../../../../crates/renovate-core/src/datasources/sbt_plugin.rs#L337) | partial |
 

@@ -8,5 +8,5 @@
 |---|--:|--:|--:|---|---|
 | [`lib/modules/datasource/terraform-module/base.spec.ts`](../../lib/modules/datasource/terraform-module/base.spec.ts.md) | 2 | 0 | 2 | — | pending |
 | [`lib/modules/datasource/terraform-module/index.spec.ts`](../../lib/modules/datasource/terraform-module/index.spec.ts.md) | 12 | 0 | 12 | — | pending |
-| [`lib/modules/datasource/terraform-module/utils.spec.ts`](../../lib/modules/datasource/terraform-module/utils.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/datasources/terraform.rs`](../../../../../crates/renovate-core/src/datasources/terraform.rs) | ported |
+| [`lib/modules/datasource/terraform-module/utils.spec.ts`](../../lib/modules/datasource/terraform-module/utils.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/datasources/terraform.rs:496`](../../../../../crates/renovate-core/src/datasources/terraform.rs#L496) | ported |
 

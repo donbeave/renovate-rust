@@ -7,5 +7,5 @@
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
 | [`lib/modules/datasource/aws-eks-addon/index.spec.ts`](../../lib/modules/datasource/aws-eks-addon/index.spec.ts.md) | 7 | 0 | 7 | — | pending |
-| [`lib/modules/datasource/aws-eks-addon/schema.spec.ts`](../../lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/versioning/aws_eks_addon.rs`](../../../../../crates/renovate-core/src/versioning/aws_eks_addon.rs) | ported |
+| [`lib/modules/datasource/aws-eks-addon/schema.spec.ts`](../../lib/modules/datasource/aws-eks-addon/schema.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/versioning/aws_eks_addon.rs:319`](../../../../../crates/renovate-core/src/versioning/aws_eks_addon.rs#L319) | ported |
 

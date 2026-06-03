@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/osgi/extract.spec.ts`](../../lib/modules/manager/osgi/extract.spec.ts.md) | 14 | 14 | 0 | [`crates/renovate-core/src/extractors/osgi.rs`](../../../../../crates/renovate-core/src/extractors/osgi.rs) | ported |
+| [`lib/modules/manager/osgi/extract.spec.ts`](../../lib/modules/manager/osgi/extract.spec.ts.md) | 14 | 14 | 0 | [`crates/renovate-core/src/extractors/osgi.rs:165`](../../../../../crates/renovate-core/src/extractors/osgi.rs#L165) | ported |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/bitbucket-pipelines/extract.spec.ts`](../../lib/modules/manager/bitbucket-pipelines/extract.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/bitbucket_pipelines.rs`](../../../../../crates/renovate-core/src/extractors/bitbucket_pipelines.rs) | ported |
+| [`lib/modules/manager/bitbucket-pipelines/extract.spec.ts`](../../lib/modules/manager/bitbucket-pipelines/extract.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/bitbucket_pipelines.rs:233`](../../../../../crates/renovate-core/src/extractors/bitbucket_pipelines.rs#L233) | ported |
 

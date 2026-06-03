@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/github-tags/index.spec.ts`](../../lib/modules/datasource/github-tags/index.spec.ts.md) | 12 | 11 | 1 | [`crates/renovate-core/src/datasources/github_tags.rs`](../../../../../crates/renovate-core/src/datasources/github_tags.rs) | partial |
+| [`lib/modules/datasource/github-tags/index.spec.ts`](../../lib/modules/datasource/github-tags/index.spec.ts.md) | 12 | 11 | 1 | [`crates/renovate-core/src/datasources/github_tags.rs:469`](../../../../../crates/renovate-core/src/datasources/github_tags.rs#L469) | partial |
 

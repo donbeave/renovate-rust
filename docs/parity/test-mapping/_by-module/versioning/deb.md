@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/deb/index.spec.ts`](../../lib/modules/versioning/deb/index.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/versioning/deb.rs`](../../../../../crates/renovate-core/src/versioning/deb.rs) | ported |
+| [`lib/modules/versioning/deb/index.spec.ts`](../../lib/modules/versioning/deb/index.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/versioning/deb.rs:318`](../../../../../crates/renovate-core/src/versioning/deb.rs#L318) | ported |
 

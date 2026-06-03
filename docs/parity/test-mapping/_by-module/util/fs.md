@@ -6,6 +6,6 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/util/fs/index.spec.ts`](../../lib/util/fs/index.spec.ts.md) | 56 | 24 | 32 | [`crates/renovate-core/src/fs.rs`](../../../../../crates/renovate-core/src/fs.rs) | partial |
-| [`lib/util/fs/util.spec.ts`](../../lib/util/fs/util.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/fs.rs`](../../../../../crates/renovate-core/src/fs.rs) | ported |
+| [`lib/util/fs/index.spec.ts`](../../lib/util/fs/index.spec.ts.md) | 56 | 24 | 32 | [`crates/renovate-core/src/fs.rs:338`](../../../../../crates/renovate-core/src/fs.rs#L338) | partial |
+| [`lib/util/fs/util.spec.ts`](../../lib/util/fs/util.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/fs.rs:235`](../../../../../crates/renovate-core/src/fs.rs#L235) | ported |
 

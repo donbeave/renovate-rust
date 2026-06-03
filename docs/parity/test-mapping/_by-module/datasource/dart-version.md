@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/dart-version/index.spec.ts`](../../lib/modules/datasource/dart-version/index.spec.ts.md) | 4 | 2 | 2 | [`crates/renovate-core/src/datasources/dart_version.rs`](../../../../../crates/renovate-core/src/datasources/dart_version.rs) | partial |
+| [`lib/modules/datasource/dart-version/index.spec.ts`](../../lib/modules/datasource/dart-version/index.spec.ts.md) | 4 | 2 | 2 | [`crates/renovate-core/src/datasources/dart_version.rs:124`](../../../../../crates/renovate-core/src/datasources/dart_version.rs#L124) | partial |
 

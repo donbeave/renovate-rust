@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/azure-pipelines-tasks/index.spec.ts`](../../lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/datasources/azure_pipelines_tasks.rs`](../../../../../crates/renovate-core/src/datasources/azure_pipelines_tasks.rs) | ported |
+| [`lib/modules/datasource/azure-pipelines-tasks/index.spec.ts`](../../lib/modules/datasource/azure-pipelines-tasks/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/datasources/azure_pipelines_tasks.rs:263`](../../../../../crates/renovate-core/src/datasources/azure_pipelines_tasks.rs#L263) | ported |
 

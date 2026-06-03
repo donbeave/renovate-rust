@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/semver-coerced/index.spec.ts`](../../lib/modules/versioning/semver-coerced/index.spec.ts.md) | 53 | 48 | 5 | [`crates/renovate-core/src/versioning/semver_coerced.rs`](../../../../../crates/renovate-core/src/versioning/semver_coerced.rs) | partial |
+| [`lib/modules/versioning/semver-coerced/index.spec.ts`](../../lib/modules/versioning/semver-coerced/index.spec.ts.md) | 53 | 48 | 5 | [`crates/renovate-core/src/versioning/semver_coerced.rs:236`](../../../../../crates/renovate-core/src/versioning/semver_coerced.rs#L236) | partial |
 

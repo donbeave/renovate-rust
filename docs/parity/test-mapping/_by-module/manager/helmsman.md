@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/helmsman/extract.spec.ts`](../../lib/modules/manager/helmsman/extract.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/helmsman.rs`](../../../../../crates/renovate-core/src/extractors/helmsman.rs) | ported |
+| [`lib/modules/manager/helmsman/extract.spec.ts`](../../lib/modules/manager/helmsman/extract.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/helmsman.rs:279`](../../../../../crates/renovate-core/src/extractors/helmsman.rs#L279) | ported |
 

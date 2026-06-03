@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/hackage/index.spec.ts`](../../lib/modules/datasource/hackage/index.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/datasources/hackage.rs`](../../../../../crates/renovate-core/src/datasources/hackage.rs) | ported |
+| [`lib/modules/datasource/hackage/index.spec.ts`](../../lib/modules/datasource/hackage/index.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/datasources/hackage.rs:183`](../../../../../crates/renovate-core/src/datasources/hackage.rs#L183) | ported |
 

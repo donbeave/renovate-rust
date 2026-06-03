@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/pip_setup/extract.spec.ts`](../../lib/modules/manager/pip_setup/extract.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/extractors/pip_setup.rs`](../../../../../crates/renovate-core/src/extractors/pip_setup.rs) | ported |
+| [`lib/modules/manager/pip_setup/extract.spec.ts`](../../lib/modules/manager/pip_setup/extract.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/extractors/pip_setup.rs:124`](../../../../../crates/renovate-core/src/extractors/pip_setup.rs#L124) | ported |
 

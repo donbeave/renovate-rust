@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/cargo/index.spec.ts`](../../lib/modules/versioning/cargo/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/versioning/cargo.rs`](../../../../../crates/renovate-core/src/versioning/cargo.rs) | ported |
+| [`lib/modules/versioning/cargo/index.spec.ts`](../../lib/modules/versioning/cargo/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/versioning/cargo.rs:1049`](../../../../../crates/renovate-core/src/versioning/cargo.rs#L1049) | ported |
 

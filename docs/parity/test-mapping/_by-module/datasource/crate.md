@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/crate/index.spec.ts`](../../lib/modules/datasource/crate/index.spec.ts.md) | 27 | 22 | 5 | [`crates/renovate-core/src/datasources/crates_io.rs`](../../../../../crates/renovate-core/src/datasources/crates_io.rs) | partial |
+| [`lib/modules/datasource/crate/index.spec.ts`](../../lib/modules/datasource/crate/index.spec.ts.md) | 27 | 22 | 5 | [`crates/renovate-core/src/datasources/crates_io.rs:725`](../../../../../crates/renovate-core/src/datasources/crates_io.rs#L725) | partial |
 

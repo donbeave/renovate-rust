@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/helm/index.spec.ts`](../../lib/modules/versioning/helm/index.spec.ts.md) | 3 | 3 | 0 | [`crates/renovate-core/src/versioning/helm.rs`](../../../../../crates/renovate-core/src/versioning/helm.rs) | ported |
+| [`lib/modules/versioning/helm/index.spec.ts`](../../lib/modules/versioning/helm/index.spec.ts.md) | 3 | 3 | 0 | [`crates/renovate-core/src/versioning/helm.rs:160`](../../../../../crates/renovate-core/src/versioning/helm.rs#L160) | ported |
 

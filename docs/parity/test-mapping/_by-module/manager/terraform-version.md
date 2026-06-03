@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/terraform-version/extract.spec.ts`](../../lib/modules/manager/terraform-version/extract.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/extractors/version_file.rs`](../../../../../crates/renovate-core/src/extractors/version_file.rs) | ported |
+| [`lib/modules/manager/terraform-version/extract.spec.ts`](../../lib/modules/manager/terraform-version/extract.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/extractors/version_file.rs:219`](../../../../../crates/renovate-core/src/extractors/version_file.rs#L219) | ported |
 

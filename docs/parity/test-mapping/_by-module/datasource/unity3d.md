@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/unity3d/index.spec.ts`](../../lib/modules/datasource/unity3d/index.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/datasources/unity3d.rs`](../../../../../crates/renovate-core/src/datasources/unity3d.rs) | ported |
+| [`lib/modules/datasource/unity3d/index.spec.ts`](../../lib/modules/datasource/unity3d/index.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/datasources/unity3d.rs:305`](../../../../../crates/renovate-core/src/datasources/unity3d.rs#L305) | ported |
 

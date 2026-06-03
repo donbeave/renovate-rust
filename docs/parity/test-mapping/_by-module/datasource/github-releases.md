@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/github-releases/index.spec.ts`](../../lib/modules/datasource/github-releases/index.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/datasources/github_releases.rs`](../../../../../crates/renovate-core/src/datasources/github_releases.rs) | ported |
+| [`lib/modules/datasource/github-releases/index.spec.ts`](../../lib/modules/datasource/github-releases/index.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/datasources/github_releases.rs:372`](../../../../../crates/renovate-core/src/datasources/github_releases.rs#L372) | ported |
 
