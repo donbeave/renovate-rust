@@ -2,9 +2,9 @@
 
 [← `manager/nuget`](../../../../_by-module/manager/nuget.md) · [all modules](../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 32 | returns self for single project | ported | [`crates/renovate-core/src/extractors/nuget.rs:2842`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2842) |
 | 45 | returns self for two projects with no references | ported | [`crates/renovate-core/src/extractors/nuget.rs:2864`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2864) |

@@ -2,9 +2,9 @@
 
 [← `datasource/_common`](../../../_by-module/datasource/_common.md) · [all modules](../../../README.md)
 
-**10/32 ported** (22 pending) · status: partial
+**10/32 in-scope tests ported** (22 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | should handle manualchangelogurls | ported | [`crates/renovate-core/src/datasources.rs:959`](../../../../../../crates/renovate-core/src/datasources.rs#L959) |
 | 51 | should handle manualsourceurls | ported | [`crates/renovate-core/src/datasources.rs:982`](../../../../../../crates/renovate-core/src/datasources.rs#L982) |

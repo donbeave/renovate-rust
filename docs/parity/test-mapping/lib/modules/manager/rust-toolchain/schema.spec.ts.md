@@ -2,9 +2,9 @@
 
 [← `manager/rust-toolchain`](../../../../_by-module/manager/rust-toolchain.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | parses valid toml with channel | ported | [`crates/renovate-core/src/extractors/rust_toolchain.rs:98`](../../../../../../../crates/renovate-core/src/extractors/rust_toolchain.rs#L98) |
 | 21 | parses toml with additional fields | ported | [`crates/renovate-core/src/extractors/rust_toolchain.rs:107`](../../../../../../../crates/renovate-core/src/extractors/rust_toolchain.rs#L107) |

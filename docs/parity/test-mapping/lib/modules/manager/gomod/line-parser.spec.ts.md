@@ -2,9 +2,9 @@
 
 [← `manager/gomod`](../../../../_by-module/manager/gomod.md) · [all modules](../../../../README.md)
 
-**32/32 ported** (0 pending) · status: ported
+**32/32 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | should return null for invalid input | ported | [`crates/renovate-core/src/extractors/gomod.rs:1557`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L1557) |
 | 8 | should parse go version | ported | [`crates/renovate-core/src/extractors/gomod.rs:1563`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L1563) |

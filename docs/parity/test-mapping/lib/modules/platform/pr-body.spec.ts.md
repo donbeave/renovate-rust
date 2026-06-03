@@ -2,9 +2,9 @@
 
 [← `platform/_common`](../../../_by-module/platform/_common.md) · [all modules](../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns hash for empty inputs | ported | [`crates/renovate-core/src/platform/pr_body.rs:315`](../../../../../../crates/renovate-core/src/platform/pr_body.rs#L315) |
 | 29 | checks if we reach warning | ported | [`crates/renovate-core/src/platform/pr_body.rs:335`](../../../../../../crates/renovate-core/src/platform/pr_body.rs#L335) |

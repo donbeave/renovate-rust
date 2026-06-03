@@ -2,9 +2,9 @@
 
 [← `manager/poetry`](../../../../_by-module/manager/poetry.md) · [all modules](../../../../README.md)
 
-**34/34 ported** (0 pending) · status: ported
+**34/34 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 43 | returns null for empty | ported | [`crates/renovate-core/src/extractors/poetry.rs:1492`](../../../../../../../crates/renovate-core/src/extractors/poetry.rs#L1492) |
 | 47 | returns null for parsed file without poetry section | ported | [`crates/renovate-core/src/extractors/poetry.rs:1484`](../../../../../../../crates/renovate-core/src/extractors/poetry.rs#L1484) |

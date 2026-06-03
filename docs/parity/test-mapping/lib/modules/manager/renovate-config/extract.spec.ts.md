@@ -2,9 +2,9 @@
 
 [← `manager/renovate-config`](../../../../_by-module/manager/renovate-config.md) · [all modules](../../../../README.md)
 
-**18/20 ported** (2 pending) · status: partial
+**18/20 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns null for empty file | ported | [`crates/renovate-core/src/extractors/renovate_config_presets.rs:776`](../../../../../../../crates/renovate-core/src/extractors/renovate_config_presets.rs#L776) |
 | 11 | returns null for invalid file | ported | [`crates/renovate-core/src/extractors/renovate_config_presets.rs:782`](../../../../../../../crates/renovate-core/src/extractors/renovate_config_presets.rs#L782) |

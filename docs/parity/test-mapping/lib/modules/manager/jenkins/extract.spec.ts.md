@@ -2,9 +2,9 @@
 
 [← `manager/jenkins`](../../../../_by-module/manager/jenkins.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | returns empty list for an empty text file | ported | [`crates/renovate-core/src/extractors/jenkins.rs:294`](../../../../../../../crates/renovate-core/src/extractors/jenkins.rs#L294) |
 | 19 | returns empty list for an empty yaml file | ported | [`crates/renovate-core/src/extractors/jenkins.rs:288`](../../../../../../../crates/renovate-core/src/extractors/jenkins.rs#L288) |

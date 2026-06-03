@@ -2,10 +2,10 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 15/15 tests ported across 2 spec files.
+**Coverage:** 15/15 in-scope tests ported (opt-out=0) across 2 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/helm/index.spec.ts`](../../lib/modules/datasource/helm/index.spec.ts.md) | 14 | 14 | 0 | [`crates/renovate-core/src/datasources/helm.rs:485`](../../../../../crates/renovate-core/src/datasources/helm.rs#L485) | ported |
-| [`lib/modules/datasource/helm/schema.spec.ts`](../../lib/modules/datasource/helm/schema.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/datasources/helm.rs:439`](../../../../../crates/renovate-core/src/datasources/helm.rs#L439) | ported |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/modules/datasource/helm/index.spec.ts`](../../lib/modules/datasource/helm/index.spec.ts.md) | 14 | 14 | 0 | 0 | [`crates/renovate-core/src/datasources/helm.rs:485`](../../../../../crates/renovate-core/src/datasources/helm.rs#L485) | ported |
+| [`lib/modules/datasource/helm/schema.spec.ts`](../../lib/modules/datasource/helm/schema.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/datasources/helm.rs:439`](../../../../../crates/renovate-core/src/datasources/helm.rs#L439) | ported |
 

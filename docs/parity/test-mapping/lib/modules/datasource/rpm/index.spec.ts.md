@@ -2,9 +2,9 @@
 
 [← `datasource/rpm`](../../../../_by-module/datasource/rpm.md) · [all modules](../../../../README.md)
 
-**0/28 ported** (28 pending) · status: pending
+**0/28 in-scope tests ported** (28 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 43 | returns the correct primary.xml url | pending | — |
 | 64 | returns the correct primary.xml url when repomd.xml omits xml declaration | pending | — |

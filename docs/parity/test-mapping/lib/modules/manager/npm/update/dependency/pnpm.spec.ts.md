@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../README.md)
 
-**24/24 ported** (0 pending) · status: ported
+**24/24 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | returns null on invalid input | ported | [`crates/renovate-core/src/extractors/npm.rs:6454`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6454) |
 | 19 | handles implicit default catalog dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:6468`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6468) |

@@ -2,9 +2,9 @@
 
 [← `manager/terraform`](../../../../../_by-module/manager/terraform.md) · [all modules](../../../../../README.md)
 
-**26/26 ported** (0 pending) · status: ported
+**26/26 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 36 | returns artifact error | ported | [`crates/renovate-core/src/extractors/terraform.rs:3654`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3654) |
 | 56 | returns null if no .terraform.lock.hcl found | ported | [`crates/renovate-core/src/extractors/terraform.rs:3598`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3598) |

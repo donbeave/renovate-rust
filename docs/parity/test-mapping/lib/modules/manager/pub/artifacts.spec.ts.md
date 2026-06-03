@@ -2,9 +2,9 @@
 
 [← `manager/pub`](../../../../_by-module/manager/pub.md) · [all modules](../../../../README.md)
 
-**0/12 ported** (12 pending) · status: pending
+**0/12 in-scope tests ported** (12 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 62 | returns null if no pubspec.lock found | pending | — |
 | 66 | returns null if updateddeps is empty | pending | — |

@@ -2,9 +2,9 @@
 
 [← `manager/_common`](../../../_by-module/manager/_common.md) · [all modules](../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | applies github source for tag | ported | [`crates/renovate-core/src/util.rs:8651`](../../../../../../crates/renovate-core/src/util.rs#L8651) |
 | 30 | applies gitlab source for tag | ported | [`crates/renovate-core/src/util.rs:8661`](../../../../../../crates/renovate-core/src/util.rs#L8661) |

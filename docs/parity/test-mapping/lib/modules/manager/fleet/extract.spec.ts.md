@@ -2,9 +2,9 @@
 
 [← `manager/fleet`](../../../../_by-module/manager/fleet.md) · [all modules](../../../../README.md)
 
-**8/10 ported** (2 pending) · status: partial
+**8/10 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | should return null if empty content | ported | [`crates/renovate-core/src/extractors/fleet.rs:682`](../../../../../../../crates/renovate-core/src/extractors/fleet.rs#L682) |
 | 30 | should return null if a unknown manifest is supplied | ported | [`crates/renovate-core/src/extractors/fleet.rs:497`](../../../../../../../crates/renovate-core/src/extractors/fleet.rs#L497) |

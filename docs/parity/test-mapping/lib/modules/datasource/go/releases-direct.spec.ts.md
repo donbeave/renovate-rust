@@ -2,9 +2,9 @@
 
 [← `datasource/go`](../../../../_by-module/datasource/go.md) · [all modules](../../../../README.md)
 
-**0/15 ported** (15 pending) · status: pending
+**0/15 in-scope tests ported** (15 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | returns null for null getdatasource result | pending | — |
 | 34 | throws for getdatasource error | pending | — |

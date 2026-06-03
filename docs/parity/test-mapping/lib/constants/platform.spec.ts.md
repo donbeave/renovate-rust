@@ -2,9 +2,9 @@
 
 [← `constants`](../../_by-module/constants.md) · [all modules](../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | should be part of the gitea_api_using_host_types | ported | [`crates/renovate-core/src/platform_constants.rs:68`](../../../../../crates/renovate-core/src/platform_constants.rs#L68) |
 | 30 | should be part of the forgejo_api_using_host_types | ported | [`crates/renovate-core/src/platform_constants.rs:75`](../../../../../crates/renovate-core/src/platform_constants.rs#L75) |

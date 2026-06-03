@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**10/19 ported** (9 pending) · status: partial
+**10/19 in-scope tests ported** (9 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | should return empty array for empty string | ported | [`crates/renovate-core/src/util.rs:8771`](../../../../../crates/renovate-core/src/util.rs#L8771) |
 | 11 | should parse content with single document | ported | [`crates/renovate-core/src/util.rs:8780`](../../../../../crates/renovate-core/src/util.rs#L8780) |

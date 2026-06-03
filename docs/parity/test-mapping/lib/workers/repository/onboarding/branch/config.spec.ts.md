@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/9 ported** (9 pending) · status: pending
+**0/9 in-scope tests ported** (9 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 32 | returns the json stringified onboarding config | pending | — |
 | 48 | handles finding a preset in the same group level | pending | — |

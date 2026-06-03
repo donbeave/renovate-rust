@@ -2,9 +2,9 @@
 
 [← `manager/hermit`](../../../../_by-module/manager/hermit.md) · [all modules](../../../../README.md)
 
-**0/8 ported** (8 pending) · status: pending
+**0/8 in-scope tests ported** (8 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | should run hermit install for packages and return updated files | pending | — |
 | 140 | should uninstall old package for name replacement | pending | — |

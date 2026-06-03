@@ -2,9 +2,9 @@
 
 [← `datasource/rubygems`](../../../../_by-module/datasource/rubygems.md) · [all modules](../../../../README.md)
 
-**0/7 ported** (7 pending) · status: pending
+**0/7 in-scope tests ported** (7 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | fetches data | pending | — |
 | 100 | handles inconsistent data between versions and endpoint | pending | — |

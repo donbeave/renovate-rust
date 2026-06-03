@@ -2,9 +2,9 @@
 
 [← `datasource/git-tags`](../../../../_by-module/datasource/git-tags.md) · [all modules](../../../../README.md)
 
-**7/8 ported** (1 pending) · status: partial
+**7/8 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 38 | returns nil if response is wrong | ported | [`crates/renovate-core/src/datasources/git_tags.rs:84`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L84) |
 | 45 | returns nil if remote call throws exception | ported | [`crates/renovate-core/src/datasources/git_tags.rs:91`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L91) |

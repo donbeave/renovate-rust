@@ -2,9 +2,9 @@
 
 [← `manager/swift`](../../../../_by-module/manager/swift.md) · [all modules](../../../../README.md)
 
-**21/21 ported** (0 pending) · status: ported
+**21/21 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns null for empty content | ported | [`crates/renovate-core/src/extractors/spm.rs:772`](../../../../../../../crates/renovate-core/src/extractors/spm.rs#L772) |
 | 11 | returns null for content without dependencies | ported | [`crates/renovate-core/src/extractors/spm.rs:778`](../../../../../../../crates/renovate-core/src/extractors/spm.rs#L778) |

@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | returns from user constraints | ported | [`crates/renovate-core/src/extractors/npm_post_update/node_version.rs:112`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/node_version.rs#L112) |
 | 29 | returns .node-version value | ported | [`crates/renovate-core/src/extractors/npm_post_update/node_version.rs:131`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/node_version.rs#L131) |

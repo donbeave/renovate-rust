@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../_by-module/worker/global.md) · [all modules](../../../README.md)
 
-**19/19 ported** (0 pending) · status: ported
+**19/19 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | increments limited value | ported | [`crates/renovate-core/src/limits.rs:233`](../../../../../../crates/renovate-core/src/limits.rs#L233) |
 | 38 | defaults to unlimited | ported | [`crates/renovate-core/src/limits.rs:248`](../../../../../../crates/renovate-core/src/limits.rs#L248) |

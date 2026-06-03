@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/11 ported** (11 pending) · status: pending
+**0/11 in-scope tests ported** (11 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 31 | returns true if in silent mode | pending | — |
 | 36 | skips normal onboarding check if onboardingcache is valid | pending | — |

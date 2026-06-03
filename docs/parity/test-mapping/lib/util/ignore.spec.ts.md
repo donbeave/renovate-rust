@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**4/5 ported** (1 pending) · status: partial
+**4/5 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | returns true for "renovate:ignore" comments | ported | [`crates/renovate-core/src/string_match.rs:579`](../../../../../crates/renovate-core/src/string_match.rs#L579) |
 | 15 | returns false for comments not starting with "renovate:" or "pyup:" | ported | [`crates/renovate-core/src/string_match.rs:591`](../../../../../crates/renovate-core/src/string_match.rs#L591) |

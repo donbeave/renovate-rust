@@ -2,9 +2,9 @@
 
 [← `datasource/git-refs`](../../../../_by-module/datasource/git-refs.md) · [all modules](../../../../README.md)
 
-**8/11 ported** (3 pending) · status: partial
+**8/11 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 38 | returns nil if response is wrong | ported | [`crates/renovate-core/src/datasources/git_refs.rs:189`](../../../../../../../crates/renovate-core/src/datasources/git_refs.rs#L189) |
 | 48 | returns nil if response is malformed | ported | [`crates/renovate-core/src/datasources/git_refs.rs:197`](../../../../../../../crates/renovate-core/src/datasources/git_refs.rs#L197) |

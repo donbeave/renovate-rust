@@ -2,9 +2,9 @@
 
 [← `versioning/maven`](../../../../_by-module/versioning/maven.md) · [all modules](../../../../README.md)
 
-**11/13 ported** (2 pending) · status: partial
+**11/13 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | uses same function module export and api object | ported | [`crates/renovate-core/src/versioning/maven.rs:1272`](../../../../../../../crates/renovate-core/src/versioning/maven.rs#L1272) |
 | 11 | _(it.each / template — verify manually)_ | ? | — |

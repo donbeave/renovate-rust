@@ -2,9 +2,9 @@
 
 [← `util/http`](../../../_by-module/util/http.md) · [all modules](../../../README.md)
 
-**10/13 ported** (3 pending) · status: partial
+**10/13 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | works | ported | [`crates/renovate-core/src/http.rs:728`](../../../../../../crates/renovate-core/src/http.rs#L728) |
 | 34 | throws | ported | [`crates/renovate-core/src/http.rs:803`](../../../../../../crates/renovate-core/src/http.rs#L803) |

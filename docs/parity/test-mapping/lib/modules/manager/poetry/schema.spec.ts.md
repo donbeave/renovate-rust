@@ -2,9 +2,9 @@
 
 [← `manager/poetry`](../../../../_by-module/manager/poetry.md) · [all modules](../../../../README.md)
 
-**0/15 ported** (15 pending) · status: pending
+**0/15 in-scope tests ported** (15 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | parses project version | pending | — |
 | 13 | parses default values | pending | — |

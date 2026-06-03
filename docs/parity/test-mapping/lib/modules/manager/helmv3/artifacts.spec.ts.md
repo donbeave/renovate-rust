@@ -2,9 +2,9 @@
 
 [← `manager/helmv3`](../../../../_by-module/manager/helmv3.md) · [all modules](../../../../README.md)
 
-**0/24 ported** (24 pending) · status: pending
+**0/24 in-scope tests ported** (24 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 72 | returns null if no chart.lock found | pending | — |
 | 84 | returns null if updateddeps is empty | pending | — |

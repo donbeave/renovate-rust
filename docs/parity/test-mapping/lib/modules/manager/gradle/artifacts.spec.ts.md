@@ -2,9 +2,9 @@
 
 [← `manager/gradle`](../../../../_by-module/manager/gradle.md) · [all modules](../../../../README.md)
 
-**0/27 ported** (27 pending) · status: pending
+**0/27 in-scope tests ported** (27 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 91 | returns false when allowedunsafeexecutions is empty (as it not enabled by default option) | pending | — |
 | 102 | returns true when allowedunsafeexecutions includes `gradlewrapper` | pending | — |

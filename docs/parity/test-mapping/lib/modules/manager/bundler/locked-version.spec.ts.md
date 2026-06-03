@@ -2,9 +2,9 @@
 
 [← `manager/bundler`](../../../../_by-module/manager/bundler.md) · [all modules](../../../../README.md)
 
-**12/12 ported** (0 pending) · status: ported
+**12/12 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | parse rails gem lock file | ported | [`crates/renovate-core/src/extractors/bundler.rs:1036`](../../../../../../../crates/renovate-core/src/extractors/bundler.rs#L1036) |
 | 19 | parse webpacker gem lock file | ported | [`crates/renovate-core/src/extractors/bundler.rs:1044`](../../../../../../../crates/renovate-core/src/extractors/bundler.rs#L1044) |

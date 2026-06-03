@@ -2,9 +2,9 @@
 
 [← `manager/travis`](../../../../_by-module/manager/travis.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | returns empty if fails to parse | ported | [`crates/renovate-core/src/extractors/travis.rs:142`](../../../../../../../crates/renovate-core/src/extractors/travis.rs#L142) |
 | 18 | returns results | ported | [`crates/renovate-core/src/extractors/travis.rs:110`](../../../../../../../crates/renovate-core/src/extractors/travis.rs#L110) |

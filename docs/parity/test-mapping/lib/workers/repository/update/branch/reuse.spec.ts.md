@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/26 ported** (26 pending) · status: pending
+**0/26 in-scope tests ported** (26 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 28 | returns false if branch does not exist | pending | — |
 | 34 | returns true if no pr | pending | — |

@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**12/12 ported** (0 pending) · status: ported
+**12/12 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | supports docker username/password | ported | [`crates/renovate-core/src/config/host_rules_from_env.rs:261`](../../../../../../../../crates/renovate-core/src/config/host_rules_from_env.rs#L261) |
 | 19 | supports password-only | ported | [`crates/renovate-core/src/config/host_rules_from_env.rs:275`](../../../../../../../../crates/renovate-core/src/config/host_rules_from_env.rs#L275) |

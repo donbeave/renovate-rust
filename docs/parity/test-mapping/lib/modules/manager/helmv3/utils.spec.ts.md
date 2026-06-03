@@ -2,9 +2,9 @@
 
 [← `manager/helmv3`](../../../../_by-module/manager/helmv3.md) · [all modules](../../../../README.md)
 
-**9/11 ported** (2 pending) · status: partial
+**9/11 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | return alias with "alias:" | ported | [`crates/renovate-core/src/extractors/helm.rs:871`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L871) |
 | 14 | return alias with "@" | ported | [`crates/renovate-core/src/extractors/helm.rs:878`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L878) |

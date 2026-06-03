@@ -2,9 +2,9 @@
 
 [← `manager/fvm`](../../../../_by-module/manager/fvm.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns null for invalid json | ported | [`crates/renovate-core/src/extractors/fvm.rs:68`](../../../../../../../crates/renovate-core/src/extractors/fvm.rs#L68) |
 | 13 | returns null for empty flutter sdk version | ported | [`crates/renovate-core/src/extractors/fvm.rs:62`](../../../../../../../crates/renovate-core/src/extractors/fvm.rs#L62) |

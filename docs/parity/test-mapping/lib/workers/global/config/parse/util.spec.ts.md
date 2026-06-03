@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**1/1 ported** (0 pending) · status: ported
+**1/1 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | massages config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4932`](../../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4932) |
 

@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | creates semantic commit message | ported | [`crates/renovate-core/src/branch.rs:2168`](../../../../../../../../crates/renovate-core/src/branch.rs#L2168) |
 | 19 | creates semantic pr title | ported | [`crates/renovate-core/src/branch.rs:2177`](../../../../../../../../crates/renovate-core/src/branch.rs#L2177) |

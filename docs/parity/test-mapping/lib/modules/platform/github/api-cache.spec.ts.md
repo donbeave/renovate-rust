@@ -2,9 +2,9 @@
 
 [← `platform/github`](../../../../_by-module/platform/github.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | stores and retrieves items | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:277`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L277) |
 | 29 | maps items | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:299`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L299) |

@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**0/6 ported** (6 pending) · status: pending
+**0/6 in-scope tests ported** (6 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | should return an expression | pending | — |
 | 10 | should return an error | pending | — |

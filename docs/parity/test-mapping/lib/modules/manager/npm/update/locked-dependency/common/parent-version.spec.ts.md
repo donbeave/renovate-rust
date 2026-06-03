@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../../README.md)
 
-**0/5 ported** (5 pending) · status: pending
+**0/5 in-scope tests ported** (5 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | finds indirect dependency | pending | — |
 | 35 | finds removed dependencies | pending | — |

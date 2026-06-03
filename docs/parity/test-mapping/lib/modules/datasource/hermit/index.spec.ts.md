@@ -2,9 +2,9 @@
 
 [← `datasource/hermit`](../../../../_by-module/datasource/hermit.md) · [all modules](../../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | should return result from hermit list | ported | [`crates/renovate-core/src/datasources/hermit.rs:234`](../../../../../../../crates/renovate-core/src/datasources/hermit.rs#L234) |
 | 79 | should fail on no result found | ported | [`crates/renovate-core/src/datasources/hermit.rs:280`](../../../../../../../crates/renovate-core/src/datasources/hermit.rs#L280) |

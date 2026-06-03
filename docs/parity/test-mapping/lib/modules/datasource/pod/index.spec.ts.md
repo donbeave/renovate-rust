@@ -2,9 +2,9 @@
 
 [← `datasource/pod`](../../../../_by-module/datasource/pod.md) · [all modules](../../../../README.md)
 
-**2/19 ported** (17 pending) · status: partial
+**2/19 in-scope tests ported** (17 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | returns null for invalid inputs | pending | — |
 | 41 | returns null disabled host | pending | — |

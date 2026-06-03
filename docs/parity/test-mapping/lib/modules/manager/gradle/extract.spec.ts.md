@@ -2,9 +2,9 @@
 
 [← `manager/gradle`](../../../../_by-module/manager/gradle.md) · [all modules](../../../../README.md)
 
-**14/31 ported** (17 pending) · status: partial
+**14/31 in-scope tests ported** (17 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 37 | returns null | ported | [`crates/renovate-core/src/extractors/gradle.rs:2106`](../../../../../../../crates/renovate-core/src/extractors/gradle.rs#L2106) |
 | 52 | logs a warning in case parsegradle throws an exception | pending | — |

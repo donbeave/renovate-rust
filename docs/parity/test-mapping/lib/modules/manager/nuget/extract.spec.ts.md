@@ -2,9 +2,9 @@
 
 [← `manager/nuget`](../../../../_by-module/manager/nuget.md) · [all modules](../../../../README.md)
 
-**35/35 ported** (0 pending) · status: ported
+**35/35 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 28 | returns null for invalid csproj | ported | [`crates/renovate-core/src/extractors/nuget.rs:1845`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L1845) |
 | 43 | returns null if not xml | ported | [`crates/renovate-core/src/extractors/nuget.rs:1853`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L1853) |

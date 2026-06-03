@@ -2,9 +2,9 @@
 
 [← `datasource/gitea-releases`](../../../../_by-module/datasource/gitea-releases.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | returns tags from gitea.com | ported | [`crates/renovate-core/src/datasources/gitea_releases.rs:166`](../../../../../../../crates/renovate-core/src/datasources/gitea_releases.rs#L166) |
 | 100 | returns tags from codeberg.org | ported | [`crates/renovate-core/src/datasources/gitea_releases.rs:202`](../../../../../../../crates/renovate-core/src/datasources/gitea_releases.rs#L202) |

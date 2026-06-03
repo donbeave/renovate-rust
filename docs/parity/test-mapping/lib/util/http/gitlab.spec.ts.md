@@ -2,9 +2,9 @@
 
 [← `util/http`](../../../_by-module/util/http.md) · [all modules](../../../README.md)
 
-**0/14 ported** (14 pending) · status: pending
+**0/14 in-scope tests ported** (14 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 35 | paginates | pending | — |
 | 63 | paginates with gitlab_ignore_repo_url set | pending | — |

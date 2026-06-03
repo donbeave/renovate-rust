@@ -2,9 +2,9 @@
 
 [← `versioning/maven`](../../../../_by-module/versioning/maven.md) · [all modules](../../../../README.md)
 
-**8/10 ported** (2 pending) · status: partial
+**8/10 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | _(it.each / template — verify manually)_ | ? | — |
 | 106 | _(it.each / template — verify manually)_ | ? | — |

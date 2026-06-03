@@ -2,9 +2,9 @@
 
 [← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | detects false if unknown | ported | [`crates/renovate-core/src/branch.rs:2214`](../../../../../../crates/renovate-core/src/branch.rs#L2214) |
 | 31 | detects true if known | ported | [`crates/renovate-core/src/branch.rs:2222`](../../../../../../crates/renovate-core/src/branch.rs#L2222) |

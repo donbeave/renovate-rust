@@ -2,9 +2,9 @@
 
 [← `util/exec`](../../../_by-module/util/exec.md) · [all modules](../../../README.md)
 
-**9/20 ported** (11 pending) · status: partial
+**9/20 in-scope tests ported** (11 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | returns false if binarysource is not install | ported | [`crates/renovate-core/src/exec/containerbase.rs:320`](../../../../../../crates/renovate-core/src/exec/containerbase.rs#L320) |
 | 26 | returns false if not containerbase | ported | [`crates/renovate-core/src/exec/containerbase.rs:331`](../../../../../../crates/renovate-core/src/exec/containerbase.rs#L331) |

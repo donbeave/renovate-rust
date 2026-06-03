@@ -2,9 +2,9 @@
 
 [← `util/http`](../../../_by-module/util/http.md) · [all modules](../../../README.md)
 
-**0/12 ported** (12 pending) · status: pending
+**0/12 in-scope tests ported** (12 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | returns null if no limits are set | pending | — |
 | 19 | returns null if host does not match | pending | — |

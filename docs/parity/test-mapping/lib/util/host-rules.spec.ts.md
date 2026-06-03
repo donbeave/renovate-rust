@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**27/29 ported** (2 pending) · status: partial
+**27/29 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | throws if both domainname and hostname | ported | [`crates/renovate-core/src/util/host_rules.rs:426`](../../../../../crates/renovate-core/src/util/host_rules.rs#L426) |
 | 28 | throws if both domainname and baseurl | ported | [`crates/renovate-core/src/util/host_rules.rs:444`](../../../../../crates/renovate-core/src/util/host_rules.rs#L444) |

@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**1/1 ported** (0 pending) · status: ported
+**1/1 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | should migrate to ignorepaths | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6333`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6333) |
 

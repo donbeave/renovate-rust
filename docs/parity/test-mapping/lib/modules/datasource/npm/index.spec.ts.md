@@ -2,9 +2,9 @@
 
 [← `datasource/npm`](../../../../_by-module/datasource/npm.md) · [all modules](../../../../README.md)
 
-**24/24 ported** (0 pending) · status: ported
+**24/24 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 44 | should return null for no versions | ported | [`crates/renovate-core/src/datasources/npm.rs:770`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L770) |
 | 55 | should fetch package info from npm | ported | [`crates/renovate-core/src/datasources/npm.rs:789`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L789) |

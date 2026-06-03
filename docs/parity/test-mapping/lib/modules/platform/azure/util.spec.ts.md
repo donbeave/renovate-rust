@@ -2,9 +2,9 @@
 
 [← `platform/azure`](../../../../_by-module/platform/azure.md) · [all modules](../../../../README.md)
 
-**26/29 ported** (3 pending) · status: partial
+**26/29 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | should return undefined if null context passed | ported | [`crates/renovate-core/src/platform/azure_utils.rs:196`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L196) |
 | 21 | should combine valid genre and name with slash | ported | [`crates/renovate-core/src/platform/azure_utils.rs:204`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L204) |

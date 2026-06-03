@@ -2,9 +2,9 @@
 
 [← `manager/homebrew`](../../../../../_by-module/manager/homebrew.md) · [all modules](../../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
 | 9 | returns github handler for github type | ported | [`crates/renovate-core/src/extractors/homebrew.rs:1181`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L1181) |

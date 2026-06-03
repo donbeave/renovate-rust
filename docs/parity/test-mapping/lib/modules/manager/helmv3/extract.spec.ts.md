@@ -2,9 +2,9 @@
 
 [← `manager/helmv3`](../../../../_by-module/manager/helmv3.md) · [all modules](../../../../README.md)
 
-**12/12 ported** (0 pending) · status: ported
+**12/12 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | skips invalid registry urls | ported | [`crates/renovate-core/src/extractors/helm.rs:959`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L959) |
 | 40 | parses simple chart.yaml correctly | ported | [`crates/renovate-core/src/extractors/helm.rs:967`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L967) |

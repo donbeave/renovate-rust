@@ -2,9 +2,9 @@
 
 [← `manager/puppet`](../../../../_by-module/manager/puppet.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | puppetfile_github_tag | ported | [`crates/renovate-core/src/extractors/puppet.rs:551`](../../../../../../../crates/renovate-core/src/extractors/puppet.rs#L551) |
 | 31 | puppetfile_github_tag_single_line | ported | [`crates/renovate-core/src/extractors/puppet.rs:579`](../../../../../../../crates/renovate-core/src/extractors/puppet.rs#L579) |

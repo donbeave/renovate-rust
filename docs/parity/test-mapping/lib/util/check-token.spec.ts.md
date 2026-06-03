@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**30/34 ported** (4 pending) · status: partial
+**30/34 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | does nothing if data is empty | ported | [`crates/renovate-core/src/util.rs:6655`](../../../../../crates/renovate-core/src/util.rs#L6655) |
 | 33 | returns early if github token is found | ported | [`crates/renovate-core/src/util.rs:6662`](../../../../../crates/renovate-core/src/util.rs#L6662) |

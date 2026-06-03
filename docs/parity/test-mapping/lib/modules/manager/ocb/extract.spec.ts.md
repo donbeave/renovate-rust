@@ -2,9 +2,9 @@
 
 [← `manager/ocb`](../../../../_by-module/manager/ocb.md) · [all modules](../../../../README.md)
 
-**3/3 ported** (0 pending) · status: ported
+**3/3 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | run successfully with full example | ported | [`crates/renovate-core/src/extractors/ocb.rs:194`](../../../../../../../crates/renovate-core/src/extractors/ocb.rs#L194) |
 | 81 | return null for unknown content | ported | [`crates/renovate-core/src/extractors/ocb.rs:278`](../../../../../../../crates/renovate-core/src/extractors/ocb.rs#L278) |

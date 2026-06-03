@@ -2,9 +2,9 @@
 
 [← `platform/gitlab`](../../../../_by-module/platform/gitlab.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | should extract an owner rule from a line | ported | [`crates/renovate-core/src/platform/gitlab.rs:2487`](../../../../../../../crates/renovate-core/src/platform/gitlab.rs#L2487) |
 | 20 | should extract an owner rule from a line with no usernames | ported | [`crates/renovate-core/src/platform/gitlab.rs:2497`](../../../../../../../crates/renovate-core/src/platform/gitlab.rs#L2497) |

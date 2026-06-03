@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**1/1 ported** (0 pending) · status: ported
+**1/1 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | compresses strings | ported | [`crates/renovate-core/src/util.rs:12203`](../../../../../crates/renovate-core/src/util.rs#L12203) |
 

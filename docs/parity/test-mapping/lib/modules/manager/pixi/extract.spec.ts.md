@@ -2,9 +2,9 @@
 
 [← `manager/pixi`](../../../../_by-module/manager/pixi.md) · [all modules](../../../../README.md)
 
-**16/16 ported** (0 pending) · status: ported
+**16/16 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 145 | returns null for empty pyproject.toml | ported | [`crates/renovate-core/src/extractors/pixi.rs:426`](../../../../../../../crates/renovate-core/src/extractors/pixi.rs#L426) |
 | 151 | returns null for empty pixi.toml | ported | [`crates/renovate-core/src/extractors/pixi.rs:396`](../../../../../../../crates/renovate-core/src/extractors/pixi.rs#L396) |

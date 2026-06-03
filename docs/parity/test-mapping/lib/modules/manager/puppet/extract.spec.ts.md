@@ -2,9 +2,9 @@
 
 [← `manager/puppet`](../../../../_by-module/manager/puppet.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | returns null for empty puppetfile | ported | [`crates/renovate-core/src/extractors/puppet.rs:430`](../../../../../../../crates/renovate-core/src/extractors/puppet.rs#L430) |
 | 14 | extracts multiple modules from puppetfile without a forge | ported | [`crates/renovate-core/src/extractors/puppet.rs:338`](../../../../../../../crates/renovate-core/src/extractors/puppet.rs#L338) |

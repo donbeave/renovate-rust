@@ -20,6 +20,7 @@
 // This is a CLI: stdout is the report, stderr is diagnostics. Both intended.
 #![allow(clippy::print_stdout, clippy::print_stderr, clippy::str_to_string)]
 
+mod optout;
 mod paths;
 mod source;
 mod test_map;
@@ -104,9 +105,12 @@ fn main() -> ExitCode {
         Cmd::Check => check(&cli.upstream, &cli.rust),
         Cmd::Gaps { module } => {
             let specs = test_map::scan_specs(&cli.upstream);
+            let Some(optout) = load_optout() else {
+                return ExitCode::FAILURE;
+            };
             match test_map::scan_ported(&cli.rust) {
                 Ok(ported) => {
-                    test_map::gaps(&specs, &ported, &module);
+                    test_map::gaps(&specs, &ported, &optout, &module);
                     ExitCode::SUCCESS
                 }
                 Err(e) => {
@@ -135,6 +139,17 @@ fn main() -> ExitCode {
     }
 }
 
+/// Load the opt-out registry, or print the error and return `None`.
+fn load_optout() -> Option<optout::OptOut> {
+    match optout::OptOut::load(Path::new(optout::OPT_OUT_PATH)) {
+        Ok(o) => Some(o),
+        Err(e) => {
+            eprintln!("error loading opt-out registry: {e}");
+            None
+        }
+    }
+}
+
 /// Regenerate the split source-mapping tree. Returns false on error.
 fn write_source_pages(lib: &Path, rust: &Path) -> bool {
     let upstream = source::scan_upstream(lib);
@@ -145,7 +160,10 @@ fn write_source_pages(lib: &Path, rust: &Path) -> bool {
             return false;
         }
     };
-    match source::write_pages(Path::new(source::MAPPING_DIR), &upstream, &tags) {
+    let Some(optout) = load_optout() else {
+        return false;
+    };
+    match source::write_pages(Path::new(source::MAPPING_DIR), &upstream, &tags, &optout) {
         Ok(n) => {
             eprintln!("wrote {n} pages under {}", source::MAPPING_DIR);
             true
@@ -167,7 +185,10 @@ fn write_test_pages(upstream: &Path, rust: &Path) -> bool {
             return false;
         }
     };
-    match test_map::write_pages(Path::new(test_map::MAPPING_DIR), &specs, &ported) {
+    let Some(optout) = load_optout() else {
+        return false;
+    };
+    match test_map::write_pages(Path::new(test_map::MAPPING_DIR), &specs, &ported, &optout) {
         Ok(n) => {
             eprintln!("wrote {n} pages under {}", test_map::MAPPING_DIR);
             true

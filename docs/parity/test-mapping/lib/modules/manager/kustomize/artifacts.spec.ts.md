@@ -2,9 +2,9 @@
 
 [← `manager/kustomize`](../../../../_by-module/manager/kustomize.md) · [all modules](../../../../README.md)
 
-**0/19 ported** (19 pending) · status: pending
+**0/19 in-scope tests ported** (19 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 47 | returns null if newpackagefilecontent is not parseable | pending | — |
 | 70 | returns null if no helmchart dependencies found | pending | — |

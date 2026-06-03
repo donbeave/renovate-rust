@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**7/8 ported** (1 pending) · status: partial
+**7/8 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | returns filelist if no includepaths | ported | [`crates/renovate-core/src/managers.rs:2069`](../../../../../../../crates/renovate-core/src/managers.rs#L2069) |
 | 13 | returns exact matches | ported | [`crates/renovate-core/src/managers.rs:2077`](../../../../../../../crates/renovate-core/src/managers.rs#L2077) |

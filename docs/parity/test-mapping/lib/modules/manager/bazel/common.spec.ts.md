@@ -2,9 +2,9 @@
 
 [← `manager/bazel`](../../../../_by-module/manager/bazel.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns input for invalid | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:613`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L613) |
 | 11 | replaces whole rule | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:620`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L620) |

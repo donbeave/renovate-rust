@@ -2,9 +2,9 @@
 
 [← `versioning/semver-coerced`](../../../../_by-module/versioning/semver-coerced.md) · [all modules](../../../../README.md)
 
-**48/53 ported** (5 pending) · status: partial
+**48/53 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | should return true for strictly equal versions | ported | [`crates/renovate-core/src/versioning/semver_coerced.rs:236`](../../../../../../../crates/renovate-core/src/versioning/semver_coerced.rs#L236) |
 | 9 | should return true for non-strictly equal versions | ported | [`crates/renovate-core/src/versioning/semver_coerced.rs:242`](../../../../../../../crates/renovate-core/src/versioning/semver_coerced.rs#L242) |

@@ -2,9 +2,9 @@
 
 [← `manager/git-submodules`](../../../../_by-module/manager/git-submodules.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 46 | empty submodule returns null | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:339`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L339) |
 | 50 | currentvalue is unset when no branch is specified | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:345`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L345) |

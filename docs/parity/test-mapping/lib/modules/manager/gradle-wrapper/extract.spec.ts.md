@@ -2,9 +2,9 @@
 
 [← `manager/gradle-wrapper`](../../../../_by-module/manager/gradle-wrapper.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | returns null for property file without distributionurl | ported | [`crates/renovate-core/src/extractors/gradle_wrapper.rs:238`](../../../../../../../crates/renovate-core/src/extractors/gradle_wrapper.rs#L238) |
 | 28 | returns null for property file with unsupported distributionurl format | ported | [`crates/renovate-core/src/extractors/gradle_wrapper.rs:267`](../../../../../../../crates/renovate-core/src/extractors/gradle_wrapper.rs#L267) |

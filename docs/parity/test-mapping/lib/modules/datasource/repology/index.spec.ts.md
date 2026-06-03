@@ -2,9 +2,9 @@
 
 [← `datasource/repology`](../../../../_by-module/datasource/repology.md) · [all modules](../../../../README.md)
 
-**18/19 ported** (1 pending) · status: partial
+**18/19 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 69 | returns null for empty result | ported | [`crates/renovate-core/src/datasources/repology.rs:242`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L242) |
 | 88 | returns null for missing repository or package | ported | [`crates/renovate-core/src/datasources/repology.rs:272`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L272) |

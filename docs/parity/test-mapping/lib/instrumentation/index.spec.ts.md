@@ -2,9 +2,9 @@
 
 [← `instrumentation`](../../_by-module/instrumentation.md) · [all modules](../../README.md)
 
-**0/10 ported** (10 pending) · status: pending
+**0/10 in-scope tests ported** (10 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 40 | should use nooptraceprovider if not activated | pending | — |
 | 48 | activate console logger | pending | — |

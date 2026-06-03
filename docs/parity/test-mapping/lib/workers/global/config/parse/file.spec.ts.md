@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**8/15 ported** (7 pending) · status: partial
+**8/15 in-scope tests ported** (7 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | _(it.each / template — verify manually)_ | ? | — |
 | 61 | migrates | pending | — |

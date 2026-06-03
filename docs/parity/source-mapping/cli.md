@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 0/160 in-scope files mapped (full=0 partial=0 stub=0 pending=160 out-of-scope=0) across 15 modules.
+**Coverage:** 0/160 in-scope files mapped (full=0 partial=0 stub=0 pending=160 out-of-scope=0 opt-out=0) across 15 modules.
 
 ### `commander.d.ts`
 

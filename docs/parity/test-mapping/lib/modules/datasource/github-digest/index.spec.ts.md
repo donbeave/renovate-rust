@@ -2,9 +2,9 @@
 
 [← `datasource/github-digest`](../../../../_by-module/datasource/github-digest.md) · [all modules](../../../../README.md)
 
-**0/10 ported** (10 pending) · status: pending
+**0/10 in-scope tests ported** (10 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | returns tags and branches merged | pending | — |
 | 72 | prioritizes tags over branches with same name | pending | — |

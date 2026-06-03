@@ -2,9 +2,9 @@
 
 [← `manager/mix`](../../../../_by-module/manager/mix.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns same if not auto | ported | [`crates/renovate-core/src/extractors/mix.rs:447`](../../../../../../../crates/renovate-core/src/extractors/mix.rs#L447) |
 | 13 | widens complex bump | ported | [`crates/renovate-core/src/extractors/mix.rs:454`](../../../../../../../crates/renovate-core/src/extractors/mix.rs#L454) |

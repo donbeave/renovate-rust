@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**39/41 ported** (2 pending) · status: partial
+**39/41 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 38 | returns null if cannot parse | ported | [`crates/renovate-core/src/extractors/npm.rs:3916`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3916) |
 | 47 | catches invalid names | ported | [`crates/renovate-core/src/extractors/npm.rs:3922`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3922) |

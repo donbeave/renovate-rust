@@ -2,9 +2,9 @@
 
 [← `datasource/deno`](../../../../_by-module/datasource/deno.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | returns releases of standard library | ported | [`crates/renovate-core/src/datasources/deno.rs:151`](../../../../../../../crates/renovate-core/src/datasources/deno.rs#L151) |
 | 74 | throws error if module endpoint fails | ported | [`crates/renovate-core/src/datasources/deno.rs:244`](../../../../../../../crates/renovate-core/src/datasources/deno.rs#L244) |

@@ -2,9 +2,9 @@
 
 [← `datasource/maven`](../../../../_by-module/datasource/maven.md) · [all modules](../../../../README.md)
 
-**41/46 ported** (5 pending) · status: partial
+**41/46 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 123 | returns null when metadata is not found | ported | [`crates/renovate-core/src/datasources/maven.rs:1860`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1860) |
 | 136 | when using primary registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2356`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2356) |

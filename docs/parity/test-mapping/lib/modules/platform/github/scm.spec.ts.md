@@ -2,9 +2,9 @@
 
 [← `platform/github`](../../../../_by-module/platform/github.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | platformcommit = disabled => delegate to git | ported | [`crates/renovate-core/src/platform/scm.rs:161`](../../../../../../../crates/renovate-core/src/platform/scm.rs#L161) |
 | 39 | platformcommit = enabled => delegate to github | ported | [`crates/renovate-core/src/platform/scm.rs:171`](../../../../../../../crates/renovate-core/src/platform/scm.rs#L171) |

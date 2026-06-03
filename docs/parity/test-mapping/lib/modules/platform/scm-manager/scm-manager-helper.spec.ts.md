@@ -2,9 +2,9 @@
 
 [← `platform/scm-manager`](../../../../_by-module/platform/scm-manager.md) · [all modules](../../../../README.md)
 
-**0/17 ported** (17 pending) · status: pending
+**0/17 in-scope tests ported** (17 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 66 | should return the current user | pending | — |
 | 78 | _(it.each / template — verify manually)_ | ? | — |

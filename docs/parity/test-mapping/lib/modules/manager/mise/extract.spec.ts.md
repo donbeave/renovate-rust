@@ -2,9 +2,9 @@
 
 [← `manager/mise`](../../../../_by-module/manager/mise.md) · [all modules](../../../../README.md)
 
-**41/42 ported** (1 pending) · status: partial
+**41/42 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | returns null for empty | ported | [`crates/renovate-core/src/extractors/mise.rs:2152`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L2152) |
 | 18 | returns null for invalid toml | ported | [`crates/renovate-core/src/extractors/mise.rs:2202`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L2202) |

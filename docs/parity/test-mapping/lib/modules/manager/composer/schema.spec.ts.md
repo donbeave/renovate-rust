@@ -2,9 +2,9 @@
 
 [← `manager/composer`](../../../../_by-module/manager/composer.md) · [all modules](../../../../README.md)
 
-**3/7 ported** (4 pending) · status: partial
+**3/7 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | parses default values | ported | [`crates/renovate-core/src/extractors/composer.rs:1190`](../../../../../../../crates/renovate-core/src/extractors/composer.rs#L1190) |
 | 9 | parses repositories | ported | [`crates/renovate-core/src/extractors/composer.rs:1197`](../../../../../../../crates/renovate-core/src/extractors/composer.rs#L1197) |

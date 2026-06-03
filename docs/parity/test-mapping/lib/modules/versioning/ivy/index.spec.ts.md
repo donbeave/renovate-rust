@@ -2,9 +2,9 @@
 
 [← `versioning/ivy`](../../../../_by-module/versioning/ivy.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | _(it.each / template — verify manually)_ | ? | — |
 | 33 | _(it.each / template — verify manually)_ | ? | — |

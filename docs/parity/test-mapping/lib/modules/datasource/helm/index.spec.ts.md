@@ -2,9 +2,9 @@
 
 [← `datasource/helm`](../../../../_by-module/datasource/helm.md) · [all modules](../../../../README.md)
 
-**14/14 ported** (0 pending) · status: ported
+**14/14 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | returns null if packagename was not provided | ported | [`crates/renovate-core/src/datasources/helm.rs:485`](../../../../../../../crates/renovate-core/src/datasources/helm.rs#L485) |
 | 22 | returns null if repository was not provided | ported | [`crates/renovate-core/src/datasources/helm.rs:492`](../../../../../../../crates/renovate-core/src/datasources/helm.rs#L492) |

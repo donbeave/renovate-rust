@@ -2,9 +2,9 @@
 
 [← `manager/maven-wrapper`](../../../../_by-module/manager/maven-wrapper.md) · [all modules](../../../../README.md)
 
-**0/30 ported** (30 pending) · status: pending
+**0/30 in-scope tests ported** (30 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 63 | should not update if there is no dep with maven:wrapper | pending | — |
 | 75 | docker should use java 8 if version is lower then 2.0.0 | pending | — |

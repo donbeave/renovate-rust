@@ -2,9 +2,9 @@
 
 [← `manager/gomod`](../../../../_by-module/manager/gomod.md) · [all modules](../../../../README.md)
 
-**33/33 ported** (0 pending) · status: ported
+**33/33 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | replaces existing value | ported | [`crates/renovate-core/src/extractors/gomod.rs:2252`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L2252) |
 | 28 | replaces golang version update | ported | [`crates/renovate-core/src/extractors/gomod.rs:2261`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L2261) |

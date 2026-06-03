@@ -2,9 +2,9 @@
 
 [← `datasource/npm`](../../../../_by-module/datasource/npm.md) · [all modules](../../../../README.md)
 
-**15/24 ported** (9 pending) · status: partial
+**15/24 in-scope tests ported** (9 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 43 | _(it.each / template — verify manually)_ | ? | — |
 | 76 | _(it.each / template — verify manually)_ | ? | — |

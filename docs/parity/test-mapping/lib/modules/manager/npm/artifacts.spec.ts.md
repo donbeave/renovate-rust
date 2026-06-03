@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../_by-module/manager/npm.md) · [all modules](../../../../README.md)
 
-**10/23 ported** (13 pending) · status: partial
+**10/23 in-scope tests ported** (13 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 57 | returns null if no packagemanager updates present | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:178`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L178) |
 | 68 | returns null if currentvalue is undefined | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:327`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L327) |

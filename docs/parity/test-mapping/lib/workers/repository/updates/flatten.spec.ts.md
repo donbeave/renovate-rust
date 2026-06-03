@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**1/6 ported** (5 pending) · status: partial
+**1/6 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | sanitizes urls | ported | [`crates/renovate-core/src/branch.rs:1182`](../../../../../../../crates/renovate-core/src/branch.rs#L1182) |
 | 28 | flattens | pending | — |

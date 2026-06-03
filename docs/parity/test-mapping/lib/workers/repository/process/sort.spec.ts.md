@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | sorts based on updatetype and prtitle | ported | [`crates/renovate-core/src/branch.rs:2309`](../../../../../../../crates/renovate-core/src/branch.rs#L2309) |
 | 49 | sorts based on prpriority | ported | [`crates/renovate-core/src/branch.rs:2340`](../../../../../../../crates/renovate-core/src/branch.rs#L2340) |

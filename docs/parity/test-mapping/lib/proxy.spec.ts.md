@@ -2,9 +2,9 @@
 
 [← `cli/_root`](../_by-module/cli/_root.md) · [all modules](../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | respects http_proxy | ported | [`crates/renovate-core/src/proxy.rs:58`](../../../../crates/renovate-core/src/proxy.rs#L58) |
 | 23 | copies upper case http_proxy to http_proxy | ported | [`crates/renovate-core/src/proxy.rs:65`](../../../../crates/renovate-core/src/proxy.rs#L65) |

@@ -2,9 +2,9 @@
 
 [← `manager/github-actions`](../../../../_by-module/manager/github-actions.md) · [all modules](../../../../README.md)
 
-**0/17 ported** (17 pending) · status: pending
+**0/17 in-scope tests ported** (17 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 33 | proposes major update when using tagged major, if a major is available | pending | — |
 | 87 | switches major-only version to major.minor if no major is available | pending | — |

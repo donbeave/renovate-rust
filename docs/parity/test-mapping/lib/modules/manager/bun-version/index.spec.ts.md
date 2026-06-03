@@ -2,9 +2,9 @@
 
 [← `manager/bun-version`](../../../../_by-module/manager/bun-version.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns a result | ported | [`crates/renovate-core/src/extractors/bun_version.rs:42`](../../../../../../../crates/renovate-core/src/extractors/bun_version.rs#L42) |
 | 17 | handles empty files | ported | [`crates/renovate-core/src/extractors/bun_version.rs:55`](../../../../../../../crates/renovate-core/src/extractors/bun_version.rs#L55) |

@@ -2,9 +2,9 @@
 
 [← `config/decrypt`](../../../_by-module/config/decrypt.md) · [all modules](../../../README.md)
 
-**0/9 ported** (9 pending) · status: pending
+**0/9 in-scope tests ported** (9 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 40 | returns null for invalid key | pending | — |
 | 54 | works broken pgp message | pending | — |

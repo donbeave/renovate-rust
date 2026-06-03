@@ -2,9 +2,9 @@
 
 [← `util/package-rules`](../../../_by-module/util/package-rules.md) · [all modules](../../../README.md)
 
-**9/10 ported** (1 pending) · status: partial
+**9/10 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | returns true for null versioning | ported | [`crates/renovate-core/src/package_rule.rs:1712`](../../../../../../crates/renovate-core/src/package_rule.rs#L1712) |
 | 22 | return false on version exception | pending | — |

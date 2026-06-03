@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**5/16 ported** (11 pending) · status: partial
+**5/16 in-scope tests ported** (11 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 28 | detects errors in pnpm-workspace.yml file structure | pending | — |
 | 46 | detects errors when opening pnpm-workspace.yml file | pending | — |

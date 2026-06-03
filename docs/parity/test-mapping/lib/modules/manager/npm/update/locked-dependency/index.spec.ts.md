@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../README.md)
 
-**20/20 ported** (0 pending) · status: ported
+**20/20 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 45 | validates filename | ported | [`crates/renovate-core/src/extractors/npm.rs:5496`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5496) |
 | 54 | validates versions | ported | [`crates/renovate-core/src/extractors/npm.rs:5511`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5511) |

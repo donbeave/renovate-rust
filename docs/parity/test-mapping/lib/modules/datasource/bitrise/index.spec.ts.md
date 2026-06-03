@@ -2,9 +2,9 @@
 
 [← `datasource/bitrise`](../../../../_by-module/datasource/bitrise.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | returns null for unsupported registryurl | ported | [`crates/renovate-core/src/datasources/bitrise.rs:270`](../../../../../../../crates/renovate-core/src/datasources/bitrise.rs#L270) |
 | 19 | support github enterprise api url | ported | [`crates/renovate-core/src/datasources/bitrise.rs:284`](../../../../../../../crates/renovate-core/src/datasources/bitrise.rs#L284) |

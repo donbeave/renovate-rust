@@ -2,9 +2,9 @@
 
 [← `manager/gomod`](../../../../_by-module/manager/gomod.md) · [all modules](../../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 34 | detects extra dependencies | ported | [`crates/renovate-core/src/extractors/gomod.rs:1899`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L1899) |
 | 55 | generates a table | ported | [`crates/renovate-core/src/extractors/gomod.rs:1913`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L1913) |

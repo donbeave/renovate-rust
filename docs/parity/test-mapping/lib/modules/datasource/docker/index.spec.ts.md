@@ -2,9 +2,9 @@
 
 [← `datasource/docker`](../../../../_by-module/datasource/docker.md) · [all modules](../../../../README.md)
 
-**3/87 ported** (84 pending) · status: partial
+**3/87 in-scope tests ported** (84 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 59 | returns null if errored | pending | — |
 | 75 | returns null if empty header | pending | — |

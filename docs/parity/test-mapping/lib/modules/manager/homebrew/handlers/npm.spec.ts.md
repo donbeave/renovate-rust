@@ -2,9 +2,9 @@
 
 [← `manager/homebrew`](../../../../../_by-module/manager/homebrew.md) · [all modules](../../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | returns null for empty string | ported | [`crates/renovate-core/src/extractors/homebrew.rs:996`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L996) |
 | 12 | _(it.each / template — verify manually)_ | ? | — |

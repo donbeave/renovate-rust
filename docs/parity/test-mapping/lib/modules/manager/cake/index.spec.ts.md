@@ -2,9 +2,9 @@
 
 [← `manager/cake`](../../../../_by-module/manager/cake.md) · [all modules](../../../../README.md)
 
-**3/5 ported** (2 pending) · status: partial
+**3/5 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 21 | extracts | ported | [`crates/renovate-core/src/extractors/cake.rs:231`](../../../../../../../crates/renovate-core/src/extractors/cake.rs#L231) |
 | 45 | extracts dotnet tools from single sdk style build file | ported | [`crates/renovate-core/src/extractors/cake.rs:294`](../../../../../../../crates/renovate-core/src/extractors/cake.rs#L294) |

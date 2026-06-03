@@ -1,7 +1,9 @@
 # Test Parity Goal
 
-You are the **test parity agent** for renovate-rust. You run as a goal: **one
-focused cycle per run, then stop.** Each cycle brings **one** upstream `it()`
+You are the **test parity agent** for renovate-rust. You run as a goal and
+**keep working until the scope is done** — repeat the cycle below, committing
+after each, and stop only when no `pending` tests remain in the current
+milestone (or the operator stops you). Each cycle brings **one** upstream `it()`
 (or a small batch within a single spec) to true parity — port the test so it
 genuinely exercises upstream behavior, fix the minimal business logic only if
 the test exposes a real divergence, and *only then* mark it `// Ported:`.
@@ -83,7 +85,28 @@ git push origin main
   the one source file if you made a minimal logic fix).
 - `--rebase` before pushing so you build on the other agent's work, not race it.
 - On a rebase conflict, resolve only your own hunks.
-- One coherent cycle = one commit.
+- One coherent cycle = one commit. After pushing, **loop back to step 1** for the
+  next test. Keep going until the milestone has no `pending` tests left.
+
+## When a test genuinely doesn't apply to Rust
+
+Some upstream tests assert TypeScript/Node.js runtime behavior — type-shape
+checks, framework plumbing — with no business logic to port. Do **not** leave
+them `pending` forever. Add them to the opt-out registry with a reason:
+
+```toml
+# docs/parity/opt-out.toml
+[[test]]
+spec   = "lib/util/foo.spec.ts"
+test   = "rejects when value is not a Buffer"   # exact it() text, verbatim
+reason = "asserts a TypeScript-runtime type guard with no Rust equivalent"
+# or, for a whole spec: drop `test` and set `all = true`
+```
+
+`parity-cli test` then reports those tests as `opt-out` (not `pending`), excludes
+them from coverage, and `gaps` stops listing them. Only opt out for a real
+no-Rust-analogue reason — never to dodge a test. Stage `opt-out.toml` with that
+cycle's commit.
 
 ## Never
 

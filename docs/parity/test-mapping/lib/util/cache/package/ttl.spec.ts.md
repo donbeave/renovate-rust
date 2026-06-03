@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../_by-module/util/cache.md) · [all modules](../../../../README.md)
 
-**18/31 ported** (13 pending) · status: partial
+**18/31 in-scope tests ported** (13 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | returns undefined when no cachettloverride config exists | ported | [`crates/renovate-core/src/cache/package.rs:1328`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1328) |
 | 20 | returns undefined when cachettloverride is empty | pending | — |

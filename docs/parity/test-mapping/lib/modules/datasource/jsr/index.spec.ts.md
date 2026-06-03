@@ -2,9 +2,9 @@
 
 [← `datasource/jsr`](../../../../_by-module/datasource/jsr.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | should return null for invalid package name | ported | [`crates/renovate-core/src/datasources/jsr.rs:276`](../../../../../../../crates/renovate-core/src/datasources/jsr.rs#L276) |
 | 32 | should return null for no versions | ported | [`crates/renovate-core/src/datasources/jsr.rs:286`](../../../../../../../crates/renovate-core/src/datasources/jsr.rs#L286) |

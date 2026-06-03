@@ -2,9 +2,9 @@
 
 [← `versioning/conan`](../../../../_by-module/versioning/conan.md) · [all modules](../../../../README.md)
 
-**15/16 ported** (1 pending) · status: partial
+**15/16 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
 | 117 | _(it.each / template — verify manually)_ | ? | — |

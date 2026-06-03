@@ -2,9 +2,9 @@
 
 [← `manager/deno`](../../../../_by-module/manager/deno.md) · [all modules](../../../../README.md)
 
-**4/30 ported** (26 pending) · status: partial
+**4/30 in-scope tests ported** (26 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | empty lock file | pending | — |
 | 29 | not supported version | pending | — |

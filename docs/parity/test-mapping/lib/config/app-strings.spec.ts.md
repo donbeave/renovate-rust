@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | adds user configured filenames to list | ported | [`crates/renovate-core/src/repo_config.rs:7148`](../../../../../crates/renovate-core/src/repo_config.rs#L7148) |
 | 20 | expands brace patterns for json, jsonc and json5 filenames | ported | [`crates/renovate-core/src/repo_config.rs:7161`](../../../../../crates/renovate-core/src/repo_config.rs#L7161) |

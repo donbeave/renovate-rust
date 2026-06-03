@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | should migrate true to "enabled" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5200`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5200) |
 | 13 | should migrate false to "disabled" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5209`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5209) |

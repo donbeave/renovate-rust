@@ -2,9 +2,9 @@
 
 [← `datasource/typst`](../../../../_by-module/datasource/typst.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | processes real data | ported | [`crates/renovate-core/src/datasources/typst.rs:175`](../../../../../../../crates/renovate-core/src/datasources/typst.rs#L175) |
 | 74 | returns null for unsupported namespace | ported | [`crates/renovate-core/src/datasources/typst.rs:214`](../../../../../../../crates/renovate-core/src/datasources/typst.rs#L214) |

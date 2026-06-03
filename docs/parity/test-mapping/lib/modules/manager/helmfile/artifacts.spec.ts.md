@@ -2,9 +2,9 @@
 
 [← `manager/helmfile`](../../../../_by-module/manager/helmfile.md) · [all modules](../../../../README.md)
 
-**0/9 ported** (9 pending) · status: pending
+**0/9 in-scope tests ported** (9 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 84 | returns null if no helmfile.lock found | pending | — |
 | 96 | returns null if updateddeps is empty | pending | — |

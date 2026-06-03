@@ -2,9 +2,9 @@
 
 [← `manager/pep621`](../../../../../_by-module/manager/pep621.md) · [all modules](../../../../../README.md)
 
-**0/18 ported** (18 pending) · status: pending
+**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 38 | returns initial dependencies if there is no tool.uv section | pending | — |
 | 50 | includes uv dev dependencies if there is a tool.uv section | pending | — |

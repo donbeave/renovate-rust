@@ -2,9 +2,9 @@
 
 [← `datasource/bazel`](../../../../_by-module/datasource/bazel.md) · [all modules](../../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | throws for error | ported | [`crates/renovate-core/src/datasources/bazel.rs:192`](../../../../../../../crates/renovate-core/src/datasources/bazel.rs#L192) |
 | 33 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/bazel.rs:201`](../../../../../../../crates/renovate-core/src/datasources/bazel.rs#L201) |

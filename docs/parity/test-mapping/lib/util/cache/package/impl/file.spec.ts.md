@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../../_by-module/util/cache.md) · [all modules](../../../../../README.md)
 
-**9/17 ported** (8 pending) · status: partial
+**9/17 in-scope tests ported** (8 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | sets and gets | pending | — |
 | 34 | stores payload with value and expiry | pending | — |

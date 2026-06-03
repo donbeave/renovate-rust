@@ -2,9 +2,9 @@
 
 [← `manager/ant`](../../../../_by-module/manager/ant.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | parses key=value pairs | ported | [`crates/renovate-core/src/extractors/ant.rs:805`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L805) |
 | 28 | skips comments and blank lines | ported | [`crates/renovate-core/src/extractors/ant.rs:818`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L818) |

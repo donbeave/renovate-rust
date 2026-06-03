@@ -2,9 +2,9 @@
 
 [← `datasource/go`](../../../../_by-module/datasource/go.md) · [all modules](../../../../README.md)
 
-**1/28 ported** (27 pending) · status: partial
+**1/28 in-scope tests ported** (27 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | encodecase | ported | [`crates/renovate-core/src/datasources/gomod.rs:278`](../../../../../../../crates/renovate-core/src/datasources/gomod.rs#L278) |
 | 37 | listversions | pending | — |

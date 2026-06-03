@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../../README.md)
 
-**2/2 ported** (0 pending) · status: ported
+**2/2 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | finds unscoped | ported | [`crates/renovate-core/src/extractors/npm.rs:5102`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5102) |
 | 28 | finds scoped | ported | [`crates/renovate-core/src/extractors/npm.rs:5117`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5117) |

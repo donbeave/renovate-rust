@@ -2,9 +2,9 @@
 
 [← `datasource/hackage`](../../../../_by-module/datasource/hackage.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | should make release with given version | ported | [`crates/renovate-core/src/datasources/hackage.rs:183`](../../../../../../../crates/renovate-core/src/datasources/hackage.rs#L183) |
 | 17 | return null with empty registryurl | ported | [`crates/renovate-core/src/datasources/hackage.rs:243`](../../../../../../../crates/renovate-core/src/datasources/hackage.rs#L243) |

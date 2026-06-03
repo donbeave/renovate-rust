@@ -2,9 +2,9 @@
 
 [← `manager/xcodegen`](../../../../_by-module/manager/xcodegen.md) · [all modules](../../../../README.md)
 
-**24/24 ported** (0 pending) · status: ported
+**24/24 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns null for empty content | ported | [`crates/renovate-core/src/extractors/xcodegen.rs:529`](../../../../../../../crates/renovate-core/src/extractors/xcodegen.rs#L529) |
 | 11 | returns null for invalid yaml | ported | [`crates/renovate-core/src/extractors/xcodegen.rs:563`](../../../../../../../crates/renovate-core/src/extractors/xcodegen.rs#L563) |

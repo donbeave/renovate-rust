@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**3/3 ported** (0 pending) · status: ported
+**3/3 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 32 | works | ported | [`crates/renovate-core/src/util.rs:9375`](../../../../../crates/renovate-core/src/util.rs#L9375) |
 | 37 | works with gitlab | ported | [`crates/renovate-core/src/util.rs:9383`](../../../../../crates/renovate-core/src/util.rs#L9383) |

@@ -2,9 +2,9 @@
 
 [← `versioning/debian`](../../../../_by-module/versioning/debian.md) · [all modules](../../../../README.md)
 
-**4/5 ported** (1 pending) · status: partial
+**4/5 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | no rolling release data | pending | — |
 | 31 | _(it.each / template — verify manually)_ | ? | — |

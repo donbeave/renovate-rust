@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../_by-module/config/migrations.md) · [all modules](../../../README.md)
 
-**4/6 ported** (2 pending) · status: partial
+**4/6 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | should remove deprecated properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6900`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6900) |
 | 23 | should rename renamed properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6930`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6930) |

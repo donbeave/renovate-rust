@@ -2,9 +2,9 @@
 
 [← `manager/pip-compile`](../../../../_by-module/manager/pip-compile.md) · [all modules](../../../../README.md)
 
-**0/34 ported** (34 pending) · status: pending
+**0/34 in-scope tests ported** (34 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 85 | returns if no requirements.txt found | pending | — |
 | 101 | returns null if all unchanged | pending | — |

@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**6/7 ported** (1 pending) · status: partial
+**6/7 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | considers default registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3314`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3314) |
 | 17 | chooses matching scoped registry over default registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3324`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3324) |

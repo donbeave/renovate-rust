@@ -2,9 +2,9 @@
 
 [← `manager/gitlabci`](../../../../_by-module/manager/gitlabci.md) · [all modules](../../../../README.md)
 
-**13/14 ported** (1 pending) · status: partial
+**13/14 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | extracts from empty file | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:770`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L770) |
 | 28 | returns null for empty | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:1172`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L1172) |

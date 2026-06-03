@@ -2,9 +2,9 @@
 
 [← `datasource/devbox`](../../../../_by-module/datasource/devbox.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 29 | throws for error | ported | [`crates/renovate-core/src/datasources/devbox.rs:143`](../../../../../../../crates/renovate-core/src/datasources/devbox.rs#L143) |
 | 43 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/devbox.rs:159`](../../../../../../../crates/renovate-core/src/datasources/devbox.rs#L159) |

@@ -2,9 +2,9 @@
 
 [← `manager/ant`](../../../../_by-module/manager/ant.md) · [all modules](../../../../README.md)
 
-**49/49 ported** (0 pending) · status: ported
+**49/49 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | extracts inline version dependencies from build.xml | ported | [`crates/renovate-core/src/extractors/ant.rs:863`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L863) |
 | 37 | extracts multiple dependencies | ported | [`crates/renovate-core/src/extractors/ant.rs:1188`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L1188) |

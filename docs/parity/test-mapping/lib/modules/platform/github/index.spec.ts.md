@@ -2,9 +2,9 @@
 
 [← `platform/github`](../../../../_by-module/platform/github.md) · [all modules](../../../../README.md)
 
-**158/206 ported** (48 pending) · status: partial
+**158/206 in-scope tests ported** (48 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 64 | should throw if no token | ported | [`crates/renovate-core/src/platform/github.rs:5962`](../../../../../../../crates/renovate-core/src/platform/github.rs#L5962) |
 | 70 | should throw if endpoint is invalid url | ported | [`crates/renovate-core/src/platform/github.rs:5989`](../../../../../../../crates/renovate-core/src/platform/github.rs#L5989) |

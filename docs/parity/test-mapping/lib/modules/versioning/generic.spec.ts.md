@@ -2,9 +2,9 @@
 
 [← `versioning/_common`](../../../_by-module/versioning/_common.md) · [all modules](../../../README.md)
 
-**18/18 ported** (0 pending) · status: ported
+**18/18 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 54 | scheme keys | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:647`](../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L647) |
 | 82 | equals | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:668`](../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L668) |

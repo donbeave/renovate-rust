@@ -2,9 +2,9 @@
 
 [← `manager/cargo`](../../../../_by-module/manager/cargo.md) · [all modules](../../../../README.md)
 
-**32/32 ported** (0 pending) · status: ported
+**32/32 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 46 | returns null for invalid toml | ported | [`crates/renovate-core/src/extractors/cargo.rs:825`](../../../../../../../crates/renovate-core/src/extractors/cargo.rs#L825) |
 | 52 | returns null for empty dependencies | ported | [`crates/renovate-core/src/extractors/cargo.rs:679`](../../../../../../../crates/renovate-core/src/extractors/cargo.rs#L679) |

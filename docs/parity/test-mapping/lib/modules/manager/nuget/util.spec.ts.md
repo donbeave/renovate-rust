@@ -2,9 +2,9 @@
 
 [← `manager/nuget`](../../../../_by-module/manager/nuget.md) · [all modules](../../../../README.md)
 
-**18/18 ported** (0 pending) · status: ported
+**18/18 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | finds the version in a later property group | ported | [`crates/renovate-core/src/extractors/nuget.rs:2645`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2645) |
 | 28 | picks version over versionprefix | ported | [`crates/renovate-core/src/extractors/nuget.rs:2653`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2653) |

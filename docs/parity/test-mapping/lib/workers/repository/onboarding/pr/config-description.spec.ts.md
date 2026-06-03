@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | returns empty | ported | [`crates/renovate-core/src/onboarding.rs:34`](../../../../../../../../crates/renovate-core/src/onboarding.rs#L34) |
 | 22 | returns a full list | ported | [`crates/renovate-core/src/onboarding.rs:40`](../../../../../../../../crates/renovate-core/src/onboarding.rs#L40) |

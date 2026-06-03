@@ -2,9 +2,9 @@
 
 [← `datasource/pypi`](../../../../_by-module/datasource/pypi.md) · [all modules](../../../../README.md)
 
-**2/39 ported** (37 pending) · status: partial
+**2/39 in-scope tests ported** (37 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 90 | returns null for empty result | pending | — |
 | 100 | returns null for 404 | pending | — |

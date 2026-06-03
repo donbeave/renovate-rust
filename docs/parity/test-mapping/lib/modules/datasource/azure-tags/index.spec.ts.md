@@ -2,9 +2,9 @@
 
 [← `datasource/azure-tags`](../../../../_by-module/datasource/azure-tags.md) · [all modules](../../../../README.md)
 
-**2/5 ported** (3 pending) · status: partial
+**2/5 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | returns tags from azure devops | pending | — |
 | 47 | filters out undefined names | pending | — |

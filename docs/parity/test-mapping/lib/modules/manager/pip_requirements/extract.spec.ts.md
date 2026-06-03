@@ -2,9 +2,9 @@
 
 [← `manager/pip_requirements`](../../../../_by-module/manager/pip_requirements.md) · [all modules](../../../../README.md)
 
-**22/22 ported** (0 pending) · status: ported
+**22/22 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 39 | returns null for empty | ported | [`crates/renovate-core/src/extractors/pip.rs:572`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L572) |
 | 43 | extracts dependencies | ported | [`crates/renovate-core/src/extractors/pip.rs:416`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L416) |

@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | returns true for a valid packagemanager with name@version(e.g. pnpm@8.15.4) | ported | [`crates/renovate-core/src/extractors/npm.rs:6410`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6410) |
 | 31 | returns true for a valid range like npm@^9 | ported | [`crates/renovate-core/src/extractors/npm.rs:6416`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6416) |

@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../_by-module/util/cache.md) · [all modules](../../../../README.md)
 
-**8/9 ported** (1 pending) · status: partial
+**8/9 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | returns undefined if not initialized | ported | [`crates/renovate-core/src/cache/package.rs:810`](../../../../../../../crates/renovate-core/src/cache/package.rs#L810) |
 | 33 | delegates init to backend | ported | [`crates/renovate-core/src/cache/package.rs:818`](../../../../../../../crates/renovate-core/src/cache/package.rs#L818) |

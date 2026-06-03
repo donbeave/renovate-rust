@@ -2,9 +2,9 @@
 
 [← `manager/cargo`](../../../../_by-module/manager/cargo.md) · [all modules](../../../../README.md)
 
-**9/20 ported** (11 pending) · status: partial
+**9/20 in-scope tests ported** (11 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 44 | returns null if no cargo.lock found | ported | [`crates/renovate-core/src/extractors/cargo_artifact_runner.rs:374`](../../../../../../../crates/renovate-core/src/extractors/cargo_artifact_runner.rs#L374) |
 | 62 | returns null if updateddeps is empty | ported | [`crates/renovate-core/src/extractors/cargo_artifact_runner.rs:400`](../../../../../../../crates/renovate-core/src/extractors/cargo_artifact_runner.rs#L400) |

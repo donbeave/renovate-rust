@@ -2,9 +2,9 @@
 
 [← `manager/nix`](../../../../_by-module/manager/nix.md) · [all modules](../../../../README.md)
 
-**38/38 ported** (0 pending) · status: ported
+**38/38 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | returns null when no nixpkgs input exists | ported | [`crates/renovate-core/src/extractors/nix.rs:458`](../../../../../../../crates/renovate-core/src/extractors/nix.rs#L458) |
 | 25 | does not include nixpkgs input with no explicit ref | ported | [`crates/renovate-core/src/extractors/nix.rs:467`](../../../../../../../crates/renovate-core/src/extractors/nix.rs#L467) |

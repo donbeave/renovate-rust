@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/12 ported** (12 pending) · status: pending
+**0/12 in-scope tests ported** (12 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 31 | does nothing when migration disabled and checkbox unchecked | pending | — |
 | 50 | creates migration branch when migration disabled but checkbox checked | pending | — |

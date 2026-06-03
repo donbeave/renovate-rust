@@ -2,9 +2,9 @@
 
 [← `manager/cargo`](../../../../_by-module/manager/cargo.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | returns null for missing lock file | ported | [`crates/renovate-core/src/versioning/cargo.rs:1476`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1476) |
 | 23 | returns null for invalid lock file | ported | [`crates/renovate-core/src/versioning/cargo.rs:1482`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1482) |

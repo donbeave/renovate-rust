@@ -2,111 +2,111 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 250/1681 tests ported across 103 spec files.
+**Coverage:** 250/1681 in-scope tests ported (opt-out=0) across 103 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/workers/repository/changelog/index.spec.ts`](../../lib/workers/repository/changelog/index.spec.ts.md) | 2 | 0 | 2 | — | pending |
-| [`lib/workers/repository/common.spec.ts`](../../lib/workers/repository/common.spec.ts.md) | 6 | 6 | 0 | [`crates/renovate-core/src/branch.rs:2454`](../../../../../crates/renovate-core/src/branch.rs#L2454) | ported |
-| [`lib/workers/repository/config-migration/branch/commit-message.spec.ts`](../../lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/branch.rs:2168`](../../../../../crates/renovate-core/src/branch.rs#L2168) | ported |
-| [`lib/workers/repository/config-migration/branch/create.spec.ts`](../../lib/workers/repository/config-migration/branch/create.spec.ts.md) | 6 | 0 | 6 | — | pending |
-| [`lib/workers/repository/config-migration/branch/index.spec.ts`](../../lib/workers/repository/config-migration/branch/index.spec.ts.md) | 12 | 0 | 12 | — | pending |
-| [`lib/workers/repository/config-migration/branch/migrated-data.spec.ts`](../../lib/workers/repository/config-migration/branch/migrated-data.spec.ts.md) | 19 | 0 | 19 | — | pending |
-| [`lib/workers/repository/config-migration/branch/rebase.spec.ts`](../../lib/workers/repository/config-migration/branch/rebase.spec.ts.md) | 5 | 1 | 4 | [`crates/renovate-core/src/json_writer.rs:119`](../../../../../crates/renovate-core/src/json_writer.rs#L119) | partial |
-| [`lib/workers/repository/config-migration/index.spec.ts`](../../lib/workers/repository/config-migration/index.spec.ts.md) | 7 | 0 | 7 | — | pending |
-| [`lib/workers/repository/config-migration/pr/index.spec.ts`](../../lib/workers/repository/config-migration/pr/index.spec.ts.md) | 16 | 0 | 16 | — | pending |
-| [`lib/workers/repository/configured.spec.ts`](../../lib/workers/repository/configured.spec.ts.md) | 3 | 3 | 0 | [`crates/renovate-core/src/util.rs:8600`](../../../../../crates/renovate-core/src/util.rs#L8600) | ported |
-| [`lib/workers/repository/dependency-dashboard.spec.ts`](../../lib/workers/repository/dependency-dashboard.spec.ts.md) | 63 | 0 | 63 | — | pending |
-| [`lib/workers/repository/error-config.spec.ts`](../../lib/workers/repository/error-config.spec.ts.md) | 6 | 0 | 6 | — | pending |
-| [`lib/workers/repository/error.spec.ts`](../../lib/workers/repository/error.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/util.rs:10046`](../../../../../crates/renovate-core/src/util.rs#L10046) | ported |
-| [`lib/workers/repository/errors-warnings.spec.ts`](../../lib/workers/repository/errors-warnings.spec.ts.md) | 16 | 14 | 2 | [`crates/renovate-core/src/util.rs:11143`](../../../../../crates/renovate-core/src/util.rs#L11143) | partial |
-| [`lib/workers/repository/extract/extract-fingerprint-config.spec.ts`](../../lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) | 2 | 0 | 2 | — | pending |
-| [`lib/workers/repository/extract/file-match.spec.ts`](../../lib/workers/repository/extract/file-match.spec.ts.md) | 8 | 7 | 1 | [`crates/renovate-core/src/managers.rs:2069`](../../../../../crates/renovate-core/src/managers.rs#L2069) | partial |
-| [`lib/workers/repository/extract/index.spec.ts`](../../lib/workers/repository/extract/index.spec.ts.md) | 5 | 0 | 5 | — | pending |
-| [`lib/workers/repository/extract/manager-files.spec.ts`](../../lib/workers/repository/extract/manager-files.spec.ts.md) | 5 | 0 | 5 | — | pending |
-| [`lib/workers/repository/extract/supersedes.spec.ts`](../../lib/workers/repository/extract/supersedes.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/managers.rs:1968`](../../../../../crates/renovate-core/src/managers.rs#L1968) | ported |
-| [`lib/workers/repository/finalize/prune.spec.ts`](../../lib/workers/repository/finalize/prune.spec.ts.md) | 18 | 0 | 18 | — | pending |
-| [`lib/workers/repository/finalize/repository-statistics.spec.ts`](../../lib/workers/repository/finalize/repository-statistics.spec.ts.md) | 4 | 0 | 4 | — | pending |
-| [`lib/workers/repository/index.spec.ts`](../../lib/workers/repository/index.spec.ts.md) | 1 | 0 | 1 | — | pending |
-| [`lib/workers/repository/init/apis.spec.ts`](../../lib/workers/repository/init/apis.spec.ts.md) | 12 | 0 | 12 | — | pending |
-| [`lib/workers/repository/init/cache.spec.ts`](../../lib/workers/repository/init/cache.spec.ts.md) | 1 | 0 | 1 | — | pending |
-| [`lib/workers/repository/init/index.spec.ts`](../../lib/workers/repository/init/index.spec.ts.md) | 2 | 0 | 2 | — | pending |
-| [`lib/workers/repository/init/inherited.spec.ts`](../../lib/workers/repository/init/inherited.spec.ts.md) | 18 | 0 | 18 | — | pending |
-| [`lib/workers/repository/init/merge.spec.ts`](../../lib/workers/repository/init/merge.spec.ts.md) | 39 | 8 | 31 | [`crates/renovate-core/src/repo_config.rs:7348`](../../../../../crates/renovate-core/src/repo_config.rs#L7348) | partial |
-| [`lib/workers/repository/init/vulnerability.spec.ts`](../../lib/workers/repository/init/vulnerability.spec.ts.md) | 16 | 0 | 16 | — | pending |
-| [`lib/workers/repository/model/custom-commit-message.spec.ts`](../../lib/workers/repository/model/custom-commit-message.spec.ts.md) | 3 | 3 | 0 | [`crates/renovate-core/src/branch.rs:2141`](../../../../../crates/renovate-core/src/branch.rs#L2141) | ported |
-| [`lib/workers/repository/model/semantic-commit-message.spec.ts`](../../lib/workers/repository/model/semantic-commit-message.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/branch.rs:2075`](../../../../../crates/renovate-core/src/branch.rs#L2075) | ported |
-| [`lib/workers/repository/onboarding/branch/check.spec.ts`](../../lib/workers/repository/onboarding/branch/check.spec.ts.md) | 11 | 0 | 11 | — | pending |
-| [`lib/workers/repository/onboarding/branch/config.spec.ts`](../../lib/workers/repository/onboarding/branch/config.spec.ts.md) | 9 | 0 | 9 | — | pending |
-| [`lib/workers/repository/onboarding/branch/create.spec.ts`](../../lib/workers/repository/onboarding/branch/create.spec.ts.md) | 12 | 0 | 12 | — | pending |
-| [`lib/workers/repository/onboarding/branch/index.spec.ts`](../../lib/workers/repository/onboarding/branch/index.spec.ts.md) | 26 | 0 | 26 | — | pending |
-| [`lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts`](../../lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts.md) | 20 | 0 | 20 | — | pending |
-| [`lib/workers/repository/onboarding/branch/rebase.spec.ts`](../../lib/workers/repository/onboarding/branch/rebase.spec.ts.md) | 9 | 0 | 9 | — | pending |
-| [`lib/workers/repository/onboarding/pr/base-branch.spec.ts`](../../lib/workers/repository/onboarding/pr/base-branch.spec.ts.md) | 3 | 3 | 0 | [`crates/renovate-core/src/branch.rs:2250`](../../../../../crates/renovate-core/src/branch.rs#L2250) | ported |
-| [`lib/workers/repository/onboarding/pr/config-description.spec.ts`](../../lib/workers/repository/onboarding/pr/config-description.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/onboarding.rs:34`](../../../../../crates/renovate-core/src/onboarding.rs#L34) | ported |
-| [`lib/workers/repository/onboarding/pr/index.spec.ts`](../../lib/workers/repository/onboarding/pr/index.spec.ts.md) | 29 | 0 | 29 | — | pending |
-| [`lib/workers/repository/onboarding/pr/pr-list.spec.ts`](../../lib/workers/repository/onboarding/pr/pr-list.spec.ts.md) | 6 | 6 | 0 | [`crates/renovate-core/src/util.rs:11460`](../../../../../crates/renovate-core/src/util.rs#L11460) | ported |
-| [`lib/workers/repository/process/extract-update.spec.ts`](../../lib/workers/repository/process/extract-update.spec.ts.md) | 18 | 0 | 18 | — | pending |
-| [`lib/workers/repository/process/fetch.spec.ts`](../../lib/workers/repository/process/fetch.spec.ts.md) | 13 | 0 | 13 | — | pending |
-| [`lib/workers/repository/process/index.spec.ts`](../../lib/workers/repository/process/index.spec.ts.md) | 13 | 0 | 13 | — | pending |
-| [`lib/workers/repository/process/libyear.spec.ts`](../../lib/workers/repository/process/libyear.spec.ts.md) | 5 | 0 | 5 | — | pending |
-| [`lib/workers/repository/process/limits.spec.ts`](../../lib/workers/repository/process/limits.spec.ts.md) | 7 | 0 | 7 | — | pending |
-| [`lib/workers/repository/process/lookup/abandonment.spec.ts`](../../lib/workers/repository/process/lookup/abandonment.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/util.rs:8198`](../../../../../crates/renovate-core/src/util.rs#L8198) | ported |
-| [`lib/workers/repository/process/lookup/filter-checks.spec.ts`](../../lib/workers/repository/process/lookup/filter-checks.spec.ts.md) | 12 | 0 | 12 | — | pending |
-| [`lib/workers/repository/process/lookup/filter.spec.ts`](../../lib/workers/repository/process/lookup/filter.spec.ts.md) | 9 | 4 | 5 | [`crates/renovate-core/src/workers/repository/process/lookup/filter.rs:207`](../../../../../crates/renovate-core/src/workers/repository/process/lookup/filter.rs#L207) | partial |
-| [`lib/workers/repository/process/lookup/index.spec.ts`](../../lib/workers/repository/process/lookup/index.spec.ts.md) | 171 | 0 | 171 | — | pending |
-| [`lib/workers/repository/process/lookup/timestamps.spec.ts`](../../lib/workers/repository/process/lookup/timestamps.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/util.rs:11775`](../../../../../crates/renovate-core/src/util.rs#L11775) | ported |
-| [`lib/workers/repository/process/lookup/utils.spec.ts`](../../lib/workers/repository/process/lookup/utils.spec.ts.md) | 3 | 3 | 0 | [`crates/renovate-core/src/branch.rs:2276`](../../../../../crates/renovate-core/src/branch.rs#L2276) | ported |
-| [`lib/workers/repository/process/sort.spec.ts`](../../lib/workers/repository/process/sort.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/branch.rs:2309`](../../../../../crates/renovate-core/src/branch.rs#L2309) | ported |
-| [`lib/workers/repository/process/vulnerabilities.spec.ts`](../../lib/workers/repository/process/vulnerabilities.spec.ts.md) | 41 | 0 | 41 | — | pending |
-| [`lib/workers/repository/process/write.spec.ts`](../../lib/workers/repository/process/write.spec.ts.md) | 16 | 0 | 16 | — | pending |
-| [`lib/workers/repository/reconfigure/comment.spec.ts`](../../lib/workers/repository/reconfigure/comment.spec.ts.md) | 6 | 0 | 6 | — | pending |
-| [`lib/workers/repository/reconfigure/index.spec.ts`](../../lib/workers/repository/reconfigure/index.spec.ts.md) | 8 | 0 | 8 | — | pending |
-| [`lib/workers/repository/reconfigure/reconfigure-cache.spec.ts`](../../lib/workers/repository/reconfigure/reconfigure-cache.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/util.rs:8536`](../../../../../crates/renovate-core/src/util.rs#L8536) | ported |
-| [`lib/workers/repository/reconfigure/utils.spec.ts`](../../lib/workers/repository/reconfigure/utils.spec.ts.md) | 5 | 1 | 4 | [`crates/renovate-core/src/util.rs:8466`](../../../../../crates/renovate-core/src/util.rs#L8466) | partial |
-| [`lib/workers/repository/reconfigure/validate.spec.ts`](../../lib/workers/repository/reconfigure/validate.spec.ts.md) | 9 | 0 | 9 | — | pending |
-| [`lib/workers/repository/result.spec.ts`](../../lib/workers/repository/result.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/util.rs:5934`](../../../../../crates/renovate-core/src/util.rs#L5934) | ported |
-| [`lib/workers/repository/update/branch/artifacts.spec.ts`](../../lib/workers/repository/update/branch/artifacts.spec.ts.md) | 7 | 0 | 7 | — | pending |
-| [`lib/workers/repository/update/branch/auto-replace.spec.ts`](../../lib/workers/repository/update/branch/auto-replace.spec.ts.md) | 71 | 0 | 71 | — | pending |
-| [`lib/workers/repository/update/branch/automerge.spec.ts`](../../lib/workers/repository/update/branch/automerge.spec.ts.md) | 9 | 0 | 9 | — | pending |
-| [`lib/workers/repository/update/branch/bump-versions.spec.ts`](../../lib/workers/repository/update/branch/bump-versions.spec.ts.md) | 23 | 0 | 23 | — | pending |
-| [`lib/workers/repository/update/branch/check-existing.spec.ts`](../../lib/workers/repository/update/branch/check-existing.spec.ts.md) | 4 | 0 | 4 | — | pending |
-| [`lib/workers/repository/update/branch/commit.spec.ts`](../../lib/workers/repository/update/branch/commit.spec.ts.md) | 3 | 0 | 3 | — | pending |
-| [`lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts`](../../lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts.md) | 17 | 0 | 17 | — | pending |
-| [`lib/workers/repository/update/branch/get-updated.spec.ts`](../../lib/workers/repository/update/branch/get-updated.spec.ts.md) | 53 | 0 | 53 | — | pending |
-| [`lib/workers/repository/update/branch/index.spec.ts`](../../lib/workers/repository/update/branch/index.spec.ts.md) | 101 | 0 | 101 | — | pending |
-| [`lib/workers/repository/update/branch/lock-files/index.spec.ts`](../../lib/workers/repository/update/branch/lock-files/index.spec.ts.md) | 5 | 0 | 5 | — | pending |
-| [`lib/workers/repository/update/branch/reuse.spec.ts`](../../lib/workers/repository/update/branch/reuse.spec.ts.md) | 26 | 0 | 26 | — | pending |
-| [`lib/workers/repository/update/branch/schedule.spec.ts`](../../lib/workers/repository/update/branch/schedule.spec.ts.md) | 68 | 63 | 5 | [`crates/renovate-core/src/schedule.rs:973`](../../../../../crates/renovate-core/src/schedule.rs#L973) | partial |
-| [`lib/workers/repository/update/branch/status-checks.spec.ts`](../../lib/workers/repository/update/branch/status-checks.spec.ts.md) | 17 | 0 | 17 | — | pending |
-| [`lib/workers/repository/update/pr/automerge.spec.ts`](../../lib/workers/repository/update/pr/automerge.spec.ts.md) | 13 | 0 | 13 | — | pending |
-| [`lib/workers/repository/update/pr/body/changelogs.spec.ts`](../../lib/workers/repository/update/pr/body/changelogs.spec.ts.md) | 2 | 1 | 1 | [`crates/renovate-core/src/branch.rs:2488`](../../../../../crates/renovate-core/src/branch.rs#L2488) | partial |
-| [`lib/workers/repository/update/pr/body/config-description.spec.ts`](../../lib/workers/repository/update/pr/body/config-description.spec.ts.md) | 18 | 13 | 5 | [`crates/renovate-core/src/util.rs:10950`](../../../../../crates/renovate-core/src/util.rs#L10950) | partial |
-| [`lib/workers/repository/update/pr/body/controls.spec.ts`](../../lib/workers/repository/update/pr/body/controls.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/branch.rs:2470`](../../../../../crates/renovate-core/src/branch.rs#L2470) | ported |
-| [`lib/workers/repository/update/pr/body/footer.spec.ts`](../../lib/workers/repository/update/pr/body/footer.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/branch.rs:2542`](../../../../../crates/renovate-core/src/branch.rs#L2542) | ported |
-| [`lib/workers/repository/update/pr/body/header.spec.ts`](../../lib/workers/repository/update/pr/body/header.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/branch.rs:2554`](../../../../../crates/renovate-core/src/branch.rs#L2554) | ported |
-| [`lib/workers/repository/update/pr/body/index.spec.ts`](../../lib/workers/repository/update/pr/body/index.spec.ts.md) | 8 | 0 | 8 | — | pending |
-| [`lib/workers/repository/update/pr/body/notes.spec.ts`](../../lib/workers/repository/update/pr/body/notes.spec.ts.md) | 3 | 1 | 2 | [`crates/renovate-core/src/branch.rs:2528`](../../../../../crates/renovate-core/src/branch.rs#L2528) | partial |
-| [`lib/workers/repository/update/pr/body/updates-table.spec.ts`](../../lib/workers/repository/update/pr/body/updates-table.spec.ts.md) | 5 | 1 | 4 | [`crates/renovate-core/src/branch.rs:2494`](../../../../../crates/renovate-core/src/branch.rs#L2494) | partial |
-| [`lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts.md) | 14 | 0 | 14 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts.md) | 5 | 0 | 5 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/common.spec.ts`](../../lib/workers/repository/update/pr/changelog/common.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/branch.rs:2417`](../../../../../crates/renovate-core/src/branch.rs#L2417)<br>[`crates/renovate-core/src/util.rs:8740`](../../../../../crates/renovate-core/src/util.rs#L8740) | ported |
-| [`lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts.md) | 16 | 0 | 16 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/gitea/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/gitea/index.spec.ts.md) | 17 | 0 | 17 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/github/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/github/index.spec.ts.md) | 17 | 0 | 17 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts.md) | 16 | 0 | 16 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/index.spec.ts.md) | 18 | 0 | 18 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/release-notes.spec.ts`](../../lib/workers/repository/update/pr/changelog/release-notes.spec.ts.md) | 57 | 0 | 57 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/releases.spec.ts`](../../lib/workers/repository/update/pr/changelog/releases.spec.ts.md) | 6 | 0 | 6 | — | pending |
-| [`lib/workers/repository/update/pr/changelog/source.spec.ts`](../../lib/workers/repository/update/pr/changelog/source.spec.ts.md) | 6 | 4 | 2 | [`crates/renovate-core/src/util.rs:8162`](../../../../../crates/renovate-core/src/util.rs#L8162) | partial |
-| [`lib/workers/repository/update/pr/code-owners.spec.ts`](../../lib/workers/repository/update/pr/code-owners.spec.ts.md) | 31 | 0 | 31 | — | pending |
-| [`lib/workers/repository/update/pr/index.spec.ts`](../../lib/workers/repository/update/pr/index.spec.ts.md) | 53 | 0 | 53 | — | pending |
-| [`lib/workers/repository/update/pr/labels.spec.ts`](../../lib/workers/repository/update/pr/labels.spec.ts.md) | 20 | 13 | 7 | [`crates/renovate-core/src/util.rs:8274`](../../../../../crates/renovate-core/src/util.rs#L8274) | partial |
-| [`lib/workers/repository/update/pr/participants.spec.ts`](../../lib/workers/repository/update/pr/participants.spec.ts.md) | 18 | 0 | 18 | — | pending |
-| [`lib/workers/repository/update/pr/pr-cache.spec.ts`](../../lib/workers/repository/update/pr/pr-cache.spec.ts.md) | 6 | 0 | 6 | — | pending |
-| [`lib/workers/repository/update/pr/pr-reuse.spec.ts`](../../lib/workers/repository/update/pr/pr-reuse.spec.ts.md) | 8 | 0 | 8 | — | pending |
-| [`lib/workers/repository/updates/branch-name.spec.ts`](../../lib/workers/repository/updates/branch-name.spec.ts.md) | 27 | 27 | 0 | [`crates/renovate-core/src/branch.rs:1247`](../../../../../crates/renovate-core/src/branch.rs#L1247) | ported |
-| [`lib/workers/repository/updates/branchify.spec.ts`](../../lib/workers/repository/updates/branchify.spec.ts.md) | 6 | 0 | 6 | — | pending |
-| [`lib/workers/repository/updates/flatten.spec.ts`](../../lib/workers/repository/updates/flatten.spec.ts.md) | 6 | 1 | 5 | [`crates/renovate-core/src/branch.rs:1182`](../../../../../crates/renovate-core/src/branch.rs#L1182) | partial |
-| [`lib/workers/repository/updates/generate.spec.ts`](../../lib/workers/repository/updates/generate.spec.ts.md) | 58 | 0 | 58 | — | pending |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/workers/repository/changelog/index.spec.ts`](../../lib/workers/repository/changelog/index.spec.ts.md) | 2 | 0 | 2 | 0 | — | pending |
+| [`lib/workers/repository/common.spec.ts`](../../lib/workers/repository/common.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2454`](../../../../../crates/renovate-core/src/branch.rs#L2454) | ported |
+| [`lib/workers/repository/config-migration/branch/commit-message.spec.ts`](../../lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2168`](../../../../../crates/renovate-core/src/branch.rs#L2168) | ported |
+| [`lib/workers/repository/config-migration/branch/create.spec.ts`](../../lib/workers/repository/config-migration/branch/create.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
+| [`lib/workers/repository/config-migration/branch/index.spec.ts`](../../lib/workers/repository/config-migration/branch/index.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
+| [`lib/workers/repository/config-migration/branch/migrated-data.spec.ts`](../../lib/workers/repository/config-migration/branch/migrated-data.spec.ts.md) | 19 | 0 | 19 | 0 | — | pending |
+| [`lib/workers/repository/config-migration/branch/rebase.spec.ts`](../../lib/workers/repository/config-migration/branch/rebase.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/json_writer.rs:119`](../../../../../crates/renovate-core/src/json_writer.rs#L119) | partial |
+| [`lib/workers/repository/config-migration/index.spec.ts`](../../lib/workers/repository/config-migration/index.spec.ts.md) | 7 | 0 | 7 | 0 | — | pending |
+| [`lib/workers/repository/config-migration/pr/index.spec.ts`](../../lib/workers/repository/config-migration/pr/index.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
+| [`lib/workers/repository/configured.spec.ts`](../../lib/workers/repository/configured.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:8600`](../../../../../crates/renovate-core/src/util.rs#L8600) | ported |
+| [`lib/workers/repository/dependency-dashboard.spec.ts`](../../lib/workers/repository/dependency-dashboard.spec.ts.md) | 63 | 0 | 63 | 0 | — | pending |
+| [`lib/workers/repository/error-config.spec.ts`](../../lib/workers/repository/error-config.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
+| [`lib/workers/repository/error.spec.ts`](../../lib/workers/repository/error.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/util.rs:10046`](../../../../../crates/renovate-core/src/util.rs#L10046) | ported |
+| [`lib/workers/repository/errors-warnings.spec.ts`](../../lib/workers/repository/errors-warnings.spec.ts.md) | 16 | 14 | 2 | 0 | [`crates/renovate-core/src/util.rs:11143`](../../../../../crates/renovate-core/src/util.rs#L11143) | partial |
+| [`lib/workers/repository/extract/extract-fingerprint-config.spec.ts`](../../lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) | 2 | 0 | 2 | 0 | — | pending |
+| [`lib/workers/repository/extract/file-match.spec.ts`](../../lib/workers/repository/extract/file-match.spec.ts.md) | 8 | 7 | 1 | 0 | [`crates/renovate-core/src/managers.rs:2069`](../../../../../crates/renovate-core/src/managers.rs#L2069) | partial |
+| [`lib/workers/repository/extract/index.spec.ts`](../../lib/workers/repository/extract/index.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
+| [`lib/workers/repository/extract/manager-files.spec.ts`](../../lib/workers/repository/extract/manager-files.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
+| [`lib/workers/repository/extract/supersedes.spec.ts`](../../lib/workers/repository/extract/supersedes.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/managers.rs:1968`](../../../../../crates/renovate-core/src/managers.rs#L1968) | ported |
+| [`lib/workers/repository/finalize/prune.spec.ts`](../../lib/workers/repository/finalize/prune.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
+| [`lib/workers/repository/finalize/repository-statistics.spec.ts`](../../lib/workers/repository/finalize/repository-statistics.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
+| [`lib/workers/repository/index.spec.ts`](../../lib/workers/repository/index.spec.ts.md) | 1 | 0 | 1 | 0 | — | pending |
+| [`lib/workers/repository/init/apis.spec.ts`](../../lib/workers/repository/init/apis.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
+| [`lib/workers/repository/init/cache.spec.ts`](../../lib/workers/repository/init/cache.spec.ts.md) | 1 | 0 | 1 | 0 | — | pending |
+| [`lib/workers/repository/init/index.spec.ts`](../../lib/workers/repository/init/index.spec.ts.md) | 2 | 0 | 2 | 0 | — | pending |
+| [`lib/workers/repository/init/inherited.spec.ts`](../../lib/workers/repository/init/inherited.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
+| [`lib/workers/repository/init/merge.spec.ts`](../../lib/workers/repository/init/merge.spec.ts.md) | 39 | 8 | 31 | 0 | [`crates/renovate-core/src/repo_config.rs:7348`](../../../../../crates/renovate-core/src/repo_config.rs#L7348) | partial |
+| [`lib/workers/repository/init/vulnerability.spec.ts`](../../lib/workers/repository/init/vulnerability.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
+| [`lib/workers/repository/model/custom-commit-message.spec.ts`](../../lib/workers/repository/model/custom-commit-message.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2141`](../../../../../crates/renovate-core/src/branch.rs#L2141) | ported |
+| [`lib/workers/repository/model/semantic-commit-message.spec.ts`](../../lib/workers/repository/model/semantic-commit-message.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2075`](../../../../../crates/renovate-core/src/branch.rs#L2075) | ported |
+| [`lib/workers/repository/onboarding/branch/check.spec.ts`](../../lib/workers/repository/onboarding/branch/check.spec.ts.md) | 11 | 0 | 11 | 0 | — | pending |
+| [`lib/workers/repository/onboarding/branch/config.spec.ts`](../../lib/workers/repository/onboarding/branch/config.spec.ts.md) | 9 | 0 | 9 | 0 | — | pending |
+| [`lib/workers/repository/onboarding/branch/create.spec.ts`](../../lib/workers/repository/onboarding/branch/create.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
+| [`lib/workers/repository/onboarding/branch/index.spec.ts`](../../lib/workers/repository/onboarding/branch/index.spec.ts.md) | 26 | 0 | 26 | 0 | — | pending |
+| [`lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts`](../../lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts.md) | 20 | 0 | 20 | 0 | — | pending |
+| [`lib/workers/repository/onboarding/branch/rebase.spec.ts`](../../lib/workers/repository/onboarding/branch/rebase.spec.ts.md) | 9 | 0 | 9 | 0 | — | pending |
+| [`lib/workers/repository/onboarding/pr/base-branch.spec.ts`](../../lib/workers/repository/onboarding/pr/base-branch.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2250`](../../../../../crates/renovate-core/src/branch.rs#L2250) | ported |
+| [`lib/workers/repository/onboarding/pr/config-description.spec.ts`](../../lib/workers/repository/onboarding/pr/config-description.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/onboarding.rs:34`](../../../../../crates/renovate-core/src/onboarding.rs#L34) | ported |
+| [`lib/workers/repository/onboarding/pr/index.spec.ts`](../../lib/workers/repository/onboarding/pr/index.spec.ts.md) | 29 | 0 | 29 | 0 | — | pending |
+| [`lib/workers/repository/onboarding/pr/pr-list.spec.ts`](../../lib/workers/repository/onboarding/pr/pr-list.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/util.rs:11460`](../../../../../crates/renovate-core/src/util.rs#L11460) | ported |
+| [`lib/workers/repository/process/extract-update.spec.ts`](../../lib/workers/repository/process/extract-update.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
+| [`lib/workers/repository/process/fetch.spec.ts`](../../lib/workers/repository/process/fetch.spec.ts.md) | 13 | 0 | 13 | 0 | — | pending |
+| [`lib/workers/repository/process/index.spec.ts`](../../lib/workers/repository/process/index.spec.ts.md) | 13 | 0 | 13 | 0 | — | pending |
+| [`lib/workers/repository/process/libyear.spec.ts`](../../lib/workers/repository/process/libyear.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
+| [`lib/workers/repository/process/limits.spec.ts`](../../lib/workers/repository/process/limits.spec.ts.md) | 7 | 0 | 7 | 0 | — | pending |
+| [`lib/workers/repository/process/lookup/abandonment.spec.ts`](../../lib/workers/repository/process/lookup/abandonment.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/util.rs:8198`](../../../../../crates/renovate-core/src/util.rs#L8198) | ported |
+| [`lib/workers/repository/process/lookup/filter-checks.spec.ts`](../../lib/workers/repository/process/lookup/filter-checks.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
+| [`lib/workers/repository/process/lookup/filter.spec.ts`](../../lib/workers/repository/process/lookup/filter.spec.ts.md) | 9 | 4 | 5 | 0 | [`crates/renovate-core/src/workers/repository/process/lookup/filter.rs:207`](../../../../../crates/renovate-core/src/workers/repository/process/lookup/filter.rs#L207) | partial |
+| [`lib/workers/repository/process/lookup/index.spec.ts`](../../lib/workers/repository/process/lookup/index.spec.ts.md) | 171 | 0 | 171 | 0 | — | pending |
+| [`lib/workers/repository/process/lookup/timestamps.spec.ts`](../../lib/workers/repository/process/lookup/timestamps.spec.ts.md) | 10 | 10 | 0 | 0 | [`crates/renovate-core/src/util.rs:11775`](../../../../../crates/renovate-core/src/util.rs#L11775) | ported |
+| [`lib/workers/repository/process/lookup/utils.spec.ts`](../../lib/workers/repository/process/lookup/utils.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2276`](../../../../../crates/renovate-core/src/branch.rs#L2276) | ported |
+| [`lib/workers/repository/process/sort.spec.ts`](../../lib/workers/repository/process/sort.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2309`](../../../../../crates/renovate-core/src/branch.rs#L2309) | ported |
+| [`lib/workers/repository/process/vulnerabilities.spec.ts`](../../lib/workers/repository/process/vulnerabilities.spec.ts.md) | 41 | 0 | 41 | 0 | — | pending |
+| [`lib/workers/repository/process/write.spec.ts`](../../lib/workers/repository/process/write.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
+| [`lib/workers/repository/reconfigure/comment.spec.ts`](../../lib/workers/repository/reconfigure/comment.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
+| [`lib/workers/repository/reconfigure/index.spec.ts`](../../lib/workers/repository/reconfigure/index.spec.ts.md) | 8 | 0 | 8 | 0 | — | pending |
+| [`lib/workers/repository/reconfigure/reconfigure-cache.spec.ts`](../../lib/workers/repository/reconfigure/reconfigure-cache.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/util.rs:8536`](../../../../../crates/renovate-core/src/util.rs#L8536) | ported |
+| [`lib/workers/repository/reconfigure/utils.spec.ts`](../../lib/workers/repository/reconfigure/utils.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/util.rs:8466`](../../../../../crates/renovate-core/src/util.rs#L8466) | partial |
+| [`lib/workers/repository/reconfigure/validate.spec.ts`](../../lib/workers/repository/reconfigure/validate.spec.ts.md) | 9 | 0 | 9 | 0 | — | pending |
+| [`lib/workers/repository/result.spec.ts`](../../lib/workers/repository/result.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/util.rs:5934`](../../../../../crates/renovate-core/src/util.rs#L5934) | ported |
+| [`lib/workers/repository/update/branch/artifacts.spec.ts`](../../lib/workers/repository/update/branch/artifacts.spec.ts.md) | 7 | 0 | 7 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/auto-replace.spec.ts`](../../lib/workers/repository/update/branch/auto-replace.spec.ts.md) | 71 | 0 | 71 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/automerge.spec.ts`](../../lib/workers/repository/update/branch/automerge.spec.ts.md) | 9 | 0 | 9 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/bump-versions.spec.ts`](../../lib/workers/repository/update/branch/bump-versions.spec.ts.md) | 23 | 0 | 23 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/check-existing.spec.ts`](../../lib/workers/repository/update/branch/check-existing.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/commit.spec.ts`](../../lib/workers/repository/update/branch/commit.spec.ts.md) | 3 | 0 | 3 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts`](../../lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts.md) | 17 | 0 | 17 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/get-updated.spec.ts`](../../lib/workers/repository/update/branch/get-updated.spec.ts.md) | 53 | 0 | 53 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/index.spec.ts`](../../lib/workers/repository/update/branch/index.spec.ts.md) | 101 | 0 | 101 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/lock-files/index.spec.ts`](../../lib/workers/repository/update/branch/lock-files/index.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/reuse.spec.ts`](../../lib/workers/repository/update/branch/reuse.spec.ts.md) | 26 | 0 | 26 | 0 | — | pending |
+| [`lib/workers/repository/update/branch/schedule.spec.ts`](../../lib/workers/repository/update/branch/schedule.spec.ts.md) | 68 | 63 | 5 | 0 | [`crates/renovate-core/src/schedule.rs:973`](../../../../../crates/renovate-core/src/schedule.rs#L973) | partial |
+| [`lib/workers/repository/update/branch/status-checks.spec.ts`](../../lib/workers/repository/update/branch/status-checks.spec.ts.md) | 17 | 0 | 17 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/automerge.spec.ts`](../../lib/workers/repository/update/pr/automerge.spec.ts.md) | 13 | 0 | 13 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/body/changelogs.spec.ts`](../../lib/workers/repository/update/pr/body/changelogs.spec.ts.md) | 2 | 1 | 1 | 0 | [`crates/renovate-core/src/branch.rs:2488`](../../../../../crates/renovate-core/src/branch.rs#L2488) | partial |
+| [`lib/workers/repository/update/pr/body/config-description.spec.ts`](../../lib/workers/repository/update/pr/body/config-description.spec.ts.md) | 18 | 13 | 5 | 0 | [`crates/renovate-core/src/util.rs:10950`](../../../../../crates/renovate-core/src/util.rs#L10950) | partial |
+| [`lib/workers/repository/update/pr/body/controls.spec.ts`](../../lib/workers/repository/update/pr/body/controls.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2470`](../../../../../crates/renovate-core/src/branch.rs#L2470) | ported |
+| [`lib/workers/repository/update/pr/body/footer.spec.ts`](../../lib/workers/repository/update/pr/body/footer.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2542`](../../../../../crates/renovate-core/src/branch.rs#L2542) | ported |
+| [`lib/workers/repository/update/pr/body/header.spec.ts`](../../lib/workers/repository/update/pr/body/header.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2554`](../../../../../crates/renovate-core/src/branch.rs#L2554) | ported |
+| [`lib/workers/repository/update/pr/body/index.spec.ts`](../../lib/workers/repository/update/pr/body/index.spec.ts.md) | 8 | 0 | 8 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/body/notes.spec.ts`](../../lib/workers/repository/update/pr/body/notes.spec.ts.md) | 3 | 1 | 2 | 0 | [`crates/renovate-core/src/branch.rs:2528`](../../../../../crates/renovate-core/src/branch.rs#L2528) | partial |
+| [`lib/workers/repository/update/pr/body/updates-table.spec.ts`](../../lib/workers/repository/update/pr/body/updates-table.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/branch.rs:2494`](../../../../../crates/renovate-core/src/branch.rs#L2494) | partial |
+| [`lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts.md) | 14 | 0 | 14 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/common.spec.ts`](../../lib/workers/repository/update/pr/changelog/common.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2417`](../../../../../crates/renovate-core/src/branch.rs#L2417)<br>[`crates/renovate-core/src/util.rs:8740`](../../../../../crates/renovate-core/src/util.rs#L8740) | ported |
+| [`lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/gitea/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/gitea/index.spec.ts.md) | 17 | 0 | 17 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/github/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/github/index.spec.ts.md) | 17 | 0 | 17 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/index.spec.ts`](../../lib/workers/repository/update/pr/changelog/index.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/release-notes.spec.ts`](../../lib/workers/repository/update/pr/changelog/release-notes.spec.ts.md) | 57 | 0 | 57 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/releases.spec.ts`](../../lib/workers/repository/update/pr/changelog/releases.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/changelog/source.spec.ts`](../../lib/workers/repository/update/pr/changelog/source.spec.ts.md) | 6 | 4 | 2 | 0 | [`crates/renovate-core/src/util.rs:8162`](../../../../../crates/renovate-core/src/util.rs#L8162) | partial |
+| [`lib/workers/repository/update/pr/code-owners.spec.ts`](../../lib/workers/repository/update/pr/code-owners.spec.ts.md) | 31 | 0 | 31 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/index.spec.ts`](../../lib/workers/repository/update/pr/index.spec.ts.md) | 53 | 0 | 53 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/labels.spec.ts`](../../lib/workers/repository/update/pr/labels.spec.ts.md) | 20 | 13 | 7 | 0 | [`crates/renovate-core/src/util.rs:8274`](../../../../../crates/renovate-core/src/util.rs#L8274) | partial |
+| [`lib/workers/repository/update/pr/participants.spec.ts`](../../lib/workers/repository/update/pr/participants.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/pr-cache.spec.ts`](../../lib/workers/repository/update/pr/pr-cache.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
+| [`lib/workers/repository/update/pr/pr-reuse.spec.ts`](../../lib/workers/repository/update/pr/pr-reuse.spec.ts.md) | 8 | 0 | 8 | 0 | — | pending |
+| [`lib/workers/repository/updates/branch-name.spec.ts`](../../lib/workers/repository/updates/branch-name.spec.ts.md) | 27 | 27 | 0 | 0 | [`crates/renovate-core/src/branch.rs:1247`](../../../../../crates/renovate-core/src/branch.rs#L1247) | ported |
+| [`lib/workers/repository/updates/branchify.spec.ts`](../../lib/workers/repository/updates/branchify.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
+| [`lib/workers/repository/updates/flatten.spec.ts`](../../lib/workers/repository/updates/flatten.spec.ts.md) | 6 | 1 | 5 | 0 | [`crates/renovate-core/src/branch.rs:1182`](../../../../../crates/renovate-core/src/branch.rs#L1182) | partial |
+| [`lib/workers/repository/updates/generate.spec.ts`](../../lib/workers/repository/updates/generate.spec.ts.md) | 58 | 0 | 58 | 0 | — | pending |
 

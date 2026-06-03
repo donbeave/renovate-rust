@@ -2,9 +2,9 @@
 
 [← `manager/bundler`](../../../../_by-module/manager/bundler.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 36 | returns null for empty | ported | [`crates/renovate-core/src/extractors/bundler.rs:1146`](../../../../../../../crates/renovate-core/src/extractors/bundler.rs#L1146) |
 | 40 | parses rails gemfile | ported | [`crates/renovate-core/src/extractors/bundler.rs:1152`](../../../../../../../crates/renovate-core/src/extractors/bundler.rs#L1152) |

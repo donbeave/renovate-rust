@@ -2,9 +2,9 @@
 
 [← `datasource/orb`](../../../../_by-module/datasource/orb.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 32 | returns null for empty result | ported | [`crates/renovate-core/src/datasources/orb.rs:263`](../../../../../../../crates/renovate-core/src/datasources/orb.rs#L263) |
 | 42 | returns null for missing orb | ported | [`crates/renovate-core/src/datasources/orb.rs:284`](../../../../../../../crates/renovate-core/src/datasources/orb.rs#L284) |

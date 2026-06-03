@@ -2,9 +2,9 @@
 
 [← `manager/sbt`](../../../../_by-module/manager/sbt.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | places build.sbt first | ported | [`crates/renovate-core/src/extractors/sbt.rs:1235`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1235) |
 | 20 | does not normalize prior to 2.10 | ported | [`crates/renovate-core/src/extractors/sbt.rs:1253`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1253) |

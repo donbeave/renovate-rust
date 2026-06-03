@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**3/3 ported** (0 pending) · status: ported
+**3/3 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | returns empty if no basebranch | ported | [`crates/renovate-core/src/branch.rs:2250`](../../../../../../../../crates/renovate-core/src/branch.rs#L2250) |
 | 18 | describes basebranch | ported | [`crates/renovate-core/src/branch.rs:2256`](../../../../../../../../crates/renovate-core/src/branch.rs#L2256) |

@@ -2,9 +2,9 @@
 
 [← `manager/bundler`](../../../../_by-module/manager/bundler.md) · [all modules](../../../../README.md)
 
-**9/20 ported** (11 pending) · status: partial
+**9/20 in-scope tests ported** (11 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 66 | returns null by default | ported | [`crates/renovate-core/src/extractors/bundler_artifact_runner.rs:251`](../../../../../../../crates/renovate-core/src/extractors/bundler_artifact_runner.rs#L251) |
 | 77 | returns null if gemfile.lock was not changed | ported | [`crates/renovate-core/src/extractors/bundler_artifact_runner.rs:269`](../../../../../../../crates/renovate-core/src/extractors/bundler_artifact_runner.rs#L269) |

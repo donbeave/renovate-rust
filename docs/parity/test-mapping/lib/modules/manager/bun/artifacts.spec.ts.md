@@ -2,9 +2,9 @@
 
 [← `manager/bun`](../../../../_by-module/manager/bun.md) · [all modules](../../../../README.md)
 
-**0/18 ported** (18 pending) · status: pending
+**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 35 | skips if no updateddeps and no lockfilemaintenance | pending | — |
 | 39 | skips if no lock file in config | pending | — |

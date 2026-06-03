@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**0/33 ported** (33 pending) · status: pending
+**0/33 in-scope tests ported** (33 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 154 | works | pending | — |
 | 168 | lockfile maintenance | pending | — |

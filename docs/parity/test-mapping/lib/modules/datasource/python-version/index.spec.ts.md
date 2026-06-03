@@ -2,9 +2,9 @@
 
 [← `datasource/python-version`](../../../../_by-module/datasource/python-version.md) · [all modules](../../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | returns python eol data | ported | [`crates/renovate-core/src/datasources/python_version.rs:240`](../../../../../../../crates/renovate-core/src/datasources/python_version.rs#L240) |
 | 63 | throws for 500 | ported | [`crates/renovate-core/src/datasources/python_version.rs:263`](../../../../../../../crates/renovate-core/src/datasources/python_version.rs#L263) |

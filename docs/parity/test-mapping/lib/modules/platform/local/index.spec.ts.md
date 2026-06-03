@@ -2,9 +2,9 @@
 
 [← `platform/local`](../../../../_by-module/platform/local.md) · [all modules](../../../../README.md)
 
-**28/28 ported** (0 pending) · status: ported
+**28/28 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns input | ported | [`crates/renovate-core/src/util.rs:10185`](../../../../../../../crates/renovate-core/src/util.rs#L10185) |
 | 16 | preserves an explicit dryrun=extract override | ported | [`crates/renovate-core/src/util.rs:10195`](../../../../../../../crates/renovate-core/src/util.rs#L10195) |

@@ -2,9 +2,9 @@
 
 [← `manager/terraform`](../../../../_by-module/manager/terraform.md) · [all modules](../../../../README.md)
 
-**18/18 ported** (0 pending) · status: ported
+**18/18 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 39 | returns null for empty | ported | [`crates/renovate-core/src/extractors/terraform.rs:2732`](../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L2732) |
 | 43 | returns null for no deps | ported | [`crates/renovate-core/src/extractors/terraform.rs:2838`](../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L2838) |

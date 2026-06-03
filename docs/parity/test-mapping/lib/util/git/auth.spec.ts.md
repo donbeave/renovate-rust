@@ -2,9 +2,9 @@
 
 [← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
 
-**30/30 ported** (0 pending) · status: ported
+**30/30 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | returns url with token | ported | [`crates/renovate-core/src/util.rs:7202`](../../../../../../crates/renovate-core/src/util.rs#L7202) |
 | 31 | returns url with username and password | ported | [`crates/renovate-core/src/util.rs:7233`](../../../../../../crates/renovate-core/src/util.rs#L7233) |

@@ -2,9 +2,9 @@
 
 [← `manager/velaci`](../../../../_by-module/manager/velaci.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | should handle invalid yaml | ported | [`crates/renovate-core/src/extractors/velaci.rs:85`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L85) |
 | 11 | should handle yaml without pipeline/images | ported | [`crates/renovate-core/src/extractors/velaci.rs:79`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L79) |

@@ -2,9 +2,9 @@
 
 [← `manager/pep621`](../../../../_by-module/manager/pep621.md) · [all modules](../../../../README.md)
 
-**14/14 ported** (0 pending) · status: ported
+**14/14 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | should return null for empty content | ported | [`crates/renovate-core/src/extractors/pep621.rs:1117`](../../../../../../../crates/renovate-core/src/extractors/pep621.rs#L1117) |
 | 21 | should return null for invalid toml | ported | [`crates/renovate-core/src/extractors/pep621.rs:1124`](../../../../../../../crates/renovate-core/src/extractors/pep621.rs#L1124) |

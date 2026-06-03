@@ -2,9 +2,9 @@
 
 [← `manager/terraform`](../../../../../../_by-module/manager/terraform.md) · [all modules](../../../../../../README.md)
 
-**9/13 ported** (4 pending) · status: partial
+**9/13 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | return empty array if no module is found | ported | [`crates/renovate-core/src/extractors/terraform.rs:3219`](../../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3219) |
 | 19 | should split project and tag from source | ported | [`crates/renovate-core/src/extractors/terraform.rs:3226`](../../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3226) |

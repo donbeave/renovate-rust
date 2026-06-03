@@ -2,9 +2,9 @@
 
 [← `manager/ant`](../../../../_by-module/manager/ant.md) · [all modules](../../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | updates inline xml version attribute | ported | [`crates/renovate-core/src/extractors/ant.rs:1704`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L1704) |
 | 23 | updates single-quoted xml version attribute | ported | [`crates/renovate-core/src/extractors/ant.rs:1722`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L1722) |

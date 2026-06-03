@@ -2,9 +2,9 @@
 
 [← `manager/sbt`](../../../../_by-module/manager/sbt.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | increments | ported | [`crates/renovate-core/src/extractors/sbt.rs:1205`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1205) |
 | 21 | no ops | ported | [`crates/renovate-core/src/extractors/sbt.rs:1213`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1213) |

@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../../_by-module/worker/repository.md) · [all modules](../../../../../../README.md)
 
-**0/57 ported** (57 pending) · status: pending
+**0/57 in-scope tests ported** (57 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 197 | _(it.each / template — verify manually)_ | ? | — |
 | 205 | handles date object | pending | — |

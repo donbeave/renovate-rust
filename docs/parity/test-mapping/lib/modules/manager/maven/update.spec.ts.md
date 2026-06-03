@@ -2,9 +2,9 @@
 
 [← `manager/maven`](../../../../_by-module/manager/maven.md) · [all modules](../../../../README.md)
 
-**18/18 ported** (0 pending) · status: ported
+**18/18 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | should update version | ported | [`crates/renovate-core/src/extractors/maven.rs:2909`](../../../../../../../crates/renovate-core/src/extractors/maven.rs#L2909) |
 | 36 | should do simple replacement | ported | [`crates/renovate-core/src/extractors/maven.rs:2933`](../../../../../../../crates/renovate-core/src/extractors/maven.rs#L2933) |

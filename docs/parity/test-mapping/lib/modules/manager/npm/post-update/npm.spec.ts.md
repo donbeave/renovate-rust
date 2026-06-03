@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**32/35 ported** (3 pending) · status: partial
+**32/35 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | generates lock files | ported | [`crates/renovate-core/src/extractors/npm_post_update/npm.rs:247`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/npm.rs#L247) |
 | 54 | runs npm install twice | ported | [`crates/renovate-core/src/extractors/npm_post_update/npm.rs:256`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/npm.rs#L256) |

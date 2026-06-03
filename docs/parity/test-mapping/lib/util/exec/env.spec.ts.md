@@ -2,9 +2,9 @@
 
 [← `util/exec`](../../../_by-module/util/exec.md) · [all modules](../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 35 | returns default environment variables | ported | [`crates/renovate-core/src/util.rs:12005`](../../../../../../crates/renovate-core/src/util.rs#L12005) |
 | 57 | returns environment variable only if defined | ported | [`crates/renovate-core/src/util.rs:12061`](../../../../../../crates/renovate-core/src/util.rs#L12061) |

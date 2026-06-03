@@ -2,9 +2,9 @@
 
 [← `manager/github-actions`](../../../../_by-module/manager/github-actions.md) · [all modules](../../../../README.md)
 
-**53/53 ported** (0 pending) · status: ported
+**53/53 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | returns null for empty string | ported | [`crates/renovate-core/src/extractors/github_actions.rs:1666`](../../../../../../../crates/renovate-core/src/extractors/github_actions.rs#L1666) |
 | 16 | returns null for empty docker reference | ported | [`crates/renovate-core/src/extractors/github_actions.rs:1672`](../../../../../../../crates/renovate-core/src/extractors/github_actions.rs#L1672) |

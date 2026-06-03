@@ -2,9 +2,9 @@
 
 [← `platform/bitbucket-server`](../../../../_by-module/platform/bitbucket-server.md) · [all modules](../../../../README.md)
 
-**3/17 ported** (14 pending) · status: partial
+**3/17 in-scope tests ported** (14 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 95 | getinvalidreviewers | ported | [`crates/renovate-core/src/util.rs:9785`](../../../../../../../crates/renovate-core/src/util.rs#L9785) |
 | 128 | works giturl:undefined generate endpoint | pending | — |

@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../../_by-module/util/cache.md) · [all modules](../../../../../README.md)
 
-**0/13 ported** (13 pending) · status: pending
+**0/13 in-scope tests ported** (13 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 41 | returns empty object before any data load | pending | — |
 | 51 | skip when receives non-string data | pending | — |

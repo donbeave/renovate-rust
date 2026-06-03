@@ -2,9 +2,9 @@
 
 [← `versioning/bazel-module`](../../../../_by-module/versioning/bazel-module.md) · [all modules](../../../../README.md)
 
-**12/12 ported** (0 pending) · status: ported
+**12/12 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | getmajor() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:106`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L106) |
 | 9 | getminor() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:112`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L112) |

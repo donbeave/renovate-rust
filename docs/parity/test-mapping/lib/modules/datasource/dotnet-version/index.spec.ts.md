@@ -2,9 +2,9 @@
 
 [← `datasource/dotnet-version`](../../../../_by-module/datasource/dotnet-version.md) · [all modules](../../../../README.md)
 
-**3/9 ported** (6 pending) · status: partial
+**3/9 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | returns null for non-dotnet package | ported | [`crates/renovate-core/src/datasources/dotnet_version.rs:210`](../../../../../../../crates/renovate-core/src/datasources/dotnet_version.rs#L210) |
 | 27 | returns null for 404 for index | pending | — |

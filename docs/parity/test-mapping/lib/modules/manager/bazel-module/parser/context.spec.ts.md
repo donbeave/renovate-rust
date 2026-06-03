@@ -2,9 +2,9 @@
 
 [← `manager/bazel-module`](../../../../../_by-module/manager/bazel-module.md) · [all modules](../../../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | throws if there is no current | ported | [`crates/renovate-core/src/extractors/bazel_module.rs:2450`](../../../../../../../../crates/renovate-core/src/extractors/bazel_module.rs#L2450) |
 | 13 | throws if the current is not a prepared extension tag | ported | [`crates/renovate-core/src/extractors/bazel_module.rs:2460`](../../../../../../../../crates/renovate-core/src/extractors/bazel_module.rs#L2460) |

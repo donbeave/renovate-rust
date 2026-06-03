@@ -2,9 +2,9 @@
 
 [← `datasource/deb`](../../../../_by-module/datasource/deb.md) · [all modules](../../../../README.md)
 
-**0/13 ported** (13 pending) · status: pending
+**0/13 in-scope tests ported** (13 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 72 | returns a valid version for the package `album` and does not require redownload | pending | — |
 | 101 | returns null when registry url misses components | pending | — |

@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | sets new cache | ported | [`crates/renovate-core/src/util.rs:8536`](../../../../../../../crates/renovate-core/src/util.rs#L8536) |
 | 28 | updates old cache | ported | [`crates/renovate-core/src/util.rs:8548`](../../../../../../../crates/renovate-core/src/util.rs#L8548) |

@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | handles no monorepo | ported | [`crates/renovate-core/src/extractors/npm.rs:8672`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8672) |
 | 19 | updates internal packages | ported | [`crates/renovate-core/src/extractors/npm.rs:8683`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8683) |

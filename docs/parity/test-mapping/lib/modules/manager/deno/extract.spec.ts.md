@@ -2,9 +2,9 @@
 
 [← `manager/deno`](../../../../_by-module/manager/deno.md) · [all modules](../../../../README.md)
 
-**0/14 ported** (14 pending) · status: pending
+**0/14 in-scope tests ported** (14 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | found lock file | pending | — |
 | 29 | not found lock file | pending | — |

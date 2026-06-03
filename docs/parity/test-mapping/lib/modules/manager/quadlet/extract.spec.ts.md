@@ -2,9 +2,9 @@
 
 [← `manager/quadlet`](../../../../_by-module/manager/quadlet.md) · [all modules](../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | returns null for invalid quadlet file content | ported | [`crates/renovate-core/src/extractors/quadlet.rs:208`](../../../../../../../crates/renovate-core/src/extractors/quadlet.rs#L208) |
 | 24 | returns null for empty yaml file content | ported | [`crates/renovate-core/src/extractors/quadlet.rs:150`](../../../../../../../crates/renovate-core/src/extractors/quadlet.rs#L150) |

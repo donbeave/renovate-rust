@@ -2,9 +2,9 @@
 
 [← `manager/bitrise`](../../../../_by-module/manager/bitrise.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns null on an empty file | ported | [`crates/renovate-core/src/extractors/bitrise.rs:405`](../../../../../../../crates/renovate-core/src/extractors/bitrise.rs#L405) |
 | 11 | returns a valid file | ported | [`crates/renovate-core/src/extractors/bitrise.rs:328`](../../../../../../../crates/renovate-core/src/extractors/bitrise.rs#L328) |

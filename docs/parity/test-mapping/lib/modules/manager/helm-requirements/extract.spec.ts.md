@@ -2,9 +2,9 @@
 
 [← `manager/helm-requirements`](../../../../_by-module/manager/helm-requirements.md) · [all modules](../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | ensure that currentvalue is string | ported | [`crates/renovate-core/src/extractors/helm.rs:615`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L615) |
 | 34 | skips invalid registry urls | ported | [`crates/renovate-core/src/extractors/helm.rs:602`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L602) |

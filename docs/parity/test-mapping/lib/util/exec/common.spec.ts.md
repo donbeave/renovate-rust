@@ -2,9 +2,9 @@
 
 [← `util/exec`](../../../_by-module/util/exec.md) · [all modules](../../../README.md)
 
-**13/30 ported** (17 pending) · status: partial
+**13/30 in-scope tests ported** (17 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 175 | command exits with code 0 | ported | [`crates/renovate-core/src/exec/raw.rs:145`](../../../../../../crates/renovate-core/src/exec/raw.rs#L145) |
 | 194 | never extends the process environment | ported | [`crates/renovate-core/src/exec/raw.rs:166`](../../../../../../crates/renovate-core/src/exec/raw.rs#L166) |

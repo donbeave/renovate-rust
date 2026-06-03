@@ -2,9 +2,9 @@
 
 [← `util/exec`](../../../_by-module/util/exec.md) · [all modules](../../../README.md)
 
-**26/40 ported** (14 pending) · status: partial
+**26/40 in-scope tests ported** (14 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 910 | _(it.each / template — verify manually)_ | ? | — |
 | 943 | supports image prefetch | pending | — |

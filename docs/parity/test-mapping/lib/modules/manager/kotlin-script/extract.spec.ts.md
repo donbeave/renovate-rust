@@ -2,9 +2,9 @@
 
 [← `manager/kotlin-script`](../../../../_by-module/manager/kotlin-script.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | extracts dependencies in a generic case | ported | [`crates/renovate-core/src/extractors/kotlin_script.rs:69`](../../../../../../../crates/renovate-core/src/extractors/kotlin_script.rs#L69) |
 | 43 | detects custom repository definitions | ported | [`crates/renovate-core/src/extractors/kotlin_script.rs:94`](../../../../../../../crates/renovate-core/src/extractors/kotlin_script.rs#L94) |

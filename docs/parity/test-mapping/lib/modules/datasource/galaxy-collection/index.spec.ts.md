@@ -2,9 +2,9 @@
 
 [← `datasource/galaxy-collection`](../../../../_by-module/datasource/galaxy-collection.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 29 | returns null for 404 result | ported | [`crates/renovate-core/src/datasources/galaxy_collection.rs:263`](../../../../../../../crates/renovate-core/src/datasources/galaxy_collection.rs#L263) |
 | 39 | throws for remote host error | ported | [`crates/renovate-core/src/datasources/galaxy_collection.rs:280`](../../../../../../../crates/renovate-core/src/datasources/galaxy_collection.rs#L280) |

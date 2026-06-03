@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../../_by-module/worker/repository.md) · [all modules](../../../../../../README.md)
 
-**1/3 ported** (2 pending) · status: partial
+**1/3 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | renders notes | pending | — |
 | 25 | handles render error | pending | — |

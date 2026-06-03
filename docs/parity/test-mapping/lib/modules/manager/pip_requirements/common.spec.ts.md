@@ -2,9 +2,9 @@
 
 [← `manager/pip_requirements`](../../../../_by-module/manager/pip_requirements.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | extracts --index-url flag | ported | [`crates/renovate-core/src/extractors/pip.rs:777`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L777) |
 | 15 | extracts --index-url short code | ported | [`crates/renovate-core/src/extractors/pip.rs:785`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L785) |

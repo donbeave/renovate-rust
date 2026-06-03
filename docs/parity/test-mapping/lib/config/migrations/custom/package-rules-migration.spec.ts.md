@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | should preserve config order | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5666`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5666) |
 | 35 | should not migrate nested packagerules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5707`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5707) |

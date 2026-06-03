@@ -2,9 +2,9 @@
 
 [← `manager/terragrunt`](../../../../_by-module/manager/terragrunt.md) · [all modules](../../../../README.md)
 
-**4/5 ported** (1 pending) · status: partial
+**4/5 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | should split project and tag from source | ported | [`crates/renovate-core/src/extractors/terragrunt.rs:488`](../../../../../../../crates/renovate-core/src/extractors/terragrunt.rs#L488) |
 | 21 | should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names | ported | [`crates/renovate-core/src/extractors/terragrunt.rs:497`](../../../../../../../crates/renovate-core/src/extractors/terragrunt.rs#L497) |

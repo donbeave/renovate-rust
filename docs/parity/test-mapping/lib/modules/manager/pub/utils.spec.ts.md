@@ -2,9 +2,9 @@
 
 [← `manager/pub`](../../../../_by-module/manager/pub.md) · [all modules](../../../../README.md)
 
-**3/6 ported** (3 pending) · status: partial
+**3/6 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | load and parse successfully | ported | [`crates/renovate-core/src/extractors/pubspec.rs:633`](../../../../../../../crates/renovate-core/src/extractors/pubspec.rs#L633) |
 | 32 | invalid yaml | ported | [`crates/renovate-core/src/extractors/pubspec.rs:650`](../../../../../../../crates/renovate-core/src/extractors/pubspec.rs#L650) |

@@ -2,9 +2,9 @@
 
 [← `manager/helmv3`](../../../../_by-module/manager/helmv3.md) · [all modules](../../../../README.md)
 
-**1/1 ported** (0 pending) · status: ported
+**1/1 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | should generate a login command with username and password | ported | [`crates/renovate-core/src/extractors/helm.rs:544`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L544) |
 

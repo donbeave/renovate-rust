@@ -2,9 +2,9 @@
 
 [← `datasource/dart-version`](../../../../_by-module/datasource/dart-version.md) · [all modules](../../../../README.md)
 
-**2/4 ported** (2 pending) · status: partial
+**2/4 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | throws for 500 | pending | — |
 | 26 | returns null for error | pending | — |

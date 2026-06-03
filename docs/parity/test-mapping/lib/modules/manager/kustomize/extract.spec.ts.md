@@ -2,9 +2,9 @@
 
 [← `manager/kustomize`](../../../../_by-module/manager/kustomize.md) · [all modules](../../../../README.md)
 
-**43/45 ported** (2 pending) · status: partial
+**43/45 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | should successfully parse a valid kustomize file | ported | [`crates/renovate-core/src/extractors/kustomize.rs:1427`](../../../../../../../crates/renovate-core/src/extractors/kustomize.rs#L1427) |
 | 33 | return null on an invalid file | ported | [`crates/renovate-core/src/extractors/kustomize.rs:1387`](../../../../../../../crates/renovate-core/src/extractors/kustomize.rs#L1387) |

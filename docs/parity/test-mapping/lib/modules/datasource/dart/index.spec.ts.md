@@ -2,9 +2,9 @@
 
 [← `datasource/dart`](../../../../_by-module/datasource/dart.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | returns null for empty result | ported | [`crates/renovate-core/src/datasources/pub_dev.rs:235`](../../../../../../../crates/renovate-core/src/datasources/pub_dev.rs#L235) |
 | 23 | returns null for empty fields | ported | [`crates/renovate-core/src/datasources/pub_dev.rs:252`](../../../../../../../crates/renovate-core/src/datasources/pub_dev.rs#L252) |

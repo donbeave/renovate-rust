@@ -2,9 +2,9 @@
 
 [← `versioning/regex`](../../../../_by-module/versioning/regex.md) · [all modules](../../../../README.md)
 
-**20/24 ported** (4 pending) · status: partial
+**20/24 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | requires a valid configuration to be initialized | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:323`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L323) |
 | 14 | works without config | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:329`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L329) |

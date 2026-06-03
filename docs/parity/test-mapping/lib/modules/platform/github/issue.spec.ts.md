@@ -2,9 +2,9 @@
 
 [← `platform/github`](../../../../_by-module/platform/github.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | returns null for empty cache | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:485`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L485) |
 | 20 | stores issues to the cache | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:492`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L492) |

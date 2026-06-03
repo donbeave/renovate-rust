@@ -2,9 +2,9 @@
 
 [← `versioning/aws-machine-image`](../../../../_by-module/versioning/aws-machine-image.md) · [all modules](../../../../README.md)
 
-**3/10 ported** (7 pending) · status: partial
+**3/10 in-scope tests ported** (7 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | should return 1.0.0 | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:44`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L44) |
 | 13 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:52`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L52) |

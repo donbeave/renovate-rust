@@ -2,9 +2,9 @@
 
 [← `manager/_common`](../../../_by-module/manager/_common.md) · [all modules](../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns same if not auto | ported | [`crates/renovate-core/src/util.rs:8049`](../../../../../../crates/renovate-core/src/util.rs#L8049) |
 | 13 | returns manager strategy | ported | [`crates/renovate-core/src/util.rs:8055`](../../../../../../crates/renovate-core/src/util.rs#L8055) |

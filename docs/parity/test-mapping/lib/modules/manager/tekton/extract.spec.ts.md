@@ -2,9 +2,9 @@
 
 [← `manager/tekton`](../../../../_by-module/manager/tekton.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | extracts deps from a file | ported | [`crates/renovate-core/src/extractors/tekton.rs:113`](../../../../../../../crates/renovate-core/src/extractors/tekton.rs#L113) |
 | 15 | extracts deps from a file in annotations | ported | [`crates/renovate-core/src/extractors/tekton.rs:166`](../../../../../../../crates/renovate-core/src/extractors/tekton.rs#L166) |

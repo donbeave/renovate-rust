@@ -2,9 +2,9 @@
 
 [← `logger`](../../_by-module/logger.md) · [all modules](../../README.md)
 
-**12/15 ported** (3 pending) · status: partial
+**12/15 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | returns empty string if null rec | ported | [`crates/renovate-core/src/util.rs:10362`](../../../../../crates/renovate-core/src/util.rs#L10362) |
 | 13 | returns empty string if empty rec | ported | [`crates/renovate-core/src/util.rs:10368`](../../../../../crates/renovate-core/src/util.rs#L10368) |

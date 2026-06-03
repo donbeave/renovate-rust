@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../_by-module/worker/repository.md) · [all modules](../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 77 | errors ${err} | ported | [`crates/renovate-core/src/util.rs:10091`](../../../../../../crates/renovate-core/src/util.rs#L10091) |
 | 83 | handles externalhosterror | ported | [`crates/renovate-core/src/util.rs:10111`](../../../../../../crates/renovate-core/src/util.rs#L10111) |

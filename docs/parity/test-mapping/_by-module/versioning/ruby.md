@@ -2,9 +2,9 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 14/15 tests ported across 1 spec files.
+**Coverage:** 14/15 in-scope tests ported (opt-out=0) across 1 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/ruby/index.spec.ts`](../../lib/modules/versioning/ruby/index.spec.ts.md) | 15 | 14 | 1 | [`crates/renovate-core/src/versioning/ruby.rs:901`](../../../../../crates/renovate-core/src/versioning/ruby.rs#L901) | partial |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/modules/versioning/ruby/index.spec.ts`](../../lib/modules/versioning/ruby/index.spec.ts.md) | 15 | 14 | 1 | 0 | [`crates/renovate-core/src/versioning/ruby.rs:901`](../../../../../crates/renovate-core/src/versioning/ruby.rs#L901) | partial |
 

@@ -2,9 +2,9 @@
 
 [← `platform/scm-manager`](../../../../_by-module/platform/scm-manager.md) · [all modules](../../../../README.md)
 
-**9/12 ported** (3 pending) · status: partial
+**9/12 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | _(it.each / template — verify manually)_ | ? | — |
 | 39 | _(it.each / template — verify manually)_ | ? | — |

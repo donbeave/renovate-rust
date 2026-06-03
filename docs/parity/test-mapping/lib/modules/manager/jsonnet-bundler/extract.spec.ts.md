@@ -2,9 +2,9 @@
 
 [← `manager/jsonnet-bundler`](../../../../_by-module/manager/jsonnet-bundler.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | returns null for invalid jsonnetfile | ported | [`crates/renovate-core/src/extractors/jsonnet_bundler.rs:236`](../../../../../../../crates/renovate-core/src/extractors/jsonnet_bundler.rs#L236) |
 | 30 | returns null for jsonnetfile with no dependencies | ported | [`crates/renovate-core/src/extractors/jsonnet_bundler.rs:242`](../../../../../../../crates/renovate-core/src/extractors/jsonnet_bundler.rs#L242) |

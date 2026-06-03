@@ -2,9 +2,9 @@
 
 [← `datasource/flutter-version`](../../../../_by-module/datasource/flutter-version.md) · [all modules](../../../../README.md)
 
-**2/4 ported** (2 pending) · status: partial
+**2/4 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | throws for 500 | pending | — |
 | 24 | returns null for error | pending | — |

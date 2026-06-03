@@ -2,9 +2,9 @@
 
 [← `manager/composer`](../../../../_by-module/manager/composer.md) · [all modules](../../../../README.md)
 
-**0/33 ported** (33 pending) · status: pending
+**0/33 in-scope tests ported** (33 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | returns from require | pending | — |
 | 31 | returns platform php version | pending | — |

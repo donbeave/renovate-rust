@@ -2,9 +2,9 @@
 
 [← `versioning/pep440`](../../../../_by-module/versioning/pep440.md) · [all modules](../../../../README.md)
 
-**9/10 ported** (1 pending) · status: partial
+**9/10 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | _(it.each / template — verify manually)_ | ? | — |
 | 25 | _(it.each / template — verify manually)_ | ? | — |

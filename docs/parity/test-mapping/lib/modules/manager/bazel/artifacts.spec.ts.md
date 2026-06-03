@@ -2,9 +2,9 @@
 
 [← `manager/bazel`](../../../../_by-module/manager/bazel.md) · [all modules](../../../../README.md)
 
-**0/15 ported** (15 pending) · status: pending
+**0/15 in-scope tests ported** (15 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | updates commit-based http archive | pending | — |
 | 69 | updates http archive with content other then workspace | pending | — |

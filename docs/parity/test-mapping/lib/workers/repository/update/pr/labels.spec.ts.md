@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**13/20 ported** (7 pending) · status: partial
+**13/20 in-scope tests ported** (7 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | returns empty array if no labels are configured | ported | [`crates/renovate-core/src/util.rs:8274`](../../../../../../../../crates/renovate-core/src/util.rs#L8274) |
 | 16 | only labels | ported | [`crates/renovate-core/src/util.rs:8280`](../../../../../../../../crates/renovate-core/src/util.rs#L8280) |

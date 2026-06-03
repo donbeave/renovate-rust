@@ -2,9 +2,9 @@
 
 [← `manager/batect`](../../../../_by-module/manager/batect.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 41 | returns empty array for empty configuration file | ported | [`crates/renovate-core/src/extractors/batect.rs:281`](../../../../../../../crates/renovate-core/src/extractors/batect.rs#L281) |
 | 49 | returns empty array for non-object configuration file | ported | [`crates/renovate-core/src/extractors/batect.rs:287`](../../../../../../../crates/renovate-core/src/extractors/batect.rs#L287) |

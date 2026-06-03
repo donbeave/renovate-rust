@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**4/9 ported** (5 pending) · status: partial
+**4/9 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | should filter versions allowed by semver syntax when allowedversions is not valid version, range or pypi syntax | pending | — |
 | 60 | should filter versions when allowedversions templating is used | pending | — |

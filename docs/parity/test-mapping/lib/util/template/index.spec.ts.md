@@ -2,9 +2,9 @@
 
 [← `util/template`](../../../_by-module/util/template.md) · [all modules](../../../README.md)
 
-**0/54 ported** (54 pending) · status: pending
+**0/54 in-scope tests ported** (54 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | returns empty string if cannot compile | pending | — |
 | 21 | has valid exposed config options | pending | — |

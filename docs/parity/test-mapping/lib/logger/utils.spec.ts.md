@@ -2,9 +2,9 @@
 
 [← `logger`](../../_by-module/logger.md) · [all modules](../../README.md)
 
-**2/8 ported** (6 pending) · status: partial
+**2/8 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | _(it.each / template — verify manually)_ | ? | — |
 | 26 | sanitizes boxed string objects as strings | pending | — |

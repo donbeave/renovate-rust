@@ -2,9 +2,9 @@
 
 [← `util/exec`](../../../_by-module/util/exec.md) · [all modules](../../../README.md)
 
-**3/21 ported** (18 pending) · status: partial
+**3/21 in-scope tests ported** (18 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | is a commandwithoptions | pending | — |
 | 17 | is a commandwithoptions | pending | — |

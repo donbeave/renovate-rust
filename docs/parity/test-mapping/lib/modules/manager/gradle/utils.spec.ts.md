@@ -2,9 +2,9 @@
 
 [← `manager/gradle`](../../../../_by-module/manager/gradle.md) · [all modules](../../../../README.md)
 
-**11/12 ported** (1 pending) · status: partial
+**11/12 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | extracts the actual version | ported | [`crates/renovate-core/src/extractors/gradle.rs:2152`](../../../../../../../crates/renovate-core/src/extractors/gradle.rs#L2152) |
 | 41 | returns null for invalid inputs | ported | [`crates/renovate-core/src/extractors/gradle.rs:2173`](../../../../../../../crates/renovate-core/src/extractors/gradle.rs#L2173) |

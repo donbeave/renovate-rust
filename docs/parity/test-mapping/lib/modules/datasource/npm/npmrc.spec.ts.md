@@ -2,9 +2,9 @@
 
 [← `datasource/npm`](../../../../_by-module/datasource/npm.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | parses //host | ported | [`crates/renovate-core/src/datasources/npm_npmrc.rs:531`](../../../../../../../crates/renovate-core/src/datasources/npm_npmrc.rs#L531) |
 | 28 | parses //host/path | ported | [`crates/renovate-core/src/datasources/npm_npmrc.rs:522`](../../../../../../../crates/renovate-core/src/datasources/npm_npmrc.rs#L522) |

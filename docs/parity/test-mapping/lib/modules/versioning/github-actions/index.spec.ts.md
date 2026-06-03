@@ -2,9 +2,9 @@
 
 [← `versioning/github-actions`](../../../../_by-module/versioning/github-actions.md) · [all modules](../../../../README.md)
 
-**29/29 ported** (0 pending) · status: ported
+**29/29 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | _(it.each / template — verify manually)_ | ? | — |
 | 30 | _(it.each / template — verify manually)_ | ? | — |

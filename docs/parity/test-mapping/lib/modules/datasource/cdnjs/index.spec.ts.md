@@ -2,9 +2,9 @@
 
 [← `datasource/cdnjs`](../../../../_by-module/datasource/cdnjs.md) · [all modules](../../../../README.md)
 
-**13/14 ported** (1 pending) · status: partial
+**13/14 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | throws for empty result | ported | [`crates/renovate-core/src/datasources/cdnjs.rs:167`](../../../../../../../crates/renovate-core/src/datasources/cdnjs.rs#L167) |
 | 28 | throws for error | ported | [`crates/renovate-core/src/datasources/cdnjs.rs:182`](../../../../../../../crates/renovate-core/src/datasources/cdnjs.rs#L182) |

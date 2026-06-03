@@ -2,9 +2,9 @@
 
 [← `manager/ocb`](../../../../_by-module/manager/ocb.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | increments with all fields | ported | [`crates/renovate-core/src/extractors/ocb.rs:229`](../../../../../../../crates/renovate-core/src/extractors/ocb.rs#L229) |
 | 22 | increments with double quotes | ported | [`crates/renovate-core/src/extractors/ocb.rs:237`](../../../../../../../crates/renovate-core/src/extractors/ocb.rs#L237) |

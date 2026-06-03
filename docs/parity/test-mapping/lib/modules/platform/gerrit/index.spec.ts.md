@@ -2,9 +2,9 @@
 
 [← `platform/gerrit`](../../../../_by-module/platform/gerrit.md) · [all modules](../../../../README.md)
 
-**0/63 ported** (63 pending) · status: pending
+**0/63 in-scope tests ported** (63 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 59 | should throw if no endpoint | pending | — |
 | 64 | should throw if no username/password | pending | — |

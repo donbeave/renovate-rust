@@ -2,9 +2,9 @@
 
 [← `util/merge-confidence`](../../../_by-module/util/merge-confidence.md) · [all modules](../../../README.md)
 
-**7/28 ported** (21 pending) · status: partial
+**7/28 in-scope tests ported** (21 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | returns false if null | ported | [`crates/renovate-core/src/merge_confidence.rs:45`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L45) |
 | 26 | returns false if low | ported | [`crates/renovate-core/src/merge_confidence.rs:51`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L51) |

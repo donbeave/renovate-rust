@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../../_by-module/worker/repository.md) · [all modules](../../../../../../README.md)
 
-**4/6 ported** (2 pending) · status: partial
+**4/6 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | handles unsupported sourceurl | ported | [`crates/renovate-core/src/util.rs:8162`](../../../../../../../../../crates/renovate-core/src/util.rs#L8162) |
 | 22 | handles sourceurl | ported | [`crates/renovate-core/src/util.rs:8163`](../../../../../../../../../crates/renovate-core/src/util.rs#L8163) |

@@ -2,9 +2,9 @@
 
 [← `platform/forgejo`](../../../../_by-module/platform/forgejo.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | trimtrailingapipath | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:121`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L121) |
 | 45 | should abort when endpoint is not valid | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:147`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L147) |

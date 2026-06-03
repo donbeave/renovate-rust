@@ -2,9 +2,9 @@
 
 [← `manager/ansible-galaxy`](../../../../_by-module/manager/ansible-galaxy.md) · [all modules](../../../../README.md)
 
-**14/14 ported** (0 pending) · status: ported
+**14/14 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | returns null for empty | ported | [`crates/renovate-core/src/extractors/ansible_galaxy.rs:394`](../../../../../../../crates/renovate-core/src/extractors/ansible_galaxy.rs#L394) |
 | 19 | extracts multiple dependencies from requirements.yml | ported | [`crates/renovate-core/src/extractors/ansible_galaxy.rs:330`](../../../../../../../crates/renovate-core/src/extractors/ansible_galaxy.rs#L330) |

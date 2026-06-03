@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**8/39 ported** (31 pending) · status: partial
+**8/39 in-scope tests ported** (31 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 76 | returns config if not found | ported | [`crates/renovate-core/src/repo_config.rs:7454`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7454) |
 | 82 | returns config if not found - uses cache | pending | — |

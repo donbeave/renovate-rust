@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**27/27 ported** (0 pending) · status: ported
+**27/27 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | falls back to sharedvariablename if no groupname | ported | [`crates/renovate-core/src/branch.rs:1921`](../../../../../../../crates/renovate-core/src/branch.rs#L1921) |
 | 19 | ignores grouping of replacement update | ported | [`crates/renovate-core/src/branch.rs:1932`](../../../../../../../crates/renovate-core/src/branch.rs#L1932) |

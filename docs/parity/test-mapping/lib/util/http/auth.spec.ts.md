@@ -2,9 +2,9 @@
 
 [← `util/http`](../../../_by-module/util/http.md) · [all modules](../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | does nothing | ported | [`crates/renovate-core/src/http.rs:1398`](../../../../../../crates/renovate-core/src/http.rs#L1398) |
 | 24 | gitea password | ported | [`crates/renovate-core/src/http.rs:1408`](../../../../../../crates/renovate-core/src/http.rs#L1408) |

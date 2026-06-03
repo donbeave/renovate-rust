@@ -2,9 +2,9 @@
 
 [← `manager/github-actions`](../../../../_by-module/manager/github-actions.md) · [all modules](../../../../README.md)
 
-**28/28 ported** (0 pending) · status: ported
+**28/28 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 46 | returns null for empty | ported | [`crates/renovate-core/src/extractors/github_actions.rs:2573`](../../../../../../../crates/renovate-core/src/extractors/github_actions.rs#L2573) |
 | 52 | returns null for invalid yaml | ported | [`crates/renovate-core/src/extractors/github_actions.rs:2579`](../../../../../../../crates/renovate-core/src/extractors/github_actions.rs#L2579) |

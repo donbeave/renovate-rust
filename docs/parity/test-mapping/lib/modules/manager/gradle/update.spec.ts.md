@@ -2,9 +2,9 @@
 
 [← `manager/gradle`](../../../../_by-module/manager/gradle.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | replaces | ported | [`crates/renovate-core/src/extractors/gradle.rs:2113`](../../../../../../../crates/renovate-core/src/extractors/gradle.rs#L2113) |
 | 20 | groups | ported | [`crates/renovate-core/src/extractors/gradle.rs:2120`](../../../../../../../crates/renovate-core/src/extractors/gradle.rs#L2120) |

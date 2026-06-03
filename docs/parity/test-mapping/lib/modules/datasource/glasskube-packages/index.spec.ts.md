@@ -2,9 +2,9 @@
 
 [← `datasource/glasskube-packages`](../../../../_by-module/datasource/glasskube-packages.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | should handle error response on versions request | ported | [`crates/renovate-core/src/datasources/glasskube_packages.rs:188`](../../../../../../../crates/renovate-core/src/datasources/glasskube_packages.rs#L188) |
 | 41 | should handle empty response on versions request | ported | [`crates/renovate-core/src/datasources/glasskube_packages.rs:203`](../../../../../../../crates/renovate-core/src/datasources/glasskube_packages.rs#L203) |

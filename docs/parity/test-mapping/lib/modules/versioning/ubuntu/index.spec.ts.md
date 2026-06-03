@@ -2,9 +2,9 @@
 
 [← `versioning/ubuntu`](../../../../_by-module/versioning/ubuntu.md) · [all modules](../../../../README.md)
 
-**13/13 ported** (0 pending) · status: ported
+**13/13 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | _(it.each / template — verify manually)_ | ? | — |
 | 94 | _(it.each / template — verify manually)_ | ? | — |

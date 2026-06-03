@@ -2,9 +2,9 @@
 
 [← `versioning/nuget`](../../../../_by-module/versioning/nuget.md) · [all modules](../../../../README.md)
 
-**10/15 ported** (5 pending) · status: partial
+**10/15 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | returns null for invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1152`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1152) |
 | 18 | parses version | ported | [`crates/renovate-core/src/versioning/nuget.rs:1159`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1159) |

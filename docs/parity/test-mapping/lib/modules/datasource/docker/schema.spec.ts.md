@@ -2,9 +2,9 @@
 
 [← `datasource/docker`](../../../../_by-module/datasource/docker.md) · [all modules](../../../../README.md)
 
-**0/10 ported** (10 pending) · status: pending
+**0/10 in-scope tests ported** (10 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | parses oci image manifest | pending | — |
 | 57 | parses oci helm manifest | pending | — |

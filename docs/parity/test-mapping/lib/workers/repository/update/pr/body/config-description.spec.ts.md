@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../../_by-module/worker/repository.md) · [all modules](../../../../../../README.md)
 
-**13/18 ported** (5 pending) · status: partial
+**13/18 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | renders stopupdating=true | ported | [`crates/renovate-core/src/util.rs:10950`](../../../../../../../../../crates/renovate-core/src/util.rs#L10950) |
 | 25 | renders rebasewhen="never" | ported | [`crates/renovate-core/src/util.rs:10958`](../../../../../../../../../crates/renovate-core/src/util.rs#L10958) |

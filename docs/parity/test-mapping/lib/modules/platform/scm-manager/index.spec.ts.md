@@ -2,9 +2,9 @@
 
 [← `platform/scm-manager`](../../../../_by-module/platform/scm-manager.md) · [all modules](../../../../README.md)
 
-**0/35 ported** (35 pending) · status: pending
+**0/35 in-scope tests ported** (35 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 77 | should throw error, when endpoint is not configured | pending | — |
 | 83 | should throw error, when token is not configured | pending | — |

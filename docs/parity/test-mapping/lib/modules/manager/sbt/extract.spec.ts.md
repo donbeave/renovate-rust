@@ -2,9 +2,9 @@
 
 [← `manager/sbt`](../../../../_by-module/manager/sbt.md) · [all modules](../../../../README.md)
 
-**26/26 ported** (0 pending) · status: ported
+**26/26 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | returns null for empty | ported | [`crates/renovate-core/src/extractors/sbt.rs:1067`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1067) |
 | 47 | extracts deps for generic use-cases | ported | [`crates/renovate-core/src/extractors/sbt.rs:561`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L561) |

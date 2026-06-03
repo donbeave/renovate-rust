@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | handles empty input | ported | [`crates/renovate-core/src/managers.rs:1968`](../../../../../../../crates/renovate-core/src/managers.rs#L1968) |
 | 12 | ignores extracts without superseding managers | ported | [`crates/renovate-core/src/managers.rs:1976`](../../../../../../../crates/renovate-core/src/managers.rs#L1976) |

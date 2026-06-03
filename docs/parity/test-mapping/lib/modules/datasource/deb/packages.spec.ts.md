@@ -2,9 +2,9 @@
 
 [← `datasource/deb`](../../../../_by-module/datasource/deb.md) · [all modules](../../../../README.md)
 
-**0/3 ported** (3 pending) · status: pending
+**0/3 in-scope tests ported** (3 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 67 | should ignore error when fetching the inrelease content fails | pending | — |
 | 93 | should throw error when checksum validation fails | pending | — |

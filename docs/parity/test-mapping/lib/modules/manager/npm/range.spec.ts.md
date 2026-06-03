@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../_by-module/manager/npm.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns same if not auto | ported | [`crates/renovate-core/src/extractors/npm.rs:4688`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4688) |
 | 10 | widens peerdependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:4694`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4694) |

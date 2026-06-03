@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**12/12 ported** (0 pending) · status: ported
+**12/12 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | merges | ported | [`crates/renovate-core/src/config.rs:797`](../../../../../crates/renovate-core/src/config.rs#L797) |
 | 32 | merges packagerules | ported | [`crates/renovate-core/src/config.rs:818`](../../../../../crates/renovate-core/src/config.rs#L818) |

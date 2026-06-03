@@ -2,9 +2,9 @@
 
 [← `datasource/conda`](../../../../_by-module/datasource/conda.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | throws for error | ported | [`crates/renovate-core/src/datasources/conda.rs:353`](../../../../../../../crates/renovate-core/src/datasources/conda.rs#L353) |
 | 24 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/conda.rs:361`](../../../../../../../crates/renovate-core/src/datasources/conda.rs#L361) |

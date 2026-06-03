@@ -2,9 +2,9 @@
 
 [← `datasource/bitbucket-server-tags`](../../../../_by-module/datasource/bitbucket-server-tags.md) · [all modules](../../../../README.md)
 
-**8/11 ported** (3 pending) · status: partial
+**8/11 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | returns tags | ported | [`crates/renovate-core/src/datasources/bitbucket_server_tags.rs:180`](../../../../../../../crates/renovate-core/src/datasources/bitbucket_server_tags.rs#L180) |
 | 66 | returns null on empty result | ported | [`crates/renovate-core/src/datasources/bitbucket_server_tags.rs:243`](../../../../../../../crates/renovate-core/src/datasources/bitbucket_server_tags.rs#L243) |

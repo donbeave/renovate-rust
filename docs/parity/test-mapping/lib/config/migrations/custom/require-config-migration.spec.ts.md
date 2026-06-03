@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**2/2 ported** (0 pending) · status: ported
+**2/2 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | should migrate requireconfig=true to requireconfig=required | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6543`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6543) |
 | 16 | should migrate requireconfig=false to requireconfig=optional | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6552`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6552) |

@@ -2,9 +2,9 @@
 
 [← `manager/bazel-module`](../../../../../_by-module/manager/bazel-module.md) · [all modules](../../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | .string() | ported | [`crates/renovate-core/src/extractors/bazel_module.rs:2315`](../../../../../../../../crates/renovate-core/src/extractors/bazel_module.rs#L2315) |
 | 19 | .boolean() | ported | [`crates/renovate-core/src/extractors/bazel_module.rs:2327`](../../../../../../../../crates/renovate-core/src/extractors/bazel_module.rs#L2327) |

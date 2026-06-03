@@ -2,9 +2,9 @@
 
 [← `platform/gerrit`](../../../../_by-module/platform/gerrit.md) · [all modules](../../../../README.md)
 
-**0/29 ported** (29 pending) · status: pending
+**0/29 in-scope tests ported** (29 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 29 | no open change for with branchname found -> isbehind == true | pending | — |
 | 46 | open change found for branchname, rebase action is available -> isbehind == true | pending | — |

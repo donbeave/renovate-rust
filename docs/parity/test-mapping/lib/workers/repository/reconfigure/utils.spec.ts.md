@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**1/5 ported** (4 pending) · status: partial
+**1/5 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | no config file found | pending | — |
 | 26 | handles error while reading reconfigure config file | pending | — |

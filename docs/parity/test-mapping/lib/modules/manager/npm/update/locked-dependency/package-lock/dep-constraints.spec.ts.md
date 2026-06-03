@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | finds indirect dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5349`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5349) |
 | 29 | finds direct dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5362`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5362) |

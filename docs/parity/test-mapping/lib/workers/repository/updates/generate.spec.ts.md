@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**0/58 ported** (58 pending) · status: pending
+**0/58 in-scope tests ported** (58 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 31 | groups single upgrade by default | pending | — |
 | 53 | groups single upgrade across multiple files | pending | — |

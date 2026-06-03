@@ -2,9 +2,9 @@
 
 [← `platform/local`](../../../../_by-module/platform/local.md) · [all modules](../../../../README.md)
 
-**13/13 ported** (0 pending) · status: ported
+**13/13 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | behindbasebranch | ported | [`crates/renovate-core/src/platform/local.rs:422`](../../../../../../../crates/renovate-core/src/platform/local.rs#L422) |
 | 24 | isbranchmodified | ported | [`crates/renovate-core/src/platform/local.rs:429`](../../../../../../../crates/renovate-core/src/platform/local.rs#L429) |

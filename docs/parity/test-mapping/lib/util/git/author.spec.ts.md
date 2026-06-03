@@ -2,9 +2,9 @@
 
 [← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | returns null if empty email given | ported | [`crates/renovate-core/src/git/author.rs:116`](../../../../../../crates/renovate-core/src/git/author.rs#L116) |
 | 12 | catches errors | ported | [`crates/renovate-core/src/git/author.rs:122`](../../../../../../crates/renovate-core/src/git/author.rs#L122) |

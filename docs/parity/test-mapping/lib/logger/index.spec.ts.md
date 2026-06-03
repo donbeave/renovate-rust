@@ -2,9 +2,9 @@
 
 [← `logger`](../../_by-module/logger.md) · [all modules](../../README.md)
 
-**0/26 ported** (26 pending) · status: pending
+**0/26 in-scope tests ported** (26 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 44 | inits | pending | — |
 | 48 | uses an auto-generated log context | pending | — |

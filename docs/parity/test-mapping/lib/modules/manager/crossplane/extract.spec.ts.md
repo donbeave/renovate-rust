@@ -2,9 +2,9 @@
 
 [← `manager/crossplane`](../../../../_by-module/manager/crossplane.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | returns null for empty | ported | [`crates/renovate-core/src/extractors/crossplane.rs:192`](../../../../../../../crates/renovate-core/src/extractors/crossplane.rs#L192) |
 | 16 | strips invalid templates | ported | [`crates/renovate-core/src/extractors/crossplane.rs:198`](../../../../../../../crates/renovate-core/src/extractors/crossplane.rs#L198) |

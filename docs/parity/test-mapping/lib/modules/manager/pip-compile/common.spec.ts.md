@@ -2,9 +2,9 @@
 
 [← `manager/pip-compile`](../../../../_by-module/manager/pip-compile.md) · [all modules](../../../../README.md)
 
-**7/27 ported** (20 pending) · status: partial
+**7/27 in-scope tests ported** (20 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | _(it.each / template — verify manually)_ | ? | — |
 | 48 | _(it.each / template — verify manually)_ | ? | — |

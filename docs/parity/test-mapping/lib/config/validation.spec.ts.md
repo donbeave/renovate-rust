@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**126/132 ported** (6 pending) · status: partial
+**126/132 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | _(it.each / template — verify manually)_ | ? | — |
 | 26 | returns the deprecationmsg for `dnscache` as a warning | ported | [`crates/renovate-core/src/config/migrate_validate.rs:2875`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L2875) |

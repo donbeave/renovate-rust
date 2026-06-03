@@ -2,9 +2,9 @@
 
 [← `manager/helmsman`](../../../../_by-module/manager/helmsman.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | returns null if empty | ported | [`crates/renovate-core/src/extractors/helmsman.rs:317`](../../../../../../../crates/renovate-core/src/extractors/helmsman.rs#L317) |
 | 16 | returns null if extracting non helmsman yaml file | ported | [`crates/renovate-core/src/extractors/helmsman.rs:329`](../../../../../../../crates/renovate-core/src/extractors/helmsman.rs#L329) |

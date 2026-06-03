@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**3/3 ported** (0 pending) · status: ported
+**3/3 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns new instances of arrays when called repeatedly | ported | [`crates/renovate-core/src/config.rs:955`](../../../../../crates/renovate-core/src/config.rs#L955) |
 | 20 | returns true for boolean values | ported | [`crates/renovate-core/src/config.rs:973`](../../../../../crates/renovate-core/src/config.rs#L973) |

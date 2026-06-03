@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../README.md)
 
-**25/26 ported** (1 pending) · status: partial
+**25/26 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | returns null if catalogname is missing and logs error | ported | [`crates/renovate-core/src/extractors/npm.rs:6868`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6868) |
 | 33 | ensure continuation even if catalog list and update does not match | ported | [`crates/renovate-core/src/extractors/npm.rs:6883`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6883) |

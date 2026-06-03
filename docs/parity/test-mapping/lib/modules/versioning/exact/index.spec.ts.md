@@ -2,9 +2,9 @@
 
 [← `versioning/exact`](../../../../_by-module/versioning/exact.md) · [all modules](../../../../README.md)
 
-**13/14 ported** (1 pending) · status: partial
+**13/14 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
 | 19 | _(it.each / template — verify manually)_ | ? | — |

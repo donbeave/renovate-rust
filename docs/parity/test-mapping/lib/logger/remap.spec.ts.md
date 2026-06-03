@@ -2,9 +2,9 @@
 
 [← `logger`](../../_by-module/logger.md) · [all modules](../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | returns null if no remaps are set | ported | [`crates/renovate-core/src/util.rs:8485`](../../../../../crates/renovate-core/src/util.rs#L8485) |
 | 24 | performs global remaps | ported | [`crates/renovate-core/src/util.rs:8491`](../../../../../crates/renovate-core/src/util.rs#L8491) |

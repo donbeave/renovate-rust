@@ -2,9 +2,9 @@
 
 [← `manager/pipenv`](../../../../_by-module/manager/pipenv.md) · [all modules](../../../../README.md)
 
-**16/16 ported** (0 pending) · status: ported
+**16/16 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 37 | returns null for empty | ported | [`crates/renovate-core/src/extractors/pipfile.rs:374`](../../../../../../../crates/renovate-core/src/extractors/pipfile.rs#L374) |
 | 41 | returns null for invalid toml file | ported | [`crates/renovate-core/src/extractors/pipfile.rs:368`](../../../../../../../crates/renovate-core/src/extractors/pipfile.rs#L368) |

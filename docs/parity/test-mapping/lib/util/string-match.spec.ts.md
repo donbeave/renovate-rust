@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**24/25 ported** (1 pending) · status: partial
+**24/25 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | returns false if empty patterns | ported | [`crates/renovate-core/src/string_match.rs:248`](../../../../../crates/renovate-core/src/string_match.rs#L248) |
 | 14 | returns false if no match | ported | [`crates/renovate-core/src/string_match.rs:254`](../../../../../crates/renovate-core/src/string_match.rs#L254) |

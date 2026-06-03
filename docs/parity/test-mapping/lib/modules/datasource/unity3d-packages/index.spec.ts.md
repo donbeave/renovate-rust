@@ -2,9 +2,9 @@
 
 [← `datasource/unity3d-packages`](../../../../_by-module/datasource/unity3d-packages.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | package with no versions | ported | [`crates/renovate-core/src/datasources/unity3d_packages.rs:170`](../../../../../../../crates/renovate-core/src/datasources/unity3d_packages.rs#L170) |
 | 31 | package with no documentationurl | ported | [`crates/renovate-core/src/datasources/unity3d_packages.rs:192`](../../../../../../../crates/renovate-core/src/datasources/unity3d_packages.rs#L192) |

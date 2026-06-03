@@ -2,9 +2,9 @@
 
 [← `manager/terragrunt`](../../../../_by-module/manager/terragrunt.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/terragrunt.rs:462`](../../../../../../../crates/renovate-core/src/extractors/terragrunt.rs#L462) |
 | 10 | extracts terragrunt sources using tfr protocol | ported | [`crates/renovate-core/src/extractors/terragrunt.rs:295`](../../../../../../../crates/renovate-core/src/extractors/terragrunt.rs#L295) |

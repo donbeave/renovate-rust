@@ -2,9 +2,9 @@
 
 [← `datasource/nuget`](../../../../_by-module/datasource/nuget.md) · [all modules](../../../../README.md)
 
-**1/36 ported** (35 pending) · status: partial
+**1/36 in-scope tests ported** (35 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 127 | extracts feed version from registry url hash (v3) | pending | — |
 | 134 | extracts feed version from registry url hash (v2) | pending | — |

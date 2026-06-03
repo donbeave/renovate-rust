@@ -2,9 +2,9 @@
 
 [← `config/presets`](../../../../_by-module/config/presets.md) · [all modules](../../../../README.md)
 
-**1/9 ported** (8 pending) · status: partial
+**1/9 in-scope tests ported** (8 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | _(it.each / template — verify manually)_ | ? | — |
 | 34 | _(it.each / template — verify manually)_ | ? | — |

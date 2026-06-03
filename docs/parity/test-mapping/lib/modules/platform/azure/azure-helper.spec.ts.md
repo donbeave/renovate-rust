@@ -2,9 +2,9 @@
 
 [← `platform/azure`](../../../../_by-module/platform/azure.md) · [all modules](../../../../README.md)
 
-**0/19 ported** (19 pending) · status: pending
+**0/19 in-scope tests ported** (19 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | should get the ref with short ref name | pending | — |
 | 34 | should not get ref | pending | — |

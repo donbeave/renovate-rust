@@ -2,9 +2,9 @@
 
 [← `manager/terraform`](../../../../../_by-module/manager/terraform.md) · [all modules](../../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 35 | detects already updated | ported | [`crates/renovate-core/src/extractors/terraform.rs:3021`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3021) |
 | 47 | returns unsupported if dependency is undefined | ported | [`crates/renovate-core/src/extractors/terraform.rs:3032`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3032) |

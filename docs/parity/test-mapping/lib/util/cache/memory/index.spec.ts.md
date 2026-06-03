@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../_by-module/util/cache.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | returns undefined if not init | ported | [`crates/renovate-core/src/cache/memory.rs:54`](../../../../../../../crates/renovate-core/src/cache/memory.rs#L54) |
 | 8 | sets and gets repo cache | ported | [`crates/renovate-core/src/cache/memory.rs:61`](../../../../../../../crates/renovate-core/src/cache/memory.rs#L61) |

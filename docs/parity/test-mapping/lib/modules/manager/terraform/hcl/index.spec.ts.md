@@ -2,9 +2,9 @@
 
 [← `manager/terraform`](../../../../../_by-module/manager/terraform.md) · [all modules](../../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | should return flat modules | ported | [`crates/renovate-core/src/extractors/terraform_hcl.rs:326`](../../../../../../../../crates/renovate-core/src/extractors/terraform_hcl.rs#L326) |
 | 53 | should return nested terraform block | ported | [`crates/renovate-core/src/extractors/terraform_hcl.rs:373`](../../../../../../../../crates/renovate-core/src/extractors/terraform_hcl.rs#L373) |

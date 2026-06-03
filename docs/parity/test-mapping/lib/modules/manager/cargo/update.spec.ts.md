@@ -2,9 +2,9 @@
 
 [← `manager/cargo`](../../../../_by-module/manager/cargo.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | increments | ported | [`crates/renovate-core/src/versioning/cargo.rs:1582`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1582) |
 | 22 | no ops | ported | [`crates/renovate-core/src/versioning/cargo.rs:1590`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1590) |

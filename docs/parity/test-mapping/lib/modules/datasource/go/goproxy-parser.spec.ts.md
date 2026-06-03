@@ -2,9 +2,9 @@
 
 [← `datasource/go`](../../../../_by-module/datasource/go.md) · [all modules](../../../../README.md)
 
-**7/9 ported** (2 pending) · status: partial
+**7/9 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | parses single url | ported | [`crates/renovate-core/src/util.rs:11313`](../../../../../../../crates/renovate-core/src/util.rs#L11313) |
 | 15 | parses multiple urls | ported | [`crates/renovate-core/src/util.rs:11322`](../../../../../../../crates/renovate-core/src/util.rs#L11322) |

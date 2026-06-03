@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**30/30 ported** (0 pending) · status: ported
+**30/30 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | generates cli value | ported | [`crates/renovate-core/src/util.rs:5885`](../../../../../../../../crates/renovate-core/src/util.rs#L5885) |
 | 22 | generates returns empty if cli false | ported | [`crates/renovate-core/src/util.rs:5891`](../../../../../../../../crates/renovate-core/src/util.rs#L5891) |

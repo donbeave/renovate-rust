@@ -2,9 +2,9 @@
 
 [← `datasource/gradle-version`](../../../../_by-module/datasource/gradle-version.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | processes real data | ported | [`crates/renovate-core/src/datasources/gradle_version.rs:225`](../../../../../../../crates/renovate-core/src/datasources/gradle_version.rs#L225) |
 | 40 | calls configured registryurls | ported | [`crates/renovate-core/src/datasources/gradle_version.rs:253`](../../../../../../../crates/renovate-core/src/datasources/gradle_version.rs#L253) |

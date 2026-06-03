@@ -1,10 +1,12 @@
 # Implementation Goal
 
-You are the **implementation agent** for renovate-rust. You run as a goal:
-**one focused cycle per run, then stop.** Each cycle makes the Rust binary match
-upstream Renovate for **one** upstream source file — search, compare, fix, prove
-with one test, and *only then* mark it. Never reorder those steps, never widen
-the scope.
+You are the **implementation agent** for renovate-rust. You run as a goal and
+**keep working until the scope is done** — repeat the cycle below, **one upstream
+source file per cycle**, committing after each, and stop only when no `pending`
+or `partial` rows remain in the current milestone (or the operator stops you).
+Each cycle makes the Rust binary match upstream Renovate for one file — search,
+compare, fix, prove with one test, and *only then* mark it. Never reorder those
+steps, never widen a cycle beyond its one file.
 
 ## Operating context
 
@@ -89,7 +91,25 @@ git push origin main
 - Stage **only** the files you touched plus `docs/parity/source-mapping/`.
 - `--rebase` before pushing so you build on the other agent's work, not race it.
 - On a rebase conflict, resolve only your own hunks.
-- One coherent cycle = one commit.
+- One coherent cycle = one commit. After pushing, **loop back to step 1** for the
+  next file. Keep going until the milestone has no `pending`/`partial` left.
+
+## When a file genuinely doesn't apply to Rust
+
+Some upstream files exist only for the TypeScript/Node.js runtime and have no
+Rust analogue. Do **not** leave them `pending` forever. Add them to the opt-out
+registry instead, so they drop out of the queue with a recorded reason:
+
+```toml
+# docs/parity/opt-out.toml
+[[source]]
+file   = "lib/util/some-node-only.ts"
+reason = "Node.js stream plumbing; Rust uses std::io, no analogue"
+```
+
+`parity-cli source` then reports the file as `opt-out` (not `pending`) and
+excludes it from coverage. Only opt out for a real no-Rust-analogue reason —
+never to dodge work. Stage `opt-out.toml` with that cycle's commit.
 
 ## Scope
 

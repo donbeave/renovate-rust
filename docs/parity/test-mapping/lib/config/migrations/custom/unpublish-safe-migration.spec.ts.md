@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | should migrate true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6230`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6230) |
 | 15 | should migrate true and handle extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6239`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6239) |

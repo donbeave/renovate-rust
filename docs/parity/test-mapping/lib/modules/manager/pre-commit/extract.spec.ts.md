@@ -2,9 +2,9 @@
 
 [← `manager/pre-commit`](../../../../_by-module/manager/pre-commit.md) · [all modules](../../../../README.md)
 
-**12/12 ported** (0 pending) · status: ported
+**12/12 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 52 | returns null for invalid yaml file content | ported | [`crates/renovate-core/src/extractors/pre_commit.rs:499`](../../../../../../../crates/renovate-core/src/extractors/pre_commit.rs#L499) |
 | 57 | returns null for empty yaml file content | ported | [`crates/renovate-core/src/extractors/pre_commit.rs:439`](../../../../../../../crates/renovate-core/src/extractors/pre_commit.rs#L439) |

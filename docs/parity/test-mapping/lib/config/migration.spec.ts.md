@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**28/30 ported** (2 pending) · status: partial
+**28/30 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | migrates config | ported | [`crates/renovate-core/src/repo_config.rs:9971`](../../../../../crates/renovate-core/src/repo_config.rs#L9971) |
 | 184 | migrates before and after schedules | ported | [`crates/renovate-core/src/repo_config.rs:9904`](../../../../../crates/renovate-core/src/repo_config.rs#L9904) |

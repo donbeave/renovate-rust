@@ -2,9 +2,9 @@
 
 [← `platform/bitbucket-server`](../../../../_by-module/platform/bitbucket-server.md) · [all modules](../../../../README.md)
 
-**3/139 ported** (136 pending) · status: partial
+**3/139 in-scope tests ported** (136 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 240 | should throw if no endpoint | pending | — |
 | 245 | should throw if no username/password/token | pending | — |

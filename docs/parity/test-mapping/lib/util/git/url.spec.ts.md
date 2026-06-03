@@ -2,9 +2,9 @@
 
 [← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
 
-**23/23 ported** (0 pending) · status: ported
+**23/23 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | supports ports | ported | [`crates/renovate-core/src/util.rs:6825`](../../../../../../crates/renovate-core/src/util.rs#L6825) |
 | 40 | returns https url for git url | ported | [`crates/renovate-core/src/util.rs:6840`](../../../../../../crates/renovate-core/src/util.rs#L6840) |

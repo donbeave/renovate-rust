@@ -1,0 +1,36 @@
+# Opt-out registry — the single place that records intentional exclusions.
+#
+# List upstream source files and tests that will NEVER be ported because they
+# exercise behavior with no Rust analogue: TypeScript/Node.js runtime specifics,
+# type-shape assertions, framework plumbing, etc. Items listed here are reported
+# as `opt-out` (not `pending`) in the parity trees, are excluded from the
+# coverage denominator, and are never picked by an agent.
+#
+# Every entry needs a `reason`. Keep it specific — this is the audit trail for
+# "why we decided not to port it".
+#
+# Consumed by `parity-cli` (see `cargo run -p parity-cli -- source|test`).
+#
+# ---------------------------------------------------------------------------
+# Source files: a whole upstream `lib/**/*.ts` that has no Rust counterpart.
+# ---------------------------------------------------------------------------
+#
+# [[source]]
+# file   = "lib/util/some-node-only.ts"
+# reason = "Node.js stream plumbing; Rust uses std::io, no analogue"
+#
+# ---------------------------------------------------------------------------
+# Tests: an individual upstream `it()`, or a whole spec.
+# ---------------------------------------------------------------------------
+#
+# [[test]]
+# spec   = "lib/util/foo.spec.ts"
+# test   = "rejects when value is not a Buffer"   # exact it() text, verbatim
+# reason = "asserts a TypeScript-runtime type guard with no Rust equivalent"
+#
+# [[test]]
+# spec   = "lib/util/bar.spec.ts"
+# all    = true                                   # the whole spec is excluded
+# reason = "entirely TypeScript type-shape checks, not business logic"
+
+# --- Active exclusions below this line ---

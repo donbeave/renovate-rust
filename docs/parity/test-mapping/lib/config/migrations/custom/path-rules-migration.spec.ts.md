@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | should migrate to packagerules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5918`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5918) |
 | 25 | should rewrite packagerules when it is not array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5928`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5928) |

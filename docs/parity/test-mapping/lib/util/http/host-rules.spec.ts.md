@@ -2,9 +2,9 @@
 
 [← `util/http`](../../../_by-module/util/http.md) · [all modules](../../../README.md)
 
-**0/28 ported** (28 pending) · status: pending
+**0/28 in-scope tests ported** (28 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 63 | adds token | pending | — |
 | 78 | adds token to an api.github.com url | pending | — |

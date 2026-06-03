@@ -2,9 +2,9 @@
 
 [← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
 
-**0/9 ported** (9 pending) · status: pending
+**0/9 in-scope tests ported** (9 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 21 | returns null if cache is not populated | pending | — |
 | 25 | returns null if branch not found | pending | — |

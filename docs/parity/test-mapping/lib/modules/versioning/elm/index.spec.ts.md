@@ -2,9 +2,9 @@
 
 [← `versioning/elm`](../../../../_by-module/versioning/elm.md) · [all modules](../../../../README.md)
 
-**28/31 ported** (3 pending) · status: partial
+**28/31 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
 | 23 | _(it.each / template — verify manually)_ | ? | — |

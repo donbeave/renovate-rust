@@ -2,9 +2,9 @@
 
 [← `manager/gitlabci-include`](../../../../_by-module/manager/gitlabci-include.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | returns null for empty | ported | [`crates/renovate-core/src/extractors/gitlabci_include.rs:291`](../../../../../../../crates/renovate-core/src/extractors/gitlabci_include.rs#L291) |
 | 17 | returns null for include block without any actual includes | ported | [`crates/renovate-core/src/extractors/gitlabci_include.rs:355`](../../../../../../../crates/renovate-core/src/extractors/gitlabci_include.rs#L355) |

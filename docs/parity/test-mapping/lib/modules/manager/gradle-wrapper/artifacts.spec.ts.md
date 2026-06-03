@@ -2,9 +2,9 @@
 
 [← `manager/gradle-wrapper`](../../../../_by-module/manager/gradle-wrapper.md) · [all modules](../../../../README.md)
 
-**0/14 ported** (14 pending) · status: pending
+**0/14 in-scope tests ported** (14 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 78 | custom gradle wrapper heap settings are populated | pending | — |
 | 120 | replaces existing value | pending | — |

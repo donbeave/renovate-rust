@@ -2,9 +2,9 @@
 
 [← `manager/bazel-module`](../../../../../_by-module/manager/bazel-module.md) · [all modules](../../../../../README.md)
 
-**12/12 ported** (0 pending) · status: ported
+**12/12 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns empty string if invalid content | ported | [`crates/renovate-core/src/extractors/bazel_module.rs:3699`](../../../../../../../../crates/renovate-core/src/extractors/bazel_module.rs#L3699) |
 | 17 | finds simple bazel_dep | ported | [`crates/renovate-core/src/extractors/bazel_module.rs:3707`](../../../../../../../../crates/renovate-core/src/extractors/bazel_module.rs#L3707) |

@@ -2,9 +2,9 @@
 
 [← `util/schema-utils`](../../../_by-module/util/schema-utils.md) · [all modules](../../../README.md)
 
-**0/35 ported** (35 pending) · status: pending
+**0/35 in-scope tests ported** (35 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | parses array | pending | — |
 | 28 | drops wrong items | pending | — |

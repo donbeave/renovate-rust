@@ -2,9 +2,9 @@
 
 [← `util/github`](../../../../_by-module/util/github.md) · [all modules](../../../../README.md)
 
-**0/15 ported** (15 pending) · status: pending
+**0/15 in-scope tests ported** (15 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 119 | can perform query and receive result | pending | — |
 | 139 | performs query when persistence flag is set and cache is expired | pending | — |

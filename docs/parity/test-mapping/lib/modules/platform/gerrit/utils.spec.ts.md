@@ -2,9 +2,9 @@
 
 [← `platform/gerrit`](../../../../_by-module/platform/gerrit.md) · [all modules](../../../../README.md)
 
-**0/23 ported** (23 pending) · status: pending
+**0/23 in-scope tests ported** (23 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 28 | create a git url with username/password | pending | — |
 | 37 | create a git url without username/password | pending | — |

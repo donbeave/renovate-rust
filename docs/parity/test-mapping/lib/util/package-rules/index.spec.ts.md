@@ -2,9 +2,9 @@
 
 [← `util/package-rules`](../../../_by-module/util/package-rules.md) · [all modules](../../../README.md)
 
-**73/73 ported** (0 pending) · status: ported
+**73/73 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 38 | applies | ported | [`crates/renovate-core/src/repo_config.rs:8545`](../../../../../../crates/renovate-core/src/repo_config.rs#L8545) |
 | 71 | applies both rules for a | ported | [`crates/renovate-core/src/repo_config.rs:8581`](../../../../../../crates/renovate-core/src/repo_config.rs#L8581) |

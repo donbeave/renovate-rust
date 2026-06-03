@@ -2,9 +2,9 @@
 
 [← `manager/proto`](../../../../_by-module/manager/proto.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | returns null for empty content | ported | [`crates/renovate-core/src/extractors/proto.rs:179`](../../../../../../../crates/renovate-core/src/extractors/proto.rs#L179) |
 | 14 | returns null for invalid toml | ported | [`crates/renovate-core/src/extractors/proto.rs:185`](../../../../../../../crates/renovate-core/src/extractors/proto.rs#L185) |

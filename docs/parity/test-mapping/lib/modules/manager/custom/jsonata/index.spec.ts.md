@@ -2,9 +2,9 @@
 
 [← `manager/custom`](../../../../../_by-module/manager/custom.md) · [all modules](../../../../../README.md)
 
-**0/14 ported** (14 pending) · status: pending
+**0/14 in-scope tests ported** (14 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | has default config | pending | — |
 | 13 | returns null when content does not match specified file format | pending | — |

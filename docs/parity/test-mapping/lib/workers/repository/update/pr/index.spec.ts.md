@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/53 ported** (53 pending) · status: pending
+**0/53 in-scope tests ported** (53 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 78 | creates pr | pending | — |
 | 98 | fetches changelogs for the "pr" stage | pending | — |

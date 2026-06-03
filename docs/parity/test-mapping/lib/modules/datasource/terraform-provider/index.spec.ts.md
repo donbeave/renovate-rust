@@ -2,9 +2,9 @@
 
 [← `datasource/terraform-provider`](../../../../_by-module/datasource/terraform-provider.md) · [all modules](../../../../README.md)
 
-**0/18 ported** (18 pending) · status: pending
+**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 68 | _(it.each / template — verify manually)_ | ? | — |
 | 87 | processes real data | pending | — |

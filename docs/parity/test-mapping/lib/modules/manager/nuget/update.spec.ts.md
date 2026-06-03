@@ -2,9 +2,9 @@
 
 [← `manager/nuget`](../../../../_by-module/manager/nuget.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | bumps csproj version | ported | [`crates/renovate-core/src/extractors/nuget.rs:2401`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2401) |
 | 28 | does not bump version twice | ported | [`crates/renovate-core/src/extractors/nuget.rs:2408`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2408) |

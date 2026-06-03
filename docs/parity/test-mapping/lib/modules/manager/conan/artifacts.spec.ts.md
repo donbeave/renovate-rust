@@ -2,9 +2,9 @@
 
 [← `manager/conan`](../../../../_by-module/manager/conan.md) · [all modules](../../../../README.md)
 
-**0/11 ported** (11 pending) · status: pending
+**0/11 in-scope tests ported** (11 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 31 | returns null if updateddeps are empty and lockfilemaintenance is turned off | pending | — |
 | 46 | returns null if conan.lock was not found | pending | — |

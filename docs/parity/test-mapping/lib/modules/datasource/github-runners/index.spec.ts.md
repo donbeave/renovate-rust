@@ -2,9 +2,9 @@
 
 [← `datasource/github-runners`](../../../../_by-module/datasource/github-runners.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns releases for ubuntu | ported | [`crates/renovate-core/src/datasources/github_runners.rs:271`](../../../../../../../crates/renovate-core/src/datasources/github_runners.rs#L271) |
 | 26 | returns releases for macos | ported | [`crates/renovate-core/src/datasources/github_runners.rs:288`](../../../../../../../crates/renovate-core/src/datasources/github_runners.rs#L288) |

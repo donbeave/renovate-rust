@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns empty | ported | [`crates/renovate-core/src/config/massage.rs:149`](../../../../../crates/renovate-core/src/config/massage.rs#L149) |
 | 12 | massages strings to array | ported | [`crates/renovate-core/src/config/massage.rs:155`](../../../../../crates/renovate-core/src/config/massage.rs#L155) |

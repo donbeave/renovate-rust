@@ -2,9 +2,9 @@
 
 [← `versioning/same-major`](../../../../_by-module/versioning/same-major.md) · [all modules](../../../../README.md)
 
-**8/10 ported** (2 pending) · status: partial
+**8/10 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | should return true | ported | [`crates/renovate-core/src/versioning/same_major.rs:47`](../../../../../../../crates/renovate-core/src/versioning/same_major.rs#L47) |
 | 9 | should return false | ported | [`crates/renovate-core/src/versioning/same_major.rs:53`](../../../../../../../crates/renovate-core/src/versioning/same_major.rs#L53) |

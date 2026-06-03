@@ -2,9 +2,9 @@
 
 [← `manager/poetry`](../../../../_by-module/manager/poetry.md) · [all modules](../../../../README.md)
 
-**0/19 ported** (19 pending) · status: pending
+**0/19 in-scope tests ported** (19 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 57 | detects from pyproject.toml | pending | — |
 | 68 | detects from poetry.ock | pending | — |

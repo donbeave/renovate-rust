@@ -2,9 +2,9 @@
 
 [← `manager/nuget`](../../../../_by-module/manager/nuget.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | returns xml with registries | ported | [`crates/renovate-core/src/extractors/nuget.rs:2471`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2471) |
 | 58 | returns xml with authenticated registries | ported | [`crates/renovate-core/src/extractors/nuget.rs:2579`](../../../../../../../crates/renovate-core/src/extractors/nuget.rs#L2579) |

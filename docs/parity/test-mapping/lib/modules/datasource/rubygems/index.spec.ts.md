@@ -2,9 +2,9 @@
 
 [← `datasource/rubygems`](../../../../_by-module/datasource/rubygems.md) · [all modules](../../../../README.md)
 
-**0/11 ported** (11 pending) · status: pending
+**0/11 in-scope tests ported** (11 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | returns null for missing pkg | pending | — |
 | 43 | returns null for rubygems.org package miss | pending | — |

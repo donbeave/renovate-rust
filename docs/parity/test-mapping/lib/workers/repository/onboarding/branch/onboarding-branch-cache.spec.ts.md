@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/20 ported** (20 pending) · status: pending
+**0/20 in-scope tests ported** (20 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | does not create new cache | pending | — |
 | 31 | sets new cache | pending | — |

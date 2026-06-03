@@ -2,9 +2,9 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | migrates every friday | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5155`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5155) |
 | 15 | does not migrate every weekday | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5164`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5164) |

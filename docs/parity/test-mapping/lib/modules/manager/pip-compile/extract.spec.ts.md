@@ -2,9 +2,9 @@
 
 [← `manager/pip-compile`](../../../../_by-module/manager/pip-compile.md) · [all modules](../../../../README.md)
 
-**4/27 ported** (23 pending) · status: partial
+**4/27 in-scope tests ported** (23 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 40 | returns object for requirements.in | ported | [`crates/renovate-core/src/extractors/pip_compile.rs:171`](../../../../../../../crates/renovate-core/src/extractors/pip_compile.rs#L171) |
 | 50 | returns object for setup.py | ported | [`crates/renovate-core/src/extractors/pip_compile.rs:183`](../../../../../../../crates/renovate-core/src/extractors/pip_compile.rs#L183) |

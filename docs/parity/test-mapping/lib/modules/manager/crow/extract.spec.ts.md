@@ -2,9 +2,9 @@
 
 [← `manager/crow`](../../../../_by-module/manager/crow.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/crow.rs:219`](../../../../../../../crates/renovate-core/src/extractors/crow.rs#L219) |
 | 10 | returns null for non-object yaml | ported | [`crates/renovate-core/src/extractors/crow.rs:238`](../../../../../../../crates/renovate-core/src/extractors/crow.rs#L238) |

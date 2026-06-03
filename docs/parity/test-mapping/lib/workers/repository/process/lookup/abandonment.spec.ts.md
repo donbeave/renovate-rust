@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | returns the original release result when no abandonment threshold is provided | ported | [`crates/renovate-core/src/util.rs:8198`](../../../../../../../../crates/renovate-core/src/util.rs#L8198) |
 | 39 | returns the original release result when abandonment threshold is invalid | ported | [`crates/renovate-core/src/util.rs:8205`](../../../../../../../../crates/renovate-core/src/util.rs#L8205) |

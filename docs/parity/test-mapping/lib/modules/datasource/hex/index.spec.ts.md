@@ -2,9 +2,9 @@
 
 [← `datasource/hex`](../../../../_by-module/datasource/hex.md) · [all modules](../../../../README.md)
 
-**2/33 ported** (31 pending) · status: partial
+**2/33 in-scope tests ported** (31 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 112 | returns null for empty result | pending | — |
 | 122 | returns null for missing fields | ported | [`crates/renovate-core/src/datasources/hex.rs:168`](../../../../../../../crates/renovate-core/src/datasources/hex.rs#L168) |

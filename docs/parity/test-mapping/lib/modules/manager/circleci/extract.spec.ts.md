@@ -2,9 +2,9 @@
 
 [← `manager/circleci`](../../../../_by-module/manager/circleci.md) · [all modules](../../../../README.md)
 
-**9/10 ported** (1 pending) · status: partial
+**9/10 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | returns null for empty | ported | [`crates/renovate-core/src/extractors/circleci.rs:469`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L469) |
 | 16 | handles registry alias | ported | [`crates/renovate-core/src/extractors/circleci.rs:475`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L475) |

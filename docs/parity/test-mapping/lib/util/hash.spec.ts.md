@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | hashes data with sha256 | ported | [`crates/renovate-core/src/util.rs:9480`](../../../../../crates/renovate-core/src/util.rs#L9480) |
 | 15 | hashes data with sha512 | ported | [`crates/renovate-core/src/util.rs:9490`](../../../../../crates/renovate-core/src/util.rs#L9490) |

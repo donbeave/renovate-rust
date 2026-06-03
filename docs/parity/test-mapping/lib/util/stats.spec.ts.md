@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**12/33 ported** (21 pending) · status: partial
+**12/33 in-scope tests ported** (21 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 21 | supports empty data | ported | [`crates/renovate-core/src/util.rs:6028`](../../../../../crates/renovate-core/src/util.rs#L6028) |
 | 32 | supports single data point | ported | [`crates/renovate-core/src/util.rs:6044`](../../../../../crates/renovate-core/src/util.rs#L6044) |

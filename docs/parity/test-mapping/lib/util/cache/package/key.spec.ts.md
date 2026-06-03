@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../_by-module/util/cache.md) · [all modules](../../../../README.md)
 
-**1/1 ported** (0 pending) · status: ported
+**1/1 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | works | ported | [`crates/renovate-core/src/branch.rs:2479`](../../../../../../../crates/renovate-core/src/branch.rs#L2479) |
 

@@ -2,9 +2,9 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 10/10 tests ported across 1 spec files.
+**Coverage:** 10/10 in-scope tests ported (opt-out=0) across 1 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/golang-version/index.spec.ts`](../../lib/modules/datasource/golang-version/index.spec.ts.md) | 10 | 10 | 0 | [`crates/renovate-core/src/datasources/golang_version.rs:228`](../../../../../crates/renovate-core/src/datasources/golang_version.rs#L228) | ported |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/modules/datasource/golang-version/index.spec.ts`](../../lib/modules/datasource/golang-version/index.spec.ts.md) | 10 | 10 | 0 | 0 | [`crates/renovate-core/src/datasources/golang_version.rs:228`](../../../../../crates/renovate-core/src/datasources/golang_version.rs#L228) | ported |
 

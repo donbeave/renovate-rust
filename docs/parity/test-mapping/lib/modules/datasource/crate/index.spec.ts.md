@@ -2,9 +2,9 @@
 
 [← `datasource/crate`](../../../../_by-module/datasource/crate.md) · [all modules](../../../../README.md)
 
-**22/27 ported** (5 pending) · status: partial
+**22/27 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 98 | returns correct suffixes | ported | [`crates/renovate-core/src/datasources/crates_io.rs:725`](../../../../../../../crates/renovate-core/src/datasources/crates_io.rs#L725) |
 | 148 | returns null for missing registry url | ported | [`crates/renovate-core/src/datasources/crates_io.rs:930`](../../../../../../../crates/renovate-core/src/datasources/crates_io.rs#L930) |

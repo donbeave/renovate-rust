@@ -2,9 +2,9 @@
 
 [← `platform/forgejo`](../../../../_by-module/platform/forgejo.md) · [all modules](../../../../README.md)
 
-**3/137 ported** (134 pending) · status: partial
+**3/137 in-scope tests ported** (134 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 279 | should throw if no token | pending | — |
 | 283 | should throw if auth fails | pending | — |

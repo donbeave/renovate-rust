@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../../../_by-module/worker/repository.md) · [all modules](../../../../../../../README.md)
 
-**0/16 ported** (16 pending) · status: pending
+**0/16 in-scope tests ported** (16 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 54 | returns null if @types | pending | — |
 | 63 | returns null if currentversion equals newversion | pending | — |

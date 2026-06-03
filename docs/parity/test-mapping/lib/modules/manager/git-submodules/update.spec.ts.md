@@ -2,9 +2,9 @@
 
 [← `manager/git-submodules`](../../../../_by-module/manager/git-submodules.md) · [all modules](../../../../README.md)
 
-**3/6 ported** (3 pending) · status: partial
+**3/6 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 49 | returns null on error | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:607`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L607) |
 | 60 | returns content on update | pending | — |

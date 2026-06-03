@@ -2,9 +2,9 @@
 
 [← `util/fs`](../../../_by-module/util/fs.md) · [all modules](../../../README.md)
 
-**24/56 ported** (32 pending) · status: partial
+**24/56 in-scope tests ported** (32 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 78 | _(it.each / template — verify manually)_ | ? | — |
 | 99 | _(it.each / template — verify manually)_ | ? | — |

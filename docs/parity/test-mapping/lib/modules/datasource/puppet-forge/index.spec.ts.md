@@ -2,9 +2,9 @@
 
 [← `datasource/puppet-forge`](../../../../_by-module/datasource/puppet-forge.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | should use default forge if no other provided | ported | [`crates/renovate-core/src/datasources/puppet_forge.rs:168`](../../../../../../../crates/renovate-core/src/datasources/puppet_forge.rs#L168) |
 | 34 | parses real data | ported | [`crates/renovate-core/src/datasources/puppet_forge.rs:191`](../../../../../../../crates/renovate-core/src/datasources/puppet_forge.rs#L191) |

@@ -2,9 +2,9 @@
 
 [← `versioning/pvp`](../../../../_by-module/versioning/pvp.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | should return null when there are no numbers | ported | [`crates/renovate-core/src/versioning/pvp.rs:283`](../../../../../../../crates/renovate-core/src/versioning/pvp.rs#L283) |
 | 9 | should parse 3.0 | ported | [`crates/renovate-core/src/versioning/pvp.rs:289`](../../../../../../../crates/renovate-core/src/versioning/pvp.rs#L289) |

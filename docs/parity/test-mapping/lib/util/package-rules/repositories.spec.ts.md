@@ -2,9 +2,9 @@
 
 [← `util/package-rules`](../../../_by-module/util/package-rules.md) · [all modules](../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | should return null if match repositories is not defined | ported | [`crates/renovate-core/src/package_rule.rs:1590`](../../../../../../crates/renovate-core/src/package_rule.rs#L1590) |
 | 19 | should return false if repository is not defined | ported | [`crates/renovate-core/src/package_rule.rs:1598`](../../../../../../crates/renovate-core/src/package_rule.rs#L1598) |

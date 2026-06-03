@@ -2,9 +2,9 @@
 
 [← `config/presets`](../../../_by-module/config/presets.md) · [all modules](../../../README.md)
 
-**46/46 ported** (0 pending) · status: ported
+**46/46 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns default package name | ported | [`crates/renovate-core/src/extractors/renovate_config_presets.rs:1117`](../../../../../../crates/renovate-core/src/extractors/renovate_config_presets.rs#L1117) |
 | 17 | parses github | ported | [`crates/renovate-core/src/extractors/renovate_config_presets.rs:1130`](../../../../../../crates/renovate-core/src/extractors/renovate_config_presets.rs#L1130) |

@@ -2,9 +2,9 @@
 
 [← `manager/argocd`](../../../../_by-module/manager/argocd.md) · [all modules](../../../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | returns null for empty | ported | [`crates/renovate-core/src/extractors/argocd.rs:417`](../../../../../../../crates/renovate-core/src/extractors/argocd.rs#L417) |
 | 15 | returns null for invalid | ported | [`crates/renovate-core/src/extractors/argocd.rs:462`](../../../../../../../crates/renovate-core/src/extractors/argocd.rs#L462) |

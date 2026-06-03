@@ -2,9 +2,9 @@
 
 [← `manager/cpanfile`](../../../../_by-module/manager/cpanfile.md) · [all modules](../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/cpanfile.rs:341`](../../../../../../../crates/renovate-core/src/extractors/cpanfile.rs#L341) |
 | 12 | _(it.each / template — verify manually)_ | ? | — |

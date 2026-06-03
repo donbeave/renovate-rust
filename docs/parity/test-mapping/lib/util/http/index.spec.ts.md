@@ -2,9 +2,9 @@
 
 [← `util/http`](../../../_by-module/util/http.md) · [all modules](../../../README.md)
 
-**18/52 ported** (34 pending) · status: partial
+**18/52 in-scope tests ported** (34 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 37 | sets default user-agent | ported | [`crates/renovate-core/src/http.rs:1034`](../../../../../../crates/renovate-core/src/http.rs#L1034) |
 | 47 | uses useragent when set as a plain string | pending | — |

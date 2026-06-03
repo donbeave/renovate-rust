@@ -2,9 +2,9 @@
 
 [← `versioning/semver-partial`](../../../../_by-module/versioning/semver-partial.md) · [all modules](../../../../README.md)
 
-**18/18 ported** (0 pending) · status: ported
+**18/18 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
 | 24 | _(it.each / template — verify manually)_ | ? | — |

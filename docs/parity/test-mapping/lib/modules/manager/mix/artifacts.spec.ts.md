@@ -2,9 +2,9 @@
 
 [← `manager/mix`](../../../../_by-module/manager/mix.md) · [all modules](../../../../README.md)
 
-**0/20 ported** (20 pending) · status: pending
+**0/20 in-scope tests ported** (20 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 48 | returns null if no mix.lock found | pending | — |
 | 59 | returns null if no updateddeps were provided | pending | — |

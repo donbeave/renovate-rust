@@ -2,9 +2,9 @@
 
 [← `datasource/golang-version`](../../../../_by-module/datasource/golang-version.md) · [all modules](../../../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | parses real data | ported | [`crates/renovate-core/src/datasources/golang_version.rs:228`](../../../../../../../crates/renovate-core/src/datasources/golang_version.rs#L228) |
 | 36 | supports custom registry url | ported | [`crates/renovate-core/src/datasources/golang_version.rs:342`](../../../../../../../crates/renovate-core/src/datasources/golang_version.rs#L342) |

@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | handles empty | ported | [`crates/renovate-core/src/util.rs:11460`](../../../../../../../../crates/renovate-core/src/util.rs#L11460) |
 | 28 | has special lock file maintenance description | ported | [`crates/renovate-core/src/util.rs:11468`](../../../../../../../../crates/renovate-core/src/util.rs#L11468) |

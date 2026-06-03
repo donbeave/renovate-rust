@@ -2,9 +2,9 @@
 
 [← `platform/azure`](../../../../_by-module/platform/azure.md) · [all modules](../../../../README.md)
 
-**2/79 ported** (77 pending) · status: partial
+**2/79 in-scope tests ported** (77 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 102 | should throw if no endpoint | pending | — |
 | 107 | should throw if no token nor a username and password | pending | — |

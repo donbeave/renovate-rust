@@ -2,9 +2,9 @@
 
 [← `datasource/go`](../../../../_by-module/datasource/go.md) · [all modules](../../../../README.md)
 
-**0/29 ported** (29 pending) · status: pending
+**0/29 in-scope tests ported** (29 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | _(it.each / template — verify manually)_ | ? | — |
 | 46 | returns null for unknown prefix | pending | — |

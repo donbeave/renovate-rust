@@ -2,9 +2,9 @@
 
 [← `manager/bundler`](../../../../_by-module/manager/bundler.md) · [all modules](../../../../README.md)
 
-**8/11 ported** (3 pending) · status: partial
+**8/11 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 31 | uses existing constraint | ported | [`crates/renovate-core/src/extractors/bundler.rs:1531`](../../../../../../../crates/renovate-core/src/extractors/bundler.rs#L1531) |
 | 41 | extracts from lockfile | ported | [`crates/renovate-core/src/extractors/bundler.rs:1542`](../../../../../../../crates/renovate-core/src/extractors/bundler.rs#L1542) |

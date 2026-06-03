@@ -24,29 +24,32 @@ other's way.
 ### Implementation agent — paste this
 
 ```text
-/goal Follow renovate-rust/prompts/implementation.md. Do exactly one focused
-cycle: read the source-mapping state, pick one pending/partial source file in
-the first incomplete milestone, search the repo for an existing implementation,
-compare it to the upstream TypeScript, fix divergences, prove it with the single
-test that covers it, then mark the @parity tag last. Regenerate source-mapping
-and commit + push only the files you changed. Then stop.
+/goal Follow renovate-rust/prompts/implementation.md. Keep cycling until the
+current milestone has no pending/partial source files left: each cycle, read the
+source-mapping state, pick one pending/partial source file, search the repo for
+an existing implementation, compare it to the upstream TypeScript, fix
+divergences, prove it with the single test that covers it, then mark the @parity
+tag last (or, if it has no Rust analogue, opt it out in docs/parity/opt-out.toml
+with a reason). Regenerate source-mapping, commit + push only the files you
+changed, then move to the next file.
 ```
 
 ### Test parity agent — paste this
 
 ```text
-/goal Follow renovate-rust/prompts/test-parity.md. Do exactly one focused cycle:
-read the test-mapping state, pick one spec with pending tests in the first
-incomplete milestone (skip it if its implementation is missing), port the
-missing test(s) so they really exercise the behavior — making a minimal
-business-logic fix only if a test exposes a real divergence — then mark
-// Ported: last. Regenerate test-mapping and commit + push only the files you
-changed. Then stop.
+/goal Follow renovate-rust/prompts/test-parity.md. Keep cycling until the current
+milestone has no pending tests left: each cycle, read the test-mapping state,
+pick one spec with pending tests (skip it if its implementation is missing), port
+the missing test(s) so they really exercise the behavior — making a minimal
+business-logic fix only if a test exposes a real divergence, or opting a test out
+in docs/parity/opt-out.toml with a reason if it only checks TypeScript-runtime
+behavior — then mark // Ported: last. Regenerate test-mapping, commit + push only
+the files you changed, then move to the next test.
 ```
 
 `/goal` is the recommended way to run these in both Claude Code and Codex: paste
-the block, the agent runs one cycle and stops, and you re-issue it for the next
-cycle. (If a harness lacks `/goal`, the same text works as a plain message; in
+the block and the agent keeps working through its scope, committing after each
+item. (If a harness lacks `/goal`, the same text works as a plain message; in
 non-interactive Codex you can inline the prompt with
 `$(cat renovate-rust/prompts/implementation.md)`.)
 
@@ -84,10 +87,17 @@ cargo run -p parity-cli -- check       # CI guard: stale @parity tags + deleted-
 ```
 
 - **source-mapping** statuses: `full` · `partial` · `stub` · `pending` (no
-  `@parity` tag) · `out-of-scope`.
+  `@parity` tag) · `out-of-scope` (tag) · `opt-out` (registry).
 - **test-mapping** states: `ported` (upstream test + matching `// Ported:`) ·
-  `pending` · `deleted` (a `// Ported:` whose upstream identity is gone — kept
-  for review, never auto-removed).
+  `pending` · `opt-out` (registry) · `deleted` (a `// Ported:` whose upstream
+  identity is gone — kept for review, never auto-removed).
+
+**Opt-out registry — `docs/parity/opt-out.toml`.** The single place recording
+items that will never be ported (TypeScript/Node-runtime specifics with no Rust
+analogue), each with a reason. `parity-cli` reads it, marks those items `opt-out`
+(not `pending`), excludes them from the coverage denominator, and keeps agents
+from picking them. This is how the agents' loops terminate: every item ends up
+ported/full or opted-out, so `pending` drains to zero.
 
 Per-module coverage is the by-module summary in each tree's `README.md`. The
 previous Python scripts have been removed; `parity-cli` is the only parity tool.

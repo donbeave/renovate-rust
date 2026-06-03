@@ -2,9 +2,9 @@
 
 [← `manager/nodenv`](../../../../_by-module/manager/nodenv.md) · [all modules](../../../../README.md)
 
-**3/3 ported** (0 pending) · status: ported
+**3/3 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns a result | ported | [`crates/renovate-core/src/extractors/version_file.rs:440`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L440) |
 | 16 | supports ranges | ported | [`crates/renovate-core/src/extractors/version_file.rs:449`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L449) |

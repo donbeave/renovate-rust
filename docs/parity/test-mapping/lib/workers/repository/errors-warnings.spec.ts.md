@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../_by-module/worker/repository.md) · [all modules](../../../README.md)
 
-**14/16 ported** (2 pending) · status: partial
+**14/16 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | returns warning text | ported | [`crates/renovate-core/src/util.rs:11143`](../../../../../../crates/renovate-core/src/util.rs#L11143) |
 | 41 | getwarning returns empty string | ported | [`crates/renovate-core/src/util.rs:11153`](../../../../../../crates/renovate-core/src/util.rs#L11153) |

@@ -2,9 +2,9 @@
 
 [← `manager/docker-compose`](../../../../_by-module/manager/docker-compose.md) · [all modules](../../../../README.md)
 
-**13/13 ported** (0 pending) · status: ported
+**13/13 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | returns null for empty | ported | [`crates/renovate-core/src/extractors/docker_compose.rs:441`](../../../../../../../crates/renovate-core/src/extractors/docker_compose.rs#L441) |
 | 16 | returns null for non-object yaml | ported | [`crates/renovate-core/src/extractors/docker_compose.rs:448`](../../../../../../../crates/renovate-core/src/extractors/docker_compose.rs#L448) |

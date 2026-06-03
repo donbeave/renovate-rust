@@ -409,12 +409,66 @@ impl<'a> Resolver<'a> {
 }
 
 // ---------------------------------------------------------------------------
+// Opt-out exclusions (from docs/parity/opt-out.toml)
+// ---------------------------------------------------------------------------
+
+/// Test exclusions resolved from the opt-out registry, keyed for matching
+/// against normalized upstream descriptions.
+struct Exclusions {
+    /// spec rel → reason (the whole spec is excluded).
+    whole_specs: HashMap<String, String>,
+    /// (spec rel, normalized desc) → reason.
+    per_test: HashMap<(String, String), String>,
+}
+
+impl Exclusions {
+    fn build(optout: &crate::optout::OptOut) -> Self {
+        let mut whole_specs = HashMap::new();
+        let mut per_test = HashMap::new();
+        for e in &optout.test {
+            if e.all {
+                whole_specs.insert(e.spec.clone(), e.reason.clone());
+            } else if let Some(t) = &e.test {
+                per_test.insert((e.spec.clone(), normalize_desc(t)), e.reason.clone());
+            }
+        }
+        Self {
+            whole_specs,
+            per_test,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            whole_specs: HashMap::new(),
+            per_test: HashMap::new(),
+        }
+    }
+
+    fn spec_reason(&self, spec: &str) -> Option<&str> {
+        self.whole_specs.get(spec).map(String::as_str)
+    }
+
+    /// Reason a specific (already-normalized) test is excluded, if any.
+    fn test_reason(&self, spec: &str, desc_norm: &str) -> Option<&str> {
+        if let Some(r) = self.whole_specs.get(spec) {
+            return Some(r);
+        }
+        self.per_test
+            .get(&(spec.to_string(), desc_norm.to_string()))
+            .map(String::as_str)
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Reconcile
 // ---------------------------------------------------------------------------
 
 struct SpecStat<'a> {
     spec: &'a SpecFile,
     ported: usize,
+    /// Upstream tests intentionally excluded (opt-out registry).
+    optout: usize,
     /// Distinct Rust files holding this spec's ported tests (the migration
     /// targets), each with the line of its first ported test. Empty when the
     /// spec has no ported tests yet.
@@ -441,7 +495,7 @@ struct Analysis<'a> {
     deleted: Vec<Deleted>,
 }
 
-fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
+fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported], excl: &Exclusions) -> Analysis<'a> {
     let resolver = Resolver::new(specs, false);
     let mut covered: HashMap<&str, HashSet<String>> = HashMap::new();
     // spec rel -> (rust file -> line of its first ported test).
@@ -500,14 +554,34 @@ fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
     let stats = specs
         .iter()
         .map(|s| {
-            let n = covered.get(s.rel.as_str()).map_or(0, HashSet::len);
+            let cov = covered.get(s.rel.as_str());
+            let ported = cov.map_or(0, HashSet::len).min(s.it_count);
+            // Site-level opt-out: an excluded site that is not already ported.
+            let mut optout = 0;
+            for (_line, desc) in &s.sites {
+                let is_covered = desc
+                    .as_ref()
+                    .is_some_and(|d| cov.is_some_and(|c| c.contains(d)));
+                if is_covered {
+                    continue;
+                }
+                let excluded = match desc {
+                    Some(d) => excl.test_reason(&s.rel, d).is_some(),
+                    None => excl.spec_reason(&s.rel).is_some(),
+                };
+                if excluded {
+                    optout += 1;
+                }
+            }
+            let optout = optout.min(s.it_count - ported);
             let rust_files = rust_by_spec
                 .get(s.rel.as_str())
                 .map(|m| m.iter().map(|(f, l)| (f.clone(), *l)).collect())
                 .unwrap_or_default();
             SpecStat {
                 spec: s,
-                ported: n.min(s.it_count),
+                ported,
+                optout,
                 rust_files,
             }
         })
@@ -519,7 +593,8 @@ fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
 /// Print deleted/orphan `// Ported:` comments to stderr for `check`. Returns
 /// `true` if any were found.
 pub(crate) fn report_orphans(specs: &[SpecFile], ported: &[Ported]) -> bool {
-    let Analysis { deleted, .. } = analyze(specs, ported);
+    // Deleted detection is independent of opt-out, so an empty set is fine here.
+    let Analysis { deleted, .. } = analyze(specs, ported, &Exclusions::empty());
     for d in &deleted {
         let reason = match d.reason {
             DeleteReason::FileGone => "file removed/moved",
@@ -565,10 +640,13 @@ fn spec_page_path(spec_rel: &str) -> String {
     format!("{spec_rel}.md")
 }
 
-fn spec_status(it: usize, ported: usize) -> &'static str {
+fn spec_status(it: usize, ported: usize, optout: usize) -> &'static str {
+    let in_scope = it.saturating_sub(optout);
     if it == 0 {
         "—"
-    } else if ported >= it {
+    } else if in_scope == 0 {
+        "opt-out"
+    } else if ported >= in_scope {
         "ported"
     } else if ported == 0 {
         "pending"
@@ -580,17 +658,21 @@ fn spec_status(it: usize, ported: usize) -> &'static str {
 fn render_readme(by_module: &BTreeMap<&str, Vec<&SpecStat>>, deleted: &[Deleted]) -> String {
     let total_it: usize = by_module.values().flatten().map(|s| s.spec.it_count).sum();
     let total_por: usize = by_module.values().flatten().map(|s| s.ported).sum();
+    let total_opt: usize = by_module.values().flatten().map(|s| s.optout).sum();
+    let in_scope = total_it - total_opt;
     let mut out = String::new();
     out.push_str("# Test Mapping\n\n");
     out.push_str("Auto-generated by `cargo run -p parity-cli -- test`. **Do not hand-edit.**\n\n");
     out.push_str("Upstream `it()`/`test()` → Rust `// Ported:`. Click a module to see its spec ");
-    out.push_str("files; click a spec to see each test and its Rust destination.\n\n");
+    out.push_str("files; click a spec to see each test and its Rust destination. `opt-out` tests ");
+    out.push_str("(`docs/parity/opt-out.toml`) will never be ported and are excluded.\n\n");
     out.push_str(&format!(
-        "**Coverage:** {total_por}/{total_it} upstream tests ported. **Deleted (review):** {}.\n\n",
+        "**Coverage:** {total_por}/{in_scope} in-scope tests ported \
+         (opt-out={total_opt}). **Deleted (review):** {}.\n\n",
         deleted.len()
     ));
-    out.push_str("| Module | Spec files | it() | ported | pending | deleted | % |\n");
-    out.push_str("|---|--:|--:|--:|--:|--:|--:|\n");
+    out.push_str("| Module | Spec files | it() | ported | pending | opt-out | deleted | % |\n");
+    out.push_str("|---|--:|--:|--:|--:|--:|--:|--:|\n");
     let mut del_by_module: BTreeMap<&str, usize> = BTreeMap::new();
     for d in deleted {
         *del_by_module.entry(d.module.as_str()).or_default() += 1;
@@ -598,20 +680,23 @@ fn render_readme(by_module: &BTreeMap<&str, Vec<&SpecStat>>, deleted: &[Deleted]
     for (module, grp) in by_module {
         let it: usize = grp.iter().map(|s| s.spec.it_count).sum();
         let por: usize = grp.iter().map(|s| s.ported).sum();
+        let opt: usize = grp.iter().map(|s| s.optout).sum();
+        let scope = it - opt;
         let del = del_by_module.get(module).copied().unwrap_or(0);
         let pct = por
             .checked_mul(100)
-            .and_then(|n| n.checked_div(it))
+            .and_then(|n| n.checked_div(scope))
             .unwrap_or(100);
         let link = rel_link("README.md", &module_page_path(module));
         out.push_str(&format!(
-            "| [`{}`]({}) | {} | {} | {} | {} | {} | {}% |\n",
+            "| [`{}`]({}) | {} | {} | {} | {} | {} | {} | {}% |\n",
             module,
             link,
             grp.len(),
             it,
             por,
-            it - por,
+            scope - por,
+            opt,
             del,
             pct,
         ));
@@ -644,6 +729,8 @@ fn render_readme(by_module: &BTreeMap<&str, Vec<&SpecStat>>, deleted: &[Deleted]
 fn render_module_page(module: &str, grp: &[&SpecStat], mpath: &str) -> String {
     let it: usize = grp.iter().map(|s| s.spec.it_count).sum();
     let por: usize = grp.iter().map(|s| s.ported).sum();
+    let opt: usize = grp.iter().map(|s| s.optout).sum();
+    let in_scope = it - opt;
     let mut out = String::new();
     out.push_str(&format!("# Module: `{module}`\n\n"));
     out.push_str(&format!(
@@ -651,14 +738,16 @@ fn render_module_page(module: &str, grp: &[&SpecStat], mpath: &str) -> String {
         rel_link(mpath, "README.md")
     ));
     out.push_str(&format!(
-        "**Coverage:** {por}/{it} tests ported across {} spec files.\n\n",
+        "**Coverage:** {por}/{in_scope} in-scope tests ported (opt-out={opt}) across {} spec files.\n\n",
         grp.len()
     ));
-    out.push_str("| Spec file | it() | ported | pending | Rust test file(s) | Status |\n");
-    out.push_str("|---|--:|--:|--:|---|---|\n");
+    out.push_str(
+        "| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |\n",
+    );
+    out.push_str("|---|--:|--:|--:|--:|---|---|\n");
     for s in grp {
         let itc = s.spec.it_count;
-        let pending = itc - s.ported;
+        let pending = itc - s.ported - s.optout;
         let spath = spec_page_path(&s.spec.rel);
         let link = rel_link(mpath, &spath);
         let rust = if s.rust_files.is_empty() {
@@ -671,14 +760,15 @@ fn render_module_page(module: &str, grp: &[&SpecStat], mpath: &str) -> String {
                 .join("<br>")
         };
         out.push_str(&format!(
-            "| [`{}`]({}) | {} | {} | {} | {} | {} |\n",
+            "| [`{}`]({}) | {} | {} | {} | {} | {} | {} |\n",
             s.spec.rel,
             link,
             itc,
             s.ported,
             pending,
+            s.optout,
             rust,
-            spec_status(itc, s.ported),
+            spec_status(itc, s.ported, s.optout),
         ));
     }
     out.push('\n');
@@ -688,11 +778,13 @@ fn render_module_page(module: &str, grp: &[&SpecStat], mpath: &str) -> String {
 fn render_spec_page(
     s: &SpecStat,
     dest: &HashMap<(String, String), (String, usize)>,
+    excl: &Exclusions,
     mpath: &str,
     spath: &str,
     module: &str,
 ) -> String {
     let rel = &s.spec.rel;
+    let in_scope = s.spec.it_count - s.optout;
     let mut out = String::new();
     out.push_str(&format!("# `{rel}`\n\n"));
     out.push_str(&format!(
@@ -702,29 +794,37 @@ fn render_spec_page(
         rel_link(spath, "README.md"),
     ));
     out.push_str(&format!(
-        "**{}/{} ported** ({} pending) · status: {}\n\n",
+        "**{}/{} in-scope tests ported** ({} pending, {} opt-out) · status: {}\n\n",
         s.ported,
-        s.spec.it_count,
-        s.spec.it_count - s.ported,
-        spec_status(s.spec.it_count, s.ported),
+        in_scope,
+        in_scope - s.ported,
+        s.optout,
+        spec_status(s.spec.it_count, s.ported, s.optout),
     ));
-    out.push_str("| Line | Test | Status | Rust destination |\n");
+    out.push_str("| Line | Test | Status | Rust destination / opt-out reason |\n");
     out.push_str("|--:|---|---|---|\n");
     for (line, desc) in &s.spec.sites {
         match desc {
             Some(d) => {
                 let raw = d.replace('|', "\\|");
-                match dest.get(&(rel.clone(), d.clone())) {
-                    Some((rf, rl)) => {
-                        let link = rust_link(spath, rf, Some(*rl));
-                        out.push_str(&format!("| {line} | {raw} | ported | {link} |\n"));
-                    }
-                    None => out.push_str(&format!("| {line} | {raw} | pending | — |\n")),
+                if let Some((rf, rl)) = dest.get(&(rel.clone(), d.clone())) {
+                    let link = rust_link(spath, rf, Some(*rl));
+                    out.push_str(&format!("| {line} | {raw} | ported | {link} |\n"));
+                } else if let Some(reason) = excl.test_reason(rel, d) {
+                    out.push_str(&format!("| {line} | {raw} | opt-out | {reason} |\n"));
+                } else {
+                    out.push_str(&format!("| {line} | {raw} | pending | — |\n"));
                 }
             }
-            None => out.push_str(&format!(
-                "| {line} | _(it.each / template — verify manually)_ | ? | — |\n"
-            )),
+            None => {
+                let (status, cell) = match excl.spec_reason(rel) {
+                    Some(reason) => ("opt-out", reason.to_string()),
+                    None => ("?", "—".to_string()),
+                };
+                out.push_str(&format!(
+                    "| {line} | _(it.each / template — verify manually)_ | {status} | {cell} |\n"
+                ));
+            }
         }
     }
     out.push('\n');
@@ -737,9 +837,11 @@ pub(crate) fn write_pages(
     out_dir: &Path,
     specs: &[SpecFile],
     ported: &[Ported],
+    optout: &crate::optout::OptOut,
 ) -> std::io::Result<usize> {
+    let excl = Exclusions::build(optout);
     let dest = build_dest_map(specs, ported);
-    let Analysis { stats, deleted } = analyze(specs, ported);
+    let Analysis { stats, deleted } = analyze(specs, ported, &excl);
 
     let mut by_module: BTreeMap<&str, Vec<&SpecStat>> = BTreeMap::new();
     for s in &stats {
@@ -755,7 +857,7 @@ pub(crate) fn write_pages(
             let spath = spec_page_path(&s.spec.rel);
             files.push((
                 spath.clone(),
-                render_spec_page(s, &dest, &mpath, &spath, module),
+                render_spec_page(s, &dest, &excl, &mpath, &spath, module),
             ));
         }
     }
@@ -779,7 +881,13 @@ pub(crate) fn write_pages(
 
 /// List the upstream `it()` call sites that have no `// Ported:` counterpart,
 /// for every spec whose module id or path contains `filter`. Prints to stdout.
-pub(crate) fn gaps(specs: &[SpecFile], ported: &[Ported], filter: &str) -> bool {
+pub(crate) fn gaps(
+    specs: &[SpecFile],
+    ported: &[Ported],
+    optout: &crate::optout::OptOut,
+    filter: &str,
+) -> bool {
+    let excl = Exclusions::build(optout);
     let resolver = Resolver::new(specs, false);
     let mut covered: HashMap<&str, HashSet<&str>> = HashMap::new();
     for p in ported {
@@ -797,29 +905,36 @@ pub(crate) fn gaps(specs: &[SpecFile], ported: &[Ported], filter: &str) -> bool 
             continue;
         }
         let cov = covered.get(spec.rel.as_str());
-        let ported_n = cov.map_or(0, HashSet::len).min(spec.it_count);
-        if ported_n >= spec.it_count {
-            continue;
-        }
-        matched = true;
-        println!(
-            "## {}  —  {}/{} ({} missing)",
-            spec.rel,
-            ported_n,
-            spec.it_count,
-            spec.it_count - ported_n
-        );
+        // Pending = sites neither ported nor opted-out.
+        let mut pending: Vec<(usize, &str)> = Vec::new();
         for (line, desc) in &spec.sites {
             match desc {
                 Some(d) if cov.is_some_and(|c| c.contains(d.as_str())) => {} // ported
-                Some(d) => println!("  L{line:<5} {d}"),
-                None => println!("  L{line:<5} (it.each / template — verify manually)"),
+                Some(d) if excl.test_reason(&spec.rel, d).is_some() => {}    // opt-out
+                None if excl.spec_reason(&spec.rel).is_some() => {}          // opt-out (whole spec)
+                Some(d) => pending.push((*line, d.as_str())),
+                None => pending.push((*line, "(it.each / template — verify manually)")),
             }
+        }
+        if pending.is_empty() {
+            continue;
+        }
+        matched = true;
+        let ported_n = cov.map_or(0, HashSet::len).min(spec.it_count);
+        println!(
+            "## {}  —  {}/{} ported, {} pending",
+            spec.rel,
+            ported_n,
+            spec.it_count,
+            pending.len()
+        );
+        for (line, desc) in pending {
+            println!("  L{line:<5} {desc}");
         }
         println!();
     }
     if !matched {
-        eprintln!("no pending specs match `{filter}` (already fully ported, or unknown module)");
+        eprintln!("no pending specs match `{filter}` (already ported/opt-out, or unknown module)");
     }
     matched
 }

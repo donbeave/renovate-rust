@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**13/13 ported** (0 pending) · status: ported
+**13/13 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | works with default config | ported | [`crates/renovate-core/src/config/secrets.rs:200`](../../../../../crates/renovate-core/src/config/secrets.rs#L200) |
 | 20 | returns if no secrets/variables | ported | [`crates/renovate-core/src/config/secrets.rs:206`](../../../../../crates/renovate-core/src/config/secrets.rs#L206) |

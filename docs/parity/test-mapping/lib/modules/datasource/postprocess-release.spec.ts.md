@@ -2,9 +2,9 @@
 
 [← `datasource/_common`](../../../_by-module/datasource/_common.md) · [all modules](../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | returns original release for empty datasource field | ported | [`crates/renovate-core/src/datasources.rs:1647`](../../../../../../crates/renovate-core/src/datasources.rs#L1647) |
 | 36 | returns original release for missing datasource | ported | [`crates/renovate-core/src/datasources.rs:1659`](../../../../../../crates/renovate-core/src/datasources.rs#L1659) |

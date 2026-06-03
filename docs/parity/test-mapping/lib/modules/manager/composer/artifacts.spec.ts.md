@@ -2,9 +2,9 @@
 
 [← `manager/composer`](../../../../_by-module/manager/composer.md) · [all modules](../../../../README.md)
 
-**0/30 ported** (30 pending) · status: pending
+**0/30 in-scope tests ported** (30 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 70 | returns if no composer.lock found | pending | — |
 | 81 | returns null if unchanged | pending | — |

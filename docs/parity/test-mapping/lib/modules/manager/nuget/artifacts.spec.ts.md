@@ -2,9 +2,9 @@
 
 [← `manager/nuget`](../../../../_by-module/manager/nuget.md) · [all modules](../../../../README.md)
 
-**0/13 ported** (13 pending) · status: pending
+**0/13 in-scope tests ported** (13 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 54 | re-throws temporary_error | pending | — |
 | 73 | aborts if no lock file found | pending | — |

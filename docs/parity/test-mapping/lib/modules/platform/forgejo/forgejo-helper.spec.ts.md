@@ -2,9 +2,9 @@
 
 [← `platform/forgejo`](../../../../_by-module/platform/forgejo.md) · [all modules](../../../../README.md)
 
-**0/40 ported** (40 pending) · status: pending
+**0/40 in-scope tests ported** (40 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 200 | should call /api/v1/user endpoint | pending | — |
 | 209 | should call /api/v1/version endpoint | pending | — |

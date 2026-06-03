@@ -2,9 +2,9 @@
 
 [← `manager/gomod`](../../../../_by-module/manager/gomod.md) · [all modules](../../../../README.md)
 
-**26/56 ported** (30 pending) · status: partial
+**26/56 in-scope tests ported** (30 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 94 | returns if no go.sum found | ported | [`crates/renovate-core/src/extractors/gomod_artifact_runner.rs:428`](../../../../../../../crates/renovate-core/src/extractors/gomod_artifact_runner.rs#L428) |
 | 107 | returns null if unchanged | ported | [`crates/renovate-core/src/extractors/gomod_artifact_runner.rs:438`](../../../../../../../crates/renovate-core/src/extractors/gomod_artifact_runner.rs#L438) |

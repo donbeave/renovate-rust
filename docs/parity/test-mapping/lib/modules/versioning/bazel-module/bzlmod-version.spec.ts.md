@@ -2,9 +2,9 @@
 
 [← `versioning/bazel-module`](../../../../_by-module/versioning/bazel-module.md) · [all modules](../../../../README.md)
 
-**14/18 ported** (4 pending) · status: partial
+**14/18 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | when all digits | ported | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:221`](../../../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L221) |
 | 12 | when not all digits | ported | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:230`](../../../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L230) |

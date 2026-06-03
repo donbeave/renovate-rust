@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../_by-module/manager/npm.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | parses lockfile string into an object | ported | [`crates/renovate-core/src/extractors/npm.rs:4903`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4903) |
 | 37 | can deal with invalid lockfiles | ported | [`crates/renovate-core/src/extractors/npm.rs:4916`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4916) |

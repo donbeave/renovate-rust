@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 0/227 in-scope files mapped (full=0 partial=0 stub=0 pending=227 out-of-scope=0) across 82 modules.
+**Coverage:** 0/227 in-scope files mapped (full=0 partial=0 stub=0 pending=227 out-of-scope=0 opt-out=0) across 82 modules.
 
 ### `datasource/_root`
 

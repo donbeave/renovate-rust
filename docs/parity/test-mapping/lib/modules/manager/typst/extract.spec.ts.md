@@ -2,9 +2,9 @@
 
 [← `manager/typst`](../../../../_by-module/manager/typst.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns empty deps for empty content | ported | [`crates/renovate-core/src/extractors/typst.rs:178`](../../../../../../../crates/renovate-core/src/extractors/typst.rs#L178) |
 | 10 | returns empty deps when no imports found | ported | [`crates/renovate-core/src/extractors/typst.rs:151`](../../../../../../../crates/renovate-core/src/extractors/typst.rs#L151) |

@@ -2,9 +2,9 @@
 
 [← `datasource/docker`](../../../../_by-module/datasource/docker.md) · [all modules](../../../../README.md)
 
-**1/15 ported** (14 pending) · status: partial
+**1/15 in-scope tests ported** (14 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | handles local registries | pending | — |
 | 35 | supports registryurls | pending | — |

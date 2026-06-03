@@ -2,9 +2,9 @@
 
 [← `util/http`](../../../_by-module/util/http.md) · [all modules](../../../README.md)
 
-**0/54 ported** (54 pending) · status: pending
+**0/54 in-scope tests ported** (54 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 67 | supports app mode | pending | — |
 | 81 | supports different datasources | pending | — |

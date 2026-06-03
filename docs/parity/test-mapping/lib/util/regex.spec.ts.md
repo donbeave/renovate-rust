@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**1/6 ported** (5 pending) · status: partial
+**1/6 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | uses re2 | pending | — |
 | 10 | throws unsafe 2 | ported | [`crates/renovate-core/src/util.rs:9354`](../../../../../crates/renovate-core/src/util.rs#L9354) |

@@ -2,9 +2,9 @@
 
 [← `datasource/maven`](../../../../_by-module/datasource/maven.md) · [all modules](../../../../README.md)
 
-**14/16 ported** (2 pending) · status: partial
+**14/16 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 53 | returns error for unsupported protocols | ported | [`crates/renovate-core/src/datasources/maven.rs:2868`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2868) |
 | 64 | returns error for xml parse error | ported | [`crates/renovate-core/src/datasources/maven.rs:2876`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2876) |

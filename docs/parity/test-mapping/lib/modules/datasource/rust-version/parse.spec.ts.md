@@ -2,9 +2,9 @@
 
 [← `datasource/rust-version`](../../../../_by-module/datasource/rust-version.md) · [all modules](../../../../README.md)
 
-**13/13 ported** (0 pending) · status: ported
+**13/13 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | parses nightly url | ported | [`crates/renovate-core/src/datasources/rust_version.rs:184`](../../../../../../../crates/renovate-core/src/datasources/rust_version.rs#L184) |
 | 15 | parses versioned release url | ported | [`crates/renovate-core/src/datasources/rust_version.rs:198`](../../../../../../../crates/renovate-core/src/datasources/rust_version.rs#L198) |

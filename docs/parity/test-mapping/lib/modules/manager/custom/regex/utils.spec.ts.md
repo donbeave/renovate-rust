@@ -2,9 +2,9 @@
 
 [← `manager/custom`](../../../../../_by-module/manager/custom.md) · [all modules](../../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | does not crash for lazy regex | ported | [`crates/renovate-core/src/managers.rs:2051`](../../../../../../../../crates/renovate-core/src/managers.rs#L2051) |
 | 27 | sets registryurls when registryurl group is a valid url | ported | [`crates/renovate-core/src/repo_config.rs:15569`](../../../../../../../../crates/renovate-core/src/repo_config.rs#L15569) |

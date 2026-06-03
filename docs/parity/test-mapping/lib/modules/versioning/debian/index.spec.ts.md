@@ -2,9 +2,9 @@
 
 [← `versioning/debian`](../../../../_by-module/versioning/debian.md) · [all modules](../../../../README.md)
 
-**16/16 ported** (0 pending) · status: ported
+**16/16 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | test | ported | [`crates/renovate-core/src/versioning/debian.rs:560`](../../../../../../../crates/renovate-core/src/versioning/debian.rs#L560) |
 | 22 | _(it.each / template — verify manually)_ | ? | — |

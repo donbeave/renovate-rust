@@ -2,9 +2,9 @@
 
 [← `manager/mise`](../../../../_by-module/manager/mise.md) · [all modules](../../../../README.md)
 
-**29/37 ported** (8 pending) · status: partial
+**29/37 in-scope tests ported** (8 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | should create a tooling config | ported | [`crates/renovate-core/src/extractors/mise.rs:2669`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L2669) |
 | 27 | should trim the leading v from version | ported | [`crates/renovate-core/src/extractors/mise.rs:2679`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L2679) |

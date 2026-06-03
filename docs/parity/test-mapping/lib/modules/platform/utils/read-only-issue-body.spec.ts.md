@@ -2,9 +2,9 @@
 
 [← `platform/utils`](../../../../_by-module/platform/utils.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | removes all checkbox formatting | ported | [`crates/renovate-core/src/platform/pr_body.rs:206`](../../../../../../../crates/renovate-core/src/platform/pr_body.rs#L206) |
 | 14 | removes all checkbox-related instructions | ported | [`crates/renovate-core/src/platform/pr_body.rs:212`](../../../../../../../crates/renovate-core/src/platform/pr_body.rs#L212) |

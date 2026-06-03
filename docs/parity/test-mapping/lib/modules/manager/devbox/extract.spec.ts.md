@@ -2,9 +2,9 @@
 
 [← `manager/devbox`](../../../../_by-module/manager/devbox.md) · [all modules](../../../../README.md)
 
-**13/13 ported** (0 pending) · status: ported
+**13/13 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns null when the devbox json file is empty | ported | [`crates/renovate-core/src/extractors/devbox.rs:151`](../../../../../../../crates/renovate-core/src/extractors/devbox.rs#L151) |
 | 11 | returns null when the devbox json file is malformed | ported | [`crates/renovate-core/src/extractors/devbox.rs:145`](../../../../../../../crates/renovate-core/src/extractors/devbox.rs#L145) |

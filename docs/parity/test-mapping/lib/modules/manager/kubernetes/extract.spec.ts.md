@@ -2,9 +2,9 @@
 
 [← `manager/kubernetes`](../../../../_by-module/manager/kubernetes.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | returns null for empty | ported | [`crates/renovate-core/src/extractors/kubernetes.rs:326`](../../../../../../../crates/renovate-core/src/extractors/kubernetes.rs#L326) |
 | 18 | does not return unknown kind | ported | [`crates/renovate-core/src/extractors/kubernetes.rs:346`](../../../../../../../crates/renovate-core/src/extractors/kubernetes.rs#L346) |

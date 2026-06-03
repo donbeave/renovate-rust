@@ -2,9 +2,9 @@
 
 [← `manager/devcontainer`](../../../../_by-module/manager/devcontainer.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | returns null when the dev container json file is empty | ported | [`crates/renovate-core/src/extractors/devcontainer.rs:265`](../../../../../../../crates/renovate-core/src/extractors/devcontainer.rs#L265) |
 | 22 | returns null when the dev container json file contents are malformed | ported | [`crates/renovate-core/src/extractors/devcontainer.rs:162`](../../../../../../../crates/renovate-core/src/extractors/devcontainer.rs#L162) |

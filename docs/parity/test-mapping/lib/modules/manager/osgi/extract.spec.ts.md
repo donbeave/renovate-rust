@@ -2,9 +2,9 @@
 
 [← `manager/osgi`](../../../../_by-module/manager/osgi.md) · [all modules](../../../../README.md)
 
-**14/14 ported** (0 pending) · status: ported
+**14/14 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 143 | returns null for empty file | ported | [`crates/renovate-core/src/extractors/osgi.rs:268`](../../../../../../../crates/renovate-core/src/extractors/osgi.rs#L268) |
 | 147 | returns null for invalid file | ported | [`crates/renovate-core/src/extractors/osgi.rs:241`](../../../../../../../crates/renovate-core/src/extractors/osgi.rs#L241) |

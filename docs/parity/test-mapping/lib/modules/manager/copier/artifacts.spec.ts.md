@@ -2,9 +2,9 @@
 
 [← `manager/copier`](../../../../_by-module/manager/copier.md) · [all modules](../../../../README.md)
 
-**0/14 ported** (14 pending) · status: pending
+**0/14 in-scope tests ported** (14 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 63 | returns null if newversion is not provided | pending | — |
 | 88 | uses newvalue for vcs-ref when both newvalue and newversion are provided | pending | — |

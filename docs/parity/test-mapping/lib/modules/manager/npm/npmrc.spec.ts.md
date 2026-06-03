@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../_by-module/manager/npm.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | returns undefined if no .npmrc exists and no config.npmrc | ported | [`crates/renovate-core/src/extractors/npm.rs:8540`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8540) |
 | 24 | uses config.npmrc if no .npmrc is found | ported | [`crates/renovate-core/src/extractors/npm.rs:8549`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8549) |

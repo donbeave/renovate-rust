@@ -2,9 +2,9 @@
 
 [← `datasource/custom`](../../../../_by-module/datasource/custom.md) · [all modules](../../../../README.md)
 
-**1/30 ported** (29 pending) · status: partial
+**1/30 in-scope tests ported** (29 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | return null if only the prefix is supplied | pending | — |
 | 22 | return null if no registryurl is provided as well no defaultregistrytemplate is defined | pending | — |

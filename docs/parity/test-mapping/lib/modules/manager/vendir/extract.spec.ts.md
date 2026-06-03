@@ -2,9 +2,9 @@
 
 [← `manager/vendir`](../../../../_by-module/manager/vendir.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | returns null for invalid yaml file content | ported | [`crates/renovate-core/src/extractors/vendir.rs:167`](../../../../../../../crates/renovate-core/src/extractors/vendir.rs#L167) |
 | 15 | returns null for empty yaml file content | ported | [`crates/renovate-core/src/extractors/vendir.rs:154`](../../../../../../../crates/renovate-core/src/extractors/vendir.rs#L154) |

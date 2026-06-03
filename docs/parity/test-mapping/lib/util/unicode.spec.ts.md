@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**4/5 ported** (1 pending) · status: partial
+**4/5 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | logs a warning for hidden unicode characters in text files | ported | [`crates/renovate-core/src/util.rs:9925`](../../../../../crates/renovate-core/src/util.rs#L9925) |
 | 16 | logs a trace message for bom character only | ported | [`crates/renovate-core/src/util.rs:9936`](../../../../../crates/renovate-core/src/util.rs#L9936) |

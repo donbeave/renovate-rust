@@ -2,9 +2,9 @@
 
 [← `util/package-rules`](../../../_by-module/util/package-rules.md) · [all modules](../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | return true for exact match | ported | [`crates/renovate-core/src/package_rule.rs:1395`](../../../../../../crates/renovate-core/src/package_rule.rs#L1395) |
 | 19 | return true for glob match | ported | [`crates/renovate-core/src/package_rule.rs:1403`](../../../../../../crates/renovate-core/src/package_rule.rs#L1403) |

@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../_by-module/worker/repository.md) · [all modules](../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | handles trace level | ported | [`crates/renovate-core/src/branch.rs:2454`](../../../../../../crates/renovate-core/src/branch.rs#L2454) |
 | 10 | handles debug level | ported | [`crates/renovate-core/src/branch.rs:2455`](../../../../../../crates/renovate-core/src/branch.rs#L2455) |

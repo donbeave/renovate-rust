@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**9/15 ported** (6 pending) · status: partial
+**9/15 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | returns empty with no privatekey | pending | — |
 | 29 | warns if no privatekey found | pending | — |

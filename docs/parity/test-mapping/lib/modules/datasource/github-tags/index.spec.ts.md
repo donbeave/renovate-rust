@@ -2,9 +2,9 @@
 
 [← `datasource/github-tags`](../../../../_by-module/datasource/github-tags.md) · [all modules](../../../../README.md)
 
-**11/12 ported** (1 pending) · status: partial
+**11/12 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 25 | returns commit digest | ported | [`crates/renovate-core/src/datasources/github_tags.rs:469`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L469) |
 | 36 | returns null for missing commit | ported | [`crates/renovate-core/src/datasources/github_tags.rs:486`](../../../../../../../crates/renovate-core/src/datasources/github_tags.rs#L486) |

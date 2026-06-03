@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**63/68 ported** (5 pending) · status: partial
+**63/68 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns false for invalid timezone | ported | [`crates/renovate-core/src/schedule.rs:2030`](../../../../../../../../crates/renovate-core/src/schedule.rs#L2030) |
 | 11 | returns true for valid timezone | ported | [`crates/renovate-core/src/schedule.rs:2036`](../../../../../../../../crates/renovate-core/src/schedule.rs#L2036) |

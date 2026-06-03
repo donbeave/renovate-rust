@@ -2,9 +2,9 @@
 
 [← `datasource/deb`](../../../../_by-module/datasource/deb.md) · [all modules](../../../../README.md)
 
-**4/6 ported** (2 pending) · status: partial
+**4/6 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | constructs urls correctly from registry url with suite | ported | [`crates/renovate-core/src/datasources/deb.rs:102`](../../../../../../../crates/renovate-core/src/datasources/deb.rs#L102) |
 | 22 | constructs urls correctly from registry url with deprecated release | ported | [`crates/renovate-core/src/datasources/deb.rs:117`](../../../../../../../crates/renovate-core/src/datasources/deb.rs#L117) |

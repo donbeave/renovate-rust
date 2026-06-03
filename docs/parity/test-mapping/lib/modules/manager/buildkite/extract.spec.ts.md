@@ -2,9 +2,9 @@
 
 [← `manager/buildkite`](../../../../_by-module/manager/buildkite.md) · [all modules](../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns null for empty | ported | [`crates/renovate-core/src/extractors/buildkite.rs:273`](../../../../../../../crates/renovate-core/src/extractors/buildkite.rs#L273) |
 | 11 | extracts simple single plugin | ported | [`crates/renovate-core/src/extractors/buildkite.rs:229`](../../../../../../../crates/renovate-core/src/extractors/buildkite.rs#L229) |

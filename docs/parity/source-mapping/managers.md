@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 0/628 in-scope files mapped (full=0 partial=0 stub=0 pending=628 out-of-scope=0) across 117 modules.
+**Coverage:** 0/628 in-scope files mapped (full=0 partial=0 stub=0 pending=628 out-of-scope=0 opt-out=0) across 117 modules.
 
 ### `manager/_root`
 

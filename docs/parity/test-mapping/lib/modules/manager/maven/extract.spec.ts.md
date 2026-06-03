@@ -2,9 +2,9 @@
 
 [← `manager/maven`](../../../../_by-module/manager/maven.md) · [all modules](../../../../README.md)
 
-**29/30 ported** (1 pending) · status: partial
+**29/30 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | returns null for invalid xml | ported | [`crates/renovate-core/src/extractors/maven.rs:1751`](../../../../../../../crates/renovate-core/src/extractors/maven.rs#L1751) |
 | 29 | extract dependencies from any xml position | ported | [`crates/renovate-core/src/extractors/maven.rs:1630`](../../../../../../../crates/renovate-core/src/extractors/maven.rs#L1630) |

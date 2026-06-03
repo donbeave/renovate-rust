@@ -2,9 +2,9 @@
 
 [← `datasource/elm-package`](../../../../_by-module/datasource/elm-package.md) · [all modules](../../../../README.md)
 
-**4/10 ported** (6 pending) · status: partial
+**4/10 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | returns null for empty result | ported | [`crates/renovate-core/src/datasources/elm_package.rs:150`](../../../../../../../crates/renovate-core/src/datasources/elm_package.rs#L150) |
 | 32 | returns null for 404 | pending | — |

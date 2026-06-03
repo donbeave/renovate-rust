@@ -2,9 +2,9 @@
 
 [← `util/github`](../../../../../_by-module/util/github.md) · [all modules](../../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | transforms commit type | ported | [`crates/renovate-core/src/util.rs:11639`](../../../../../../../../crates/renovate-core/src/util.rs#L11639) |
 | 23 | transforms tag type | ported | [`crates/renovate-core/src/util.rs:11657`](../../../../../../../../crates/renovate-core/src/util.rs#L11657) |

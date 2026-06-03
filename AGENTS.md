@@ -144,10 +144,18 @@ next. The implementation agent owns `@parity` tags; the test parity agent owns
   notes, dependency dashboard, onboarding, and config discovery. Out of scope
   is hosted-only infrastructure (Mend SaaS, GitHub App, marketplace plugin,
   hosted dashboards, webhook ingestors, billing).
-- The per-module Coverage target is **≥ 80% `ported / upstream_it()`** (the
-  module table in `test-mapping/README.md`). If a few upstream tests exercise
-  TypeScript-internal behavior with no Rust analogue, coverage caps below 100% —
-  that is acceptable. There is no `not-applicable` mechanism; do not invent one.
+- The per-module Coverage target is **≥ 80% `ported / in-scope`** (the module
+  table in `test-mapping/README.md`, where in-scope = upstream tests minus
+  opt-outs).
+- **Opt-out registry — `docs/parity/opt-out.toml`.** This is the single place
+  recording items that will **never** be ported because they exercise behavior
+  with no Rust analogue — TypeScript/Node.js runtime specifics, type-shape
+  assertions, framework plumbing. List the upstream source file or test there,
+  with a `reason`. `parity-cli` then reports it as `opt-out` (not `pending`),
+  excludes it from the coverage denominator, and agents stop picking it. This
+  replaces the old "no not-applicable mechanism" rule: do not leave a genuinely
+  un-portable item `pending` — opt it out with a reason instead. Only exclude
+  for a real no-Rust-analogue reason, never to dodge work.
 - Additional Rust tests beyond the upstream baseline are welcome but they do
   not raise Coverage (they have no `// Ported:` comment).
 

@@ -2,9 +2,9 @@
 
 [← `manager/helm-values`](../../../../_by-module/manager/helm-values.md) · [all modules](../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | returns null for invalid yaml file content | ported | [`crates/renovate-core/src/extractors/helm_values.rs:348`](../../../../../../../crates/renovate-core/src/extractors/helm_values.rs#L348) |
 | 31 | returns null for empty yaml file content | ported | [`crates/renovate-core/src/extractors/helm_values.rs:342`](../../../../../../../crates/renovate-core/src/extractors/helm_values.rs#L342) |

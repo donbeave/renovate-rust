@@ -2,9 +2,9 @@
 
 [← `manager/gleam`](../../../../_by-module/manager/gleam.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | should extract dev and prod dependencies | ported | [`crates/renovate-core/src/extractors/gleam.rs:261`](../../../../../../../crates/renovate-core/src/extractors/gleam.rs#L261) |
 | 41 | should extract dev only dependencies | ported | [`crates/renovate-core/src/extractors/gleam.rs:275`](../../../../../../../crates/renovate-core/src/extractors/gleam.rs#L275) |

@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | returns empty if exception parsing | ported | [`crates/renovate-core/src/extractors/npm.rs:3543`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3543) |
 | 20 | extracts yarn 1 | ported | [`crates/renovate-core/src/extractors/npm.rs:3552`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3552) |

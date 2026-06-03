@@ -2,9 +2,9 @@
 
 [← `datasource/galaxy`](../../../../_by-module/datasource/galaxy.md) · [all modules](../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | returns null for empty result | ported | [`crates/renovate-core/src/datasources/galaxy.rs:134`](../../../../../../../crates/renovate-core/src/datasources/galaxy.rs#L134) |
 | 24 | returns null for missing fields | ported | [`crates/renovate-core/src/datasources/galaxy.rs:153`](../../../../../../../crates/renovate-core/src/datasources/galaxy.rs#L153) |

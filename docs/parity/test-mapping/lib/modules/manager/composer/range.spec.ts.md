@@ -2,9 +2,9 @@
 
 [← `manager/composer`](../../../../_by-module/manager/composer.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns same if not auto | ported | [`crates/renovate-core/src/extractors/composer.rs:1129`](../../../../../../../crates/renovate-core/src/extractors/composer.rs#L1129) |
 | 10 | replaces require-dev | ported | [`crates/renovate-core/src/extractors/composer.rs:1135`](../../../../../../../crates/renovate-core/src/extractors/composer.rs#L1135) |

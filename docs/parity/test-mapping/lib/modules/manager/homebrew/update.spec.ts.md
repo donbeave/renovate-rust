@@ -2,9 +2,9 @@
 
 [← `manager/homebrew`](../../../../_by-module/manager/homebrew.md) · [all modules](../../../../README.md)
 
-**7/19 ported** (12 pending) · status: partial
+**7/19 in-scope tests ported** (12 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | updates "releases" github dependency | pending | — |
 | 49 | updates "archive" github dependency | pending | — |

@@ -2,9 +2,9 @@
 
 [← `versioning/_common`](../../../_by-module/versioning/_common.md) · [all modules](../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 12 | _(it.each / template — verify manually)_ | ? | — |
 | 27 | _(it.each / template — verify manually)_ | ? | — |

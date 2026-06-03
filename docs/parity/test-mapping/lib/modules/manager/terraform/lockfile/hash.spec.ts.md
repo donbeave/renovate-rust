@@ -2,9 +2,9 @@
 
 [← `manager/terraform`](../../../../../_by-module/manager/terraform.md) · [all modules](../../../../../README.md)
 
-**10/11 ported** (1 pending) · status: partial
+**10/11 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 43 | returns null if getbuilds returns null | ported | [`crates/renovate-core/src/extractors/terraform.rs:3785`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3785) |
 | 58 | return null if requesting a version which is not available | ported | [`crates/renovate-core/src/extractors/terraform.rs:3794`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3794) |

@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**8/8 ported** (0 pending) · status: ported
+**8/8 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | returns elapsed days | ported | [`crates/renovate-core/src/util.rs:9575`](../../../../../crates/renovate-core/src/util.rs#L9575) |
 | 27 | returns floor'd version of floating point when partial days | ported | [`crates/renovate-core/src/util.rs:9584`](../../../../../crates/renovate-core/src/util.rs#L9584) |

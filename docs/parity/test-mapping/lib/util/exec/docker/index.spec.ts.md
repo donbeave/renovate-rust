@@ -2,9 +2,9 @@
 
 [← `util/exec`](../../../../_by-module/util/exec.md) · [all modules](../../../../README.md)
 
-**11/19 ported** (8 pending) · status: partial
+**11/19 in-scope tests ported** (8 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 25 | runs prefetch command | pending | — |
 | 31 | performs prefetch once for each image | pending | — |

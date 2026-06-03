@@ -2,9 +2,9 @@
 
 [← `versioning/ruby`](../../../../_by-module/versioning/ruby.md) · [all modules](../../../../README.md)
 
-**14/15 ported** (1 pending) · status: partial
+**14/15 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | _(it.each / template — verify manually)_ | ? | — |
 | 18 | _(it.each / template — verify manually)_ | ? | — |

@@ -2,9 +2,9 @@
 
 [← `manager/_common`](../../../_by-module/manager/_common.md) · [all modules](../../../README.md)
 
-**9/22 ported** (13 pending) · status: partial
+**9/22 in-scope tests ported** (13 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | has valid supporteddatasources for ${m} | pending | — |
 | 31 | has lockfilenames for ${name} | pending | — |

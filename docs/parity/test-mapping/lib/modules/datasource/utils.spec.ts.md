@@ -2,9 +2,9 @@
 
 [← `datasource/_common`](../../../_by-module/datasource/_common.md) · [all modules](../../../README.md)
 
-**2/6 ported** (4 pending) · status: partial
+**2/6 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | is artifactory server invalid | ported | [`crates/renovate-core/src/util.rs:7982`](../../../../../../crates/renovate-core/src/util.rs#L7982) |
 | 19 | is artifactory server valid | ported | [`crates/renovate-core/src/util.rs:7991`](../../../../../../crates/renovate-core/src/util.rs#L7991) |

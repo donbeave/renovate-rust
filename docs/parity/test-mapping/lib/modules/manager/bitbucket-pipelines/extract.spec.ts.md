@@ -2,9 +2,9 @@
 
 [← `manager/bitbucket-pipelines`](../../../../_by-module/manager/bitbucket-pipelines.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/bitbucket_pipelines.rs:344`](../../../../../../../crates/renovate-core/src/extractors/bitbucket_pipelines.rs#L344) |
 | 12 | returns null for malformed | ported | [`crates/renovate-core/src/extractors/bitbucket_pipelines.rs:350`](../../../../../../../crates/renovate-core/src/extractors/bitbucket_pipelines.rs#L350) |

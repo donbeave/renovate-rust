@@ -2,9 +2,9 @@
 
 [← `datasource/hexpm-bob`](../../../../_by-module/datasource/hexpm-bob.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | throws for error | ported | [`crates/renovate-core/src/datasources/hexpm_bob.rs:184`](../../../../../../../crates/renovate-core/src/datasources/hexpm_bob.rs#L184) |
 | 22 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/hexpm_bob.rs:199`](../../../../../../../crates/renovate-core/src/datasources/hexpm_bob.rs#L199) |

@@ -2,9 +2,9 @@
 
 [← `datasource/gitlab-tags`](../../../../_by-module/datasource/gitlab-tags.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | returns tags from custom registry | ported | [`crates/renovate-core/src/datasources/gitlab_tags.rs:352`](../../../../../../../crates/renovate-core/src/datasources/gitlab_tags.rs#L352) |
 | 38 | returns tags from custom registry in sub path | ported | [`crates/renovate-core/src/datasources/gitlab_tags.rs:383`](../../../../../../../crates/renovate-core/src/datasources/gitlab_tags.rs#L383) |

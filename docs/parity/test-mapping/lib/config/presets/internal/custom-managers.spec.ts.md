@@ -2,9 +2,9 @@
 
 [← `config/presets`](../../../../_by-module/config/presets.md) · [all modules](../../../../README.md)
 
-**0/22 ported** (22 pending) · status: pending
+**0/22 in-scope tests ported** (22 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | find dependencies in file | pending | — |
 | 112 | _(it.each / template — verify manually)_ | ? | — |

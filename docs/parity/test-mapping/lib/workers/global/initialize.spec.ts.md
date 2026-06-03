@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../_by-module/worker/global.md) · [all modules](../../../README.md)
 
-**0/7 ported** (7 pending) · status: pending
+**0/7 in-scope tests ported** (7 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | throws if invalid version | pending | — |
 | 21 | returns if valid git version | pending | — |

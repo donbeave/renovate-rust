@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../../_by-module/manager/npm.md) · [all modules](../../../../../../README.md)
 
-**12/21 ported** (9 pending) · status: partial
+**12/21 in-scope tests ported** (9 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 57 | uses yarn.lock with yarn v1.22.0 | ported | [`crates/renovate-core/src/extractors/npm.rs:7287`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L7287) |
 | 94 | uses yarn.lock with yarn v2.1.0 | ported | [`crates/renovate-core/src/extractors/npm.rs:7717`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L7717) |

@@ -2,9 +2,9 @@
 
 [← `datasource/sbt-plugin`](../../../../_by-module/datasource/sbt-plugin.md) · [all modules](../../../../README.md)
 
-**7/8 ported** (1 pending) · status: partial
+**7/8 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | parses maven index directory | ported | [`crates/renovate-core/src/datasources/sbt_plugin.rs:337`](../../../../../../../crates/renovate-core/src/datasources/sbt_plugin.rs#L337) |
 | 23 | parses sbt index directory | ported | [`crates/renovate-core/src/datasources/sbt_plugin.rs:354`](../../../../../../../crates/renovate-core/src/datasources/sbt_plugin.rs#L354) |

@@ -2,9 +2,9 @@
 
 [← `manager/azure-pipelines`](../../../../_by-module/manager/azure-pipelines.md) · [all modules](../../../../README.md)
 
-**28/29 ported** (1 pending) · status: partial
+**28/29 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 25 | should parse a valid azure-pipelines file | ported | [`crates/renovate-core/src/extractors/azure_pipelines.rs:236`](../../../../../../../crates/renovate-core/src/extractors/azure_pipelines.rs#L236) |
 | 30 | return null on an invalid file | ported | [`crates/renovate-core/src/extractors/azure_pipelines.rs:580`](../../../../../../../crates/renovate-core/src/extractors/azure_pipelines.rs#L580) |

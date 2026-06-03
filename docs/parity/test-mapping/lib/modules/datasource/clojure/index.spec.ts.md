@@ -2,9 +2,9 @@
 
 [← `datasource/clojure`](../../../../_by-module/datasource/clojure.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 93 | returns releases from custom repository | ported | [`crates/renovate-core/src/datasources/clojure.rs:176`](../../../../../../../crates/renovate-core/src/datasources/clojure.rs#L176) |
 | 101 | collects releases from all registry urls | ported | [`crates/renovate-core/src/datasources/clojure.rs:204`](../../../../../../../crates/renovate-core/src/datasources/clojure.rs#L204) |

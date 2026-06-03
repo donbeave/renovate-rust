@@ -2,9 +2,9 @@
 
 [← `datasource/rubygems`](../../../../_by-module/datasource/rubygems.md) · [all modules](../../../../README.md)
 
-**3/7 ported** (4 pending) · status: partial
+**3/7 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | parses valid input | ported | [`crates/renovate-core/src/datasources/rubygems.rs:420`](../../../../../../../crates/renovate-core/src/datasources/rubygems.rs#L420) |
 | 27 | errors on empty input | ported | [`crates/renovate-core/src/datasources/rubygems.rs:435`](../../../../../../../crates/renovate-core/src/datasources/rubygems.rs#L435) |

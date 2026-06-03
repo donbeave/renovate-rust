@@ -2,9 +2,9 @@
 
 [← `manager/flux`](../../../../_by-module/manager/flux.md) · [all modules](../../../../README.md)
 
-**59/59 ported** (0 pending) · status: ported
+**59/59 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | extracts multiple resources | ported | [`crates/renovate-core/src/extractors/flux.rs:821`](../../../../../../../crates/renovate-core/src/extractors/flux.rs#L821) |
 | 72 | _(it.each / template — verify manually)_ | ? | — |

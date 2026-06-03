@@ -2,9 +2,9 @@
 
 [← `manager/asdf`](../../../../_by-module/manager/asdf.md) · [all modules](../../../../README.md)
 
-**13/13 ported** (0 pending) · status: ported
+**13/13 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | returns a result | ported | [`crates/renovate-core/src/extractors/asdf.rs:1571`](../../../../../../../crates/renovate-core/src/extractors/asdf.rs#L1571) |
 | 19 | provides skipreason for lines with unsupported tooling | ported | [`crates/renovate-core/src/extractors/asdf.rs:1585`](../../../../../../../crates/renovate-core/src/extractors/asdf.rs#L1585) |

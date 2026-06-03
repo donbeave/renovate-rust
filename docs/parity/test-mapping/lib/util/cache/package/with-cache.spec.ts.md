@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../_by-module/util/cache.md) · [all modules](../../../../README.md)
 
-**12/14 ported** (2 pending) · status: partial
+**12/14 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 35 | caches string result | ported | [`crates/renovate-core/src/cache/package.rs:900`](../../../../../../../crates/renovate-core/src/cache/package.rs#L900) |
 | 57 | disables cache if cacheable is false | ported | [`crates/renovate-core/src/cache/package.rs:929`](../../../../../../../crates/renovate-core/src/cache/package.rs#L929) |

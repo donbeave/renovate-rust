@@ -2,9 +2,9 @@
 
 [← `platform/_common`](../../../_by-module/platform/_common.md) · [all modules](../../../README.md)
 
-**3/3 ported** (0 pending) · status: ported
+**3/3 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | _(it.each / template — verify manually)_ | ? | — |
 | 21 | should add refs/heads | ported | [`crates/renovate-core/src/platform/util.rs:55`](../../../../../../crates/renovate-core/src/platform/util.rs#L55) |

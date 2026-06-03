@@ -2,9 +2,9 @@
 
 [← `versioning/rust-release-channel`](../../../../_by-module/versioning/rust-release-channel.md) · [all modules](../../../../README.md)
 
-**15/15 ported** (0 pending) · status: ported
+**15/15 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | _(it.each / template — verify manually)_ | ? | — |
 | 23 | _(it.each / template — verify manually)_ | ? | — |

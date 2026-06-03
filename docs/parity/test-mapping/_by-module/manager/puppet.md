@@ -2,11 +2,11 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 21/21 tests ported across 3 spec files.
+**Coverage:** 21/21 in-scope tests ported (opt-out=0) across 3 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/modules/manager/puppet/common.spec.ts`](../../lib/modules/manager/puppet/common.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/puppet.rs:520`](../../../../../crates/renovate-core/src/extractors/puppet.rs#L520) | ported |
-| [`lib/modules/manager/puppet/extract.spec.ts`](../../lib/modules/manager/puppet/extract.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/extractors/puppet.rs:338`](../../../../../crates/renovate-core/src/extractors/puppet.rs#L338) | ported |
-| [`lib/modules/manager/puppet/puppetfile-parser.spec.ts`](../../lib/modules/manager/puppet/puppetfile-parser.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/extractors/puppet.rs:339`](../../../../../crates/renovate-core/src/extractors/puppet.rs#L339) | ported |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/modules/manager/puppet/common.spec.ts`](../../lib/modules/manager/puppet/common.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/extractors/puppet.rs:520`](../../../../../crates/renovate-core/src/extractors/puppet.rs#L520) | ported |
+| [`lib/modules/manager/puppet/extract.spec.ts`](../../lib/modules/manager/puppet/extract.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/extractors/puppet.rs:338`](../../../../../crates/renovate-core/src/extractors/puppet.rs#L338) | ported |
+| [`lib/modules/manager/puppet/puppetfile-parser.spec.ts`](../../lib/modules/manager/puppet/puppetfile-parser.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/extractors/puppet.rs:339`](../../../../../crates/renovate-core/src/extractors/puppet.rs#L339) | ported |
 

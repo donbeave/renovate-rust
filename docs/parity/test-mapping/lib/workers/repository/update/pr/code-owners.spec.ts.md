@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/31 ported** (31 pending) · status: pending
+**0/31 in-scope tests ported** (31 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 28 | returns global code owner | pending | — |
 | 35 | returns global code owner for commit with sha set | pending | — |

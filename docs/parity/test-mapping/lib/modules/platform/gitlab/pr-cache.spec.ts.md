@@ -2,9 +2,9 @@
 
 [← `platform/gitlab`](../../../../_by-module/platform/gitlab.md) · [all modules](../../../../README.md)
 
-**3/8 ported** (5 pending) · status: partial
+**3/8 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 81 | fetches cache initially | ported | [`crates/renovate-core/src/platform/gitlab.rs:1612`](../../../../../../../crates/renovate-core/src/platform/gitlab.rs#L1612) |
 | 110 | fetches cache with ignoreprauthor=true | ported | [`crates/renovate-core/src/platform/gitlab.rs:1660`](../../../../../../../crates/renovate-core/src/platform/gitlab.rs#L1660) |

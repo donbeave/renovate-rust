@@ -2,9 +2,9 @@
 
 [← `manager/sveltos`](../../../../_by-module/manager/sveltos.md) · [all modules](../../../../README.md)
 
-**14/14 ported** (0 pending) · status: ported
+**14/14 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 278 | returns an empty array when parsing fails | ported | [`crates/renovate-core/src/extractors/sveltos.rs:369`](../../../../../../../crates/renovate-core/src/extractors/sveltos.rs#L369) |
 | 284 | returns null if extractdefinition returns an empty array | ported | [`crates/renovate-core/src/extractors/sveltos.rs:437`](../../../../../../../crates/renovate-core/src/extractors/sveltos.rs#L437) |

@@ -2,9 +2,9 @@
 
 [← `manager/mise`](../../../../_by-module/manager/mise.md) · [all modules](../../../../README.md)
 
-**8/23 ported** (15 pending) · status: partial
+**8/23 in-scope tests ported** (15 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 46 | returns null if lock file does not exist | pending | — |
 | 60 | returns null if lock file unchanged after exec | pending | — |

@@ -2,9 +2,9 @@
 
 [← `manager/maven-wrapper`](../../../../_by-module/manager/maven-wrapper.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | extracts version for property file with distribution type "bin" in distributionurl | ported | [`crates/renovate-core/src/extractors/maven_wrapper.rs:137`](../../../../../../../crates/renovate-core/src/extractors/maven_wrapper.rs#L137) |
 | 37 | extracts version for property file with only a wrapper url | ported | [`crates/renovate-core/src/extractors/maven_wrapper.rs:158`](../../../../../../../crates/renovate-core/src/extractors/maven_wrapper.rs#L158) |

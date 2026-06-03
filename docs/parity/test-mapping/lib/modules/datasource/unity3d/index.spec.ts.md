@@ -2,9 +2,9 @@
 
 [← `datasource/unity3d`](../../../../_by-module/datasource/unity3d.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 52 | _(it.each / template — verify manually)_ | ? | — |
 | 88 | returns tech if requested | ported | [`crates/renovate-core/src/datasources/unity3d.rs:323`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L323) |

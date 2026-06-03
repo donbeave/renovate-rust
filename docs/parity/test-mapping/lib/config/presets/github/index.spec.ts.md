@@ -2,9 +2,9 @@
 
 [← `config/presets`](../../../../_by-module/config/presets.md) · [all modules](../../../../README.md)
 
-**0/18 ported** (18 pending) · status: pending
+**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 17 | returns json | pending | — |
 | 34 | throws external host error | pending | — |

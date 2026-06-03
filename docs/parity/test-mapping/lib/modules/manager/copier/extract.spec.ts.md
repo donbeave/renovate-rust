@@ -2,9 +2,9 @@
 
 [← `manager/copier`](../../../../_by-module/manager/copier.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | extracts repository and version from .copier-answers.yml | ported | [`crates/renovate-core/src/extractors/copier.rs:105`](../../../../../../../crates/renovate-core/src/extractors/copier.rs#L105) |
 | 25 | extracts repository and version from .copier-answers.yml with ssh url | ported | [`crates/renovate-core/src/extractors/copier.rs:146`](../../../../../../../crates/renovate-core/src/extractors/copier.rs#L146) |

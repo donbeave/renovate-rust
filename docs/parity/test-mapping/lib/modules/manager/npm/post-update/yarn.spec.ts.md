@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**21/29 ported** (8 pending) · status: partial
+**21/29 in-scope tests ported** (8 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 62 | _(it.each / template — verify manually)_ | ? | — |
 | 115 | if nodemaxmemory set on global config | ported | [`crates/renovate-core/src/extractors/npm_post_update/utils.rs:44`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/utils.rs#L44) |

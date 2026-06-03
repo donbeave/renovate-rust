@@ -2,9 +2,9 @@
 
 [← `manager/bazelisk`](../../../../_by-module/manager/bazelisk.md) · [all modules](../../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | returns a result | ported | [`crates/renovate-core/src/extractors/version_file.rs:467`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L467) |
 | 17 | supports ranges | ported | [`crates/renovate-core/src/extractors/version_file.rs:477`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L477) |

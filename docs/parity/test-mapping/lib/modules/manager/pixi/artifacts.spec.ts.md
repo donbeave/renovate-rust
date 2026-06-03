@@ -2,9 +2,9 @@
 
 [← `manager/pixi`](../../../../_by-module/manager/pixi.md) · [all modules](../../../../README.md)
 
-**6/10 ported** (4 pending) · status: partial
+**6/10 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 70 | returns null if no pixi.lock found | ported | [`crates/renovate-core/src/extractors/pixi_artifact_runner.rs:191`](../../../../../../../crates/renovate-core/src/extractors/pixi_artifact_runner.rs#L191) |
 | 83 | returns null if updateddeps is empty | ported | [`crates/renovate-core/src/extractors/pixi_artifact_runner.rs:210`](../../../../../../../crates/renovate-core/src/extractors/pixi_artifact_runner.rs#L210) |

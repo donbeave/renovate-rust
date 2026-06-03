@@ -2,9 +2,9 @@
 
 [← `manager/helmfile`](../../../../_by-module/manager/helmfile.md) · [all modules](../../../../README.md)
 
-**20/20 ported** (0 pending) · status: ported
+**20/20 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 18 | skip null yaml document | ported | [`crates/renovate-core/src/extractors/helmfile.rs:559`](../../../../../../../crates/renovate-core/src/extractors/helmfile.rs#L559) |
 | 31 | returns null if no releases | ported | [`crates/renovate-core/src/extractors/helmfile.rs:565`](../../../../../../../crates/renovate-core/src/extractors/helmfile.rs#L565) |

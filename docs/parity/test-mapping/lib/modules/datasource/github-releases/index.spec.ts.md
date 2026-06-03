@@ -2,9 +2,9 @@
 
 [← `datasource/github-releases`](../../../../_by-module/datasource/github-releases.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | returns releases | ported | [`crates/renovate-core/src/datasources/github_releases.rs:372`](../../../../../../../crates/renovate-core/src/datasources/github_releases.rs#L372) |
 | 116 | should be independent of the current digest | ported | [`crates/renovate-core/src/datasources/github_releases.rs:414`](../../../../../../../crates/renovate-core/src/datasources/github_releases.rs#L414) |

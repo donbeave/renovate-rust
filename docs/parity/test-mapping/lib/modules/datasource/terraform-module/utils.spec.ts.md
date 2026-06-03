@@ -2,9 +2,9 @@
 
 [← `datasource/terraform-module`](../../../../_by-module/datasource/terraform-module.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | returns url with relative sd for modules | ported | [`crates/renovate-core/src/datasources/terraform.rs:496`](../../../../../../../crates/renovate-core/src/datasources/terraform.rs#L496) |
 | 21 | returns url with relative sd for providers | ported | [`crates/renovate-core/src/datasources/terraform.rs:511`](../../../../../../../crates/renovate-core/src/datasources/terraform.rs#L511) |

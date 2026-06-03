@@ -2,9 +2,9 @@
 
 [← `logger`](../../_by-module/logger.md) · [all modules](../../README.md)
 
-**3/9 ported** (6 pending) · status: partial
+**3/9 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 15 | should call a function only once | ported | [`crates/renovate-core/src/util.rs:6766`](../../../../../crates/renovate-core/src/util.rs#L6766) |
 | 28 | supports support distinct calls | ported | [`crates/renovate-core/src/util.rs:6777`](../../../../../crates/renovate-core/src/util.rs#L6777) |

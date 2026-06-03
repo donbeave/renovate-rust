@@ -2,9 +2,9 @@
 
 [← `util/exec`](../../../_by-module/util/exec.md) · [all modules](../../../README.md)
 
-**4/4 ported** (0 pending) · status: ported
+**4/4 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | should return true when binarysource is hermit | ported | [`crates/renovate-core/src/exec/hermit.rs:63`](../../../../../../crates/renovate-core/src/exec/hermit.rs#L63) |
 | 30 | _(it.each / template — verify manually)_ | ? | — |

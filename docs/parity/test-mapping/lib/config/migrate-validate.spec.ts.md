@@ -2,9 +2,9 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**4/5 ported** (1 pending) · status: partial
+**4/5 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | handles empty | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4952`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4952) |
 | 22 | handles migration | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4961`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4961) |

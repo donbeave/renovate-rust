@@ -2,9 +2,9 @@
 
 [← `manager/deno`](../../../../_by-module/manager/deno.md) · [all modules](../../../../README.md)
 
-**0/43 ported** (43 pending) · status: pending
+**0/43 in-scope tests ported** (43 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 21 | parses lock file with specifiers | pending | — |
 | 43 | parses lock file with specifiers that do not match regex | pending | — |

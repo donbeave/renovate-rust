@@ -2,9 +2,9 @@
 
 [← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
 
-**0/107 ported** (107 pending) · status: pending
+**0/107 in-scope tests ported** (107 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 170 | returns result if git returns successfully | pending | — |
 | 183 | retries the func call if externalhosterror thrown | pending | — |

@@ -2,9 +2,9 @@
 
 [← `manager/rust-toolchain`](../../../../_by-module/manager/rust-toolchain.md) · [all modules](../../../../README.md)
 
-**14/14 ported** (0 pending) · status: ported
+**14/14 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 7 | extracts major.minor.patch versions | ported | [`crates/renovate-core/src/extractors/rust_toolchain.rs:164`](../../../../../../../crates/renovate-core/src/extractors/rust_toolchain.rs#L164) |
 | 27 | extracts major.minor ranges | ported | [`crates/renovate-core/src/extractors/rust_toolchain.rs:173`](../../../../../../../crates/renovate-core/src/extractors/rust_toolchain.rs#L173) |

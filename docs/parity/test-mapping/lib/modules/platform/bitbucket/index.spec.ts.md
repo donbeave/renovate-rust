@@ -2,9 +2,9 @@
 
 [← `platform/bitbucket`](../../../../_by-module/platform/bitbucket.md) · [all modules](../../../../README.md)
 
-**0/96 ported** (96 pending) · status: pending
+**0/96 in-scope tests ported** (96 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 68 | should throw if no token or username/password | pending | — |
 | 73 | should show warning message if custom endpoint | pending | — |

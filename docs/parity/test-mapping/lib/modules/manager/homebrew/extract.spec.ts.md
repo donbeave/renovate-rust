@@ -2,9 +2,9 @@
 
 [← `manager/homebrew`](../../../../_by-module/manager/homebrew.md) · [all modules](../../../../README.md)
 
-**17/17 ported** (0 pending) · status: ported
+**17/17 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | skips sourceforge dependency 1 | ported | [`crates/renovate-core/src/extractors/homebrew.rs:709`](../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L709) |
 | 32 | skips sourceforge dependency 2 | ported | [`crates/renovate-core/src/extractors/homebrew.rs:749`](../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L749) |

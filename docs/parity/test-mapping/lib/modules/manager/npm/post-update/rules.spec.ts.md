@@ -2,9 +2,9 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**6/6 ported** (0 pending) · status: ported
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | returns empty if no rules | ported | [`crates/renovate-core/src/extractors/npm.rs:5293`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5293) |
 | 16 | returns empty if no resolvedhost | ported | [`crates/renovate-core/src/extractors/npm.rs:5302`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5302) |

@@ -2,9 +2,9 @@
 
 [← `manager/gomod`](../../../../_by-module/manager/gomod.md) · [all modules](../../../../README.md)
 
-**23/23 ported** (0 pending) · status: ported
+**23/23 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | returns null for empty | ported | [`crates/renovate-core/src/extractors/gomod.rs:1286`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L1286) |
 | 18 | extracts single-line requires | ported | [`crates/renovate-core/src/extractors/gomod.rs:1143`](../../../../../../../crates/renovate-core/src/extractors/gomod.rs#L1143) |

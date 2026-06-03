@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**44/45 ported** (1 pending) · status: partial
+**44/45 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 11 | returns empty env | ported | [`crates/renovate-cli/src/config_env.rs:683`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L683) |
 | 15 | supports boolean true | ported | [`crates/renovate-cli/src/config_env.rs:691`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L691) |

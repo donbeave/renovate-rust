@@ -2,12 +2,12 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 3/35 tests ported across 4 spec files.
+**Coverage:** 3/35 in-scope tests ported (opt-out=0) across 4 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/rubygems/index.spec.ts`](../../lib/modules/datasource/rubygems/index.spec.ts.md) | 11 | 0 | 11 | — | pending |
-| [`lib/modules/datasource/rubygems/metadata-cache.spec.ts`](../../lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) | 7 | 0 | 7 | — | pending |
-| [`lib/modules/datasource/rubygems/schema.spec.ts`](../../lib/modules/datasource/rubygems/schema.spec.ts.md) | 7 | 3 | 4 | [`crates/renovate-core/src/datasources/rubygems.rs:420`](../../../../../crates/renovate-core/src/datasources/rubygems.rs#L420) | partial |
-| [`lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts`](../../lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) | 10 | 0 | 10 | — | pending |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/modules/datasource/rubygems/index.spec.ts`](../../lib/modules/datasource/rubygems/index.spec.ts.md) | 11 | 0 | 11 | 0 | — | pending |
+| [`lib/modules/datasource/rubygems/metadata-cache.spec.ts`](../../lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) | 7 | 0 | 7 | 0 | — | pending |
+| [`lib/modules/datasource/rubygems/schema.spec.ts`](../../lib/modules/datasource/rubygems/schema.spec.ts.md) | 7 | 3 | 4 | 0 | [`crates/renovate-core/src/datasources/rubygems.rs:420`](../../../../../crates/renovate-core/src/datasources/rubygems.rs#L420) | partial |
+| [`lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts`](../../lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) | 10 | 0 | 10 | 0 | — | pending |
 

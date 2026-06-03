@@ -2,9 +2,9 @@
 
 [← `platform/gitlab`](../../../../_by-module/platform/gitlab.md) · [all modules](../../../../README.md)
 
-**59/163 ported** (104 pending) · status: partial
+**59/163 in-scope tests ported** (104 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 78 | should throw if no token | pending | — |
 | 82 | should throw if endpoint is not a valid url | ported | [`crates/renovate-core/src/platform/gitlab.rs:1169`](../../../../../../../crates/renovate-core/src/platform/gitlab.rs#L1169) |

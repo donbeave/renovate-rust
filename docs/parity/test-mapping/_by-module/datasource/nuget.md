@@ -2,10 +2,10 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 2/37 tests ported across 2 spec files.
+**Coverage:** 2/37 in-scope tests ported (opt-out=0) across 2 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/nuget/common.spec.ts`](../../lib/modules/datasource/nuget/common.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/versioning/nuget.rs:888`](../../../../../crates/renovate-core/src/versioning/nuget.rs#L888) | ported |
-| [`lib/modules/datasource/nuget/index.spec.ts`](../../lib/modules/datasource/nuget/index.spec.ts.md) | 36 | 1 | 35 | [`crates/renovate-core/src/datasources/nuget.rs:300`](../../../../../crates/renovate-core/src/datasources/nuget.rs#L300) | partial |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/modules/datasource/nuget/common.spec.ts`](../../lib/modules/datasource/nuget/common.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/versioning/nuget.rs:888`](../../../../../crates/renovate-core/src/versioning/nuget.rs#L888) | ported |
+| [`lib/modules/datasource/nuget/index.spec.ts`](../../lib/modules/datasource/nuget/index.spec.ts.md) | 36 | 1 | 35 | 0 | [`crates/renovate-core/src/datasources/nuget.rs:300`](../../../../../crates/renovate-core/src/datasources/nuget.rs#L300) | partial |
 

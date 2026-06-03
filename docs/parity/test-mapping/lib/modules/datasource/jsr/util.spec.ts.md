@@ -2,9 +2,9 @@
 
 [← `datasource/jsr`](../../../../_by-module/datasource/jsr.md) · [all modules](../../../../README.md)
 
-**9/9 ported** (0 pending) · status: ported
+**9/9 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | should extract package name | ported | [`crates/renovate-core/src/datasources/jsr.rs:216`](../../../../../../../crates/renovate-core/src/datasources/jsr.rs#L216) |
 | 12 | should return null for invalid name | ported | [`crates/renovate-core/src/datasources/jsr.rs:224`](../../../../../../../crates/renovate-core/src/datasources/jsr.rs#L224) |

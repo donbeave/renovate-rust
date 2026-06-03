@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**10/10 ported** (0 pending) · status: ported
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | does nothing if not input | ported | [`crates/renovate-core/src/util.rs:9105`](../../../../../crates/renovate-core/src/util.rs#L9105) |
 | 19 | does not throw error when keys and values are valid | ported | [`crates/renovate-core/src/util.rs:9111`](../../../../../crates/renovate-core/src/util.rs#L9111) |

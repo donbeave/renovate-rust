@@ -2,9 +2,9 @@
 
 [← `manager/pep723`](../../../../_by-module/manager/pep723.md) · [all modules](../../../../README.md)
 
-**5/5 ported** (0 pending) · status: ported
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | should extract dependencies | ported | [`crates/renovate-core/src/extractors/pep723.rs:337`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L337) |
 | 42 | should skip invalid dependencies | ported | [`crates/renovate-core/src/extractors/pep723.rs:352`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L352) |

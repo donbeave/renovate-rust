@@ -2,9 +2,9 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/9 ported** (9 pending) · status: pending
+**0/9 in-scope tests ported** (9 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 19 | returns false if not configured for automerge | pending | — |
 | 24 | returns false if automergetype is pr | pending | — |

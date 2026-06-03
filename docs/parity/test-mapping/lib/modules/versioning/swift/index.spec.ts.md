@@ -2,9 +2,9 @@
 
 [← `versioning/swift`](../../../../_by-module/versioning/swift.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 14 | _(it.each / template — verify manually)_ | ? | — |
 | 24 | _(it.each / template — verify manually)_ | ? | — |

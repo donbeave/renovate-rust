@@ -2,9 +2,9 @@
 
 [← `datasource/github-release-attachments`](../../../../_by-module/datasource/github-release-attachments.md) · [all modules](../../../../README.md)
 
-**0/11 ported** (11 pending) · status: pending
+**0/11 in-scope tests ported** (11 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 16 | finds shasums.txt file containing digest | pending | — |
 | 31 | returns null when not found in digest file asset | pending | — |

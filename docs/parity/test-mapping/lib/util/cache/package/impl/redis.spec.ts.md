@@ -2,9 +2,9 @@
 
 [← `util/cache`](../../../../../_by-module/util/cache.md) · [all modules](../../../../../README.md)
 
-**0/18 ported** (18 pending) · status: pending
+**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 10 | _(it.each / template — verify manually)_ | ? | — |
 | 40 | initializes single-node client and connects | pending | — |

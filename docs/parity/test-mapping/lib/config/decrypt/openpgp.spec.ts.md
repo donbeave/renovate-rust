@@ -2,9 +2,9 @@
 
 [← `config/decrypt`](../../../_by-module/config/decrypt.md) · [all modules](../../../README.md)
 
-**0/7 ported** (7 pending) · status: pending
+**0/7 in-scope tests ported** (7 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 44 | rejects invalid pgp message | pending | — |
 | 85 | works with ecc and aead | pending | — |

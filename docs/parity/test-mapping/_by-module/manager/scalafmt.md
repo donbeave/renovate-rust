@@ -2,9 +2,9 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 4/4 tests ported across 1 spec files.
+**Coverage:** 4/4 in-scope tests ported (opt-out=0) across 1 spec files.
 
-| Spec file | it() | ported | pending | Rust test file(s) | Status |
-|---|--:|--:|--:|---|---|
-| [`lib/modules/manager/scalafmt/extract.spec.ts`](../../lib/modules/manager/scalafmt/extract.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/flux.rs:1788`](../../../../../crates/renovate-core/src/extractors/flux.rs#L1788)<br>[`crates/renovate-core/src/extractors/scalafmt.rs:50`](../../../../../crates/renovate-core/src/extractors/scalafmt.rs#L50) | ported |
+| Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
+|---|--:|--:|--:|--:|---|---|
+| [`lib/modules/manager/scalafmt/extract.spec.ts`](../../lib/modules/manager/scalafmt/extract.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/extractors/flux.rs:1788`](../../../../../crates/renovate-core/src/extractors/flux.rs#L1788)<br>[`crates/renovate-core/src/extractors/scalafmt.rs:50`](../../../../../crates/renovate-core/src/extractors/scalafmt.rs#L50) | ported |
 

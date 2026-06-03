@@ -2,9 +2,9 @@
 
 [← `manager/gradle`](../../../../_by-module/manager/gradle.md) · [all modules](../../../../README.md)
 
-**0/45 ported** (45 pending) · status: pending
+**0/45 in-scope tests ported** (45 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 30 | handles end of input | pending | — |
 | 37 | _(it.each / template — verify manually)_ | ? | — |

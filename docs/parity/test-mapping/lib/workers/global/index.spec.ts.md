@@ -2,9 +2,9 @@
 
 [← `worker/global`](../../../_by-module/worker/global.md) · [all modules](../../../README.md)
 
-**2/15 ported** (13 pending) · status: partial
+**2/15 in-scope tests ported** (13 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 56 | should generate correct toplevelorg/parentorg with multiple levels | ported | [`crates/renovate-core/src/util.rs:10122`](../../../../../../crates/renovate-core/src/util.rs#L10122) |
 | 67 | should generate correct toplevelorg/parentorg with two levels | ported | [`crates/renovate-core/src/util.rs:10131`](../../../../../../crates/renovate-core/src/util.rs#L10131) |

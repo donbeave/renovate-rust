@@ -2,9 +2,9 @@
 
 [← `manager/bazelisk`](../../../../_by-module/manager/bazelisk.md) · [all modules](../../../../README.md)
 
-**0/6 ported** (6 pending) · status: pending
+**0/6 in-scope tests ported** (6 pending, 0 opt-out) · status: pending
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 25 | returns null if no updated deps and not lockfile maintenance | pending | — |
 | 36 | returns null if no module.bazel found | pending | — |

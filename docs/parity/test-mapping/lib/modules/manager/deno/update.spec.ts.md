@@ -2,9 +2,9 @@
 
 [← `manager/deno`](../../../../_by-module/manager/deno.md) · [all modules](../../../../README.md)
 
-**27/38 ported** (11 pending) · status: partial
+**27/38 in-scope tests ported** (11 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 9 | updates dependency in imports | ported | [`crates/renovate-core/src/extractors/deno.rs:541`](../../../../../../../crates/renovate-core/src/extractors/deno.rs#L541) |
 | 39 | throws when multiple imports require more than one replacement | ported | [`crates/renovate-core/src/extractors/deno.rs:560`](../../../../../../../crates/renovate-core/src/extractors/deno.rs#L560) |

@@ -2,9 +2,9 @@
 
 [← `versioning/deb`](../../../../_by-module/versioning/deb.md) · [all modules](../../../../README.md)
 
-**7/7 ported** (0 pending) · status: ported
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | _(it.each / template — verify manually)_ | ? | — |
 | 60 | _(it.each / template — verify manually)_ | ? | — |

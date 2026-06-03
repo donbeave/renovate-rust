@@ -2,9 +2,9 @@
 
 [← `manager/woodpecker`](../../../../_by-module/manager/woodpecker.md) · [all modules](../../../../README.md)
 
-**11/11 ported** (0 pending) · status: ported
+**11/11 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 8 | returns null for empty | ported | [`crates/renovate-core/src/extractors/helmfile.rs:1206`](../../../../../../../crates/renovate-core/src/extractors/helmfile.rs#L1206) |
 | 12 | returns null for non-object yaml | ported | [`crates/renovate-core/src/extractors/woodpecker.rs:261`](../../../../../../../crates/renovate-core/src/extractors/woodpecker.rs#L261) |

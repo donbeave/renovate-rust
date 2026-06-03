@@ -2,9 +2,9 @@
 
 [← `manager/gradle-wrapper`](../../../../_by-module/manager/gradle-wrapper.md) · [all modules](../../../../README.md)
 
-**12/14 ported** (2 pending) · status: partial
+**12/14 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
-| Line | Test | Status | Rust destination |
+| Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 20 | _(it.each / template — verify manually)_ | ? | — |
 | 43 | returns toolchainversion constraint if daemon jvm configured | ported | [`crates/renovate-core/src/extractors/gradle_wrapper.rs:369`](../../../../../../../crates/renovate-core/src/extractors/gradle_wrapper.rs#L369) |
