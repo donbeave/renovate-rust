@@ -125,11 +125,19 @@ for `#[tokio::test]`, above `#[tokio::test]`; for `it.each` / `test.each`, one
    ```
 6. **Regenerate and verify:**
    ```sh
-   cargo run -p parity-cli -- test      # refresh the table; your test moves pending → ported
+   cargo run -p parity-cli -- test      # wipes + rebuilds the whole test-mapping/ tree
    cargo run -p parity-cli -- check     # flags any deleted (mismatched / removed) ports
    ```
-7. **Commit** with the conventional commit format (see `COMMITS.md`) and the
-   Co-authored-by trailer.
+   `test` deletes `docs/parity/test-mapping/` and regenerates it from scratch, so
+   a page for a removed/renamed spec physically disappears — no stale leftovers.
+7. **Stage the whole generated tree, then commit.** Always:
+   ```sh
+   git add -A docs/parity/test-mapping
+   ```
+   Never hand-pick individual pages — that risks committing a page the wipe
+   deleted, leaving a stale, untracked-as-deleted file. Then commit with the
+   conventional format (see `COMMITS.md`) and the Co-authored-by trailer. The
+   git diff is the before→after of the mapping.
 
 ## What you do NOT do
 
