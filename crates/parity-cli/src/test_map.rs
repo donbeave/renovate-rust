@@ -24,7 +24,7 @@
 //! // Ported: "extracts image lines" — lib/modules/manager/ansible/extract.spec.ts line 16
 //! ```
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 use std::path::Path;
 
@@ -404,6 +404,9 @@ impl<'a> Resolver<'a> {
 struct SpecStat<'a> {
     spec: &'a SpecFile,
     ported: usize,
+    /// Distinct Rust files holding this spec's ported tests (the migration
+    /// targets). Empty when the spec has no ported tests yet.
+    rust_files: Vec<String>,
 }
 
 #[derive(Clone)]
@@ -429,6 +432,7 @@ struct Analysis<'a> {
 fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
     let resolver = Resolver::new(specs, false);
     let mut covered: HashMap<&str, HashSet<String>> = HashMap::new();
+    let mut rust_by_spec: HashMap<&str, BTreeSet<String>> = HashMap::new();
     let mut deleted = Vec::new();
 
     for p in ported {
@@ -469,6 +473,10 @@ fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
                         .entry(spec.rel.as_str())
                         .or_default()
                         .insert(p.desc_norm.clone());
+                    rust_by_spec
+                        .entry(spec.rel.as_str())
+                        .or_default()
+                        .insert(p.rust_file.clone());
                 }
             }
         }
@@ -478,9 +486,14 @@ fn analyze<'a>(specs: &'a [SpecFile], ported: &[Ported]) -> Analysis<'a> {
         .iter()
         .map(|s| {
             let n = covered.get(s.rel.as_str()).map_or(0, HashSet::len);
+            let rust_files = rust_by_spec
+                .get(s.rel.as_str())
+                .map(|set| set.iter().cloned().collect())
+                .unwrap_or_default();
             SpecStat {
                 spec: s,
                 ported: n.min(s.it_count),
+                rust_files,
             }
         })
         .collect();
@@ -551,10 +564,12 @@ pub(crate) fn render_report(specs: &[SpecFile], ported: &[Ported]) -> String {
     out.push('\n');
 
     out.push_str("## Per-spec mapping\n\n");
+    out.push_str("The Rust test file(s) column is where the ported tests live — the migration ");
+    out.push_str("target the agent re-opens to check or extend. Empty until a test is ported.\n\n");
     for (module, grp) in &by_module {
         out.push_str(&format!("### `{module}`\n\n"));
-        out.push_str("| Spec file | it() | ported | pending | Status |\n");
-        out.push_str("|---|--:|--:|--:|---|\n");
+        out.push_str("| Spec file | it() | ported | pending | Rust test file(s) | Status |\n");
+        out.push_str("|---|--:|--:|--:|---|---|\n");
         for s in grp {
             let it = s.spec.it_count;
             let pending = it - s.ported;
@@ -567,9 +582,18 @@ pub(crate) fn render_report(specs: &[SpecFile], ported: &[Ported]) -> String {
             } else {
                 "partial"
             };
+            let rust = if s.rust_files.is_empty() {
+                "—".to_owned()
+            } else {
+                s.rust_files
+                    .iter()
+                    .map(|f| format!("`{f}`"))
+                    .collect::<Vec<_>>()
+                    .join("<br>")
+            };
             out.push_str(&format!(
-                "| `{}` | {} | {} | {} | {} |\n",
-                s.spec.rel, it, s.ported, pending, status
+                "| `{}` | {} | {} | {} | {} | {} |\n",
+                s.spec.rel, it, s.ported, pending, rust, status
             ));
         }
         out.push('\n');

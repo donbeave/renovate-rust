@@ -308,2398 +308,2400 @@ Each upstream `it()`/`test()` is `ported` or `pending`. A Rust `// Ported:` whos
 
 ## Per-spec mapping
 
+The Rust test file(s) column is where the ported tests live — the migration target the agent re-opens to check or extend. Empty until a test is ported.
+
 ### `cli/_root`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/proxy.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/renovate.spec.ts` | 1 | 0 | 1 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/proxy.spec.ts` | 5 | 5 | 0 | `renovate-core/src/proxy.rs` | ported |
+| `lib/renovate.spec.ts` | 1 | 0 | 1 | — | pending |
 
 ### `config/_root`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/config/app-strings.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/config/decrypt.spec.ts` | 15 | 9 | 6 | partial |
-| `lib/config/defaults.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/global.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/index.spec.ts` | 12 | 12 | 0 | ported |
-| `lib/config/inherit.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/massage.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/config/migrate-validate.spec.ts` | 5 | 4 | 1 | partial |
-| `lib/config/migration.spec.ts` | 30 | 28 | 2 | partial |
-| `lib/config/parse.spec.ts` | 4 | 2 | 2 | partial |
-| `lib/config/secrets.spec.ts` | 13 | 13 | 0 | ported |
-| `lib/config/validation.spec.ts` | 132 | 126 | 6 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/config/app-strings.spec.ts` | 4 | 4 | 0 | `renovate-core/src/repo_config.rs` | ported |
+| `lib/config/decrypt.spec.ts` | 15 | 9 | 6 | `renovate-core/src/config/decrypt.rs` | partial |
+| `lib/config/defaults.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config.rs` | ported |
+| `lib/config/global.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config.rs` | ported |
+| `lib/config/index.spec.ts` | 12 | 12 | 0 | `renovate-core/src/config.rs` | ported |
+| `lib/config/inherit.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config.rs` | ported |
+| `lib/config/massage.spec.ts` | 7 | 7 | 0 | `renovate-core/src/config/massage.rs` | ported |
+| `lib/config/migrate-validate.spec.ts` | 5 | 4 | 1 | `renovate-core/src/config/migrate_validate.rs` | partial |
+| `lib/config/migration.spec.ts` | 30 | 28 | 2 | `renovate-core/src/config/migrate_validate.rs`<br>`renovate-core/src/repo_config.rs` | partial |
+| `lib/config/parse.spec.ts` | 4 | 2 | 2 | `renovate-core/src/config/file.rs` | partial |
+| `lib/config/secrets.spec.ts` | 13 | 13 | 0 | `renovate-core/src/config/secrets.rs` | ported |
+| `lib/config/validation.spec.ts` | 132 | 126 | 6 | `renovate-core/src/config/migrate_validate.rs` | partial |
 
 ### `config/decrypt`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/config/decrypt/bcpgp.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/config/decrypt/openpgp.spec.ts` | 7 | 0 | 7 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/config/decrypt/bcpgp.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/config/decrypt/openpgp.spec.ts` | 7 | 0 | 7 | — | pending |
 
 ### `config/migrations`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/config/migrations/base/abstract-migration.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/config/migrations/custom/automerge-major-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/automerge-migration.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/config/migrations/custom/automerge-minor-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/automerge-patch-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/automerge-type-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/config/migrations/custom/base-branch-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/binary-source-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/branch-name-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/branch-prefix-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/compatibility-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/custom-managers-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/datasource-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/dep-types-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/dry-run-migration.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/config/migrations/custom/enabled-managers-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/extends-migration.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/config/migrations/custom/fetch-release-notes-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/file-match-migration.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/config/migrations/custom/go-mod-tidy-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/host-rules-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/ignore-node-modules-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/ignore-npmrc-file-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/include-forks-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/match-datasources-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/match-managers-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/match-strings-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/node-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/package-files-migration.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/config/migrations/custom/package-name-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/package-pattern-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/package-rules-migration.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/config/migrations/custom/packages-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/path-rules-migration.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/config/migrations/custom/pin-versions-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/platform-commit-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/post-update-options-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/rebase-conflicted-prs-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/rebase-stale-prs-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/recreate-closed-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/renovate-fork-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/require-config-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/required-status-checks-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/schedule-migration.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/config/migrations/custom/semantic-commits-migration.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/config/migrations/custom/semantic-prefix-migration.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/config/migrations/custom/separate-major-release-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/separate-multiple-major-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/stability-days-migration.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/migrations/custom/suppress-notifications-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/trust-level-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/unpublish-safe-migration.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/config/migrations/custom/update-lock-files-migration.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/migrations/custom/upgrade-in-range-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/custom/version-strategy-migration.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/migrations/migrations-service.spec.ts` | 6 | 4 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/config/migrations/base/abstract-migration.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/config/migrations/custom/automerge-major-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/automerge-migration.spec.ts` | 4 | 4 | 0 | `renovate-core/src/config/migrate_validate.rs`<br>`renovate-core/src/repo_config.rs` | ported |
+| `lib/config/migrations/custom/automerge-minor-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/automerge-patch-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/automerge-type-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/azure-gitlab-automerge-migration.spec.ts` | 6 | 6 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/base-branch-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/binary-source-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/branch-name-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/branch-prefix-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/compatibility-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/composer-ignore-platform-reqs-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/custom-managers-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/datasource-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/dep-types-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/dry-run-migration.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/config/migrations/custom/enabled-managers-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/extends-migration.spec.ts` | 6 | 6 | 0 | `renovate-core/src/config/migrate_validate.rs`<br>`renovate-core/src/repo_config.rs` | ported |
+| `lib/config/migrations/custom/fetch-release-notes-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/file-match-migration.spec.ts` | 4 | 4 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/go-mod-tidy-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/host-rules-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/ignore-node-modules-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/ignore-npmrc-file-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/include-forks-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/match-datasources-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/match-managers-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs`<br>`renovate-core/src/repo_config.rs` | ported |
+| `lib/config/migrations/custom/match-strings-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/node-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/package-files-migration.spec.ts` | 6 | 6 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/package-name-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/package-pattern-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/package-rules-migration.spec.ts` | 8 | 8 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/packages-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/path-rules-migration.spec.ts` | 4 | 4 | 0 | `renovate-core/src/config/migrate_validate.rs`<br>`renovate-core/src/repo_config.rs` | ported |
+| `lib/config/migrations/custom/pin-versions-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/platform-commit-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/post-update-options-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/rebase-conflicted-prs-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/rebase-stale-prs-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/recreate-closed-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/renovate-fork-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/require-config-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/required-status-checks-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/schedule-migration.spec.ts` | 5 | 5 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/semantic-commits-migration.spec.ts` | 6 | 6 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/semantic-prefix-migration.spec.ts` | 4 | 4 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/separate-major-release-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/separate-multiple-major-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/stability-days-migration.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/suppress-notifications-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/trust-level-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/unpublish-safe-migration.spec.ts` | 7 | 7 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/update-lock-files-migration.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/upgrade-in-range-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/custom/version-strategy-migration.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/migrations/migrations-service.spec.ts` | 6 | 4 | 2 | `renovate-core/src/config/migrate_validate.rs` | partial |
 
 ### `config/options`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/config/options/env-options.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/config/options/index.spec.ts` | 9 | 0 | 9 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/config/options/env-options.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/config/options/index.spec.ts` | 9 | 0 | 9 | — | pending |
 
 ### `config/presets`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/config/presets/forgejo/index.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/config/presets/gitea/index.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/config/presets/github/index.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/config/presets/gitlab/index.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/config/presets/http/index.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/config/presets/index.spec.ts` | 69 | 0 | 69 | pending |
-| `lib/config/presets/internal/custom-managers.spec.ts` | 22 | 0 | 22 | pending |
-| `lib/config/presets/internal/group.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/config/presets/internal/index.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/config/presets/internal/monorepos.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/config/presets/internal/schedule.spec.ts` | 9 | 1 | 8 | partial |
-| `lib/config/presets/internal/workarounds.spec.ts` | 10 | 3 | 7 | partial |
-| `lib/config/presets/local/common.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/config/presets/local/index.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/config/presets/npm/index.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/config/presets/parse.spec.ts` | 46 | 46 | 0 | ported |
-| `lib/config/presets/util.spec.ts` | 5 | 0 | 5 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/config/presets/forgejo/index.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/config/presets/gitea/index.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/config/presets/github/index.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/config/presets/gitlab/index.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/config/presets/http/index.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/config/presets/index.spec.ts` | 69 | 0 | 69 | — | pending |
+| `lib/config/presets/internal/custom-managers.spec.ts` | 22 | 0 | 22 | — | pending |
+| `lib/config/presets/internal/group.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/config/presets/internal/index.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/config/presets/internal/monorepos.spec.ts` | 1 | 1 | 0 | `renovate-core/src/monorepos.rs` | ported |
+| `lib/config/presets/internal/schedule.spec.ts` | 9 | 1 | 8 | `renovate-core/src/schedule.rs` | partial |
+| `lib/config/presets/internal/workarounds.spec.ts` | 10 | 3 | 7 | `renovate-core/src/repo_config.rs` | partial |
+| `lib/config/presets/local/common.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/config/presets/local/index.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/config/presets/npm/index.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/config/presets/parse.spec.ts` | 46 | 46 | 0 | `renovate-core/src/extractors/renovate_config_presets.rs` | ported |
+| `lib/config/presets/util.spec.ts` | 5 | 0 | 5 | — | pending |
 
 ### `config/validation-helpers`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/config/validation-helpers/match-base-branches.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/config/validation-helpers/regex-glob-matchers.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/config/validation-helpers/utils.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/config/validation-helpers/match-base-branches.spec.ts` | 2 | 2 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/validation-helpers/regex-glob-matchers.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/config/validation-helpers/utils.spec.ts` | 3 | 3 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
 
 ### `constants`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/constants/platform.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/constants/platform.spec.ts` | 8 | 8 | 0 | `renovate-core/src/platform_constants.rs` | ported |
 
 ### `data`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/data/index.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/data/index.spec.ts` | 1 | 1 | 0 | `renovate-core/src/lib.rs` | ported |
 
 ### `datasource/_common`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/common.spec.ts` | 30 | 30 | 0 | ported |
-| `lib/modules/datasource/datasource.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/modules/datasource/index.spec.ts` | 44 | 0 | 44 | pending |
-| `lib/modules/datasource/metadata.spec.ts` | 32 | 10 | 22 | partial |
-| `lib/modules/datasource/postprocess-release.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/datasource/span-processor.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/modules/datasource/utils.spec.ts` | 6 | 2 | 4 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/common.spec.ts` | 30 | 30 | 0 | `renovate-core/src/datasources.rs`<br>`renovate-core/src/util.rs` | ported |
+| `lib/modules/datasource/datasource.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/modules/datasource/index.spec.ts` | 44 | 0 | 44 | — | pending |
+| `lib/modules/datasource/metadata.spec.ts` | 32 | 10 | 22 | `renovate-core/src/datasources.rs`<br>`renovate-core/src/util.rs` | partial |
+| `lib/modules/datasource/postprocess-release.spec.ts` | 7 | 7 | 0 | `renovate-core/src/datasources.rs` | ported |
+| `lib/modules/datasource/span-processor.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/modules/datasource/utils.spec.ts` | 6 | 2 | 4 | `renovate-core/src/util.rs` | partial |
 
 ### `datasource/artifactory`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/artifactory/index.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/artifactory/index.spec.ts` | 8 | 8 | 0 | `renovate-core/src/datasources/artifactory.rs` | ported |
 
 ### `datasource/aws-eks-addon`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/aws-eks-addon/index.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/aws-eks-addon/index.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/modules/datasource/aws-eks-addon/schema.spec.ts` | 1 | 1 | 0 | `renovate-core/src/versioning/aws_eks_addon.rs` | ported |
 
 ### `datasource/aws-machine-image`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/aws-machine-image/index.spec.ts` | 14 | 0 | 14 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/aws-machine-image/index.spec.ts` | 14 | 0 | 14 | — | pending |
 
 ### `datasource/aws-rds`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/aws-rds/index.spec.ts` | 3 | 0 | 3 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/aws-rds/index.spec.ts` | 3 | 0 | 3 | — | pending |
 
 ### `datasource/azure-bicep-resource`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/azure-bicep-resource/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/azure-bicep-resource/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/datasources/azure_bicep.rs` | ported |
 
 ### `datasource/azure-pipelines-tasks`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/azure-pipelines-tasks/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/datasources/azure_pipelines_tasks.rs` | ported |
 
 ### `datasource/azure-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/azure-tags/index.spec.ts` | 5 | 2 | 3 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/azure-tags/index.spec.ts` | 5 | 2 | 3 | `renovate-core/src/util.rs` | partial |
 
 ### `datasource/bazel`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/bazel/index.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/modules/datasource/bazel/schema.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/bazel/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/datasources/bazel.rs` | ported |
+| `lib/modules/datasource/bazel/schema.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/bazel.rs` | ported |
 
 ### `datasource/bitbucket-server-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | 11 | 8 | 3 | partial |
-| `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/bitbucket-server-tags/index.spec.ts` | 11 | 8 | 3 | `renovate-core/src/datasources/bitbucket_server_tags.rs` | partial |
+| `lib/modules/datasource/bitbucket-server-tags/schema.spec.ts` | 2 | 2 | 0 | `renovate-core/src/datasources/bitbucket_server_tags.rs` | ported |
 
 ### `datasource/bitbucket-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/bitbucket-tags/index.spec.ts` | 5 | 4 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/bitbucket-tags/index.spec.ts` | 5 | 4 | 1 | `renovate-core/src/datasources/bitbucket_tags.rs` | partial |
 
 ### `datasource/bitrise`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/bitrise/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/bitrise/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/datasources/bitrise.rs` | ported |
 
 ### `datasource/buildpacks-registry`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/buildpacks-registry/index.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/buildpacks-registry/index.spec.ts` | 3 | 3 | 0 | `renovate-core/src/datasources/buildpacks_registry.rs` | ported |
+| `lib/modules/datasource/buildpacks-registry/schema.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/buildpacks_registry.rs` | ported |
 
 ### `datasource/cdnjs`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/cdnjs/index.spec.ts` | 14 | 13 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/cdnjs/index.spec.ts` | 14 | 13 | 1 | `renovate-core/src/datasources/cdnjs.rs` | partial |
 
 ### `datasource/clojure`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/clojure/index.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/clojure/index.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/clojure.rs` | ported |
 
 ### `datasource/conan`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/conan/index.spec.ts` | 22 | 0 | 22 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/conan/index.spec.ts` | 22 | 0 | 22 | — | pending |
 
 ### `datasource/conda`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/conda/index.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/conda/index.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/conda.rs` | ported |
 
 ### `datasource/cpan`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/cpan/index.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/datasource/cpan/schema.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/cpan/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/cpan.rs` | ported |
+| `lib/modules/datasource/cpan/schema.spec.ts` | 3 | 3 | 0 | `renovate-core/src/datasources/cpan.rs` | ported |
 
 ### `datasource/crate`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/crate/index.spec.ts` | 27 | 22 | 5 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/crate/index.spec.ts` | 27 | 22 | 5 | `renovate-core/src/datasources/crates_io.rs` | partial |
 
 ### `datasource/custom`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/custom/index.spec.ts` | 30 | 1 | 29 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/custom/index.spec.ts` | 30 | 1 | 29 | `renovate-core/src/datasources/artifactory.rs` | partial |
 
 ### `datasource/dart`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/dart/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/dart/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/datasources/pub_dev.rs` | ported |
 
 ### `datasource/dart-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/dart-version/index.spec.ts` | 4 | 2 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/dart-version/index.spec.ts` | 4 | 2 | 2 | `renovate-core/src/datasources/dart_version.rs` | partial |
 
 ### `datasource/deb`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/deb/checksum.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/datasource/deb/index.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/modules/datasource/deb/packages.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/modules/datasource/deb/url.spec.ts` | 6 | 4 | 2 | partial |
-| `lib/modules/datasource/deb/utils.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/deb/checksum.spec.ts` | 3 | 3 | 0 | `renovate-core/src/datasources/deb.rs` | ported |
+| `lib/modules/datasource/deb/index.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/modules/datasource/deb/packages.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/modules/datasource/deb/url.spec.ts` | 6 | 4 | 2 | `renovate-core/src/datasources/deb.rs` | partial |
+| `lib/modules/datasource/deb/utils.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/deb.rs` | ported |
 
 ### `datasource/deno`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/deno/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/deno/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/datasources/deno.rs` | ported |
 
 ### `datasource/devbox`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/devbox/index.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/devbox/index.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/devbox.rs` | ported |
 
 ### `datasource/docker`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/docker/common.spec.ts` | 15 | 1 | 14 | partial |
-| `lib/modules/datasource/docker/dockerhub-cache.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/modules/datasource/docker/index.spec.ts` | 87 | 3 | 84 | partial |
-| `lib/modules/datasource/docker/schema.spec.ts` | 10 | 0 | 10 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/docker/common.spec.ts` | 15 | 1 | 14 | `renovate-core/src/datasources/docker_hub.rs` | partial |
+| `lib/modules/datasource/docker/dockerhub-cache.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/modules/datasource/docker/index.spec.ts` | 87 | 3 | 84 | `renovate-core/src/datasources/docker_hub.rs` | partial |
+| `lib/modules/datasource/docker/schema.spec.ts` | 10 | 0 | 10 | — | pending |
 
 ### `datasource/dotnet-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/dotnet-version/index.spec.ts` | 9 | 3 | 6 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/dotnet-version/index.spec.ts` | 9 | 3 | 6 | `renovate-core/src/datasources/dotnet_version.rs` | partial |
 
 ### `datasource/elm-package`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/elm-package/index.spec.ts` | 10 | 4 | 6 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/elm-package/index.spec.ts` | 10 | 4 | 6 | `renovate-core/src/datasources/elm_package.rs` | partial |
 
 ### `datasource/endoflife-date`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/endoflife-date/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/endoflife-date/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/datasources/endoflife.rs` | ported |
 
 ### `datasource/flutter-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/flutter-version/index.spec.ts` | 4 | 2 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/flutter-version/index.spec.ts` | 4 | 2 | 2 | `renovate-core/src/datasources/flutter_version.rs` | partial |
 
 ### `datasource/forgejo-releases`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/forgejo-releases/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/forgejo-releases/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/forgejo_releases.rs` | ported |
 
 ### `datasource/forgejo-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/forgejo-tags/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/forgejo-tags/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/forgejo_tags.rs` | ported |
 
 ### `datasource/galaxy`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/galaxy/index.spec.ts` | 11 | 11 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/galaxy/index.spec.ts` | 11 | 11 | 0 | `renovate-core/src/datasources/galaxy.rs` | ported |
 
 ### `datasource/galaxy-collection`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/galaxy-collection/index.spec.ts` | 15 | 15 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/galaxy-collection/index.spec.ts` | 15 | 15 | 0 | `renovate-core/src/datasources/galaxy_collection.rs` | ported |
 
 ### `datasource/git-refs`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/git-refs/index.spec.ts` | 11 | 8 | 3 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/git-refs/index.spec.ts` | 11 | 8 | 3 | `renovate-core/src/datasources/git_refs.rs` | partial |
 
 ### `datasource/git-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/git-tags/index.spec.ts` | 8 | 7 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/git-tags/index.spec.ts` | 8 | 7 | 1 | `renovate-core/src/datasources/git_tags.rs`<br>`renovate-core/src/util.rs` | partial |
 
 ### `datasource/gitea-releases`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/gitea-releases/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/gitea-releases/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/gitea_releases.rs` | ported |
 
 ### `datasource/gitea-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/gitea-tags/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/gitea-tags/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/gitea_tags.rs` | ported |
 
 ### `datasource/github-digest`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/github-digest/index.spec.ts` | 10 | 0 | 10 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/github-digest/index.spec.ts` | 10 | 0 | 10 | — | pending |
 
 ### `datasource/github-release-attachments`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/github-release-attachments/digest.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/modules/datasource/github-release-attachments/index.spec.ts` | 5 | 0 | 5 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/github-release-attachments/digest.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/modules/datasource/github-release-attachments/index.spec.ts` | 5 | 0 | 5 | — | pending |
 
 ### `datasource/github-releases`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/github-releases/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/github-releases/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/github_releases.rs` | ported |
 
 ### `datasource/github-runners`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/github-runners/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/github-runners/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/datasources/github_runners.rs` | ported |
 
 ### `datasource/github-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/github-tags/index.spec.ts` | 12 | 11 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/github-tags/index.spec.ts` | 12 | 11 | 1 | `renovate-core/src/datasources/github_tags.rs` | partial |
 
 ### `datasource/gitlab-packages`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/gitlab-packages/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/gitlab-packages/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/gitlab_packages.rs` | ported |
 
 ### `datasource/gitlab-releases`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/gitlab-releases/index.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/gitlab-releases/index.spec.ts` | 3 | 3 | 0 | `renovate-core/src/datasources/gitlab_releases.rs` | ported |
 
 ### `datasource/gitlab-tags`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/gitlab-tags/index.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/datasource/gitlab-tags/util.spec.ts` | 2 | 1 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/gitlab-tags/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/datasources/gitlab_tags.rs` | ported |
+| `lib/modules/datasource/gitlab-tags/util.spec.ts` | 2 | 1 | 1 | `renovate-core/src/datasources/gitlab_tags.rs` | partial |
 
 ### `datasource/glasskube-packages`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/glasskube-packages/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/glasskube-packages/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/datasources/glasskube_packages.rs` | ported |
 
 ### `datasource/go`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/go/base.spec.ts` | 29 | 0 | 29 | pending |
-| `lib/modules/datasource/go/common.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/datasource/go/goproxy-parser.spec.ts` | 9 | 7 | 2 | partial |
-| `lib/modules/datasource/go/index.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/modules/datasource/go/releases-direct.spec.ts` | 15 | 0 | 15 | pending |
-| `lib/modules/datasource/go/releases-goproxy.spec.ts` | 28 | 1 | 27 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/go/base.spec.ts` | 29 | 0 | 29 | — | pending |
+| `lib/modules/datasource/go/common.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/gomod.rs` | ported |
+| `lib/modules/datasource/go/goproxy-parser.spec.ts` | 9 | 7 | 2 | `renovate-core/src/util.rs` | partial |
+| `lib/modules/datasource/go/index.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/modules/datasource/go/releases-direct.spec.ts` | 15 | 0 | 15 | — | pending |
+| `lib/modules/datasource/go/releases-goproxy.spec.ts` | 28 | 1 | 27 | `renovate-core/src/datasources/gomod.rs` | partial |
 
 ### `datasource/golang-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/golang-version/index.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/golang-version/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/datasources/golang_version.rs` | ported |
 
 ### `datasource/gradle-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/gradle-version/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/gradle-version/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/datasources/gradle_version.rs` | ported |
 
 ### `datasource/hackage`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/hackage/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/hackage/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/datasources/hackage.rs` | ported |
 
 ### `datasource/helm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/helm/index.spec.ts` | 14 | 14 | 0 | ported |
-| `lib/modules/datasource/helm/schema.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/helm/index.spec.ts` | 14 | 14 | 0 | `renovate-core/src/datasources/helm.rs` | ported |
+| `lib/modules/datasource/helm/schema.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/helm.rs` | ported |
 
 ### `datasource/hermit`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/hermit/index.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/hermit/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/datasources/hermit.rs` | ported |
 
 ### `datasource/hex`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/hex/index.spec.ts` | 33 | 2 | 31 | partial |
-| `lib/modules/datasource/hex/v2/index.spec.ts` | 2 | 0 | 2 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/hex/index.spec.ts` | 33 | 2 | 31 | `renovate-core/src/datasources/hex.rs` | partial |
+| `lib/modules/datasource/hex/v2/index.spec.ts` | 2 | 0 | 2 | — | pending |
 
 ### `datasource/hexpm-bob`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/hexpm-bob/index.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/hexpm-bob/index.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/hexpm_bob.rs` | ported |
 
 ### `datasource/java-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/java-version/common.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/datasource/java-version/index.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/java-version/common.spec.ts` | 2 | 2 | 0 | `renovate-core/src/datasources/java_version.rs` | ported |
+| `lib/modules/datasource/java-version/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/datasources/java_version.rs` | ported |
 
 ### `datasource/jenkins-plugins`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/jenkins-plugins/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/jenkins-plugins/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/jenkins_plugins.rs` | ported |
 
 ### `datasource/jsr`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/jsr/index.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/datasource/jsr/util.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/jsr/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/datasources/jsr.rs` | ported |
+| `lib/modules/datasource/jsr/util.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/jsr.rs` | ported |
 
 ### `datasource/kubernetes-api`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/kubernetes-api/index.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/kubernetes-api/index.spec.ts` | 3 | 3 | 0 | `renovate-core/src/datasources/kubernetes_api.rs` | ported |
 
 ### `datasource/maven`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/maven/cache.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/modules/datasource/maven/common.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/datasource/maven/index.spec.ts` | 46 | 41 | 5 | partial |
-| `lib/modules/datasource/maven/s3.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/modules/datasource/maven/schema.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/datasource/maven/util.spec.ts` | 16 | 14 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/maven/cache.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/modules/datasource/maven/common.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/maven.rs` | ported |
+| `lib/modules/datasource/maven/index.spec.ts` | 46 | 41 | 5 | `renovate-core/src/datasources/maven.rs` | partial |
+| `lib/modules/datasource/maven/s3.spec.ts` | 8 | 8 | 0 | `renovate-core/src/datasources/maven.rs` | ported |
+| `lib/modules/datasource/maven/schema.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/maven.rs` | ported |
+| `lib/modules/datasource/maven/util.spec.ts` | 16 | 14 | 2 | `renovate-core/src/datasources/maven.rs` | partial |
 
 ### `datasource/nextcloud`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/nextcloud/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/nextcloud/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/nextcloud.rs` | ported |
 
 ### `datasource/node-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/node-version/index.spec.ts` | 4 | 2 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/node-version/index.spec.ts` | 4 | 2 | 2 | `renovate-core/src/datasources/node_version.rs` | partial |
 
 ### `datasource/npm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/npm/get.spec.ts` | 24 | 15 | 9 | partial |
-| `lib/modules/datasource/npm/index.spec.ts` | 24 | 24 | 0 | ported |
-| `lib/modules/datasource/npm/npmrc.spec.ts` | 15 | 15 | 0 | ported |
-| `lib/modules/datasource/npm/schema.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/npm/get.spec.ts` | 24 | 15 | 9 | `renovate-core/src/datasources/npm.rs`<br>`renovate-core/src/datasources/npm_npmrc.rs` | partial |
+| `lib/modules/datasource/npm/index.spec.ts` | 24 | 24 | 0 | `renovate-core/src/datasources/npm.rs` | ported |
+| `lib/modules/datasource/npm/npmrc.spec.ts` | 15 | 15 | 0 | `renovate-core/src/datasources/npm_npmrc.rs` | ported |
+| `lib/modules/datasource/npm/schema.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/npm.rs` | ported |
 
 ### `datasource/nuget`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/nuget/common.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/datasource/nuget/index.spec.ts` | 36 | 1 | 35 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/nuget/common.spec.ts` | 1 | 1 | 0 | `renovate-core/src/versioning/nuget.rs` | ported |
+| `lib/modules/datasource/nuget/index.spec.ts` | 36 | 1 | 35 | `renovate-core/src/datasources/nuget.rs` | partial |
 
 ### `datasource/orb`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/orb/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/orb/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/datasources/orb.rs` | ported |
 
 ### `datasource/packagist`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/packagist/index.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/modules/datasource/packagist/schema.spec.ts` | 8 | 0 | 8 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/packagist/index.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/modules/datasource/packagist/schema.spec.ts` | 8 | 0 | 8 | — | pending |
 
 ### `datasource/pod`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/pod/index.spec.ts` | 19 | 2 | 17 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/pod/index.spec.ts` | 19 | 2 | 17 | `renovate-core/src/datasources/cocoapods.rs`<br>`renovate-core/src/datasources/github_releases.rs`<br>`renovate-core/src/datasources/gitlab_tags.rs`<br>`renovate-core/src/datasources/gomod.rs`<br>`renovate-core/src/datasources/hex.rs`<br>`renovate-core/src/datasources/nuget.rs`<br>`renovate-core/src/datasources/packagist.rs`<br>`renovate-core/src/datasources/rubygems.rs` | partial |
 
 ### `datasource/puppet-forge`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/puppet-forge/index.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/puppet-forge/index.spec.ts` | 8 | 8 | 0 | `renovate-core/src/datasources/puppet_forge.rs` | ported |
 
 ### `datasource/pypi`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/pypi/index.spec.ts` | 39 | 2 | 37 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/pypi/index.spec.ts` | 39 | 2 | 37 | `renovate-core/src/datasources/pypi.rs` | partial |
 
 ### `datasource/python-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/python-version/index.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/python-version/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/datasources/python_version.rs` | ported |
 
 ### `datasource/repology`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/repology/index.spec.ts` | 19 | 18 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/repology/index.spec.ts` | 19 | 18 | 1 | `renovate-core/src/datasources/repology.rs` | partial |
 
 ### `datasource/rpm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/rpm/index.spec.ts` | 28 | 0 | 28 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/rpm/index.spec.ts` | 28 | 0 | 28 | — | pending |
 
 ### `datasource/ruby-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/ruby-version/index.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/ruby-version/index.spec.ts` | 3 | 3 | 0 | `renovate-core/src/datasources/ruby_version.rs` | ported |
 
 ### `datasource/rubygems`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/rubygems/index.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/modules/datasource/rubygems/schema.spec.ts` | 7 | 3 | 4 | partial |
-| `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | 10 | 0 | 10 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/rubygems/index.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/modules/datasource/rubygems/metadata-cache.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/modules/datasource/rubygems/schema.spec.ts` | 7 | 3 | 4 | `renovate-core/src/datasources/rubygems.rs` | partial |
+| `lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts` | 10 | 0 | 10 | — | pending |
 
 ### `datasource/rust-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/rust-version/index.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/datasource/rust-version/parse.spec.ts` | 13 | 13 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/rust-version/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/rust_version.rs` | ported |
+| `lib/modules/datasource/rust-version/parse.spec.ts` | 13 | 13 | 0 | `renovate-core/src/datasources/rust_version.rs` | ported |
 
 ### `datasource/sbt-package`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/sbt-package/index.spec.ts` | 13 | 11 | 2 | partial |
-| `lib/modules/datasource/sbt-package/util.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/sbt-package/index.spec.ts` | 13 | 11 | 2 | `renovate-core/src/datasources/sbt_package.rs` | partial |
+| `lib/modules/datasource/sbt-package/util.spec.ts` | 1 | 1 | 0 | `renovate-core/src/datasources/sbt_package.rs` | ported |
 
 ### `datasource/sbt-plugin`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/sbt-plugin/index.spec.ts` | 8 | 7 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/sbt-plugin/index.spec.ts` | 8 | 7 | 1 | `renovate-core/src/datasources/sbt_plugin.rs` | partial |
 
 ### `datasource/terraform-module`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/terraform-module/base.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/modules/datasource/terraform-module/index.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/modules/datasource/terraform-module/utils.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/terraform-module/base.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/modules/datasource/terraform-module/index.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/modules/datasource/terraform-module/utils.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/terraform.rs` | ported |
 
 ### `datasource/terraform-provider`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/terraform-provider/index.spec.ts` | 18 | 0 | 18 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/terraform-provider/index.spec.ts` | 18 | 0 | 18 | — | pending |
 
 ### `datasource/typst`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/typst/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/typst/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/datasources/typst.rs` | ported |
 
 ### `datasource/unity3d`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/unity3d/index.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/unity3d/index.spec.ts` | 9 | 9 | 0 | `renovate-core/src/datasources/unity3d.rs` | ported |
 
 ### `datasource/unity3d-packages`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/datasource/unity3d-packages/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/datasource/unity3d-packages/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/datasources/unity3d_packages.rs` | ported |
 
 ### `instrumentation`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/instrumentation/detectors.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/instrumentation/index.spec.ts` | 10 | 0 | 10 | pending |
-| `lib/instrumentation/reporting.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/instrumentation/utils.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/instrumentation/with-instrumenting.spec.ts` | 5 | 0 | 5 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/instrumentation/detectors.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/instrumentation/index.spec.ts` | 10 | 0 | 10 | — | pending |
+| `lib/instrumentation/reporting.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/instrumentation/utils.spec.ts` | 1 | 1 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/instrumentation/with-instrumenting.spec.ts` | 5 | 0 | 5 | — | pending |
 
 ### `logger`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/logger/bunyan.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/logger/cmd-serializer.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/logger/config-serializer.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/logger/err-serializer.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/logger/index.spec.ts` | 26 | 0 | 26 | pending |
-| `lib/logger/once.spec.ts` | 9 | 3 | 6 | partial |
-| `lib/logger/pretty-stdout.spec.ts` | 15 | 12 | 3 | partial |
-| `lib/logger/remap.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/logger/renovate-logger.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/logger/utils.spec.ts` | 8 | 2 | 6 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/logger/bunyan.spec.ts` | 2 | 2 | 0 | `renovate-cli/src/logging.rs` | ported |
+| `lib/logger/cmd-serializer.spec.ts` | 2 | 2 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/logger/config-serializer.spec.ts` | 3 | 3 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/logger/err-serializer.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/logger/index.spec.ts` | 26 | 0 | 26 | — | pending |
+| `lib/logger/once.spec.ts` | 9 | 3 | 6 | `renovate-core/src/util.rs` | partial |
+| `lib/logger/pretty-stdout.spec.ts` | 15 | 12 | 3 | `renovate-core/src/util.rs` | partial |
+| `lib/logger/remap.spec.ts` | 6 | 6 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/logger/renovate-logger.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/logger/utils.spec.ts` | 8 | 2 | 6 | `renovate-core/src/util.rs` | partial |
 
 ### `manager/_common`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/fingerprint.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/modules/manager/index.spec.ts` | 22 | 9 | 13 | partial |
-| `lib/modules/manager/metadata.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/modules/manager/range.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/util.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/fingerprint.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/modules/manager/index.spec.ts` | 22 | 9 | 13 | `renovate-core/src/managers.rs` | partial |
+| `lib/modules/manager/metadata.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/modules/manager/range.spec.ts` | 5 | 5 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/modules/manager/util.spec.ts` | 10 | 10 | 0 | `renovate-core/src/util.rs` | ported |
 
 ### `manager/ansible`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/ansible/extract.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/ansible/extract.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/ansible.rs` | ported |
 
 ### `manager/ansible-galaxy`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | 14 | 14 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/ansible-galaxy/extract.spec.ts` | 14 | 14 | 0 | `renovate-core/src/extractors/ansible_galaxy.rs` | ported |
 
 ### `manager/ant`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/ant/extract.spec.ts` | 49 | 49 | 0 | ported |
-| `lib/modules/manager/ant/properties.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/ant/update.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/ant/extract.spec.ts` | 49 | 49 | 0 | `renovate-core/src/extractors/ant.rs` | ported |
+| `lib/modules/manager/ant/properties.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/ant.rs` | ported |
+| `lib/modules/manager/ant/update.spec.ts` | 10 | 10 | 0 | `renovate-core/src/extractors/ant.rs` | ported |
 
 ### `manager/argocd`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/argocd/extract.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/argocd/extract.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/argocd.rs` | ported |
 
 ### `manager/asdf`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/asdf/extract.spec.ts` | 13 | 13 | 0 | ported |
-| `lib/modules/manager/asdf/index.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/asdf/extract.spec.ts` | 13 | 13 | 0 | `renovate-core/src/extractors/asdf.rs` | ported |
+| `lib/modules/manager/asdf/index.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/asdf.rs` | ported |
 
 ### `manager/azure-pipelines`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | 28 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/azure-pipelines/extract.spec.ts` | 29 | 28 | 1 | `renovate-core/src/extractors/azure_pipelines.rs` | partial |
 
 ### `manager/batect`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/batect/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/batect/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/batect.rs` | ported |
 
 ### `manager/batect-wrapper`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/modules/manager/batect-wrapper/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/batect-wrapper/artifacts.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/modules/manager/batect-wrapper/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/batect_wrapper.rs` | ported |
 
 ### `manager/bazel`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bazel/artifacts.spec.ts` | 15 | 0 | 15 | pending |
-| `lib/modules/manager/bazel/common.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/manager/bazel/extract.spec.ts` | 12 | 12 | 0 | ported |
-| `lib/modules/manager/bazel/parser.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/bazel/rules/index.spec.ts` | 7 | 0 | 7 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bazel/artifacts.spec.ts` | 15 | 0 | 15 | — | pending |
+| `lib/modules/manager/bazel/common.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/bazel_parser.rs` | ported |
+| `lib/modules/manager/bazel/extract.spec.ts` | 12 | 12 | 0 | `renovate-core/src/extractors/bazel.rs` | ported |
+| `lib/modules/manager/bazel/parser.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/bazel_parser.rs` | ported |
+| `lib/modules/manager/bazel/rules/index.spec.ts` | 7 | 0 | 7 | — | pending |
 
 ### `manager/bazel-module`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bazel-module/artifacts.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/modules/manager/bazel-module/bazelrc.spec.ts` | 19 | 19 | 0 | ported |
-| `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | 35 | 0 | ported |
-| `lib/modules/manager/bazel-module/lockfile.spec.ts` | 8 | 0 | 8 | pending |
-| `lib/modules/manager/bazel-module/parser/context.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/modules/manager/bazel-module/parser/fragments.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/manager/bazel-module/parser/index.spec.ts` | 12 | 12 | 0 | ported |
-| `lib/modules/manager/bazel-module/parser/starlark.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/bazel-module/rules-img.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/bazel-module/rules.spec.ts` | 5 | 0 | 5 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bazel-module/artifacts.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/modules/manager/bazel-module/bazelrc.spec.ts` | 19 | 19 | 0 | `renovate-core/src/extractors/bazel_module.rs` | ported |
+| `lib/modules/manager/bazel-module/extract.spec.ts` | 35 | 35 | 0 | `renovate-core/src/extractors/bazel_module.rs` | ported |
+| `lib/modules/manager/bazel-module/lockfile.spec.ts` | 8 | 0 | 8 | — | pending |
+| `lib/modules/manager/bazel-module/parser/context.spec.ts` | 10 | 10 | 0 | `renovate-core/src/extractors/bazel_module.rs` | ported |
+| `lib/modules/manager/bazel-module/parser/fragments.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/bazel_module.rs` | ported |
+| `lib/modules/manager/bazel-module/parser/index.spec.ts` | 12 | 12 | 0 | `renovate-core/src/extractors/bazel_module.rs` | ported |
+| `lib/modules/manager/bazel-module/parser/starlark.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/bazel_module.rs` | ported |
+| `lib/modules/manager/bazel-module/rules-img.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/bazel_module.rs` | ported |
+| `lib/modules/manager/bazel-module/rules.spec.ts` | 5 | 0 | 5 | — | pending |
 
 ### `manager/bazelisk`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bazelisk/artifacts.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/modules/manager/bazelisk/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bazelisk/artifacts.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/modules/manager/bazelisk/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/version_file.rs` | ported |
 
 ### `manager/bicep`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bicep/extract.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bicep/extract.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/bicep.rs` | ported |
 
 ### `manager/bitbucket-pipelines`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bitbucket-pipelines/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bitbucket-pipelines/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/bitbucket_pipelines.rs` | ported |
 
 ### `manager/bitrise`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bitrise/extract.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/bitrise/utils.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bitrise/extract.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/bitrise.rs` | ported |
+| `lib/modules/manager/bitrise/utils.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/bitrise.rs` | ported |
 
 ### `manager/buildkite`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/buildkite/extract.spec.ts` | 11 | 11 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/buildkite/extract.spec.ts` | 11 | 11 | 0 | `renovate-core/src/extractors/buildkite.rs` | ported |
 
 ### `manager/buildpacks`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/buildpacks/extract.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/buildpacks/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/buildpacks.rs` | ported |
 
 ### `manager/bun`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bun/artifacts.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/modules/manager/bun/extract.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/modules/manager/bun/utils.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bun/artifacts.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/modules/manager/bun/extract.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/modules/manager/bun/utils.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
 
 ### `manager/bun-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bun-version/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bun-version/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/bun_version.rs` | ported |
 
 ### `manager/bundler`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/bundler/artifacts.spec.ts` | 20 | 9 | 11 | partial |
-| `lib/modules/manager/bundler/common.spec.ts` | 11 | 8 | 3 | partial |
-| `lib/modules/manager/bundler/extract.spec.ts` | 15 | 15 | 0 | ported |
-| `lib/modules/manager/bundler/gemfile.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/bundler/host-rules.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/modules/manager/bundler/locked-version.spec.ts` | 12 | 12 | 0 | ported |
-| `lib/modules/manager/bundler/update-locked.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/bundler/artifacts.spec.ts` | 20 | 9 | 11 | `renovate-core/src/extractors/bundler_artifact_runner.rs` | partial |
+| `lib/modules/manager/bundler/common.spec.ts` | 11 | 8 | 3 | `renovate-core/src/extractors/bundler.rs` | partial |
+| `lib/modules/manager/bundler/extract.spec.ts` | 15 | 15 | 0 | `renovate-core/src/extractors/bundler.rs` | ported |
+| `lib/modules/manager/bundler/gemfile.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/bundler.rs` | ported |
+| `lib/modules/manager/bundler/host-rules.spec.ts` | 10 | 10 | 0 | `renovate-core/src/extractors/bundler.rs` | ported |
+| `lib/modules/manager/bundler/locked-version.spec.ts` | 12 | 12 | 0 | `renovate-core/src/extractors/bundler.rs` | ported |
+| `lib/modules/manager/bundler/update-locked.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/bundler.rs` | ported |
 
 ### `manager/cake`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/cake/index.spec.ts` | 5 | 3 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/cake/index.spec.ts` | 5 | 3 | 2 | `renovate-core/src/extractors/cake.rs` | partial |
 
 ### `manager/cargo`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/cargo/artifacts.spec.ts` | 20 | 9 | 11 | partial |
-| `lib/modules/manager/cargo/extract.spec.ts` | 32 | 32 | 0 | ported |
-| `lib/modules/manager/cargo/locked-version.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/modules/manager/cargo/range.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/manager/cargo/update-locked.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/cargo/update.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/cargo/artifacts.spec.ts` | 20 | 9 | 11 | `renovate-core/src/extractors/cargo.rs`<br>`renovate-core/src/extractors/cargo_artifact_runner.rs` | partial |
+| `lib/modules/manager/cargo/extract.spec.ts` | 32 | 32 | 0 | `renovate-core/src/extractors/cargo.rs` | ported |
+| `lib/modules/manager/cargo/locked-version.spec.ts` | 8 | 8 | 0 | `renovate-core/src/versioning/cargo.rs` | ported |
+| `lib/modules/manager/cargo/range.spec.ts` | 3 | 3 | 0 | `renovate-core/src/versioning/cargo.rs` | ported |
+| `lib/modules/manager/cargo/update-locked.spec.ts` | 5 | 5 | 0 | `renovate-core/src/versioning/cargo.rs` | ported |
+| `lib/modules/manager/cargo/update.spec.ts` | 5 | 5 | 0 | `renovate-core/src/versioning/cargo.rs` | ported |
 
 ### `manager/cdnurl`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/cdnurl/extract.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/cdnurl/extract.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/cdnurl.rs` | ported |
 
 ### `manager/circleci`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/circleci/extract.spec.ts` | 10 | 9 | 1 | partial |
-| `lib/modules/manager/circleci/index.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/circleci/range.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/circleci/schema.spec.ts` | 1 | 0 | 1 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/circleci/extract.spec.ts` | 10 | 9 | 1 | `renovate-core/src/extractors/circleci.rs` | partial |
+| `lib/modules/manager/circleci/index.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/circleci.rs`<br>`renovate-core/src/managers.rs` | ported |
+| `lib/modules/manager/circleci/range.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/circleci.rs` | ported |
+| `lib/modules/manager/circleci/schema.spec.ts` | 1 | 0 | 1 | — | pending |
 
 ### `manager/cloudbuild`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/cloudbuild/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/cloudbuild/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/cloudbuild.rs` | ported |
 
 ### `manager/cocoapods`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/cocoapods/artifacts.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/modules/manager/cocoapods/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/cocoapods/artifacts.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/modules/manager/cocoapods/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/cocoapods.rs` | ported |
 
 ### `manager/composer`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/composer/artifacts.spec.ts` | 30 | 0 | 30 | pending |
-| `lib/modules/manager/composer/extract.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/modules/manager/composer/range.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/manager/composer/schema.spec.ts` | 7 | 3 | 4 | partial |
-| `lib/modules/manager/composer/update-locked.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/composer/utils.spec.ts` | 33 | 0 | 33 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/composer/artifacts.spec.ts` | 30 | 0 | 30 | — | pending |
+| `lib/modules/manager/composer/extract.spec.ts` | 10 | 10 | 0 | `renovate-core/src/extractors/composer.rs` | ported |
+| `lib/modules/manager/composer/range.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/composer.rs` | ported |
+| `lib/modules/manager/composer/schema.spec.ts` | 7 | 3 | 4 | `renovate-core/src/extractors/composer.rs` | partial |
+| `lib/modules/manager/composer/update-locked.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/composer.rs` | ported |
+| `lib/modules/manager/composer/utils.spec.ts` | 33 | 0 | 33 | — | pending |
 
 ### `manager/conan`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/conan/artifacts.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/modules/manager/conan/extract.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/conan/range.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/conan/artifacts.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/modules/manager/conan/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/conan.rs` | ported |
+| `lib/modules/manager/conan/range.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/conan.rs` | ported |
 
 ### `manager/copier`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/copier/artifacts.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/modules/manager/copier/extract.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/manager/copier/update.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/copier/artifacts.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/modules/manager/copier/extract.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/copier.rs` | ported |
+| `lib/modules/manager/copier/update.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/copier.rs` | ported |
 
 ### `manager/cpanfile`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/cpanfile/extract.spec.ts` | 11 | 11 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/cpanfile/extract.spec.ts` | 11 | 11 | 0 | `renovate-core/src/extractors/cpanfile.rs` | ported |
 
 ### `manager/crossplane`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/crossplane/extract.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/crossplane/extract.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/crossplane.rs` | ported |
 
 ### `manager/crow`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/crow/extract.spec.ts` | 15 | 15 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/crow/extract.spec.ts` | 15 | 15 | 0 | `renovate-core/src/extractors/crow.rs` | ported |
 
 ### `manager/custom`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/custom/index.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/custom/jsonata/index.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/modules/manager/custom/regex/index.spec.ts` | 31 | 0 | 31 | pending |
-| `lib/modules/manager/custom/regex/utils.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/custom/index.spec.ts` | 2 | 2 | 0 | `renovate-core/src/managers.rs` | ported |
+| `lib/modules/manager/custom/jsonata/index.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/modules/manager/custom/regex/index.spec.ts` | 31 | 0 | 31 | — | pending |
+| `lib/modules/manager/custom/regex/utils.spec.ts` | 7 | 7 | 0 | `renovate-core/src/managers.rs`<br>`renovate-core/src/repo_config.rs` | ported |
 
 ### `manager/deno`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/deno/artifacts.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/modules/manager/deno/compat.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/modules/manager/deno/extract.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/modules/manager/deno/post.spec.ts` | 30 | 4 | 26 | partial |
-| `lib/modules/manager/deno/schema.spec.ts` | 43 | 0 | 43 | pending |
-| `lib/modules/manager/deno/update.spec.ts` | 38 | 27 | 11 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/deno/artifacts.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/modules/manager/deno/compat.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/modules/manager/deno/extract.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/modules/manager/deno/post.spec.ts` | 30 | 4 | 26 | `renovate-core/src/extractors/deno.rs` | partial |
+| `lib/modules/manager/deno/schema.spec.ts` | 43 | 0 | 43 | — | pending |
+| `lib/modules/manager/deno/update.spec.ts` | 38 | 27 | 11 | `renovate-core/src/extractors/deno.rs` | partial |
 
 ### `manager/deps-edn`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/deps-edn/extract.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/deps-edn/parser.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/deps-edn/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/deps_edn.rs` | ported |
+| `lib/modules/manager/deps-edn/parser.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/deps_edn.rs` | ported |
 
 ### `manager/devbox`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/devbox/artifacts.spec.ts` | 15 | 0 | 15 | pending |
-| `lib/modules/manager/devbox/extract.spec.ts` | 13 | 13 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/devbox/artifacts.spec.ts` | 15 | 0 | 15 | — | pending |
+| `lib/modules/manager/devbox/extract.spec.ts` | 13 | 13 | 0 | `renovate-core/src/extractors/devbox.rs` | ported |
 
 ### `manager/devcontainer`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/devcontainer/extract.spec.ts` | 15 | 15 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/devcontainer/extract.spec.ts` | 15 | 15 | 0 | `renovate-core/src/extractors/devcontainer.rs` | ported |
 
 ### `manager/docker-compose`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/docker-compose/extract.spec.ts` | 13 | 13 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/docker-compose/extract.spec.ts` | 13 | 13 | 0 | `renovate-core/src/extractors/docker_compose.rs` | ported |
 
 ### `manager/dockerfile`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/dockerfile/extract.spec.ts` | 76 | 76 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/dockerfile/extract.spec.ts` | 76 | 76 | 0 | `renovate-core/src/extractors/dockerfile.rs` | ported |
 
 ### `manager/droneci`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/droneci/extract.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/droneci/extract.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/droneci.rs` | ported |
 
 ### `manager/fleet`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/fleet/extract.spec.ts` | 10 | 8 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/fleet/extract.spec.ts` | 10 | 8 | 2 | `renovate-core/src/extractors/fleet.rs` | partial |
 
 ### `manager/flux`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/flux/artifacts.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/modules/manager/flux/extract.spec.ts` | 59 | 59 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/flux/artifacts.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/modules/manager/flux/extract.spec.ts` | 59 | 59 | 0 | `renovate-core/src/extractors/flux.rs` | ported |
 
 ### `manager/fvm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/fvm/extract.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/fvm/extract.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/fvm.rs` | ported |
 
 ### `manager/git-submodules`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/git-submodules/artifact.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/git-submodules/extract.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/modules/manager/git-submodules/update.spec.ts` | 6 | 3 | 3 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/git-submodules/artifact.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/git_submodules.rs` | ported |
+| `lib/modules/manager/git-submodules/extract.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/git_submodules.rs` | ported |
+| `lib/modules/manager/git-submodules/update.spec.ts` | 6 | 3 | 3 | `renovate-core/src/extractors/git_submodules.rs` | partial |
 
 ### `manager/github-actions`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/github-actions/extract.spec.ts` | 28 | 28 | 0 | ported |
-| `lib/modules/manager/github-actions/integration.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/modules/manager/github-actions/parse.spec.ts` | 53 | 53 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/github-actions/extract.spec.ts` | 28 | 28 | 0 | `renovate-core/src/extractors/github_actions.rs`<br>`renovate-core/src/extractors/mint.rs` | ported |
+| `lib/modules/manager/github-actions/integration.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/modules/manager/github-actions/parse.spec.ts` | 53 | 53 | 0 | `renovate-core/src/extractors/github_actions.rs` | ported |
 
 ### `manager/gitlabci`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | 13 | 1 | partial |
-| `lib/modules/manager/gitlabci/utils.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/gitlabci/extract.spec.ts` | 14 | 13 | 1 | `renovate-core/src/extractors/gitlabci.rs` | partial |
+| `lib/modules/manager/gitlabci/utils.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/gitlabci.rs` | ported |
 
 ### `manager/gitlabci-include`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/gitlabci-include/extract.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/gitlabci-include/extract.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/gitlabci_include.rs` | ported |
 
 ### `manager/glasskube`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/glasskube/extract.spec.ts` | 5 | 3 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/glasskube/extract.spec.ts` | 5 | 3 | 2 | `renovate-core/src/extractors/glasskube.rs` | partial |
 
 ### `manager/gleam`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/gleam/artifacts.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/modules/manager/gleam/extract.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/manager/gleam/locked-version.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/gleam/range.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/gleam/artifacts.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/modules/manager/gleam/extract.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/gleam.rs` | ported |
+| `lib/modules/manager/gleam/locked-version.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/gleam.rs` | ported |
+| `lib/modules/manager/gleam/range.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/gleam.rs` | ported |
 
 ### `manager/gomod`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/gomod/artifacts-extra.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/modules/manager/gomod/artifacts.spec.ts` | 56 | 26 | 30 | partial |
-| `lib/modules/manager/gomod/extract.spec.ts` | 23 | 23 | 0 | ported |
-| `lib/modules/manager/gomod/integration.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/modules/manager/gomod/line-parser.spec.ts` | 32 | 32 | 0 | ported |
-| `lib/modules/manager/gomod/update.spec.ts` | 33 | 33 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/gomod/artifacts-extra.spec.ts` | 10 | 10 | 0 | `renovate-core/src/extractors/gomod.rs` | ported |
+| `lib/modules/manager/gomod/artifacts.spec.ts` | 56 | 26 | 30 | `renovate-core/src/extractors/gomod_artifact_runner.rs` | partial |
+| `lib/modules/manager/gomod/extract.spec.ts` | 23 | 23 | 0 | `renovate-core/src/extractors/gomod.rs` | ported |
+| `lib/modules/manager/gomod/integration.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/modules/manager/gomod/line-parser.spec.ts` | 32 | 32 | 0 | `renovate-core/src/extractors/gomod.rs` | ported |
+| `lib/modules/manager/gomod/update.spec.ts` | 33 | 33 | 0 | `renovate-core/src/extractors/gomod.rs` | ported |
 
 ### `manager/gradle`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/gradle/artifacts.spec.ts` | 27 | 0 | 27 | pending |
-| `lib/modules/manager/gradle/extract.spec.ts` | 31 | 14 | 17 | partial |
-| `lib/modules/manager/gradle/extract/catalog.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/gradle/parser.spec.ts` | 45 | 0 | 45 | pending |
-| `lib/modules/manager/gradle/parser/common.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/modules/manager/gradle/update.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/gradle/utils.spec.ts` | 12 | 11 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/gradle/artifacts.spec.ts` | 27 | 0 | 27 | — | pending |
+| `lib/modules/manager/gradle/extract.spec.ts` | 31 | 14 | 17 | `renovate-core/src/extractors/gradle.rs` | partial |
+| `lib/modules/manager/gradle/extract/catalog.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/gradle.rs` | ported |
+| `lib/modules/manager/gradle/extract/consistent-versions-plugin.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/gradle.rs` | ported |
+| `lib/modules/manager/gradle/parser.spec.ts` | 45 | 0 | 45 | — | pending |
+| `lib/modules/manager/gradle/parser/common.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/modules/manager/gradle/update.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/gradle.rs` | ported |
+| `lib/modules/manager/gradle/utils.spec.ts` | 12 | 11 | 1 | `renovate-core/src/extractors/gradle.rs` | partial |
 
 ### `manager/gradle-wrapper`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/gradle-wrapper/artifacts.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/modules/manager/gradle-wrapper/extract.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/modules/manager/gradle-wrapper/util.spec.ts` | 14 | 12 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/gradle-wrapper/artifacts.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/modules/manager/gradle-wrapper/extract.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/gradle_wrapper.rs` | ported |
+| `lib/modules/manager/gradle-wrapper/util.spec.ts` | 14 | 12 | 2 | `renovate-core/src/extractors/gradle_wrapper.rs` | partial |
 
 ### `manager/haskell-cabal`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/haskell-cabal/extract.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/haskell-cabal/index.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/haskell-cabal/extract.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/cabal.rs` | ported |
+| `lib/modules/manager/haskell-cabal/index.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/cabal.rs` | ported |
 
 ### `manager/helm-requirements`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/helm-requirements/extract.spec.ts` | 11 | 11 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/helm-requirements/extract.spec.ts` | 11 | 11 | 0 | `renovate-core/src/extractors/helm.rs` | ported |
 
 ### `manager/helm-values`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/helm-values/extract.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/helm-values/extract.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/helm_values.rs` | ported |
 
 ### `manager/helmfile`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/helmfile/artifacts.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/modules/manager/helmfile/extract.spec.ts` | 20 | 20 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/helmfile/artifacts.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/modules/manager/helmfile/extract.spec.ts` | 20 | 20 | 0 | `renovate-core/src/extractors/helmfile.rs` | ported |
 
 ### `manager/helmsman`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/helmsman/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/helmsman/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/helmsman.rs` | ported |
 
 ### `manager/helmv3`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/helmv3/artifacts.spec.ts` | 24 | 0 | 24 | pending |
-| `lib/modules/manager/helmv3/common.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/helmv3/extract.spec.ts` | 12 | 12 | 0 | ported |
-| `lib/modules/manager/helmv3/update.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/helmv3/utils.spec.ts` | 11 | 9 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/helmv3/artifacts.spec.ts` | 24 | 0 | 24 | — | pending |
+| `lib/modules/manager/helmv3/common.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/helm.rs` | ported |
+| `lib/modules/manager/helmv3/extract.spec.ts` | 12 | 12 | 0 | `renovate-core/src/extractors/helm.rs` | ported |
+| `lib/modules/manager/helmv3/update.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/helm.rs` | ported |
+| `lib/modules/manager/helmv3/utils.spec.ts` | 11 | 9 | 2 | `renovate-core/src/extractors/helm.rs` | partial |
 
 ### `manager/hermit`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/hermit/artifacts.spec.ts` | 8 | 0 | 8 | pending |
-| `lib/modules/manager/hermit/default-config.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/hermit/extract.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/hermit/update.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/hermit/artifacts.spec.ts` | 8 | 0 | 8 | — | pending |
+| `lib/modules/manager/hermit/default-config.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/hermit.rs` | ported |
+| `lib/modules/manager/hermit/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/hermit.rs` | ported |
+| `lib/modules/manager/hermit/update.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/hermit.rs` | ported |
 
 ### `manager/homeassistant-manifest`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | 16 | 16 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/homeassistant-manifest/extract.spec.ts` | 16 | 16 | 0 | `renovate-core/src/extractors/homeassistant.rs` | ported |
 
 ### `manager/homebrew`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/homebrew/extract.spec.ts` | 17 | 17 | 0 | ported |
-| `lib/modules/manager/homebrew/handlers/github.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/modules/manager/homebrew/handlers/index.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/homebrew/handlers/npm.spec.ts` | 15 | 15 | 0 | ported |
-| `lib/modules/manager/homebrew/update.spec.ts` | 19 | 7 | 12 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/homebrew/extract.spec.ts` | 17 | 17 | 0 | `renovate-core/src/extractors/homebrew.rs` | ported |
+| `lib/modules/manager/homebrew/handlers/github.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/homebrew.rs` | ported |
+| `lib/modules/manager/homebrew/handlers/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/homebrew.rs` | ported |
+| `lib/modules/manager/homebrew/handlers/npm.spec.ts` | 15 | 15 | 0 | `renovate-core/src/extractors/homebrew.rs` | ported |
+| `lib/modules/manager/homebrew/update.spec.ts` | 19 | 7 | 12 | `renovate-core/src/extractors/homebrew.rs` | partial |
 
 ### `manager/html`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/html/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/html/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/html.rs` | ported |
 
 ### `manager/jenkins`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/jenkins/extract.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/jenkins/extract.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/jenkins.rs` | ported |
 
 ### `manager/jsonnet-bundler`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/modules/manager/jsonnet-bundler/extract.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/jsonnet-bundler/artifacts.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/modules/manager/jsonnet-bundler/extract.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/jsonnet_bundler.rs` | ported |
 
 ### `manager/kotlin-script`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/kotlin-script/extract.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/kotlin-script/index.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/kotlin-script/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/kotlin_script.rs` | ported |
+| `lib/modules/manager/kotlin-script/index.spec.ts` | 1 | 1 | 0 | `renovate-core/src/managers.rs` | ported |
 
 ### `manager/kubernetes`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/kubernetes/extract.spec.ts` | 15 | 15 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/kubernetes/extract.spec.ts` | 15 | 15 | 0 | `renovate-core/src/extractors/kubernetes.rs` | ported |
 
 ### `manager/kustomize`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/kustomize/artifacts.spec.ts` | 19 | 0 | 19 | pending |
-| `lib/modules/manager/kustomize/common.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/kustomize/extract.spec.ts` | 45 | 43 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/kustomize/artifacts.spec.ts` | 19 | 0 | 19 | — | pending |
+| `lib/modules/manager/kustomize/common.spec.ts` | 4 | 4 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/modules/manager/kustomize/extract.spec.ts` | 45 | 43 | 2 | `renovate-core/src/extractors/kustomize.rs` | partial |
 
 ### `manager/leiningen`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/leiningen/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/leiningen/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/leiningen.rs` | ported |
 
 ### `manager/maven`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/maven/extract.spec.ts` | 30 | 29 | 1 | partial |
-| `lib/modules/manager/maven/index.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/modules/manager/maven/update.spec.ts` | 18 | 18 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/maven/extract.spec.ts` | 30 | 29 | 1 | `renovate-core/src/extractors/maven.rs` | partial |
+| `lib/modules/manager/maven/index.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/maven.rs` | ported |
+| `lib/modules/manager/maven/update.spec.ts` | 18 | 18 | 0 | `renovate-core/src/extractors/maven.rs` | ported |
 
 ### `manager/maven-wrapper`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/maven-wrapper/artifacts.spec.ts` | 30 | 0 | 30 | pending |
-| `lib/modules/manager/maven-wrapper/extract.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/maven-wrapper/artifacts.spec.ts` | 30 | 0 | 30 | — | pending |
+| `lib/modules/manager/maven-wrapper/extract.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/maven_wrapper.rs` | ported |
 
 ### `manager/meteor`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/meteor/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/meteor/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/meteor.rs` | ported |
 
 ### `manager/mint`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/mint/extract.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/mint/extract.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/mint.rs` | ported |
 
 ### `manager/mise`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/mise/artifacts.spec.ts` | 23 | 8 | 15 | partial |
-| `lib/modules/manager/mise/backends.spec.ts` | 37 | 29 | 8 | partial |
-| `lib/modules/manager/mise/extract.spec.ts` | 42 | 41 | 1 | partial |
-| `lib/modules/manager/mise/index.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/mise/lockfile.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/mise/schema.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/manager/mise/utils.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/mise/artifacts.spec.ts` | 23 | 8 | 15 | `renovate-core/src/extractors/mise.rs` | partial |
+| `lib/modules/manager/mise/backends.spec.ts` | 37 | 29 | 8 | `renovate-core/src/extractors/mise.rs` | partial |
+| `lib/modules/manager/mise/extract.spec.ts` | 42 | 41 | 1 | `renovate-core/src/extractors/mise.rs` | partial |
+| `lib/modules/manager/mise/index.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/mise.rs`<br>`renovate-core/src/managers.rs` | ported |
+| `lib/modules/manager/mise/lockfile.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/mise.rs` | ported |
+| `lib/modules/manager/mise/schema.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/mise.rs` | ported |
+| `lib/modules/manager/mise/utils.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/mise.rs` | ported |
 
 ### `manager/mix`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/mix/artifacts.spec.ts` | 20 | 0 | 20 | pending |
-| `lib/modules/manager/mix/extract.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/manager/mix/range.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/mix/artifacts.spec.ts` | 20 | 0 | 20 | — | pending |
+| `lib/modules/manager/mix/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/mix.rs` | ported |
+| `lib/modules/manager/mix/range.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/mix.rs` | ported |
 
 ### `manager/nix`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/nix/artifacts.spec.ts` | 10 | 0 | 10 | pending |
-| `lib/modules/manager/nix/extract.spec.ts` | 38 | 38 | 0 | ported |
-| `lib/modules/manager/nix/range.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/nix/artifacts.spec.ts` | 10 | 0 | 10 | — | pending |
+| `lib/modules/manager/nix/extract.spec.ts` | 38 | 38 | 0 | `renovate-core/src/extractors/nix.rs` | ported |
+| `lib/modules/manager/nix/range.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/nix.rs` | ported |
 
 ### `manager/nodenv`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/nodenv/extract.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/nodenv/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/version_file.rs` | ported |
 
 ### `manager/npm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/npm/artifacts.spec.ts` | 23 | 10 | 13 | partial |
-| `lib/modules/manager/npm/detect.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/npm/extract/common/catalogs.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/npm/extract/common/package-file.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/manager/npm/extract/index.spec.ts` | 41 | 39 | 2 | partial |
-| `lib/modules/manager/npm/extract/npm.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/npm/extract/pnpm.spec.ts` | 16 | 5 | 11 | partial |
-| `lib/modules/manager/npm/extract/post/locked-versions.spec.ts` | 21 | 12 | 9 | partial |
-| `lib/modules/manager/npm/extract/post/monorepo.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/npm/extract/utils.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/manager/npm/extract/yarn.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/manager/npm/extract/yarnrc.spec.ts` | 7 | 6 | 1 | partial |
-| `lib/modules/manager/npm/npmrc.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/manager/npm/post-update/index.spec.ts` | 33 | 0 | 33 | pending |
-| `lib/modules/manager/npm/post-update/node-version.spec.ts` | 11 | 11 | 0 | ported |
-| `lib/modules/manager/npm/post-update/npm.spec.ts` | 35 | 32 | 3 | partial |
-| `lib/modules/manager/npm/post-update/pnpm.spec.ts` | 31 | 31 | 0 | ported |
-| `lib/modules/manager/npm/post-update/rules.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/npm/post-update/yarn.spec.ts` | 29 | 21 | 8 | partial |
-| `lib/modules/manager/npm/range.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/npm/update/dependency/index.spec.ts` | 24 | 24 | 0 | ported |
-| `lib/modules/manager/npm/update/dependency/pnpm.spec.ts` | 24 | 24 | 0 | ported |
-| `lib/modules/manager/npm/update/dependency/yarn.spec.ts` | 26 | 25 | 1 | partial |
-| `lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/modules/manager/npm/update/locked-dependency/index.spec.ts` | 20 | 20 | 0 | ported |
-| `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/npm/update/package-version/index.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/manager/npm/utils.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/npm/artifacts.spec.ts` | 23 | 10 | 13 | `renovate-core/src/extractors/npm.rs`<br>`renovate-core/src/extractors/npm_post_update/artifact_runner.rs` | partial |
+| `lib/modules/manager/npm/detect.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/extract/common/catalogs.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/extract/common/package-file.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/extract/index.spec.ts` | 41 | 39 | 2 | `renovate-core/src/extractors/npm.rs` | partial |
+| `lib/modules/manager/npm/extract/npm.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/extract/pnpm.spec.ts` | 16 | 5 | 11 | `renovate-core/src/extractors/npm.rs` | partial |
+| `lib/modules/manager/npm/extract/post/locked-versions.spec.ts` | 21 | 12 | 9 | `renovate-core/src/extractors/npm.rs` | partial |
+| `lib/modules/manager/npm/extract/post/monorepo.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/extract/utils.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/extract/yarn.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/extract/yarnrc.spec.ts` | 7 | 6 | 1 | `renovate-core/src/extractors/npm.rs` | partial |
+| `lib/modules/manager/npm/npmrc.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/post-update/index.spec.ts` | 33 | 0 | 33 | — | pending |
+| `lib/modules/manager/npm/post-update/node-version.spec.ts` | 11 | 11 | 0 | `renovate-core/src/extractors/npm.rs`<br>`renovate-core/src/extractors/npm_post_update/node_version.rs` | ported |
+| `lib/modules/manager/npm/post-update/npm.spec.ts` | 35 | 32 | 3 | `renovate-core/src/extractors/npm_post_update.rs`<br>`renovate-core/src/extractors/npm_post_update/npm.rs`<br>`renovate-core/src/extractors/npm_post_update/utils.rs` | partial |
+| `lib/modules/manager/npm/post-update/pnpm.spec.ts` | 31 | 31 | 0 | `renovate-core/src/extractors/npm_post_update.rs`<br>`renovate-core/src/extractors/npm_post_update/pnpm.rs`<br>`renovate-core/src/extractors/npm_post_update/utils.rs` | ported |
+| `lib/modules/manager/npm/post-update/rules.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/post-update/yarn.spec.ts` | 29 | 21 | 8 | `renovate-core/src/extractors/npm_post_update.rs`<br>`renovate-core/src/extractors/npm_post_update/utils.rs`<br>`renovate-core/src/extractors/npm_post_update/yarn.rs` | partial |
+| `lib/modules/manager/npm/range.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/dependency/index.spec.ts` | 24 | 24 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/dependency/pnpm.spec.ts` | 24 | 24 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/dependency/yarn.spec.ts` | 26 | 25 | 1 | `renovate-core/src/extractors/npm.rs` | partial |
+| `lib/modules/manager/npm/update/locked-dependency/common/parent-version.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/modules/manager/npm/update/locked-dependency/index.spec.ts` | 20 | 20 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/dep-constraints.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/locked-dependency/package-lock/get-locked.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/get-locked.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/locked-dependency/yarn-lock/replace.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/update/package-version/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
+| `lib/modules/manager/npm/utils.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/npm.rs` | ported |
 
 ### `manager/nuget`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/nuget/artifacts.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/modules/manager/nuget/config-formatter.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/manager/nuget/extract.spec.ts` | 35 | 35 | 0 | ported |
-| `lib/modules/manager/nuget/package-tree.spec.ts` | 11 | 11 | 0 | ported |
-| `lib/modules/manager/nuget/update.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/manager/nuget/util.spec.ts` | 18 | 18 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/nuget/artifacts.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/modules/manager/nuget/config-formatter.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/nuget.rs` | ported |
+| `lib/modules/manager/nuget/extract.spec.ts` | 35 | 35 | 0 | `renovate-core/src/extractors/cpanfile.rs`<br>`renovate-core/src/extractors/nuget.rs` | ported |
+| `lib/modules/manager/nuget/package-tree.spec.ts` | 11 | 11 | 0 | `renovate-core/src/extractors/nuget.rs` | ported |
+| `lib/modules/manager/nuget/update.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/nuget.rs` | ported |
+| `lib/modules/manager/nuget/util.spec.ts` | 18 | 18 | 0 | `renovate-core/src/extractors/nuget.rs` | ported |
 
 ### `manager/nvm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/nvm/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/nvm/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/version_file.rs` | ported |
 
 ### `manager/ocb`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/ocb/extract.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/manager/ocb/update.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/ocb/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/ocb.rs` | ported |
+| `lib/modules/manager/ocb/update.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/ocb.rs` | ported |
 
 ### `manager/osgi`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/osgi/extract.spec.ts` | 14 | 14 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/osgi/extract.spec.ts` | 14 | 14 | 0 | `renovate-core/src/extractors/osgi.rs` | ported |
 
 ### `manager/pep621`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pep621/artifacts.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/modules/manager/pep621/extract.spec.ts` | 14 | 14 | 0 | ported |
-| `lib/modules/manager/pep621/processors/pdm.spec.ts` | 8 | 0 | 8 | pending |
-| `lib/modules/manager/pep621/processors/uv.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/modules/manager/pep621/update.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/pep621/utils.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pep621/artifacts.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/modules/manager/pep621/extract.spec.ts` | 14 | 14 | 0 | `renovate-core/src/extractors/pep621.rs` | ported |
+| `lib/modules/manager/pep621/processors/pdm.spec.ts` | 8 | 0 | 8 | — | pending |
+| `lib/modules/manager/pep621/processors/uv.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/modules/manager/pep621/update.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/pep621.rs` | ported |
+| `lib/modules/manager/pep621/utils.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/pep621.rs` | ported |
 
 ### `manager/pep723`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pep723/extract.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/pep723/utils.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pep723/extract.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/pep723.rs` | ported |
+| `lib/modules/manager/pep723/utils.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/pep723.rs` | ported |
 
 ### `manager/pip-compile`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pip-compile/artifacts.spec.ts` | 34 | 0 | 34 | pending |
-| `lib/modules/manager/pip-compile/common.spec.ts` | 27 | 7 | 20 | partial |
-| `lib/modules/manager/pip-compile/extract.spec.ts` | 27 | 4 | 23 | partial |
-| `lib/modules/manager/pip-compile/utils.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pip-compile/artifacts.spec.ts` | 34 | 0 | 34 | — | pending |
+| `lib/modules/manager/pip-compile/common.spec.ts` | 27 | 7 | 20 | `renovate-core/src/extractors/pip_compile.rs` | partial |
+| `lib/modules/manager/pip-compile/extract.spec.ts` | 27 | 4 | 23 | `renovate-core/src/extractors/pip_compile.rs` | partial |
+| `lib/modules/manager/pip-compile/utils.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/pip_compile.rs` | ported |
 
 ### `manager/pip_requirements`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pip_requirements/artifacts.spec.ts` | 8 | 6 | 2 | partial |
-| `lib/modules/manager/pip_requirements/common.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/pip_requirements/extract.spec.ts` | 22 | 22 | 0 | ported |
-| `lib/modules/manager/pip_requirements/index.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pip_requirements/artifacts.spec.ts` | 8 | 6 | 2 | `renovate-core/src/extractors/pip_artifact_runner.rs` | partial |
+| `lib/modules/manager/pip_requirements/common.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/pip.rs` | ported |
+| `lib/modules/manager/pip_requirements/extract.spec.ts` | 22 | 22 | 0 | `renovate-core/src/extractors/npm.rs`<br>`renovate-core/src/extractors/pip.rs` | ported |
+| `lib/modules/manager/pip_requirements/index.spec.ts` | 1 | 1 | 0 | `renovate-core/src/managers.rs` | ported |
 
 ### `manager/pip_setup`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pip_setup/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pip_setup/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/pip_setup.rs` | ported |
 
 ### `manager/pipenv`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pipenv/artifacts.spec.ts` | 21 | 0 | 21 | pending |
-| `lib/modules/manager/pipenv/extract.spec.ts` | 16 | 16 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pipenv/artifacts.spec.ts` | 21 | 0 | 21 | — | pending |
+| `lib/modules/manager/pipenv/extract.spec.ts` | 16 | 16 | 0 | `renovate-core/src/extractors/pipfile.rs` | ported |
 
 ### `manager/pixi`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pixi/artifacts.spec.ts` | 10 | 6 | 4 | partial |
-| `lib/modules/manager/pixi/extract.spec.ts` | 16 | 16 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pixi/artifacts.spec.ts` | 10 | 6 | 4 | `renovate-core/src/extractors/pixi_artifact_runner.rs` | partial |
+| `lib/modules/manager/pixi/extract.spec.ts` | 16 | 16 | 0 | `renovate-core/src/extractors/pixi.rs` | ported |
 
 ### `manager/poetry`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/poetry/artifacts.spec.ts` | 19 | 0 | 19 | pending |
-| `lib/modules/manager/poetry/extract.spec.ts` | 34 | 34 | 0 | ported |
-| `lib/modules/manager/poetry/schema.spec.ts` | 15 | 0 | 15 | pending |
-| `lib/modules/manager/poetry/update-locked.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/poetry/artifacts.spec.ts` | 19 | 0 | 19 | — | pending |
+| `lib/modules/manager/poetry/extract.spec.ts` | 34 | 34 | 0 | `renovate-core/src/extractors/gemspec.rs`<br>`renovate-core/src/extractors/poetry.rs` | ported |
+| `lib/modules/manager/poetry/schema.spec.ts` | 15 | 0 | 15 | — | pending |
+| `lib/modules/manager/poetry/update-locked.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/poetry.rs` | ported |
 
 ### `manager/pre-commit`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pre-commit/extract.spec.ts` | 12 | 12 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pre-commit/extract.spec.ts` | 12 | 12 | 0 | `renovate-core/src/extractors/pre_commit.rs` | ported |
 
 ### `manager/proto`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/proto/extract.spec.ts` | 15 | 15 | 0 | ported |
-| `lib/modules/manager/proto/index.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/proto/extract.spec.ts` | 15 | 15 | 0 | `renovate-core/src/extractors/proto.rs` | ported |
+| `lib/modules/manager/proto/index.spec.ts` | 1 | 1 | 0 | `renovate-core/src/managers.rs` | ported |
 
 ### `manager/pub`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pub/artifacts.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/modules/manager/pub/extract.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/manager/pub/utils.spec.ts` | 6 | 3 | 3 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pub/artifacts.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/modules/manager/pub/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/pubspec.rs` | ported |
+| `lib/modules/manager/pub/utils.spec.ts` | 6 | 3 | 3 | `renovate-core/src/extractors/pubspec.rs` | partial |
 
 ### `manager/puppet`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/puppet/common.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/puppet/extract.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/manager/puppet/puppetfile-parser.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/puppet/common.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/puppet.rs` | ported |
+| `lib/modules/manager/puppet/extract.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/puppet.rs` | ported |
+| `lib/modules/manager/puppet/puppetfile-parser.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/puppet.rs` | ported |
 
 ### `manager/pyenv`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/pyenv/extract.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/pyenv/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/pyenv.rs` | ported |
 
 ### `manager/quadlet`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/quadlet/extract.spec.ts` | 11 | 11 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/quadlet/extract.spec.ts` | 11 | 11 | 0 | `renovate-core/src/extractors/quadlet.rs` | ported |
 
 ### `manager/renovate-config`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/renovate-config/extract.spec.ts` | 20 | 18 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/renovate-config/extract.spec.ts` | 20 | 18 | 2 | `renovate-core/src/extractors/renovate_config_presets.rs` | partial |
 
 ### `manager/ruby-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/ruby-version/extract.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/ruby-version/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/version_file.rs` | ported |
 
 ### `manager/runtime-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/runtime-version/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/runtime-version/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/runtime_version.rs` | ported |
 
 ### `manager/rust-toolchain`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/rust-toolchain/extract.spec.ts` | 14 | 14 | 0 | ported |
-| `lib/modules/manager/rust-toolchain/schema.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/rust-toolchain/extract.spec.ts` | 14 | 14 | 0 | `renovate-core/src/extractors/rust_toolchain.rs` | ported |
+| `lib/modules/manager/rust-toolchain/schema.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/rust_toolchain.rs` | ported |
 
 ### `manager/sbt`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/sbt/extract.spec.ts` | 26 | 26 | 0 | ported |
-| `lib/modules/manager/sbt/update.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/sbt/util.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/sbt/extract.spec.ts` | 26 | 26 | 0 | `renovate-core/src/extractors/sbt.rs` | ported |
+| `lib/modules/manager/sbt/update.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/sbt.rs` | ported |
+| `lib/modules/manager/sbt/util.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/sbt.rs` | ported |
 
 ### `manager/scalafmt`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/scalafmt/extract.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/scalafmt/extract.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/flux.rs`<br>`renovate-core/src/extractors/scalafmt.rs` | ported |
 
 ### `manager/setup-cfg`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/setup-cfg/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/setup-cfg/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/asdf.rs`<br>`renovate-core/src/extractors/gemspec.rs`<br>`renovate-core/src/extractors/setup_cfg.rs` | ported |
 
 ### `manager/sveltos`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/sveltos/extract.spec.ts` | 14 | 14 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/sveltos/extract.spec.ts` | 14 | 14 | 0 | `renovate-core/src/extractors/sveltos.rs` | ported |
 
 ### `manager/swift`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/swift/artifacts.spec.ts` | 31 | 0 | 31 | pending |
-| `lib/modules/manager/swift/extract.spec.ts` | 21 | 21 | 0 | ported |
-| `lib/modules/manager/swift/index.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/swift/range.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/swift/artifacts.spec.ts` | 31 | 0 | 31 | — | pending |
+| `lib/modules/manager/swift/extract.spec.ts` | 21 | 21 | 0 | `renovate-core/src/extractors/spm.rs` | ported |
+| `lib/modules/manager/swift/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/spm.rs` | ported |
+| `lib/modules/manager/swift/range.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/spm.rs` | ported |
 
 ### `manager/tekton`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/tekton/extract.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/tekton/extract.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/tekton.rs` | ported |
 
 ### `manager/terraform`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/terraform/extract.spec.ts` | 18 | 18 | 0 | ported |
-| `lib/modules/manager/terraform/extractors/others/modules.spec.ts` | 13 | 9 | 4 | partial |
-| `lib/modules/manager/terraform/extractors/others/providers.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/manager/terraform/hcl/index.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/manager/terraform/lockfile/hash.spec.ts` | 11 | 10 | 1 | partial |
-| `lib/modules/manager/terraform/lockfile/index.spec.ts` | 26 | 26 | 0 | ported |
-| `lib/modules/manager/terraform/lockfile/update-locked.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/modules/manager/terraform/lockfile/util.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/terraform/extract.spec.ts` | 18 | 18 | 0 | `renovate-core/src/extractors/renovate_config_presets.rs`<br>`renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/extractors/others/modules.spec.ts` | 13 | 9 | 4 | `renovate-core/src/extractors/terraform.rs` | partial |
+| `lib/modules/manager/terraform/extractors/others/providers.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/extractors/resources/generic-docker-image-ref.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/extractors/resources/helm-release.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/extractors/resources/terraform-workspaces.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/extractors/terraform-block/required-provider.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/extractors/terraform-block/terraform-version.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/hcl/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/terraform_hcl.rs` | ported |
+| `lib/modules/manager/terraform/lockfile/hash.spec.ts` | 11 | 10 | 1 | `renovate-core/src/extractors/terraform.rs` | partial |
+| `lib/modules/manager/terraform/lockfile/index.spec.ts` | 26 | 26 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/lockfile/update-locked.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
+| `lib/modules/manager/terraform/lockfile/util.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/terraform.rs` | ported |
 
 ### `manager/terraform-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/terraform-version/extract.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/terraform-version/extract.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/version_file.rs` | ported |
 
 ### `manager/terragrunt`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/terragrunt/artifacts.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/modules/manager/terragrunt/extract.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/manager/terragrunt/modules.spec.ts` | 5 | 4 | 1 | partial |
-| `lib/modules/manager/terragrunt/util.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/terragrunt/artifacts.spec.ts` | 2 | 2 | 0 | `renovate-core/src/extractors/terragrunt.rs` | ported |
+| `lib/modules/manager/terragrunt/extract.spec.ts` | 7 | 7 | 0 | `renovate-core/src/extractors/terragrunt.rs` | ported |
+| `lib/modules/manager/terragrunt/modules.spec.ts` | 5 | 4 | 1 | `renovate-core/src/extractors/terragrunt.rs` | partial |
+| `lib/modules/manager/terragrunt/util.spec.ts` | 4 | 4 | 0 | `renovate-core/src/extractors/terragrunt.rs` | ported |
 
 ### `manager/terragrunt-version`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/terragrunt-version/extract.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/terragrunt-version/extract.spec.ts` | 1 | 1 | 0 | `renovate-core/src/extractors/version_file.rs` | ported |
 
 ### `manager/tflint-plugin`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/tflint-plugin/extract.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/tflint-plugin/extract.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/tflint_plugin.rs` | ported |
 
 ### `manager/travis`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/travis/extract.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/travis/extract.spec.ts` | 8 | 8 | 0 | `renovate-core/src/extractors/travis.rs` | ported |
 
 ### `manager/typst`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/typst/extract.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/typst/extract.spec.ts` | 9 | 9 | 0 | `renovate-core/src/extractors/typst.rs` | ported |
 
 ### `manager/unity3d`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/unity3d/extract.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/unity3d/extract.spec.ts` | 3 | 3 | 0 | `renovate-core/src/extractors/unity3d.rs` | ported |
 
 ### `manager/velaci`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/velaci/extract.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/velaci/extract.spec.ts` | 6 | 6 | 0 | `renovate-core/src/extractors/velaci.rs` | ported |
 
 ### `manager/vendir`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/vendir/artifacts.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/modules/manager/vendir/extract.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/vendir/artifacts.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/modules/manager/vendir/extract.spec.ts` | 5 | 5 | 0 | `renovate-core/src/extractors/vendir.rs` | ported |
 
 ### `manager/woodpecker`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/woodpecker/extract.spec.ts` | 11 | 11 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/woodpecker/extract.spec.ts` | 11 | 11 | 0 | `renovate-core/src/extractors/cabal.rs`<br>`renovate-core/src/extractors/cake.rs`<br>`renovate-core/src/extractors/deps_edn.rs`<br>`renovate-core/src/extractors/helmfile.rs`<br>`renovate-core/src/extractors/maven_wrapper.rs`<br>`renovate-core/src/extractors/woodpecker.rs` | ported |
 
 ### `manager/xcodegen`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/manager/xcodegen/extract.spec.ts` | 24 | 24 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/manager/xcodegen/extract.spec.ts` | 24 | 24 | 0 | `renovate-core/src/extractors/xcodegen.rs` | ported |
 
 ### `platform/_common`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/comment.spec.ts` | 10 | 0 | 10 | pending |
-| `lib/modules/platform/default-scm.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/modules/platform/index.spec.ts` | 8 | 0 | 8 | pending |
-| `lib/modules/platform/pr-body.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/modules/platform/scm.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/modules/platform/types.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/modules/platform/util.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/comment.spec.ts` | 10 | 0 | 10 | — | pending |
+| `lib/modules/platform/default-scm.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/modules/platform/index.spec.ts` | 8 | 0 | 8 | — | pending |
+| `lib/modules/platform/pr-body.spec.ts` | 10 | 10 | 0 | `renovate-core/src/platform/pr_body.rs` | ported |
+| `lib/modules/platform/scm.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/modules/platform/types.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/modules/platform/util.spec.ts` | 3 | 3 | 0 | `renovate-core/src/platform/util.rs` | ported |
 
 ### `platform/azure`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/modules/platform/azure/azure-helper.spec.ts` | 19 | 0 | 19 | pending |
-| `lib/modules/platform/azure/index.spec.ts` | 79 | 2 | 77 | partial |
-| `lib/modules/platform/azure/util.spec.ts` | 29 | 26 | 3 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/azure/azure-got-wrapper.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/modules/platform/azure/azure-helper.spec.ts` | 19 | 0 | 19 | — | pending |
+| `lib/modules/platform/azure/index.spec.ts` | 79 | 2 | 77 | `renovate-core/src/platform/azure_utils.rs` | partial |
+| `lib/modules/platform/azure/util.spec.ts` | 29 | 26 | 3 | `renovate-core/src/platform/azure_utils.rs` | partial |
 
 ### `platform/bitbucket`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/bitbucket/comments.spec.ts` | 10 | 0 | 10 | pending |
-| `lib/modules/platform/bitbucket/index.spec.ts` | 96 | 0 | 96 | pending |
-| `lib/modules/platform/bitbucket/pr-cache.spec.ts` | 3 | 0 | 3 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/bitbucket/comments.spec.ts` | 10 | 0 | 10 | — | pending |
+| `lib/modules/platform/bitbucket/index.spec.ts` | 96 | 0 | 96 | — | pending |
+| `lib/modules/platform/bitbucket/pr-cache.spec.ts` | 3 | 0 | 3 | — | pending |
 
 ### `platform/bitbucket-server`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/bitbucket-server/index.spec.ts` | 139 | 3 | 136 | partial |
-| `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/modules/platform/bitbucket-server/utils.spec.ts` | 17 | 3 | 14 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/bitbucket-server/index.spec.ts` | 139 | 3 | 136 | `renovate-core/src/platform/bitbucket_server.rs` | partial |
+| `lib/modules/platform/bitbucket-server/pr-cache.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/modules/platform/bitbucket-server/utils.spec.ts` | 17 | 3 | 14 | `renovate-core/src/util.rs` | partial |
 
 ### `platform/codecommit`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/codecommit/index.spec.ts` | 58 | 0 | 58 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/codecommit/index.spec.ts` | 58 | 0 | 58 | — | pending |
 
 ### `platform/forgejo`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/forgejo/forgejo-helper.spec.ts` | 40 | 0 | 40 | pending |
-| `lib/modules/platform/forgejo/index.spec.ts` | 137 | 3 | 134 | partial |
-| `lib/modules/platform/forgejo/pr-cache.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/modules/platform/forgejo/schema.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/platform/forgejo/utils.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/forgejo/forgejo-helper.spec.ts` | 40 | 0 | 40 | — | pending |
+| `lib/modules/platform/forgejo/index.spec.ts` | 137 | 3 | 134 | `renovate-core/src/platform/gitea_forgejo_utils.rs` | partial |
+| `lib/modules/platform/forgejo/pr-cache.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/modules/platform/forgejo/schema.spec.ts` | 1 | 1 | 0 | `renovate-core/src/platform/gitea_forgejo_utils.rs` | ported |
+| `lib/modules/platform/forgejo/utils.spec.ts` | 6 | 6 | 0 | `renovate-core/src/platform/gitea_forgejo_utils.rs` | ported |
 
 ### `platform/gerrit`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/gerrit/client.spec.ts` | 43 | 0 | 43 | pending |
-| `lib/modules/platform/gerrit/index.spec.ts` | 63 | 0 | 63 | pending |
-| `lib/modules/platform/gerrit/scm.spec.ts` | 29 | 0 | 29 | pending |
-| `lib/modules/platform/gerrit/utils.spec.ts` | 23 | 0 | 23 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/gerrit/client.spec.ts` | 43 | 0 | 43 | — | pending |
+| `lib/modules/platform/gerrit/index.spec.ts` | 63 | 0 | 63 | — | pending |
+| `lib/modules/platform/gerrit/scm.spec.ts` | 29 | 0 | 29 | — | pending |
+| `lib/modules/platform/gerrit/utils.spec.ts` | 23 | 0 | 23 | — | pending |
 
 ### `platform/gitea`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/gitea/gitea-helper.spec.ts` | 39 | 0 | 39 | pending |
-| `lib/modules/platform/gitea/index.spec.ts` | 134 | 0 | 134 | pending |
-| `lib/modules/platform/gitea/pr-cache.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/modules/platform/gitea/schema.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/modules/platform/gitea/utils.spec.ts` | 6 | 0 | 6 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/gitea/gitea-helper.spec.ts` | 39 | 0 | 39 | — | pending |
+| `lib/modules/platform/gitea/index.spec.ts` | 134 | 0 | 134 | — | pending |
+| `lib/modules/platform/gitea/pr-cache.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/modules/platform/gitea/schema.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/modules/platform/gitea/utils.spec.ts` | 6 | 0 | 6 | — | pending |
 
 ### `platform/github`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/github/api-cache.spec.ts` | 15 | 15 | 0 | ported |
-| `lib/modules/platform/github/branch.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/modules/platform/github/index.spec.ts` | 206 | 158 | 48 | partial |
-| `lib/modules/platform/github/issue.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/platform/github/massage-markdown-links.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/modules/platform/github/schema.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/modules/platform/github/scm.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/github/api-cache.spec.ts` | 15 | 15 | 0 | `renovate-core/src/platform/github_api_cache.rs` | ported |
+| `lib/modules/platform/github/branch.spec.ts` | 4 | 4 | 0 | `renovate-core/src/platform/github.rs` | ported |
+| `lib/modules/platform/github/index.spec.ts` | 206 | 158 | 48 | `renovate-core/src/platform/github.rs` | partial |
+| `lib/modules/platform/github/issue.spec.ts` | 7 | 7 | 0 | `renovate-core/src/platform/github_api_cache.rs` | ported |
+| `lib/modules/platform/github/massage-markdown-links.spec.ts` | 3 | 3 | 0 | `renovate-core/src/platform/github.rs` | ported |
+| `lib/modules/platform/github/schema.spec.ts` | 6 | 6 | 0 | `renovate-core/src/platform/github.rs` | ported |
+| `lib/modules/platform/github/scm.spec.ts` | 4 | 4 | 0 | `renovate-core/src/platform/scm.rs` | ported |
 
 ### `platform/gitlab`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/gitlab/code-owners.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/modules/platform/gitlab/index.spec.ts` | 163 | 59 | 104 | partial |
-| `lib/modules/platform/gitlab/pr-cache.spec.ts` | 8 | 3 | 5 | partial |
-| `lib/modules/platform/gitlab/utils.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/gitlab/code-owners.spec.ts` | 9 | 9 | 0 | `renovate-core/src/platform/gitlab.rs` | ported |
+| `lib/modules/platform/gitlab/index.spec.ts` | 163 | 59 | 104 | `renovate-core/src/platform/gitlab.rs` | partial |
+| `lib/modules/platform/gitlab/pr-cache.spec.ts` | 8 | 3 | 5 | `renovate-core/src/platform/gitlab.rs` | partial |
+| `lib/modules/platform/gitlab/utils.spec.ts` | 2 | 2 | 0 | `renovate-core/src/platform/gitlab.rs` | ported |
 
 ### `platform/local`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/local/index.spec.ts` | 28 | 28 | 0 | ported |
-| `lib/modules/platform/local/scm.spec.ts` | 13 | 13 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/local/index.spec.ts` | 28 | 28 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/modules/platform/local/scm.spec.ts` | 13 | 13 | 0 | `renovate-core/src/platform/local.rs` | ported |
 
 ### `platform/scm-manager`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/scm-manager/index.spec.ts` | 35 | 0 | 35 | pending |
-| `lib/modules/platform/scm-manager/mapper.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/platform/scm-manager/scm-manager-helper.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/modules/platform/scm-manager/utils.spec.ts` | 12 | 9 | 3 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/scm-manager/index.spec.ts` | 35 | 0 | 35 | — | pending |
+| `lib/modules/platform/scm-manager/mapper.spec.ts` | 1 | 1 | 0 | `renovate-core/src/platform/scm_manager.rs` | ported |
+| `lib/modules/platform/scm-manager/scm-manager-helper.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/modules/platform/scm-manager/utils.spec.ts` | 12 | 9 | 3 | `renovate-core/src/platform/scm_manager.rs` | partial |
 
 ### `platform/utils`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/platform/utils/pr-body.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/modules/platform/utils/read-only-issue-body.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/platform/utils/pr-body.spec.ts` | 8 | 8 | 0 | `renovate-core/src/platform/pr_body.rs` | ported |
+| `lib/modules/platform/utils/read-only-issue-body.spec.ts` | 6 | 6 | 0 | `renovate-core/src/platform/pr_body.rs` | ported |
 
 ### `test`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `test/docs/documentation.spec.ts` | 10 | 0 | 10 | pending |
-| `test/other/sync-module-labels.spec.ts` | 4 | 0 | 4 | pending |
-| `test/other/validate-config-files.spec.ts` | 1 | 0 | 1 | pending |
-| `test/other/validate-docker.spec.ts` | 1 | 0 | 1 | pending |
-| `test/other/validate-schemas.spec.ts` | 1 | 0 | 1 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `test/docs/documentation.spec.ts` | 10 | 0 | 10 | — | pending |
+| `test/other/sync-module-labels.spec.ts` | 4 | 0 | 4 | — | pending |
+| `test/other/validate-config-files.spec.ts` | 1 | 0 | 1 | — | pending |
+| `test/other/validate-docker.spec.ts` | 1 | 0 | 1 | — | pending |
+| `test/other/validate-schemas.spec.ts` | 1 | 0 | 1 | — | pending |
 
 ### `tools`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `tools/docs/test/utils.spec.ts` | 3 | 0 | 3 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `tools/docs/test/utils.spec.ts` | 3 | 0 | 3 | — | pending |
 
 ### `util/_root`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/array.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/util/assign-keys.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/check-token.spec.ts` | 34 | 30 | 4 | partial |
-| `lib/util/clone.spec.ts` | 3 | 2 | 1 | partial |
-| `lib/util/coerce.spec.ts` | 4 | 3 | 1 | partial |
-| `lib/util/common.spec.ts` | 22 | 18 | 4 | partial |
-| `lib/util/compress.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/date.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/util/emoji.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/util/env.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/util/filter-map.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/util/fingerprint.spec.ts` | 10 | 2 | 8 | partial |
-| `lib/util/hash.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/util/host-rules.spec.ts` | 29 | 27 | 2 | partial |
-| `lib/util/html.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/util/ignore.spec.ts` | 5 | 4 | 1 | partial |
-| `lib/util/interpolator.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/util/jsonata.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/util/lazy.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/util/markdown.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/util/mask.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/util/memoize.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/minimatch.spec.ts` | 5 | 2 | 3 | partial |
-| `lib/util/mutex.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/util/number.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/util/object.spec.ts` | 5 | 4 | 1 | partial |
-| `lib/util/pretty-time.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/util/promises.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/util/range.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/regex.spec.ts` | 6 | 1 | 5 | partial |
-| `lib/util/result.spec.ts` | 85 | 0 | 85 | pending |
-| `lib/util/s3.spec.ts` | 6 | 3 | 3 | partial |
-| `lib/util/sample.spec.ts` | 7 | 4 | 3 | partial |
-| `lib/util/sanitize.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/util/split.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/stats.spec.ts` | 33 | 12 | 21 | partial |
-| `lib/util/streams.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/util/string-match.spec.ts` | 25 | 24 | 1 | partial |
-| `lib/util/string.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/util/timestamp.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/toml.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/util/unicode.spec.ts` | 5 | 4 | 1 | partial |
-| `lib/util/uniq.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/util/url.spec.ts` | 13 | 13 | 0 | ported |
-| `lib/util/yaml.spec.ts` | 19 | 10 | 9 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/array.spec.ts` | 2 | 2 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/assign-keys.spec.ts` | 1 | 1 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/check-token.spec.ts` | 34 | 30 | 4 | `renovate-core/src/util.rs` | partial |
+| `lib/util/clone.spec.ts` | 3 | 2 | 1 | `renovate-core/src/util.rs` | partial |
+| `lib/util/coerce.spec.ts` | 4 | 3 | 1 | `renovate-core/src/util.rs` | partial |
+| `lib/util/common.spec.ts` | 22 | 18 | 4 | `renovate-core/src/util.rs` | partial |
+| `lib/util/compress.spec.ts` | 1 | 1 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/date.spec.ts` | 8 | 8 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/emoji.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/util/env.spec.ts` | 2 | 2 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/filter-map.spec.ts` | 2 | 2 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/fingerprint.spec.ts` | 10 | 2 | 8 | `renovate-core/src/util.rs` | partial |
+| `lib/util/hash.spec.ts` | 4 | 4 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/host-rules.spec.ts` | 29 | 27 | 2 | `renovate-core/src/util/host_rules.rs` | partial |
+| `lib/util/html.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/util/ignore.spec.ts` | 5 | 4 | 1 | `renovate-core/src/string_match.rs` | partial |
+| `lib/util/interpolator.spec.ts` | 10 | 10 | 0 | `renovate-core/src/config/secrets.rs`<br>`renovate-core/src/util.rs` | ported |
+| `lib/util/jsonata.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/util/lazy.spec.ts` | 6 | 6 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/markdown.spec.ts` | 3 | 3 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/mask.spec.ts` | 2 | 2 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/memoize.spec.ts` | 1 | 1 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/minimatch.spec.ts` | 5 | 2 | 3 | `renovate-core/src/string_match.rs` | partial |
+| `lib/util/mutex.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/util/number.spec.ts` | 2 | 2 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/object.spec.ts` | 5 | 4 | 1 | `renovate-core/src/util.rs` | partial |
+| `lib/util/pretty-time.spec.ts` | 3 | 3 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/promises.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/util/range.spec.ts` | 1 | 1 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/regex.spec.ts` | 6 | 1 | 5 | `renovate-core/src/util.rs` | partial |
+| `lib/util/result.spec.ts` | 85 | 0 | 85 | — | pending |
+| `lib/util/s3.spec.ts` | 6 | 3 | 3 | `renovate-core/src/util.rs` | partial |
+| `lib/util/sample.spec.ts` | 7 | 4 | 3 | `renovate-core/src/util.rs` | partial |
+| `lib/util/sanitize.spec.ts` | 3 | 3 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/split.spec.ts` | 1 | 1 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/stats.spec.ts` | 33 | 12 | 21 | `renovate-core/src/util.rs` | partial |
+| `lib/util/streams.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/util/string-match.spec.ts` | 25 | 24 | 1 | `renovate-core/src/string_match.rs` | partial |
+| `lib/util/string.spec.ts` | 6 | 6 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/timestamp.spec.ts` | 1 | 1 | 0 | `renovate-core/src/timestamp.rs` | ported |
+| `lib/util/toml.spec.ts` | 3 | 3 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/unicode.spec.ts` | 5 | 4 | 1 | `renovate-core/src/util.rs` | partial |
+| `lib/util/uniq.spec.ts` | 2 | 2 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/url.spec.ts` | 13 | 13 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/yaml.spec.ts` | 19 | 10 | 9 | `renovate-core/src/util.rs` | partial |
 
 ### `util/cache`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/cache/memory/index.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/util/cache/package/backend.spec.ts` | 10 | 0 | 10 | pending |
-| `lib/util/cache/package/impl/file.spec.ts` | 17 | 9 | 8 | partial |
-| `lib/util/cache/package/impl/redis.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/util/cache/package/impl/sqlite.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/util/cache/package/index.spec.ts` | 9 | 8 | 1 | partial |
-| `lib/util/cache/package/key.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/cache/package/ttl.spec.ts` | 31 | 18 | 13 | partial |
-| `lib/util/cache/package/with-cache.spec.ts` | 14 | 12 | 2 | partial |
-| `lib/util/cache/repository/http-cache.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/util/cache/repository/impl/local.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/util/cache/repository/impl/s3.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/util/cache/repository/index.spec.ts` | 5 | 0 | 5 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/cache/memory/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/cache/memory.rs` | ported |
+| `lib/util/cache/package/backend.spec.ts` | 10 | 0 | 10 | — | pending |
+| `lib/util/cache/package/impl/file.spec.ts` | 17 | 9 | 8 | `renovate-core/src/cache/package.rs` | partial |
+| `lib/util/cache/package/impl/redis.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/util/cache/package/impl/sqlite.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/util/cache/package/index.spec.ts` | 9 | 8 | 1 | `renovate-core/src/cache/package.rs` | partial |
+| `lib/util/cache/package/key.spec.ts` | 1 | 1 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/util/cache/package/ttl.spec.ts` | 31 | 18 | 13 | `renovate-core/src/cache/package.rs` | partial |
+| `lib/util/cache/package/with-cache.spec.ts` | 14 | 12 | 2 | `renovate-core/src/cache/package.rs` | partial |
+| `lib/util/cache/repository/http-cache.spec.ts` | 3 | 3 | 0 | `renovate-core/src/http.rs` | ported |
+| `lib/util/cache/repository/impl/local.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/util/cache/repository/impl/s3.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/util/cache/repository/index.spec.ts` | 5 | 0 | 5 | — | pending |
 
 ### `util/exec`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/exec/common.spec.ts` | 30 | 13 | 17 | partial |
-| `lib/util/exec/containerbase.spec.ts` | 20 | 9 | 11 | partial |
-| `lib/util/exec/docker/index.spec.ts` | 19 | 11 | 8 | partial |
-| `lib/util/exec/env.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/util/exec/hermit.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/util/exec/index.spec.ts` | 40 | 26 | 14 | partial |
-| `lib/util/exec/utils.spec.ts` | 21 | 3 | 18 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/exec/common.spec.ts` | 30 | 13 | 17 | `renovate-core/src/exec/error.rs`<br>`renovate-core/src/exec/raw.rs` | partial |
+| `lib/util/exec/containerbase.spec.ts` | 20 | 9 | 11 | `renovate-core/src/exec/containerbase.rs` | partial |
+| `lib/util/exec/docker/index.spec.ts` | 19 | 11 | 8 | `renovate-core/src/exec/docker.rs` | partial |
+| `lib/util/exec/env.spec.ts` | 4 | 4 | 0 | `renovate-core/src/exec/env.rs`<br>`renovate-core/src/util.rs` | ported |
+| `lib/util/exec/hermit.spec.ts` | 4 | 4 | 0 | `renovate-core/src/exec/hermit.rs` | ported |
+| `lib/util/exec/index.spec.ts` | 40 | 26 | 14 | `renovate-core/src/exec/orchestrator.rs`<br>`renovate-core/src/exec/tool_settings.rs` | partial |
+| `lib/util/exec/utils.spec.ts` | 21 | 3 | 18 | `renovate-core/src/exec/raw.rs`<br>`renovate-core/src/util.rs` | partial |
 
 ### `util/fs`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/fs/index.spec.ts` | 56 | 24 | 32 | partial |
-| `lib/util/fs/util.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/fs/index.spec.ts` | 56 | 24 | 32 | `renovate-core/src/fs.rs` | partial |
+| `lib/util/fs/util.spec.ts` | 5 | 5 | 0 | `renovate-core/src/fs.rs` | ported |
 
 ### `util/git`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/git/auth.spec.ts` | 30 | 30 | 0 | ported |
-| `lib/util/git/author.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/util/git/behind-base-branch-cache.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/util/git/config.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/util/git/conflicts-cache.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/util/git/errors.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/git/index.spec.ts` | 107 | 0 | 107 | pending |
-| `lib/util/git/modified-cache.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/util/git/pristine.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/util/git/private-key.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/util/git/semantic.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/util/git/set-branch-commit.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/util/git/span-processor.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/util/git/update-date-cache.spec.ts` | 10 | 0 | 10 | pending |
-| `lib/util/git/url.spec.ts` | 23 | 23 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/git/auth.spec.ts` | 30 | 30 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/git/author.spec.ts` | 8 | 8 | 0 | `renovate-core/src/git/author.rs` | ported |
+| `lib/util/git/behind-base-branch-cache.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/util/git/config.spec.ts` | 3 | 3 | 0 | `renovate-core/src/git.rs` | ported |
+| `lib/util/git/conflicts-cache.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/util/git/errors.spec.ts` | 1 | 1 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/util/git/index.spec.ts` | 107 | 0 | 107 | — | pending |
+| `lib/util/git/modified-cache.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/util/git/pristine.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/util/git/private-key.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/util/git/semantic.spec.ts` | 5 | 5 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/util/git/set-branch-commit.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/util/git/span-processor.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/util/git/update-date-cache.spec.ts` | 10 | 0 | 10 | — | pending |
+| `lib/util/git/url.spec.ts` | 23 | 23 | 0 | `renovate-core/src/util.rs` | ported |
 
 ### `util/github`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/util/github/graphql/datasource-fetcher.spec.ts` | 15 | 0 | 15 | pending |
-| `lib/util/github/graphql/index.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/util/github/graphql/util.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/util/github/tags.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/util/github/url.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/github/graphql/cache-strategies/memory-cache-strategy.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/util/github/graphql/cache-strategies/package-cache-strategy.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/util/github/graphql/datasource-fetcher.spec.ts` | 15 | 0 | 15 | — | pending |
+| `lib/util/github/graphql/index.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/util/github/graphql/query-adapters/branches-query-adapter.spec.ts` | 2 | 2 | 0 | `renovate-core/src/platform/github.rs` | ported |
+| `lib/util/github/graphql/query-adapters/releases-query-adapter.spec.ts` | 4 | 4 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/github/graphql/query-adapters/tags-query-adapter.spec.ts` | 4 | 4 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/util/github/graphql/util.spec.ts` | 3 | 3 | 0 | `renovate-core/src/platform/github.rs`<br>`renovate-core/src/util.rs` | ported |
+| `lib/util/github/tags.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/util/github/url.spec.ts` | 4 | 4 | 0 | `renovate-core/src/platform/github.rs` | ported |
 
 ### `util/http`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/http/auth.spec.ts` | 11 | 11 | 0 | ported |
-| `lib/util/http/bitbucket-server.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/util/http/bitbucket.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/util/http/cache/memory-http-cache-provider.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/util/http/cache/package-http-cache-provider.spec.ts` | 20 | 0 | 20 | pending |
-| `lib/util/http/cache/repository-http-cache-provider.spec.ts` | 10 | 0 | 10 | pending |
-| `lib/util/http/forgejo.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/util/http/gerrit.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/util/http/gitea.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/util/http/github.spec.ts` | 54 | 0 | 54 | pending |
-| `lib/util/http/gitlab.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/util/http/got.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/util/http/host-rules.spec.ts` | 28 | 0 | 28 | pending |
-| `lib/util/http/index.spec.ts` | 52 | 18 | 34 | partial |
-| `lib/util/http/jira.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/util/http/queue.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/util/http/rate-limit.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/util/http/retry-after.spec.ts` | 13 | 10 | 3 | partial |
-| `lib/util/http/scm-manager.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/util/http/throttle.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/util/http/www-authenticate.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/http/auth.spec.ts` | 11 | 11 | 0 | `renovate-core/src/http.rs` | ported |
+| `lib/util/http/bitbucket-server.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/util/http/bitbucket.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/util/http/cache/memory-http-cache-provider.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/util/http/cache/package-http-cache-provider.spec.ts` | 20 | 0 | 20 | — | pending |
+| `lib/util/http/cache/repository-http-cache-provider.spec.ts` | 10 | 0 | 10 | — | pending |
+| `lib/util/http/forgejo.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/util/http/gerrit.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/util/http/gitea.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/util/http/github.spec.ts` | 54 | 0 | 54 | — | pending |
+| `lib/util/http/gitlab.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/util/http/got.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/util/http/host-rules.spec.ts` | 28 | 0 | 28 | — | pending |
+| `lib/util/http/index.spec.ts` | 52 | 18 | 34 | `renovate-core/src/http.rs` | partial |
+| `lib/util/http/jira.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/util/http/queue.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/util/http/rate-limit.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/util/http/retry-after.spec.ts` | 13 | 10 | 3 | `renovate-core/src/http.rs` | partial |
+| `lib/util/http/scm-manager.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/util/http/throttle.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/util/http/www-authenticate.spec.ts` | 3 | 3 | 0 | `renovate-core/src/http.rs` | ported |
 
 ### `util/json-writer`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/json-writer/editor-config.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/util/json-writer/json-writer.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/json-writer/editor-config.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/util/json-writer/json-writer.spec.ts` | 4 | 4 | 0 | `renovate-core/src/json_writer.rs` | ported |
 
 ### `util/merge-confidence`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/merge-confidence/index.spec.ts` | 28 | 7 | 21 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/merge-confidence/index.spec.ts` | 28 | 7 | 21 | `renovate-core/src/merge_confidence.rs` | partial |
 
 ### `util/package-rules`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/package-rules/current-age.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/util/package-rules/current-value.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/util/package-rules/current-version.spec.ts` | 10 | 9 | 1 | partial |
-| `lib/util/package-rules/dep-names.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/util/package-rules/files.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/util/package-rules/index.spec.ts` | 73 | 73 | 0 | ported |
-| `lib/util/package-rules/jsonata.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/util/package-rules/managers.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/util/package-rules/new-value.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/util/package-rules/package-names.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/util/package-rules/repositories.spec.ts` | 15 | 15 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/package-rules/current-age.spec.ts` | 5 | 5 | 0 | `renovate-core/src/package_rule.rs` | ported |
+| `lib/util/package-rules/current-value.spec.ts` | 7 | 7 | 0 | `renovate-core/src/package_rule.rs`<br>`renovate-core/src/repo_config.rs` | ported |
+| `lib/util/package-rules/current-version.spec.ts` | 10 | 9 | 1 | `renovate-core/src/package_rule.rs`<br>`renovate-core/src/repo_config.rs` | partial |
+| `lib/util/package-rules/dep-names.spec.ts` | 4 | 4 | 0 | `renovate-core/src/package_rule.rs`<br>`renovate-core/src/repo_config.rs` | ported |
+| `lib/util/package-rules/files.spec.ts` | 1 | 1 | 0 | `renovate-core/src/package_rule.rs` | ported |
+| `lib/util/package-rules/index.spec.ts` | 73 | 73 | 0 | `renovate-core/src/repo_config.rs` | ported |
+| `lib/util/package-rules/jsonata.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/util/package-rules/managers.spec.ts` | 5 | 5 | 0 | `renovate-core/src/package_rule.rs` | ported |
+| `lib/util/package-rules/new-value.spec.ts` | 7 | 7 | 0 | `renovate-core/src/package_rule.rs`<br>`renovate-core/src/repo_config.rs` | ported |
+| `lib/util/package-rules/package-names.spec.ts` | 4 | 4 | 0 | `renovate-core/src/package_rule.rs` | ported |
+| `lib/util/package-rules/repositories.spec.ts` | 15 | 15 | 0 | `renovate-core/src/package_rule.rs` | ported |
 
 ### `util/schema-utils`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/schema-utils/index.spec.ts` | 35 | 0 | 35 | pending |
-| `lib/util/schema-utils/v4.spec.ts` | 12 | 12 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/schema-utils/index.spec.ts` | 35 | 0 | 35 | — | pending |
+| `lib/util/schema-utils/v4.spec.ts` | 12 | 12 | 0 | `renovate-core/src/util.rs` | ported |
 
 ### `util/template`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/template/index.spec.ts` | 54 | 0 | 54 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/template/index.spec.ts` | 54 | 0 | 54 | — | pending |
 
 ### `util/vulnerability`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/util/vulnerability/ecosystem.spec.ts` | 12 | 12 | 0 | ported |
-| `lib/util/vulnerability/utils.spec.ts` | 13 | 12 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/util/vulnerability/ecosystem.spec.ts` | 12 | 12 | 0 | `renovate-core/src/vulnerability.rs` | ported |
+| `lib/util/vulnerability/utils.spec.ts` | 13 | 12 | 1 | `renovate-core/src/vulnerability.rs` | partial |
 
 ### `versioning/_common`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/distro.spec.ts` | 15 | 15 | 0 | ported |
-| `lib/modules/versioning/generic.spec.ts` | 18 | 18 | 0 | ported |
-| `lib/modules/versioning/index.spec.ts` | 4 | 3 | 1 | partial |
-| `lib/modules/versioning/schema.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/modules/versioning/versioning-metadata.spec.ts` | 2 | 0 | 2 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/distro.spec.ts` | 15 | 15 | 0 | `renovate-core/src/versioning/ubuntu.rs` | ported |
+| `lib/modules/versioning/generic.spec.ts` | 18 | 18 | 0 | `renovate-core/src/versioning/regex_versioning.rs` | ported |
+| `lib/modules/versioning/index.spec.ts` | 4 | 3 | 1 | `renovate-core/src/versioning.rs` | partial |
+| `lib/modules/versioning/schema.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/modules/versioning/versioning-metadata.spec.ts` | 2 | 0 | 2 | — | pending |
 
 ### `versioning/apk`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/apk/index.spec.ts` | 53 | 53 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/apk/index.spec.ts` | 53 | 53 | 0 | `renovate-core/src/versioning/apk.rs` | ported |
 
 ### `versioning/aws-eks-addon`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/aws-eks-addon/index.spec.ts` | 7 | 6 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/aws-eks-addon/index.spec.ts` | 7 | 6 | 1 | `renovate-core/src/versioning/aws_eks_addon.rs` | partial |
 
 ### `versioning/aws-machine-image`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/aws-machine-image/index.spec.ts` | 10 | 3 | 7 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/aws-machine-image/index.spec.ts` | 10 | 3 | 7 | `renovate-core/src/versioning/aws_machine_image.rs` | partial |
 
 ### `versioning/azure-rest-api`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/azure-rest-api/index.spec.ts` | 11 | 11 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/azure-rest-api/index.spec.ts` | 11 | 11 | 0 | `renovate-core/src/versioning/azure_rest_api.rs` | ported |
 
 ### `versioning/bazel-module`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/bazel-module/bzlmod-version.spec.ts` | 18 | 14 | 4 | partial |
-| `lib/modules/versioning/bazel-module/index.spec.ts` | 12 | 12 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/bazel-module/bzlmod-version.spec.ts` | 18 | 14 | 4 | `renovate-core/src/versioning/bazel_module/bzlmod_version.rs` | partial |
+| `lib/modules/versioning/bazel-module/index.spec.ts` | 12 | 12 | 0 | `renovate-core/src/versioning/bazel_module.rs` | ported |
 
 ### `versioning/cargo`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/cargo/index.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/cargo/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/versioning/cargo.rs` | ported |
 
 ### `versioning/composer`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/composer/index.spec.ts` | 18 | 18 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/composer/index.spec.ts` | 18 | 18 | 0 | `renovate-core/src/versioning/composer.rs` | ported |
 
 ### `versioning/conan`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/conan/index.spec.ts` | 16 | 15 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/conan/index.spec.ts` | 16 | 15 | 1 | `renovate-core/src/versioning/conan.rs` | partial |
 
 ### `versioning/conda`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/conda/index.spec.ts` | 15 | 15 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/conda/index.spec.ts` | 15 | 15 | 0 | `renovate-core/src/versioning/conda.rs` | ported |
 
 ### `versioning/deb`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/deb/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/deb/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/versioning/deb.rs` | ported |
 
 ### `versioning/debian`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/debian/common.spec.ts` | 5 | 4 | 1 | partial |
-| `lib/modules/versioning/debian/index.spec.ts` | 16 | 16 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/debian/common.spec.ts` | 5 | 4 | 1 | `renovate-core/src/versioning/deb.rs` | partial |
+| `lib/modules/versioning/debian/index.spec.ts` | 16 | 16 | 0 | `renovate-core/src/versioning/debian.rs` | ported |
 
 ### `versioning/deno`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/deno/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/deno/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/versioning/deno.rs` | ported |
 
 ### `versioning/devbox`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/devbox/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/devbox/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/versioning/devbox.rs` | ported |
 
 ### `versioning/docker`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/docker/index.spec.ts` | 12 | 12 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/docker/index.spec.ts` | 12 | 12 | 0 | `renovate-core/src/versioning/docker.rs` | ported |
 
 ### `versioning/elm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/elm/index.spec.ts` | 31 | 28 | 3 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/elm/index.spec.ts` | 31 | 28 | 3 | `renovate-core/src/versioning/elm.rs` | partial |
 
 ### `versioning/exact`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/exact/index.spec.ts` | 14 | 13 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/exact/index.spec.ts` | 14 | 13 | 1 | `renovate-core/src/versioning/exact.rs` | partial |
 
 ### `versioning/git`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/git/index.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/git/index.spec.ts` | 3 | 3 | 0 | `renovate-core/src/versioning/git.rs` | ported |
 
 ### `versioning/github-actions`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/github-actions/index.spec.ts` | 29 | 29 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/github-actions/index.spec.ts` | 29 | 29 | 0 | `renovate-core/src/versioning/github_actions.rs` | ported |
 
 ### `versioning/glasskube`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/glasskube/index.spec.ts` | 4 | 3 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/glasskube/index.spec.ts` | 4 | 3 | 1 | `renovate-core/src/versioning/glasskube.rs` | partial |
 
 ### `versioning/go-mod-directive`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/go-mod-directive/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/go-mod-directive/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/versioning/go_mod_directive.rs` | ported |
 
 ### `versioning/gradle`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/gradle/index.spec.ts` | 12 | 12 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/gradle/index.spec.ts` | 12 | 12 | 0 | `renovate-core/src/versioning/gradle.rs` | ported |
 
 ### `versioning/hashicorp`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/hashicorp/convertor.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/modules/versioning/hashicorp/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/hashicorp/convertor.spec.ts` | 7 | 7 | 0 | `renovate-core/src/versioning/hashicorp.rs` | ported |
+| `lib/modules/versioning/hashicorp/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/versioning/hashicorp.rs` | ported |
 
 ### `versioning/helm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/helm/index.spec.ts` | 3 | 3 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/helm/index.spec.ts` | 3 | 3 | 0 | `renovate-core/src/versioning/helm.rs` | ported |
 
 ### `versioning/hermit`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/hermit/index.spec.ts` | 10 | 10 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/hermit/index.spec.ts` | 10 | 10 | 0 | `renovate-core/src/versioning/hermit.rs` | ported |
 
 ### `versioning/hex`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/hex/index.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/hex/index.spec.ts` | 8 | 8 | 0 | `renovate-core/src/versioning/hex.rs` | ported |
 
 ### `versioning/ivy`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/ivy/index.spec.ts` | 9 | 9 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/ivy/index.spec.ts` | 9 | 9 | 0 | `renovate-core/src/versioning/ivy.rs` | ported |
 
 ### `versioning/kubernetes-api`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/kubernetes-api/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/kubernetes-api/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/versioning/kubernetes_api.rs` | ported |
 
 ### `versioning/lambda-node`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/lambda-node/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/lambda-node/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/versioning/lambda_node.rs` | ported |
 
 ### `versioning/loose`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/loose/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/loose/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/versioning/loose.rs` | ported |
 
 ### `versioning/maven`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/maven/compare.spec.ts` | 10 | 8 | 2 | partial |
-| `lib/modules/versioning/maven/index.spec.ts` | 13 | 11 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/maven/compare.spec.ts` | 10 | 8 | 2 | `renovate-core/src/versioning/maven.rs` | partial |
+| `lib/modules/versioning/maven/index.spec.ts` | 13 | 11 | 2 | `renovate-core/src/versioning/maven.rs` | partial |
 
 ### `versioning/nixpkgs`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/nixpkgs/index.spec.ts` | 5 | 4 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/nixpkgs/index.spec.ts` | 5 | 4 | 1 | `renovate-core/src/versioning/nixpkgs.rs` | partial |
 
 ### `versioning/node`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/node/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/node/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/versioning/node.rs` | ported |
 
 ### `versioning/npm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/npm/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/npm/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/versioning/npm.rs` | ported |
 
 ### `versioning/nuget`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/nuget/index.spec.ts` | 18 | 18 | 0 | ported |
-| `lib/modules/versioning/nuget/parser.spec.ts` | 15 | 10 | 5 | partial |
-| `lib/modules/versioning/nuget/version.spec.ts` | 1 | 1 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/nuget/index.spec.ts` | 18 | 18 | 0 | `renovate-core/src/versioning/nuget.rs` | ported |
+| `lib/modules/versioning/nuget/parser.spec.ts` | 15 | 10 | 5 | `renovate-core/src/versioning/nuget.rs` | partial |
+| `lib/modules/versioning/nuget/version.spec.ts` | 1 | 1 | 0 | `renovate-core/src/versioning/nuget.rs` | ported |
 
 ### `versioning/pep440`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/pep440/index.spec.ts` | 10 | 9 | 1 | partial |
-| `lib/modules/versioning/pep440/range.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/pep440/index.spec.ts` | 10 | 9 | 1 | `renovate-core/src/versioning/pep440.rs` | partial |
+| `lib/modules/versioning/pep440/range.spec.ts` | 4 | 4 | 0 | `renovate-core/src/versioning/pep440.rs` | ported |
 
 ### `versioning/perl`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/perl/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/perl/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/versioning/perl.rs` | ported |
 
 ### `versioning/poetry`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/poetry/index.spec.ts` | 14 | 14 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/poetry/index.spec.ts` | 14 | 14 | 0 | `renovate-core/src/versioning/poetry.rs` | ported |
 
 ### `versioning/pvp`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/pvp/index.spec.ts` | 18 | 18 | 0 | ported |
-| `lib/modules/versioning/pvp/range.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/versioning/pvp/util.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/pvp/index.spec.ts` | 18 | 18 | 0 | `renovate-core/src/versioning/pvp.rs` | ported |
+| `lib/modules/versioning/pvp/range.spec.ts` | 1 | 1 | 0 | `renovate-core/src/versioning/pvp.rs` | ported |
+| `lib/modules/versioning/pvp/util.spec.ts` | 4 | 4 | 0 | `renovate-core/src/versioning/pvp.rs` | ported |
 
 ### `versioning/python`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/python/index.spec.ts` | 8 | 8 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/python/index.spec.ts` | 8 | 8 | 0 | `renovate-core/src/versioning/python.rs` | ported |
 
 ### `versioning/redhat`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/redhat/index.spec.ts` | 2 | 2 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/redhat/index.spec.ts` | 2 | 2 | 0 | `renovate-core/src/versioning/redhat.rs` | ported |
 
 ### `versioning/regex`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/regex/index.spec.ts` | 24 | 20 | 4 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/regex/index.spec.ts` | 24 | 20 | 4 | `renovate-core/src/versioning/regex_versioning.rs` | partial |
 
 ### `versioning/rez`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/rez/index.spec.ts` | 16 | 16 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/rez/index.spec.ts` | 16 | 16 | 0 | `renovate-core/src/versioning/rez.rs` | ported |
 
 ### `versioning/rpm`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/rpm/index.spec.ts` | 6 | 6 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/rpm/index.spec.ts` | 6 | 6 | 0 | `renovate-core/src/versioning/rpm.rs` | ported |
 
 ### `versioning/ruby`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/ruby/index.spec.ts` | 15 | 14 | 1 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/ruby/index.spec.ts` | 15 | 14 | 1 | `renovate-core/src/versioning/ruby.rs` | partial |
 
 ### `versioning/rust-release-channel`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/rust-release-channel/index.spec.ts` | 15 | 15 | 0 | ported |
-| `lib/modules/versioning/rust-release-channel/parse.spec.ts` | 8 | 2 | 6 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/rust-release-channel/index.spec.ts` | 15 | 15 | 0 | `renovate-core/src/versioning/rust_release_channel.rs` | ported |
+| `lib/modules/versioning/rust-release-channel/parse.spec.ts` | 8 | 2 | 6 | `renovate-core/src/versioning/rust_release_channel.rs` | partial |
 
 ### `versioning/same-major`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/same-major/index.spec.ts` | 10 | 8 | 2 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/same-major/index.spec.ts` | 10 | 8 | 2 | `renovate-core/src/versioning/same_major.rs` | partial |
 
 ### `versioning/semver`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/semver/common.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/modules/versioning/semver/index.spec.ts` | 5 | 5 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/semver/common.spec.ts` | 1 | 1 | 0 | `renovate-core/src/versioning/semver_generic.rs` | ported |
+| `lib/modules/versioning/semver/index.spec.ts` | 5 | 5 | 0 | `renovate-core/src/versioning/semver_node.rs` | ported |
 
 ### `versioning/semver-coerced`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/semver-coerced/index.spec.ts` | 53 | 48 | 5 | partial |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/semver-coerced/index.spec.ts` | 53 | 48 | 5 | `renovate-core/src/versioning/semver_coerced.rs` | partial |
 
 ### `versioning/semver-partial`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/semver-partial/index.spec.ts` | 18 | 18 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/semver-partial/index.spec.ts` | 18 | 18 | 0 | `renovate-core/src/versioning/semver_partial.rs` | ported |
 
 ### `versioning/swift`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/swift/index.spec.ts` | 7 | 7 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/swift/index.spec.ts` | 7 | 7 | 0 | `renovate-core/src/versioning/swift.rs` | ported |
 
 ### `versioning/ubuntu`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/ubuntu/index.spec.ts` | 13 | 13 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/ubuntu/index.spec.ts` | 13 | 13 | 0 | `renovate-core/src/versioning/ubuntu.rs` | ported |
 
 ### `versioning/unity3d`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/unity3d/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/unity3d/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/versioning/unity3d.rs` | ported |
 
 ### `versioning/unity3d-packages`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/modules/versioning/unity3d-packages/index.spec.ts` | 4 | 4 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/modules/versioning/unity3d-packages/index.spec.ts` | 4 | 4 | 0 | `renovate-core/src/versioning/unity3d_packages.rs` | ported |
 
 ### `worker/global`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/workers/global/autodiscover.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/workers/global/config/parse/additional-config-file.spec.ts` | 15 | 0 | 15 | pending |
-| `lib/workers/global/config/parse/cli.spec.ts` | 30 | 30 | 0 | ported |
-| `lib/workers/global/config/parse/env.spec.ts` | 45 | 44 | 1 | partial |
-| `lib/workers/global/config/parse/file.spec.ts` | 15 | 8 | 7 | partial |
-| `lib/workers/global/config/parse/host-rules-from-env.spec.ts` | 12 | 12 | 0 | ported |
-| `lib/workers/global/config/parse/index.spec.ts` | 35 | 0 | 35 | pending |
-| `lib/workers/global/config/parse/util.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/workers/global/index.spec.ts` | 15 | 2 | 13 | partial |
-| `lib/workers/global/initialize.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/workers/global/limits.spec.ts` | 19 | 19 | 0 | ported |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/workers/global/autodiscover.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/workers/global/config/parse/additional-config-file.spec.ts` | 15 | 0 | 15 | — | pending |
+| `lib/workers/global/config/parse/cli.spec.ts` | 30 | 30 | 0 | `renovate-cli/src/config_builder.rs`<br>`renovate-cli/tests/cli.rs`<br>`renovate-core/src/util.rs` | ported |
+| `lib/workers/global/config/parse/env.spec.ts` | 45 | 44 | 1 | `renovate-cli/src/config_env.rs`<br>`renovate-core/src/util.rs` | partial |
+| `lib/workers/global/config/parse/file.spec.ts` | 15 | 8 | 7 | `renovate-core/src/config/file.rs` | partial |
+| `lib/workers/global/config/parse/host-rules-from-env.spec.ts` | 12 | 12 | 0 | `renovate-core/src/config/host_rules_from_env.rs` | ported |
+| `lib/workers/global/config/parse/index.spec.ts` | 35 | 0 | 35 | — | pending |
+| `lib/workers/global/config/parse/util.spec.ts` | 1 | 1 | 0 | `renovate-core/src/config/migrate_validate.rs` | ported |
+| `lib/workers/global/index.spec.ts` | 15 | 2 | 13 | `renovate-core/src/util.rs` | partial |
+| `lib/workers/global/initialize.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/workers/global/limits.spec.ts` | 19 | 19 | 0 | `renovate-core/src/limits.rs` | ported |
 
 ### `worker/repository`
 
-| Spec file | it() | ported | pending | Status |
-|---|--:|--:|--:|---|
-| `lib/workers/repository/changelog/index.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/workers/repository/common.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/workers/repository/config-migration/branch/commit-message.spec.ts` | 5 | 5 | 0 | ported |
-| `lib/workers/repository/config-migration/branch/create.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/workers/repository/config-migration/branch/index.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/workers/repository/config-migration/branch/migrated-data.spec.ts` | 19 | 0 | 19 | pending |
-| `lib/workers/repository/config-migration/branch/rebase.spec.ts` | 5 | 1 | 4 | partial |
-| `lib/workers/repository/config-migration/index.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/workers/repository/config-migration/pr/index.spec.ts` | 16 | 0 | 16 | pending |
-| `lib/workers/repository/configured.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/workers/repository/dependency-dashboard.spec.ts` | 63 | 0 | 63 | pending |
-| `lib/workers/repository/error-config.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/workers/repository/error.spec.ts` | 9 | 9 | 0 | ported |
-| `lib/workers/repository/errors-warnings.spec.ts` | 16 | 14 | 2 | partial |
-| `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/workers/repository/extract/file-match.spec.ts` | 8 | 7 | 1 | partial |
-| `lib/workers/repository/extract/index.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/workers/repository/extract/manager-files.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/workers/repository/extract/supersedes.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/workers/repository/finalize/prune.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/workers/repository/finalize/repository-statistics.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/workers/repository/index.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/workers/repository/init/apis.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/workers/repository/init/cache.spec.ts` | 1 | 0 | 1 | pending |
-| `lib/workers/repository/init/index.spec.ts` | 2 | 0 | 2 | pending |
-| `lib/workers/repository/init/inherited.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/workers/repository/init/merge.spec.ts` | 39 | 8 | 31 | partial |
-| `lib/workers/repository/init/vulnerability.spec.ts` | 16 | 0 | 16 | pending |
-| `lib/workers/repository/model/custom-commit-message.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/workers/repository/model/semantic-commit-message.spec.ts` | 8 | 8 | 0 | ported |
-| `lib/workers/repository/onboarding/branch/check.spec.ts` | 11 | 0 | 11 | pending |
-| `lib/workers/repository/onboarding/branch/config.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/workers/repository/onboarding/branch/create.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/workers/repository/onboarding/branch/index.spec.ts` | 26 | 0 | 26 | pending |
-| `lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts` | 20 | 0 | 20 | pending |
-| `lib/workers/repository/onboarding/branch/rebase.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/workers/repository/onboarding/pr/base-branch.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/workers/repository/onboarding/pr/config-description.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/workers/repository/onboarding/pr/index.spec.ts` | 29 | 0 | 29 | pending |
-| `lib/workers/repository/onboarding/pr/pr-list.spec.ts` | 6 | 6 | 0 | ported |
-| `lib/workers/repository/process/extract-update.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/workers/repository/process/fetch.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/workers/repository/process/index.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/workers/repository/process/libyear.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/workers/repository/process/limits.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/workers/repository/process/lookup/abandonment.spec.ts` | 7 | 7 | 0 | ported |
-| `lib/workers/repository/process/lookup/filter-checks.spec.ts` | 12 | 0 | 12 | pending |
-| `lib/workers/repository/process/lookup/filter.spec.ts` | 9 | 4 | 5 | partial |
-| `lib/workers/repository/process/lookup/index.spec.ts` | 171 | 0 | 171 | pending |
-| `lib/workers/repository/process/lookup/timestamps.spec.ts` | 10 | 10 | 0 | ported |
-| `lib/workers/repository/process/lookup/utils.spec.ts` | 3 | 3 | 0 | ported |
-| `lib/workers/repository/process/sort.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/workers/repository/process/vulnerabilities.spec.ts` | 41 | 0 | 41 | pending |
-| `lib/workers/repository/process/write.spec.ts` | 16 | 0 | 16 | pending |
-| `lib/workers/repository/reconfigure/comment.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/workers/repository/reconfigure/index.spec.ts` | 8 | 0 | 8 | pending |
-| `lib/workers/repository/reconfigure/reconfigure-cache.spec.ts` | 4 | 4 | 0 | ported |
-| `lib/workers/repository/reconfigure/utils.spec.ts` | 5 | 1 | 4 | partial |
-| `lib/workers/repository/reconfigure/validate.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/workers/repository/result.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/workers/repository/update/branch/artifacts.spec.ts` | 7 | 0 | 7 | pending |
-| `lib/workers/repository/update/branch/auto-replace.spec.ts` | 71 | 0 | 71 | pending |
-| `lib/workers/repository/update/branch/automerge.spec.ts` | 9 | 0 | 9 | pending |
-| `lib/workers/repository/update/branch/bump-versions.spec.ts` | 23 | 0 | 23 | pending |
-| `lib/workers/repository/update/branch/check-existing.spec.ts` | 4 | 0 | 4 | pending |
-| `lib/workers/repository/update/branch/commit.spec.ts` | 3 | 0 | 3 | pending |
-| `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/workers/repository/update/branch/get-updated.spec.ts` | 53 | 0 | 53 | pending |
-| `lib/workers/repository/update/branch/index.spec.ts` | 101 | 0 | 101 | pending |
-| `lib/workers/repository/update/branch/lock-files/index.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/workers/repository/update/branch/reuse.spec.ts` | 26 | 0 | 26 | pending |
-| `lib/workers/repository/update/branch/schedule.spec.ts` | 68 | 63 | 5 | partial |
-| `lib/workers/repository/update/branch/status-checks.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/workers/repository/update/pr/automerge.spec.ts` | 13 | 0 | 13 | pending |
-| `lib/workers/repository/update/pr/body/changelogs.spec.ts` | 2 | 1 | 1 | partial |
-| `lib/workers/repository/update/pr/body/config-description.spec.ts` | 18 | 13 | 5 | partial |
-| `lib/workers/repository/update/pr/body/controls.spec.ts` | 1 | 1 | 0 | ported |
-| `lib/workers/repository/update/pr/body/footer.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/workers/repository/update/pr/body/header.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/workers/repository/update/pr/body/index.spec.ts` | 8 | 0 | 8 | pending |
-| `lib/workers/repository/update/pr/body/notes.spec.ts` | 3 | 1 | 2 | partial |
-| `lib/workers/repository/update/pr/body/updates-table.spec.ts` | 5 | 1 | 4 | partial |
-| `lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts` | 14 | 0 | 14 | pending |
-| `lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts` | 5 | 0 | 5 | pending |
-| `lib/workers/repository/update/pr/changelog/common.spec.ts` | 2 | 2 | 0 | ported |
-| `lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts` | 16 | 0 | 16 | pending |
-| `lib/workers/repository/update/pr/changelog/gitea/index.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/workers/repository/update/pr/changelog/github/index.spec.ts` | 17 | 0 | 17 | pending |
-| `lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts` | 16 | 0 | 16 | pending |
-| `lib/workers/repository/update/pr/changelog/index.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/workers/repository/update/pr/changelog/release-notes.spec.ts` | 57 | 0 | 57 | pending |
-| `lib/workers/repository/update/pr/changelog/releases.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/workers/repository/update/pr/changelog/source.spec.ts` | 6 | 4 | 2 | partial |
-| `lib/workers/repository/update/pr/code-owners.spec.ts` | 31 | 0 | 31 | pending |
-| `lib/workers/repository/update/pr/index.spec.ts` | 53 | 0 | 53 | pending |
-| `lib/workers/repository/update/pr/labels.spec.ts` | 20 | 13 | 7 | partial |
-| `lib/workers/repository/update/pr/participants.spec.ts` | 18 | 0 | 18 | pending |
-| `lib/workers/repository/update/pr/pr-cache.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/workers/repository/update/pr/pr-reuse.spec.ts` | 8 | 0 | 8 | pending |
-| `lib/workers/repository/updates/branch-name.spec.ts` | 27 | 27 | 0 | ported |
-| `lib/workers/repository/updates/branchify.spec.ts` | 6 | 0 | 6 | pending |
-| `lib/workers/repository/updates/flatten.spec.ts` | 6 | 1 | 5 | partial |
-| `lib/workers/repository/updates/generate.spec.ts` | 58 | 0 | 58 | pending |
+| Spec file | it() | ported | pending | Rust test file(s) | Status |
+|---|--:|--:|--:|---|---|
+| `lib/workers/repository/changelog/index.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/workers/repository/common.spec.ts` | 6 | 6 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/config-migration/branch/commit-message.spec.ts` | 5 | 5 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/config-migration/branch/create.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/workers/repository/config-migration/branch/index.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/workers/repository/config-migration/branch/migrated-data.spec.ts` | 19 | 0 | 19 | — | pending |
+| `lib/workers/repository/config-migration/branch/rebase.spec.ts` | 5 | 1 | 4 | `renovate-core/src/json_writer.rs` | partial |
+| `lib/workers/repository/config-migration/index.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/workers/repository/config-migration/pr/index.spec.ts` | 16 | 0 | 16 | — | pending |
+| `lib/workers/repository/configured.spec.ts` | 3 | 3 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/dependency-dashboard.spec.ts` | 63 | 0 | 63 | — | pending |
+| `lib/workers/repository/error-config.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/workers/repository/error.spec.ts` | 9 | 9 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/errors-warnings.spec.ts` | 16 | 14 | 2 | `renovate-core/src/util.rs` | partial |
+| `lib/workers/repository/extract/extract-fingerprint-config.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/workers/repository/extract/file-match.spec.ts` | 8 | 7 | 1 | `renovate-core/src/managers.rs` | partial |
+| `lib/workers/repository/extract/index.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/workers/repository/extract/manager-files.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/workers/repository/extract/supersedes.spec.ts` | 8 | 8 | 0 | `renovate-core/src/managers.rs` | ported |
+| `lib/workers/repository/finalize/prune.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/workers/repository/finalize/repository-statistics.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/workers/repository/index.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/workers/repository/init/apis.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/workers/repository/init/cache.spec.ts` | 1 | 0 | 1 | — | pending |
+| `lib/workers/repository/init/index.spec.ts` | 2 | 0 | 2 | — | pending |
+| `lib/workers/repository/init/inherited.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/workers/repository/init/merge.spec.ts` | 39 | 8 | 31 | `renovate-core/src/repo_config.rs` | partial |
+| `lib/workers/repository/init/vulnerability.spec.ts` | 16 | 0 | 16 | — | pending |
+| `lib/workers/repository/model/custom-commit-message.spec.ts` | 3 | 3 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/model/semantic-commit-message.spec.ts` | 8 | 8 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/onboarding/branch/check.spec.ts` | 11 | 0 | 11 | — | pending |
+| `lib/workers/repository/onboarding/branch/config.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/workers/repository/onboarding/branch/create.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/workers/repository/onboarding/branch/index.spec.ts` | 26 | 0 | 26 | — | pending |
+| `lib/workers/repository/onboarding/branch/onboarding-branch-cache.spec.ts` | 20 | 0 | 20 | — | pending |
+| `lib/workers/repository/onboarding/branch/rebase.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/workers/repository/onboarding/pr/base-branch.spec.ts` | 3 | 3 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/onboarding/pr/config-description.spec.ts` | 4 | 4 | 0 | `renovate-core/src/onboarding.rs` | ported |
+| `lib/workers/repository/onboarding/pr/index.spec.ts` | 29 | 0 | 29 | — | pending |
+| `lib/workers/repository/onboarding/pr/pr-list.spec.ts` | 6 | 6 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/process/extract-update.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/workers/repository/process/fetch.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/workers/repository/process/index.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/workers/repository/process/libyear.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/workers/repository/process/limits.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/workers/repository/process/lookup/abandonment.spec.ts` | 7 | 7 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/process/lookup/filter-checks.spec.ts` | 12 | 0 | 12 | — | pending |
+| `lib/workers/repository/process/lookup/filter.spec.ts` | 9 | 4 | 5 | `renovate-core/src/workers/repository/process/lookup/filter.rs` | partial |
+| `lib/workers/repository/process/lookup/index.spec.ts` | 171 | 0 | 171 | — | pending |
+| `lib/workers/repository/process/lookup/timestamps.spec.ts` | 10 | 10 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/process/lookup/utils.spec.ts` | 3 | 3 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/process/sort.spec.ts` | 4 | 4 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/process/vulnerabilities.spec.ts` | 41 | 0 | 41 | — | pending |
+| `lib/workers/repository/process/write.spec.ts` | 16 | 0 | 16 | — | pending |
+| `lib/workers/repository/reconfigure/comment.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/workers/repository/reconfigure/index.spec.ts` | 8 | 0 | 8 | — | pending |
+| `lib/workers/repository/reconfigure/reconfigure-cache.spec.ts` | 4 | 4 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/reconfigure/utils.spec.ts` | 5 | 1 | 4 | `renovate-core/src/util.rs` | partial |
+| `lib/workers/repository/reconfigure/validate.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/workers/repository/result.spec.ts` | 1 | 1 | 0 | `renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/update/branch/artifacts.spec.ts` | 7 | 0 | 7 | — | pending |
+| `lib/workers/repository/update/branch/auto-replace.spec.ts` | 71 | 0 | 71 | — | pending |
+| `lib/workers/repository/update/branch/automerge.spec.ts` | 9 | 0 | 9 | — | pending |
+| `lib/workers/repository/update/branch/bump-versions.spec.ts` | 23 | 0 | 23 | — | pending |
+| `lib/workers/repository/update/branch/check-existing.spec.ts` | 4 | 0 | 4 | — | pending |
+| `lib/workers/repository/update/branch/commit.spec.ts` | 3 | 0 | 3 | — | pending |
+| `lib/workers/repository/update/branch/execute-post-upgrade-commands.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/workers/repository/update/branch/get-updated.spec.ts` | 53 | 0 | 53 | — | pending |
+| `lib/workers/repository/update/branch/index.spec.ts` | 101 | 0 | 101 | — | pending |
+| `lib/workers/repository/update/branch/lock-files/index.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/workers/repository/update/branch/reuse.spec.ts` | 26 | 0 | 26 | — | pending |
+| `lib/workers/repository/update/branch/schedule.spec.ts` | 68 | 63 | 5 | `renovate-core/src/schedule.rs` | partial |
+| `lib/workers/repository/update/branch/status-checks.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/workers/repository/update/pr/automerge.spec.ts` | 13 | 0 | 13 | — | pending |
+| `lib/workers/repository/update/pr/body/changelogs.spec.ts` | 2 | 1 | 1 | `renovate-core/src/branch.rs` | partial |
+| `lib/workers/repository/update/pr/body/config-description.spec.ts` | 18 | 13 | 5 | `renovate-core/src/util.rs` | partial |
+| `lib/workers/repository/update/pr/body/controls.spec.ts` | 1 | 1 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/update/pr/body/footer.spec.ts` | 2 | 2 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/update/pr/body/header.spec.ts` | 2 | 2 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/update/pr/body/index.spec.ts` | 8 | 0 | 8 | — | pending |
+| `lib/workers/repository/update/pr/body/notes.spec.ts` | 3 | 1 | 2 | `renovate-core/src/branch.rs` | partial |
+| `lib/workers/repository/update/pr/body/updates-table.spec.ts` | 5 | 1 | 4 | `renovate-core/src/branch.rs` | partial |
+| `lib/workers/repository/update/pr/changelog/bitbucket-server/index.spec.ts` | 14 | 0 | 14 | — | pending |
+| `lib/workers/repository/update/pr/changelog/bitbucket/index.spec.ts` | 5 | 0 | 5 | — | pending |
+| `lib/workers/repository/update/pr/changelog/common.spec.ts` | 2 | 2 | 0 | `renovate-core/src/branch.rs`<br>`renovate-core/src/util.rs` | ported |
+| `lib/workers/repository/update/pr/changelog/forgejo/index.spec.ts` | 16 | 0 | 16 | — | pending |
+| `lib/workers/repository/update/pr/changelog/gitea/index.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/workers/repository/update/pr/changelog/github/index.spec.ts` | 17 | 0 | 17 | — | pending |
+| `lib/workers/repository/update/pr/changelog/gitlab/index.spec.ts` | 16 | 0 | 16 | — | pending |
+| `lib/workers/repository/update/pr/changelog/index.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/workers/repository/update/pr/changelog/release-notes.spec.ts` | 57 | 0 | 57 | — | pending |
+| `lib/workers/repository/update/pr/changelog/releases.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/workers/repository/update/pr/changelog/source.spec.ts` | 6 | 4 | 2 | `renovate-core/src/util.rs` | partial |
+| `lib/workers/repository/update/pr/code-owners.spec.ts` | 31 | 0 | 31 | — | pending |
+| `lib/workers/repository/update/pr/index.spec.ts` | 53 | 0 | 53 | — | pending |
+| `lib/workers/repository/update/pr/labels.spec.ts` | 20 | 13 | 7 | `renovate-core/src/util.rs` | partial |
+| `lib/workers/repository/update/pr/participants.spec.ts` | 18 | 0 | 18 | — | pending |
+| `lib/workers/repository/update/pr/pr-cache.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/workers/repository/update/pr/pr-reuse.spec.ts` | 8 | 0 | 8 | — | pending |
+| `lib/workers/repository/updates/branch-name.spec.ts` | 27 | 27 | 0 | `renovate-core/src/branch.rs` | ported |
+| `lib/workers/repository/updates/branchify.spec.ts` | 6 | 0 | 6 | — | pending |
+| `lib/workers/repository/updates/flatten.spec.ts` | 6 | 1 | 5 | `renovate-core/src/branch.rs` | partial |
+| `lib/workers/repository/updates/generate.spec.ts` | 58 | 0 | 58 | — | pending |
 
 ## Deleted upstream — review
 
