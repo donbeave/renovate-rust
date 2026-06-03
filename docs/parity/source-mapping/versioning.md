@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 22/96 in-scope files mapped (full=22 partial=0 stub=0 pending=74 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 23/96 in-scope files mapped (full=23 partial=0 stub=0 pending=73 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -120,7 +120,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/git/index.ts` | pending | — | — |
+| `lib/modules/versioning/git/index.ts` | full | [`crates/renovate-core/src/versioning/git.rs`](../../../crates/renovate-core/src/versioning/git.rs) | — |
 
 ### `versioning/github-actions`
 

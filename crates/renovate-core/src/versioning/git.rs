@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/git/index.ts full
 //! Git hash versioning.
 //!
 //! Renovate reference:
