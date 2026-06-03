@@ -71,7 +71,11 @@ pub async fn fetch_releases(
     http: &HttpClient,
 ) -> Result<Option<FlutterVersionResult>, FlutterVersionError> {
     let url = format!("{registry_url}/flutter_infra_release/releases/releases_linux.json");
-    let resp: FlutterResponse = http.get_json(&url).await?;
+    let resp: FlutterResponse = match http.get_json(&url).await {
+        Ok(resp) => resp,
+        Err(crate::http::HttpError::Request(_)) => return Ok(None),
+        Err(error) => return Err(error.into()),
+    };
 
     let releases: Vec<FlutterVersionRelease> = resp
         .releases
@@ -106,6 +110,8 @@ pub async fn fetch_releases(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     // Ported: "returns null for empty 200 OK" — lib/modules/datasource/flutter-version/index.spec.ts line 34
     #[test]
@@ -161,5 +167,29 @@ mod tests {
         assert!(is_stable_pattern("2.17.5"));
         assert!(!is_stable_pattern("3.1.0-0.pre"));
         assert!(!is_stable_pattern("2.12.0-4.1.pre"));
+    }
+
+    // Ported: "throws for 500" — lib/modules/datasource/flutter-version/index.spec.ts line 14
+    #[tokio::test]
+    async fn throws_for_500() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/flutter_infra_release/releases/releases_linux.json"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await;
+        assert!(result.is_err(), "server 500 should propagate as error");
+    }
+
+    // Ported: "returns null for error" — lib/modules/datasource/flutter-version/index.spec.ts line 24
+    #[tokio::test]
+    async fn returns_null_for_error() {
+        let bad_url = "http://127.0.0.1:1";
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(bad_url, &http).await.unwrap();
+        assert!(result.is_none(), "request errors should return None");
     }
 }
