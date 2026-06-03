@@ -1,6 +1,6 @@
-//! Docker versioning.
+//! @parity lib/modules/versioning/docker/index.ts full
 //!
-//! Ports `lib/modules/versioning/docker/index.ts`.
+//! Docker versioning.
 //! Version format: `numeric-parts[prerelease][-suffix]` (e.g. `3.8.0b1-alpine`).
 //! Shorter release array is considered greater: `3.7 > 3.7.0` (broader tag covers range).
 
