@@ -19,10 +19,12 @@ and note the decision in `docs/parity/compatibility-decisions.md`. If blocked
 by missing credentials or network, document the blocker and switch to another
 slice.
 
-## Your single source of truth: the source map
+## Your single source of truth: the source mapping
 
-**`docs/parity/source-map.md`** is the comparison table. Every upstream
-`lib/**/*.ts` implementation file (tests excluded) is one row:
+**`docs/parity/source-mapping/`** is the comparison surface — a split tree:
+`README.md` (group + module index) → one page per group (managers,
+datasources, …), where every upstream `lib/**/*.ts` implementation file (tests
+excluded) is one row:
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
@@ -32,7 +34,7 @@ slice.
 It is **generated** — never hand-edit it. Regenerate it with the raw tool:
 
 ```sh
-cargo run -p parity-cli -- source     # rewrites docs/parity/source-map.md
+cargo run -p parity-cli -- source     # wipes + rebuilds the docs/parity/source-mapping/ tree
 ```
 
 Status values: `full` · `partial` · `stub` · `pending` (no work yet) ·
@@ -58,10 +60,10 @@ The Status/Rust columns are not typed into the table. They are harvested from
 
 ## Iteration — one table row at a time
 
-1. **Pick the work.** Regenerate the table (`parity-cli -- source`), open
-   `docs/parity/source-map.md`, and inside the first incomplete milestone pick
-   **one** row whose status is `pending` or `partial`. That single upstream
-   `.ts` file is your unit of work.
+1. **Pick the work.** Regenerate the tree (`parity-cli -- source`), open the
+   group page under `docs/parity/source-mapping/<group>.md` for the module you're
+   on, and inside the first incomplete milestone pick **one** row whose status is
+   `pending` or `partial`. That single upstream `.ts` file is your unit of work.
 2. **Analyze it.** Read the upstream file under `../renovate/<path>` and the
    Rust file(s) that do (or should) implement it. Understand the observable
    behavior: exported functions, edge cases, what upstream tests exercise.
@@ -81,11 +83,15 @@ The Status/Rust columns are not typed into the table. They are harvested from
      hosted-only file (with a reason).
 6. **Regenerate and verify:**
    ```sh
-   cargo run -p parity-cli -- source     # refresh the table
+   cargo run -p parity-cli -- source     # wipes + rebuilds the source-mapping/ tree
    cargo run -p parity-cli -- check      # fails on stale / malformed tags
    ```
-7. **Commit one coherent slice** (see `COMMITS.md`), stage only this row's
-   changes, include the Co-authored-by trailer, and **push**.
+   `source` deletes and rebuilds `docs/parity/source-mapping/`, so a removed
+   upstream file leaves no stale page.
+7. **Commit one coherent slice** (see `COMMITS.md`): stage your Rust changes and
+   the **whole** regenerated tree — `git add -A docs/parity/source-mapping` (never
+   hand-pick pages, so deletions commit). Include the Co-authored-by trailer and
+   **push**.
 8. **Continue** with the next row unless the operator asks you to stop.
 
 ## Definition of `full` for a file

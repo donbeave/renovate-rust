@@ -45,7 +45,7 @@ work inside the first incomplete milestone.
    `docs/parity/test-mapping/_by-module/<module>.md`.
 2. Inside the first incomplete milestone, pick **one** spec file with
    `pending > 0`. Skip specs whose implementation does not exist yet — check
-   `docs/parity/source-map.md`; if the module is all `pending` there, the
+   `docs/parity/source-mapping/`; if the module is all `pending` there, the
    implementation agent must go first.
 3. List the exact pending `it()`s for that module — line number + description:
    ```sh

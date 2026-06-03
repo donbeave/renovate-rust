@@ -31,8 +31,16 @@ use std::path::Path;
 use regex::Regex;
 use walkdir::{DirEntry, WalkDir};
 
+use crate::paths::rel_link;
+
 /// Where the split test-mapping tree is written, relative to the working dir.
 pub(crate) const MAPPING_DIR: &str = "docs/parity/test-mapping";
+
+/// Link from a page in the tree (path relative to `MAPPING_DIR`) to a Rust
+/// file at an optional line.
+fn rust_link(page_in_tree: &str, rust_file: &str, line: Option<usize>) -> String {
+    crate::paths::rust_link(&format!("{MAPPING_DIR}/{page_in_tree}"), rust_file, line)
+}
 
 /// Directory names pruned during discovery — never contain in-scope specs and
 /// can be huge (node_modules) or unreadable. Pruned as whole subtrees.
@@ -547,47 +555,6 @@ fn build_dest_map(
         }
     }
     map
-}
-
-/// Relative markdown link from one page to another, both given as paths
-/// relative to the mapping-tree root.
-fn rel_link(from: &str, to: &str) -> String {
-    let fc: Vec<&str> = from.split('/').collect();
-    let tc: Vec<&str> = to.split('/').collect();
-    let fdir = &fc[..fc.len().saturating_sub(1)];
-    let tdir = &tc[..tc.len().saturating_sub(1)];
-    let mut i = 0;
-    while i < fdir.len() && i < tdir.len() && fdir[i] == tdir[i] {
-        i += 1;
-    }
-    let mut parts: Vec<String> = Vec::new();
-    for _ in i..fdir.len() {
-        parts.push("..".to_string());
-    }
-    for c in &tdir[i..] {
-        parts.push((*c).to_string());
-    }
-    parts.push(tc[tc.len() - 1].to_string());
-    parts.join("/")
-}
-
-/// Markdown link from a mapping page to a Rust file in the repo, at an optional
-/// line (`#L<n>` anchor so a click lands on the exact line). `page_in_tree` is
-/// the page path relative to the mapping root; `rust_file` is relative to
-/// `crates/`. The href is relative to the repo so it resolves on GitHub and
-/// locally.
-fn rust_link(page_in_tree: &str, rust_file: &str, line: Option<usize>) -> String {
-    let page_repo = format!("{MAPPING_DIR}/{page_in_tree}");
-    let target_repo = format!("crates/{rust_file}");
-    let mut href = rel_link(&page_repo, &target_repo);
-    let label = match line {
-        Some(l) => {
-            href.push_str(&format!("#L{l}"));
-            format!("crates/{rust_file}:{l}")
-        }
-        None => format!("crates/{rust_file}"),
-    };
-    format!("[`{label}`]({href})")
 }
 
 fn module_page_path(module: &str) -> String {

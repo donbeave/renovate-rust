@@ -124,9 +124,10 @@ the smallest possible diff.
 Parity is tracked by two generated surfaces, both owned by the Rust `parity-cli`
 tool and **never hand-edited**:
 
-- `docs/parity/source-map.md` — every upstream `lib/**/*.ts` implementation file
-  → Rust file(s) + status, from `@parity` tags in the Rust source. Regenerate
-  with `cargo run -p parity-cli -- source`.
+- `docs/parity/source-mapping/` — a split tree (root `README.md` → one page per
+  group: managers, datasources, …) mapping every upstream `lib/**/*.ts`
+  implementation file → Rust file(s) + status, from `@parity` tags in the Rust
+  source. Regenerate with `cargo run -p parity-cli -- source`.
 - `docs/parity/test-mapping/` — a split, linked tree (root `README.md` → one
   page per module → one page per spec, with each `it()`'s status and Rust
   destination) mapping every upstream `it()`/`test()` → ported / pending /
