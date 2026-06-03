@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/ivy/index.spec.ts`](../../lib/modules/versioning/ivy/index.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/versioning/ivy.rs:192`](../../../../../crates/renovate-core/src/versioning/ivy.rs#L192) | ported |
+| [`lib/modules/versioning/ivy/index.spec.ts`](../../lib/modules/versioning/ivy/index.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/versioning/ivy.rs:194`](../../../../../crates/renovate-core/src/versioning/ivy.rs#L194) | ported |
 

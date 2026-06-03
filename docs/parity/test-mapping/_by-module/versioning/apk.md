@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/apk/index.spec.ts`](../../lib/modules/versioning/apk/index.spec.ts.md) | 53 | 53 | 0 | 0 | [`crates/renovate-core/src/versioning/apk.rs:381`](../../../../../crates/renovate-core/src/versioning/apk.rs#L381) | ported |
+| [`lib/modules/versioning/apk/index.spec.ts`](../../lib/modules/versioning/apk/index.spec.ts.md) | 53 | 53 | 0 | 0 | [`crates/renovate-core/src/versioning/apk.rs:382`](../../../../../crates/renovate-core/src/versioning/apk.rs#L382) | ported |
 

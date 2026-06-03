@@ -2,9 +2,9 @@
 
 [← `cli/_root`](../_by-module/cli/_root.md) · [all modules](../README.md)
 
-**0/1 in-scope tests ported** (1 pending, 0 opt-out) · status: pending
+**1/1 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | starts | pending | — |
+| 10 | starts | ported | [`crates/renovate-cli/tests/cli.rs:59`](../../../../crates/renovate-cli/tests/cli.rs#L59) |
 

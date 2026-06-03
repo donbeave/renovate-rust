@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/azure-rest-api/index.spec.ts`](../../lib/modules/versioning/azure-rest-api/index.spec.ts.md) | 11 | 11 | 0 | 0 | [`crates/renovate-core/src/versioning/azure_rest_api.rs:69`](../../../../../crates/renovate-core/src/versioning/azure_rest_api.rs#L69) | ported |
+| [`lib/modules/versioning/azure-rest-api/index.spec.ts`](../../lib/modules/versioning/azure-rest-api/index.spec.ts.md) | 11 | 11 | 0 | 0 | [`crates/renovate-core/src/versioning/azure_rest_api.rs:70`](../../../../../crates/renovate-core/src/versioning/azure_rest_api.rs#L70) | ported |
 

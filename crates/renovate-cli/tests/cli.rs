@@ -56,7 +56,7 @@ fn unknown_flag_exits_with_usage_error() {
         .code(2);
 }
 
-// Rust-specific: cli behavior test
+// Ported: "starts" — lib/renovate.spec.ts line 10
 #[test]
 fn no_args_succeeds() {
     // No repos means "nothing to do" — must exit 0 with no user-facing stdout.

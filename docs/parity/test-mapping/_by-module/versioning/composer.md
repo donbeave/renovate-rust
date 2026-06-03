@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/composer/index.spec.ts`](../../lib/modules/versioning/composer/index.spec.ts.md) | 18 | 18 | 0 | 0 | [`crates/renovate-core/src/versioning/composer.rs:599`](../../../../../crates/renovate-core/src/versioning/composer.rs#L599) | ported |
+| [`lib/modules/versioning/composer/index.spec.ts`](../../lib/modules/versioning/composer/index.spec.ts.md) | 18 | 18 | 0 | 0 | [`crates/renovate-core/src/versioning/composer.rs:600`](../../../../../crates/renovate-core/src/versioning/composer.rs#L600) | ported |
 

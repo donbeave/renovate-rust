@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/redhat/index.spec.ts`](../../lib/modules/versioning/redhat/index.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/versioning/redhat.rs:58`](../../../../../crates/renovate-core/src/versioning/redhat.rs#L58) | ported |
+| [`lib/modules/versioning/redhat/index.spec.ts`](../../lib/modules/versioning/redhat/index.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/versioning/redhat.rs:57`](../../../../../crates/renovate-core/src/versioning/redhat.rs#L57) | ported |
 

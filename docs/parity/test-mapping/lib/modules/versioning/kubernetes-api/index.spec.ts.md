@@ -12,5 +12,5 @@
 | 54 | _(it.each / template — verify manually)_ | ? | — |
 | 81 | _(it.each / template — verify manually)_ | ? | — |
 | 100 | _(it.each / template — verify manually)_ | ? | — |
-| 116 | sorts versions in an ascending order | ported | [`crates/renovate-core/src/versioning/kubernetes_api.rs:255`](../../../../../../../crates/renovate-core/src/versioning/kubernetes_api.rs#L255) |
+| 116 | sorts versions in an ascending order | ported | [`crates/renovate-core/src/versioning/kubernetes_api.rs:256`](../../../../../../../crates/renovate-core/src/versioning/kubernetes_api.rs#L256) |
 

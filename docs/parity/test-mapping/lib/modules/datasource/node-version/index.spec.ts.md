@@ -6,7 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 9 | throws for 500 | ported | [`crates/renovate-core/src/datasources/node_version.rs:172`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L172) |
-| 19 | returns null for error | ported | [`crates/renovate-core/src/datasources/node_version.rs:188`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L188) |
+| 9 | throws for 500 | ported | [`crates/renovate-core/src/datasources/node_version.rs:171`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L171) |
+| 19 | returns null for error | ported | [`crates/renovate-core/src/datasources/node_version.rs:186`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L186) |
 | 32 | returns null for empty 200 ok | ported | [`crates/renovate-core/src/datasources/node_version.rs:127`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L127) |
 | 42 | processes real data | ported | [`crates/renovate-core/src/datasources/node_version.rs:135`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L135) |
+

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/deno/index.spec.ts`](../../lib/modules/versioning/deno/index.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/versioning/deno.rs:42`](../../../../../crates/renovate-core/src/versioning/deno.rs#L42) | ported |
+| [`lib/modules/versioning/deno/index.spec.ts`](../../lib/modules/versioning/deno/index.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/versioning/deno.rs:43`](../../../../../crates/renovate-core/src/versioning/deno.rs#L43) | ported |
 

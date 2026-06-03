@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/unity3d-packages/index.spec.ts`](../../lib/modules/versioning/unity3d-packages/index.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/versioning/unity3d_packages.rs:133`](../../../../../crates/renovate-core/src/versioning/unity3d_packages.rs#L133) | ported |
+| [`lib/modules/versioning/unity3d-packages/index.spec.ts`](../../lib/modules/versioning/unity3d-packages/index.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/versioning/unity3d_packages.rs:134`](../../../../../crates/renovate-core/src/versioning/unity3d_packages.rs#L134) | ported |
 

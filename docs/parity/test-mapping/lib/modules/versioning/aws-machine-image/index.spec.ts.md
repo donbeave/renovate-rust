@@ -6,14 +6,14 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | should return 1.0.0 | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:44`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L44) |
-| 13 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:52`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L52) |
-| 17 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:58`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L58) |
-| 23 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:52`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L52) |
-| 27 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:58`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L58) |
-| 33 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:52`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L52) |
-| 37 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:58`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L58) |
-| 43 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:52`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L52) |
-| 49 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:58`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L58) |
-| 55 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:52`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L52) |
+| 5 | should return 1.0.0 | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:45`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L45) |
+| 13 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:53`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L53) |
+| 17 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:59`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L59) |
+| 23 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:53`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L53) |
+| 27 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:59`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L59) |
+| 33 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:53`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L53) |
+| 37 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:59`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L59) |
+| 43 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:53`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L53) |
+| 49 | should return false | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:59`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L59) |
+| 55 | should return true | ported | [`crates/renovate-core/src/versioning/aws_machine_image.rs:53`](../../../../../../../crates/renovate-core/src/versioning/aws_machine_image.rs#L53) |
 

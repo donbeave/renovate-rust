@@ -6,19 +6,19 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 13 | returns null for invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1152`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1152) |
-| 18 | parses version | ported | [`crates/renovate-core/src/versioning/nuget.rs:1159`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1159) |
-| 32 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1177`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1177) |
+| 13 | returns null for invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1156`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1156) |
+| 18 | parses version | ported | [`crates/renovate-core/src/versioning/nuget.rs:1163`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1163) |
+| 32 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1181`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1181) |
 | 39 | _(it.each / template — verify manually)_ | ? | — |
 | 78 | _(it.each / template — verify manually)_ | ? | — |
-| 115 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1177`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1177) |
-| 123 | parses exact range | ported | [`crates/renovate-core/src/versioning/nuget.rs:1462`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1462) |
-| 137 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1177`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1177) |
-| 147 | parses range without lower bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1494`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1494) |
-| 157 | parses range without upper bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1515`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1515) |
+| 115 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1181`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1181) |
+| 123 | parses exact range | ported | [`crates/renovate-core/src/versioning/nuget.rs:1466`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1466) |
+| 137 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1181`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1181) |
+| 147 | parses range without lower bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1498`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1498) |
+| 157 | parses range without upper bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1519`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1519) |
 | 168 | _(it.each / template — verify manually)_ | ? | — |
-| 185 | handles whitespaces | ported | [`crates/renovate-core/src/versioning/nuget.rs:1575`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1575) |
-| 195 | handles floating ranges as lower bounds | ported | [`crates/renovate-core/src/versioning/nuget.rs:1603`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1603) |
+| 185 | handles whitespaces | ported | [`crates/renovate-core/src/versioning/nuget.rs:1579`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1579) |
+| 195 | handles floating ranges as lower bounds | ported | [`crates/renovate-core/src/versioning/nuget.rs:1607`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1607) |
 | 224 | _(it.each / template — verify manually)_ | ? | — |
 | 242 | _(it.each / template — verify manually)_ | ? | — |
 

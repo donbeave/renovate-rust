@@ -10,7 +10,7 @@
 | 106 | _(it.each / template — verify manually)_ | ? | — |
 | 203 | _(it.each / template — verify manually)_ | ? | — |
 | 226 | _(it.each / template — verify manually)_ | ? | — |
-| 454 | should tokenize | ported | [`crates/renovate-core/src/versioning/maven.rs:1579`](../../../../../../../crates/renovate-core/src/versioning/maven.rs#L1579) |
+| 454 | should tokenize | ported | [`crates/renovate-core/src/versioning/maven.rs:1581`](../../../../../../../crates/renovate-core/src/versioning/maven.rs#L1581) |
 | 463 | _(it.each / template — verify manually)_ | ? | — |
 | 478 | _(it.each / template — verify manually)_ | ? | — |
 | 490 | _(it.each / template — verify manually)_ | ? | — |

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/lambda-node/index.spec.ts`](../../lib/modules/versioning/lambda-node/index.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/versioning/lambda_node.rs:81`](../../../../../crates/renovate-core/src/versioning/lambda_node.rs#L81) | ported |
+| [`lib/modules/versioning/lambda-node/index.spec.ts`](../../lib/modules/versioning/lambda-node/index.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/versioning/lambda_node.rs:83`](../../../../../crates/renovate-core/src/versioning/lambda_node.rs#L83) | ported |
 

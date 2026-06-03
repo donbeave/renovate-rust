@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/kubernetes-api/index.spec.ts`](../../lib/modules/versioning/kubernetes-api/index.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/versioning/kubernetes_api.rs:158`](../../../../../crates/renovate-core/src/versioning/kubernetes_api.rs#L158) | ported |
+| [`lib/modules/versioning/kubernetes-api/index.spec.ts`](../../lib/modules/versioning/kubernetes-api/index.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/versioning/kubernetes_api.rs:159`](../../../../../crates/renovate-core/src/versioning/kubernetes_api.rs#L159) | ported |
 
