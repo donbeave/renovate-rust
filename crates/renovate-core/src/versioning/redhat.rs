@@ -1,7 +1,6 @@
-//! Red Hat versioning.
+//! @parity lib/modules/versioning/redhat/index.ts full
 //!
-//! Renovate reference:
-//! - `lib/modules/versioning/redhat/index.ts`
+//! Red Hat versioning.
 
 use std::sync::LazyLock;
 
