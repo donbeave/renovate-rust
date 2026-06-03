@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/go-mod-directive/index.ts full
 //! Go Modules Directive versioning.
 //!
 //! Ports `lib/modules/versioning/go-mod-directive/index.ts`.
