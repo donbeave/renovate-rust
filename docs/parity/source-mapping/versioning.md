@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 34/96 in-scope files mapped (full=34 partial=0 stub=0 pending=62 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 36/96 in-scope files mapped (full=36 partial=0 stub=0 pending=60 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -202,8 +202,8 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/maven/compare.ts` | pending | — | — |
-| `lib/modules/versioning/maven/index.ts` | pending | — | — |
+| `lib/modules/versioning/maven/compare.ts` | full | [`crates/renovate-core/src/versioning/maven.rs`](../../../crates/renovate-core/src/versioning/maven.rs) | — |
+| `lib/modules/versioning/maven/index.ts` | full | [`crates/renovate-core/src/versioning/maven.rs`](../../../crates/renovate-core/src/versioning/maven.rs) | — |
 
 ### `versioning/nixpkgs`
 

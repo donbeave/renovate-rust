@@ -1,4 +1,6 @@
 //! Maven versioning and update-decision logic.
+//! @parity lib/modules/versioning/maven/compare.ts full
+//! @parity lib/modules/versioning/maven/index.ts full
 //!
 //! Ports the comparison algorithm from Renovate's
 //! `lib/modules/versioning/maven/compare.ts`, which itself follows the
