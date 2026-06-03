@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 9 | returns tags from code.forgejo.org | ported | `crates/renovate-core/src/datasources/forgejo_tags.rs:50` |
-| 129 | returns tags from codeberg.org | ported | `crates/renovate-core/src/datasources/forgejo_tags.rs:79` |
-| 214 | returns commits from codeberg.org | ported | `crates/renovate-core/src/datasources/forgejo_tags.rs:109` |
-| 261 | returns null from code.forgejo.org when no commits found | ported | `crates/renovate-core/src/datasources/forgejo_tags.rs:131` |
-| 277 | returns tags commit hash from code.forgejo.org | ported | `crates/renovate-core/src/datasources/forgejo_tags.rs:148` |
+| 9 | returns tags from code.forgejo.org | ported | [`crates/renovate-core/src/datasources/forgejo_tags.rs:50`](../../../../../../../crates/renovate-core/src/datasources/forgejo_tags.rs#L50) |
+| 129 | returns tags from codeberg.org | ported | [`crates/renovate-core/src/datasources/forgejo_tags.rs:79`](../../../../../../../crates/renovate-core/src/datasources/forgejo_tags.rs#L79) |
+| 214 | returns commits from codeberg.org | ported | [`crates/renovate-core/src/datasources/forgejo_tags.rs:109`](../../../../../../../crates/renovate-core/src/datasources/forgejo_tags.rs#L109) |
+| 261 | returns null from code.forgejo.org when no commits found | ported | [`crates/renovate-core/src/datasources/forgejo_tags.rs:131`](../../../../../../../crates/renovate-core/src/datasources/forgejo_tags.rs#L131) |
+| 277 | returns tags commit hash from code.forgejo.org | ported | [`crates/renovate-core/src/datasources/forgejo_tags.rs:148`](../../../../../../../crates/renovate-core/src/datasources/forgejo_tags.rs#L148) |
 

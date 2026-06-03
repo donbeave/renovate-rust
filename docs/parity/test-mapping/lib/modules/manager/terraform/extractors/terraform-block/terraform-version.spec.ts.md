@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | return empty array if no terraform block is found | ported | `crates/renovate-core/src/extractors/terraform.rs:3108` |
+| 6 | return empty array if no terraform block is found | ported | [`crates/renovate-core/src/extractors/terraform.rs:3108`](../../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3108) |
 

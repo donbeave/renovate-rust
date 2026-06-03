@@ -567,6 +567,25 @@ fn rel_link(from: &str, to: &str) -> String {
     parts.join("/")
 }
 
+/// Markdown link from a mapping page to a Rust file in the repo, at an optional
+/// line (`#L<n>` anchor so a click lands on the exact line). `page_in_tree` is
+/// the page path relative to the mapping root; `rust_file` is relative to
+/// `crates/`. The href is relative to the repo so it resolves on GitHub and
+/// locally.
+fn rust_link(page_in_tree: &str, rust_file: &str, line: Option<usize>) -> String {
+    let page_repo = format!("{MAPPING_DIR}/{page_in_tree}");
+    let target_repo = format!("crates/{rust_file}");
+    let mut href = rel_link(&page_repo, &target_repo);
+    let label = match line {
+        Some(l) => {
+            href.push_str(&format!("#L{l}"));
+            format!("crates/{rust_file}:{l}")
+        }
+        None => format!("crates/{rust_file}"),
+    };
+    format!("[`{label}`]({href})")
+}
+
 fn module_page_path(module: &str) -> String {
     format!("_by-module/{module}.md")
 }
@@ -640,9 +659,10 @@ fn render_readme(by_module: &BTreeMap<&str, Vec<&SpecStat>>, deleted: &[Deleted]
                 DeleteReason::FileGone => "spec file removed/moved",
                 DeleteReason::TestRemoved => "test removed/renamed",
             };
+            let dest = rust_link("README.md", &d.rust_file, Some(d.rust_line));
             out.push_str(&format!(
-                "| `crates/{}:{}` \"{}\" | `{}` | {} |\n",
-                d.rust_file, d.rust_line, d.desc, d.spec_ref, reason
+                "| {} \"{}\" | `{}` | {} |\n",
+                dest, d.desc, d.spec_ref, reason
             ));
         }
         out.push('\n');
@@ -675,7 +695,7 @@ fn render_module_page(module: &str, grp: &[&SpecStat], mpath: &str) -> String {
         } else {
             s.rust_files
                 .iter()
-                .map(|f| format!("`crates/{f}`"))
+                .map(|f| rust_link(mpath, f, None))
                 .collect::<Vec<_>>()
                 .join("<br>")
         };
@@ -724,9 +744,10 @@ fn render_spec_page(
             Some(d) => {
                 let raw = d.replace('|', "\\|");
                 match dest.get(&(rel.clone(), d.clone())) {
-                    Some((rf, rl)) => out.push_str(&format!(
-                        "| {line} | {raw} | ported | `crates/{rf}:{rl}` |\n"
-                    )),
+                    Some((rf, rl)) => {
+                        let link = rust_link(spath, rf, Some(*rl));
+                        out.push_str(&format!("| {line} | {raw} | ported | {link} |\n"));
+                    }
                     None => out.push_str(&format!("| {line} | {raw} | pending | — |\n")),
                 }
             }

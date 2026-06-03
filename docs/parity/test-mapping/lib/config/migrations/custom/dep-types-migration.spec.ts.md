@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should only add deptypes to packagerules | ported | `crates/renovate-core/src/config/migrate_validate.rs:5477` |
+| 4 | should only add deptypes to packagerules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5477`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5477) |
 

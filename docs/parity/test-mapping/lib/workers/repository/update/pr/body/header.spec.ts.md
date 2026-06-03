@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | renders empty header | ported | `crates/renovate-core/src/branch.rs:2554` |
-| 19 | renders prheader | ported | `crates/renovate-core/src/branch.rs:2560` |
+| 8 | renders empty header | ported | [`crates/renovate-core/src/branch.rs:2554`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2554) |
+| 19 | renders prheader | ported | [`crates/renovate-core/src/branch.rs:2560`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2560) |
 

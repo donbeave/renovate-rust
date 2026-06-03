@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/clojure/index.spec.ts`](../../lib/modules/datasource/clojure/index.spec.ts.md) | 9 | 9 | 0 | `crates/renovate-core/src/datasources/clojure.rs` | ported |
+| [`lib/modules/datasource/clojure/index.spec.ts`](../../lib/modules/datasource/clojure/index.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/datasources/clojure.rs`](../../../../../crates/renovate-core/src/datasources/clojure.rs) | ported |
 

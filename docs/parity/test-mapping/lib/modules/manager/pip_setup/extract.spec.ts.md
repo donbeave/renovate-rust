@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 11 | returns found deps | ported | `crates/renovate-core/src/extractors/pip_setup.rs:124` |
-| 41 | returns nothing | ported | `crates/renovate-core/src/extractors/pip_setup.rs:171` |
+| 11 | returns found deps | ported | [`crates/renovate-core/src/extractors/pip_setup.rs:124`](../../../../../../../crates/renovate-core/src/extractors/pip_setup.rs#L124) |
+| 41 | returns nothing | ported | [`crates/renovate-core/src/extractors/pip_setup.rs:171`](../../../../../../../crates/renovate-core/src/extractors/pip_setup.rs#L171) |
 

@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns replace if currentvalue not null | ported | `crates/renovate-core/src/extractors/nix.rs:1794` |
-| 13 | defaults to update-lockfile | ported | `crates/renovate-core/src/extractors/nix.rs:1800` |
+| 5 | returns replace if currentvalue not null | ported | [`crates/renovate-core/src/extractors/nix.rs:1794`](../../../../../../../crates/renovate-core/src/extractors/nix.rs#L1794) |
+| 13 | defaults to update-lockfile | ported | [`crates/renovate-core/src/extractors/nix.rs:1800`](../../../../../../../crates/renovate-core/src/extractors/nix.rs#L1800) |
 

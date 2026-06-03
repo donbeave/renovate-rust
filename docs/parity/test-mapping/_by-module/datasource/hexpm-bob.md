@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/hexpm-bob/index.spec.ts`](../../lib/modules/datasource/hexpm-bob/index.spec.ts.md) | 9 | 9 | 0 | `crates/renovate-core/src/datasources/hexpm_bob.rs` | ported |
+| [`lib/modules/datasource/hexpm-bob/index.spec.ts`](../../lib/modules/datasource/hexpm-bob/index.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/datasources/hexpm_bob.rs`](../../../../../crates/renovate-core/src/datasources/hexpm_bob.rs) | ported |
 

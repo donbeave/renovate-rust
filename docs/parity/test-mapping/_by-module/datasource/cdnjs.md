@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/cdnjs/index.spec.ts`](../../lib/modules/datasource/cdnjs/index.spec.ts.md) | 14 | 13 | 1 | `crates/renovate-core/src/datasources/cdnjs.rs` | partial |
+| [`lib/modules/datasource/cdnjs/index.spec.ts`](../../lib/modules/datasource/cdnjs/index.spec.ts.md) | 14 | 13 | 1 | [`crates/renovate-core/src/datasources/cdnjs.rs`](../../../../../crates/renovate-core/src/datasources/cdnjs.rs) | partial |
 

@@ -6,12 +6,12 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | returns null for empty string | ported | `crates/renovate-core/src/extractors/homebrew.rs:883` |
+| 8 | returns null for empty string | ported | [`crates/renovate-core/src/extractors/homebrew.rs:883`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L883) |
 | 12 | _(it.each / template — verify manually)_ | ? | — |
-| 19 | parses valid releases url | ported | `crates/renovate-core/src/extractors/homebrew.rs:889` |
-| 33 | parses valid archive url | ported | `crates/renovate-core/src/extractors/homebrew.rs:902` |
-| 49 | uses original version when semver.coerce fails | ported | `crates/renovate-core/src/extractors/homebrew.rs:915` |
-| 66 | uses coerced version for filename when semver succeeds | ported | `crates/renovate-core/src/extractors/homebrew.rs:936` |
-| 85 | creates dependency with github-releases datasource for releases url | ported | `crates/renovate-core/src/extractors/homebrew.rs:955` |
-| 107 | creates dependency with github-tags datasource for archive url | ported | `crates/renovate-core/src/extractors/homebrew.rs:974` |
+| 19 | parses valid releases url | ported | [`crates/renovate-core/src/extractors/homebrew.rs:889`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L889) |
+| 33 | parses valid archive url | ported | [`crates/renovate-core/src/extractors/homebrew.rs:902`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L902) |
+| 49 | uses original version when semver.coerce fails | ported | [`crates/renovate-core/src/extractors/homebrew.rs:915`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L915) |
+| 66 | uses coerced version for filename when semver succeeds | ported | [`crates/renovate-core/src/extractors/homebrew.rs:936`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L936) |
+| 85 | creates dependency with github-releases datasource for releases url | ported | [`crates/renovate-core/src/extractors/homebrew.rs:955`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L955) |
+| 107 | creates dependency with github-tags datasource for archive url | ported | [`crates/renovate-core/src/extractors/homebrew.rs:974`](../../../../../../../../crates/renovate-core/src/extractors/homebrew.rs#L974) |
 

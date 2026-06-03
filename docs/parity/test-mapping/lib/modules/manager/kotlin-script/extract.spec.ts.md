@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 12 | extracts dependencies in a generic case | ported | `crates/renovate-core/src/extractors/kotlin_script.rs:69` |
-| 43 | detects custom repository definitions | ported | `crates/renovate-core/src/extractors/kotlin_script.rs:94` |
-| 71 | no dependencies | ported | `crates/renovate-core/src/extractors/kotlin_script.rs:106` |
-| 81 | skips dependencies with missing parts | ported | `crates/renovate-core/src/extractors/kotlin_script.rs:160` |
+| 12 | extracts dependencies in a generic case | ported | [`crates/renovate-core/src/extractors/kotlin_script.rs:69`](../../../../../../../crates/renovate-core/src/extractors/kotlin_script.rs#L69) |
+| 43 | detects custom repository definitions | ported | [`crates/renovate-core/src/extractors/kotlin_script.rs:94`](../../../../../../../crates/renovate-core/src/extractors/kotlin_script.rs#L94) |
+| 71 | no dependencies | ported | [`crates/renovate-core/src/extractors/kotlin_script.rs:106`](../../../../../../../crates/renovate-core/src/extractors/kotlin_script.rs#L106) |
+| 81 | skips dependencies with missing parts | ported | [`crates/renovate-core/src/extractors/kotlin_script.rs:160`](../../../../../../../crates/renovate-core/src/extractors/kotlin_script.rs#L160) |
 

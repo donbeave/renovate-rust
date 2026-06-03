@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 10 | detects already updated | ported | `crates/renovate-core/src/extractors/composer.rs:1107` |
-| 22 | returns unsupported | ported | `crates/renovate-core/src/extractors/composer.rs:1118` |
+| 10 | detects already updated | ported | [`crates/renovate-core/src/extractors/composer.rs:1107`](../../../../../../../crates/renovate-core/src/extractors/composer.rs#L1107) |
+| 22 | returns unsupported | ported | [`crates/renovate-core/src/extractors/composer.rs:1118`](../../../../../../../crates/renovate-core/src/extractors/composer.rs#L1118) |
 

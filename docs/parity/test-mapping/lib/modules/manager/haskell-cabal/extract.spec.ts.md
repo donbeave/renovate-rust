@@ -10,6 +10,6 @@
 | 45 | _(it.each / template — verify manually)_ | ? | — |
 | 62 | _(it.each / template — verify manually)_ | ? | — |
 | 75 | _(it.each / template — verify manually)_ | ? | — |
-| 95 | trims replacestring | ported | `crates/renovate-core/src/extractors/cabal.rs:502` |
-| 105 | strips comments | ported | `crates/renovate-core/src/extractors/cabal.rs:525` |
+| 95 | trims replacestring | ported | [`crates/renovate-core/src/extractors/cabal.rs:502`](../../../../../../../crates/renovate-core/src/extractors/cabal.rs#L502) |
+| 105 | strips comments | ported | [`crates/renovate-core/src/extractors/cabal.rs:525`](../../../../../../../crates/renovate-core/src/extractors/cabal.rs#L525) |
 

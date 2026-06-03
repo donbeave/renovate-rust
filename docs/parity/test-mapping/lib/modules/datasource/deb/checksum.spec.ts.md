@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 27 | parses the checksum for the specified package | ported | `crates/renovate-core/src/datasources/deb.rs:131` |
-| 47 | computes the checksum of a file | ported | `crates/renovate-core/src/datasources/deb.rs:150` |
-| 56 | should fail if there is an error in the stream | ported | `crates/renovate-core/src/datasources/deb.rs:163` |
+| 27 | parses the checksum for the specified package | ported | [`crates/renovate-core/src/datasources/deb.rs:131`](../../../../../../../crates/renovate-core/src/datasources/deb.rs#L131) |
+| 47 | computes the checksum of a file | ported | [`crates/renovate-core/src/datasources/deb.rs:150`](../../../../../../../crates/renovate-core/src/datasources/deb.rs#L150) |
+| 56 | should fail if there is an error in the stream | ported | [`crates/renovate-core/src/datasources/deb.rs:163`](../../../../../../../crates/renovate-core/src/datasources/deb.rs#L163) |
 

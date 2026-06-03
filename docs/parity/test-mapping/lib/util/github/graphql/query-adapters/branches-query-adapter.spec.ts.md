@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | transforms commit type | ported | `crates/renovate-core/src/platform/github.rs:3675` |
-| 23 | returns null for invalid input | ported | `crates/renovate-core/src/platform/github.rs:3690` |
+| 5 | transforms commit type | ported | [`crates/renovate-core/src/platform/github.rs:3675`](../../../../../../../../crates/renovate-core/src/platform/github.rs#L3675) |
+| 23 | returns null for invalid input | ported | [`crates/renovate-core/src/platform/github.rs:3690`](../../../../../../../../crates/renovate-core/src/platform/github.rs#L3690) |
 

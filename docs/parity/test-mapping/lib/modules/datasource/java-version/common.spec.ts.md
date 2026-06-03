@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 10 | no os and architecture | ported | `crates/renovate-core/src/datasources/java_version.rs:374` |
-| 74 | logs for unsupported os and architecture | ported | `crates/renovate-core/src/datasources/java_version.rs:383` |
+| 10 | no os and architecture | ported | [`crates/renovate-core/src/datasources/java_version.rs:374`](../../../../../../../crates/renovate-core/src/datasources/java_version.rs#L374) |
+| 74 | logs for unsupported os and architecture | ported | [`crates/renovate-core/src/datasources/java_version.rs:383`](../../../../../../../crates/renovate-core/src/datasources/java_version.rs#L383) |
 

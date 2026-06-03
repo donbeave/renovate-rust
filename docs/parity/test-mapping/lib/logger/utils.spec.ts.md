@@ -8,7 +8,7 @@
 |--:|---|---|---|
 | 11 | _(it.each / template — verify manually)_ | ? | — |
 | 26 | sanitizes boxed string objects as strings | pending | — |
-| 39 | preserves secret template strings in redacted fields | ported | `crates/renovate-core/src/util.rs:5945` |
+| 39 | preserves secret template strings in redacted fields | ported | [`crates/renovate-core/src/util.rs:5945`](../../../../../crates/renovate-core/src/util.rs#L5945) |
 | 90 | preparezodissues | pending | — |
 | 178 | prepareerror | pending | — |
 | 203 | handles http timout error | pending | — |

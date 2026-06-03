@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | defaults tools to empty object when [tools] is absent | ported | `crates/renovate-core/src/extractors/mise.rs:1734` |
-| 13 | defaults tools to empty object for empty toml | ported | `crates/renovate-core/src/extractors/mise.rs:1742` |
-| 17 | parses [tools] when present | ported | `crates/renovate-core/src/extractors/mise.rs:1750` |
+| 6 | defaults tools to empty object when [tools] is absent | ported | [`crates/renovate-core/src/extractors/mise.rs:1734`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1734) |
+| 13 | defaults tools to empty object for empty toml | ported | [`crates/renovate-core/src/extractors/mise.rs:1742`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1742) |
+| 17 | parses [tools] when present | ported | [`crates/renovate-core/src/extractors/mise.rs:1750`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1750) |
 

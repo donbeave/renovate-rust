@@ -14,8 +14,8 @@
 | 100 | empty lock file | pending | — |
 | 105 | deno datasource remoteversions | pending | — |
 | 122 | deno datasource redirects | pending | — |
-| 139 | get exact lockedversion | ported | `crates/renovate-core/src/extractors/deno.rs:1008` |
-| 155 | get latest lockedversion | ported | `crates/renovate-core/src/extractors/deno.rs:1029` |
+| 139 | get exact lockedversion | ported | [`crates/renovate-core/src/extractors/deno.rs:1008`](../../../../../../../crates/renovate-core/src/extractors/deno.rs#L1008) |
+| 155 | get latest lockedversion | ported | [`crates/renovate-core/src/extractors/deno.rs:1029`](../../../../../../../crates/renovate-core/src/extractors/deno.rs#L1029) |
 | 171 | get intersects lockedversion | pending | — |
 | 189 | gets lockedversion for npm package names containing dots | pending | — |
 | 206 | invalid lock file content | pending | — |
@@ -28,8 +28,8 @@
 | 445 | should handle deno datasource with no depname | pending | — |
 | 458 | should handle jsr datasource with no lockedversions | pending | — |
 | 472 | should apply locked versions from lock files | pending | — |
-| 506 | should handle lock file with no lockfiles | ported | `crates/renovate-core/src/extractors/deno.rs:1101` |
-| 532 | should use lock file cache for multiple packages | ported | `crates/renovate-core/src/extractors/deno.rs:1121` |
+| 506 | should handle lock file with no lockfiles | ported | [`crates/renovate-core/src/extractors/deno.rs:1101`](../../../../../../../crates/renovate-core/src/extractors/deno.rs#L1101) |
+| 532 | should use lock file cache for multiple packages | ported | [`crates/renovate-core/src/extractors/deno.rs:1121`](../../../../../../../crates/renovate-core/src/extractors/deno.rs#L1121) |
 | 585 | should handle deno datasource with empty redirectversions | pending | — |
 | 599 | should handle deno datasource with currentvalue and depname for redirects | pending | — |
 | 616 | should handle dep without lockedversion match | pending | — |

@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | compresses strings | ported | `crates/renovate-core/src/util.rs:12203` |
+| 4 | compresses strings | ported | [`crates/renovate-core/src/util.rs:12203`](../../../../../crates/renovate-core/src/util.rs#L12203) |
 

@@ -16,11 +16,11 @@
 | 347 | _(it.each / template — verify manually)_ | ? | — |
 | 392 | _(it.each / template — verify manually)_ | ? | — |
 | 420 | _(it.each / template — verify manually)_ | ? | — |
-| 435 | returns a pinned value | ported | `crates/renovate-core/src/versioning/nuget.rs:2146` |
-| 441 | returns newversion if the range is version too | ported | `crates/renovate-core/src/versioning/nuget.rs:2156` |
-| 451 | returns null if version is invalid | ported | `crates/renovate-core/src/versioning/nuget.rs:2165` |
-| 461 | returns null if range is invalid | ported | `crates/renovate-core/src/versioning/nuget.rs:2171` |
-| 472 | returns the new version | ported | `crates/renovate-core/src/versioning/nuget.rs:2177` |
+| 435 | returns a pinned value | ported | [`crates/renovate-core/src/versioning/nuget.rs:2146`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2146) |
+| 441 | returns newversion if the range is version too | ported | [`crates/renovate-core/src/versioning/nuget.rs:2156`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2156) |
+| 451 | returns null if version is invalid | ported | [`crates/renovate-core/src/versioning/nuget.rs:2165`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2165) |
+| 461 | returns null if range is invalid | ported | [`crates/renovate-core/src/versioning/nuget.rs:2171`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2171) |
+| 472 | returns the new version | ported | [`crates/renovate-core/src/versioning/nuget.rs:2177`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2177) |
 | 478 | _(it.each / template — verify manually)_ | ? | — |
 | 522 | _(it.each / template — verify manually)_ | ? | — |
 | 547 | _(it.each / template — verify manually)_ | ? | — |

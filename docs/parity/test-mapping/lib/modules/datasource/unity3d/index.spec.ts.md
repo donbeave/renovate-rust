@@ -7,12 +7,12 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 52 | _(it.each / template — verify manually)_ | ? | — |
-| 88 | returns tech if requested | ported | `crates/renovate-core/src/datasources/unity3d.rs:323` |
-| 120 | returns alpha if requested | ported | `crates/renovate-core/src/datasources/unity3d.rs:340` |
+| 88 | returns tech if requested | ported | [`crates/renovate-core/src/datasources/unity3d.rs:323`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L323) |
+| 120 | returns alpha if requested | ported | [`crates/renovate-core/src/datasources/unity3d.rs:340`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L340) |
 | 152 | _(it.each / template — verify manually)_ | ? | — |
-| 187 | returns lts releases by default | ported | `crates/renovate-core/src/datasources/unity3d.rs:374` |
-| 235 | returns hash if requested | ported | `crates/renovate-core/src/datasources/unity3d.rs:388` |
-| 258 | returns no hash if not requested | ported | `crates/renovate-core/src/datasources/unity3d.rs:401` |
-| 281 | returns only lts by default | ported | `crates/renovate-core/src/datasources/unity3d.rs:414` |
-| 306 | uses pagination | ported | `crates/renovate-core/src/datasources/unity3d.rs:435` |
+| 187 | returns lts releases by default | ported | [`crates/renovate-core/src/datasources/unity3d.rs:374`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L374) |
+| 235 | returns hash if requested | ported | [`crates/renovate-core/src/datasources/unity3d.rs:388`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L388) |
+| 258 | returns no hash if not requested | ported | [`crates/renovate-core/src/datasources/unity3d.rs:401`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L401) |
+| 281 | returns only lts by default | ported | [`crates/renovate-core/src/datasources/unity3d.rs:414`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L414) |
+| 306 | uses pagination | ported | [`crates/renovate-core/src/datasources/unity3d.rs:435`](../../../../../../../crates/renovate-core/src/datasources/unity3d.rs#L435) |
 

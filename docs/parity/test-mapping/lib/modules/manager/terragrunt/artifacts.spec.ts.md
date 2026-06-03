@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 40 | calls terraform updateartifacts if the update type is lockfilemaintenance | ported | `crates/renovate-core/src/extractors/terragrunt.rs:584` |
+| 40 | calls terraform updateartifacts if the update type is lockfilemaintenance | ported | [`crates/renovate-core/src/extractors/terragrunt.rs:584`](../../../../../../../crates/renovate-core/src/extractors/terragrunt.rs#L584) |
 | 58 | _(it.each / template — verify manually)_ | ? | — |
 

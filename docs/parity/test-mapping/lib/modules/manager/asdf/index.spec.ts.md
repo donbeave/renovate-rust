@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 22 | contains ${datasource} | ported | `crates/renovate-core/src/extractors/asdf.rs:1856` |
+| 22 | contains ${datasource} | ported | [`crates/renovate-core/src/extractors/asdf.rs:1856`](../../../../../../../crates/renovate-core/src/extractors/asdf.rs#L1856) |
 

@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 7 | should return false when filename does not start with pwd | ported | `crates/renovate-core/src/extractors/npm.rs:4749` |
-| 14 | should correctly evaluate filename when it starts with pwd | ported | `crates/renovate-core/src/extractors/npm.rs:4756` |
-| 30 | should filter files matching workspaces and pwd | ported | `crates/renovate-core/src/extractors/npm.rs:4763` |
+| 7 | should return false when filename does not start with pwd | ported | [`crates/renovate-core/src/extractors/npm.rs:4749`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4749) |
+| 14 | should correctly evaluate filename when it starts with pwd | ported | [`crates/renovate-core/src/extractors/npm.rs:4756`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4756) |
+| 30 | should filter files matching workspaces and pwd | ported | [`crates/renovate-core/src/extractors/npm.rs:4763`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4763) |
 

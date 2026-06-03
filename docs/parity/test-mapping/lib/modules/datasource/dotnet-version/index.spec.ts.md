@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 18 | returns null for non-dotnet package | ported | `crates/renovate-core/src/datasources/dotnet_version.rs:210` |
+| 18 | returns null for non-dotnet package | ported | [`crates/renovate-core/src/datasources/dotnet_version.rs:210`](../../../../../../../crates/renovate-core/src/datasources/dotnet_version.rs#L210) |
 | 27 | returns null for 404 for index | pending | — |
 | 38 | returns null for 404 for version | pending | — |
 | 54 | throws for 5xx for index | pending | — |
 | 65 | throws for 5xx for version | pending | — |
 | 81 | returns null for unknown error for index | pending | — |
 | 92 | returns null for unknown error for version | pending | — |
-| 108 | returns real data for sdk | ported | `crates/renovate-core/src/datasources/dotnet_version.rs:230` |
-| 159 | returns real data for runtime | ported | `crates/renovate-core/src/datasources/dotnet_version.rs:274` |
+| 108 | returns real data for sdk | ported | [`crates/renovate-core/src/datasources/dotnet_version.rs:230`](../../../../../../../crates/renovate-core/src/datasources/dotnet_version.rs#L230) |
+| 159 | returns real data for runtime | ported | [`crates/renovate-core/src/datasources/dotnet_version.rs:274`](../../../../../../../crates/renovate-core/src/datasources/dotnet_version.rs#L274) |
 

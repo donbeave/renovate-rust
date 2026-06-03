@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 26 | trimtrailingapipath | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:121` |
-| 45 | should abort when endpoint is not valid | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:147` |
+| 26 | trimtrailingapipath | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:121`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L121) |
+| 45 | should abort when endpoint is not valid | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:147`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L147) |
 | 53 | _(it.each / template — verify manually)_ | ? | — |
-| 66 | should return true when repo is usable | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:173` |
-| 70 | should return false when repo lacks permissions | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:179` |
-| 85 | should return false when repo has disabled pull requests | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:202` |
+| 66 | should return true when repo is usable | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:173`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L173) |
+| 70 | should return false when repo lacks permissions | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:179`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L179) |
+| 85 | should return false when repo has disabled pull requests | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:202`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L202) |
 

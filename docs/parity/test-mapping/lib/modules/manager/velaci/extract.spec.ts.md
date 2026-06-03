@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | should handle invalid yaml | ported | `crates/renovate-core/src/extractors/velaci.rs:85` |
-| 11 | should handle yaml without pipeline/images | ported | `crates/renovate-core/src/extractors/velaci.rs:79` |
-| 16 | extracts multiple step pipeline image lines | ported | `crates/renovate-core/src/extractors/velaci.rs:52` |
-| 30 | extracts multiple services pipeline image lines | ported | `crates/renovate-core/src/extractors/velaci.rs:62` |
-| 48 | extracts multiple stages pipeline image lines | ported | `crates/renovate-core/src/extractors/velaci.rs:98` |
-| 62 | extracts multiple secrets pipeline image lines | ported | `crates/renovate-core/src/extractors/velaci.rs:112` |
+| 6 | should handle invalid yaml | ported | [`crates/renovate-core/src/extractors/velaci.rs:85`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L85) |
+| 11 | should handle yaml without pipeline/images | ported | [`crates/renovate-core/src/extractors/velaci.rs:79`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L79) |
+| 16 | extracts multiple step pipeline image lines | ported | [`crates/renovate-core/src/extractors/velaci.rs:52`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L52) |
+| 30 | extracts multiple services pipeline image lines | ported | [`crates/renovate-core/src/extractors/velaci.rs:62`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L62) |
+| 48 | extracts multiple stages pipeline image lines | ported | [`crates/renovate-core/src/extractors/velaci.rs:98`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L98) |
+| 62 | extracts multiple secrets pipeline image lines | ported | [`crates/renovate-core/src/extractors/velaci.rs:112`](../../../../../../../crates/renovate-core/src/extractors/velaci.rs#L112) |
 

@@ -7,9 +7,9 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 112 | returns null for empty result | pending | — |
-| 122 | returns null for missing fields | ported | `crates/renovate-core/src/datasources/hex.rs:168` |
+| 122 | returns null for missing fields | ported | [`crates/renovate-core/src/datasources/hex.rs:168`](../../../../../../../crates/renovate-core/src/datasources/hex.rs#L168) |
 | 135 | returns null for 404 | pending | — |
-| 142 | returns null for 401 | ported | `crates/renovate-core/src/datasources/hex.rs:200` |
+| 142 | returns null for 401 | ported | [`crates/renovate-core/src/datasources/hex.rs:200`](../../../../../../../crates/renovate-core/src/datasources/hex.rs#L200) |
 | 149 | throws for 429 | pending | — |
 | 156 | throws for 5xx | pending | — |
 | 163 | returns null for unknown error | pending | — |

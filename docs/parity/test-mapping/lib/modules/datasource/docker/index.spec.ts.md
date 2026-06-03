@@ -67,14 +67,14 @@
 | 2140 | returns null when the response body does not contain errors | pending | — |
 | 2163 | returns null when the the response errors does not have a message property | pending | — |
 | 2190 | returns null when the the error message does not have the expected max results error | pending | — |
-| 2219 | uses docker hub tags for registry-1.docker.io | ported | `crates/renovate-core/src/datasources/docker_hub.rs:559` |
+| 2219 | uses docker hub tags for registry-1.docker.io | ported | [`crates/renovate-core/src/datasources/docker_hub.rs:559`](../../../../../../../crates/renovate-core/src/datasources/docker_hub.rs#L559) |
 | 2265 | uses custom page limit for docker hub repository tags | pending | — |
-| 2315 | adds library/ prefix for docker hub (implicit) | ported | `crates/renovate-core/src/datasources/docker_hub.rs:353` |
+| 2315 | adds library/ prefix for docker hub (implicit) | ported | [`crates/renovate-core/src/datasources/docker_hub.rs:353`](../../../../../../../crates/renovate-core/src/datasources/docker_hub.rs#L353) |
 | 2343 | adds library/ prefix for docker hub (explicit) | pending | — |
 | 2389 | sets releasetimestamp on digests from docker hub | pending | — |
 | 2440 | adds no library/ prefix for other registries | pending | — |
 | 2466 | returns null on error | pending | — |
-| 2481 | strips trailing slash from registry | ported | `crates/renovate-core/src/datasources/docker_hub.rs:579` |
+| 2481 | strips trailing slash from registry | ported | [`crates/renovate-core/src/datasources/docker_hub.rs:579`](../../../../../../../crates/renovate-core/src/datasources/docker_hub.rs#L579) |
 | 2508 | returns null if no auth | pending | — |
 | 2524 | supports labels | pending | — |
 | 2599 | supports labels - handle missing config prop on blob response | pending | — |

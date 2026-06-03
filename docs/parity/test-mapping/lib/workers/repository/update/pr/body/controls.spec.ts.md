@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | calls getcontrols | ported | `crates/renovate-core/src/branch.rs:2470` |
+| 4 | calls getcontrols | ported | [`crates/renovate-core/src/branch.rs:2470`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2470) |
 

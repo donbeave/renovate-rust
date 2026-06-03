@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 7 | matches the expected output | ported | `crates/renovate-core/src/extractors/bundler.rs:1037` |
+| 7 | matches the expected output | ported | [`crates/renovate-core/src/extractors/bundler.rs:1037`](../../../../../../../crates/renovate-core/src/extractors/bundler.rs#L1037) |
 

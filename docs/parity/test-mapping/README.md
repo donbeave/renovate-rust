@@ -309,14 +309,14 @@ Rust tests whose upstream identity is gone. Kept for review; never auto-removed.
 
 | Rust test | Upstream ref | Reason |
 |---|---|---|
-| `crates/renovate-cli/src/main.rs:1263` "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1284` "rejects dep that was not updated" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1295` "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1311` "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1327` "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1345` "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1363` "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1379` "falls back to string heuristic for unknown managers" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-cli/src/main.rs:1391` "falls back to string heuristic for unknown managers" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
-| `crates/renovate-core/src/http.rs:1645` "returns $expected for status code $statusCode and followRedirect $followRedirect" | `util/http/hooks.spec.ts` | spec file removed/moved |
+| [`crates/renovate-cli/src/main.rs:1263`](../../../crates/renovate-cli/src/main.rs#L1263) "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1284`](../../../crates/renovate-cli/src/main.rs#L1284) "rejects dep that was not updated" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1295`](../../../crates/renovate-cli/src/main.rs#L1295) "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1311`](../../../crates/renovate-cli/src/main.rs#L1311) "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1327`](../../../crates/renovate-cli/src/main.rs#L1327) "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1345`](../../../crates/renovate-cli/src/main.rs#L1345) "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1363`](../../../crates/renovate-cli/src/main.rs#L1363) "confirms dep updated after auto-replace" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1379`](../../../crates/renovate-cli/src/main.rs#L1379) "falls back to string heuristic for unknown managers" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-cli/src/main.rs:1391`](../../../crates/renovate-cli/src/main.rs#L1391) "falls back to string heuristic for unknown managers" | `lib/workers/repository/update/branch/auto-replace.spec.ts` | test removed/renamed |
+| [`crates/renovate-core/src/http.rs:1645`](../../../crates/renovate-core/src/http.rs#L1645) "returns $expected for status code $statusCode and followRedirect $followRedirect" | `util/http/hooks.spec.ts` | spec file removed/moved |
 

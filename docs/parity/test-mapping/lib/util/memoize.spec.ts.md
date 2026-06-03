@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | works | ported | `crates/renovate-core/src/util.rs:5600` |
+| 6 | works | ported | [`crates/renovate-core/src/util.rs:5600`](../../../../../crates/renovate-core/src/util.rs#L5600) |
 

@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | should return 1.23.7 and release version | ported | `crates/renovate-core/src/versioning/aws_eks_addon.rs:155` |
+| 5 | should return 1.23.7 and release version | ported | [`crates/renovate-core/src/versioning/aws_eks_addon.rs:155`](../../../../../../../crates/renovate-core/src/versioning/aws_eks_addon.rs#L155) |
 | 13 | _(it.each / template — verify manually)_ | ? | — |
 | 41 | _(it.each / template — verify manually)_ | ? | — |
 | 67 | _(it.each / template — verify manually)_ | ? | — |
 | 91 | _(it.each / template — verify manually)_ | ? | — |
 | 110 | _(it.each / template — verify manually)_ | ? | — |
-| 129 | getsatisfyingversion | ported | `crates/renovate-core/src/versioning/aws_eks_addon.rs:292` |
+| 129 | getsatisfyingversion | ported | [`crates/renovate-core/src/versioning/aws_eks_addon.rs:292`](../../../../../../../crates/renovate-core/src/versioning/aws_eks_addon.rs#L292) |
 

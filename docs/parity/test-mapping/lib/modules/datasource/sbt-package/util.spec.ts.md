@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | gets latest version | ported | `crates/renovate-core/src/datasources/sbt_package.rs:408` |
+| 4 | gets latest version | ported | [`crates/renovate-core/src/datasources/sbt_package.rs:408`](../../../../../../../crates/renovate-core/src/datasources/sbt_package.rs#L408) |
 

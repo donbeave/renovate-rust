@@ -10,9 +10,9 @@
 | 39 | _(it.each / template — verify manually)_ | ? | — |
 | 61 | _(it.each / template — verify manually)_ | ? | — |
 | 117 | _(it.each / template — verify manually)_ | ? | — |
-| 132 | should throw error because of missing ssh link | ported | `crates/renovate-core/src/platform/scm_manager.rs:222` |
+| 132 | should throw error because of missing ssh link | ported | [`crates/renovate-core/src/platform/scm_manager.rs:222`](../../../../../../../crates/renovate-core/src/platform/scm_manager.rs#L222) |
 | 145 | should throw error because protocol links are not an array | pending | — |
-| 158 | should use the provided ssh link | ported | `crates/renovate-core/src/platform/scm_manager.rs:214` |
+| 158 | should use the provided ssh link | ported | [`crates/renovate-core/src/platform/scm_manager.rs:214`](../../../../../../../crates/renovate-core/src/platform/scm_manager.rs#L214) |
 | 171 | _(it.each / template — verify manually)_ | ? | — |
 | 192 | _(it.each / template — verify manually)_ | ? | — |
 | 213 | _(it.each / template — verify manually)_ | ? | — |

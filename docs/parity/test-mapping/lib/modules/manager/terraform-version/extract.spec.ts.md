@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns a result | ported | `crates/renovate-core/src/extractors/version_file.rs:219` |
-| 18 | skips non ranges | ported | `crates/renovate-core/src/extractors/version_file.rs:234` |
+| 5 | returns a result | ported | [`crates/renovate-core/src/extractors/version_file.rs:219`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L219) |
+| 18 | skips non ranges | ported | [`crates/renovate-core/src/extractors/version_file.rs:234`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L234) |
 

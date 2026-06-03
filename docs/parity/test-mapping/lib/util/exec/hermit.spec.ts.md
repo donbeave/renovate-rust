@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 16 | should return true when binarysource is hermit | ported | `crates/renovate-core/src/exec/hermit.rs:63` |
+| 16 | should return true when binarysource is hermit | ported | [`crates/renovate-core/src/exec/hermit.rs:63`](../../../../../../crates/renovate-core/src/exec/hermit.rs#L63) |
 | 30 | _(it.each / template — verify manually)_ | ? | — |
-| 49 | should throw error when hermit cwd is not found | ported | `crates/renovate-core/src/exec/hermit.rs:77` |
-| 62 | should return hermit environment variables when hermit env returns successfully | ported | `crates/renovate-core/src/exec/hermit.rs:124` |
+| 49 | should throw error when hermit cwd is not found | ported | [`crates/renovate-core/src/exec/hermit.rs:77`](../../../../../../crates/renovate-core/src/exec/hermit.rs#L77) |
+| 62 | should return hermit environment variables when hermit env returns successfully | ported | [`crates/renovate-core/src/exec/hermit.rs:124`](../../../../../../crates/renovate-core/src/exec/hermit.rs#L124) |
 

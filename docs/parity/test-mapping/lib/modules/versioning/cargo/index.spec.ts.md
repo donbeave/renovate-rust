@@ -13,7 +13,7 @@
 | 60 | _(it.each / template — verify manually)_ | ? | — |
 | 71 | _(it.each / template — verify manually)_ | ? | — |
 | 85 | _(it.each / template — verify manually)_ | ? | — |
-| 101 | returns a pinned value | ported | `crates/renovate-core/src/versioning/cargo.rs:1144` |
+| 101 | returns a pinned value | ported | [`crates/renovate-core/src/versioning/cargo.rs:1144`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1144) |
 | 105 | _(it.each / template — verify manually)_ | ? | — |
 | 163 | _(it.each / template — verify manually)_ | ? | — |
 

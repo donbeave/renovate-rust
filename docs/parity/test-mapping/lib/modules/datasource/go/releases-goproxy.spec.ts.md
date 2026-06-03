@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 27 | encodecase | ported | `crates/renovate-core/src/datasources/gomod.rs:278` |
+| 27 | encodecase | ported | [`crates/renovate-core/src/datasources/gomod.rs:278`](../../../../../../../crates/renovate-core/src/datasources/gomod.rs#L278) |
 | 37 | listversions | pending | — |
 | 49 | versioninfo | pending | — |
 | 78 | handles direct | pending | — |

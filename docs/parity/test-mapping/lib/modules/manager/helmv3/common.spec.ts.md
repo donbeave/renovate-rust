@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | should generate a login command with username and password | ported | `crates/renovate-core/src/extractors/helm.rs:544` |
+| 5 | should generate a login command with username and password | ported | [`crates/renovate-core/src/extractors/helm.rs:544`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L544) |
 

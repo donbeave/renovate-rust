@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/html/extract.spec.ts`](../../lib/modules/manager/html/extract.spec.ts.md) | 2 | 2 | 0 | `crates/renovate-core/src/extractors/html.rs` | ported |
+| [`lib/modules/manager/html/extract.spec.ts`](../../lib/modules/manager/html/extract.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/extractors/html.rs`](../../../../../crates/renovate-core/src/extractors/html.rs) | ported |
 

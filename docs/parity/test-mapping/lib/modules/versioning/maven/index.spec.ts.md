@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 7 | uses same function module export and api object | ported | `crates/renovate-core/src/versioning/maven.rs:1272` |
+| 7 | uses same function module export and api object | ported | [`crates/renovate-core/src/versioning/maven.rs:1272`](../../../../../../../crates/renovate-core/src/versioning/maven.rs#L1272) |
 | 11 | _(it.each / template — verify manually)_ | ? | — |
 | 32 | _(it.each / template — verify manually)_ | ? | — |
 | 60 | _(it.each / template — verify manually)_ | ? | — |

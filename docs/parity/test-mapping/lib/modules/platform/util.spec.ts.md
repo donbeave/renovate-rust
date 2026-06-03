@@ -7,6 +7,6 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 8 | _(it.each / template — verify manually)_ | ? | — |
-| 21 | should add refs/heads | ported | `crates/renovate-core/src/platform/util.rs:55` |
-| 26 | should be the same | ported | `crates/renovate-core/src/platform/util.rs:61` |
+| 21 | should add refs/heads | ported | [`crates/renovate-core/src/platform/util.rs:55`](../../../../../../crates/renovate-core/src/platform/util.rs#L55) |
+| 26 | should be the same | ported | [`crates/renovate-core/src/platform/util.rs:61`](../../../../../../crates/renovate-core/src/platform/util.rs#L61) |
 

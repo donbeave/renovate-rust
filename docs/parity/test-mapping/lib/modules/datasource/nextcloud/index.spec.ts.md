@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | no registryurl | ported | `crates/renovate-core/src/datasources/nextcloud.rs:156` |
-| 16 | no package | ported | `crates/renovate-core/src/datasources/nextcloud.rs:164` |
-| 30 | package with no versions | ported | `crates/renovate-core/src/datasources/nextcloud.rs:181` |
+| 6 | no registryurl | ported | [`crates/renovate-core/src/datasources/nextcloud.rs:156`](../../../../../../../crates/renovate-core/src/datasources/nextcloud.rs#L156) |
+| 16 | no package | ported | [`crates/renovate-core/src/datasources/nextcloud.rs:164`](../../../../../../../crates/renovate-core/src/datasources/nextcloud.rs#L164) |
+| 30 | package with no versions | ported | [`crates/renovate-core/src/datasources/nextcloud.rs:181`](../../../../../../../crates/renovate-core/src/datasources/nextcloud.rs#L181) |
 | 56 | _(it.each / template — verify manually)_ | ? | — |
-| 102 | package with changelog content and url | ported | `crates/renovate-core/src/datasources/nextcloud.rs:249` |
+| 102 | package with changelog content and url | ported | [`crates/renovate-core/src/datasources/nextcloud.rs:249`](../../../../../../../crates/renovate-core/src/datasources/nextcloud.rs#L249) |
 

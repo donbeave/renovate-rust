@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 11 | returns empty for invalid dependency file | ported | `crates/renovate-core/src/extractors/mix.rs:427` |
-| 16 | extracts all dependencies when no lockfile | ported | `crates/renovate-core/src/extractors/mix.rs:249` |
-| 139 | extracts all dependencies and adds the locked version if lockfile present | ported | `crates/renovate-core/src/extractors/mix.rs:388` |
+| 11 | returns empty for invalid dependency file | ported | [`crates/renovate-core/src/extractors/mix.rs:427`](../../../../../../../crates/renovate-core/src/extractors/mix.rs#L427) |
+| 16 | extracts all dependencies when no lockfile | ported | [`crates/renovate-core/src/extractors/mix.rs:249`](../../../../../../../crates/renovate-core/src/extractors/mix.rs#L249) |
+| 139 | extracts all dependencies and adds the locked version if lockfile present | ported | [`crates/renovate-core/src/extractors/mix.rs:388`](../../../../../../../crates/renovate-core/src/extractors/mix.rs#L388) |
 

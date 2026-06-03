@@ -7,5 +7,5 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 7 | _(it.each / template — verify manually)_ | ? | — |
-| 41 | extracts file | ported | `crates/renovate-core/src/extractors/deps_edn.rs:655` |
+| 41 | extracts file | ported | [`crates/renovate-core/src/extractors/deps_edn.rs:655`](../../../../../../../crates/renovate-core/src/extractors/deps_edn.rs#L655) |
 

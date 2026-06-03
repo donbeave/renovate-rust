@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns null for empty | ported | `crates/renovate-core/src/extractors/terraform.rs:2956` |
-| 11 | extracts | ported | `crates/renovate-core/src/extractors/terraform.rs:2962` |
+| 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/terraform.rs:2956`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L2956) |
+| 11 | extracts | ported | [`crates/renovate-core/src/extractors/terraform.rs:2962`](../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L2962) |
 

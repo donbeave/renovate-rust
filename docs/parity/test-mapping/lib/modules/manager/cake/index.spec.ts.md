@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 21 | extracts | ported | `crates/renovate-core/src/extractors/cake.rs:231` |
-| 45 | extracts dotnet tools from single sdk style build file | ported | `crates/renovate-core/src/extractors/cake.rs:294` |
-| 101 | skips invalid entries in installtools | ported | `crates/renovate-core/src/extractors/cake.rs:338` |
+| 21 | extracts | ported | [`crates/renovate-core/src/extractors/cake.rs:231`](../../../../../../../crates/renovate-core/src/extractors/cake.rs#L231) |
+| 45 | extracts dotnet tools from single sdk style build file | ported | [`crates/renovate-core/src/extractors/cake.rs:294`](../../../../../../../crates/renovate-core/src/extractors/cake.rs#L294) |
+| 101 | skips invalid entries in installtools | ported | [`crates/renovate-core/src/extractors/cake.rs:338`](../../../../../../../crates/renovate-core/src/extractors/cake.rs#L338) |
 | 124 | calls applyregistries to honor nuget.config files if present for .cake files | pending | — |
 | 141 | calls applyregistries to honor nuget.config files if present for installtools | pending | — |
 

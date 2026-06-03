@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | returns null for empty | ported | `crates/renovate-core/src/extractors/droneci.rs:243` |
-| 12 | extracts multiple image lines | ported | `crates/renovate-core/src/extractors/droneci.rs:174` |
-| 19 | extracts image and replaces registry | ported | `crates/renovate-core/src/extractors/droneci.rs:288` |
-| 42 | extracts image but no replacement | ported | `crates/renovate-core/src/extractors/droneci.rs:234` |
-| 65 | extracts image and no double replacement | ported | `crates/renovate-core/src/extractors/droneci.rs:327` |
+| 8 | returns null for empty | ported | [`crates/renovate-core/src/extractors/droneci.rs:243`](../../../../../../../crates/renovate-core/src/extractors/droneci.rs#L243) |
+| 12 | extracts multiple image lines | ported | [`crates/renovate-core/src/extractors/droneci.rs:174`](../../../../../../../crates/renovate-core/src/extractors/droneci.rs#L174) |
+| 19 | extracts image and replaces registry | ported | [`crates/renovate-core/src/extractors/droneci.rs:288`](../../../../../../../crates/renovate-core/src/extractors/droneci.rs#L288) |
+| 42 | extracts image but no replacement | ported | [`crates/renovate-core/src/extractors/droneci.rs:234`](../../../../../../../crates/renovate-core/src/extractors/droneci.rs#L234) |
+| 65 | extracts image and no double replacement | ported | [`crates/renovate-core/src/extractors/droneci.rs:327`](../../../../../../../crates/renovate-core/src/extractors/droneci.rs#L327) |
 

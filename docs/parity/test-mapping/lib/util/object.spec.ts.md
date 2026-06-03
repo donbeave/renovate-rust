@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | finds key in regular object | ported | `crates/renovate-core/src/util.rs:5770` |
-| 8 | detects missing key in regular object | ported | `crates/renovate-core/src/util.rs:5771` |
+| 4 | finds key in regular object | ported | [`crates/renovate-core/src/util.rs:5770`](../../../../../crates/renovate-core/src/util.rs#L5770) |
+| 8 | detects missing key in regular object | ported | [`crates/renovate-core/src/util.rs:5771`](../../../../../crates/renovate-core/src/util.rs#L5771) |
 | 12 | returns false for wrong instance type | pending | — |
-| 17 | should return empty object | ported | `crates/renovate-core/src/util.rs:5781` |
-| 22 | should return input object | ported | `crates/renovate-core/src/util.rs:5782` |
+| 17 | should return empty object | ported | [`crates/renovate-core/src/util.rs:5781`](../../../../../crates/renovate-core/src/util.rs#L5781) |
+| 22 | should return input object | ported | [`crates/renovate-core/src/util.rs:5782`](../../../../../crates/renovate-core/src/util.rs#L5782) |
 

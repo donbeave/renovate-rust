@@ -7,6 +7,6 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
-| 45 | returns null for error | ported | `crates/renovate-core/src/util.rs:9694` |
+| 45 | returns null for error | ported | [`crates/renovate-core/src/util.rs:9694`](../../../../../crates/renovate-core/src/util.rs#L9694) |
 | 60 | _(it.each / template — verify manually)_ | ? | — |
 

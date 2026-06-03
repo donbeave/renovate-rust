@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/quadlet/extract.spec.ts`](../../lib/modules/manager/quadlet/extract.spec.ts.md) | 11 | 11 | 0 | `crates/renovate-core/src/extractors/quadlet.rs` | ported |
+| [`lib/modules/manager/quadlet/extract.spec.ts`](../../lib/modules/manager/quadlet/extract.spec.ts.md) | 11 | 11 | 0 | [`crates/renovate-core/src/extractors/quadlet.rs`](../../../../../crates/renovate-core/src/extractors/quadlet.rs) | ported |
 

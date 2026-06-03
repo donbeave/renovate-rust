@@ -6,16 +6,16 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 57 | returns null if no packagemanager updates present | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:178` |
-| 68 | returns null if currentvalue is undefined | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:327` |
-| 79 | returns null if currentvalue has no hash | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:400` |
-| 90 | returns null if unchanged | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:348` |
-| 105 | returns updated package.json | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:145` |
-| 131 | supports docker mode | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:421` |
-| 180 | supports install mode | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:185` |
-| 221 | catches errors | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:369` |
-| 243 | returns null if no security updates are found | ported | `crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:428` |
-| 254 | returns null if pnpm workspace file does not exist | ported | `crates/renovate-core/src/extractors/npm.rs:8144` |
+| 57 | returns null if no packagemanager updates present | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:178`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L178) |
+| 68 | returns null if currentvalue is undefined | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:327`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L327) |
+| 79 | returns null if currentvalue has no hash | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:400`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L400) |
+| 90 | returns null if unchanged | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:348`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L348) |
+| 105 | returns updated package.json | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:145`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L145) |
+| 131 | supports docker mode | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:421`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L421) |
+| 180 | supports install mode | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:185`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L185) |
+| 221 | catches errors | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:369`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L369) |
+| 243 | returns null if no security updates are found | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:428`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L428) |
+| 254 | returns null if pnpm workspace file does not exist | ported | [`crates/renovate-core/src/extractors/npm.rs:8144`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8144) |
 | 274 | returns null if the pnpmshrinkwrap file is not found | pending | — |
 | 305 | returns null if no minimumreleaseage setting found | pending | — |
 | 326 | returns null if minimumreleaseageexclude excludes all versions of updated dep | pending | — |

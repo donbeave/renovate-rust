@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | migrates old custom manager syntax to new one | ported | `crates/renovate-core/src/config/migrate_validate.rs:5600` |
-| 28 | only migrates when necessary | ported | `crates/renovate-core/src/config/migrate_validate.rs:5625` |
+| 4 | migrates old custom manager syntax to new one | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5600`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5600) |
+| 28 | only migrates when necessary | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5625`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5625) |
 

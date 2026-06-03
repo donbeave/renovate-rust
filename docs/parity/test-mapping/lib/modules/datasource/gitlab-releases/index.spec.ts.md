@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 18 | returns releases from custom registry | ported | `crates/renovate-core/src/datasources/gitlab_releases.rs:121` |
-| 32 | returns releases from default registry | ported | `crates/renovate-core/src/datasources/gitlab_releases.rs:141` |
-| 45 | return null if not found | ported | `crates/renovate-core/src/datasources/gitlab_releases.rs:134` |
+| 18 | returns releases from custom registry | ported | [`crates/renovate-core/src/datasources/gitlab_releases.rs:121`](../../../../../../../crates/renovate-core/src/datasources/gitlab_releases.rs#L121) |
+| 32 | returns releases from default registry | ported | [`crates/renovate-core/src/datasources/gitlab_releases.rs:141`](../../../../../../../crates/renovate-core/src/datasources/gitlab_releases.rs#L141) |
+| 45 | return null if not found | ported | [`crates/renovate-core/src/datasources/gitlab_releases.rs:134`](../../../../../../../crates/renovate-core/src/datasources/gitlab_releases.rs#L134) |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/endoflife-date/index.spec.ts`](../../lib/modules/datasource/endoflife-date/index.spec.ts.md) | 7 | 7 | 0 | `crates/renovate-core/src/datasources/endoflife.rs` | ported |
+| [`lib/modules/datasource/endoflife-date/index.spec.ts`](../../lib/modules/datasource/endoflife-date/index.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/datasources/endoflife.rs`](../../../../../crates/renovate-core/src/datasources/endoflife.rs) | ported |
 

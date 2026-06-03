@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns null on an empty string | ported | `crates/renovate-core/src/extractors/bitrise.rs:452` |
-| 10 | returns dependency for step | ported | `crates/renovate-core/src/extractors/bitrise.rs:458` |
-| 19 | parses missing version | ported | `crates/renovate-core/src/extractors/bitrise.rs:468` |
+| 6 | returns null on an empty string | ported | [`crates/renovate-core/src/extractors/bitrise.rs:452`](../../../../../../../crates/renovate-core/src/extractors/bitrise.rs#L452) |
+| 10 | returns dependency for step | ported | [`crates/renovate-core/src/extractors/bitrise.rs:458`](../../../../../../../crates/renovate-core/src/extractors/bitrise.rs#L458) |
+| 19 | parses missing version | ported | [`crates/renovate-core/src/extractors/bitrise.rs:468`](../../../../../../../crates/renovate-core/src/extractors/bitrise.rs#L468) |
 

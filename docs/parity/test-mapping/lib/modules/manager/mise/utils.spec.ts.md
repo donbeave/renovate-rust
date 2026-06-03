@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | load and parse successfully | ported | `crates/renovate-core/src/extractors/mise.rs:1704` |
-| 23 | invalid toml | ported | `crates/renovate-core/src/extractors/mise.rs:1720` |
-| 31 | invalid schema | ported | `crates/renovate-core/src/extractors/mise.rs:1726` |
+| 8 | load and parse successfully | ported | [`crates/renovate-core/src/extractors/mise.rs:1704`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1704) |
+| 23 | invalid toml | ported | [`crates/renovate-core/src/extractors/mise.rs:1720`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1720) |
+| 31 | invalid schema | ported | [`crates/renovate-core/src/extractors/mise.rs:1726`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1726) |
 

@@ -8,6 +8,6 @@
 |--:|---|---|---|
 | 9 | throws for 500 | pending | — |
 | 19 | returns null for error | pending | — |
-| 32 | returns null for empty 200 ok | ported | `crates/renovate-core/src/datasources/node_version.rs:121` |
-| 42 | processes real data | ported | `crates/renovate-core/src/datasources/node_version.rs:129` |
+| 32 | returns null for empty 200 ok | ported | [`crates/renovate-core/src/datasources/node_version.rs:121`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L121) |
+| 42 | processes real data | ported | [`crates/renovate-core/src/datasources/node_version.rs:129`](../../../../../../../crates/renovate-core/src/datasources/node_version.rs#L129) |
 

@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should assign values from right to left for specified keys | ported | `crates/renovate-core/src/util.rs:5811` |
+| 4 | should assign values from right to left for specified keys | ported | [`crates/renovate-core/src/util.rs:5811`](../../../../../crates/renovate-core/src/util.rs#L5811) |
 

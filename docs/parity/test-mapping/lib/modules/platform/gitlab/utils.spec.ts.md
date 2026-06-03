@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 42 | throws on invalid endpoint when giturl is endpoint | ported | `crates/renovate-core/src/platform/gitlab.rs:2564` |
-| 48 | throws on invalid endpoint when http_url_to_repo is null | ported | `crates/renovate-core/src/platform/gitlab.rs:2583` |
+| 42 | throws on invalid endpoint when giturl is endpoint | ported | [`crates/renovate-core/src/platform/gitlab.rs:2564`](../../../../../../../crates/renovate-core/src/platform/gitlab.rs#L2564) |
+| 48 | throws on invalid endpoint when http_url_to_repo is null | ported | [`crates/renovate-core/src/platform/gitlab.rs:2583`](../../../../../../../crates/renovate-core/src/platform/gitlab.rs#L2583) |
 

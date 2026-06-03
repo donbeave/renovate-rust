@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns null for empty | ported | `crates/renovate-core/src/extractors/cloudbuild.rs:151` |
-| 10 | extracts multiple image lines | ported | `crates/renovate-core/src/extractors/cloudbuild.rs:102` |
+| 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/cloudbuild.rs:151`](../../../../../../../crates/renovate-core/src/extractors/cloudbuild.rs#L151) |
+| 10 | extracts multiple image lines | ported | [`crates/renovate-core/src/extractors/cloudbuild.rs:102`](../../../../../../../crates/renovate-core/src/extractors/cloudbuild.rs#L102) |
 

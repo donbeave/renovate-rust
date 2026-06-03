@@ -6,20 +6,20 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 76 | returns config if not found | ported | `crates/renovate-core/src/repo_config.rs:7454` |
+| 76 | returns config if not found | ported | [`crates/renovate-core/src/repo_config.rs:7454`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7454) |
 | 82 | returns config if not found - uses cache | pending | — |
 | 96 | returns cache config from onboarding cache - package.json | pending | — |
 | 111 | clones, if onboarding cache is valid but parsed config is undefined | pending | — |
 | 134 | returns cache config from onboarding cache - renovate.json | pending | — |
-| 153 | uses package.json config if found | ported | `crates/renovate-core/src/repo_config.rs:7470` |
-| 174 | massages package.json renovate string | ported | `crates/renovate-core/src/repo_config.rs:7555` |
+| 153 | uses package.json config if found | ported | [`crates/renovate-core/src/repo_config.rs:7470`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7470) |
+| 174 | massages package.json renovate string | ported | [`crates/renovate-core/src/repo_config.rs:7555`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7555) |
 | 188 | returns error if cannot parse | pending | — |
 | 200 | throws error if duplicate keys | pending | — |
-| 215 | finds and parse renovate.json5 | ported | `crates/renovate-core/src/repo_config.rs:7348` |
-| 227 | finds .github/renovate.json | ported | `crates/renovate-core/src/repo_config.rs:7365` |
-| 239 | finds .gitlab/renovate.json | ported | `crates/renovate-core/src/repo_config.rs:7380` |
-| 251 | finds .renovaterc.json | ported | `crates/renovate-core/src/repo_config.rs:7395` |
-| 267 | finds .renovaterc.json5 | ported | `crates/renovate-core/src/repo_config.rs:7409` |
+| 215 | finds and parse renovate.json5 | ported | [`crates/renovate-core/src/repo_config.rs:7348`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7348) |
+| 227 | finds .github/renovate.json | ported | [`crates/renovate-core/src/repo_config.rs:7365`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7365) |
+| 239 | finds .gitlab/renovate.json | ported | [`crates/renovate-core/src/repo_config.rs:7380`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7380) |
+| 251 | finds .renovaterc.json | ported | [`crates/renovate-core/src/repo_config.rs:7395`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7395) |
+| 267 | finds .renovaterc.json5 | ported | [`crates/renovate-core/src/repo_config.rs:7409`](../../../../../../../crates/renovate-core/src/repo_config.rs#L7409) |
 | 285 | returns if no error | pending | — |
 | 289 | throws on error | pending | — |
 | 306 | uses onboarding config if silent | pending | — |

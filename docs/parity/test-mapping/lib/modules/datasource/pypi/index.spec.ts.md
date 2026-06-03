@@ -9,7 +9,7 @@
 | 90 | returns null for empty result | pending | — |
 | 100 | returns null for 404 | pending | — |
 | 111 | processes real data | pending | — |
-| 121 | supports custom datasource url | ported | `crates/renovate-core/src/datasources/pypi.rs:336` |
+| 121 | supports custom datasource url | ported | [`crates/renovate-core/src/datasources/pypi.rs:336`](../../../../../../../crates/renovate-core/src/datasources/pypi.rs#L336) |
 | 142 | sets private if authorization privided | pending | — |
 | 159 | supports multiple custom datasource urls | pending | — |
 | 194 | supports google auth | pending | — |
@@ -18,7 +18,7 @@
 | 267 | find url from project_urls | pending | — |
 | 291 | excludes gh sponsors url from project_urls | pending | — |
 | 310 | does not mistake sponsors in project name as sponsors url | pending | — |
-| 329 | normalizes the package name according to pep 503 | ported | `crates/renovate-core/src/datasources/pypi.rs:355` |
+| 329 | normalizes the package name according to pep 503 | ported | [`crates/renovate-core/src/datasources/pypi.rs:355`](../../../../../../../crates/renovate-core/src/datasources/pypi.rs#L355) |
 | 349 | normalizes the package name according to pep 503 when falling back to simple endpoint | pending | — |
 | 368 | normalizes the package name according to pep 503 querying a simple endpoint | pending | — |
 | 384 | respects constraints | pending | — |

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/ruby-version/extract.spec.ts`](../../lib/modules/manager/ruby-version/extract.spec.ts.md) | 3 | 3 | 0 | `crates/renovate-core/src/extractors/version_file.rs` | ported |
+| [`lib/modules/manager/ruby-version/extract.spec.ts`](../../lib/modules/manager/ruby-version/extract.spec.ts.md) | 3 | 3 | 0 | [`crates/renovate-core/src/extractors/version_file.rs`](../../../../../crates/renovate-core/src/extractors/version_file.rs) | ported |
 

@@ -7,5 +7,5 @@
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
 | [`lib/modules/manager/jsonnet-bundler/artifacts.spec.ts`](../../lib/modules/manager/jsonnet-bundler/artifacts.spec.ts.md) | 5 | 0 | 5 | — | pending |
-| [`lib/modules/manager/jsonnet-bundler/extract.spec.ts`](../../lib/modules/manager/jsonnet-bundler/extract.spec.ts.md) | 7 | 7 | 0 | `crates/renovate-core/src/extractors/jsonnet_bundler.rs` | ported |
+| [`lib/modules/manager/jsonnet-bundler/extract.spec.ts`](../../lib/modules/manager/jsonnet-bundler/extract.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/extractors/jsonnet_bundler.rs`](../../../../../crates/renovate-core/src/extractors/jsonnet_bundler.rs) | ported |
 

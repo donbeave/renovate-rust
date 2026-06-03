@@ -11,7 +11,7 @@
 | 47 | _(it.each / template — verify manually)_ | ? | — |
 | 70 | _(it.each / template — verify manually)_ | ? | — |
 | 87 | _(it.each / template — verify manually)_ | ? | — |
-| 141 | should handle invalid range that is not ~latest or valid version | ported | `crates/renovate-core/src/versioning/semver_partial.rs:407` |
+| 141 | should handle invalid range that is not ~latest or valid version | ported | [`crates/renovate-core/src/versioning/semver_partial.rs:407`](../../../../../../../crates/renovate-core/src/versioning/semver_partial.rs#L407) |
 | 149 | _(it.each / template — verify manually)_ | ? | — |
 | 185 | _(it.each / template — verify manually)_ | ? | — |
 | 209 | _(it.each / template — verify manually)_ | ? | — |

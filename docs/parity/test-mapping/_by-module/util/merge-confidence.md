@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/util/merge-confidence/index.spec.ts`](../../lib/util/merge-confidence/index.spec.ts.md) | 28 | 7 | 21 | `crates/renovate-core/src/merge_confidence.rs` | partial |
+| [`lib/util/merge-confidence/index.spec.ts`](../../lib/util/merge-confidence/index.spec.ts.md) | 28 | 7 | 21 | [`crates/renovate-core/src/merge_confidence.rs`](../../../../../crates/renovate-core/src/merge_confidence.rs) | partial |
 

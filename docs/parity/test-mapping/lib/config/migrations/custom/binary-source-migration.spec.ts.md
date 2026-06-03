@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should migrate "auto" to "global" | ported | `crates/renovate-core/src/config/migrate_validate.rs:5097` |
+| 4 | should migrate "auto" to "global" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5097`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5097) |
 

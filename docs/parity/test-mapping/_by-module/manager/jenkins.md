@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/jenkins/extract.spec.ts`](../../lib/modules/manager/jenkins/extract.spec.ts.md) | 5 | 5 | 0 | `crates/renovate-core/src/extractors/jenkins.rs` | ported |
+| [`lib/modules/manager/jenkins/extract.spec.ts`](../../lib/modules/manager/jenkins/extract.spec.ts.md) | 5 | 5 | 0 | [`crates/renovate-core/src/extractors/jenkins.rs`](../../../../../crates/renovate-core/src/extractors/jenkins.rs) | ported |
 

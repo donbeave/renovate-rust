@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 10 | parses single url | ported | `crates/renovate-core/src/util.rs:11313` |
-| 15 | parses multiple urls | ported | `crates/renovate-core/src/util.rs:11322` |
-| 25 | ignores everything starting from "direct" and "off" keywords | ported | `crates/renovate-core/src/util.rs:11357` |
+| 10 | parses single url | ported | [`crates/renovate-core/src/util.rs:11313`](../../../../../../../crates/renovate-core/src/util.rs#L11313) |
+| 15 | parses multiple urls | ported | [`crates/renovate-core/src/util.rs:11322`](../../../../../../../crates/renovate-core/src/util.rs#L11322) |
+| 25 | ignores everything starting from "direct" and "off" keywords | ported | [`crates/renovate-core/src/util.rs:11357`](../../../../../../../crates/renovate-core/src/util.rs#L11357) |
 | 43 | caches results | pending | — |
-| 49 | produces regex | ported | `crates/renovate-core/src/util.rs:11373` |
-| 68 | matches on real package prefixes | ported | `crates/renovate-core/src/util.rs:11398` |
-| 100 | matches on wildcards | ported | `crates/renovate-core/src/util.rs:11433` |
-| 126 | matches on character ranges | ported | `crates/renovate-core/src/util.rs:11451` |
+| 49 | produces regex | ported | [`crates/renovate-core/src/util.rs:11373`](../../../../../../../crates/renovate-core/src/util.rs#L11373) |
+| 68 | matches on real package prefixes | ported | [`crates/renovate-core/src/util.rs:11398`](../../../../../../../crates/renovate-core/src/util.rs#L11398) |
+| 100 | matches on wildcards | ported | [`crates/renovate-core/src/util.rs:11433`](../../../../../../../crates/renovate-core/src/util.rs#L11433) |
+| 126 | matches on character ranges | ported | [`crates/renovate-core/src/util.rs:11451`](../../../../../../../crates/renovate-core/src/util.rs#L11451) |
 | 131 | caches results | pending | — |
 

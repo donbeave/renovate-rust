@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 7 | should return true | ported | `crates/renovate-core/src/package_rule.rs:1318` |
-| 19 | should return false for no match | ported | `crates/renovate-core/src/package_rule.rs:1326` |
-| 31 | should return null if matchmanagers is undefined | ported | `crates/renovate-core/src/package_rule.rs:1334` |
-| 41 | should return false if no manager | ported | `crates/renovate-core/src/package_rule.rs:1342` |
-| 51 | should match custom managers | ported | `crates/renovate-core/src/package_rule.rs:1351` |
+| 7 | should return true | ported | [`crates/renovate-core/src/package_rule.rs:1318`](../../../../../../crates/renovate-core/src/package_rule.rs#L1318) |
+| 19 | should return false for no match | ported | [`crates/renovate-core/src/package_rule.rs:1326`](../../../../../../crates/renovate-core/src/package_rule.rs#L1326) |
+| 31 | should return null if matchmanagers is undefined | ported | [`crates/renovate-core/src/package_rule.rs:1334`](../../../../../../crates/renovate-core/src/package_rule.rs#L1334) |
+| 41 | should return false if no manager | ported | [`crates/renovate-core/src/package_rule.rs:1342`](../../../../../../crates/renovate-core/src/package_rule.rs#L1342) |
+| 51 | should match custom managers | ported | [`crates/renovate-core/src/package_rule.rs:1351`](../../../../../../crates/renovate-core/src/package_rule.rs#L1351) |
 

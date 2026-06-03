@@ -15,10 +15,10 @@
 | 93 | _(it.each / template — verify manually)_ | ? | — |
 | 105 | _(it.each / template — verify manually)_ | ? | — |
 | 116 | _(it.each / template — verify manually)_ | ? | — |
-| 131 | always compatible | ported | `crates/renovate-core/src/versioning/conda.rs:547` |
+| 131 | always compatible | ported | [`crates/renovate-core/src/versioning/conda.rs:547`](../../../../../../../crates/renovate-core/src/versioning/conda.rs#L547) |
 | 146 | _(it.each / template — verify manually)_ | ? | — |
 | 157 | _(it.each / template — verify manually)_ | ? | — |
 | 168 | _(it.each / template — verify manually)_ | ? | — |
-| 176 | returns a pinned value | ported | `crates/renovate-core/src/versioning/conda.rs:598` |
+| 176 | returns a pinned value | ported | [`crates/renovate-core/src/versioning/conda.rs:598`](../../../../../../../crates/renovate-core/src/versioning/conda.rs#L598) |
 | 180 | _(it.each / template — verify manually)_ | ? | — |
 

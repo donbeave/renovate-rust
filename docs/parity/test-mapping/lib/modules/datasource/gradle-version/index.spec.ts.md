@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 26 | processes real data | ported | `crates/renovate-core/src/datasources/gradle_version.rs:225` |
-| 40 | calls configured registryurls | ported | `crates/renovate-core/src/datasources/gradle_version.rs:253` |
-| 59 | handles empty releases | ported | `crates/renovate-core/src/datasources/gradle_version.rs:271` |
-| 69 | handles errors | ported | `crates/renovate-core/src/datasources/gradle_version.rs:288` |
+| 26 | processes real data | ported | [`crates/renovate-core/src/datasources/gradle_version.rs:225`](../../../../../../../crates/renovate-core/src/datasources/gradle_version.rs#L225) |
+| 40 | calls configured registryurls | ported | [`crates/renovate-core/src/datasources/gradle_version.rs:253`](../../../../../../../crates/renovate-core/src/datasources/gradle_version.rs#L253) |
+| 59 | handles empty releases | ported | [`crates/renovate-core/src/datasources/gradle_version.rs:271`](../../../../../../../crates/renovate-core/src/datasources/gradle_version.rs#L271) |
+| 69 | handles errors | ported | [`crates/renovate-core/src/datasources/gradle_version.rs:288`](../../../../../../../crates/renovate-core/src/datasources/gradle_version.rs#L288) |
 

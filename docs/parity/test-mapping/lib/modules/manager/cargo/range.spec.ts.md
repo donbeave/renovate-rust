@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns same if not auto | ported | `crates/renovate-core/src/versioning/cargo.rs:1401` |
-| 10 | returns widen if current value includes < | ported | `crates/renovate-core/src/versioning/cargo.rs:1407` |
-| 18 | defaults to update-lockfile | ported | `crates/renovate-core/src/versioning/cargo.rs:1413` |
+| 5 | returns same if not auto | ported | [`crates/renovate-core/src/versioning/cargo.rs:1401`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1401) |
+| 10 | returns widen if current value includes < | ported | [`crates/renovate-core/src/versioning/cargo.rs:1407`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1407) |
+| 18 | defaults to update-lockfile | ported | [`crates/renovate-core/src/versioning/cargo.rs:1413`](../../../../../../../crates/renovate-core/src/versioning/cargo.rs#L1413) |
 

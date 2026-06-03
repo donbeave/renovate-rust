@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | returns null for an unknown kubernetes api type | ported | `crates/renovate-core/src/datasources/kubernetes_api.rs:56` |
-| 13 | returns for a known kubernetes api type | ported | `crates/renovate-core/src/datasources/kubernetes_api.rs:62` |
-| 27 | is case sensitive | ported | `crates/renovate-core/src/datasources/kubernetes_api.rs:71` |
+| 8 | returns null for an unknown kubernetes api type | ported | [`crates/renovate-core/src/datasources/kubernetes_api.rs:56`](../../../../../../../crates/renovate-core/src/datasources/kubernetes_api.rs#L56) |
+| 13 | returns for a known kubernetes api type | ported | [`crates/renovate-core/src/datasources/kubernetes_api.rs:62`](../../../../../../../crates/renovate-core/src/datasources/kubernetes_api.rs#L62) |
+| 27 | is case sensitive | ported | [`crates/renovate-core/src/datasources/kubernetes_api.rs:71`](../../../../../../../crates/renovate-core/src/datasources/kubernetes_api.rs#L71) |
 

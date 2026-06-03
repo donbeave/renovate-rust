@@ -7,5 +7,5 @@
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
 | [`lib/modules/manager/cocoapods/artifacts.spec.ts`](../../lib/modules/manager/cocoapods/artifacts.spec.ts.md) | 11 | 0 | 11 | — | pending |
-| [`lib/modules/manager/cocoapods/extract.spec.ts`](../../lib/modules/manager/cocoapods/extract.spec.ts.md) | 2 | 2 | 0 | `crates/renovate-core/src/extractors/cocoapods.rs` | ported |
+| [`lib/modules/manager/cocoapods/extract.spec.ts`](../../lib/modules/manager/cocoapods/extract.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/extractors/cocoapods.rs`](../../../../../crates/renovate-core/src/extractors/cocoapods.rs) | ported |
 

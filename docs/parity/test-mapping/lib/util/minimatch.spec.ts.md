@@ -8,7 +8,7 @@
 |--:|---|---|---|
 | 5 | caches minimatch | pending | — |
 | 12 | does not cache minimatch | pending | — |
-| 20 | matches | ported | `crates/renovate-core/src/string_match.rs:616` |
+| 20 | matches | ported | [`crates/renovate-core/src/string_match.rs:616`](../../../../../crates/renovate-core/src/string_match.rs#L616) |
 | 32 | should return a function | pending | — |
-| 37 | should correctly match filenames | ported | `crates/renovate-core/src/string_match.rs:638` |
+| 37 | should correctly match filenames | ported | [`crates/renovate-core/src/string_match.rs:638`](../../../../../crates/renovate-core/src/string_match.rs#L638) |
 

@@ -7,6 +7,6 @@
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
 | [`lib/modules/manager/gradle-wrapper/artifacts.spec.ts`](../../lib/modules/manager/gradle-wrapper/artifacts.spec.ts.md) | 14 | 0 | 14 | — | pending |
-| [`lib/modules/manager/gradle-wrapper/extract.spec.ts`](../../lib/modules/manager/gradle-wrapper/extract.spec.ts.md) | 8 | 8 | 0 | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | ported |
-| [`lib/modules/manager/gradle-wrapper/util.spec.ts`](../../lib/modules/manager/gradle-wrapper/util.spec.ts.md) | 14 | 12 | 2 | `crates/renovate-core/src/extractors/gradle_wrapper.rs` | partial |
+| [`lib/modules/manager/gradle-wrapper/extract.spec.ts`](../../lib/modules/manager/gradle-wrapper/extract.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/extractors/gradle_wrapper.rs`](../../../../../crates/renovate-core/src/extractors/gradle_wrapper.rs) | ported |
+| [`lib/modules/manager/gradle-wrapper/util.spec.ts`](../../lib/modules/manager/gradle-wrapper/util.spec.ts.md) | 14 | 12 | 2 | [`crates/renovate-core/src/extractors/gradle_wrapper.rs`](../../../../../crates/renovate-core/src/extractors/gradle_wrapper.rs) | partial |
 

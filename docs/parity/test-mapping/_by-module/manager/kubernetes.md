@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/kubernetes/extract.spec.ts`](../../lib/modules/manager/kubernetes/extract.spec.ts.md) | 15 | 15 | 0 | `crates/renovate-core/src/extractors/kubernetes.rs` | ported |
+| [`lib/modules/manager/kubernetes/extract.spec.ts`](../../lib/modules/manager/kubernetes/extract.spec.ts.md) | 15 | 15 | 0 | [`crates/renovate-core/src/extractors/kubernetes.rs`](../../../../../crates/renovate-core/src/extractors/kubernetes.rs) | ported |
 

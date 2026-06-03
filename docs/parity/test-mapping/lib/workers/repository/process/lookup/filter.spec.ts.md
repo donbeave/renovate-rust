@@ -11,8 +11,8 @@
 | 98 | allows unstable major upgrades | pending | — |
 | 124 | ignores version insufficient prefixes | pending | — |
 | 153 | single version range, but invalid current version (for coverage) | pending | — |
-| 187 | filters versions with major increment greater than maxmajorincrement | ported | `crates/renovate-core/src/workers/repository/process/lookup/filter.rs:207` |
-| 216 | allows all versions when maxmajorincrement is 0 | ported | `crates/renovate-core/src/workers/repository/process/lookup/filter.rs:227` |
-| 243 | filters with maxmajorincrement set to 1 | ported | `crates/renovate-core/src/workers/repository/process/lookup/filter.rs:245` |
-| 272 | handles maxmajorincrement with 0.x versions | ported | `crates/renovate-core/src/workers/repository/process/lookup/filter.rs:265` |
+| 187 | filters versions with major increment greater than maxmajorincrement | ported | [`crates/renovate-core/src/workers/repository/process/lookup/filter.rs:207`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/filter.rs#L207) |
+| 216 | allows all versions when maxmajorincrement is 0 | ported | [`crates/renovate-core/src/workers/repository/process/lookup/filter.rs:227`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/filter.rs#L227) |
+| 243 | filters with maxmajorincrement set to 1 | ported | [`crates/renovate-core/src/workers/repository/process/lookup/filter.rs:245`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/filter.rs#L245) |
+| 272 | handles maxmajorincrement with 0.x versions | ported | [`crates/renovate-core/src/workers/repository/process/lookup/filter.rs:265`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/filter.rs#L265) |
 

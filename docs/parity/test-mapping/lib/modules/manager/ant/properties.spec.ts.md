@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | parses key=value pairs | ported | `crates/renovate-core/src/extractors/ant.rs:805` |
-| 28 | skips comments and blank lines | ported | `crates/renovate-core/src/extractors/ant.rs:818` |
-| 39 | supports colon separator | ported | `crates/renovate-core/src/extractors/ant.rs:825` |
-| 46 | skips malformed lines without separators | ported | `crates/renovate-core/src/extractors/ant.rs:832` |
-| 57 | implements first-definition-wins | ported | `crates/renovate-core/src/extractors/ant.rs:845` |
-| 64 | respects pre-existing props (first-definition-wins across sources) | ported | `crates/renovate-core/src/extractors/ant.rs:852` |
+| 6 | parses key=value pairs | ported | [`crates/renovate-core/src/extractors/ant.rs:805`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L805) |
+| 28 | skips comments and blank lines | ported | [`crates/renovate-core/src/extractors/ant.rs:818`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L818) |
+| 39 | supports colon separator | ported | [`crates/renovate-core/src/extractors/ant.rs:825`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L825) |
+| 46 | skips malformed lines without separators | ported | [`crates/renovate-core/src/extractors/ant.rs:832`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L832) |
+| 57 | implements first-definition-wins | ported | [`crates/renovate-core/src/extractors/ant.rs:845`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L845) |
+| 64 | respects pre-existing props (first-definition-wins across sources) | ported | [`crates/renovate-core/src/extractors/ant.rs:852`](../../../../../../../crates/renovate-core/src/extractors/ant.rs#L852) |
 

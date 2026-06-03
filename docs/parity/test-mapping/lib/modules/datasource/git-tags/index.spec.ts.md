@@ -6,12 +6,12 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 38 | returns nil if response is wrong | ported | `crates/renovate-core/src/datasources/git_tags.rs:84` |
-| 45 | returns nil if remote call throws exception | ported | `crates/renovate-core/src/datasources/git_tags.rs:91` |
-| 52 | returns versions filtered from tags | ported | `crates/renovate-core/src/datasources/git_tags.rs:98` |
-| 64 | returns null if not found | ported | `crates/renovate-core/src/datasources/git_tags.rs:135` |
-| 74 | returns digest for tag | ported | `crates/renovate-core/src/datasources/git_tags.rs:142` |
-| 84 | returns digest for head | ported | `crates/renovate-core/src/datasources/git_tags.rs:149` |
+| 38 | returns nil if response is wrong | ported | [`crates/renovate-core/src/datasources/git_tags.rs:84`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L84) |
+| 45 | returns nil if remote call throws exception | ported | [`crates/renovate-core/src/datasources/git_tags.rs:91`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L91) |
+| 52 | returns versions filtered from tags | ported | [`crates/renovate-core/src/datasources/git_tags.rs:98`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L98) |
+| 64 | returns null if not found | ported | [`crates/renovate-core/src/datasources/git_tags.rs:135`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L135) |
+| 74 | returns digest for tag | ported | [`crates/renovate-core/src/datasources/git_tags.rs:142`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L142) |
+| 84 | returns digest for head | ported | [`crates/renovate-core/src/datasources/git_tags.rs:149`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L149) |
 | 94 | returns digest for head with authentication environment variables | pending | — |
-| 121 | returns digest for head with authentication environment variables for datasource type git-tags | ported | `crates/renovate-core/src/util.rs:7868` |
+| 121 | returns digest for head with authentication environment variables for datasource type git-tags | ported | [`crates/renovate-core/src/util.rs:7868`](../../../../../../../crates/renovate-core/src/util.rs#L7868) |
 

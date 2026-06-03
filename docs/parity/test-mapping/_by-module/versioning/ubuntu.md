@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/ubuntu/index.spec.ts`](../../lib/modules/versioning/ubuntu/index.spec.ts.md) | 13 | 13 | 0 | `crates/renovate-core/src/versioning/ubuntu.rs` | ported |
+| [`lib/modules/versioning/ubuntu/index.spec.ts`](../../lib/modules/versioning/ubuntu/index.spec.ts.md) | 13 | 13 | 0 | [`crates/renovate-core/src/versioning/ubuntu.rs`](../../../../../crates/renovate-core/src/versioning/ubuntu.rs) | ported |
 

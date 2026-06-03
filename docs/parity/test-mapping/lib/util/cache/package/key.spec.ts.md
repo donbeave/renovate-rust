@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | works | ported | `crates/renovate-core/src/branch.rs:2479` |
+| 5 | works | ported | [`crates/renovate-core/src/branch.rs:2479`](../../../../../../../crates/renovate-core/src/branch.rs#L2479) |
 

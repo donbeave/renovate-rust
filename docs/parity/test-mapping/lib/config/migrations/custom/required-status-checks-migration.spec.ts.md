@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should migrate requiredstatuschecks=null to ignoretests=true | ported | `crates/renovate-core/src/config/migrate_validate.rs:6681` |
+| 4 | should migrate requiredstatuschecks=null to ignoretests=true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6681`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6681) |
 

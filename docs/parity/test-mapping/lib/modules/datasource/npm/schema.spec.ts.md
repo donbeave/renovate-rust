@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | strips fields outside the cached packument shape | ported | `crates/renovate-core/src/datasources/npm.rs:1647` |
+| 4 | strips fields outside the cached packument shape | ported | [`crates/renovate-core/src/datasources/npm.rs:1647`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L1647) |
 

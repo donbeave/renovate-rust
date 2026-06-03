@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 15 | should call a function only once | ported | `crates/renovate-core/src/util.rs:6766` |
-| 28 | supports support distinct calls | ported | `crates/renovate-core/src/util.rs:6777` |
-| 44 | resets keys | ported | `crates/renovate-core/src/util.rs:6794` |
+| 15 | should call a function only once | ported | [`crates/renovate-core/src/util.rs:6766`](../../../../../crates/renovate-core/src/util.rs#L6766) |
+| 28 | supports support distinct calls | ported | [`crates/renovate-core/src/util.rs:6777`](../../../../../crates/renovate-core/src/util.rs#L6777) |
+| 44 | resets keys | ported | [`crates/renovate-core/src/util.rs:6794`](../../../../../crates/renovate-core/src/util.rs#L6794) |
 | 60 | logs once per function call | pending | — |
 | 73 | distincts between log levels | pending | — |
 | 89 | distincts between different log statements | pending | — |

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/puppet-forge/index.spec.ts`](../../lib/modules/datasource/puppet-forge/index.spec.ts.md) | 8 | 8 | 0 | `crates/renovate-core/src/datasources/puppet_forge.rs` | ported |
+| [`lib/modules/datasource/puppet-forge/index.spec.ts`](../../lib/modules/datasource/puppet-forge/index.spec.ts.md) | 8 | 8 | 0 | [`crates/renovate-core/src/datasources/puppet_forge.rs`](../../../../../crates/renovate-core/src/datasources/puppet_forge.rs) | ported |
 

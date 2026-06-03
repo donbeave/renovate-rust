@@ -9,5 +9,5 @@
 | 11 | _(it.each / template — verify manually)_ | ? | — |
 | 28 | _(it.each / template — verify manually)_ | ? | — |
 | 48 | _(it.each / template — verify manually)_ | ? | — |
-| 73 | no docker hub | ported | `crates/renovate-core/src/extractors/gitlabci.rs:1156` |
+| 73 | no docker hub | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:1156`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L1156) |
 

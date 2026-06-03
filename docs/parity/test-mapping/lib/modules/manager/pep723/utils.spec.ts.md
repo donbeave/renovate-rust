@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | should extract dependencies | ported | `crates/renovate-core/src/extractors/pep723.rs:337` |
-| 42 | should skip invalid dependencies | ported | `crates/renovate-core/src/extractors/pep723.rs:352` |
-| 71 | should return null on missing dependencies | ported | `crates/renovate-core/src/extractors/pep723.rs:362` |
-| 84 | should return null on invalid toml | ported | `crates/renovate-core/src/extractors/pep723.rs:369` |
-| 101 | should return null if there is no pep 723 metadata | ported | `crates/renovate-core/src/extractors/pep723.rs:376` |
+| 6 | should extract dependencies | ported | [`crates/renovate-core/src/extractors/pep723.rs:337`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L337) |
+| 42 | should skip invalid dependencies | ported | [`crates/renovate-core/src/extractors/pep723.rs:352`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L352) |
+| 71 | should return null on missing dependencies | ported | [`crates/renovate-core/src/extractors/pep723.rs:362`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L362) |
+| 84 | should return null on invalid toml | ported | [`crates/renovate-core/src/extractors/pep723.rs:369`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L369) |
+| 101 | should return null if there is no pep 723 metadata | ported | [`crates/renovate-core/src/extractors/pep723.rs:376`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L376) |
 

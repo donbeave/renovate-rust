@@ -12,13 +12,13 @@
 | 61 | _(it.each / template — verify manually)_ | ? | — |
 | 80 | _(it.each / template — verify manually)_ | ? | — |
 | 98 | _(it.each / template — verify manually)_ | ? | — |
-| 115 | retrieves schedule of the previous previous release | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1151` |
-| 122 | retrieves schedule of the previous release | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1152` |
-| 129 | retrieves schedule of the most recent release | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1153` |
-| 136 | sends a float as an argument | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1154` |
-| 143 | sends an out of bound argument | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1155` |
-| 147 | sends another out of bound argument | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1156` |
-| 151 | retrieves focal release schedule | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1097` |
-| 158 | retrieves non-existent release schedule | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1098` |
-| 162 | works with debian | ported | `crates/renovate-core/src/versioning/ubuntu.rs:1224` |
+| 115 | retrieves schedule of the previous previous release | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1151`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1151) |
+| 122 | retrieves schedule of the previous release | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1152`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1152) |
+| 129 | retrieves schedule of the most recent release | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1153`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1153) |
+| 136 | sends a float as an argument | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1154`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1154) |
+| 143 | sends an out of bound argument | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1155`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1155) |
+| 147 | sends another out of bound argument | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1156`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1156) |
+| 151 | retrieves focal release schedule | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1097`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1097) |
+| 158 | retrieves non-existent release schedule | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1098`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1098) |
+| 162 | works with debian | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1224`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1224) |
 

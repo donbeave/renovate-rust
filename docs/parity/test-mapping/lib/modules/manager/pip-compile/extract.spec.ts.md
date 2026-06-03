@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 40 | returns object for requirements.in | ported | `crates/renovate-core/src/extractors/pip_compile.rs:171` |
-| 50 | returns object for setup.py | ported | `crates/renovate-core/src/extractors/pip_compile.rs:183` |
-| 60 | returns object for pyproject.toml | ported | `crates/renovate-core/src/extractors/pip_compile.rs:203` |
+| 40 | returns object for requirements.in | ported | [`crates/renovate-core/src/extractors/pip_compile.rs:171`](../../../../../../../crates/renovate-core/src/extractors/pip_compile.rs#L171) |
+| 50 | returns object for setup.py | ported | [`crates/renovate-core/src/extractors/pip_compile.rs:183`](../../../../../../../crates/renovate-core/src/extractors/pip_compile.rs#L183) |
+| 60 | returns object for pyproject.toml | ported | [`crates/renovate-core/src/extractors/pip_compile.rs:203`](../../../../../../../crates/renovate-core/src/extractors/pip_compile.rs#L203) |
 | 93 | _(it.each / template — verify manually)_ | ? | — |
 | 105 | support package file with multiple lock files | pending | — |
 | 137 | no lock files in returned package files | pending | — |

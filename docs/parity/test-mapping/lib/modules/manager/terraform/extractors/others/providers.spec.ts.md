@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | return null if no provider returned | ported | `crates/renovate-core/src/extractors/terraform.rs:3075` |
+| 6 | return null if no provider returned | ported | [`crates/renovate-core/src/extractors/terraform.rs:3075`](../../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3075) |
 

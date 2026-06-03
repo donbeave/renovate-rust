@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 11 | returns null for empty result | ported | `crates/renovate-core/src/datasources/cpan.rs:277` |
-| 27 | returns null for 404 | ported | `crates/renovate-core/src/datasources/cpan.rs:297` |
-| 37 | throws for 5xx | ported | `crates/renovate-core/src/datasources/cpan.rs:314` |
-| 47 | returns null for unknown error | ported | `crates/renovate-core/src/datasources/cpan.rs:329` |
-| 57 | processes real data | ported | `crates/renovate-core/src/datasources/cpan.rs:346` |
+| 11 | returns null for empty result | ported | [`crates/renovate-core/src/datasources/cpan.rs:277`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L277) |
+| 27 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/cpan.rs:297`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L297) |
+| 37 | throws for 5xx | ported | [`crates/renovate-core/src/datasources/cpan.rs:314`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L314) |
+| 47 | returns null for unknown error | ported | [`crates/renovate-core/src/datasources/cpan.rs:329`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L329) |
+| 57 | processes real data | ported | [`crates/renovate-core/src/datasources/cpan.rs:346`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L346) |
 

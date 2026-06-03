@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns new instances of arrays when called repeatedly | ported | `crates/renovate-core/src/config.rs:955` |
-| 20 | returns true for boolean values | ported | `crates/renovate-core/src/config.rs:973` |
+| 6 | returns new instances of arrays when called repeatedly | ported | [`crates/renovate-core/src/config.rs:955`](../../../../../crates/renovate-core/src/config.rs#L955) |
+| 20 | returns true for boolean values | ported | [`crates/renovate-core/src/config.rs:973`](../../../../../crates/renovate-core/src/config.rs#L973) |
 | 31 | _(it.each / template — verify manually)_ | ? | — |
 

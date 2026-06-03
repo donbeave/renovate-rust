@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should migrate to ignorepaths | ported | `crates/renovate-core/src/config/migrate_validate.rs:6333` |
+| 4 | should migrate to ignorepaths | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6333`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6333) |
 

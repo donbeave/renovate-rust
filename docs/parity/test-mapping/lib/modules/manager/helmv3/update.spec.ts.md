@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 12 | increments | ported | `crates/renovate-core/src/extractors/helm.rs:834` |
-| 22 | no ops | ported | `crates/renovate-core/src/extractors/helm.rs:841` |
-| 31 | updates | ported | `crates/renovate-core/src/extractors/helm.rs:848` |
-| 41 | returns content if bumping errors | ported | `crates/renovate-core/src/extractors/helm.rs:855` |
+| 12 | increments | ported | [`crates/renovate-core/src/extractors/helm.rs:834`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L834) |
+| 22 | no ops | ported | [`crates/renovate-core/src/extractors/helm.rs:841`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L841) |
+| 31 | updates | ported | [`crates/renovate-core/src/extractors/helm.rs:848`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L848) |
+| 41 | returns content if bumping errors | ported | [`crates/renovate-core/src/extractors/helm.rs:855`](../../../../../../../crates/renovate-core/src/extractors/helm.rs#L855) |
 

@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 11 | detects already updated | ported | `crates/renovate-core/src/extractors/poetry.rs:1638` |
-| 23 | returns unsupported | ported | `crates/renovate-core/src/extractors/poetry.rs:1646` |
-| 35 | returns unsupported for mising locked content | ported | `crates/renovate-core/src/extractors/poetry.rs:1654` |
+| 11 | detects already updated | ported | [`crates/renovate-core/src/extractors/poetry.rs:1638`](../../../../../../../crates/renovate-core/src/extractors/poetry.rs#L1638) |
+| 23 | returns unsupported | ported | [`crates/renovate-core/src/extractors/poetry.rs:1646`](../../../../../../../crates/renovate-core/src/extractors/poetry.rs#L1646) |
+| 35 | returns unsupported for mising locked content | ported | [`crates/renovate-core/src/extractors/poetry.rs:1654`](../../../../../../../crates/renovate-core/src/extractors/poetry.rs#L1654) |
 

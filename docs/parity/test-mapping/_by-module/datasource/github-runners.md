@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/github-runners/index.spec.ts`](../../lib/modules/datasource/github-runners/index.spec.ts.md) | 4 | 4 | 0 | `crates/renovate-core/src/datasources/github_runners.rs` | ported |
+| [`lib/modules/datasource/github-runners/index.spec.ts`](../../lib/modules/datasource/github-runners/index.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/datasources/github_runners.rs`](../../../../../crates/renovate-core/src/datasources/github_runners.rs) | ported |
 

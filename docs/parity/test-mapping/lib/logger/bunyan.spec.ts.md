@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | checks for valid log levels | ported | `crates/renovate-cli/src/logging.rs:124` |
+| 6 | checks for valid log levels | ported | [`crates/renovate-cli/src/logging.rs:124`](../../../../../crates/renovate-cli/src/logging.rs#L124) |
 | 16 | _(it.each / template — verify manually)_ | ? | — |
 

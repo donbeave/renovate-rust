@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should migrate properly | ported | `crates/renovate-core/src/config/migrate_validate.rs:5589` |
+| 4 | should migrate properly | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5589`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5589) |
 

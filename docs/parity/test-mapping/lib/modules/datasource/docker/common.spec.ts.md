@@ -19,6 +19,6 @@
 | 201 | fails | pending | — |
 | 223 | use resources url and resolve scope in www-authenticate header | pending | — |
 | 251 | supports multiple challenges in www-authenticate header | pending | — |
-| 279 | findlateststable works | ported | `crates/renovate-core/src/datasources/docker_hub.rs:532` |
+| 279 | findlateststable works | ported | [`crates/renovate-core/src/datasources/docker_hub.rs:532`](../../../../../../../crates/renovate-core/src/datasources/docker_hub.rs#L532) |
 | 283 | findhelmsourceurl works | pending | — |
 

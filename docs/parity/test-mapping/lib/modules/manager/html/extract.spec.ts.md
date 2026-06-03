@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | extractpackagefile | ported | `crates/renovate-core/src/extractors/html.rs:138` |
-| 29 | returns null | ported | `crates/renovate-core/src/extractors/html.rs:207` |
+| 8 | extractpackagefile | ported | [`crates/renovate-core/src/extractors/html.rs:138`](../../../../../../../crates/renovate-core/src/extractors/html.rs#L138) |
+| 29 | returns null | ported | [`crates/renovate-core/src/extractors/html.rs:207`](../../../../../../../crates/renovate-core/src/extractors/html.rs#L207) |
 

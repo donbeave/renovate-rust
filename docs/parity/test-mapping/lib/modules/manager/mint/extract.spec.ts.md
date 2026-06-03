@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns null for empty | ported | `crates/renovate-core/src/extractors/mint.rs:84` |
-| 10 | mintfile with version description | ported | `crates/renovate-core/src/extractors/mint.rs:90` |
-| 41 | mintfile without version description | ported | `crates/renovate-core/src/extractors/mint.rs:109` |
-| 60 | complex mintfile | ported | `crates/renovate-core/src/extractors/mint.rs:121` |
-| 88 | mintfile includes commented out | ported | `crates/renovate-core/src/extractors/mint.rs:136` |
+| 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/mint.rs:84`](../../../../../../../crates/renovate-core/src/extractors/mint.rs#L84) |
+| 10 | mintfile with version description | ported | [`crates/renovate-core/src/extractors/mint.rs:90`](../../../../../../../crates/renovate-core/src/extractors/mint.rs#L90) |
+| 41 | mintfile without version description | ported | [`crates/renovate-core/src/extractors/mint.rs:109`](../../../../../../../crates/renovate-core/src/extractors/mint.rs#L109) |
+| 60 | complex mintfile | ported | [`crates/renovate-core/src/extractors/mint.rs:121`](../../../../../../../crates/renovate-core/src/extractors/mint.rs#L121) |
+| 88 | mintfile includes commented out | ported | [`crates/renovate-core/src/extractors/mint.rs:136`](../../../../../../../crates/renovate-core/src/extractors/mint.rs#L136) |
 

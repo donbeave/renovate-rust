@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 10 | should extract dependencies | ported | `crates/renovate-core/src/extractors/pep723.rs:255` |
+| 10 | should extract dependencies | ported | [`crates/renovate-core/src/extractors/pep723.rs:255`](../../../../../../../crates/renovate-core/src/extractors/pep723.rs#L255) |
 

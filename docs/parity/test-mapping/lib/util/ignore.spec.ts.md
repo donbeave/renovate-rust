@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 11 | returns true for "renovate:ignore" comments | ported | `crates/renovate-core/src/string_match.rs:579` |
-| 15 | returns false for comments not starting with "renovate:" or "pyup:" | ported | `crates/renovate-core/src/string_match.rs:591` |
-| 19 | returns false for "renovate:" comments without "ignore" | ported | `crates/renovate-core/src/string_match.rs:597` |
+| 11 | returns true for "renovate:ignore" comments | ported | [`crates/renovate-core/src/string_match.rs:579`](../../../../../crates/renovate-core/src/string_match.rs#L579) |
+| 15 | returns false for comments not starting with "renovate:" or "pyup:" | ported | [`crates/renovate-core/src/string_match.rs:591`](../../../../../crates/renovate-core/src/string_match.rs#L591) |
+| 19 | returns false for "renovate:" comments without "ignore" | ported | [`crates/renovate-core/src/string_match.rs:597`](../../../../../crates/renovate-core/src/string_match.rs#L597) |
 | 23 | logs unknown command for "renovate:" comments without "ignore" | pending | — |
-| 31 | returns false when comment is undefined | ported | `crates/renovate-core/src/string_match.rs:603` |
+| 31 | returns false when comment is undefined | ported | [`crates/renovate-core/src/string_match.rs:603`](../../../../../crates/renovate-core/src/string_match.rs#L603) |
 

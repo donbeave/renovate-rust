@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/renovate-config/extract.spec.ts`](../../lib/modules/manager/renovate-config/extract.spec.ts.md) | 20 | 18 | 2 | `crates/renovate-core/src/extractors/renovate_config_presets.rs` | partial |
+| [`lib/modules/manager/renovate-config/extract.spec.ts`](../../lib/modules/manager/renovate-config/extract.spec.ts.md) | 20 | 18 | 2 | [`crates/renovate-core/src/extractors/renovate_config_presets.rs`](../../../../../crates/renovate-core/src/extractors/renovate_config_presets.rs) | partial |
 

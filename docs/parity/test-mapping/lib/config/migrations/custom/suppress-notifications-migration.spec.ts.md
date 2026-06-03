@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should remomve preditnotification from array | ported | `crates/renovate-core/src/config/migrate_validate.rs:6172` |
-| 15 | should not migrate array without preditnotification | ported | `crates/renovate-core/src/config/migrate_validate.rs:6181` |
-| 27 | should not migrate empty array | ported | `crates/renovate-core/src/config/migrate_validate.rs:6190` |
+| 4 | should remomve preditnotification from array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6172`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6172) |
+| 15 | should not migrate array without preditnotification | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6181`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6181) |
+| 27 | should not migrate empty array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6190`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6190) |
 

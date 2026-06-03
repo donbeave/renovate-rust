@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns same if not auto | ported | `crates/renovate-core/src/extractors/circleci.rs:635` |
-| 10 | defaults to bump | ported | `crates/renovate-core/src/extractors/circleci.rs:641` |
+| 5 | returns same if not auto | ported | [`crates/renovate-core/src/extractors/circleci.rs:635`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L635) |
+| 10 | defaults to bump | ported | [`crates/renovate-core/src/extractors/circleci.rs:641`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L641) |
 

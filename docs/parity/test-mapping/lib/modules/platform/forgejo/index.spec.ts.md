@@ -133,9 +133,9 @@
 | 2957 | should assign user and team reviewers | pending | — |
 | 2975 | should assign user reviewers | pending | — |
 | 2990 | catches errors | pending | — |
-| 3009 | replaces pr links | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:208` |
-| 3018 | replaces issue links | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:219` |
-| 3028 | maxbodylength | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:230` |
+| 3009 | replaces pr links | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:208`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L208) |
+| 3018 | replaces issue links | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:219`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L219) |
+| 3028 | maxbodylength | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:230`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L230) |
 | 3033 | returns file content | pending | — |
 | 3049 | returns file content from given repo | pending | — |
 | 3065 | returns file content from branch or tag | pending | — |

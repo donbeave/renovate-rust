@@ -7,6 +7,6 @@
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
 | [`lib/modules/manager/kustomize/artifacts.spec.ts`](../../lib/modules/manager/kustomize/artifacts.spec.ts.md) | 19 | 0 | 19 | — | pending |
-| [`lib/modules/manager/kustomize/common.spec.ts`](../../lib/modules/manager/kustomize/common.spec.ts.md) | 4 | 4 | 0 | `crates/renovate-core/src/util.rs` | ported |
-| [`lib/modules/manager/kustomize/extract.spec.ts`](../../lib/modules/manager/kustomize/extract.spec.ts.md) | 45 | 43 | 2 | `crates/renovate-core/src/extractors/kustomize.rs` | partial |
+| [`lib/modules/manager/kustomize/common.spec.ts`](../../lib/modules/manager/kustomize/common.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/util.rs`](../../../../../crates/renovate-core/src/util.rs) | ported |
+| [`lib/modules/manager/kustomize/extract.spec.ts`](../../lib/modules/manager/kustomize/extract.spec.ts.md) | 45 | 43 | 2 | [`crates/renovate-core/src/extractors/kustomize.rs`](../../../../../crates/renovate-core/src/extractors/kustomize.rs) | partial |
 

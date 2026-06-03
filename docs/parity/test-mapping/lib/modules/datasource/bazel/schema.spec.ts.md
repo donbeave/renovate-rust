@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | parses metadata | ported | `crates/renovate-core/src/datasources/bazel.rs:392` |
+| 6 | parses metadata | ported | [`crates/renovate-core/src/datasources/bazel.rs:392`](../../../../../../../crates/renovate-core/src/datasources/bazel.rs#L392) |
 

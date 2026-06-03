@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 29 | should throw error for unsupported compression | ported | `crates/renovate-core/src/datasources/deb.rs:172` |
+| 29 | should throw error for unsupported compression | ported | [`crates/renovate-core/src/datasources/deb.rs:172`](../../../../../../../crates/renovate-core/src/datasources/deb.rs#L172) |
 

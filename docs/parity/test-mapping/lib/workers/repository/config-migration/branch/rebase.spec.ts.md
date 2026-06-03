@@ -10,5 +10,5 @@
 | 64 | _(it.each / template — verify manually)_ | ? | — |
 | 81 | _(it.each / template — verify manually)_ | ? | — |
 | 116 | _(it.each / template — verify manually)_ | ? | — |
-| 138 | should strip white spaces from json | ported | `crates/renovate-core/src/json_writer.rs:119` |
+| 138 | should strip white spaces from json | ported | [`crates/renovate-core/src/json_writer.rs:119`](../../../../../../../../crates/renovate-core/src/json_writer.rs#L119) |
 

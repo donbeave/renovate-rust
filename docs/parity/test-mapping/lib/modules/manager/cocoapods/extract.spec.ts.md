@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 13 | extracts from simple file | ported | `crates/renovate-core/src/extractors/cocoapods.rs:342` |
-| 42 | extracts from complex file | ported | `crates/renovate-core/src/extractors/cocoapods.rs:394` |
+| 13 | extracts from simple file | ported | [`crates/renovate-core/src/extractors/cocoapods.rs:342`](../../../../../../../crates/renovate-core/src/extractors/cocoapods.rs#L342) |
+| 42 | extracts from complex file | ported | [`crates/renovate-core/src/extractors/cocoapods.rs:394`](../../../../../../../crates/renovate-core/src/extractors/cocoapods.rs#L394) |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/repology/index.spec.ts`](../../lib/modules/datasource/repology/index.spec.ts.md) | 19 | 18 | 1 | `crates/renovate-core/src/datasources/repology.rs` | partial |
+| [`lib/modules/datasource/repology/index.spec.ts`](../../lib/modules/datasource/repology/index.spec.ts.md) | 19 | 18 | 1 | [`crates/renovate-core/src/datasources/repology.rs`](../../../../../crates/renovate-core/src/datasources/repology.rs) | partial |
 

@@ -8,6 +8,6 @@
 |---|--:|--:|--:|---|---|
 | [`lib/modules/datasource/rubygems/index.spec.ts`](../../lib/modules/datasource/rubygems/index.spec.ts.md) | 11 | 0 | 11 | — | pending |
 | [`lib/modules/datasource/rubygems/metadata-cache.spec.ts`](../../lib/modules/datasource/rubygems/metadata-cache.spec.ts.md) | 7 | 0 | 7 | — | pending |
-| [`lib/modules/datasource/rubygems/schema.spec.ts`](../../lib/modules/datasource/rubygems/schema.spec.ts.md) | 7 | 3 | 4 | `crates/renovate-core/src/datasources/rubygems.rs` | partial |
+| [`lib/modules/datasource/rubygems/schema.spec.ts`](../../lib/modules/datasource/rubygems/schema.spec.ts.md) | 7 | 3 | 4 | [`crates/renovate-core/src/datasources/rubygems.rs`](../../../../../crates/renovate-core/src/datasources/rubygems.rs) | partial |
 | [`lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts`](../../lib/modules/datasource/rubygems/versions-endpoint-cache.spec.ts.md) | 10 | 0 | 10 | — | pending |
 

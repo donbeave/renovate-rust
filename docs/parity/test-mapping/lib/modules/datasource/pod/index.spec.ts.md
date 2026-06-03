@@ -9,10 +9,10 @@
 | 26 | returns null for invalid inputs | pending | — |
 | 41 | returns null disabled host | pending | — |
 | 51 | returns null for empty result | pending | — |
-| 60 | returns null for 404 | ported | `crates/renovate-core/src/datasources/cocoapods.rs:220` |
+| 60 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/cocoapods.rs:220`](../../../../../../../crates/renovate-core/src/datasources/cocoapods.rs#L220) |
 | 78 | returns null for 404 github enterprise | pending | — |
 | 99 | returns null for 404 github enterprise with different url style | pending | — |
-| 117 | returns null for 401 | ported | `crates/renovate-core/src/datasources/cocoapods.rs:237` |
+| 117 | returns null for 401 | ported | [`crates/renovate-core/src/datasources/cocoapods.rs:237`](../../../../../../../crates/renovate-core/src/datasources/cocoapods.rs#L237) |
 | 125 | throws for 429 | pending | — |
 | 133 | throws for 500 | pending | — |
 | 141 | returns null for unknown error | pending | — |

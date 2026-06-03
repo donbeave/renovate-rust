@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | should return true if the branch exists | ported | `crates/renovate-core/src/platform/github.rs:4584` |
-| 16 | should return false if the branch does not exist | ported | `crates/renovate-core/src/platform/github.rs:4606` |
-| 27 | should throw an error for nested branches | ported | `crates/renovate-core/src/platform/github.rs:4626` |
-| 44 | should throw an error if the request fails for any other reason | ported | `crates/renovate-core/src/platform/github.rs:4650` |
+| 5 | should return true if the branch exists | ported | [`crates/renovate-core/src/platform/github.rs:4584`](../../../../../../../crates/renovate-core/src/platform/github.rs#L4584) |
+| 16 | should return false if the branch does not exist | ported | [`crates/renovate-core/src/platform/github.rs:4606`](../../../../../../../crates/renovate-core/src/platform/github.rs#L4606) |
+| 27 | should throw an error for nested branches | ported | [`crates/renovate-core/src/platform/github.rs:4626`](../../../../../../../crates/renovate-core/src/platform/github.rs#L4626) |
+| 44 | should throw an error if the request fails for any other reason | ported | [`crates/renovate-core/src/platform/github.rs:4650`](../../../../../../../crates/renovate-core/src/platform/github.rs#L4650) |
 

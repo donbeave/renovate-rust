@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/node-version/index.spec.ts`](../../lib/modules/datasource/node-version/index.spec.ts.md) | 4 | 2 | 2 | `crates/renovate-core/src/datasources/node_version.rs` | partial |
+| [`lib/modules/datasource/node-version/index.spec.ts`](../../lib/modules/datasource/node-version/index.spec.ts.md) | 4 | 2 | 2 | [`crates/renovate-core/src/datasources/node_version.rs`](../../../../../crates/renovate-core/src/datasources/node_version.rs) | partial |
 

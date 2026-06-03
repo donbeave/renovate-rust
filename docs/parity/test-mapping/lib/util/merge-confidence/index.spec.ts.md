@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 22 | returns false if null | ported | `crates/renovate-core/src/merge_confidence.rs:45` |
-| 26 | returns false if low | ported | `crates/renovate-core/src/merge_confidence.rs:51` |
-| 30 | returns false if nonsense | ported | `crates/renovate-core/src/merge_confidence.rs:57` |
-| 34 | returns true if valid value (high) | ported | `crates/renovate-core/src/merge_confidence.rs:63` |
-| 40 | returns false if less | ported | `crates/renovate-core/src/merge_confidence.rs:69` |
-| 44 | returns true if equal | ported | `crates/renovate-core/src/merge_confidence.rs:75` |
-| 48 | returns true if more | ported | `crates/renovate-core/src/merge_confidence.rs:81` |
+| 22 | returns false if null | ported | [`crates/renovate-core/src/merge_confidence.rs:45`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L45) |
+| 26 | returns false if low | ported | [`crates/renovate-core/src/merge_confidence.rs:51`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L51) |
+| 30 | returns false if nonsense | ported | [`crates/renovate-core/src/merge_confidence.rs:57`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L57) |
+| 34 | returns true if valid value (high) | ported | [`crates/renovate-core/src/merge_confidence.rs:63`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L63) |
+| 40 | returns false if less | ported | [`crates/renovate-core/src/merge_confidence.rs:69`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L69) |
+| 44 | returns true if equal | ported | [`crates/renovate-core/src/merge_confidence.rs:75`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L75) |
+| 48 | returns true if more | ported | [`crates/renovate-core/src/merge_confidence.rs:81`](../../../../../../crates/renovate-core/src/merge_confidence.rs#L81) |
 | 71 | returns neutral if undefined updatetype | pending | — |
 | 83 | returns neutral if irrelevant updatetype | pending | — |
 | 95 | returns high if pinning | pending | — |

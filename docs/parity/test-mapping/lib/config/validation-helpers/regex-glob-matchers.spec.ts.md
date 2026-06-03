@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | should error for multiple match alls | ported | `crates/renovate-core/src/config/migrate_validate.rs:4183` |
-| 12 | should error for invalid regex | ported | `crates/renovate-core/src/config/migrate_validate.rs:4191` |
-| 20 | should error for non-strings | ported | `crates/renovate-core/src/config/migrate_validate.rs:4201` |
+| 4 | should error for multiple match alls | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4183`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4183) |
+| 12 | should error for invalid regex | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4191`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4191) |
+| 20 | should error for non-strings | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4201`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4201) |
 

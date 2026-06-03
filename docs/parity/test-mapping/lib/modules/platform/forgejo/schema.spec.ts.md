@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | contentsresponseschema | ported | `crates/renovate-core/src/platform/gitea_forgejo_utils.rs:237` |
+| 4 | contentsresponseschema | ported | [`crates/renovate-core/src/platform/gitea_forgejo_utils.rs:237`](../../../../../../../crates/renovate-core/src/platform/gitea_forgejo_utils.rs#L237) |
 

@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | creates semantic commit message | ported | `crates/renovate-core/src/branch.rs:2168` |
-| 19 | creates semantic pr title | ported | `crates/renovate-core/src/branch.rs:2177` |
-| 30 | creates non-semantic commit message | ported | `crates/renovate-core/src/branch.rs:2186` |
-| 41 | creates non-semantic pr title | ported | `crates/renovate-core/src/branch.rs:2195` |
-| 50 | returns default values when commitmessage template string is empty | ported | `crates/renovate-core/src/branch.rs:2204` |
+| 8 | creates semantic commit message | ported | [`crates/renovate-core/src/branch.rs:2168`](../../../../../../../../crates/renovate-core/src/branch.rs#L2168) |
+| 19 | creates semantic pr title | ported | [`crates/renovate-core/src/branch.rs:2177`](../../../../../../../../crates/renovate-core/src/branch.rs#L2177) |
+| 30 | creates non-semantic commit message | ported | [`crates/renovate-core/src/branch.rs:2186`](../../../../../../../../crates/renovate-core/src/branch.rs#L2186) |
+| 41 | creates non-semantic pr title | ported | [`crates/renovate-core/src/branch.rs:2195`](../../../../../../../../crates/renovate-core/src/branch.rs#L2195) |
+| 50 | returns default values when commitmessage template string is empty | ported | [`crates/renovate-core/src/branch.rs:2204`](../../../../../../../../crates/renovate-core/src/branch.rs#L2204) |
 

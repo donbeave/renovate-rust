@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | returns array | ported | `crates/renovate-core/src/util.rs:5916` |
-| 8 | redacts | ported | `crates/renovate-core/src/util.rs:5925` |
+| 4 | returns array | ported | [`crates/renovate-core/src/util.rs:5916`](../../../../../crates/renovate-core/src/util.rs#L5916) |
+| 8 | redacts | ported | [`crates/renovate-core/src/util.rs:5925`](../../../../../crates/renovate-core/src/util.rs#L5925) |
 

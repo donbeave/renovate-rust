@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/crossplane/extract.spec.ts`](../../lib/modules/manager/crossplane/extract.spec.ts.md) | 9 | 9 | 0 | `crates/renovate-core/src/extractors/crossplane.rs` | ported |
+| [`lib/modules/manager/crossplane/extract.spec.ts`](../../lib/modules/manager/crossplane/extract.spec.ts.md) | 9 | 9 | 0 | [`crates/renovate-core/src/extractors/crossplane.rs`](../../../../../crates/renovate-core/src/extractors/crossplane.rs) | ported |
 

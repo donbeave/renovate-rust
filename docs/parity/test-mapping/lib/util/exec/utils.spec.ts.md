@@ -23,8 +23,8 @@
 | 153 | is not a commandwithoptions | pending | — |
 | 165 | is a commandwithoptions | pending | — |
 | 176 | is a commandwithoptions | pending | — |
-| 189 | returns array of strings | ported | `crates/renovate-core/src/util.rs:10518` |
-| 198 | returns array of strings | ported | `crates/renovate-core/src/util.rs:10518` |
-| 207 | returns an array of many strings | ported | `crates/renovate-core/src/util.rs:10537` |
-| 220 | returns commands from the `commandwithoptions` | ported | `crates/renovate-core/src/util.rs:10550` |
+| 189 | returns array of strings | ported | [`crates/renovate-core/src/util.rs:10518`](../../../../../../crates/renovate-core/src/util.rs#L10518) |
+| 198 | returns array of strings | ported | [`crates/renovate-core/src/util.rs:10518`](../../../../../../crates/renovate-core/src/util.rs#L10518) |
+| 207 | returns an array of many strings | ported | [`crates/renovate-core/src/util.rs:10537`](../../../../../../crates/renovate-core/src/util.rs#L10537) |
+| 220 | returns commands from the `commandwithoptions` | ported | [`crates/renovate-core/src/util.rs:10550`](../../../../../../crates/renovate-core/src/util.rs#L10550) |
 

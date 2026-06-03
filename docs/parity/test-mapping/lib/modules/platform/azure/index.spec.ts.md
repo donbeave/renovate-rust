@@ -65,8 +65,8 @@
 | 1539 | addassignees | pending | — |
 | 1567 | addreviewers one valid | pending | — |
 | 1593 | addreviewers all valid | pending | — |
-| 1621 | returns updated pr body | ported | `crates/renovate-core/src/platform/azure_utils.rs:456` |
-| 1630 | returns updated comment content | ported | `crates/renovate-core/src/platform/azure_utils.rs:466` |
+| 1621 | returns updated pr body | ported | [`crates/renovate-core/src/platform/azure_utils.rs:456`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L456) |
+| 1630 | returns updated comment content | ported | [`crates/renovate-core/src/platform/azure_utils.rs:466`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L466) |
 | 1641 | should build and call the create status api properly | pending | — |
 | 1673 | should build and call the create status api properly with a complex context | pending | — |
 | 1707 | should complete the pr | pending | — |

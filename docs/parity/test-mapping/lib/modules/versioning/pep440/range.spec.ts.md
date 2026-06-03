@@ -7,7 +7,7 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 8 | _(it.each / template — verify manually)_ | ? | — |
-| 24 | returns null without warning if new version is excluded from range | ported | `crates/renovate-core/src/versioning/pep440.rs:1265` |
-| 39 | handles v-prefixed version as currentvalue | ported | `crates/renovate-core/src/versioning/pep440.rs:1278` |
-| 49 | handles bare version that differs from currentversion without v-prefix | ported | `crates/renovate-core/src/versioning/pep440.rs:1291` |
+| 24 | returns null without warning if new version is excluded from range | ported | [`crates/renovate-core/src/versioning/pep440.rs:1265`](../../../../../../../crates/renovate-core/src/versioning/pep440.rs#L1265) |
+| 39 | handles v-prefixed version as currentvalue | ported | [`crates/renovate-core/src/versioning/pep440.rs:1278`](../../../../../../../crates/renovate-core/src/versioning/pep440.rs#L1278) |
+| 49 | handles bare version that differs from currentversion without v-prefix | ported | [`crates/renovate-core/src/versioning/pep440.rs:1291`](../../../../../../../crates/renovate-core/src/versioning/pep440.rs#L1291) |
 

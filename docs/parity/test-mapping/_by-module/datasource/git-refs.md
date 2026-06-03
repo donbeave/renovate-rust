@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/git-refs/index.spec.ts`](../../lib/modules/datasource/git-refs/index.spec.ts.md) | 11 | 8 | 3 | `crates/renovate-core/src/datasources/git_refs.rs` | partial |
+| [`lib/modules/datasource/git-refs/index.spec.ts`](../../lib/modules/datasource/git-refs/index.spec.ts.md) | 11 | 8 | 3 | [`crates/renovate-core/src/datasources/git_refs.rs`](../../../../../crates/renovate-core/src/datasources/git_refs.rs) | partial |
 

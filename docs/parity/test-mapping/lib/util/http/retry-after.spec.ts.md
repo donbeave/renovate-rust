@@ -6,17 +6,17 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 27 | works | ported | `crates/renovate-core/src/http.rs:728` |
-| 34 | throws | ported | `crates/renovate-core/src/http.rs:803` |
-| 44 | retries | ported | `crates/renovate-core/src/http.rs:729` |
-| 59 | gives up after max retries | ported | `crates/renovate-core/src/http.rs:759` |
-| 76 | gives up when delay exceeds maxretryafter | ported | `crates/renovate-core/src/http.rs:781` |
+| 27 | works | ported | [`crates/renovate-core/src/http.rs:728`](../../../../../../crates/renovate-core/src/http.rs#L728) |
+| 34 | throws | ported | [`crates/renovate-core/src/http.rs:803`](../../../../../../crates/renovate-core/src/http.rs#L803) |
+| 44 | retries | ported | [`crates/renovate-core/src/http.rs:729`](../../../../../../crates/renovate-core/src/http.rs#L729) |
+| 59 | gives up after max retries | ported | [`crates/renovate-core/src/http.rs:759`](../../../../../../crates/renovate-core/src/http.rs#L759) |
+| 76 | gives up when delay exceeds maxretryafter | ported | [`crates/renovate-core/src/http.rs:781`](../../../../../../crates/renovate-core/src/http.rs#L781) |
 | 89 | returns null for non-requesterror | pending | — |
 | 93 | returns null for requesterror without response | pending | — |
 | 97 | returns null for status other than 429 | pending | — |
-| 103 | returns null missing "retry-after" header | ported | `crates/renovate-core/src/http.rs:1627` |
-| 109 | returns null for non-integer "retry-after" header | ported | `crates/renovate-core/src/http.rs:1594` |
-| 122 | returns delay in seconds from date | ported | `crates/renovate-core/src/http.rs:1602` |
-| 136 | returns delay in seconds from number | ported | `crates/renovate-core/src/http.rs:1613` |
-| 149 | returns null for invalid header value | ported | `crates/renovate-core/src/http.rs:1620` |
+| 103 | returns null missing "retry-after" header | ported | [`crates/renovate-core/src/http.rs:1627`](../../../../../../crates/renovate-core/src/http.rs#L1627) |
+| 109 | returns null for non-integer "retry-after" header | ported | [`crates/renovate-core/src/http.rs:1594`](../../../../../../crates/renovate-core/src/http.rs#L1594) |
+| 122 | returns delay in seconds from date | ported | [`crates/renovate-core/src/http.rs:1602`](../../../../../../crates/renovate-core/src/http.rs#L1602) |
+| 136 | returns delay in seconds from number | ported | [`crates/renovate-core/src/http.rs:1613`](../../../../../../crates/renovate-core/src/http.rs#L1613) |
+| 149 | returns null for invalid header value | ported | [`crates/renovate-core/src/http.rs:1620`](../../../../../../crates/renovate-core/src/http.rs#L1620) |
 

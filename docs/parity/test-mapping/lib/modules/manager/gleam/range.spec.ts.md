@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns same if not auto | ported | `crates/renovate-core/src/extractors/gleam.rs:321` |
-| 10 | widens complex bump | ported | `crates/renovate-core/src/extractors/gleam.rs:327` |
-| 19 | defaults to widen | ported | `crates/renovate-core/src/extractors/gleam.rs:334` |
+| 5 | returns same if not auto | ported | [`crates/renovate-core/src/extractors/gleam.rs:321`](../../../../../../../crates/renovate-core/src/extractors/gleam.rs#L321) |
+| 10 | widens complex bump | ported | [`crates/renovate-core/src/extractors/gleam.rs:327`](../../../../../../../crates/renovate-core/src/extractors/gleam.rs#L327) |
+| 19 | defaults to widen | ported | [`crates/renovate-core/src/extractors/gleam.rs:334`](../../../../../../../crates/renovate-core/src/extractors/gleam.rs#L334) |
 

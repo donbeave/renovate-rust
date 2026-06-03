@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns a result | ported | `crates/renovate-core/src/extractors/version_file.rs:293` |
-| 16 | supports ranges | ported | `crates/renovate-core/src/extractors/version_file.rs:401` |
-| 27 | skips non ranges | ported | `crates/renovate-core/src/extractors/version_file.rs:300` |
-| 38 | supports code comments | ported | `crates/renovate-core/src/extractors/version_file.rs:409` |
+| 5 | returns a result | ported | [`crates/renovate-core/src/extractors/version_file.rs:293`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L293) |
+| 16 | supports ranges | ported | [`crates/renovate-core/src/extractors/version_file.rs:401`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L401) |
+| 27 | skips non ranges | ported | [`crates/renovate-core/src/extractors/version_file.rs:300`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L300) |
+| 38 | supports code comments | ported | [`crates/renovate-core/src/extractors/version_file.rs:409`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L409) |
 

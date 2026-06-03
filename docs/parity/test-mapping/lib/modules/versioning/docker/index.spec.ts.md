@@ -13,7 +13,7 @@
 | 68 | _(it.each / template — verify manually)_ | ? | — |
 | 92 | _(it.each / template — verify manually)_ | ? | — |
 | 108 | _(it.each / template — verify manually)_ | ? | — |
-| 123 | sorts unstable | ported | `crates/renovate-core/src/versioning/docker.rs:306` |
+| 123 | sorts unstable | ported | [`crates/renovate-core/src/versioning/docker.rs:306`](../../../../../../../crates/renovate-core/src/versioning/docker.rs#L306) |
 | 148 | _(it.each / template — verify manually)_ | ? | — |
 | 164 | _(it.each / template — verify manually)_ | ? | — |
 | 177 | _(it.each / template — verify manually)_ | ? | — |

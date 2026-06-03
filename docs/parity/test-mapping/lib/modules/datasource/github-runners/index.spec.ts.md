@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns releases for ubuntu | ported | `crates/renovate-core/src/datasources/github_runners.rs:271` |
-| 26 | returns releases for macos | ported | `crates/renovate-core/src/datasources/github_runners.rs:288` |
-| 54 | returns releases for windows | ported | `crates/renovate-core/src/datasources/github_runners.rs:313` |
-| 72 | returns null if package is unknown | ported | `crates/renovate-core/src/datasources/github_runners.rs:327` |
+| 6 | returns releases for ubuntu | ported | [`crates/renovate-core/src/datasources/github_runners.rs:271`](../../../../../../../crates/renovate-core/src/datasources/github_runners.rs#L271) |
+| 26 | returns releases for macos | ported | [`crates/renovate-core/src/datasources/github_runners.rs:288`](../../../../../../../crates/renovate-core/src/datasources/github_runners.rs#L288) |
+| 54 | returns releases for windows | ported | [`crates/renovate-core/src/datasources/github_runners.rs:313`](../../../../../../../crates/renovate-core/src/datasources/github_runners.rs#L313) |
+| 72 | returns null if package is unknown | ported | [`crates/renovate-core/src/datasources/github_runners.rs:327`](../../../../../../../crates/renovate-core/src/datasources/github_runners.rs#L327) |
 

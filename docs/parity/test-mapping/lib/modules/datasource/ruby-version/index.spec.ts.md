@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 10 | parses real data | ported | `crates/renovate-core/src/datasources/ruby_version.rs:170` |
-| 22 | returns null for empty result | ported | `crates/renovate-core/src/datasources/ruby_version.rs:213` |
-| 34 | throws for 404 | ported | `crates/renovate-core/src/datasources/ruby_version.rs:228` |
+| 10 | parses real data | ported | [`crates/renovate-core/src/datasources/ruby_version.rs:170`](../../../../../../../crates/renovate-core/src/datasources/ruby_version.rs#L170) |
+| 22 | returns null for empty result | ported | [`crates/renovate-core/src/datasources/ruby_version.rs:213`](../../../../../../../crates/renovate-core/src/datasources/ruby_version.rs#L213) |
+| 34 | throws for 404 | ported | [`crates/renovate-core/src/datasources/ruby_version.rs:228`](../../../../../../../crates/renovate-core/src/datasources/ruby_version.rs#L228) |
 

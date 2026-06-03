@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/scalafmt/extract.spec.ts`](../../lib/modules/manager/scalafmt/extract.spec.ts.md) | 4 | 4 | 0 | `crates/renovate-core/src/extractors/flux.rs`<br>`crates/renovate-core/src/extractors/scalafmt.rs` | ported |
+| [`lib/modules/manager/scalafmt/extract.spec.ts`](../../lib/modules/manager/scalafmt/extract.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/flux.rs`](../../../../../crates/renovate-core/src/extractors/flux.rs)<br>[`crates/renovate-core/src/extractors/scalafmt.rs`](../../../../../crates/renovate-core/src/extractors/scalafmt.rs) | ported |
 

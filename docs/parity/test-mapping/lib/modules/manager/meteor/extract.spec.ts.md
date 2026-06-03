@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | returns empty if fails to parse | ported | `crates/renovate-core/src/extractors/meteor.rs:84` |
-| 13 | returns results | ported | `crates/renovate-core/src/extractors/meteor.rs:73` |
+| 8 | returns empty if fails to parse | ported | [`crates/renovate-core/src/extractors/meteor.rs:84`](../../../../../../../crates/renovate-core/src/extractors/meteor.rs#L84) |
+| 13 | returns results | ported | [`crates/renovate-core/src/extractors/meteor.rs:73`](../../../../../../../crates/renovate-core/src/extractors/meteor.rs#L73) |
 

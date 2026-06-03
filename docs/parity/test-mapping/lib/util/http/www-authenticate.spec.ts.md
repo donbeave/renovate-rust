@@ -7,6 +7,6 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 4 | _(it.each / template — verify manually)_ | ? | — |
-| 135 | parses empty string | ported | `crates/renovate-core/src/http.rs:1380` |
-| 139 | throws on invalid input | ported | `crates/renovate-core/src/http.rs:1387` |
+| 135 | parses empty string | ported | [`crates/renovate-core/src/http.rs:1380`](../../../../../../crates/renovate-core/src/http.rs#L1380) |
+| 139 | throws on invalid input | ported | [`crates/renovate-core/src/http.rs:1387`](../../../../../../crates/renovate-core/src/http.rs#L1387) |
 

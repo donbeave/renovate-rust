@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/azure-tags/index.spec.ts`](../../lib/modules/datasource/azure-tags/index.spec.ts.md) | 5 | 2 | 3 | `crates/renovate-core/src/util.rs` | partial |
+| [`lib/modules/datasource/azure-tags/index.spec.ts`](../../lib/modules/datasource/azure-tags/index.spec.ts.md) | 5 | 2 | 3 | [`crates/renovate-core/src/util.rs`](../../../../../crates/renovate-core/src/util.rs) | partial |
 

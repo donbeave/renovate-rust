@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 10 | increments | ported | `crates/renovate-core/src/extractors/sbt.rs:1205` |
-| 21 | no ops | ported | `crates/renovate-core/src/extractors/sbt.rs:1213` |
-| 31 | updates | ported | `crates/renovate-core/src/extractors/sbt.rs:1220` |
-| 41 | returns content if bumping errors | ported | `crates/renovate-core/src/extractors/sbt.rs:1228` |
+| 10 | increments | ported | [`crates/renovate-core/src/extractors/sbt.rs:1205`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1205) |
+| 21 | no ops | ported | [`crates/renovate-core/src/extractors/sbt.rs:1213`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1213) |
+| 31 | updates | ported | [`crates/renovate-core/src/extractors/sbt.rs:1220`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1220) |
+| 41 | returns content if bumping errors | ported | [`crates/renovate-core/src/extractors/sbt.rs:1228`](../../../../../../../crates/renovate-core/src/extractors/sbt.rs#L1228) |
 

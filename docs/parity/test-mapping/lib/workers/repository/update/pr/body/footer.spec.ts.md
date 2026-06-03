@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | renders empty footer | ported | `crates/renovate-core/src/branch.rs:2542` |
-| 19 | renders prfooter | ported | `crates/renovate-core/src/branch.rs:2548` |
+| 8 | renders empty footer | ported | [`crates/renovate-core/src/branch.rs:2542`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2542) |
+| 19 | renders prfooter | ported | [`crates/renovate-core/src/branch.rs:2548`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2548) |
 

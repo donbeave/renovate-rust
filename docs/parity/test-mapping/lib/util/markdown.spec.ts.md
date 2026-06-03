@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 32 | works | ported | `crates/renovate-core/src/util.rs:9375` |
-| 37 | works with gitlab | ported | `crates/renovate-core/src/util.rs:9383` |
-| 47 | sanitizemarkdown check massaged release notes | ported | `crates/renovate-core/src/util.rs:9395` |
+| 32 | works | ported | [`crates/renovate-core/src/util.rs:9375`](../../../../../crates/renovate-core/src/util.rs#L9375) |
+| 37 | works with gitlab | ported | [`crates/renovate-core/src/util.rs:9383`](../../../../../crates/renovate-core/src/util.rs#L9383) |
+| 47 | sanitizemarkdown check massaged release notes | ported | [`crates/renovate-core/src/util.rs:9395`](../../../../../crates/renovate-core/src/util.rs#L9395) |
 

@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 10 | returns empty if no rules | ported | `crates/renovate-core/src/extractors/npm.rs:5293` |
-| 16 | returns empty if no resolvedhost | ported | `crates/renovate-core/src/extractors/npm.rs:5302` |
-| 23 | returns rules content | ported | `crates/renovate-core/src/extractors/npm.rs:5317` |
-| 64 | returns mixed rules content | ported | `crates/renovate-core/src/extractors/npm.rs:5215` |
-| 146 | uses rules without host type | ported | `crates/renovate-core/src/extractors/npm.rs:5165` |
-| 167 | deduplicates host rules while prefering npm type ones | ported | `crates/renovate-core/src/extractors/npm.rs:5187` |
+| 10 | returns empty if no rules | ported | [`crates/renovate-core/src/extractors/npm.rs:5293`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5293) |
+| 16 | returns empty if no resolvedhost | ported | [`crates/renovate-core/src/extractors/npm.rs:5302`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5302) |
+| 23 | returns rules content | ported | [`crates/renovate-core/src/extractors/npm.rs:5317`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5317) |
+| 64 | returns mixed rules content | ported | [`crates/renovate-core/src/extractors/npm.rs:5215`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5215) |
+| 146 | uses rules without host type | ported | [`crates/renovate-core/src/extractors/npm.rs:5165`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5165) |
+| 167 | deduplicates host rules while prefering npm type ones | ported | [`crates/renovate-core/src/extractors/npm.rs:5187`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5187) |
 

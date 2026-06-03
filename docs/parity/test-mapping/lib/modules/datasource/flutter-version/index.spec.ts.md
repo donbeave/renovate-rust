@@ -8,6 +8,6 @@
 |--:|---|---|---|
 | 14 | throws for 500 | pending | — |
 | 24 | returns null for error | pending | — |
-| 34 | returns null for empty 200 ok | ported | `crates/renovate-core/src/datasources/flutter_version.rs:110` |
-| 44 | processes real data | ported | `crates/renovate-core/src/datasources/flutter_version.rs:117` |
+| 34 | returns null for empty 200 ok | ported | [`crates/renovate-core/src/datasources/flutter_version.rs:110`](../../../../../../../crates/renovate-core/src/datasources/flutter_version.rs#L110) |
+| 44 | processes real data | ported | [`crates/renovate-core/src/datasources/flutter_version.rs:117`](../../../../../../../crates/renovate-core/src/datasources/flutter_version.rs#L117) |
 

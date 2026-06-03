@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | extractpackagefile | ported | `crates/renovate-core/src/extractors/cdnurl.rs:52` |
+| 5 | extractpackagefile | ported | [`crates/renovate-core/src/extractors/cdnurl.rs:52`](../../../../../../../crates/renovate-core/src/extractors/cdnurl.rs#L52) |
 

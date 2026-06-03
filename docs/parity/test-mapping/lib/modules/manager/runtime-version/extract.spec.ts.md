@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns a result - python | ported | `crates/renovate-core/src/extractors/runtime_version.rs:52` |
-| 16 | returns no result | ported | `crates/renovate-core/src/extractors/runtime_version.rs:67` |
+| 5 | returns a result - python | ported | [`crates/renovate-core/src/extractors/runtime_version.rs:52`](../../../../../../../crates/renovate-core/src/extractors/runtime_version.rs#L52) |
+| 16 | returns no result | ported | [`crates/renovate-core/src/extractors/runtime_version.rs:67`](../../../../../../../crates/renovate-core/src/extractors/runtime_version.rs#L67) |
 

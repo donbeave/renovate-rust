@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns null for empty | ported | `crates/renovate-core/src/extractors/gemspec.rs:220` |
-| 10 | extracts dependencies | ported | `crates/renovate-core/src/extractors/setup_cfg.rs:208` |
+| 6 | returns null for empty | ported | [`crates/renovate-core/src/extractors/gemspec.rs:220`](../../../../../../../crates/renovate-core/src/extractors/gemspec.rs#L220) |
+| 10 | extracts dependencies | ported | [`crates/renovate-core/src/extractors/setup_cfg.rs:208`](../../../../../../../crates/renovate-core/src/extractors/setup_cfg.rs#L208) |
 

@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | default config file pattern | ported | `crates/renovate-core/src/managers.rs:1622` |
+| 5 | default config file pattern | ported | [`crates/renovate-core/src/managers.rs:1622`](../../../../../../../crates/renovate-core/src/managers.rs#L1622) |
 

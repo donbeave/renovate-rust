@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 16 | runs | ported | `crates/renovate-core/src/util.rs:5934` |
+| 16 | runs | ported | [`crates/renovate-core/src/util.rs:5934`](../../../../../../crates/renovate-core/src/util.rs#L5934) |
 

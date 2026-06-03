@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/elm-package/index.spec.ts`](../../lib/modules/datasource/elm-package/index.spec.ts.md) | 10 | 4 | 6 | `crates/renovate-core/src/datasources/elm_package.rs` | partial |
+| [`lib/modules/datasource/elm-package/index.spec.ts`](../../lib/modules/datasource/elm-package/index.spec.ts.md) | 10 | 4 | 6 | [`crates/renovate-core/src/datasources/elm_package.rs`](../../../../../crates/renovate-core/src/datasources/elm_package.rs) | partial |
 

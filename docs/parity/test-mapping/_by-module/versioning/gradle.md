@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/versioning/gradle/index.spec.ts`](../../lib/modules/versioning/gradle/index.spec.ts.md) | 12 | 12 | 0 | `crates/renovate-core/src/versioning/gradle.rs` | ported |
+| [`lib/modules/versioning/gradle/index.spec.ts`](../../lib/modules/versioning/gradle/index.spec.ts.md) | 12 | 12 | 0 | [`crates/renovate-core/src/versioning/gradle.rs`](../../../../../crates/renovate-core/src/versioning/gradle.rs) | ported |
 

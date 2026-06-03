@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 55 | keys are sorted alphabetically | ported | `crates/renovate-core/src/lib.rs:161` |
+| 55 | keys are sorted alphabetically | ported | [`crates/renovate-core/src/lib.rs:161`](../../../../../crates/renovate-core/src/lib.rs#L161) |
 

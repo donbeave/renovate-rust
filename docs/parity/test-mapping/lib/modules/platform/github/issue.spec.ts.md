@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 16 | returns null for empty cache | ported | `crates/renovate-core/src/platform/github_api_cache.rs:485` |
-| 20 | stores issues to the cache | ported | `crates/renovate-core/src/platform/github_api_cache.rs:492` |
-| 64 | returns issues from the cache in the correct order | ported | `crates/renovate-core/src/platform/github_api_cache.rs:506` |
-| 120 | updates particular issue in the cache | ported | `crates/renovate-core/src/platform/github_api_cache.rs:521` |
-| 162 | removes particular issue from the cache | ported | `crates/renovate-core/src/platform/github_api_cache.rs:545` |
-| 188 | reconciles cache | ported | `crates/renovate-core/src/platform/github_api_cache.rs:560` |
-| 246 | resets cache during failed reconciliation | ported | `crates/renovate-core/src/platform/github_api_cache.rs:585` |
+| 16 | returns null for empty cache | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:485`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L485) |
+| 20 | stores issues to the cache | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:492`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L492) |
+| 64 | returns issues from the cache in the correct order | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:506`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L506) |
+| 120 | updates particular issue in the cache | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:521`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L521) |
+| 162 | removes particular issue from the cache | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:545`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L545) |
+| 188 | reconciles cache | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:560`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L560) |
+| 246 | resets cache during failed reconciliation | ported | [`crates/renovate-core/src/platform/github_api_cache.rs:585`](../../../../../../../crates/renovate-core/src/platform/github_api_cache.rs#L585) |
 

@@ -7,5 +7,5 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
-| 23 | throw if --output-file basename differs from path | ported | `crates/renovate-core/src/extractors/pip_compile.rs:257` |
+| 23 | throw if --output-file basename differs from path | ported | [`crates/renovate-core/src/extractors/pip_compile.rs:257`](../../../../../../../crates/renovate-core/src/extractors/pip_compile.rs#L257) |
 

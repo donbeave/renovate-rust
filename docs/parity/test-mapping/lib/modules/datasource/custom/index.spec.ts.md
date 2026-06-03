@@ -32,7 +32,7 @@
 | 650 | return releases from html links | pending | — |
 | 688 | return releases from html links - local file | pending | — |
 | 721 | return null for local file read error - html format | pending | — |
-| 738 | return releases from nginx directory listing | ported | `crates/renovate-core/src/datasources/artifactory.rs:378` |
+| 738 | return releases from nginx directory listing | ported | [`crates/renovate-core/src/datasources/artifactory.rs:378`](../../../../../../../crates/renovate-core/src/datasources/artifactory.rs#L378) |
 | 778 | return releases for malformed html | pending | — |
 | 815 | return releases for incomplete html | pending | — |
 | 854 | returns null as digest should be provided in releases | pending | — |

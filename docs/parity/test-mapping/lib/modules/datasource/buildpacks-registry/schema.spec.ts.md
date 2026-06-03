@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | parses buildpack-registry schema | ported | `crates/renovate-core/src/datasources/buildpacks_registry.rs:217` |
+| 4 | parses buildpack-registry schema | ported | [`crates/renovate-core/src/datasources/buildpacks_registry.rs:217`](../../../../../../../crates/renovate-core/src/datasources/buildpacks_registry.rs#L217) |
 

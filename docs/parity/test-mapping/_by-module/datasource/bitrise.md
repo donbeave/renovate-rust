@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/bitrise/index.spec.ts`](../../lib/modules/datasource/bitrise/index.spec.ts.md) | 7 | 7 | 0 | `crates/renovate-core/src/datasources/bitrise.rs` | ported |
+| [`lib/modules/datasource/bitrise/index.spec.ts`](../../lib/modules/datasource/bitrise/index.spec.ts.md) | 7 | 7 | 0 | [`crates/renovate-core/src/datasources/bitrise.rs`](../../../../../crates/renovate-core/src/datasources/bitrise.rs) | ported |
 

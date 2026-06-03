@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/docker-compose/extract.spec.ts`](../../lib/modules/manager/docker-compose/extract.spec.ts.md) | 13 | 13 | 0 | `crates/renovate-core/src/extractors/docker_compose.rs` | ported |
+| [`lib/modules/manager/docker-compose/extract.spec.ts`](../../lib/modules/manager/docker-compose/extract.spec.ts.md) | 13 | 13 | 0 | [`crates/renovate-core/src/extractors/docker_compose.rs`](../../../../../crates/renovate-core/src/extractors/docker_compose.rs) | ported |
 

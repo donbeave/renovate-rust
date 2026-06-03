@@ -21,12 +21,12 @@
 | 354 | uses --local flag for lock file maintenance on local config | pending | — |
 | 378 | prevents command injection | pending | — |
 | 400 | handles subdirectory package files | pending | — |
-| 441 | returns already-updated when version matches | ported | `crates/renovate-core/src/extractors/mise.rs:1485` |
-| 454 | returns already-updated for tool with backend prefix | ported | `crates/renovate-core/src/extractors/mise.rs:1494` |
-| 467 | returns unsupported when version does not match | ported | `crates/renovate-core/src/extractors/mise.rs:1503` |
-| 480 | returns unsupported when tool not in lock file | ported | `crates/renovate-core/src/extractors/mise.rs:1512` |
-| 493 | returns unsupported when no lock file content | ported | `crates/renovate-core/src/extractors/mise.rs:1521` |
-| 506 | returns unsupported for invalid lock file content | ported | `crates/renovate-core/src/extractors/mise.rs:1530` |
-| 519 | returns unsupported when depname is undefined | ported | `crates/renovate-core/src/extractors/mise.rs:1539` |
-| 532 | returns update-failed in case of errors | ported | `crates/renovate-core/src/extractors/mise.rs:1548` |
+| 441 | returns already-updated when version matches | ported | [`crates/renovate-core/src/extractors/mise.rs:1485`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1485) |
+| 454 | returns already-updated for tool with backend prefix | ported | [`crates/renovate-core/src/extractors/mise.rs:1494`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1494) |
+| 467 | returns unsupported when version does not match | ported | [`crates/renovate-core/src/extractors/mise.rs:1503`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1503) |
+| 480 | returns unsupported when tool not in lock file | ported | [`crates/renovate-core/src/extractors/mise.rs:1512`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1512) |
+| 493 | returns unsupported when no lock file content | ported | [`crates/renovate-core/src/extractors/mise.rs:1521`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1521) |
+| 506 | returns unsupported for invalid lock file content | ported | [`crates/renovate-core/src/extractors/mise.rs:1530`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1530) |
+| 519 | returns unsupported when depname is undefined | ported | [`crates/renovate-core/src/extractors/mise.rs:1539`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1539) |
+| 532 | returns update-failed in case of errors | ported | [`crates/renovate-core/src/extractors/mise.rs:1548`](../../../../../../../crates/renovate-core/src/extractors/mise.rs#L1548) |
 

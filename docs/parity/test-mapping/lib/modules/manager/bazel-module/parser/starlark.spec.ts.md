@@ -7,5 +7,5 @@
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
 | 4 | _(it.each / template — verify manually)_ | ? | — |
-| 12 | asboolean | ported | `crates/renovate-core/src/extractors/bazel_module.rs:3678` |
+| 12 | asboolean | ported | [`crates/renovate-core/src/extractors/bazel_module.rs:3678`](../../../../../../../../crates/renovate-core/src/extractors/bazel_module.rs#L3678) |
 

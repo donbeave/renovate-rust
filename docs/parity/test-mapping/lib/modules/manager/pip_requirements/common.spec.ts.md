@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | extracts --index-url flag | ported | `crates/renovate-core/src/extractors/pip.rs:777` |
-| 15 | extracts --index-url short code | ported | `crates/renovate-core/src/extractors/pip.rs:785` |
-| 27 | extracts --extra-index-url flag | ported | `crates/renovate-core/src/extractors/pip.rs:796` |
-| 37 | extracts --requirement short code option | ported | `crates/renovate-core/src/extractors/pip.rs:807` |
-| 48 | extracts --constraints short code option | ported | `crates/renovate-core/src/extractors/pip.rs:815` |
+| 5 | extracts --index-url flag | ported | [`crates/renovate-core/src/extractors/pip.rs:777`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L777) |
+| 15 | extracts --index-url short code | ported | [`crates/renovate-core/src/extractors/pip.rs:785`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L785) |
+| 27 | extracts --extra-index-url flag | ported | [`crates/renovate-core/src/extractors/pip.rs:796`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L796) |
+| 37 | extracts --requirement short code option | ported | [`crates/renovate-core/src/extractors/pip.rs:807`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L807) |
+| 48 | extracts --constraints short code option | ported | [`crates/renovate-core/src/extractors/pip.rs:815`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L815) |
 

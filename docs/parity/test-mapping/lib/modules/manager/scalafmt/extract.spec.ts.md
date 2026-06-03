@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | extracts version correctly | ported | `crates/renovate-core/src/extractors/scalafmt.rs:50` |
-| 25 | extracts version correctly if enclosed in quotes | ported | `crates/renovate-core/src/extractors/scalafmt.rs:58` |
-| 44 | ignore file if no version specified | ported | `crates/renovate-core/src/extractors/scalafmt.rs:66` |
-| 52 | should return empty packagefiles is no content is provided | ported | `crates/renovate-core/src/extractors/flux.rs:1788` |
+| 6 | extracts version correctly | ported | [`crates/renovate-core/src/extractors/scalafmt.rs:50`](../../../../../../../crates/renovate-core/src/extractors/scalafmt.rs#L50) |
+| 25 | extracts version correctly if enclosed in quotes | ported | [`crates/renovate-core/src/extractors/scalafmt.rs:58`](../../../../../../../crates/renovate-core/src/extractors/scalafmt.rs#L58) |
+| 44 | ignore file if no version specified | ported | [`crates/renovate-core/src/extractors/scalafmt.rs:66`](../../../../../../../crates/renovate-core/src/extractors/scalafmt.rs#L66) |
+| 52 | should return empty packagefiles is no content is provided | ported | [`crates/renovate-core/src/extractors/flux.rs:1788`](../../../../../../../crates/renovate-core/src/extractors/flux.rs#L1788) |
 

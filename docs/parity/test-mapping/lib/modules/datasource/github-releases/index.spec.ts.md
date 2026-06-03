@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 20 | returns releases | ported | `crates/renovate-core/src/datasources/github_releases.rs:372` |
-| 116 | should be independent of the current digest | ported | `crates/renovate-core/src/datasources/github_releases.rs:414` |
-| 128 | should be independent of the current value | ported | `crates/renovate-core/src/datasources/github_releases.rs:436` |
-| 136 | returns updated digest in new release | ported | `crates/renovate-core/src/datasources/github_releases.rs:458` |
-| 149 | returns null if the new value/tag does not exist | ported | `crates/renovate-core/src/datasources/github_releases.rs:480` |
+| 20 | returns releases | ported | [`crates/renovate-core/src/datasources/github_releases.rs:372`](../../../../../../../crates/renovate-core/src/datasources/github_releases.rs#L372) |
+| 116 | should be independent of the current digest | ported | [`crates/renovate-core/src/datasources/github_releases.rs:414`](../../../../../../../crates/renovate-core/src/datasources/github_releases.rs#L414) |
+| 128 | should be independent of the current value | ported | [`crates/renovate-core/src/datasources/github_releases.rs:436`](../../../../../../../crates/renovate-core/src/datasources/github_releases.rs#L436) |
+| 136 | returns updated digest in new release | ported | [`crates/renovate-core/src/datasources/github_releases.rs:458`](../../../../../../../crates/renovate-core/src/datasources/github_releases.rs#L458) |
+| 149 | returns null if the new value/tag does not exist | ported | [`crates/renovate-core/src/datasources/github_releases.rs:480`](../../../../../../../crates/renovate-core/src/datasources/github_releases.rs#L480) |
 

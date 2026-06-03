@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | ignores encrypted in root | ported | `crates/renovate-core/src/config/migrate_validate.rs:2840` |
-| 9 | handles array types | ported | `crates/renovate-core/src/config/migrate_validate.rs:2846` |
-| 13 | handles encrypted within array types | ported | `crates/renovate-core/src/config/migrate_validate.rs:2852` |
+| 5 | ignores encrypted in root | ported | [`crates/renovate-core/src/config/migrate_validate.rs:2840`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L2840) |
+| 9 | handles array types | ported | [`crates/renovate-core/src/config/migrate_validate.rs:2846`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L2846) |
+| 13 | handles encrypted within array types | ported | [`crates/renovate-core/src/config/migrate_validate.rs:2852`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L2852) |
 

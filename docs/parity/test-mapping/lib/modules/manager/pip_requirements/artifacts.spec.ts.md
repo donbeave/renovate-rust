@@ -6,12 +6,12 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 51 | returns null if no updateddeps were provided | ported | `crates/renovate-core/src/extractors/pip_artifact_runner.rs:217` |
-| 62 | returns null if no hashes | ported | `crates/renovate-core/src/extractors/pip_artifact_runner.rs:235` |
-| 74 | returns null if unchanged | ported | `crates/renovate-core/src/extractors/pip_artifact_runner.rs:259` |
-| 98 | returns updated file | ported | `crates/renovate-core/src/extractors/pip_artifact_runner.rs:302` |
-| 130 | ignores falsy depnames | ported | `crates/renovate-core/src/extractors/pip_artifact_runner.rs:357` |
-| 162 | catches and returns errors | ported | `crates/renovate-core/src/extractors/pip_artifact_runner.rs:412` |
+| 51 | returns null if no updateddeps were provided | ported | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs:217`](../../../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs#L217) |
+| 62 | returns null if no hashes | ported | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs:235`](../../../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs#L235) |
+| 74 | returns null if unchanged | ported | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs:259`](../../../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs#L259) |
+| 98 | returns updated file | ported | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs:302`](../../../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs#L302) |
+| 130 | ignores falsy depnames | ported | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs:357`](../../../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs#L357) |
+| 162 | catches and returns errors | ported | [`crates/renovate-core/src/extractors/pip_artifact_runner.rs:412`](../../../../../../../crates/renovate-core/src/extractors/pip_artifact_runner.rs#L412) |
 | 191 | supports docker mode | pending | — |
 | 245 | supports install mode | pending | — |
 

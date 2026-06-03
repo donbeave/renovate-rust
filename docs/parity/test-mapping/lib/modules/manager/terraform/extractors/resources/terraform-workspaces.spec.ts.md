@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | return empty array if no resource is found | ported | `crates/renovate-core/src/extractors/terraform.rs:3097` |
+| 6 | return empty array if no resource is found | ported | [`crates/renovate-core/src/extractors/terraform.rs:3097`](../../../../../../../../../crates/renovate-core/src/extractors/terraform.rs#L3097) |
 

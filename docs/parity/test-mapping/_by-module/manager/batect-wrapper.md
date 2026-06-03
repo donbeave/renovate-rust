@@ -7,5 +7,5 @@
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
 | [`lib/modules/manager/batect-wrapper/artifacts.spec.ts`](../../lib/modules/manager/batect-wrapper/artifacts.spec.ts.md) | 3 | 0 | 3 | — | pending |
-| [`lib/modules/manager/batect-wrapper/extract.spec.ts`](../../lib/modules/manager/batect-wrapper/extract.spec.ts.md) | 4 | 4 | 0 | `crates/renovate-core/src/extractors/batect_wrapper.rs` | ported |
+| [`lib/modules/manager/batect-wrapper/extract.spec.ts`](../../lib/modules/manager/batect-wrapper/extract.spec.ts.md) | 4 | 4 | 0 | [`crates/renovate-core/src/extractors/batect_wrapper.rs`](../../../../../crates/renovate-core/src/extractors/batect_wrapper.rs) | ported |
 

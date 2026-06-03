@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | parses bitbucketservertags | ported | `crates/renovate-core/src/datasources/bitbucket_server_tags.rs:443` |
-| 40 | parses bitbucketservercommits | ported | `crates/renovate-core/src/datasources/bitbucket_server_tags.rs:464` |
+| 4 | parses bitbucketservertags | ported | [`crates/renovate-core/src/datasources/bitbucket_server_tags.rs:443`](../../../../../../../crates/renovate-core/src/datasources/bitbucket_server_tags.rs#L443) |
+| 40 | parses bitbucketservercommits | ported | [`crates/renovate-core/src/datasources/bitbucket_server_tags.rs:464`](../../../../../../../crates/renovate-core/src/datasources/bitbucket_server_tags.rs#L464) |
 

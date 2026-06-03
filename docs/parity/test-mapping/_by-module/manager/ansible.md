@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/ansible/extract.spec.ts`](../../lib/modules/manager/ansible/extract.spec.ts.md) | 6 | 6 | 0 | `crates/renovate-core/src/extractors/ansible.rs` | ported |
+| [`lib/modules/manager/ansible/extract.spec.ts`](../../lib/modules/manager/ansible/extract.spec.ts.md) | 6 | 6 | 0 | [`crates/renovate-core/src/extractors/ansible.rs`](../../../../../crates/renovate-core/src/extractors/ansible.rs) | ported |
 

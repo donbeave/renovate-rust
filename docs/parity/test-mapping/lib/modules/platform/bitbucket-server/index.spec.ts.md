@@ -99,9 +99,9 @@
 | 2445 | throws not-found 3 | pending | — |
 | 2465 | throws conflicted | pending | — |
 | 2485 | unknown error | pending | — |
-| 2507 | returns diff files | ported | `crates/renovate-core/src/platform/bitbucket_server.rs:727` |
-| 2515 | sanitizes html comments in the body | ported | `crates/renovate-core/src/platform/bitbucket_server.rs:739` |
-| 2530 | resizes mend.io merge confidence badges | ported | `crates/renovate-core/src/platform/bitbucket_server.rs:750` |
+| 2507 | returns diff files | ported | [`crates/renovate-core/src/platform/bitbucket_server.rs:727`](../../../../../../../crates/renovate-core/src/platform/bitbucket_server.rs#L727) |
+| 2515 | sanitizes html comments in the body | ported | [`crates/renovate-core/src/platform/bitbucket_server.rs:739`](../../../../../../../crates/renovate-core/src/platform/bitbucket_server.rs#L739) |
+| 2530 | resizes mend.io merge confidence badges | ported | [`crates/renovate-core/src/platform/bitbucket_server.rs:750`](../../../../../../../crates/renovate-core/src/platform/bitbucket_server.rs#L750) |
 | 2539 | should be success | pending | — |
 | 2554 | should be pending | pending | — |
 | 2581 | should be failed | pending | — |

@@ -21,7 +21,7 @@
 | 336 | can determine source url from nupkg when packagebaseaddress is missing | pending | — |
 | 408 | can handle nupkg without repository metadata | pending | — |
 | 479 | returns null for non 200 (v3v2) | pending | — |
-| 494 | returns null for non 200 (v3) | ported | `crates/renovate-core/src/datasources/nuget.rs:300` |
+| 494 | returns null for non 200 (v3) | ported | [`crates/renovate-core/src/datasources/nuget.rs:300`](../../../../../../../crates/renovate-core/src/datasources/nuget.rs#L300) |
 | 503 | returns null for non 200 (v2) | pending | — |
 | 517 | returns null for unknown error (v3v2) | pending | — |
 | 535 | returns deduplicated results | pending | — |

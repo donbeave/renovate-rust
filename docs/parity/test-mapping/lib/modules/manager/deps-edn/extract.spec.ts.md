@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | returns null for invalid file | ported | `crates/renovate-core/src/extractors/deps_edn.rs:590` |
-| 10 | extractpackagefile | ported | `crates/renovate-core/src/extractors/deps_edn.rs:537` |
+| 6 | returns null for invalid file | ported | [`crates/renovate-core/src/extractors/deps_edn.rs:590`](../../../../../../../crates/renovate-core/src/extractors/deps_edn.rs#L590) |
+| 10 | extractpackagefile | ported | [`crates/renovate-core/src/extractors/deps_edn.rs:537`](../../../../../../../crates/renovate-core/src/extractors/deps_edn.rs#L537) |
 

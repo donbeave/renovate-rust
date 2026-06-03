@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 8 | returns null for invalid pubspec file | ported | `crates/renovate-core/src/extractors/pubspec.rs:687` |
-| 16 | returns dart sdk only | ported | `crates/renovate-core/src/extractors/pubspec.rs:694` |
-| 33 | returns valid dependencies | ported | `crates/renovate-core/src/extractors/pubspec.rs:706` |
+| 8 | returns null for invalid pubspec file | ported | [`crates/renovate-core/src/extractors/pubspec.rs:687`](../../../../../../../crates/renovate-core/src/extractors/pubspec.rs#L687) |
+| 16 | returns dart sdk only | ported | [`crates/renovate-core/src/extractors/pubspec.rs:694`](../../../../../../../crates/renovate-core/src/extractors/pubspec.rs#L694) |
+| 33 | returns valid dependencies | ported | [`crates/renovate-core/src/extractors/pubspec.rs:706`](../../../../../../../crates/renovate-core/src/extractors/pubspec.rs#L706) |
 

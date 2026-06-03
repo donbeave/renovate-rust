@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 49 | returns null on error | ported | `crates/renovate-core/src/extractors/git_submodules.rs:607` |
+| 49 | returns null on error | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:607`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L607) |
 | 60 | returns content on update | pending | — |
 | 72 | returns content on update and uses git environment variables | pending | — |
-| 107 | update gitmodule branch value if value changed | ported | `crates/renovate-core/src/extractors/git_submodules.rs:552` |
-| 136 | do not update gitmodule branch value if value not changed | ported | `crates/renovate-core/src/extractors/git_submodules.rs:573` |
+| 107 | update gitmodule branch value if value changed | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:552`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L552) |
+| 136 | do not update gitmodule branch value if value not changed | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:573`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L573) |
 | 154 | returns content on update and uses git environment variables for git-tags/git-refs | pending | — |
 

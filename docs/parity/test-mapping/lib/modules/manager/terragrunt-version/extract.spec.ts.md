@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 5 | returns a result | ported | `crates/renovate-core/src/extractors/version_file.rs:386` |
+| 5 | returns a result | ported | [`crates/renovate-core/src/extractors/version_file.rs:386`](../../../../../../../crates/renovate-core/src/extractors/version_file.rs#L386) |
 

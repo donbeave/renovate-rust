@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 4 | adds splits and returns results | ported | `crates/renovate-core/src/util.rs:10142` |
+| 4 | adds splits and returns results | ported | [`crates/renovate-core/src/util.rs:10142`](../../../../../crates/renovate-core/src/util.rs#L10142) |
 

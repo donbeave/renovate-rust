@@ -10,7 +10,7 @@
 | 19 | _(it.each / template — verify manually)_ | ? | — |
 | 30 | _(it.each / template — verify manually)_ | ? | — |
 | 41 | _(it.each / template — verify manually)_ | ? | — |
-| 52 | getpinnedvalue returns == prefixed version | ported | `crates/renovate-core/src/versioning/hex.rs:597` |
+| 52 | getpinnedvalue returns == prefixed version | ported | [`crates/renovate-core/src/versioning/hex.rs:597`](../../../../../../../crates/renovate-core/src/versioning/hex.rs#L597) |
 | 56 | _(it.each / template — verify manually)_ | ? | — |
 | 69 | _(it.each / template — verify manually)_ | ? | — |
 | 80 | _(it.each / template — verify manually)_ | ? | — |

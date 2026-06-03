@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/manager/terragrunt-version/extract.spec.ts`](../../lib/modules/manager/terragrunt-version/extract.spec.ts.md) | 1 | 1 | 0 | `crates/renovate-core/src/extractors/version_file.rs` | ported |
+| [`lib/modules/manager/terragrunt-version/extract.spec.ts`](../../lib/modules/manager/terragrunt-version/extract.spec.ts.md) | 1 | 1 | 0 | [`crates/renovate-core/src/extractors/version_file.rs`](../../../../../crates/renovate-core/src/extractors/version_file.rs) | ported |
 

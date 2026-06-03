@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 6 | hashes data with sha256 | ported | `crates/renovate-core/src/util.rs:9480` |
-| 15 | hashes data with sha512 | ported | `crates/renovate-core/src/util.rs:9490` |
-| 21 | correctly hashes the content of a readable stream | ported | `crates/renovate-core/src/util.rs:9498` |
-| 38 | uses sha512 if no algorithm is specified | ported | `crates/renovate-core/src/util.rs:9506` |
+| 6 | hashes data with sha256 | ported | [`crates/renovate-core/src/util.rs:9480`](../../../../../crates/renovate-core/src/util.rs#L9480) |
+| 15 | hashes data with sha512 | ported | [`crates/renovate-core/src/util.rs:9490`](../../../../../crates/renovate-core/src/util.rs#L9490) |
+| 21 | correctly hashes the content of a readable stream | ported | [`crates/renovate-core/src/util.rs:9498`](../../../../../crates/renovate-core/src/util.rs#L9498) |
+| 38 | uses sha512 if no algorithm is specified | ported | [`crates/renovate-core/src/util.rs:9506`](../../../../../crates/renovate-core/src/util.rs#L9506) |
 

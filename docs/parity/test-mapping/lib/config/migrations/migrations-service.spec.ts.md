@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 9 | should remove deprecated properties | ported | `crates/renovate-core/src/config/migrate_validate.rs:6900` |
-| 23 | should rename renamed properties | ported | `crates/renovate-core/src/config/migrate_validate.rs:6930` |
-| 42 | should save original order of properties | ported | `crates/renovate-core/src/config/migrate_validate.rs:6965` |
+| 9 | should remove deprecated properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6900`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6900) |
+| 23 | should rename renamed properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6930`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6930) |
+| 42 | should save original order of properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6965`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6965) |
 | 60 | should allow custom migrations by regexp | pending | — |
-| 89 | there should be a single migration per property name | ported | `crates/renovate-core/src/config/migrate_validate.rs:6995` |
+| 89 | there should be a single migration per property name | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6995`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6995) |
 | 104 | includes all defined migration classes in migrationsservice.custommigrations | pending | — |
 

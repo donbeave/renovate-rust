@@ -6,6 +6,6 @@
 
 | Spec file | it() | ported | pending | Rust test file(s) | Status |
 |---|--:|--:|--:|---|---|
-| [`lib/modules/datasource/bitbucket-server-tags/index.spec.ts`](../../lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) | 11 | 8 | 3 | `crates/renovate-core/src/datasources/bitbucket_server_tags.rs` | partial |
-| [`lib/modules/datasource/bitbucket-server-tags/schema.spec.ts`](../../lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) | 2 | 2 | 0 | `crates/renovate-core/src/datasources/bitbucket_server_tags.rs` | ported |
+| [`lib/modules/datasource/bitbucket-server-tags/index.spec.ts`](../../lib/modules/datasource/bitbucket-server-tags/index.spec.ts.md) | 11 | 8 | 3 | [`crates/renovate-core/src/datasources/bitbucket_server_tags.rs`](../../../../../crates/renovate-core/src/datasources/bitbucket_server_tags.rs) | partial |
+| [`lib/modules/datasource/bitbucket-server-tags/schema.spec.ts`](../../lib/modules/datasource/bitbucket-server-tags/schema.spec.ts.md) | 2 | 2 | 0 | [`crates/renovate-core/src/datasources/bitbucket_server_tags.rs`](../../../../../crates/renovate-core/src/datasources/bitbucket_server_tags.rs) | ported |
 

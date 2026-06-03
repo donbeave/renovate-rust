@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination |
 |--:|---|---|---|
-| 11 | return combined env | ported | `crates/renovate-core/src/util.rs:12120` |
-| 26 | maintains precendence | ported | `crates/renovate-core/src/util.rs:12152` |
+| 11 | return combined env | ported | [`crates/renovate-core/src/util.rs:12120`](../../../../../crates/renovate-core/src/util.rs#L12120) |
+| 26 | maintains precendence | ported | [`crates/renovate-core/src/util.rs:12152`](../../../../../crates/renovate-core/src/util.rs#L12152) |
 
