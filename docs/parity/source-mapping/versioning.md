@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 14/96 in-scope files mapped (full=14 partial=0 stub=0 pending=82 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 15/96 in-scope files mapped (full=15 partial=0 stub=0 pending=81 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -32,7 +32,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/aws-machine-image/index.ts` | pending | — | — |
+| `lib/modules/versioning/aws-machine-image/index.ts` | full | [`crates/renovate-core/src/versioning/aws_machine_image.rs`](../../../crates/renovate-core/src/versioning/aws_machine_image.rs) | — |
 
 ### `versioning/azure-rest-api`
 

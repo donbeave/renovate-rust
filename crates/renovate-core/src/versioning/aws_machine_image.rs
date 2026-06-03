@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/aws-machine-image/index.ts full
 //! AWS Machine Image versioning.
 //!
 //! Renovate reference:
