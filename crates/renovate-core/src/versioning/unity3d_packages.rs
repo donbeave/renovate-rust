@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/unity3d-packages/index.ts full
 //! Unity3D Packages versioning.
 //!
 //! Versions follow `MAJOR.MINOR.PATCH[-LABEL]`. A label starting with
