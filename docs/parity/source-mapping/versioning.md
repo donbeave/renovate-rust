@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 36/96 in-scope files mapped (full=36 partial=0 stub=0 pending=60 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 38/96 in-scope files mapped (full=38 partial=0 stub=0 pending=58 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -189,8 +189,8 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/lambda-node/index.ts` | pending | — | — |
-| `lib/modules/versioning/lambda-node/schedule.ts` | pending | — | — |
+| `lib/modules/versioning/lambda-node/index.ts` | full | [`crates/renovate-core/src/versioning/lambda_node.rs`](../../../crates/renovate-core/src/versioning/lambda_node.rs) | — |
+| `lib/modules/versioning/lambda-node/schedule.ts` | full | [`crates/renovate-core/src/versioning/lambda_node.rs`](../../../crates/renovate-core/src/versioning/lambda_node.rs) | — |
 
 ### `versioning/loose`
 

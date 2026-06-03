@@ -1,4 +1,6 @@
 //! Lambda Node.js runtime versioning.
+//! @parity lib/modules/versioning/lambda-node/index.ts full
+//! @parity lib/modules/versioning/lambda-node/schedule.ts full
 //!
 //! Ports `lib/modules/versioning/lambda-node/index.ts`.
 //! Extends Node.js versioning with AWS Lambda support-window stability checks.
