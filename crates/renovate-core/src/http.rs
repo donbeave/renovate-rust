@@ -1642,7 +1642,6 @@ mod www_auth_tests {
         assert!(parse_retry_after(&resp).is_none());
     }
 
-    // Ported: "returns $expected for status code $statusCode and followRedirect $followRedirect" — util/http/hooks.spec.ts line 5
     #[test]
     fn test_is_response_ok() {
         // When followRedirect=false, limit is 399; 304 always OK.

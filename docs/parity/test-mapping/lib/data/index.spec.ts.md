@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 55 | keys are sorted alphabetically | ported | [`crates/renovate-core/src/lib.rs:161`](../../../../../crates/renovate-core/src/lib.rs#L161) |
+| 55 | keys are sorted alphabetically | ported | [`crates/renovate-core/src/lib.rs:189`](../../../../../crates/renovate-core/src/lib.rs#L189) |
 
