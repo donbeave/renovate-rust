@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 12/96 in-scope files mapped (full=12 partial=0 stub=0 pending=84 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 13/96 in-scope files mapped (full=13 partial=0 stub=0 pending=83 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -158,7 +158,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/helm/index.ts` | pending | — | — |
+| `lib/modules/versioning/helm/index.ts` | full | [`crates/renovate-core/src/versioning/helm.rs`](../../../crates/renovate-core/src/versioning/helm.rs) | — |
 
 ### `versioning/hermit`
 

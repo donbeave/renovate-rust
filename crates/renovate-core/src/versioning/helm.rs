@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/helm/index.ts full
 //! Helm versioning.
 //!
 //! Renovate reference:

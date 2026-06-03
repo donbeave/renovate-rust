@@ -5,7 +5,7 @@ Status lives in `@parity` tags in the Rust source; exclusions in `docs/parity/op
 
 Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (tag) · `opt-out` (registry — will never be ported, with a reason).
 
-**Coverage:** 12/1514 in-scope files mapped (full=12 partial=0 stub=0 pending=1502 out-of-scope=0 opt-out=0). Total upstream files: 1514.
+**Coverage:** 13/1514 in-scope files mapped (full=13 partial=0 stub=0 pending=1501 out-of-scope=0 opt-out=0). Total upstream files: 1514.
 
 ## By group
 
@@ -18,7 +18,7 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [managers](managers.md) | 628 | 0 | 0 | 0 | 628 | 0 | 0 |
 | [platforms](platforms.md) | 75 | 0 | 0 | 0 | 75 | 0 | 0 |
 | [util](util.md) | 175 | 0 | 0 | 0 | 175 | 0 | 0 |
-| [versioning](versioning.md) | 96 | 12 | 0 | 0 | 84 | 0 | 0 |
+| [versioning](versioning.md) | 96 | 13 | 0 | 0 | 83 | 0 | 0 |
 
 ## By module
 
@@ -294,7 +294,7 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [`versioning/go-mod-directive`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | [`versioning/gradle`](versioning.md) | 2 | 0 | 0 | 0 | 2 | 0 | 0 |
 | [`versioning/hashicorp`](versioning.md) | 2 | 0 | 0 | 0 | 2 | 0 | 0 |
-| [`versioning/helm`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
+| [`versioning/helm`](versioning.md) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | [`versioning/hermit`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | [`versioning/hex`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | [`versioning/ivy`](versioning.md) | 2 | 0 | 0 | 0 | 2 | 0 | 0 |
