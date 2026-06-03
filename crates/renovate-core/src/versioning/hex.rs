@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/hex/index.ts full
 //! Hex versioning (Elixir/Erlang hex.pm).
 //!
 //! Renovate reference:
