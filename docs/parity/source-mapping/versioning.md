@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 17/96 in-scope files mapped (full=17 partial=0 stub=0 pending=79 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 18/96 in-scope files mapped (full=18 partial=0 stub=0 pending=78 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -20,7 +20,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/apk/index.ts` | pending | — | — |
+| `lib/modules/versioning/apk/index.ts` | full | [`crates/renovate-core/src/versioning/apk.rs`](../../../crates/renovate-core/src/versioning/apk.rs) | — |
 
 ### `versioning/aws-eks-addon`
 

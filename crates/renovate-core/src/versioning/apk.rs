@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/apk/index.ts full
 //! Alpine Package Keeper (APK) versioning.
 //!
 //! Ports `lib/modules/versioning/apk/index.ts`.
