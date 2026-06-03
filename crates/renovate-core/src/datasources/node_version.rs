@@ -90,7 +90,11 @@ pub async fn fetch_releases(
     http: &HttpClient,
 ) -> Result<Option<NodeVersionResult>, NodeVersionError> {
     let url = format!("{registry_url}/index.json");
-    let raw: Vec<NodeRelease> = http.get_json(&url).await?;
+    let raw: Vec<NodeRelease> = match http.get_json(&url).await {
+        Ok(raw) => raw,
+        Err(crate::http::HttpError::Request(_)) => return Ok(None),
+        Err(error) => return Err(error.into()),
+    };
 
     if raw.is_empty() {
         return Ok(None);
@@ -117,6 +121,8 @@ pub async fn fetch_releases(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     // Ported: "returns null for empty 200 OK" — lib/modules/datasource/node-version/index.spec.ts line 32
     #[test]
@@ -160,5 +166,29 @@ mod tests {
         let date = "2021-09-07";
         let ts = format!("{date}T00:00:00.000Z");
         assert_eq!(ts, "2021-09-07T00:00:00.000Z");
+    }
+
+    // Ported: "throws for 500" — lib/modules/datasource/node-version/index.spec.ts line 9
+    #[tokio::test]
+    async fn throws_for_500() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/index.json"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await;
+        assert!(result.is_err(), "server 500 should propagate as error");
+    }
+
+    // Ported: "returns null for error" — lib/modules/datasource/node-version/index.spec.ts line 19
+    #[tokio::test]
+    async fn returns_null_for_error() {
+        let bad_url = "http://127.0.0.1:1";
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(bad_url, &http).await.unwrap();
+        assert!(result.is_none(), "request errors should return None");
     }
 }
