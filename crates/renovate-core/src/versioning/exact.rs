@@ -1,7 +1,6 @@
-//! Exact string versioning.
+//! @parity lib/modules/versioning/exact/index.ts full
 //!
-//! Renovate reference:
-//! - `lib/modules/versioning/exact/index.ts`
+//! Exact string versioning.
 
 use std::cmp::Ordering;
 

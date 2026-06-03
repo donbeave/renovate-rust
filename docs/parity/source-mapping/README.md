@@ -5,7 +5,7 @@ Status lives in `@parity` tags in the Rust source; exclusions in `docs/parity/op
 
 Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (tag) · `opt-out` (registry — will never be ported, with a reason).
 
-**Coverage:** 5/1514 in-scope files mapped (full=5 partial=0 stub=0 pending=1509 out-of-scope=0 opt-out=0). Total upstream files: 1514.
+**Coverage:** 6/1514 in-scope files mapped (full=6 partial=0 stub=0 pending=1508 out-of-scope=0 opt-out=0). Total upstream files: 1514.
 
 ## By group
 
@@ -18,7 +18,7 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [managers](managers.md) | 628 | 0 | 0 | 0 | 628 | 0 | 0 |
 | [platforms](platforms.md) | 75 | 0 | 0 | 0 | 75 | 0 | 0 |
 | [util](util.md) | 175 | 0 | 0 | 0 | 175 | 0 | 0 |
-| [versioning](versioning.md) | 96 | 5 | 0 | 0 | 91 | 0 | 0 |
+| [versioning](versioning.md) | 96 | 6 | 0 | 0 | 90 | 0 | 0 |
 
 ## By module
 
@@ -287,7 +287,7 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [`versioning/devbox`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | [`versioning/docker`](versioning.md) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | [`versioning/elm`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
-| [`versioning/exact`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
+| [`versioning/exact`](versioning.md) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | [`versioning/git`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
 | [`versioning/github-actions`](versioning.md) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
 | [`versioning/glasskube`](versioning.md) | 1 | 0 | 0 | 0 | 1 | 0 | 0 |
