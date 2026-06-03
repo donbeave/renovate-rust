@@ -1,4 +1,5 @@
 //! Glasskube versioning scheme.
+//! @parity lib/modules/versioning/glasskube/index.ts full
 //!
 //! SemVer-based; build metadata component is included in ordering.
 //! A non-empty prerelease identifier marks the version as unstable.

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 32/96 in-scope files mapped (full=32 partial=0 stub=0 pending=64 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 33/96 in-scope files mapped (full=33 partial=0 stub=0 pending=63 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -132,7 +132,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/glasskube/index.ts` | pending | — | — |
+| `lib/modules/versioning/glasskube/index.ts` | full | [`crates/renovate-core/src/versioning/glasskube.rs`](../../../crates/renovate-core/src/versioning/glasskube.rs) | — |
 
 ### `versioning/go-mod-directive`
 
