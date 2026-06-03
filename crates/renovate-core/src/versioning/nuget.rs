@@ -1,6 +1,7 @@
 //! NuGet versioning.
 //! @parity lib/modules/versioning/nuget/version.ts full
 //! @parity lib/modules/versioning/nuget/index.ts full
+//! @parity lib/modules/versioning/nuget/parser.ts partial
 //!
 //! NuGet uses a 4-part version scheme: `Major.Minor.Patch[.Revision][-PreRelease]`.
 //! The 4th component (Revision) is optional and defaults to 0. Two versions are
