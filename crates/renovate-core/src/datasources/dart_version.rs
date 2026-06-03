@@ -95,7 +95,11 @@ pub async fn fetch_releases(
         let url = format!(
             "{registry_url}/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F{channel}%2Frelease%2F&alt=json"
         );
-        let resp: GcsPrefixList = http.get_json(&url).await?;
+        let resp: GcsPrefixList = match http.get_json(&url).await {
+            Ok(resp) => resp,
+            Err(crate::http::HttpError::Request(_)) => return Ok(None),
+            Err(error) => return Err(error.into()),
+        };
         let is_stable = *channel == "stable";
 
         for prefix in &resp.prefixes {
@@ -120,6 +124,8 @@ pub async fn fetch_releases(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     // Ported: "returns null for empty 200 OK" — lib/modules/datasource/dart-version/index.spec.ts line 36
     #[test]
@@ -160,5 +166,29 @@ mod tests {
     fn keep_beta_version_on_beta_channel() {
         let v = version_from_prefix("channels/beta/release/2.18.0-44.1.beta/", "beta");
         assert!(v.is_some());
+    }
+
+    // Ported: "throws for 500" — lib/modules/datasource/dart-version/index.spec.ts line 16
+    #[tokio::test]
+    async fn throws_for_500() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/storage/v1/b/dart-archive/o"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(&server.uri(), &http).await;
+        assert!(result.is_err(), "server 500 should propagate as error");
+    }
+
+    // Ported: "returns null for error" — lib/modules/datasource/dart-version/index.spec.ts line 26
+    #[tokio::test]
+    async fn returns_null_for_error() {
+        let bad_url = "http://127.0.0.1:1";
+        let http = HttpClient::new().unwrap();
+        let result = fetch_releases(bad_url, &http).await.unwrap();
+        assert!(result.is_none(), "network errors should return None");
     }
 }
