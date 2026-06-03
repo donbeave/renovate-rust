@@ -2,7 +2,7 @@
 
 [← `manager/cargo`](../../../../_by-module/manager/cargo.md) · [all modules](../../../../README.md)
 
-**13/20 in-scope tests ported** (7 pending, 0 opt-out) · status: partial
+**14/20 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -25,5 +25,5 @@
 | 749 | supports docker mode and ignores non git credentials | pending | — |
 | 809 | supports docker mode with cargo specific credential | pending | — |
 | 878 | supports install mode | pending | — |
-| 929 | catches errors | pending | — |
+| 929 | catches errors | ported | [`crates/renovate-core/src/extractors/cargo_artifact_runner.rs:977`](../../../../../../../crates/renovate-core/src/extractors/cargo_artifact_runner.rs#L977) |
 

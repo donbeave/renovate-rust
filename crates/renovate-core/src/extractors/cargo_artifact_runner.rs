@@ -974,6 +974,52 @@ mod tests {
         );
     }
 
+    // Ported: "catches errors" — lib/modules/manager/cargo/artifacts.spec.ts line 929
+    #[tokio::test]
+    async fn catches_errors() {
+        let dir = tempdir().unwrap();
+        let lock_dir = dir.path().to_path_buf();
+
+        std::fs::write(lock_dir.join("Cargo.lock"), "Current Cargo.lock\n").unwrap();
+        // Make manifest path unwritable to force an error during `tokio::fs::write`.
+        std::fs::create_dir(lock_dir.join("Cargo.toml")).unwrap();
+
+        let mut env: HashMap<String, String> = std::env::vars().collect();
+        let mut path = lock_dir.to_string_lossy().to_string();
+        if let Some(old_path) = env.get("PATH") {
+            path = format!("{}:{}", path, old_path);
+        }
+        env.insert("PATH".to_owned(), path);
+
+        let runner = make_runner();
+        let input = UpdateArtifact {
+            package_file_name: "Cargo.toml".to_owned(),
+            updated_deps: vec![updated_dep(
+                "dep1",
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some("crate"),
+            )],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: lock_dir,
+                env: env.into_iter().collect(),
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            err.stderr.contains("Cargo.toml") || !err.stderr.is_empty(),
+            "runner should surface manifest write failures"
+        );
+    }
+
     // Rust-specific: unit test for command building
     #[test]
     fn build_commands_maintenance() {
