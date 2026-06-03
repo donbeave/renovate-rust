@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/deno/index.ts full
 //! Deno versioning.
 //!
 //! Renovate reference: `lib/modules/versioning/deno/index.ts`

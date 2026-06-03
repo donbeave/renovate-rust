@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 9/96 in-scope files mapped (full=9 partial=0 stub=0 pending=87 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 10/96 in-scope files mapped (full=10 partial=0 stub=0 pending=86 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -90,7 +90,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/deno/index.ts` | pending | — | — |
+| `lib/modules/versioning/deno/index.ts` | full | [`crates/renovate-core/src/versioning/deno.rs`](../../../crates/renovate-core/src/versioning/deno.rs) | — |
 
 ### `versioning/devbox`
 
