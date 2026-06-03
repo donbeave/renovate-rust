@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/unity3d/index.ts full
 //! Unity3D editor versioning.
 //!
 //! Renovate reference:

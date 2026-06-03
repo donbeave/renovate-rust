@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/96 in-scope files mapped (full=10 partial=0 stub=0 pending=86 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 11/96 in-scope files mapped (full=11 partial=0 stub=0 pending=85 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -362,7 +362,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/unity3d/index.ts` | pending | — | — |
+| `lib/modules/versioning/unity3d/index.ts` | full | [`crates/renovate-core/src/versioning/unity3d.rs`](../../../crates/renovate-core/src/versioning/unity3d.rs) | — |
 
 ### `versioning/unity3d-packages`
 
