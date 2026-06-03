@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/composer/index.ts full
 //! Composer (PHP) versioning — mirrors `lib/modules/versioning/composer/index.ts`.
 //!
 //! Composer versions wrap npm semver with PHP-specific normalizations:

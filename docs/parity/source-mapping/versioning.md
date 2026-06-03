@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 13/96 in-scope files mapped (full=13 partial=0 stub=0 pending=83 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 14/96 in-scope files mapped (full=14 partial=0 stub=0 pending=82 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -57,7 +57,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/composer/index.ts` | pending | — | — |
+| `lib/modules/versioning/composer/index.ts` | full | [`crates/renovate-core/src/versioning/composer.rs`](../../../crates/renovate-core/src/versioning/composer.rs) | — |
 
 ### `versioning/conan`
 
