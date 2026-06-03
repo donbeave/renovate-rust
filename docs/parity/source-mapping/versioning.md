@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 0/96 in-scope files mapped (full=0 partial=0 stub=0 pending=96 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 1/96 in-scope files mapped (full=1 partial=0 stub=0 pending=95 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -342,7 +342,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/semver-partial/index.ts` | pending | — | — |
+| `lib/modules/versioning/semver-partial/index.ts` | full | [`crates/renovate-core/src/versioning/semver_partial.rs`](../../../crates/renovate-core/src/versioning/semver_partial.rs) | — |
 
 ### `versioning/swift`
 

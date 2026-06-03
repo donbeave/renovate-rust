@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/semver-partial/index.ts full
+
 use semver::Version;
 
 fn massage_value(input: &str) -> &str {
