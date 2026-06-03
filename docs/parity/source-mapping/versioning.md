@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 33/96 in-scope files mapped (full=33 partial=0 stub=0 pending=63 out-of-scope=0 opt-out=0) across 54 modules.
+**Coverage:** 34/96 in-scope files mapped (full=34 partial=0 stub=0 pending=62 out-of-scope=0 opt-out=0) across 54 modules.
 
 ### `versioning/_root`
 
@@ -183,7 +183,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/kubernetes-api/index.ts` | pending | — | — |
+| `lib/modules/versioning/kubernetes-api/index.ts` | full | [`crates/renovate-core/src/versioning/kubernetes_api.rs`](../../../crates/renovate-core/src/versioning/kubernetes_api.rs) | — |
 
 ### `versioning/lambda-node`
 

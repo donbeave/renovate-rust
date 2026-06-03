@@ -1,4 +1,5 @@
 //! Kubernetes API versioning.
+//! @parity lib/modules/versioning/kubernetes-api/index.ts full
 //!
 //! Ports `lib/modules/versioning/kubernetes-api/index.ts` which extends
 //! `RegExpVersioningApi` with regex:
