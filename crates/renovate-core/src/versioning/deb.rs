@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/deb/index.ts full
 //! Debian package versioning.
 //!
 //! Ports `lib/modules/versioning/deb/index.ts` and
