@@ -709,4 +709,41 @@ workflows:
             )
         );
     }
+
+    // Ported: "extracts deps from configs with multiple merge keys per mapping" — lib/modules/manager/circleci/extract.spec.ts line 336
+    #[test]
+    fn extracts_deps_with_multiple_merge_keys() {
+        let content = r#"version: 2.1
+
+aliases:
+  - &node-base
+    docker:
+      - image: node:18
+  - &node-env
+    environment:
+      NODE_ENV: production
+
+orbs:
+  python: circleci/python@2.1.1
+
+jobs:
+  build:
+    <<: *node-base
+    <<: *node-env
+    steps:
+      - checkout
+"#;
+        let docker = extract_with_registry_aliases(content, &[]);
+        assert_eq!(docker.len(), 1);
+        assert_eq!(docker[0].dep_name, "node");
+        assert_eq!(docker[0].package_name, "node");
+        assert_eq!(docker[0].current_value.as_deref(), Some("18"));
+        assert_eq!(docker[0].replace_string, "node:18");
+
+        let orbs = extract_orbs(content);
+        assert_eq!(orbs.len(), 1);
+        assert_eq!(orbs[0].alias, "python");
+        assert_eq!(orbs[0].package_name, "circleci/python");
+        assert_eq!(orbs[0].version, "2.1.1");
+    }
 }

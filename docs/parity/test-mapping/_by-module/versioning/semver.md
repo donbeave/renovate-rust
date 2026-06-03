@@ -6,6 +6,6 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/semver/common.spec.ts`](../../lib/modules/versioning/semver/common.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/versioning/semver_generic.rs:165`](../../../../../crates/renovate-core/src/versioning/semver_generic.rs#L165) | ported |
+| [`lib/modules/versioning/semver/common.spec.ts`](../../lib/modules/versioning/semver/common.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/versioning/semver_generic.rs:167`](../../../../../crates/renovate-core/src/versioning/semver_generic.rs#L167) | ported |
 | [`lib/modules/versioning/semver/index.spec.ts`](../../lib/modules/versioning/semver/index.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/versioning/semver_node.rs:63`](../../../../../crates/renovate-core/src/versioning/semver_node.rs#L63) | ported |
 

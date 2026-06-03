@@ -2,7 +2,7 @@
 
 [← `manager/circleci`](../../../../_by-module/manager/circleci.md) · [all modules](../../../../README.md)
 
-**9/10 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
+**10/10 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -15,5 +15,5 @@
 | 237 | extracts orbs without jobs | ported | [`crates/renovate-core/src/extractors/circleci.rs:507`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L507) |
 | 251 | extracts executors | ported | [`crates/renovate-core/src/extractors/circleci.rs:563`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L563) |
 | 273 | extracts orb definitions | ported | [`crates/renovate-core/src/extractors/circleci.rs:535`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L535) |
-| 336 | extracts deps from configs with multiple merge keys per mapping | pending | — |
+| 336 | extracts deps from configs with multiple merge keys per mapping | ported | [`crates/renovate-core/src/extractors/circleci.rs:713`](../../../../../../../crates/renovate-core/src/extractors/circleci.rs#L713) |
 
