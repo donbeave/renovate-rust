@@ -21,9 +21,10 @@
 //! - `nuget:file:///...` — local file path registry
 //! - No `package=` query parameter present
 //! - Inside `//` or `/* */` comments
-
+use std::collections::HashMap;
 use std::sync::LazyLock;
 
+use crate::extractors::nuget::parse_nuget_config_registries_full;
 use regex::Regex;
 
 /// A single extracted Cake NuGet dependency.
@@ -105,6 +106,15 @@ fn parse_dep_url(url_str: &str) -> Option<CakeDep> {
 
 /// Extract Cake NuGet deps from a `.cake` or `.csx` file.
 pub fn extract(content: &str) -> Vec<CakeDep> {
+    extract_with_config(content, "", &[])
+}
+
+/// Extract Cake NuGet deps from a `.cake` or `.csx` file with sibling configuration.
+pub fn extract_with_config(
+    content: &str,
+    package_file: &str,
+    files: &[(&str, Option<&str>)],
+) -> Vec<CakeDep> {
     let mut out = Vec::new();
     let mut in_block_comment = false;
 
@@ -155,7 +165,67 @@ pub fn extract(content: &str) -> Vec<CakeDep> {
         }
     }
 
+    apply_configured_registries(&mut out, package_file, files);
+
     out
+}
+
+fn apply_configured_registries(
+    deps: &mut [CakeDep],
+    package_file: &str,
+    files: &[(&str, Option<&str>)],
+) {
+    let configured_urls = configured_nuget_urls(package_file, files);
+    if configured_urls.is_empty() {
+        return;
+    }
+    for dep in deps {
+        dep.registry_url = configured_urls[0].clone();
+    }
+}
+
+fn configured_nuget_urls(package_file: &str, files: &[(&str, Option<&str>)]) -> Vec<String> {
+    let file_contents: HashMap<&str, &str> = files
+        .iter()
+        .filter_map(|(path, content)| content.map(|content| (*path, content)))
+        .collect();
+
+    for dir in package_file_dirs(package_file) {
+        for config_name in ["nuget.config", "NuGet.config", "NuGet.Config"] {
+            let path = join_path(&dir, config_name);
+            if let Some(content) = file_contents.get(path.as_str()) {
+                return parse_nuget_config_registries_full(content)
+                    .into_iter()
+                    .map(|registry| registry.url)
+                    .collect();
+            }
+        }
+    }
+    Vec::new()
+}
+
+fn package_file_dirs(package_file: &str) -> Vec<String> {
+    let Some((mut dir, _)) = package_file.rsplit_once('/') else {
+        return vec![String::new()];
+    };
+    let mut dirs = Vec::new();
+    loop {
+        dirs.push(dir.to_owned());
+        let Some((parent, _)) = dir.rsplit_once('/') else {
+            dirs.push(String::new());
+            break;
+        };
+        dir = parent;
+    }
+    dirs
+}
+
+fn join_path(dir: &str, file: &str) -> String {
+    if dir.is_empty() {
+        file.to_owned()
+    } else {
+        format!("{dir}/{file}")
+    }
 }
 
 #[cfg(test)]
@@ -354,5 +424,59 @@ bar
         assert_eq!(good.current_value, "1.2.3");
         // "bad uri" has no package= param, so it's skipped
         assert_eq!(deps.len(), 1);
+    }
+
+    // Ported: "calls applyRegistries to honor nuget.config files if present for .cake files" — lib/modules/manager/cake/index.spec.ts line 124
+    #[test]
+    fn applies_configured_registries_for_cake_files() {
+        let content = "#addin nuget:?package=Contoso.SomePackage&version=1.2.3\n";
+        let config = r#"
+            <configuration>
+              <packageSources>
+                <clear />
+                <add key="Contoso" value="https://nuget.contoso.com/v3/index.json" />
+              </packageSources>
+            </configuration>
+        "#;
+        let files = [("dir/NuGet.config", Some(config))];
+
+        let deps = extract_with_config(content, "dir/build.cake", &files);
+        let dep = deps
+            .iter()
+            .find(|dep| dep.package_name == "Contoso.SomePackage")
+            .expect("Contoso.SomePackage");
+
+        assert_eq!(dep.registry_url, "https://nuget.contoso.com/v3/index.json");
+        assert_eq!(dep.current_value, "1.2.3");
+    }
+
+    // Ported: "calls applyRegistries to honor nuget.config files if present for installtools" — lib/modules/manager/cake/index.spec.ts line 141
+    #[test]
+    fn applies_configured_registries_for_install_tools() {
+        let content = concat!(
+            "#:sdk Cake.Sdk\n",
+            "\n",
+            "InstallTools(\n",
+            "  \"dotnet:?package=Good.Tool&version=1.2.3\"\n",
+            ");\n",
+        );
+        let config = r#"
+            <configuration>
+              <packageSources>
+                <clear />
+                <add key="Contoso" value="https://nuget.contoso.com/v3/index.json" />
+              </packageSources>
+            </configuration>
+        "#;
+        let files = [("subdir/NuGet.config", Some(config))];
+
+        let deps = extract_with_config(content, "subdir/build.cs", &files);
+        let dep = deps
+            .iter()
+            .find(|dep| dep.package_name == "Good.Tool")
+            .expect("Good.Tool");
+
+        assert_eq!(dep.registry_url, "https://nuget.contoso.com/v3/index.json");
+        assert_eq!(dep.current_value, "1.2.3");
     }
 }
