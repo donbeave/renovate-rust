@@ -164,7 +164,11 @@ impl CargoArtifactRunner {
             .await
             .map_err(|e| ArtifactError {
                 lock_file: "Cargo.lock".to_owned(),
-                stderr: e.message,
+                stderr: if e.stderr.is_empty() {
+                    e.message
+                } else {
+                    e.stderr
+                },
             })
             .map(|_| ())
     }
@@ -416,6 +420,63 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
+    // Ported: "returns null if unchanged" — lib/modules/manager/cargo/artifacts.spec.ts line 73
+    #[tokio::test]
+    async fn returns_null_if_unchanged() {
+        let dir = tempdir().unwrap();
+        let lock_dir = dir.path().to_path_buf();
+
+        std::fs::write(lock_dir.join("Cargo.toml"), "[package]\nname = 'test'\n").unwrap();
+        std::fs::write(lock_dir.join("Cargo.lock"), "Current Cargo.lock\n").unwrap();
+
+        let fake_cargo = dir.path().join("cargo");
+        #[cfg(unix)]
+        {
+            let mut f = std::fs::File::create(&fake_cargo).unwrap();
+            f.write_all(
+                b"#!/bin/sh\nif [ \"$1\" = \"update\" ]; then touch .cargo-update-called; fi\n",
+            )
+            .unwrap();
+            let mut perms = std::fs::metadata(&fake_cargo).unwrap().permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&fake_cargo, perms).unwrap();
+        }
+
+        let mut env: HashMap<String, String> = std::env::vars().collect();
+        let mut path = lock_dir.to_string_lossy().to_string();
+        if let Some(old_path) = env.get("PATH") {
+            path = format!("{}:{}", path, old_path);
+        }
+        env.insert("PATH".to_owned(), path);
+
+        let runner = make_runner();
+        let input = UpdateArtifact {
+            package_file_name: "Cargo.toml".to_owned(),
+            updated_deps: vec![updated_dep(
+                "dep1",
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some("crate"),
+            )],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: lock_dir.clone(),
+                env: env.into_iter().collect(),
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await;
+        assert!(result.unwrap().is_none());
+        assert!(
+            lock_dir.join(".cargo-update-called").exists(),
+            "runner should still invoke cargo update"
+        );
+    }
+
     // Ported: "returns updated Cargo.lock" — lib/modules/manager/cargo/artifacts.spec.ts line 98
     #[tokio::test]
     async fn returns_updated_cargo_lock() {
@@ -481,6 +542,121 @@ mod tests {
             results[0].file.as_ref().unwrap().contents.as_deref(),
             Some("New Cargo.lock\n")
         );
+    }
+
+    // Ported: "updates Cargo.lock based on the packageName, when given" — lib/modules/manager/cargo/artifacts.spec.ts line 434
+    #[tokio::test]
+    async fn updates_cargo_lock_based_on_the_package_name_when_given() {
+        let dir = tempdir().unwrap();
+        let lock_dir = dir.path().to_path_buf();
+
+        std::fs::write(lock_dir.join("Cargo.toml"), "[package]\nname = 'test'\n").unwrap();
+        std::fs::write(lock_dir.join("Cargo.lock"), "Old Cargo.lock\n").unwrap();
+
+        let fake_cargo = dir.path().join("cargo");
+        #[cfg(unix)]
+        {
+            let mut f = std::fs::File::create(&fake_cargo).unwrap();
+            f.write_all(
+                b"#!/bin/sh\nif [ \"$1\" = \"update\" ]; then echo 'New Cargo.lock' > Cargo.lock; touch .cargo-package-name-called; fi\n",
+            )
+            .unwrap();
+            let mut perms = std::fs::metadata(&fake_cargo).unwrap().permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&fake_cargo, perms).unwrap();
+        }
+
+        let mut env: HashMap<String, String> = std::env::vars().collect();
+        let mut path = lock_dir.to_string_lossy().to_string();
+        if let Some(old_path) = env.get("PATH") {
+            path = format!("{}:{}", path, old_path);
+        }
+        env.insert("PATH".to_owned(), path);
+
+        let runner = make_runner();
+        let input = UpdateArtifact {
+            package_file_name: "Cargo.toml".to_owned(),
+            updated_deps: vec![updated_dep(
+                "renamed_dep1",
+                Some("dep1"),
+                None,
+                None,
+                None,
+                None,
+                Some("crate"),
+            )],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: lock_dir.clone(),
+                env: env.into_iter().collect(),
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await;
+        assert!(result.unwrap().is_some());
+        assert!(
+            lock_dir.join(".cargo-package-name-called").exists(),
+            "runner should invoke cargo update"
+        );
+    }
+
+    // Ported: "returns updated workspace Cargo.lock" — lib/modules/manager/cargo/artifacts.spec.ts line 458
+    #[tokio::test]
+    async fn returns_updated_workspace_cargo_lock() {
+        let dir = tempdir().unwrap();
+        let lock_dir = dir.path().to_path_buf();
+
+        let workspace_root = lock_dir.clone();
+        let nested = workspace_root.join("crates").join("one");
+        std::fs::create_dir_all(&nested).unwrap();
+        std::fs::write(nested.join("Cargo.toml"), "[package]\nname = 'test-one'\n").unwrap();
+        std::fs::write(workspace_root.join("Cargo.lock"), "Old Cargo.lock\n").unwrap();
+
+        let fake_cargo = workspace_root.join("cargo");
+        #[cfg(unix)]
+        {
+            let mut f = std::fs::File::create(&fake_cargo).unwrap();
+            f.write_all(
+                b"#!/bin/sh\nif [ \"$1\" = \"update\" ]; then echo 'New Workspace Cargo.lock' > ../../Cargo.lock; touch .cargo-workspace-called; fi\n",
+            )
+            .unwrap();
+            let mut perms = std::fs::metadata(&fake_cargo).unwrap().permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&fake_cargo, perms).unwrap();
+        }
+
+        let mut env: HashMap<String, String> = std::env::vars().collect();
+        let mut path = lock_dir.to_string_lossy().to_string();
+        if let Some(old_path) = env.get("PATH") {
+            path = format!("{}:{}", path, old_path);
+        }
+        env.insert("PATH".to_owned(), path);
+
+        let runner = make_runner();
+        let input = UpdateArtifact {
+            package_file_name: "crates/one/Cargo.toml".to_owned(),
+            updated_deps: vec![updated_dep(
+                "dep1",
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some("crate"),
+            )],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: workspace_root,
+                env: env.into_iter().collect(),
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await.unwrap();
+        let results = result.expect("runner should return results");
+        assert_eq!(results.len(), 1);
+        assert!(nested.join(".cargo-workspace-called").exists());
     }
 
     // Ported: "returns updated Cargo.lock with precise version update" — lib/modules/manager/cargo/artifacts.spec.ts line 122
@@ -701,6 +877,101 @@ mod tests {
         let results = result.expect("runner should return results");
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].file.as_ref().unwrap().path, "Cargo.lock");
+    }
+
+    // Ported: "returns updated Cargo.lock when a preceding dependency triggers an update in a later dependency" — lib/modules/manager/cargo/artifacts.spec.ts line 284
+    #[tokio::test]
+    async fn returns_updated_cargo_lock_when_preceding_dependency_triggers_an_update() {
+        let dir = tempdir().unwrap();
+        let lock_dir = dir.path().to_path_buf();
+
+        std::fs::write(lock_dir.join("Cargo.toml"), "[package]\nname = 'test'\n").unwrap();
+        std::fs::write(
+            lock_dir.join("Cargo.lock"),
+            "[[package]]\nname = \"dep1\"\nversion = \"1.0.0\"\n\n[[package]]\nname = \"dep2\"\nversion = \"1.0.0\"\n\n[[package]]\nname = \"dep3\"\nversion = \"1.0.0\"\n",
+        )
+        .unwrap();
+
+        let fake_cargo = dir.path().join("cargo");
+        #[cfg(unix)]
+        {
+            let mut f = std::fs::File::create(&fake_cargo).unwrap();
+            f.write_all(
+                b"#!/bin/sh\nif [ \"$1\" = \"update\" ]; then\n  if echo \"$*\" | grep -q 'dep1@1.0.0'; then\n    printf '[[package]]\\nname = \"dep1\"\\nversion = \"1.0.1\"\\n\\n[[package]]\\nname = \"dep2\"\\nversion = \"1.0.2\"\\n\\n[[package]]\\nname = \"dep3\"\\nversion = \"1.0.0\"\\n' > Cargo.lock\n    touch .cargo-dep1-called\n  elif echo \"$*\" | grep -q 'dep2@1.0.0'; then\n    echo '... error: package ID specification ...' >&2\n    exit 1\n  elif echo \"$*\" | grep -q 'dep3@1.0.0'; then\n    printf '[[package]]\\nname = \"dep1\"\\nversion = \"1.0.1\"\\n\\n[[package]]\\nname = \"dep2\"\\nversion = \"1.0.2\"\\n\\n[[package]]\\nname = \"dep3\"\\nversion = \"1.0.3\"\\n' > Cargo.lock\n    touch .cargo-dep3-called\n  else\n    touch .cargo-workspace-called\n  fi\nfi\n",
+            )
+            .unwrap();
+            let mut perms = std::fs::metadata(&fake_cargo).unwrap().permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&fake_cargo, perms).unwrap();
+        }
+
+        let mut env: HashMap<String, String> = std::env::vars().collect();
+        let mut path = lock_dir.to_string_lossy().to_string();
+        if let Some(old_path) = env.get("PATH") {
+            path = format!("{}:{}", path, old_path);
+        }
+        env.insert("PATH".to_owned(), path);
+
+        let runner = make_runner();
+        let input = UpdateArtifact {
+            package_file_name: "Cargo.toml".to_owned(),
+            updated_deps: vec![
+                updated_dep(
+                    "dep1",
+                    Some("dep1"),
+                    Some("1.0.0"),
+                    Some("1.0.1"),
+                    None,
+                    None,
+                    Some("crate"),
+                ),
+                updated_dep(
+                    "dep2",
+                    Some("dep2"),
+                    Some("1.0.0"),
+                    Some("1.0.2"),
+                    None,
+                    None,
+                    Some("crate"),
+                ),
+                updated_dep(
+                    "dep3",
+                    Some("dep3"),
+                    Some("1.0.0"),
+                    Some("1.0.3"),
+                    None,
+                    None,
+                    Some("crate"),
+                ),
+            ],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: lock_dir.clone(),
+                env: env.into_iter().collect(),
+                ..Default::default()
+            },
+        };
+
+        let result = runner.update_artifacts(&input).await.unwrap();
+        let results = result.expect("runner should return results");
+        assert_eq!(results.len(), 1);
+        assert!(
+            results[0]
+                .file
+                .as_ref()
+                .unwrap()
+                .contents
+                .as_deref()
+                .is_some()
+        );
+        assert!(
+            lock_dir.join(".cargo-dep1-called").exists(),
+            "runner should execute dep1 update"
+        );
+        assert!(
+            lock_dir.join(".cargo-dep3-called").exists(),
+            "runner should retry with dep3 after dep2 fails"
+        );
     }
 
     // Rust-specific: unit test for command building
