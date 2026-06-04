@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 65/94 in-scope files mapped (full=65 partial=0 stub=0 pending=29 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 67/94 in-scope files mapped (full=67 partial=0 stub=0 pending=27 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -348,8 +348,8 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/swift/index.ts` | pending | — | — |
-| `lib/modules/versioning/swift/range.ts` | pending | — | — |
+| `lib/modules/versioning/swift/index.ts` | full | [`crates/renovate-core/src/versioning/swift.rs`](../../../crates/renovate-core/src/versioning/swift.rs) | — |
+| `lib/modules/versioning/swift/range.ts` | full | [`crates/renovate-core/src/versioning/swift.rs`](../../../crates/renovate-core/src/versioning/swift.rs) | — |
 
 ### `versioning/ubuntu`
 

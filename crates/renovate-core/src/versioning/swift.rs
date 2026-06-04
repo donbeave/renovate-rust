@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/swift/index.ts full
+//! @parity lib/modules/versioning/swift/range.ts full
 //! Swift Package Manager versioning.
 //!
 //! Ports `lib/modules/versioning/swift/range.ts` and `index.ts`.
