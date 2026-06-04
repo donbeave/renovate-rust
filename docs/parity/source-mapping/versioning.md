@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 78/94 in-scope files mapped (full=76 partial=2 stub=0 pending=16 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 79/94 in-scope files mapped (full=77 partial=2 stub=0 pending=15 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -263,7 +263,7 @@
 | `lib/modules/versioning/pvp/index.ts` | full | [`crates/renovate-core/src/versioning/pvp.rs`](../../../crates/renovate-core/src/versioning/pvp.rs) | — |
 | `lib/modules/versioning/pvp/range.ts` | full | [`crates/renovate-core/src/versioning/pvp.rs`](../../../crates/renovate-core/src/versioning/pvp.rs) | — |
 | `lib/modules/versioning/pvp/types.ts` | pending | — | — |
-| `lib/modules/versioning/pvp/util.ts` | pending | — | — |
+| `lib/modules/versioning/pvp/util.ts` | full | [`crates/renovate-core/src/versioning/pvp.rs`](../../../crates/renovate-core/src/versioning/pvp.rs) | — |
 
 ### `versioning/python`
 
