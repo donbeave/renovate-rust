@@ -87,6 +87,10 @@ reason = "Type-only lookup/result interfaces used only for TypeScript compile-ti
 file   = "lib/workers/repository/process/types.ts"
 reason = "Type-only vulnerability/process interfaces used only for TypeScript compile-time typing."
 
+[[source]]
+file   = "lib/workers/repository/changelog/types.ts"
+reason = "Type-only changelog option/result type aliases with no runtime behavior in Rust implementation."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"

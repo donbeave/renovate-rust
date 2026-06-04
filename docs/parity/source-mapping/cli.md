@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/153 in-scope files mapped (full=2 partial=8 stub=0 pending=143 out-of-scope=0 opt-out=7) across 15 modules.
+**Coverage:** 10/152 in-scope files mapped (full=2 partial=8 stub=0 pending=142 out-of-scope=0 opt-out=8) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -107,7 +107,7 @@
 |---|---|---|---|
 | `lib/workers/repository/cache.ts` | pending | — | — |
 | `lib/workers/repository/changelog/index.ts` | pending | — | — |
-| `lib/workers/repository/changelog/types.ts` | pending | — | — |
+| `lib/workers/repository/changelog/types.ts` | opt-out | — | Type-only changelog option/result type aliases with no runtime behavior in Rust implementation. |
 | `lib/workers/repository/common.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/branch/commit-message.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/branch/create.ts` | pending | — | — |
