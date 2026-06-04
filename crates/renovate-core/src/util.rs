@@ -5620,6 +5620,11 @@ pub fn mask_token(s: Option<&str>) -> String {
     format!("{}{}{}", prefix, "*".repeat(stars), suffix)
 }
 
+/// @parity lib/util/mask.ts full
+pub fn mask(s: Option<&str>) -> String {
+    mask_token(s)
+}
+
 // ---------------------------------------------------------------------------
 // Fingerprint — lib/util/fingerprint.ts
 // ---------------------------------------------------------------------------
@@ -5640,6 +5645,11 @@ pub fn fingerprint_json(input: Option<&serde_json::Value>) -> String {
         return String::new();
     }
     sha512_hex(serialized.as_bytes())
+}
+
+/// @parity lib/util/fingerprint.ts full
+pub fn fingerprint(input: Option<&serde_json::Value>) -> String {
+    fingerprint_json(input)
 }
 
 fn sort_json_keys(value: &serde_json::Value) -> serde_json::Value {
