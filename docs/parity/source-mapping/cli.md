@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/152 in-scope files mapped (full=2 partial=8 stub=0 pending=142 out-of-scope=0 opt-out=8) across 15 modules.
+**Coverage:** 10/151 in-scope files mapped (full=2 partial=8 stub=0 pending=141 out-of-scope=0 opt-out=9) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -138,7 +138,7 @@
 | `lib/workers/repository/init/index.ts` | pending | — | — |
 | `lib/workers/repository/init/inherited.ts` | pending | — | — |
 | `lib/workers/repository/init/merge.ts` | pending | — | — |
-| `lib/workers/repository/init/types.ts` | pending | — | — |
+| `lib/workers/repository/init/types.ts` | opt-out | — | Type-only repository initialization interfaces used only for TypeScript compile-time handoff typing. |
 | `lib/workers/repository/init/vulnerability.ts` | pending | — | — |
 | `lib/workers/repository/model/commit-message-factory.ts` | pending | — | — |
 | `lib/workers/repository/model/commit-message.ts` | pending | — | — |

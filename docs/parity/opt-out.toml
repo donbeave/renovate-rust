@@ -91,6 +91,10 @@ reason = "Type-only vulnerability/process interfaces used only for TypeScript co
 file   = "lib/workers/repository/changelog/types.ts"
 reason = "Type-only changelog option/result type aliases with no runtime behavior in Rust implementation."
 
+[[source]]
+file   = "lib/workers/repository/init/types.ts"
+reason = "Type-only repository initialization interfaces used only for TypeScript compile-time handoff typing."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
