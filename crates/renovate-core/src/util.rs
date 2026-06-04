@@ -4567,6 +4567,7 @@ impl SplitTracker {
 /// Detect binary content by checking for null bytes in the first 8 KB.
 ///
 /// Mirrors `isBinaryContent()` from `lib/util/unicode.ts`.
+/// @parity lib/util/unicode.ts full
 pub fn is_binary_content(bytes: &[u8]) -> bool {
     let sample_size = bytes.len().min(8192);
     bytes[..sample_size].contains(&0u8)
