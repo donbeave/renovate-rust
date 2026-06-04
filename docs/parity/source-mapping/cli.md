@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/154 in-scope files mapped (full=2 partial=8 stub=0 pending=144 out-of-scope=0 opt-out=6) across 15 modules.
+**Coverage:** 10/153 in-scope files mapped (full=2 partial=8 stub=0 pending=143 out-of-scope=0 opt-out=7) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -176,7 +176,7 @@
 | `lib/workers/repository/process/lookup/update-type.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/utils.ts` | pending | — | — |
 | `lib/workers/repository/process/sort.ts` | pending | — | — |
-| `lib/workers/repository/process/types.ts` | pending | — | — |
+| `lib/workers/repository/process/types.ts` | opt-out | — | Type-only vulnerability/process interfaces used only for TypeScript compile-time typing. |
 | `lib/workers/repository/process/vulnerabilities.ts` | pending | — | — |
 | `lib/workers/repository/process/write.ts` | pending | — | — |
 | `lib/workers/repository/reconfigure/comment.ts` | pending | — | — |
