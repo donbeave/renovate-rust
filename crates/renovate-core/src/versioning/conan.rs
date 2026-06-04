@@ -1,3 +1,9 @@
+//! @parity lib/modules/versioning/conan/index.ts full
+//!
+//! Conan versioning.
+//!
+//! Ports `lib/modules/versioning/conan/index.ts`.
+
 use std::sync::LazyLock;
 
 use regex::Regex;
