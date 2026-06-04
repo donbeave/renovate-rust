@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 63/94 in-scope files mapped (full=63 partial=0 stub=0 pending=31 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 64/94 in-scope files mapped (full=64 partial=0 stub=0 pending=30 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -71,7 +71,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/conda/index.ts` | pending | — | — |
+| `lib/modules/versioning/conda/index.ts` | full | [`crates/renovate-core/src/versioning/conda.rs`](../../../crates/renovate-core/src/versioning/conda.rs) | — |
 
 ### `versioning/deb`
 

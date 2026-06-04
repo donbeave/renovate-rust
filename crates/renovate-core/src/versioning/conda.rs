@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/conda/index.ts full
+//!
 //! Conda versioning.
 //!
 //! Ports `lib/modules/versioning/conda/index.ts`.
