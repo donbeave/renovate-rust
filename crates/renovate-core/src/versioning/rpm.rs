@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/rpm/index.ts full
+//!
 //! RPM versioning.
 //!
 //! Renovate reference:
