@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 67/94 in-scope files mapped (full=65 partial=2 stub=0 pending=27 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 68/94 in-scope files mapped (full=66 partial=2 stub=0 pending=26 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -63,7 +63,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/conan/common.ts` | pending | — | — |
+| `lib/modules/versioning/conan/common.ts` | full | [`crates/renovate-core/src/versioning/conan.rs`](../../../crates/renovate-core/src/versioning/conan.rs) | — |
 | `lib/modules/versioning/conan/index.ts` | full | [`crates/renovate-core/src/versioning/conan.rs`](../../../crates/renovate-core/src/versioning/conan.rs) | — |
 | `lib/modules/versioning/conan/range.ts` | pending | — | — |
 

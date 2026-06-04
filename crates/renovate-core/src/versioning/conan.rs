@@ -1,4 +1,5 @@
 //! @parity lib/modules/versioning/conan/index.ts full
+//! @parity lib/modules/versioning/conan/common.ts full
 //!
 //! Conan versioning.
 //!
