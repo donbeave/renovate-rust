@@ -14,8 +14,8 @@ pub mod emoji;
 pub mod git;
 pub mod hash;
 pub mod host_rules;
-pub mod jsonata;
 pub mod interpolator;
+pub mod jsonata;
 pub mod markdown;
 pub mod memoize;
 pub mod minimatch;
@@ -26,6 +26,7 @@ pub mod package_rules;
 pub mod promises;
 pub mod range;
 pub mod regex;
+pub mod result;
 pub mod sample;
 pub mod sanitize;
 pub mod split;
@@ -36,9 +37,9 @@ pub mod unicode;
 pub mod uniq;
 pub mod url;
 
+use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::borrow::Borrow;
 use std::fmt::Write;
 use std::panic::Location;
 
@@ -148,6 +149,7 @@ pub fn get_combined_env<S: std::hash::BuildHasher>(
 }
 
 // ---------------------------------------------------------------------------
+/// @parity lib/util/stats.ts partial
 // Timing stats — lib/util/stats.ts
 // ---------------------------------------------------------------------------
 
@@ -206,7 +208,7 @@ pub fn make_timing_report(data: &[i64]) -> TimingReport {
 }
 
 // ---------------------------------------------------------------------------
-// GitHub token utilities — lib/util/check-token.ts
+// Stats internals — lib/util/stats.ts
 // ---------------------------------------------------------------------------
 
 /// Accumulates timing data points per-datasource and generates reports.
@@ -2311,6 +2313,7 @@ pub fn get_extra_clone_opts_value(token: Option<&str>) -> Option<String> {
 
 // ---------------------------------------------------------------------------
 // S3 URL parsing — lib/util/s3.ts
+/// @parity lib/util/s3.ts full
 // ---------------------------------------------------------------------------
 
 /// Parsed S3 URL components.
@@ -2320,31 +2323,129 @@ pub struct S3UrlParts {
     pub key: String,
 }
 
+/// Mocked S3 client endpoint configuration.
+#[derive(Debug, Clone, PartialEq)]
+pub struct S3Endpoint {
+    pub hostname: String,
+    pub path: String,
+    pub port: Option<u16>,
+    pub protocol: String,
+    pub query: Option<String>,
+}
+
+impl S3Endpoint {
+    fn parse(raw: &str) -> Option<Self> {
+        let parsed = url_lib::Url::parse(raw).ok()?;
+        Some(Self {
+            hostname: parsed.host_str()?.to_owned(),
+            path: parsed.path().to_owned(),
+            port: parsed.port(),
+            protocol: format!("{}:", parsed.scheme()),
+            query: parsed.query().map(ToOwned::to_owned),
+        })
+    }
+}
+
+/// Minimal `S3Client` configuration used by parity tests.
+#[derive(Debug, Clone, PartialEq)]
+pub struct S3ClientConfig {
+    pub endpoint: Option<S3Endpoint>,
+    pub force_path_style: bool,
+}
+
+/// Minimal `S3Client` mirror for TypeScript parity.
+#[derive(Debug, Clone, PartialEq)]
+pub struct S3Client {
+    pub config: S3ClientConfig,
+}
+
+#[derive(Debug, Default)]
+struct S3ClientState {
+    instance: Option<std::sync::Arc<S3Client>>,
+    endpoint: Option<String>,
+    force_path_style: bool,
+}
+
+static S3_CLIENT_STATE: std::sync::LazyLock<std::sync::Mutex<S3ClientState>> =
+    std::sync::LazyLock::new(|| std::sync::Mutex::new(S3ClientState::default()));
+
+static TEST_S3_GLOBAL_CONFIG: std::sync::LazyLock<std::sync::Mutex<(Option<String>, bool)>> =
+    std::sync::LazyLock::new(|| std::sync::Mutex::new((None, false)));
+
 /// Parse an S3 URL string into bucket and key.
 ///
 /// Mirrors `parseS3Url()` from `lib/util/s3.ts`.
 pub fn parse_s3_url(raw_url: &str) -> Option<S3UrlParts> {
-    if !raw_url.starts_with("s3://") {
+    let parsed = url_lib::Url::parse(raw_url).ok()?;
+    if parsed.scheme() != "s3" {
         return None;
     }
-    // s3://bucket/key/path
-    let after_scheme = &raw_url[5..]; // strip "s3://"
-    let slash_pos = after_scheme.find('/');
-    let bucket = match slash_pos {
-        None => after_scheme,
-        Some(i) => &after_scheme[..i],
-    };
+    let bucket = parsed.host_str()?;
     if bucket.is_empty() {
         return None;
     }
-    let key = match slash_pos {
-        None => "",
-        Some(i) => &after_scheme[i + 1..],
-    };
+    let key = parsed.path().trim_start_matches('/');
     Some(S3UrlParts {
         bucket: bucket.to_owned(),
         key: key.to_owned(),
     })
+}
+
+/// Resolve and cache an S3 client in the same way as `getS3Client()`.
+///
+/// `s3_endpoint` and `s3_path_style` override values from cached
+/// configuration when provided.
+pub fn get_s3_client(
+    s3_endpoint: Option<&str>,
+    s3_path_style: Option<bool>,
+) -> std::sync::Arc<S3Client> {
+    let (endpoint, force_path_style) = {
+        let cfg = TEST_S3_GLOBAL_CONFIG.lock().unwrap();
+        let endpoint = s3_endpoint.map(ToOwned::to_owned).or_else(|| cfg.0.clone());
+        let force = s3_path_style.unwrap_or(cfg.1);
+        (endpoint, force)
+    };
+
+    let mut state = S3_CLIENT_STATE.lock().unwrap();
+    if let Some(client) = &state.instance
+        && state.endpoint == endpoint
+        && state.force_path_style == force_path_style
+    {
+        return client.clone();
+    }
+
+    let endpoint_cfg = endpoint.as_deref().and_then(S3Endpoint::parse);
+    let client = std::sync::Arc::new(S3Client {
+        config: S3ClientConfig {
+            endpoint: endpoint_cfg,
+            force_path_style,
+        },
+    });
+    state.endpoint = endpoint;
+    state.force_path_style = force_path_style;
+    state.instance = Some(client.clone());
+    client
+}
+
+#[cfg(test)]
+pub fn set_s3_client_test_config(endpoint: Option<String>, force_path_style: bool) {
+    let mut cfg = TEST_S3_GLOBAL_CONFIG.lock().unwrap();
+    cfg.0 = endpoint;
+    cfg.1 = force_path_style;
+    let mut state = S3_CLIENT_STATE.lock().unwrap();
+    state.instance = None;
+    state.endpoint = None;
+    state.force_path_style = false;
+}
+
+#[cfg(test)]
+static S3_CLIENT_TEST_MUTEX: std::sync::LazyLock<std::sync::Mutex<()>> =
+    std::sync::LazyLock::new(|| std::sync::Mutex::new(()));
+
+#[cfg(test)]
+fn with_s3_client_state<R>(f: impl FnOnce() -> R) -> R {
+    let _guard = S3_CLIENT_TEST_MUTEX.lock().unwrap();
+    f()
 }
 
 // ---------------------------------------------------------------------------
@@ -4533,7 +4634,10 @@ where
     match inherited.into() {
         InheritedState::Present(inh) => {
             // For onboardingAutoCloseAge, do not let inherited exceed global
-            if is_onboarding_auto_close_age && let Some(ref glob) = global && glob < &inh {
+            if is_onboarding_auto_close_age
+                && let Some(ref glob) = global
+                && glob < &inh
+            {
                 return Some(glob.clone());
             }
             Some(inh)
@@ -4980,6 +5084,7 @@ pub fn linkify_markdown(content: &str, repository: &str) -> String {
 
 // ---------------------------------------------------------------------------
 // Sanitize — lib/util/sanitize.ts
+/// @parity lib/util/sanitize.ts full
 // ---------------------------------------------------------------------------
 
 const GITHUB_APP_TOKEN_PREFIX: &str = "x-access-token:";
@@ -6313,12 +6418,23 @@ mod tests {
             coerce_object::<HashMap<&str, &str>>(None, None),
             HashMap::new()
         );
-        let with_val = Some([("name", "name")].into_iter().collect::<HashMap<&str, &str>>());
-        assert_eq!(coerce_object(with_val, None), [("name", "name")].into_iter().collect());
+        let with_val = Some(
+            [("name", "name")]
+                .into_iter()
+                .collect::<HashMap<&str, &str>>(),
+        );
+        assert_eq!(
+            coerce_object(with_val, None),
+            [("name", "name")].into_iter().collect()
+        );
         assert_eq!(
             coerce_object(
                 None,
-                Some([("name", "name")].into_iter().collect::<HashMap<&str, &str>>())
+                Some(
+                    [("name", "name")]
+                        .into_iter()
+                        .collect::<HashMap<&str, &str>>()
+                )
             ),
             [("name", "name")].into_iter().collect()
         );
@@ -9961,6 +10077,7 @@ mod tests {
     // detect_platform
     // -----------------------------------------------------------------------
 
+    // Ported: "(it.each / template — verify manually)" — lib/util/common.spec.ts line 46
     // Ported: "("$url") === $hostType" — lib/util/common.spec.ts line 46
     #[test]
     fn test_detect_platform() {
@@ -11035,6 +11152,7 @@ dep1 = "^1.0.0"
     }
 
     #[test]
+    // Ported: "logs a trace message (not warning) for binary files with hidden Unicode characters" — lib/util/unicode.spec.ts line 43
     fn binary_content_with_hidden_unicode_detected() {
         // 0xe2 0x80 0x8b = UTF-8 encoding of U+200B (zero-width space)
         let bytes = [
@@ -11044,6 +11162,7 @@ dep1 = "^1.0.0"
         let text = String::from_utf8_lossy(&bytes);
         let found = find_hidden_unicode_chars(&text);
         assert!(!found.is_empty());
+        assert!(found.contains(&'\u{200B}'));
     }
 
     // Ported: "does not log a warning when no hidden characters are present" — lib/util/unicode.spec.ts line 63
@@ -11074,11 +11193,8 @@ dep1 = "^1.0.0"
     // Ported: "handles null inherited values" — lib/util/common.spec.ts line 227
     #[test]
     fn get_inherited_or_global_null_inherited_values() {
-        let result: Option<Vec<String>> = get_inherited_or_global(
-            InheritedState::Null,
-            Some(vec!["global".to_owned()]),
-            false,
-        );
+        let result: Option<Vec<String>> =
+            get_inherited_or_global(InheritedState::Null, Some(vec!["global".to_owned()]), false);
         assert_eq!(result, None);
     }
 
@@ -11276,6 +11392,67 @@ dep1 = "^1.0.0"
     #[test]
     fn test_parse_s3_url_invalid() {
         assert!(parse_s3_url("thisisnotaurl").is_none());
+    }
+
+    // Ported: "parses S3 URLs" (query should not be part of the key) — lib/util/s3.spec.ts line 9
+    #[test]
+    fn test_parse_s3_url_strips_query_component() {
+        let r = parse_s3_url("s3://bucket/key/path?x=1").unwrap();
+        assert_eq!(r.bucket, "bucket");
+        assert_eq!(r.key, "key/path");
+    }
+
+    // ── get_s3_client ───────────────────────────────────────────────────────
+
+    // Ported: "returns a singleton s3 client instance" — lib/util/s3.spec.ts line 24
+    #[test]
+    fn test_get_s3_client_singleton() {
+        with_s3_client_state(|| {
+            set_s3_client_test_config(Some("https://minio.domain.test".to_owned()), true);
+            let client1 = get_s3_client(None, None);
+            let client2 = get_s3_client(None, None);
+            assert!(std::sync::Arc::ptr_eq(&client1, &client2));
+
+            let endpoint = client1.config.endpoint.as_ref().unwrap();
+            assert_eq!(endpoint.hostname, "minio.domain.test");
+            assert_eq!(endpoint.path, "/");
+            assert_eq!(endpoint.port, None);
+            assert_eq!(endpoint.protocol, "https:");
+            assert!(endpoint.query.is_none());
+            assert!(client1.config.force_path_style);
+        })
+    }
+
+    // Ported: "uses user-configured s3 values" — lib/util/s3.spec.ts line 30
+    #[test]
+    fn test_get_s3_client_uses_user_configured_values() {
+        with_s3_client_state(|| {
+            set_s3_client_test_config(Some("https://minio.domain.test".to_owned()), true);
+            let client = get_s3_client(None, None);
+            let endpoint = client.config.endpoint.as_ref().unwrap();
+            assert_eq!(endpoint.hostname, "minio.domain.test");
+            assert_eq!(endpoint.path, "/");
+            assert_eq!(endpoint.port, None);
+            assert_eq!(endpoint.protocol, "https:");
+            assert!(endpoint.query.is_none());
+            assert!(client.config.force_path_style);
+        })
+    }
+
+    // Ported: "uses s3 values from globalconfig instead of globalconfig class" — lib/util/s3.spec.ts line 50
+    #[test]
+    fn test_get_s3_client_uses_explicit_values() {
+        with_s3_client_state(|| {
+            set_s3_client_test_config(Some("https://config.domain.test".to_owned()), false);
+            let client = get_s3_client(Some("https://minio.domain.test"), Some(true));
+            let endpoint = client.config.endpoint.as_ref().unwrap();
+            assert_eq!(endpoint.hostname, "minio.domain.test");
+            assert_eq!(endpoint.path, "/");
+            assert_eq!(endpoint.port, None);
+            assert_eq!(endpoint.protocol, "https:");
+            assert!(endpoint.query.is_none());
+            assert!(client.config.force_path_style);
+        })
     }
 
     // ── local platform stub ───────────────────────────────────────────────────

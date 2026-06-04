@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 33/172 in-scope files mapped (full=33 partial=0 stub=0 pending=139 out-of-scope=0 opt-out=3) across 13 modules.
+**Coverage:** 37/172 in-scope files mapped (full=35 partial=2 stub=0 pending=135 out-of-scope=0 opt-out=3) across 13 modules.
 
 ### `util/_root`
 
@@ -39,12 +39,12 @@
 | `lib/util/promises.ts` | full | [`crates/renovate-core/src/util/promises.rs`](../../../crates/renovate-core/src/util/promises.rs) | — |
 | `lib/util/range.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/regex.ts` | full | [`crates/renovate-core/src/util/regex.rs`](../../../crates/renovate-core/src/util/regex.rs) | — |
-| `lib/util/result.ts` | pending | — | — |
-| `lib/util/s3.ts` | pending | — | — |
+| `lib/util/result.ts` | partial | [`crates/renovate-core/src/util/result.rs`](../../../crates/renovate-core/src/util/result.rs) | basic Result/AsyncResult plumbing is in |
+| `lib/util/s3.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sample.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/sanitize.ts` | pending | — | — |
+| `lib/util/sanitize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/split.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/stats.ts` | pending | — | — |
+| `lib/util/stats.ts` | partial | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/streams.ts` | pending | — | — |
 | `lib/util/string-match.ts` | full | [`crates/renovate-core/src/string_match.rs`](../../../crates/renovate-core/src/string_match.rs) | — |
 | `lib/util/string.ts` | pending | — | — |
