@@ -5501,6 +5501,7 @@ pub fn redact_cmd_credentials(cmd: &str) -> String {
 }
 
 // ---------------------------------------------------------------------------
+/// @parity lib/util/filter-map.ts full
 // Filter-map — lib/util/filter-map.ts
 // ---------------------------------------------------------------------------
 
