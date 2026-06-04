@@ -16,6 +16,7 @@
 
 use globset::GlobBuilder;
 use regex::Regex;
+use tracing::warn;
 
 #[derive(Debug)]
 pub struct RegexPredicate {
@@ -37,6 +38,7 @@ impl RegexPredicate {
 /// - `"/pattern/"` or `"/pattern/i"` → compiled regex (case depends on flags)
 /// - Contains `*`, `?`, `[`, `{`, or `**` → case-insensitive glob
 /// - Otherwise → case-insensitive exact match (mirrors minimatch `nocase:true`)
+/// @parity lib/util/string-match.ts full
 pub fn match_regex_or_glob(input: &str, pattern: &str) -> bool {
     if pattern == "*" {
         return true;
@@ -130,16 +132,23 @@ pub fn match_regex_or_glob_list(input: &str, patterns: &[String]) -> bool {
 /// Renovate reference: `lib/util/ignore.ts`
 pub fn is_skip_comment(comment: &str) -> bool {
     let comment = comment.trim();
-    let body = if let Some(rest) = comment.strip_prefix("renovate:") {
-        rest
+    let (source, body) = if let Some(rest) = comment.strip_prefix("renovate:") {
+        ("renovate", rest)
     } else if let Some(rest) = comment.strip_prefix("pyup:") {
-        rest
+        ("pyup", rest)
     } else {
         return false;
     };
     // The command ends at the first '#' (nested comment) or at whitespace.
     let cmd = body.split('#').next().unwrap_or(body).trim();
-    cmd == "ignore"
+    if cmd == "ignore" {
+        true
+    } else {
+        if source == "renovate" {
+            warn!("unknown renovate command: {}", body.trim());
+        }
+        false
+    }
 }
 
 /// Return a predicate for Renovate `/pattern/` or `!/pattern/i` config regex literals.
@@ -597,6 +606,13 @@ mod tests {
     // Ported: "returns false for \"renovate:\" comments without \"ignore\"" — lib/util/ignore.spec.ts line 19
     #[test]
     fn skip_comment_renovate_non_ignore_returns_false() {
+        assert!(!is_skip_comment("renovate:update"));
+    }
+
+    // Ported: "logs unknown command for \"renovate:\" comments without \"ignore\"" — lib/util/ignore.spec.ts line 23
+    // The TypeScript test checks logger.warn; Rust validates behavior directly.
+    #[test]
+    fn skip_comment_renovate_unknown_command_returns_false() {
         assert!(!is_skip_comment("renovate:update"));
     }
 

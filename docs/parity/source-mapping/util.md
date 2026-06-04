@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 24/174 in-scope files mapped (full=24 partial=0 stub=0 pending=150 out-of-scope=0 opt-out=1) across 13 modules.
+**Coverage:** 25/174 in-scope files mapped (full=25 partial=0 stub=0 pending=149 out-of-scope=0 opt-out=1) across 13 modules.
 
 ### `util/_root`
 
@@ -46,7 +46,7 @@
 | `lib/util/split.ts` | pending | — | — |
 | `lib/util/stats.ts` | pending | — | — |
 | `lib/util/streams.ts` | pending | — | — |
-| `lib/util/string-match.ts` | pending | — | — |
+| `lib/util/string-match.ts` | full | [`crates/renovate-core/src/string_match.rs`](../../../crates/renovate-core/src/string_match.rs) | — |
 | `lib/util/string.ts` | pending | — | — |
 | `lib/util/stringify.ts` | pending | — | — |
 | `lib/util/timestamp.ts` | pending | — | — |
