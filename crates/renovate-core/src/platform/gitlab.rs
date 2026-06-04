@@ -636,6 +636,10 @@ impl PlatformClient for GitlabClient {
             page += 1;
         }
 
+        if gl_state == "opened" {
+            all_prs.sort_by(|a, b| b.number.cmp(&a.number));
+        }
+
         Ok(all_prs)
     }
 
@@ -1686,6 +1690,58 @@ mod tests {
             .unwrap();
         assert_eq!(prs.len(), 1);
         assert_eq!(prs[0].state, "open");
+    }
+
+    // Ported: "returns items in reverse order (most recent first)" — lib/modules/platform/gitlab/pr-cache.spec.ts line 267
+    #[tokio::test]
+    async fn get_pr_list_returns_prs_in_reverse_order() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/projects/owner%2Frepo/merge_requests"))
+            .and(query_param("state", "opened"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!([
+                {
+                    "iid": 1,
+                    "title": "pr-1",
+                    "state": "opened",
+                    "source_branch": "branch",
+                    "target_branch": "main",
+                    "created_at": "2020-01-01T00:00:00Z",
+                    "updated_at": "2020-01-01T00:00:00Z",
+                    "sha": "abc",
+                },
+                {
+                    "iid": 2,
+                    "title": "pr-2",
+                    "state": "opened",
+                    "source_branch": "branch",
+                    "target_branch": "main",
+                    "created_at": "2021-01-01T00:00:00Z",
+                    "updated_at": "2021-01-01T00:00:00Z",
+                    "sha": "def",
+                },
+                {
+                    "iid": 3,
+                    "title": "pr-3",
+                    "state": "opened",
+                    "source_branch": "branch",
+                    "target_branch": "main",
+                    "created_at": "2022-01-01T00:00:00Z",
+                    "updated_at": "2022-01-01T00:00:00Z",
+                    "sha": "ghi",
+                },
+            ])))
+            .mount(&server)
+            .await;
+
+        let client = make_client(&server.uri());
+        let prs = client
+            .get_pr_list("owner", "repo", Some("open"))
+            .await
+            .unwrap();
+        assert_eq!(prs[0].number, 3);
+        assert_eq!(prs[1].number, 2);
+        assert_eq!(prs[2].number, 1);
     }
 
     // ── get_pr ────────────────────────────────────────────────────────────────
