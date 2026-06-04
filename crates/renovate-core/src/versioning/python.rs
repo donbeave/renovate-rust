@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/python/index.ts full
+//!
 //! Python versioning — mirrors `lib/modules/versioning/python/index.ts`.
 //!
 //! Delegates to Poetry for poetry-style ranges and PEP 440 otherwise.
