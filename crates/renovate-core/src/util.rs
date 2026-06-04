@@ -4617,6 +4617,7 @@ pub fn find_hidden_unicode_chars(content: &str) -> Vec<char> {
 /// Inserts zero-width spaces after `@` mentions and `#`+digit patterns to
 /// prevent unintended GitHub auto-linking.  Mirrors `sanitizeMarkdown` from
 /// `lib/util/markdown.ts`.
+/// @parity lib/util/markdown.ts full
 pub fn sanitize_markdown(markdown: &str) -> String {
     use regex_lib::Regex;
     static AT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
