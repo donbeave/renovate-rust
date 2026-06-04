@@ -4276,6 +4276,7 @@ pub fn uniq_eq<T: PartialEq>(array: Vec<T>) -> Vec<T> {
 ///
 /// Returns a reference to `left` (mutated in place).  This mirrors the
 /// TypeScript `assignKeys` which skips null/undefined values.
+/// @parity lib/util/assign-keys.ts full
 pub fn assign_keys<K, V>(
     left: &mut std::collections::HashMap<K, V>,
     right: &std::collections::HashMap<K, V>,
