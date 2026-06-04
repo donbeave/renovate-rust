@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 28/174 in-scope files mapped (full=28 partial=0 stub=0 pending=146 out-of-scope=0 opt-out=1) across 13 modules.
+**Coverage:** 29/174 in-scope files mapped (full=29 partial=0 stub=0 pending=145 out-of-scope=0 opt-out=1) across 13 modules.
 
 ### `util/_root`
 
@@ -38,7 +38,7 @@
 | `lib/util/pretty-time.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/promises.ts` | pending | — | — |
 | `lib/util/range.ts` | full | [`crates/renovate-core/src/util/range.rs`](../../../crates/renovate-core/src/util/range.rs) | — |
-| `lib/util/regex.ts` | pending | — | — |
+| `lib/util/regex.ts` | full | [`crates/renovate-core/src/util/regex.rs`](../../../crates/renovate-core/src/util/regex.rs) | — |
 | `lib/util/result.ts` | pending | — | — |
 | `lib/util/s3.ts` | pending | — | — |
 | `lib/util/sample.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
@@ -243,4 +243,3 @@
 |---|---|---|---|
 | `lib/util/vulnerability/ecosystem.ts` | pending | — | — |
 | `lib/util/vulnerability/utils.ts` | pending | — | — |
-
