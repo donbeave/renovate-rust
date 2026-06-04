@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 37/172 in-scope files mapped (full=35 partial=2 stub=0 pending=135 out-of-scope=0 opt-out=3) across 13 modules.
+**Coverage:** 38/172 in-scope files mapped (full=38 partial=0 stub=0 pending=134 out-of-scope=0 opt-out=3) across 13 modules.
 
 ### `util/_root`
 
@@ -39,12 +39,12 @@
 | `lib/util/promises.ts` | full | [`crates/renovate-core/src/util/promises.rs`](../../../crates/renovate-core/src/util/promises.rs) | — |
 | `lib/util/range.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/regex.ts` | full | [`crates/renovate-core/src/util/regex.rs`](../../../crates/renovate-core/src/util/regex.rs) | — |
-| `lib/util/result.ts` | partial | [`crates/renovate-core/src/util/result.rs`](../../../crates/renovate-core/src/util/result.rs) | async chaining helpers added; transform/catch |
+| `lib/util/result.ts` | full | [`crates/renovate-core/src/util/result.rs`](../../../crates/renovate-core/src/util/result.rs) | — |
 | `lib/util/s3.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sample.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sanitize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/split.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/stats.ts` | partial | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
+| `lib/util/stats.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/streams.ts` | pending | — | — |
 | `lib/util/string-match.ts` | full | [`crates/renovate-core/src/string_match.rs`](../../../crates/renovate-core/src/string_match.rs) | — |
 | `lib/util/string.ts` | pending | — | — |
@@ -53,7 +53,7 @@
 | `lib/util/toml.ts` | pending | — | — |
 | `lib/util/unicode.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/uniq.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/url.ts` | pending | — | — |
+| `lib/util/url.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/yaml.ts` | pending | — | — |
 
 ### `util/cache`

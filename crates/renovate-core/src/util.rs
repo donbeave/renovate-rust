@@ -49,6 +49,8 @@ thread_local! {
     static GLOBAL_SECRETS: RefCell<HashSet<String>> = RefCell::new(HashSet::new());
     static REPO_SECRETS: RefCell<HashSet<String>> = RefCell::new(HashSet::new());
 }
+static LOOKUP_STATS_DATA: std::sync::LazyLock<std::sync::Mutex<HashMap<String, Vec<i64>>>> =
+    std::sync::LazyLock::new(|| std::sync::Mutex::new(HashMap::new()));
 
 // ---------------------------------------------------------------------------
 // Child-process environment — lib/util/exec/env.ts
@@ -149,13 +151,14 @@ pub fn get_combined_env<S: std::hash::BuildHasher>(
 }
 
 // ---------------------------------------------------------------------------
-/// @parity lib/util/stats.ts partial
+/// @parity lib/util/stats.ts full
 // Timing stats — lib/util/stats.ts
 // ---------------------------------------------------------------------------
 
 /// Compute timing statistics from a slice of millisecond durations.
 ///
 /// Mirrors `makeTimingReport` from `lib/util/stats.ts`.
+#[derive(Clone)]
 pub struct TimingReport {
     pub count: usize,
     pub avg_ms: i64,
@@ -215,9 +218,7 @@ pub fn make_timing_report(data: &[i64]) -> TimingReport {
 ///
 /// Mirrors the `LookupStats` class from `lib/util/stats.ts`.
 #[derive(Debug, Default)]
-pub struct LookupStats {
-    data: std::collections::HashMap<String, Vec<i64>>,
-}
+pub struct LookupStats;
 
 impl LookupStats {
     pub fn new() -> Self {
@@ -225,16 +226,32 @@ impl LookupStats {
     }
 
     /// Record a duration for a datasource.
-    pub fn write(&mut self, datasource: &str, duration: i64) {
-        self.data
+    pub fn write(datasource: &str, duration: i64) {
+        LOOKUP_STATS_DATA
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
             .entry(datasource.to_owned())
             .or_default()
             .push(duration);
     }
 
+    /// Clear all collected datapoints.
+    ///
+    /// This is not part of the original TypeScript API and exists only to support
+    /// deterministic unit tests that share the same process-level storage.
+    #[cfg(test)]
+    pub(crate) fn clear_for_tests() {
+        LOOKUP_STATS_DATA
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .clear();
+    }
+
     /// Generate the timing report for all datasources.
-    pub fn get_report(&self) -> std::collections::HashMap<String, TimingReport> {
-        self.data
+    pub fn get_report() -> std::collections::HashMap<String, TimingReport> {
+        LOOKUP_STATS_DATA
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
             .iter()
             .map(|(k, v)| (k.clone(), make_timing_report(v)))
             .collect()
@@ -243,7 +260,7 @@ impl LookupStats {
     /// Wrap an async function, measuring its duration and recording it.
     ///
     /// Mirrors `LookupStats.wrap()` from `lib/util/stats.ts`.
-    pub async fn wrap<F, Fut, T>(&mut self, datasource: &str, f: F) -> T
+    pub async fn wrap<F, Fut, T>(datasource: &str, f: F) -> T
     where
         F: FnOnce() -> Fut,
         Fut: std::future::Future<Output = T>,
@@ -251,8 +268,14 @@ impl LookupStats {
         let start = std::time::Instant::now();
         let result = f().await;
         let duration = start.elapsed().as_millis() as i64;
-        self.write(datasource, duration);
+        Self::write(datasource, duration);
         result
+    }
+
+    /// Log the timing report at debug level.
+    pub fn report() {
+        let report = Self::get_report();
+        tracing::debug!(?report, "Lookup statistics");
     }
 }
 
@@ -309,6 +332,12 @@ impl PackageCacheStats {
         self.write_set(start.elapsed().as_millis() as i64);
         result
     }
+
+    /// Log the timing report at debug level.
+    pub fn report(&self) {
+        let report = self.get_report();
+        tracing::debug!(?report, "Package cache statistics");
+    }
 }
 
 /// Accumulates per-operation git timing stats.
@@ -316,6 +345,15 @@ impl PackageCacheStats {
 /// Mirrors `GitOperationStats` from `lib/util/stats.ts`.
 /// Unlike `LookupStats`, this struct accepts `f64` durations and ceilings
 /// the total in `get_report()` (matching the TypeScript implementation).
+#[derive(Debug, Clone, PartialEq)]
+pub struct GitOperationTimingReport {
+    pub count: usize,
+    pub avg_ms: f64,
+    pub median_ms: f64,
+    pub max_ms: f64,
+    pub total_ms: i64,
+}
+
 #[derive(Debug, Default)]
 pub struct GitOperationStats {
     data: std::collections::HashMap<String, Vec<f64>>,
@@ -337,7 +375,7 @@ impl GitOperationStats {
     /// Generate the timing report for all operations.
     ///
     /// The `totalMs` field is ceiled (matching TypeScript's `Math.ceil`).
-    pub fn get_report(&self) -> std::collections::HashMap<String, TimingReport> {
+    pub fn get_report(&self) -> std::collections::HashMap<String, GitOperationTimingReport> {
         self.data
             .iter()
             .map(|(k, v)| {
@@ -345,26 +383,18 @@ impl GitOperationStats {
                 let total_f: f64 = v.iter().sum();
                 let total_ms = total_f.ceil() as i64;
                 let avg_ms = if count > 0 {
-                    (total_f / count as f64).round() as i64
+                    (total_f / count as f64).round()
                 } else {
-                    0
+                    0.0
                 };
                 let max_ms = v.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-                let max_ms = if max_ms.is_infinite() {
-                    0
-                } else {
-                    max_ms as i64
-                };
+                let max_ms = if max_ms.is_infinite() { 0.0 } else { max_ms };
                 let mut sorted = v.clone();
                 sorted.sort_unstable_by(f64::total_cmp);
-                let median_ms = if count > 0 {
-                    sorted[count / 2] as i64
-                } else {
-                    0
-                };
+                let median_ms = if count > 0 { sorted[count / 2] } else { 0.0 };
                 (
                     k.clone(),
-                    TimingReport {
+                    GitOperationTimingReport {
                         count,
                         avg_ms,
                         median_ms,
@@ -375,11 +405,52 @@ impl GitOperationStats {
             })
             .collect()
     }
+
+    /// Log the timing report at debug level.
+    pub fn report(&self) {
+        let report = self.get_report();
+        tracing::debug!(?report, "Git operations statistics");
+    }
 }
 
 /// Accumulates per-release-datasource timing stats.
 ///
 /// Mirrors `GetDatasourceReleasesStats` from `lib/util/stats.ts`.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GetDatasourceReleasesRegistryReport {
+    pub stats: TimingReport,
+    pub packages: std::collections::HashMap<String, TimingReport>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GetDatasourceReleasesDatasourceReport {
+    pub stats: TimingReport,
+    pub registry_urls: std::collections::HashMap<String, GetDatasourceReleasesRegistryReport>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GetDatasourceReleasesReport {
+    pub stats: TimingReport,
+    pub datasources: std::collections::HashMap<String, GetDatasourceReleasesDatasourceReport>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GetDatasourceReleasesShortRegistryReport {
+    pub stats: TimingReport,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GetDatasourceReleasesShortDatasourceReport {
+    pub stats: TimingReport,
+    pub registry_urls: std::collections::HashMap<String, GetDatasourceReleasesShortRegistryReport>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GetDatasourceReleasesShortReport {
+    pub stats: TimingReport,
+    pub datasources: std::collections::HashMap<String, GetDatasourceReleasesShortDatasourceReport>,
+}
+
 #[derive(Debug, Default)]
 pub struct GetDatasourceReleasesStats {
     data: Vec<(String, String, String, i64)>,
@@ -392,37 +463,69 @@ impl GetDatasourceReleasesStats {
     pub fn write(
         &mut self,
         datasource: &str,
-        _registry_url: &str,
-        _package_name: &str,
+        registry_url: &str,
+        package_name: &str,
         duration: i64,
     ) {
         self.data.push((
             datasource.to_owned(),
-            String::new(),
-            String::new(),
+            registry_url.to_owned(),
+            package_name.to_owned(),
             duration,
         ));
     }
-    pub fn get_report(
-        &self,
-    ) -> (
-        TimingReport,
-        std::collections::HashMap<String, TimingReport>,
-    ) {
-        let all: Vec<i64> = self.data.iter().map(|(_, _, _, d)| *d).collect();
-        let overall = make_timing_report(&all);
-        let mut by_ds: std::collections::HashMap<String, Vec<i64>> =
-            std::collections::HashMap::new();
-        for (ds, _, _, d) in &self.data {
-            by_ds.entry(ds.clone()).or_default().push(*d);
+    pub fn get_report(&self) -> GetDatasourceReleasesReport {
+        let mut all = Vec::with_capacity(self.data.len());
+        let mut grouped: std::collections::HashMap<
+            String,
+            std::collections::HashMap<String, std::collections::HashMap<String, Vec<i64>>>,
+        > = std::collections::HashMap::new();
+
+        for (datasource, registry_url, package_name, duration) in &self.data {
+            all.push(*duration);
+            grouped
+                .entry(datasource.clone())
+                .or_default()
+                .entry(registry_url.clone())
+                .or_default()
+                .entry(package_name.clone())
+                .or_default()
+                .push(*duration);
         }
-        (
-            overall,
-            by_ds
-                .iter()
-                .map(|(k, v)| (k.clone(), make_timing_report(v)))
-                .collect(),
-        )
+
+        let mut datasources = std::collections::HashMap::new();
+        for (datasource, registries) in grouped {
+            let mut all_by_datasource = Vec::new();
+            let mut registry_urls = std::collections::HashMap::new();
+            for (registry_url, package_stats) in registries {
+                let mut all_by_registry = Vec::new();
+                let mut packages = std::collections::HashMap::new();
+                for (package_name, values) in package_stats {
+                    all_by_datasource.extend_from_slice(&values);
+                    all_by_registry.extend_from_slice(&values);
+                    packages.insert(package_name, make_timing_report(&values));
+                }
+                registry_urls.insert(
+                    registry_url,
+                    GetDatasourceReleasesRegistryReport {
+                        stats: make_timing_report(&all_by_registry),
+                        packages,
+                    },
+                );
+            }
+            datasources.insert(
+                datasource,
+                GetDatasourceReleasesDatasourceReport {
+                    stats: make_timing_report(&all_by_datasource),
+                    registry_urls,
+                },
+            );
+        }
+
+        GetDatasourceReleasesReport {
+            stats: make_timing_report(&all),
+            datasources,
+        }
     }
 
     /// Wrap an async function, measuring its duration.
@@ -444,6 +547,35 @@ impl GetDatasourceReleasesStats {
         let duration = start.elapsed().as_millis() as i64;
         self.write(datasource, registry_url, package_name, duration);
         result
+    }
+
+    /// Log full and short reports.
+    pub fn report(&self) {
+        let report = self.get_report();
+        let mut short = GetDatasourceReleasesShortReport {
+            stats: report.stats.clone(),
+            datasources: std::collections::HashMap::new(),
+        };
+        for (datasource, ds_data) in report.datasources.iter() {
+            let mut registry_urls = std::collections::HashMap::new();
+            for (registry_url, registry_data) in ds_data.registry_urls.iter() {
+                registry_urls.insert(
+                    registry_url.clone(),
+                    GetDatasourceReleasesShortRegistryReport {
+                        stats: registry_data.stats.clone(),
+                    },
+                );
+            }
+            short.datasources.insert(
+                datasource.clone(),
+                GetDatasourceReleasesShortDatasourceReport {
+                    stats: ds_data.stats.clone(),
+                    registry_urls,
+                },
+            );
+        }
+        tracing::trace!(?report, "getReleases statistics with packages");
+        tracing::debug!(?short, "getReleases statistics summary");
     }
 }
 
@@ -547,6 +679,17 @@ impl DatasourceCacheStats {
         }
         (long, short)
     }
+
+    /// Log short and detailed cache statistics.
+    pub fn report(&self) {
+        let (long, short) = self.get_report();
+        if !short.is_empty() {
+            tracing::debug!(?short, "Datasource cache statistics");
+        }
+        if !long.is_empty() {
+            tracing::trace!(?long, "Datasource cache detailed statistics");
+        }
+    }
 }
 
 /// Per-URL HTTP cache entry.
@@ -572,14 +715,18 @@ impl HttpCacheStats {
     }
 
     fn get_base_url(url: &str) -> Option<String> {
-        if !url.contains("://") {
-            return None;
+        let parsed = url_lib::Url::parse(url).ok()?;
+        let host = parsed.host_str()?;
+        let path = if parsed.path().is_empty() {
+            "/"
+        } else {
+            parsed.path()
+        };
+        if let Some(port) = parsed.port() {
+            Some(format!("{}://{host}:{port}{path}", parsed.scheme()))
+        } else {
+            Some(format!("{}://{host}{path}", parsed.scheme()))
         }
-        let after_scheme = url.split("://").nth(1)?;
-        let host = after_scheme.split('/').next()?;
-        let path = after_scheme.get(host.len()..)?.to_owned();
-        let scheme = url.split("://").next()?;
-        Some(format!("{}://{}{}", scheme, host, path))
     }
 
     pub fn inc_local_hits(&mut self, url: &str) {
@@ -610,6 +757,61 @@ impl HttpCacheStats {
 
     pub fn get_data(&self) -> &std::collections::HashMap<String, HttpCacheEntry> {
         &self.data
+    }
+
+    /// Log aggregated cache stats grouped by host and path.
+    pub fn report(&self) {
+        let data = self.get_data();
+        let mut report: std::collections::HashMap<
+            String,
+            std::collections::HashMap<String, HttpCacheEntry>,
+        > = std::collections::HashMap::new();
+
+        for (url, stats) in data {
+            let parsed = match url_lib::Url::parse(url) {
+                Ok(parsed) => parsed,
+                Err(_) => {
+                    tracing::debug!(url = %url, "Failed to parse URL during cache stats");
+                    continue;
+                }
+            };
+            let host = match parsed.host_str() {
+                Some(host) => host,
+                None => {
+                    tracing::debug!(url = %url, "Failed to parse URL during cache stats");
+                    continue;
+                }
+            };
+            let origin = if let Some(port) = parsed.port() {
+                format!("{}://{host}:{port}", parsed.scheme())
+            } else {
+                format!("{}://{host}", parsed.scheme())
+            };
+            let path = if parsed.path().is_empty() {
+                "/"
+            } else {
+                parsed.path()
+            };
+            report
+                .entry(origin)
+                .or_default()
+                .insert(path.to_owned(), stats.clone());
+        }
+
+        let mut sorted_report: std::collections::HashMap<
+            String,
+            std::collections::HashMap<String, HttpCacheEntry>,
+        > = std::collections::HashMap::new();
+        for (host, host_report) in report {
+            let mut paths: Vec<_> = host_report.into_iter().collect();
+            paths.sort_by(|(a, _), (b, _)| a.cmp(b));
+            let mut ordered = std::collections::HashMap::new();
+            for (path, value) in paths {
+                ordered.insert(path, value);
+            }
+            sorted_report.insert(host, ordered);
+        }
+        tracing::debug!(?sorted_report, "HTTP cache statistics");
     }
 }
 
@@ -649,6 +851,14 @@ impl AbandonedPackageStats {
                 .insert(pkg.clone(), ts.clone());
         }
         report
+    }
+
+    /// Log the abandon-report only when data is available.
+    pub fn report(&self) {
+        let report = self.get_report();
+        if !report.is_empty() {
+            tracing::debug!(?report, "Abandoned package statistics");
+        }
     }
 }
 
@@ -724,13 +934,32 @@ impl HttpStats {
 
         for dp in &sorted {
             let method = dp.method.to_uppercase();
-            // Parse URL hostname
-            let hostname = parse_hostname(&dp.url).unwrap_or_default();
-            let origin_path = format!(
-                "{}/{}",
-                parse_origin(&dp.url).unwrap_or_default(),
-                parse_path(&dp.url).unwrap_or_default()
-            );
+            let parsed = match url_lib::Url::parse(&dp.url) {
+                Ok(parsed) => parsed,
+                Err(_) => {
+                    tracing::debug!(url = %dp.url, "Failed to parse URL during stats reporting");
+                    continue;
+                }
+            };
+            let hostname = match parsed.host_str() {
+                Some(host) => host.to_owned(),
+                None => {
+                    tracing::debug!(url = %dp.url, "Failed to parse URL during stats reporting");
+                    continue;
+                }
+            };
+
+            let origin = if let Some(port) = parsed.port() {
+                format!("{}://{hostname}:{port}", parsed.scheme())
+            } else {
+                format!("{}://{hostname}", parsed.scheme())
+            };
+            let path = if parsed.path().is_empty() {
+                "/"
+            } else {
+                parsed.path()
+            };
+            let origin_path = format!("{origin}{path}");
 
             // urls tracking
             let url_entry = report.urls.entry(origin_path.clone()).or_default();
@@ -773,25 +1002,22 @@ impl HttpStats {
 
         report
     }
-}
 
-fn parse_hostname(url: &str) -> Option<String> {
-    let after_scheme = url.split("://").nth(1)?;
-    let host = after_scheme.split('/').next()?;
-    Some(host.to_owned())
-}
-
-fn parse_origin(url: &str) -> Option<String> {
-    let scheme_end = url.find("://")?;
-    let after = &url[scheme_end + 3..];
-    let host = after.split('/').next()?;
-    Some(format!("{}://{}", &url[..scheme_end], host))
-}
-
-fn parse_path(url: &str) -> Option<String> {
-    let after_scheme = url.split("://").nth(1)?;
-    let slash = after_scheme.find('/')?;
-    Some(after_scheme[slash..].to_owned())
+    /// Log full report data.
+    pub fn report(&self) {
+        let report = self.get_report();
+        tracing::trace!(
+            raw_requests = ?report.raw_requests,
+            host_requests = ?report.host_requests,
+            "HTTP full statistics"
+        );
+        tracing::debug!(
+            hosts = ?report.hosts,
+            requests = report.requests,
+            "HTTP statistics"
+        );
+        tracing::trace!(?report.urls, "HTTP URL statistics");
+    }
 }
 
 /// Return `true` when `token` is a GitHub Classic Personal Access Token (`ghp_`).
@@ -3999,6 +4225,7 @@ pub fn schema_parse_toml(content: &str) -> SafeParseResult<serde_json::Value> {
 // ---------------------------------------------------------------------------
 // URL utilities — lib/util/url.ts
 // ---------------------------------------------------------------------------
+/// @parity lib/util/url.ts full
 
 /// Remove one or more trailing slashes from a URL/path.
 pub fn trim_trailing_slash(url: &str) -> String {
@@ -4240,15 +4467,60 @@ pub fn massage_host_url(url: &str) -> String {
 /// Build a query string from key-value pairs.
 ///
 /// Returns an empty string for empty input.
-pub fn get_query_string(params: &[(&str, &str)]) -> String {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum QueryValue {
+    String(String),
+    Strings(Vec<String>),
+}
+
+impl From<&str> for QueryValue {
+    fn from(value: &str) -> Self {
+        Self::String(value.to_owned())
+    }
+}
+
+impl From<String> for QueryValue {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
+
+impl From<&[&str]> for QueryValue {
+    fn from(value: &[&str]) -> Self {
+        Self::Strings(value.iter().map(ToString::to_string).collect())
+    }
+}
+
+/// Build a query string from key-value pairs.
+///
+/// Returns an empty string for empty input.
+pub fn get_query_string(params: &[(&str, QueryValue)]) -> String {
     if params.is_empty() {
         return String::new();
     }
-    params
-        .iter()
-        .map(|(k, v)| format!("{k}={v}"))
-        .collect::<Vec<_>>()
-        .join("&")
+
+    let mut pieces = Vec::with_capacity(params.len());
+    for (key, value) in params {
+        match value {
+            QueryValue::String(value) => {
+                pieces.push(format!(
+                    "{}={}",
+                    percent_encode(key),
+                    percent_encode(value),
+                ));
+            }
+            QueryValue::Strings(values) => {
+                for value in values {
+                    pieces.push(format!(
+                        "{}={}",
+                        percent_encode(key),
+                        percent_encode(value),
+                    ));
+                }
+            }
+        }
+    }
+    pieces.join("&")
 }
 
 /// Parse a URL string, returning `Some(normalized_url)` for valid HTTP(S) URLs or `None`.
@@ -7150,6 +7422,51 @@ mod tests {
         assert_eq!(npm_long.1, Some("set"));
     }
 
+    // Ported: "reports" — lib/util/stats.spec.ts line 708
+    #[test]
+    fn test_datasource_cache_stats_reports() {
+        let mut stats = DatasourceCacheStats::new();
+        stats.hit("crate", "https://foo.example.com", "crate");
+        stats.miss("crate", "https://foo.example.com", "crate");
+        stats.set("npm", "https://bar.example.com", "pkg");
+        stats.skip("npm", "https://bar.example.com", "pkg");
+
+        let (long, short) = stats.get_report();
+
+        let crate_long = long
+            .get("crate")
+            .unwrap()
+            .get("https://foo.example.com")
+            .unwrap()
+            .get("crate")
+            .unwrap();
+        assert_eq!(crate_long, &(Some("miss"), None));
+
+        let npm_long = long
+            .get("npm")
+            .get("https://bar.example.com")
+            .unwrap()
+            .get("pkg")
+            .unwrap();
+        assert_eq!(npm_long, &(None, Some("skip")));
+
+        let crate_short = short
+            .get("crate")
+            .unwrap()
+            .get("https://foo.example.com")
+            .unwrap();
+        assert_eq!(crate_short.hit, 1);
+        assert_eq!(crate_short.miss, 1);
+
+        let npm_short = short
+            .get("npm")
+            .unwrap()
+            .get("https://bar.example.com")
+            .unwrap();
+        assert_eq!(npm_short.set, 1);
+        assert_eq!(npm_short.skip, 1);
+    }
+
     // ── HttpCacheStats ────────────────────────────────────────────────────────
 
     // Ported: "returns empty data" — lib/util/stats.spec.ts line 954
@@ -7276,11 +7593,11 @@ mod tests {
         let report = stats.get_report();
         let pull = report.get("pull").unwrap();
         assert_eq!(pull.count, 1);
-        assert_eq!(pull.avg_ms, 1000);
+        assert_eq!(pull.avg_ms, 1000.0);
         let push = report.get("push").unwrap();
         assert_eq!(push.count, 2);
         assert_eq!(push.total_ms, 50100);
-        assert_eq!(push.max_ms, 50000);
+        assert_eq!(push.max_ms, 50000.0);
     }
 
     // Ported: "rounds total towards ceiling when preparing report" — lib/util/stats.spec.ts line 1141
@@ -7294,9 +7611,9 @@ mod tests {
         let report = stats.get_report();
         let pull = report.get("pull").unwrap();
         assert_eq!(pull.count, 4);
-        assert_eq!(pull.avg_ms, 552); // round(2206.5/4) = round(551.6) = 552
-        assert_eq!(pull.max_ms, 1000); // floor(1000.4)
-        assert_eq!(pull.median_ms, 700); // floor(700.2)
+        assert_eq!(pull.avg_ms, 552.0); // round(2206.5/4) = round(551.6) = 552
+        assert_eq!(pull.max_ms, 1000.4); // preserves raw max
+        assert_eq!(pull.median_ms, 700.2); // preserves raw median
         // NOTE: total is ceiled: 2206.500000001 → 2207
         assert_eq!(pull.total_ms, 2207);
     }
@@ -7307,10 +7624,10 @@ mod tests {
     #[test]
     fn test_get_datasource_releases_stats_empty() {
         let stats = GetDatasourceReleasesStats::new();
-        let (overall, ds) = stats.get_report();
-        assert_eq!(overall.count, 0);
-        assert_eq!(overall.avg_ms, 0);
-        assert!(ds.is_empty());
+        let report = stats.get_report();
+        assert_eq!(report.stats.count, 0);
+        assert_eq!(report.stats.avg_ms, 0);
+        assert!(report.datasources.is_empty());
     }
 
     // Ported: "writes data points" — lib/util/stats.spec.ts line 166
@@ -7320,10 +7637,13 @@ mod tests {
         stats.write("npm", "r1", "lodash", 100);
         stats.write("npm", "r1", "lodash", 200);
         stats.write("docker", "r2", "alpine", 1000);
-        let (overall, ds) = stats.get_report();
-        assert_eq!(overall.count, 3);
-        assert_eq!(ds.get("npm").unwrap().total_ms, 300);
-        assert_eq!(ds.get("docker").unwrap().total_ms, 1000);
+        let report = stats.get_report();
+        assert_eq!(report.stats.count, 3);
+        assert_eq!(report.datasources.get("npm").unwrap().stats.total_ms, 300);
+        assert_eq!(
+            report.datasources.get("docker").unwrap().stats.total_ms,
+            1000
+        );
     }
 
     // ── LookupStats ───────────────────────────────────────────────────────────
@@ -7331,20 +7651,20 @@ mod tests {
     // Ported: "returns empty report" — lib/util/stats.spec.ts line 64
     #[test]
     fn test_lookup_stats_empty_report() {
-        let stats = LookupStats::new();
-        let report = stats.get_report();
+        LookupStats::clear_for_tests();
+        let report = LookupStats::get_report();
         assert!(report.is_empty());
     }
 
     // Ported: "writes data points" — lib/util/stats.spec.ts line 69
     #[test]
     fn test_lookup_stats_writes_data_points() {
-        let mut stats = LookupStats::new();
-        stats.write("npm", 100);
-        stats.write("npm", 200);
-        stats.write("npm", 400);
-        stats.write("docker", 1000);
-        let report = stats.get_report();
+        LookupStats::clear_for_tests();
+        LookupStats::write("npm", 100);
+        LookupStats::write("npm", 200);
+        LookupStats::write("npm", 400);
+        LookupStats::write("docker", 1000);
+        let report = LookupStats::get_report();
         let docker = report.get("docker").unwrap();
         assert_eq!(docker.count, 1);
         assert_eq!(docker.avg_ms, 1000);
@@ -7361,15 +7681,26 @@ mod tests {
     // Ported: "wraps a function" — lib/util/stats.spec.ts line 95
     #[tokio::test]
     async fn test_lookup_stats_wraps_function() {
-        let mut stats = LookupStats::new();
+        LookupStats::clear_for_tests();
         // wrap() passes through the return value
-        let result = stats.wrap("npm", || async { "foo" }).await;
+        let result = LookupStats::wrap("npm", || async { "foo" }).await;
         assert_eq!(result, "foo");
         // one data point recorded for 'npm'
-        let report = stats.get_report();
+        let report = LookupStats::get_report();
         let npm = report.get("npm").unwrap();
         assert_eq!(npm.count, 1);
         assert!(npm.total_ms >= 0, "duration must be non-negative");
+    }
+
+    // Ported: "logs report" — lib/util/stats.spec.ts line 113
+    #[test]
+    fn test_lookup_stats_report() {
+        LookupStats::clear_for_tests();
+        LookupStats::write("npm", 100);
+        let before = LookupStats::get_report();
+        LookupStats::report();
+        let after = LookupStats::get_report();
+        assert_eq!(before, after);
     }
 
     // Ported: "wraps a function" — lib/util/stats.spec.ts line 308
@@ -7383,10 +7714,10 @@ mod tests {
             .await;
         assert_eq!(result, 42);
         // one data point recorded
-        let (overall, by_ds) = stats.get_report();
-        assert_eq!(overall.count, 1);
-        let npm = by_ds.get("npm").unwrap();
-        assert_eq!(npm.count, 1);
+        let report = stats.get_report();
+        assert_eq!(report.stats.count, 1);
+        let npm = report.datasources.get("npm").unwrap();
+        assert_eq!(npm.stats.count, 1);
     }
 
     // Ported: "wraps get function" — lib/util/stats.spec.ts line 612
@@ -10396,7 +10727,11 @@ mod tests {
     // Ported: "getQueryString" — lib/util/url.spec.ts line 97
     #[test]
     fn test_get_query_string() {
-        assert_eq!(get_query_string(&[("a", "1")]), "a=1");
+        assert_eq!(get_query_string(&[("a", "1".into())]), "a=1");
+        assert_eq!(
+            get_query_string(&[("a", QueryValue::Strings(vec!["1".into(), "2".into()]))]),
+            "a=1&a=2"
+        );
         assert_eq!(get_query_string(&[]), "");
     }
 
