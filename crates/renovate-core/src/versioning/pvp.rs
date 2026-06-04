@@ -1,4 +1,5 @@
 //! @parity lib/modules/versioning/pvp/index.ts full
+//! @parity lib/modules/versioning/pvp/range.ts full
 //!
 //! Package Versioning Policy (Haskell) versioning.
 //!
