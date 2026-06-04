@@ -4245,6 +4245,7 @@ pub fn parse_integer(val: Option<&str>, def: Option<i64>) -> i64 {
 ///
 /// If `start > end`, returns an empty iterator (matching the TypeScript
 /// generator that yields nothing when the loop never executes).
+// @parity lib/util/range.ts full
 pub fn range(start: i64, end: i64) -> impl Iterator<Item = i64> {
     let range_end = if start <= end { end + 1 } else { start };
     (start..range_end).take(if start <= end {
