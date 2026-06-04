@@ -44,6 +44,10 @@ file   = "lib/modules/versioning/types.ts"
 reason = "Type-only declarations and interfaces without a Rust runtime analogue"
 
 [[source]]
+file   = "lib/modules/versioning/pvp/types.ts"
+reason = "Type-only declarations with no dedicated Rust runtime equivalent"
+
+[[source]]
 file   = "lib/commander.d.ts"
 reason = "Type declaration shim for Commander typings; no Rust runtime analogue is needed."
 
