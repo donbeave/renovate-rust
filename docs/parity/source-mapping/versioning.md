@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 68/94 in-scope files mapped (full=68 partial=0 stub=0 pending=26 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 69/94 in-scope files mapped (full=69 partial=0 stub=0 pending=25 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -45,7 +45,7 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/bazel-module/bzlmod-version.ts` | full | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs`](../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs) | — |
-| `lib/modules/versioning/bazel-module/index.ts` | pending | — | — |
+| `lib/modules/versioning/bazel-module/index.ts` | full | [`crates/renovate-core/src/versioning/bazel_module.rs`](../../../crates/renovate-core/src/versioning/bazel_module.rs) | — |
 
 ### `versioning/cargo`
 

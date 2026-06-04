@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/bazel-module/index.ts full
 //! Bazel module (Bzlmod) versioning API.
 //!
 //! Ports `lib/modules/versioning/bazel-module/index.ts`.
