@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/156 in-scope files mapped (full=2 partial=8 stub=0 pending=146 out-of-scope=0 opt-out=4) across 15 modules.
+**Coverage:** 10/155 in-scope files mapped (full=2 partial=8 stub=0 pending=145 out-of-scope=0 opt-out=5) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -95,7 +95,7 @@
 | `lib/workers/global/config/parse/file.ts` | pending | — | — |
 | `lib/workers/global/config/parse/host-rules-from-env.ts` | pending | — | — |
 | `lib/workers/global/config/parse/index.ts` | pending | — | — |
-| `lib/workers/global/config/parse/types.ts` | pending | — | — |
+| `lib/workers/global/config/parse/types.ts` | opt-out | — | Type-only parse options type aliases used only by TypeScript configuration validation typing. |
 | `lib/workers/global/config/parse/util.ts` | pending | — | — |
 | `lib/workers/global/index.ts` | pending | — | — |
 | `lib/workers/global/initialize.ts` | pending | — | — |

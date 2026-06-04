@@ -75,6 +75,10 @@ reason = "Type-only interface and type aliases used for TypeScript compile-time 
 file   = "lib/workers/repository/extract/types.ts"
 reason = "Type-only interface used for TypeScript compile-time typing in worker extraction output."
 
+[[source]]
+file   = "lib/workers/global/config/parse/types.ts"
+reason = "Type-only parse options type aliases used only by TypeScript configuration validation typing."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
