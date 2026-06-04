@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/generic.ts full
 //! Regex-based versioning.
 //!
 //! Ports `lib/modules/versioning/regex/index.ts` and
