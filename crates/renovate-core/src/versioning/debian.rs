@@ -1,4 +1,5 @@
 //! Debian versioning API with distro-info awareness.
+//! @parity lib/modules/versioning/debian/common.ts full
 //!
 //! @parity lib/modules/versioning/debian/index.ts full
 //!
