@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/rez/index.ts full
+//
 use std::sync::LazyLock;
 
 use regex::Regex;
