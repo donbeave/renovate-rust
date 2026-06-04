@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 32/172 in-scope files mapped (full=32 partial=0 stub=0 pending=140 out-of-scope=0 opt-out=3) across 13 modules.
+**Coverage:** 33/172 in-scope files mapped (full=33 partial=0 stub=0 pending=139 out-of-scope=0 opt-out=3) across 13 modules.
 
 ### `util/_root`
 
@@ -36,7 +36,7 @@
 | `lib/util/number.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/object.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/pretty-time.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/promises.ts` | pending | — | — |
+| `lib/util/promises.ts` | full | [`crates/renovate-core/src/util/promises.rs`](../../../crates/renovate-core/src/util/promises.rs) | — |
 | `lib/util/range.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/regex.ts` | full | [`crates/renovate-core/src/util/regex.rs`](../../../crates/renovate-core/src/util/regex.rs) | — |
 | `lib/util/result.ts` | pending | — | — |
