@@ -4294,6 +4294,7 @@ pub fn assign_keys<K, V>(
 }
 
 // ---------------------------------------------------------------------------
+/// @parity lib/util/coerce.ts full
 // coerceToNull / coerceToUndefined — lib/util/coerce.ts
 // ---------------------------------------------------------------------------
 
