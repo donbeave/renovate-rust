@@ -148,3 +148,8 @@ reason = "Node runtime fallback test depends on dynamic RE2 module import behavi
 spec   = "test/other/validate-config-files.spec.ts"
 test   = "tsdown entry points"
 reason = "Build-configuration smoke test imports tsdown.config.mts and inspects TypeScript bundler entry arrays; no Rust runtime analogue."
+
+[[test]]
+spec   = "test/other/validate-docker.spec.ts"
+test   = "validate dockerfile has consistent base image versions"
+reason = "Build-repo Dockerfile sanity check is a repository packaging invariant and does not map to Renovate runtime behavior."
