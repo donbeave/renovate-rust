@@ -4908,6 +4908,7 @@ pub fn sanitize_str(input: Option<&str>) -> Option<String> {
 /// input or bare unit strings without a leading number.
 ///
 /// Mirrors the TypeScript `toMs` from `lib/util/pretty-time.ts`.
+/// @parity lib/util/pretty-time.ts full
 pub fn to_ms(input: &str) -> Option<i64> {
     let s = input.trim();
     if s.is_empty() || s.len() > 100 {
