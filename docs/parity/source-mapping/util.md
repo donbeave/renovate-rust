@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 22/175 in-scope files mapped (full=22 partial=0 stub=0 pending=153 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 22/174 in-scope files mapped (full=22 partial=0 stub=0 pending=152 out-of-scope=0 opt-out=1) across 13 modules.
 
 ### `util/_root`
 
@@ -22,7 +22,7 @@
 | `lib/util/fingerprint.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/hash.ts` | full | [`crates/renovate-core/src/util/hash.rs`](../../../crates/renovate-core/src/util/hash.rs) | — |
 | `lib/util/host-rules.ts` | full | [`crates/renovate-core/src/util/host_rules.rs`](../../../crates/renovate-core/src/util/host_rules.rs) | — |
-| `lib/util/html.ts` | pending | — | — |
+| `lib/util/html.ts` | opt-out | — | Node-html-parser wrapper with no Rust analogue in scope |
 | `lib/util/ignore.ts` | pending | — | — |
 | `lib/util/interpolator.ts` | pending | — | — |
 | `lib/util/jsonata.ts` | pending | — | — |

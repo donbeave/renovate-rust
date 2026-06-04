@@ -51,6 +51,10 @@ reason = "Type declaration shim for Commander typings; no Rust runtime analogue 
 file   = "lib/globals.d.ts"
 reason = "TypeScript ambient declarations for global interfaces and module shims; no Rust runtime analogue."
 
+[[source]]
+file   = "lib/util/html.ts"
+reason = "Thin wrapper around node-html-parser specific to TypeScript runtime APIs; no Rust equivalent in the current implementation set."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
