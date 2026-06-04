@@ -95,6 +95,10 @@ reason = "Type-only changelog option/result type aliases with no runtime behavio
 file   = "lib/workers/repository/init/types.ts"
 reason = "Type-only repository initialization interfaces used only for TypeScript compile-time handoff typing."
 
+[[source]]
+file   = "lib/workers/repository/update/pr/changelog/types.ts"
+reason = "Type-only changelog result types used only for TypeScript compile-time data contracts."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
@@ -129,3 +133,13 @@ reason = "Type-level assertion (`expectTypeOf`) has no Rust runtime equivalent"
 spec   = "lib/util/streams.spec.ts"
 test   = "handles Readables"
 reason = "Node.js Readable stream runtime behavior with no direct Rust stream API analogue in this module"
+
+[[test]]
+spec   = "lib/config/migrate-validate.spec.ts"
+test   = "logs errors"
+reason = "asserts TypeScript logger spy behavior and injected migrateConfig throw path via runtime mocking; no direct Rust equivalent without changing production instrumentation"
+
+[[test]]
+spec   = "lib/util/regex.spec.ts"
+test   = "Falls back to RegExp"
+reason = "Node runtime fallback test depends on dynamic RE2 module import behavior that has no direct Rust equivalent; Rust path uses a single local regex engine."
