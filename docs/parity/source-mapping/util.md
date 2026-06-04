@@ -39,7 +39,7 @@
 | `lib/util/promises.ts` | full | [`crates/renovate-core/src/util/promises.rs`](../../../crates/renovate-core/src/util/promises.rs) | — |
 | `lib/util/range.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/regex.ts` | full | [`crates/renovate-core/src/util/regex.rs`](../../../crates/renovate-core/src/util/regex.rs) | — |
-| `lib/util/result.ts` | partial | [`crates/renovate-core/src/util/result.rs`](../../../crates/renovate-core/src/util/result.rs) | basic Result/AsyncResult plumbing is in |
+| `lib/util/result.ts` | partial | [`crates/renovate-core/src/util/result.rs`](../../../crates/renovate-core/src/util/result.rs) | async chaining helpers added; transform/catch |
 | `lib/util/s3.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sample.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sanitize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
