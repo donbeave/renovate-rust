@@ -1,4 +1,5 @@
 //! @parity lib/modules/versioning/poetry/index.ts full
+//! @parity lib/modules/versioning/poetry/patterns.ts full
 //!
 //! Poetry versioning — mirrors `lib/modules/versioning/poetry/index.ts`.
 //!
