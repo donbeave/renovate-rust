@@ -4531,6 +4531,24 @@ pub fn parse_url(url: &str) -> Option<reqwest::Url> {
 }
 
 // ---------------------------------------------------------------------------
+// Stream utilities — lib/util/streams.ts
+// ---------------------------------------------------------------------------
+/// @parity lib/util/streams.ts full
+
+/// Read the full contents of an async byte stream and return UTF-8 text.
+///
+/// Mirrors `streamToString` from `lib/util/streams.ts`.
+pub async fn stream_to_string(
+    mut stream: impl tokio::io::AsyncRead + Unpin,
+) -> Result<String, std::io::Error> {
+    use tokio::io::AsyncReadExt;
+
+    let mut bytes = Vec::new();
+    stream.read_to_end(&mut bytes).await?;
+    Ok(String::from_utf8_lossy(&bytes).into_owned())
+}
+
+// ---------------------------------------------------------------------------
 // Ignore comments — lib/util/ignore.ts
 // ---------------------------------------------------------------------------
 
@@ -4566,7 +4584,13 @@ pub fn is_skip_comment(comment: Option<&str>) -> bool {
 
 // ---------------------------------------------------------------------------
 // String utilities — lib/util/string.ts
+// @parity lib/util/string.ts full
 // ---------------------------------------------------------------------------
+
+/// Return true if `match_str` occurs at byte position `index` in `content`.
+pub fn match_at(content: &str, index: usize, match_str: &str) -> bool {
+    content.get(index..index + match_str.len()) == Some(match_str)
+}
 
 /// Replace `old_string` with `new_string` at byte position `index` in
 /// `content`.  Panics if `index + old_string.len()` is out of bounds or not
@@ -4578,6 +4602,34 @@ pub fn replace_at(content: &str, index: usize, old_string: &str, new_string: &st
         new_string,
         &content[index + old_string.len()..]
     )
+}
+
+/// Convert UTF-8 input text into a base64-encoded string.
+pub fn to_base64(input: &str) -> String {
+    use base64::{engine::general_purpose::STANDARD, Engine};
+    STANDARD.encode(input)
+}
+
+/// Decode a base64-encoded UTF-8 string.
+pub fn from_base64(input: &str) -> String {
+    use base64::{engine::general_purpose::STANDARD, Engine as _};
+    STANDARD
+        .decode(input)
+        .ok()
+        .and_then(|bytes| String::from_utf8(bytes).ok())
+        .unwrap_or_default()
+}
+
+/// Return `true` when `element` appears for the first time at `index`.
+pub fn unique_strings(element: &str, index: usize, elements: &[&str]) -> bool {
+    elements.iter().position(|value| *value == element) == Some(index)
+}
+
+/// Copy the string through a fresh UTF-8 allocation.
+pub fn copystr(x: &str) -> String {
+    let mut buf = Vec::with_capacity(x.len());
+    buf.extend_from_slice(x.as_bytes());
+    String::from_utf8(buf).unwrap_or_default()
 }
 
 /// Loose (case-insensitive, locale-insensitive) equality for two strings.
@@ -6592,6 +6644,18 @@ mod tests {
         let content = "I am a dog";
         let result = replace_at(content, 2, "am", "want to have a new pet maybe");
         assert_eq!(result, "I want to have a new pet maybe a dog");
+    }
+
+    // Ported: "matchAt" / "toBase64/fromBase64" / "uniqueStrings" / "copystr" — lib/util/string.spec.ts
+    #[test]
+    fn test_match_at_and_helpers() {
+        assert!(match_at("I am a dog", 2, "am"));
+        assert!(!match_at("I am a dog", 2, "is"));
+        assert_eq!(to_base64("hello"), "aGVsbG8=");
+        assert_eq!(from_base64("aGVsbG8="), "hello");
+        assert!(unique_strings("a", 0, &["a", "b", "c"]));
+        assert!(!unique_strings("a", 1, &["a", "a", "b"]));
+        assert_eq!(copystr("cache this"), "cache this");
     }
 
     // Ported: "reverts to literal match if either is falsey" — lib/util/string.spec.ts line 35
@@ -10876,6 +10940,22 @@ mod tests {
             "https://domain.com/some/path"
         );
         assert_eq!(massage_host_url("https://domain.com"), "https://domain.com");
+    }
+
+    // -----------------------------------------------------------------------
+    // Stream utilities
+    // -----------------------------------------------------------------------
+
+    // Ported: "handles Readables" — lib/util/streams.spec.ts line 8
+    #[tokio::test]
+    async fn test_stream_to_string() {
+        use tokio::io::{duplex, AsyncWriteExt};
+
+        let (mut tx, rx) = duplex(64);
+        tx.write_all(b"abczxc").await.unwrap();
+        drop(tx);
+        let got = stream_to_string(rx).await.unwrap();
+        assert_eq!(got, "abczxc");
     }
 
     // -----------------------------------------------------------------------
