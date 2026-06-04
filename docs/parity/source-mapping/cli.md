@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/157 in-scope files mapped (full=2 partial=8 stub=0 pending=147 out-of-scope=0 opt-out=3) across 15 modules.
+**Coverage:** 10/156 in-scope files mapped (full=2 partial=8 stub=0 pending=146 out-of-scope=0 opt-out=4) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -127,7 +127,7 @@
 | `lib/workers/repository/extract/index.ts` | pending | — | — |
 | `lib/workers/repository/extract/manager-files.ts` | pending | — | — |
 | `lib/workers/repository/extract/supersedes.ts` | pending | — | — |
-| `lib/workers/repository/extract/types.ts` | pending | — | — |
+| `lib/workers/repository/extract/types.ts` | opt-out | — | Type-only interface used for TypeScript compile-time typing in worker extraction output. |
 | `lib/workers/repository/finalize/index.ts` | pending | — | — |
 | `lib/workers/repository/finalize/prune.ts` | pending | — | — |
 | `lib/workers/repository/finalize/repository-statistics.ts` | pending | — | — |

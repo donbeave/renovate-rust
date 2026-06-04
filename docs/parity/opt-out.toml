@@ -71,6 +71,10 @@ reason = "TypeScript async mutex API uses async-mutex with namespaced runtime lo
 file   = "lib/workers/types.ts"
 reason = "Type-only interface and type aliases used for TypeScript compile-time type safety; no Rust runtime equivalent."
 
+[[source]]
+file   = "lib/workers/repository/extract/types.ts"
+reason = "Type-only interface used for TypeScript compile-time typing in worker extraction output."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
