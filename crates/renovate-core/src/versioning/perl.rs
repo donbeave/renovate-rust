@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/perl/index.ts full
+//!
 //! Perl versioning scheme.
 //!
 //! Supports two formats:

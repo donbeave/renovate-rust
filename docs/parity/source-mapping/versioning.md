@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 60/94 in-scope files mapped (full=60 partial=0 stub=0 pending=34 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 62/94 in-scope files mapped (full=62 partial=0 stub=0 pending=32 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -246,7 +246,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/perl/index.ts` | pending | — | — |
+| `lib/modules/versioning/perl/index.ts` | full | [`crates/renovate-core/src/versioning/perl.rs`](../../../crates/renovate-core/src/versioning/perl.rs) | — |
 
 ### `versioning/poetry`
 
@@ -330,7 +330,7 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/semver/common.ts` | full | [`crates/renovate-core/src/versioning/semver_generic.rs`](../../../crates/renovate-core/src/versioning/semver_generic.rs) | — |
-| `lib/modules/versioning/semver/index.ts` | pending | — | — |
+| `lib/modules/versioning/semver/index.ts` | full | [`crates/renovate-core/src/versioning/semver_node.rs`](../../../crates/renovate-core/src/versioning/semver_node.rs) | — |
 
 ### `versioning/semver-coerced`
 
