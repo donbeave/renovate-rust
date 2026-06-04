@@ -1,4 +1,5 @@
 //! @parity lib/modules/versioning/hashicorp/index.ts full
+//! @parity lib/modules/versioning/common.ts full
 //! @parity lib/modules/versioning/hashicorp/convertor.ts full
 //! HashiCorp versioning and update-decision logic.
 //!
@@ -1005,5 +1006,17 @@ mod tests {
     fn get_filtered_range_simple() {
         assert_eq!(get_filtered_range(">= 1.0.0, != 1.2.0"), ">= 1.0.0");
         assert_eq!(get_filtered_range(">= 1.0.0"), ">= 1.0.0");
+    }
+
+    #[test]
+    fn get_common_range_helpers_keeps_whitespace_behavior() {
+        assert_eq!(
+            get_excluded_versions(">= 1.0.0, != 1.2.0, !=1.2.1 , > 2.0.0"),
+            vec!["1.2.0", "1.2.1"]
+        );
+        assert_eq!(
+            get_filtered_range(">= 1.0.0, != 1.2.0, !=1.2.1 , > 2.0.0"),
+            ">= 1.0.0,> 2.0.0"
+        );
     }
 }
