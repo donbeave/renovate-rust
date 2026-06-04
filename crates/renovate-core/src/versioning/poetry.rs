@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/poetry/index.ts full
+//!
 //! Poetry versioning — mirrors `lib/modules/versioning/poetry/index.ts`.
 //!
 //! Poetry versions are a union of SemVer and PEP 440, normalized to SemVer
