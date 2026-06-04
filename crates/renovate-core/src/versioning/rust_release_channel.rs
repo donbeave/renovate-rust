@@ -2,6 +2,7 @@
 //!
 //! Ports `lib/modules/versioning/rust-release-channel/index.ts` and
 //! `lib/modules/versioning/rust-release-channel/parse.ts`.
+//! @parity lib/modules/versioning/rust-release-channel/parse.ts full
 //! Supports channel names (stable/beta/nightly), versioned releases (1.82.0),
 //! partial versions (1.82), beta prereleases (1.83.0-beta.5), dated nightlies,
 //! and host triples.
