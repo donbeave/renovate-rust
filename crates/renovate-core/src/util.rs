@@ -4535,6 +4535,7 @@ pub fn parse_repo_org(repo: &str) -> (Option<&str>, &str) {
 // ---------------------------------------------------------------------------
 // Timing splits utility — lib/util/split.ts
 // ---------------------------------------------------------------------------
+// @parity lib/util/split.ts full
 
 /// Named split checkpoints, mirroring the TypeScript `RenovateSplit` type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -5330,89 +5331,102 @@ pub fn prepare_error(error: &serde_json::Value) -> serde_json::Value {
         return prepare_zod_error(error);
     }
 
-    let is_http_error = error
-        .get("name")
-        .and_then(serde_json::Value::as_str)
-        .is_some_and(|name| name == "TimeoutError" || name == "HTTPError");
+    let is_http_error = matches!(
+        error.get("name").and_then(serde_json::Value::as_str),
+        Some("TimeoutError" | "HTTPError")
+    );
     let mut output = match error {
         serde_json::Value::Object(map) => {
-            let mut prepared = serde_json::Map::new();
-            for (key, val) in map {
-                let prepared_val = if key == "errors" && val.is_array() {
-                    serde_json::Value::Array(
-                        val.as_array()
-                            .expect("checked is_array")
-                            .iter()
-                            .map(prepare_error)
-                            .collect(),
-                    )
-                } else if key == "options" && val.is_object() && is_http_error {
-                    let options_obj = val.as_object().unwrap_or_else(|| unreachable!());
-                    let mut options = serde_json::Map::new();
+            let mut prepared = map.clone();
 
-                    if let Some(headers) = options_obj.get("headers") {
-                        options.insert("headers".to_owned(), headers.clone());
-                    }
-                    if let Some(url) = options_obj.get("url") {
-                        let value = if let Some(url) = url.as_str() {
-                            url.to_owned()
-                        } else if let Some(url_obj) = url.as_object() {
-                            url_obj
-                                .get("href")
-                                .and_then(serde_json::Value::as_str)
-                                .unwrap_or_default()
-                                .to_owned()
-                        } else {
-                            String::new()
-                        };
-                        if !value.is_empty() {
-                            options.insert("url".to_owned(), serde_json::Value::String(value));
-                        }
-                    }
-                    if let Some(host_type) = options_obj
-                        .get("context")
-                        .and_then(|context| context.get("hostType"))
-                        .and_then(serde_json::Value::as_str)
-                    {
-                        options.insert("hostType".to_owned(), serde_json::Value::String(host_type.to_owned()));
-                    }
-                    for key in ["username", "password", "method", "http2"] {
-                        if let Some(v) = options_obj.get(key) {
-                            options.insert((*key).to_owned(), v.clone());
-                        }
-                    }
-                    if let Some(response) = options_obj.get("response") {
-                        options.insert("response".to_owned(), response.clone());
-                    }
-                    if let Some(env) = options_obj.get("env").and_then(|v| v.as_object()) {
-                        if !env.is_empty() {
-                            options.insert(
-                                "env".to_owned(),
-                                serde_json::Value::Array(
-                                    env.keys().map(|k| serde_json::Value::String(k.clone())).collect(),
-                                ),
-                            );
-                        }
-                    }
-                    serde_json::Value::Object(options)
-                } else if key == "options" && val.is_object() && val.get("env").is_some() {
-                    let mut options = val.clone();
-                    if let Some(env) = options.get("env").and_then(|v| v.as_object()) {
-                        if !env.is_empty() {
-                            let env_vars = serde_json::Value::Array(
-                                env.keys().map(|v| serde_json::Value::String(v.clone())).collect(),
-                            );
-                            if let serde_json::Value::Object(options_map) = &mut options {
-                                options_map.insert("env".to_owned(), env_vars);
-                            }
-                        }
-                    }
-                    options
-                } else {
-                    val.clone()
-                };
-                prepared.insert(key.clone(), prepared_val);
+            if let Some(serde_json::Value::Array(errors)) = map.get("errors") {
+                prepared.insert(
+                    "errors".to_owned(),
+                    serde_json::Value::Array(
+                        errors.iter().map(prepare_error).collect::<Vec<_>>(),
+                    ),
+                );
             }
+
+            if is_http_error && map.contains_key("options") {
+                let options_obj = map
+                    .get("options")
+                    .and_then(serde_json::Value::as_object)
+                    .cloned()
+                    .unwrap_or_default();
+                let mut options = serde_json::Map::new();
+
+                if let Some(headers) = options_obj.get("headers") {
+                    options.insert("headers".to_owned(), headers.clone());
+                }
+                if let Some(url) = options_obj
+                    .get("url")
+                    .and_then(|value| value.as_str())
+                    .or_else(|| {
+                        options_obj
+                            .get("url")
+                            .and_then(serde_json::Value::as_object)?
+                            .get("href")
+                            .and_then(serde_json::Value::as_str)
+                    })
+                {
+                    options.insert("url".to_owned(), serde_json::Value::String(url.to_owned()));
+                }
+                if let Some(host_type) = options_obj
+                    .get("context")
+                    .and_then(|context| context.get("hostType"))
+                    .and_then(serde_json::Value::as_str)
+                {
+                    options.insert(
+                        "hostType".to_owned(),
+                        serde_json::Value::String(host_type.to_owned()),
+                    );
+                }
+                if let Some(username) = options_obj.get("username") {
+                    options.insert("username".to_owned(), username.clone());
+                }
+                if let Some(password) = options_obj.get("password") {
+                    options.insert("password".to_owned(), password.clone());
+                }
+                if let Some(method) = options_obj.get("method") {
+                    options.insert("method".to_owned(), method.clone());
+                }
+                if let Some(http2) = options_obj.get("http2") {
+                    options.insert("http2".to_owned(), http2.clone());
+                }
+                if let Some(response) = error.get("response").and_then(serde_json::Value::as_object) {
+                    let mut response_output = serde_json::Map::new();
+                    for key in ["statusCode", "statusMessage", "headers", "httpVersion", "retryCount"] {
+                        if let Some(value) = response.get(key) {
+                            response_output.insert((*key).to_owned(), value.clone());
+                        }
+                    }
+                    if let Some(body) = response.get("body") {
+                        if error.get("name").and_then(serde_json::Value::as_str)
+                            != Some("TimeoutError")
+                        {
+                            response_output.insert("body".to_owned(), body.clone());
+                        }
+                    }
+                    prepared.insert(
+                        "response".to_owned(),
+                        serde_json::Value::Object(response_output),
+                    );
+                }
+                prepared.insert("options".to_owned(), serde_json::Value::Object(options));
+            } else if let Some(serde_json::Value::Object(options_obj)) = map.get("options") {
+                if let Some(env) = options_obj.get("env").and_then(serde_json::Value::as_object) {
+                    let mut env_keys: Vec<serde_json::Value> = env
+                        .keys()
+                        .map(|name| serde_json::Value::String(name.clone()))
+                        .collect();
+                    env_keys.sort_by(|a, b| a.as_str().cmp(&b.as_str()));
+                    let mut updated_options = options_obj.clone();
+                    updated_options.insert("env".to_owned(), serde_json::Value::Array(env_keys));
+                    prepared.insert("options".to_owned(), serde_json::Value::Object(updated_options));
+                }
+            }
+
             prepared
         }
         _ => serde_json::Map::new(),
@@ -5480,6 +5494,47 @@ pub fn prepare_zod_issues(input: &serde_json::Value) -> serde_json::Value {
         output.insert("___".to_owned(), serde_json::Value::String(format!("... {} more", entries.len() - 3)));
     }
     if output.is_empty() { err } else { serde_json::Value::Object(output) }
+}
+
+fn boxed_string_from_object(
+    map: &serde_json::Map<String, serde_json::Value>,
+) -> Option<String> {
+    let mut chars: Vec<(usize, String)> = Vec::with_capacity(map.len());
+    for (key, value) in map {
+        if key == "length" {
+            continue;
+        }
+        if !key.chars().all(|c| c.is_ascii_digit()) {
+            return None;
+        }
+        let idx = key.parse::<usize>().ok()?;
+        let char_value = value.as_str()?;
+        if char_value.chars().count() != 1 {
+            return None;
+        }
+        chars.push((idx, char_value.to_owned()));
+    }
+
+    if chars.is_empty() {
+        return None;
+    }
+
+    chars.sort_by(|(a_idx, _), (b_idx, _)| a_idx.cmp(b_idx));
+    let expected_len = chars.last()?.0 + 1;
+    if chars.len() != expected_len {
+        return None;
+    }
+
+    let mut out = String::with_capacity(chars.len());
+    let mut prev = 0usize;
+    for (idx, value) in chars {
+        if idx != prev {
+            return None;
+        }
+        out.push_str(&value);
+        prev += 1;
+    }
+    Some(out)
 }
 
 /// Convert a `zod` error value into a logger payload.
@@ -5668,8 +5723,12 @@ pub fn sanitize_value(value: &serde_json::Value) -> serde_json::Value {
         serde_json::Value::Array(arr) => {
             serde_json::Value::Array(arr.iter().map(sanitize_value).collect())
         }
-        serde_json::Value::Object(map) => {
-            let mut result = serde_json::Map::new();
+            serde_json::Value::Object(map) => {
+                if let Some(boxed) = boxed_string_from_object(map) {
+                    return serde_json::Value::String(sanitize_urls(&boxed));
+                }
+
+                let mut result = serde_json::Map::new();
             for (key, val) in map {
                 let sanitized_val = if REDACTED_FIELDS.contains(&key.as_str()) {
                     if val
@@ -6383,6 +6442,137 @@ mod tests {
             ]
         });
         assert_eq!(err_serialize(&input), expected);
+    }
+
+    #[test]
+    fn test_prepare_zod_issues() {
+        use serde_json::json;
+        assert_eq!(prepare_zod_issues(&json!(null)), serde_json::Value::Null);
+        assert_eq!(
+            prepare_zod_issues(&json!({ "_errors": ["a", "b"] })),
+            json!(["a", "b"])
+        );
+        assert_eq!(
+            prepare_zod_issues(&json!({
+                "_errors": ["Invalid input: expected string, received number"]
+            })),
+            json!("Invalid input: expected string, received number")
+        );
+        assert_eq!(
+            prepare_zod_issues(&json!({
+                "_errors": ["Invalid input: expected array, received number"]
+            })),
+            json!("Invalid input: expected array, received number")
+        );
+        assert_eq!(
+            prepare_zod_issues(&json!({
+                "2": { "_errors": ["Invalid input: expected string, received number"] },
+                "3": { "_errors": ["Invalid input: expected string, received number"] },
+                "4": { "_errors": ["Invalid input: expected string, received number"] },
+                "5": { "_errors": ["Invalid input: expected string, received number"] },
+                "6": { "_errors": ["Invalid input: expected string, received number"] },
+            })),
+            json!({
+                "2": "Invalid input: expected string, received number",
+                "3": "Invalid input: expected string, received number",
+                "4": "Invalid input: expected string, received number",
+                "___": "... 2 more",
+            })
+        );
+        assert_eq!(
+            prepare_zod_issues(&json!({
+                "foo": {
+                    "bar": {
+                        "_errors": ["Invalid input: expected string, received number"]
+                    }
+                }
+            })),
+            json!({
+                "foo": {
+                    "bar": "Invalid input: expected string, received number"
+                }
+            })
+        );
+    }
+
+    #[test]
+    fn test_prepare_error() {
+        use serde_json::json;
+        assert_eq!(
+            prepare_error(&json!({
+                "name": "ZodError",
+                "stack": "ZodError: Schema error",
+                "format": {
+                    "foo": {
+                        "bar": {
+                            "baz": {
+                                "_errors": ["Invalid input: expected string, received number"]
+                            }
+                        }
+                    }
+                }
+            })),
+            json!({
+                "message": "Schema error",
+                "stack": "ZodError: Schema error",
+                "issues": {
+                    "foo": {
+                        "bar": {
+                            "baz": "Invalid input: expected string, received number"
+                        }
+                    }
+                }
+            })
+        );
+
+        assert_eq!(
+            prepare_error(&json!({
+                "name": "TimeoutError",
+                "message": "timeout"
+            })),
+            json!({
+                "name": "TimeoutError",
+                "message": "timeout"
+            })
+        );
+
+        assert_eq!(
+            prepare_error(&json!({
+                "name": "ExecError",
+                "options": {
+                    "env": {
+                        "key": "val"
+                    },
+                    "cwd": "/tmp"
+                }
+            })),
+            json!({
+                "name": "ExecError",
+                "options": {
+                    "cwd": "/tmp",
+                    "env": ["key"]
+                }
+            })
+        );
+
+        assert_eq!(
+            prepare_error(&json!({
+                "name": "AggregateError",
+                "message": "aggregate",
+                "stack": "aggregate stack",
+                "errors": [
+                    { "message": "err", "stack": "err stack" }
+                ]
+            })),
+            json!({
+                "name": "AggregateError",
+                "message": "aggregate",
+                "stack": "aggregate stack",
+                "errors": [
+                    { "message": "err", "stack": "err stack" }
+                ]
+            })
+        );
     }
 
     // Ported: "runs" — lib/workers/repository/result.spec.ts line 16
