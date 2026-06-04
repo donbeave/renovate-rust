@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 80/94 in-scope files mapped (full=78 partial=2 stub=0 pending=13 out-of-scope=0 opt-out=3) across 54 modules.
+**Coverage:** 83/94 in-scope files mapped (full=81 partial=0 stub=0 pending=12 out-of-scope=0 opt-out=3) across 54 modules.
 
 ### `versioning/_root`
 
@@ -230,8 +230,8 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/nuget/index.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
-| `lib/modules/versioning/nuget/parser.ts` | partial | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
-| `lib/modules/versioning/nuget/range.ts` | partial | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
+| `lib/modules/versioning/nuget/parser.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
+| `lib/modules/versioning/nuget/range.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
 | `lib/modules/versioning/nuget/types.ts` | opt-out | — | Type-only declarations and interfaces with no direct Rust runtime equivalent |
 | `lib/modules/versioning/nuget/version.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
 
@@ -330,7 +330,7 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/semver/common.ts` | full | [`crates/renovate-core/src/versioning/semver_generic.rs`](../../../crates/renovate-core/src/versioning/semver_generic.rs) | — |
-| `lib/modules/versioning/semver/index.ts` | pending | — | — |
+| `lib/modules/versioning/semver/index.ts` | full | [`crates/renovate-core/src/versioning/semver_node.rs`](../../../crates/renovate-core/src/versioning/semver_node.rs) | — |
 
 ### `versioning/semver-coerced`
 

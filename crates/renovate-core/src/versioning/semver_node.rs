@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/semver/index.ts full
 //! npm-semver versioning scheme.
 //!
 //! Strict SemVer: `MAJOR.MINOR.PATCH[-prerelease][+build]`.
