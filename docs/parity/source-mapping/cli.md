@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/155 in-scope files mapped (full=2 partial=8 stub=0 pending=145 out-of-scope=0 opt-out=5) across 15 modules.
+**Coverage:** 10/154 in-scope files mapped (full=2 partial=8 stub=0 pending=144 out-of-scope=0 opt-out=6) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -172,7 +172,7 @@
 | `lib/workers/repository/process/lookup/index.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/rollback.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/timestamps.ts` | pending | — | — |
-| `lib/workers/repository/process/lookup/types.ts` | pending | — | — |
+| `lib/workers/repository/process/lookup/types.ts` | opt-out | — | Type-only lookup/result interfaces used only for TypeScript compile-time types. |
 | `lib/workers/repository/process/lookup/update-type.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/utils.ts` | pending | — | — |
 | `lib/workers/repository/process/sort.ts` | pending | — | — |
