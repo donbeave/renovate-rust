@@ -3,6 +3,7 @@
 //! Ports `lib/modules/versioning/ubuntu/index.ts`.
 //! @parity lib/modules/versioning/ubuntu/index.ts full
 //! @parity lib/modules/versioning/distro.ts full
+//! @parity lib/modules/versioning/ubuntu/common.ts full
 
 use std::cmp::Ordering;
 use std::sync::LazyLock;
