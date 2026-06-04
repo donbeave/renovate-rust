@@ -4188,6 +4188,7 @@ fn find_bytes(haystack: &[u8], needle: &[u8], start: usize) -> Option<usize> {
 // ---------------------------------------------------------------------------
 
 /// Coerce a value to a number, returning `def` or `0` for `None`.
+/// @parity lib/util/number.ts full
 pub fn coerce_number(val: Option<i64>, def: Option<i64>) -> i64 {
     val.or(def).unwrap_or(0)
 }
@@ -4325,12 +4326,18 @@ pub fn coerce_to_undefined<T>(input: Option<T>) -> Option<T> {
 
 /// Return up to `n` randomly-selected elements from `array`.
 ///
+/// - `array = None` → return empty vec (TypeScript `null` / `undefined` array).
 /// - `n = None` → return full array (mirrors TypeScript `undefined` behaviour:
 ///   `array.slice(0, undefined)` returns the full array).
-/// - `n = Some(0)` → return empty vec.
+/// - `n = Some(0)` → return empty vec (also matches TypeScript `null` number).
 /// - `n > array.len()` → return all elements in random order.
 /// - `array` empty → return empty vec.
-pub fn sample_size(array: &[String], n: Option<usize>) -> Vec<String> {
+pub fn sample_size(array: Option<&[String]>, n: Option<usize>) -> Vec<String> {
+    let array = match array {
+        Some(array) => array,
+        None => return Vec::new(),
+    };
+
     let length = array.len();
     if length == 0 {
         return Vec::new();
@@ -8201,8 +8208,8 @@ mod tests {
             "c".to_owned(),
             "d".to_owned(),
         ];
-        assert_eq!(sample_size(&arr, Some(2)).len(), 2);
-        assert_eq!(sample_size(&arr, Some(10)).len(), 4); // capped at array length
+        assert_eq!(sample_size(Some(&arr), Some(2)).len(), 2);
+        assert_eq!(sample_size(Some(&arr), Some(10)).len(), 4); // capped at array length
     }
 
     // Ported: "returns full array for undefined number" — lib/util/sample.spec.ts line 12
@@ -8214,7 +8221,19 @@ mod tests {
             "c".to_owned(),
             "d".to_owned(),
         ];
-        assert_eq!(sample_size(&arr, None).len(), 4);
+        assert_eq!(sample_size(Some(&arr), None).len(), 4);
+    }
+
+    // Ported: "returns full array for null number" — lib/util/sample.spec.ts line 16
+    #[test]
+    fn test_sample_size_null_n() {
+        let arr = vec![
+            "a".to_owned(),
+            "b".to_owned(),
+            "c".to_owned(),
+            "d".to_owned(),
+        ];
+        assert_eq!(sample_size(Some(&arr), Some(0)), Vec::<String>::new());
     }
 
     // Ported: "returns full array for 0 number" — lib/util/sample.spec.ts line 20
@@ -8226,13 +8245,25 @@ mod tests {
             "c".to_owned(),
             "d".to_owned(),
         ];
-        assert_eq!(sample_size(&arr, Some(0)), Vec::<String>::new());
+        assert_eq!(sample_size(Some(&arr), Some(0)), Vec::<String>::new());
+    }
+
+    // Ported: "returns empty array for null array" — lib/util/sample.spec.ts line 24
+    #[test]
+    fn test_sample_size_null_array() {
+        assert_eq!(sample_size(None, Some(1)), Vec::<String>::new());
+    }
+
+    // Ported: "returns empty array for undefined array" — lib/util/sample.spec.ts line 28
+    #[test]
+    fn test_sample_size_undefined_array() {
+        assert_eq!(sample_size(None, Some(1)), Vec::<String>::new());
     }
 
     // Ported: "returns empty array for empty array" — lib/util/sample.spec.ts line 32
     #[test]
     fn test_sample_size_empty_arr() {
-        assert_eq!(sample_size(&[], Some(1)), Vec::<String>::new());
+        assert_eq!(sample_size(Some(&[]), Some(1)), Vec::<String>::new());
     }
 
     // -----------------------------------------------------------------------

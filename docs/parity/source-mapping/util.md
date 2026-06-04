@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 12/175 in-scope files mapped (full=12 partial=0 stub=0 pending=163 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 13/175 in-scope files mapped (full=13 partial=0 stub=0 pending=162 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
@@ -33,7 +33,7 @@
 | `lib/util/minimatch.ts` | pending | — | — |
 | `lib/util/modules.ts` | pending | — | — |
 | `lib/util/mutex.ts` | pending | — | — |
-| `lib/util/number.ts` | pending | — | — |
+| `lib/util/number.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/object.ts` | pending | — | — |
 | `lib/util/pretty-time.ts` | pending | — | — |
 | `lib/util/promises.ts` | pending | — | — |
