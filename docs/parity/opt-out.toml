@@ -91,3 +91,8 @@ reason = "mocks TypeScript-internal simpleGit infrastructure; no equivalent Rust
 spec   = "lib/modules/datasource/git-tags/index.spec.ts"
 test   = "returns digest for HEAD with authentication environment variables for datasource type git-tags"
 reason = "mocks TypeScript-internal simpleGit infrastructure; no equivalent Rust mock surface"
+
+[[test]]
+spec   = "lib/modules/platform/types.spec.ts"
+test   = "`RepoParams` and `RepoGlobalConfig` types should be incompatible"
+reason = "Type-level assertion (`expectTypeOf`) has no Rust runtime equivalent"
