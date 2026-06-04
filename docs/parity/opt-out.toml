@@ -59,6 +59,10 @@ reason = "Thin wrapper around node-html-parser specific to TypeScript runtime AP
 file   = "lib/util/modules.ts"
 reason = "Node.js module loading helper using filesystem discovery and dynamic imports; Rust uses compile-time module wiring and does not expose a generic runtime module loader."
 
+[[source]]
+file   = "lib/util/mutex.ts"
+reason = "TypeScript async mutex API uses async-mutex with namespaced runtime locks and timeout-based acquire; Rust uses a scoped mutex type without this namespace/awaited lock contract."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"

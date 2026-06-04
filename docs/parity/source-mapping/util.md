@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 32/173 in-scope files mapped (full=32 partial=0 stub=0 pending=141 out-of-scope=0 opt-out=2) across 13 modules.
+**Coverage:** 32/173 in-scope files mapped (full=32 partial=0 stub=0 pending=140 out-of-scope=0 opt-out=3) across 13 modules.
 
 ### `util/_root`
 
@@ -32,7 +32,7 @@
 | `lib/util/memoize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/minimatch.ts` | full | [`crates/renovate-core/src/util/minimatch.rs`](../../../crates/renovate-core/src/util/minimatch.rs) | — |
 | `lib/util/modules.ts` | opt-out | — | Node.js module loading helper using filesystem discovery and dynamic imports; Rust uses compile-time module wiring and does not expose a generic runtime module loader. |
-| `lib/util/mutex.ts` | pending | — | — |
+| `lib/util/mutex.ts` | opt-out | — | TypeScript async mutex API uses namespace-keyed runtime locks and timeout-based acquire; Rust provides a scoped mutex abstraction without this contract. |
 | `lib/util/number.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/object.ts` | full | [`crates/renovate-core/src/util/object.rs`](../../../crates/renovate-core/src/util/object.rs) | — |
 | `lib/util/pretty-time.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
@@ -243,4 +243,3 @@
 |---|---|---|---|
 | `lib/util/vulnerability/ecosystem.ts` | pending | — | — |
 | `lib/util/vulnerability/utils.ts` | pending | — | — |
-
