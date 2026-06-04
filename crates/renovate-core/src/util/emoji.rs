@@ -58,6 +58,8 @@ static UNICODE_EMOJI_MAP: &[(&str, &str)] = &[
     (":chart_with_downwards_trend:", "\u{1f4c9}"),
 ];
 
+/// Convert all known emoji shortcodes in a message body to Unicode.
+/// @parity lib/util/emoji.ts full
 pub fn emojify(text: &str) -> String {
     let mut result = text.to_owned();
     let emoji_map: HashMap<&str, &str> = UNICODE_EMOJI_MAP.iter().copied().collect();

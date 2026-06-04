@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 14/175 in-scope files mapped (full=14 partial=0 stub=0 pending=161 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 15/175 in-scope files mapped (full=15 partial=0 stub=0 pending=160 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
@@ -16,7 +16,7 @@
 | `lib/util/common.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/compress.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/date.ts` | pending | — | — |
-| `lib/util/emoji.ts` | pending | — | — |
+| `lib/util/emoji.ts` | full | [`crates/renovate-core/src/util/emoji.rs`](../../../crates/renovate-core/src/util/emoji.rs) | — |
 | `lib/util/env.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/filter-map.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/fingerprint.ts` | pending | — | — |
