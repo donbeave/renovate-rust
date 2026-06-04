@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 67/94 in-scope files mapped (full=67 partial=0 stub=0 pending=27 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 68/94 in-scope files mapped (full=68 partial=0 stub=0 pending=26 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -44,7 +44,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/bazel-module/bzlmod-version.ts` | pending | — | — |
+| `lib/modules/versioning/bazel-module/bzlmod-version.ts` | full | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs`](../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs) | — |
 | `lib/modules/versioning/bazel-module/index.ts` | pending | — | — |
 
 ### `versioning/cargo`
@@ -369,4 +369,3 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/unity3d-packages/index.ts` | full | [`crates/renovate-core/src/versioning/unity3d_packages.rs`](../../../crates/renovate-core/src/versioning/unity3d_packages.rs) | — |
-

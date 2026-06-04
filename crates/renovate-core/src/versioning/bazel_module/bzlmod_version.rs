@@ -1,3 +1,4 @@
+//! @parity lib/modules/versioning/bazel-module/bzlmod-version.ts full
 use regex::Regex;
 use std::sync::LazyLock;
 
