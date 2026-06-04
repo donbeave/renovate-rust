@@ -1,7 +1,7 @@
 //! Ubuntu versioning.
 //!
-//! Renovate reference:
-//! - `lib/modules/versioning/ubuntu/index.ts`
+//! Ports `lib/modules/versioning/ubuntu/index.ts`.
+//! @parity lib/modules/versioning/distro.ts full
 
 use std::cmp::Ordering;
 use std::sync::LazyLock;

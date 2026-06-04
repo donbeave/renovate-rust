@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 48/94 in-scope files mapped (full=46 partial=2 stub=0 pending=46 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 52/94 in-scope files mapped (full=52 partial=0 stub=0 pending=42 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -10,10 +10,10 @@
 |---|---|---|---|
 | `lib/modules/versioning/api.ts` | full | [`crates/renovate-core/src/versioning.rs`](../../../crates/renovate-core/src/versioning.rs) | — |
 | `lib/modules/versioning/common.ts` | full | [`crates/renovate-core/src/versioning/hashicorp.rs`](../../../crates/renovate-core/src/versioning/hashicorp.rs) | — |
-| `lib/modules/versioning/distro.ts` | pending | — | — |
-| `lib/modules/versioning/generic.ts` | pending | — | — |
+| `lib/modules/versioning/distro.ts` | full | [`crates/renovate-core/src/versioning/ubuntu.rs`](../../../crates/renovate-core/src/versioning/ubuntu.rs) | — |
+| `lib/modules/versioning/generic.ts` | full | [`crates/renovate-core/src/versioning/regex_versioning.rs`](../../../crates/renovate-core/src/versioning/regex_versioning.rs) | — |
 | `lib/modules/versioning/index.ts` | pending | — | — |
-| `lib/modules/versioning/schema.ts` | pending | — | — |
+| `lib/modules/versioning/schema.ts` | full | [`crates/renovate-core/src/versioning.rs`](../../../crates/renovate-core/src/versioning.rs) | — |
 | `lib/modules/versioning/types.ts` | opt-out | — | Type-only declarations and interfaces without a Rust runtime analogue |
 
 ### `versioning/apk`
@@ -230,8 +230,8 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/nuget/index.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
-| `lib/modules/versioning/nuget/parser.ts` | partial | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
-| `lib/modules/versioning/nuget/range.ts` | partial | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
+| `lib/modules/versioning/nuget/parser.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
+| `lib/modules/versioning/nuget/range.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
 | `lib/modules/versioning/nuget/types.ts` | opt-out | — | Type-only declarations and interfaces with no direct Rust runtime equivalent |
 | `lib/modules/versioning/nuget/version.ts` | full | [`crates/renovate-core/src/versioning/nuget.rs`](../../../crates/renovate-core/src/versioning/nuget.rs) | — |
 
@@ -281,7 +281,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/regex/index.ts` | pending | — | — |
+| `lib/modules/versioning/regex/index.ts` | full | [`crates/renovate-core/src/versioning/regex_versioning.rs`](../../../crates/renovate-core/src/versioning/regex_versioning.rs) | — |
 
 ### `versioning/rez`
 
