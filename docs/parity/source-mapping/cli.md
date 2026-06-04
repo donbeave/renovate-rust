@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 16/150 in-scope files mapped (full=3 partial=13 stub=0 pending=134 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 22/150 in-scope files mapped (full=5 partial=17 stub=0 pending=128 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -88,15 +88,15 @@
 |---|---|---|---|
 | `lib/workers/global/autodiscover.ts` | partial | [`crates/renovate-core/src/workers/global/autodiscover.rs`](../../../crates/renovate-core/src/workers/global/autodiscover.rs) | current implementation only filters configured repositories and logs basic discovery; missing platform fetch, local mode handling, and onboarding merge behavior. |
 | `lib/workers/global/config/parse/additional-config-file.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs) | parse-and-load support for `RENOVATE_ADDITIONAL_CONFIG_FILE` is implemented, including `processEnv` export and optional post-load deletion, but JS/yaml configs remain unsupported. |
-| `lib/workers/global/config/parse/cli.ts` | pending | — | — |
-| `lib/workers/global/config/parse/codespaces.ts` | pending | — | — |
-| `lib/workers/global/config/parse/coersions.ts` | pending | — | — |
-| `lib/workers/global/config/parse/env.ts` | pending | — | — |
+| `lib/workers/global/config/parse/cli.ts` | partial | [`crates/renovate-cli/src/cli.rs`](../../../crates/renovate-cli/src/cli.rs)<br>[`crates/renovate-cli/src/config_builder.rs`](../../../crates/renovate-cli/src/config_builder.rs)<br>[`crates/renovate-cli/src/migrate.rs`](../../../crates/renovate-cli/src/migrate.rs) | static enum/flag definitions, env bindings, and argument shapes that mirror Renovate's global CLI surface.; maps parsed CLI enums/options onto canonical config and emits legacy dry-run/require-config coercions.; ports migrateArgs rewrite/filter behavior for deprecated CLI flags. |
+| `lib/workers/global/config/parse/codespaces.ts` | full | [`crates/renovate-cli/src/config_codespaces.rs`](../../../crates/renovate-cli/src/config_codespaces.rs) | in GitHub Codespaces, infer token from `GITHUB_TOKEN` and prompt for repository when none are configured. |
+| `lib/workers/global/config/parse/coersions.ts` | partial | [`crates/renovate-cli/src/config_builder.rs`](../../../crates/renovate-cli/src/config_builder.rs)<br>[`crates/renovate-cli/src/config_env.rs`](../../../crates/renovate-cli/src/config_env.rs) | CLI-oriented coercion helpers are ported for supported config types.; env-backed coercion paths for booleans, numeric/string list/map values are ported for supported options. |
+| `lib/workers/global/config/parse/env.ts` | full | [`crates/renovate-cli/src/config_env.rs`](../../../crates/renovate-cli/src/config_env.rs) | env-prefix normalization, converted/env-migrated keys, and option mapping for global env vars including warning-emitting RENOVATE_CONFIG parsing/migration behavior. |
 | `lib/workers/global/config/parse/file.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs) | JSON/JSON5 parser and non-default file cleanup are implemented; CLI/global env integration and some migrate/validation flows are staged elsewhere. |
-| `lib/workers/global/config/parse/host-rules-from-env.ts` | pending | — | — |
+| `lib/workers/global/config/parse/host-rules-from-env.ts` | partial | [`crates/renovate-core/src/config/host_rules_from_env.rs`](../../../crates/renovate-core/src/config/host_rules_from_env.rs) | parses datasource/platform credentials from environment variables and expects callers to append discovered rules when `detectHostRulesFromEnv` is enabled. |
 | `lib/workers/global/config/parse/index.ts` | partial | [`crates/renovate-core/src/workers/global/config/parse/index.rs`](../../../crates/renovate-core/src/workers/global/config/parse/index.rs) | currently JSON parsing scaffold only; full parse orchestration and ENV/file merge remain in progress. |
 | `lib/workers/global/config/parse/types.ts` | opt-out | — | Type-only parse options type aliases used only by TypeScript configuration validation typing. |
-| `lib/workers/global/config/parse/util.ts` | pending | — | — |
+| `lib/workers/global/config/parse/util.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs)<br>[`crates/renovate-core/src/config/migrate_validate.rs`](../../../crates/renovate-core/src/config/migrate_validate.rs) | Config file parsing and parse error wrapping are shared here via `parse_file_config`/`parse_file_config`; migration validation and config massage is implemented in `migrate_validate.rs`, while legacy JS/CJS + YAML config loading remains unsupported.; migration + validation behavior plus massaged config output are implemented here (`migrate_config` and `validate_config_for_source`); validation message emission is delegated to call sites, while warning/error telemetry formatting still differs from JS logs. |
 | `lib/workers/global/index.ts` | pending | — | — |
 | `lib/workers/global/initialize.ts` | pending | — | — |
 | `lib/workers/global/limits.ts` | full | [`crates/renovate-core/src/limits.rs`](../../../crates/renovate-core/src/limits.rs) | — |

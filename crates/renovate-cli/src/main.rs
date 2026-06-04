@@ -13,6 +13,7 @@
 )]
 
 mod cli;
+mod config_codespaces;
 mod config_builder;
 mod config_env;
 mod context;
@@ -23,6 +24,7 @@ mod pipeline_utils;
 mod pipelines;
 mod report_builders;
 
+use std::collections::HashMap;
 use std::path::Path;
 use std::process::ExitCode;
 use std::sync::Arc;
@@ -111,14 +113,15 @@ async fn main() -> ExitCode {
         }
     };
 
-    let base = match config_file::load_additional_config(additional_config_file_env.as_deref(), &cwd) {
-        Ok(additional) => config_file::merge_over_base(base, additional),
-        Err(err) => {
-            tracing::error!(%err, "failed to parse additional config file");
-            eprintln!("renovate: error parsing additional config file: {err}");
-            return ExitCode::from(1);
-        }
-    };
+    let base =
+        match config_file::load_additional_config(additional_config_file_env.as_deref(), &cwd) {
+            Ok(additional) => config_file::merge_over_base(base, additional),
+            Err(err) => {
+                tracing::error!(%err, "failed to parse additional config file");
+                eprintln!("renovate: error parsing additional config file: {err}");
+                return ExitCode::from(1);
+            }
+        };
 
     let env_map = std::env::vars().collect();
     let base = match config_env::apply_to_base(&env_map, base) {
@@ -129,14 +132,33 @@ async fn main() -> ExitCode {
         }
     };
 
-    let config = match config_builder::try_build(&cli, base) {
+    let mut config = match config_builder::try_build(&cli, base) {
         Ok(config) => config,
         Err(err) => {
             eprintln!("renovate: {err}");
             return ExitCode::from(1);
         }
     };
-    let _ = config_file::delete_non_default_config(config_file_env.as_deref(), config.delete_config_file);
+
+    if let Err(err) = config_codespaces::apply_codespaces_config(&env_map, &mut config) {
+        eprintln!("renovate: failed reading Codespaces config: {err}");
+        return ExitCode::from(1);
+    }
+
+    if config.detect_host_rules_from_env == Some(true) {
+        let env_map = env_map
+            .iter()
+            .map(|(key, value)| (key.clone(), value.clone()))
+            .collect::<HashMap<_, _>>();
+        let discovered_host_rules =
+            renovate_core::config::host_rules_from_env::host_rules_from_env(&env_map);
+        config.host_rules.extend(discovered_host_rules);
+    }
+
+    let _ = config_file::delete_non_default_config(
+        config_file_env.as_deref(),
+        config.delete_config_file,
+    );
     let _ = config_file::delete_non_default_additional_config(
         additional_config_file_env.as_deref(),
         config.delete_additional_config_file,
