@@ -4089,6 +4089,38 @@ pub fn parse_url(url: &str) -> Option<reqwest::Url> {
 }
 
 // ---------------------------------------------------------------------------
+// Ignore comments — lib/util/ignore.ts
+// ---------------------------------------------------------------------------
+
+/// Check if a comment is an explicit Renovate ignore command.
+///
+/// Mirrors `isSkipComment()` from `lib/util/ignore.ts`.
+/// @parity lib/util/ignore.ts full
+pub fn is_skip_comment(comment: Option<&str>) -> bool {
+    let Some(comment) = comment else {
+        return false;
+    };
+
+    static SKIP_COMMENT_RE: std::sync::LazyLock<regex_lib::Regex> =
+        std::sync::LazyLock::new(|| regex_lib::Regex::new(r"^(renovate|pyup):").expect("valid regex"));
+
+    if !SKIP_COMMENT_RE.is_match(comment) {
+        return false;
+    }
+
+    let Some(command) = comment.split('#').next().and_then(|c| c.split(':').nth(1)) else {
+        return false;
+    };
+    let command = command.trim();
+    if command == "ignore" {
+        return true;
+    }
+
+    tracing::debug!("Unknown comment command: {command}");
+    false
+}
+
+// ---------------------------------------------------------------------------
 // String utilities — lib/util/string.ts
 // ---------------------------------------------------------------------------
 
@@ -4325,6 +4357,7 @@ pub fn coerce_to_undefined<T>(input: Option<T>) -> Option<T> {
 // sampleSize — lib/util/sample.ts
 // ---------------------------------------------------------------------------
 
+/// @parity lib/util/sample.ts full
 /// Return up to `n` randomly-selected elements from `array`.
 ///
 /// - `array = None` → return empty vec (TypeScript `null` / `undefined` array).
@@ -5293,19 +5326,88 @@ pub fn massage_throwable<T: std::fmt::Display>(e: Option<T>) -> Option<String> {
 /// thrown values into plain JSON-friendly objects. For this crate we operate on
 /// `serde_json::Value` so tests can directly pass error payloads.
 pub fn prepare_error(error: &serde_json::Value) -> serde_json::Value {
+    if error.get("name").and_then(|name| name.as_str()) == Some("ZodError") {
+        return prepare_zod_error(error);
+    }
+
+    let is_http_error = error
+        .get("name")
+        .and_then(serde_json::Value::as_str)
+        .is_some_and(|name| name == "TimeoutError" || name == "HTTPError");
     let mut output = match error {
         serde_json::Value::Object(map) => {
             let mut prepared = serde_json::Map::new();
             for (key, val) in map {
                 let prepared_val = if key == "errors" && val.is_array() {
                     serde_json::Value::Array(
-                        val
-                            .as_array()
+                        val.as_array()
                             .expect("checked is_array")
                             .iter()
                             .map(prepare_error)
                             .collect(),
                     )
+                } else if key == "options" && val.is_object() && is_http_error {
+                    let options_obj = val.as_object().unwrap_or_else(|| unreachable!());
+                    let mut options = serde_json::Map::new();
+
+                    if let Some(headers) = options_obj.get("headers") {
+                        options.insert("headers".to_owned(), headers.clone());
+                    }
+                    if let Some(url) = options_obj.get("url") {
+                        let value = if let Some(url) = url.as_str() {
+                            url.to_owned()
+                        } else if let Some(url_obj) = url.as_object() {
+                            url_obj
+                                .get("href")
+                                .and_then(serde_json::Value::as_str)
+                                .unwrap_or_default()
+                                .to_owned()
+                        } else {
+                            String::new()
+                        };
+                        if !value.is_empty() {
+                            options.insert("url".to_owned(), serde_json::Value::String(value));
+                        }
+                    }
+                    if let Some(host_type) = options_obj
+                        .get("context")
+                        .and_then(|context| context.get("hostType"))
+                        .and_then(serde_json::Value::as_str)
+                    {
+                        options.insert("hostType".to_owned(), serde_json::Value::String(host_type.to_owned()));
+                    }
+                    for key in ["username", "password", "method", "http2"] {
+                        if let Some(v) = options_obj.get(key) {
+                            options.insert((*key).to_owned(), v.clone());
+                        }
+                    }
+                    if let Some(response) = options_obj.get("response") {
+                        options.insert("response".to_owned(), response.clone());
+                    }
+                    if let Some(env) = options_obj.get("env").and_then(|v| v.as_object()) {
+                        if !env.is_empty() {
+                            options.insert(
+                                "env".to_owned(),
+                                serde_json::Value::Array(
+                                    env.keys().map(|k| serde_json::Value::String(k.clone())).collect(),
+                                ),
+                            );
+                        }
+                    }
+                    serde_json::Value::Object(options)
+                } else if key == "options" && val.is_object() && val.get("env").is_some() {
+                    let mut options = val.clone();
+                    if let Some(env) = options.get("env").and_then(|v| v.as_object()) {
+                        if !env.is_empty() {
+                            let env_vars = serde_json::Value::Array(
+                                env.keys().map(|v| serde_json::Value::String(v.clone())).collect(),
+                            );
+                            if let serde_json::Value::Object(options_map) = &mut options {
+                                options_map.insert("env".to_owned(), env_vars);
+                            }
+                        }
+                    }
+                    options
                 } else {
                     val.clone()
                 };
@@ -5326,6 +5428,75 @@ pub fn prepare_error(error: &serde_json::Value) -> serde_json::Value {
             .entry("stack".to_owned())
             .or_insert_with(|| serde_json::Value::String(stack.clone()));
     }
+
+    if error.get("name").and_then(|name| name.as_str()) == Some("TimeoutError")
+        && let Some(serde_json::Value::Object(response)) = output.get_mut("response")
+    {
+        response.remove("body");
+    }
+
+    serde_json::Value::Object(output)
+}
+
+/// Convert a `zod` error format object into a compact logger payload.
+pub fn prepare_zod_issues(input: &serde_json::Value) -> serde_json::Value {
+    let Some(map) = input.as_object() else {
+        return serde_json::Value::Null;
+    };
+
+    let err = match map.get("_errors") {
+        Some(serde_json::Value::Array(list)) if list.iter().all(|v| v.is_string()) => {
+            if list.is_empty() {
+                serde_json::Value::Null
+            } else if list.len() == 1 {
+                list.first().and_then(|v| v.as_str().map(|s| serde_json::Value::String(s.to_owned()))).unwrap_or(serde_json::Value::Null)
+            } else {
+                serde_json::Value::Array(
+                    list.iter()
+                        .filter_map(|v| v.as_str().map(|s| serde_json::Value::String(s.to_owned())))
+                        .collect(),
+                )
+            }
+        }
+        _ => serde_json::Value::Null,
+    };
+
+    let entries: Vec<(&String, &serde_json::Value)> = map
+        .iter()
+        .filter(|(key, _)| key.as_str() != "_errors")
+        .collect();
+    if entries.is_empty() {
+        return err;
+    }
+
+    let mut output = serde_json::Map::new();
+    for (key, value) in entries.iter().take(3) {
+        let sanitized = prepare_zod_issues(value);
+        if !sanitized.is_null() {
+            output.insert((*key).clone(), sanitized);
+        }
+    }
+    if entries.len() > 3 {
+        output.insert("___".to_owned(), serde_json::Value::String(format!("... {} more", entries.len() - 3)));
+    }
+    if output.is_empty() { err } else { serde_json::Value::Object(output) }
+}
+
+/// Convert a `zod` error value into a logger payload.
+pub fn prepare_zod_error(error: &serde_json::Value) -> serde_json::Value {
+    let mut output = serde_json::Map::new();
+    output.insert(
+        "message".to_owned(),
+        serde_json::Value::String("Schema error".to_owned()),
+    );
+    if let Some(stack) = error.get("stack").and_then(|s| s.as_str()) {
+        output.insert("stack".to_owned(), serde_json::Value::String(stack.to_owned()));
+    }
+    let issues = error
+        .get("format")
+        .map(prepare_zod_issues)
+        .unwrap_or(serde_json::Value::Null);
+    output.insert("issues".to_owned(), issues);
     serde_json::Value::Object(output)
 }
 

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 22/174 in-scope files mapped (full=22 partial=0 stub=0 pending=152 out-of-scope=0 opt-out=1) across 13 modules.
+**Coverage:** 24/174 in-scope files mapped (full=24 partial=0 stub=0 pending=150 out-of-scope=0 opt-out=1) across 13 modules.
 
 ### `util/_root`
 
@@ -23,7 +23,7 @@
 | `lib/util/hash.ts` | full | [`crates/renovate-core/src/util/hash.rs`](../../../crates/renovate-core/src/util/hash.rs) | — |
 | `lib/util/host-rules.ts` | full | [`crates/renovate-core/src/util/host_rules.rs`](../../../crates/renovate-core/src/util/host_rules.rs) | — |
 | `lib/util/html.ts` | opt-out | — | Node-html-parser wrapper with no Rust analogue in scope |
-| `lib/util/ignore.ts` | pending | — | — |
+| `lib/util/ignore.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/interpolator.ts` | pending | — | — |
 | `lib/util/jsonata.ts` | pending | — | — |
 | `lib/util/lazy.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
@@ -41,7 +41,7 @@
 | `lib/util/regex.ts` | pending | — | — |
 | `lib/util/result.ts` | pending | — | — |
 | `lib/util/s3.ts` | pending | — | — |
-| `lib/util/sample.ts` | pending | — | — |
+| `lib/util/sample.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sanitize.ts` | pending | — | — |
 | `lib/util/split.ts` | pending | — | — |
 | `lib/util/stats.ts` | pending | — | — |
