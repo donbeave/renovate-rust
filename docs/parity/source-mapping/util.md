@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 26/174 in-scope files mapped (full=26 partial=0 stub=0 pending=148 out-of-scope=0 opt-out=1) across 13 modules.
+**Coverage:** 28/174 in-scope files mapped (full=28 partial=0 stub=0 pending=146 out-of-scope=0 opt-out=1) across 13 modules.
 
 ### `util/_root`
 
@@ -22,9 +22,9 @@
 | `lib/util/fingerprint.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/hash.ts` | full | [`crates/renovate-core/src/util/hash.rs`](../../../crates/renovate-core/src/util/hash.rs) | — |
 | `lib/util/host-rules.ts` | full | [`crates/renovate-core/src/util/host_rules.rs`](../../../crates/renovate-core/src/util/host_rules.rs) | — |
-| `lib/util/html.ts` | opt-out | — | Node-html-parser wrapper with no Rust analogue in scope |
+| `lib/util/html.ts` | opt-out | — | Thin wrapper around node-html-parser specific to TypeScript runtime APIs; no Rust equivalent in the current implementation set. |
 | `lib/util/ignore.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/interpolator.ts` | pending | — | — |
+| `lib/util/interpolator.ts` | full | [`crates/renovate-core/src/config/secrets.rs`](../../../crates/renovate-core/src/config/secrets.rs)<br>[`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/jsonata.ts` | pending | — | — |
 | `lib/util/lazy.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/markdown.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
@@ -37,7 +37,7 @@
 | `lib/util/object.ts` | pending | — | — |
 | `lib/util/pretty-time.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/promises.ts` | pending | — | — |
-| `lib/util/range.ts` | pending | — | — |
+| `lib/util/range.ts` | full | [`crates/renovate-core/src/util/range.rs`](../../../crates/renovate-core/src/util/range.rs) | — |
 | `lib/util/regex.ts` | pending | — | — |
 | `lib/util/result.ts` | pending | — | — |
 | `lib/util/s3.ts` | pending | — | — |
@@ -243,3 +243,4 @@
 |---|---|---|---|
 | `lib/util/vulnerability/ecosystem.ts` | pending | — | — |
 | `lib/util/vulnerability/utils.ts` | pending | — | — |
+

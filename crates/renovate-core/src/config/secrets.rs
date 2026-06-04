@@ -22,6 +22,8 @@ pub enum SecretsError {
 }
 
 /// Validate top-level and repository-level `secrets` / `variables` maps.
+///
+/// @parity lib/util/interpolator.ts full
 pub fn validate_config_secrets_and_variables(config: &Value) -> Result<(), SecretsError> {
     validate_nested(config, "secrets", SecretsError::InvalidSecrets)?;
     validate_nested(config, "variables", SecretsError::InvalidVariables)?;
@@ -29,6 +31,8 @@ pub fn validate_config_secrets_and_variables(config: &Value) -> Result<(), Secre
 }
 
 /// Apply `secrets` and `variables` template replacements to config.
+///
+/// @parity lib/util/interpolator.ts full
 pub fn apply_secrets_and_variables_to_config(
     config: &Value,
     delete_secrets: bool,

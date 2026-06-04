@@ -3517,6 +3517,7 @@ fn transliterate_for_slug(c: char) -> Option<char> {
 ///
 /// `None` input → no-op.  Non-object → `Err(CONFIG_SECRETS_INVALID)`.
 /// Object with keys not matching `name_pattern` or non-string values → `Err`.
+/// @parity lib/util/interpolator.ts full
 pub fn validate_interpolated_values(
     input: Option<&serde_json::Value>,
     name_pattern: &str,
@@ -5723,12 +5724,12 @@ pub fn sanitize_value(value: &serde_json::Value) -> serde_json::Value {
         serde_json::Value::Array(arr) => {
             serde_json::Value::Array(arr.iter().map(sanitize_value).collect())
         }
-            serde_json::Value::Object(map) => {
-                if let Some(boxed) = boxed_string_from_object(map) {
-                    return serde_json::Value::String(sanitize_urls(&boxed));
-                }
+        serde_json::Value::Object(map) => {
+            if let Some(boxed) = boxed_string_from_object(map) {
+                return serde_json::Value::String(sanitize_urls(&boxed));
+            }
 
-                let mut result = serde_json::Map::new();
+            let mut result = serde_json::Map::new();
             for (key, val) in map {
                 let sanitized_val = if REDACTED_FIELDS.contains(&key.as_str()) {
                     if val
@@ -6444,6 +6445,7 @@ mod tests {
         assert_eq!(err_serialize(&input), expected);
     }
 
+    // Ported: "preparezodissues" — lib/logger/utils.spec.ts line 90
     #[test]
     fn test_prepare_zod_issues() {
         use serde_json::json;
@@ -6495,6 +6497,131 @@ mod tests {
         );
     }
 
+    // Ported: "handles http timout error" — lib/logger/utils.spec.ts line 203
+    #[test]
+    fn test_prepare_error_timeout() {
+        use serde_json::json;
+        assert_eq!(
+            prepare_error(&json!({
+                "name": "TimeoutError",
+                "message": "timeout",
+                "stack": "timeout stack",
+                "response": {
+                    "statusCode": 408,
+                    "statusMessage": "Request Timeout",
+                    "headers": {
+                        "retry-after": "120"
+                    },
+                    "body": { "message": "timed out" },
+                    "httpVersion": "1.1",
+                    "retryCount": 2
+                }
+            })),
+            json!({
+                "name": "TimeoutError",
+                "message": "timeout",
+                "stack": "timeout stack",
+                "response": {
+                    "statusCode": 408,
+                    "statusMessage": "Request Timeout",
+                    "headers": {
+                        "retry-after": "120"
+                    },
+                    "httpVersion": "1.1",
+                    "retryCount": 2
+                }
+            })
+        );
+    }
+
+    // Ported: "handles rawexec error" — lib/logger/utils.spec.ts line 219
+    #[test]
+    fn test_prepare_error_rawexec() {
+        use serde_json::json;
+        assert_eq!(
+            prepare_error(&json!({
+                "name": "ExecError",
+                "message": "exec failed",
+                "stack": "exec stack",
+                "format": {
+                    "cwd": "/tmp"
+                },
+                "options": {
+                    "env": {
+                        "key": "val",
+                        "token": "secret"
+                    },
+                    "cwd": "/tmp"
+                }
+            })),
+            json!({
+                "name": "ExecError",
+                "message": "exec failed",
+                "stack": "exec stack",
+                "format": {
+                    "cwd": "/tmp"
+                },
+                "options": {
+                    "cwd": "/tmp",
+                    "env": ["key", "token"]
+                }
+            })
+        );
+    }
+
+    // Ported: "handles aggregateerror" — lib/logger/utils.spec.ts line 232
+    #[test]
+    fn test_prepare_error_aggregate() {
+        use serde_json::json;
+        assert_eq!(
+            prepare_error(&json!({
+                "name": "AggregateError",
+                "message": "aggregate",
+                "stack": "aggregate stack",
+                "errors": [
+                    {
+                        "name": "Error",
+                        "message": "child failed",
+                        "stack": "child stack",
+                        "response": {
+                            "statusCode": 500,
+                            "statusMessage": "err"
+                        }
+                    }
+                ]
+            })),
+            json!({
+                "name": "AggregateError",
+                "message": "aggregate",
+                "stack": "aggregate stack",
+                "errors": [
+                    {
+                        "name": "Error",
+                        "message": "child failed",
+                        "stack": "child stack",
+                        "response": {
+                            "statusCode": 500,
+                            "statusMessage": "err"
+                        }
+                    }
+                ]
+            })
+        );
+    }
+
+    // Ported: "sanitizes boxed string objects as strings" — lib/logger/utils.spec.ts line 26
+    #[test]
+    fn test_sanitize_value_boxed_string_objects() {
+        use serde_json::json;
+        let input = json!({
+            "0": "h",
+            "1": "i",
+            "2": "!",
+            "length": 3,
+        });
+        assert_eq!(sanitize_value(&input), serde_json::Value::String("hi!".to_owned()));
+    }
+
     #[test]
     fn test_prepare_error() {
         use serde_json::json;
@@ -6524,18 +6651,6 @@ mod tests {
                 }
             })
         );
-
-        assert_eq!(
-            prepare_error(&json!({
-                "name": "TimeoutError",
-                "message": "timeout"
-            })),
-            json!({
-                "name": "TimeoutError",
-                "message": "timeout"
-            })
-        );
-
         assert_eq!(
             prepare_error(&json!({
                 "name": "ExecError",
@@ -6552,25 +6667,6 @@ mod tests {
                     "cwd": "/tmp",
                     "env": ["key"]
                 }
-            })
-        );
-
-        assert_eq!(
-            prepare_error(&json!({
-                "name": "AggregateError",
-                "message": "aggregate",
-                "stack": "aggregate stack",
-                "errors": [
-                    { "message": "err", "stack": "err stack" }
-                ]
-            })),
-            json!({
-                "name": "AggregateError",
-                "message": "aggregate",
-                "stack": "aggregate stack",
-                "errors": [
-                    { "message": "err", "stack": "err stack" }
-                ]
             })
         );
     }
