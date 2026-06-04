@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/158 in-scope files mapped (full=2 partial=8 stub=0 pending=148 out-of-scope=0 opt-out=2) across 15 modules.
+**Coverage:** 10/157 in-scope files mapped (full=2 partial=8 stub=0 pending=147 out-of-scope=0 opt-out=3) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -80,7 +80,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/workers/types.ts` | pending | — | — |
+| `lib/workers/types.ts` | opt-out | — | Type-only interface and type aliases used for TypeScript compile-time type safety; no Rust runtime equivalent. |
 
 ### `workers/global`
 

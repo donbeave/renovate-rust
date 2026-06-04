@@ -67,6 +67,10 @@ reason = "Node.js module loading helper using filesystem discovery and dynamic i
 file   = "lib/util/mutex.ts"
 reason = "TypeScript async mutex API uses async-mutex with namespaced runtime locks and timeout-based acquire; Rust uses a scoped mutex type without this namespace/awaited lock contract."
 
+[[source]]
+file   = "lib/workers/types.ts"
+reason = "Type-only interface and type aliases used for TypeScript compile-time type safety; no Rust runtime equivalent."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
