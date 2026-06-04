@@ -4252,6 +4252,7 @@ pub fn memoize<T: Clone, F: FnOnce() -> T>(f: F) -> impl FnMut() -> T {
 ///
 /// Preserves the first occurrence of each unique element (same semantics as
 /// the TypeScript `uniq` which uses `findIndex`).
+/// @parity lib/util/uniq.ts full
 pub fn uniq<T, F>(array: Vec<T>, eql: F) -> Vec<T>
 where
     F: Fn(&T, &T) -> bool,

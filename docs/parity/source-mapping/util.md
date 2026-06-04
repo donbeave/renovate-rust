@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 18/175 in-scope files mapped (full=18 partial=0 stub=0 pending=157 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 19/175 in-scope files mapped (full=19 partial=0 stub=0 pending=156 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
@@ -52,7 +52,7 @@
 | `lib/util/timestamp.ts` | pending | — | — |
 | `lib/util/toml.ts` | pending | — | — |
 | `lib/util/unicode.ts` | pending | — | — |
-| `lib/util/uniq.ts` | pending | — | — |
+| `lib/util/uniq.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/url.ts` | pending | — | — |
 | `lib/util/yaml.ts` | pending | — | — |
 
