@@ -2,6 +2,7 @@
 //!
 //! Each sub-module handles a specific versioning scheme's constraint syntax
 //! and update planning. The Cargo module is first; others will follow.
+//! @parity lib/modules/versioning/api.ts full
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Versioning registry — lib/modules/versioning/index.ts
@@ -28,7 +29,6 @@ pub const ALL_VERSIONING_IDS: &[&str] = &[
     "deno",
     "devbox",
     "docker",
-    "distro",
     "elm",
     "exact",
     "git",
@@ -178,6 +178,7 @@ mod tests {
     fn versioning_registry_fallback() {
         assert_eq!(get_versioning_id(None), DEFAULT_VERSIONING);
         assert_eq!(get_versioning_id(Some("unknown")), DEFAULT_VERSIONING);
+        assert_eq!(get_versioning_id(Some("distro")), DEFAULT_VERSIONING);
         assert_eq!(get_versioning_id(Some("semver-coerced")), "semver-coerced");
     }
 

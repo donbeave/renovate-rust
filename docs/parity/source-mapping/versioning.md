@@ -2,19 +2,19 @@
 
 [← all groups](README.md)
 
-**Coverage:** 46/95 in-scope files mapped (full=44 partial=2 stub=0 pending=49 out-of-scope=0 opt-out=1) across 54 modules.
+**Coverage:** 47/94 in-scope files mapped (full=45 partial=2 stub=0 pending=47 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/api.ts` | pending | — | — |
+| `lib/modules/versioning/api.ts` | full | [`crates/renovate-core/src/versioning.rs`](../../../crates/renovate-core/src/versioning.rs) | — |
 | `lib/modules/versioning/common.ts` | pending | — | — |
 | `lib/modules/versioning/distro.ts` | pending | — | — |
 | `lib/modules/versioning/generic.ts` | pending | — | — |
 | `lib/modules/versioning/index.ts` | pending | — | — |
 | `lib/modules/versioning/schema.ts` | pending | — | — |
-| `lib/modules/versioning/types.ts` | pending | — | — |
+| `lib/modules/versioning/types.ts` | opt-out | — | Type-only declarations and interfaces without a Rust runtime analogue |
 
 ### `versioning/apk`
 
