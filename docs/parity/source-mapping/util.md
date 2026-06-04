@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 40/172 in-scope files mapped (full=40 partial=0 stub=0 pending=132 out-of-scope=0 opt-out=3) across 13 modules.
+**Coverage:** 41/172 in-scope files mapped (full=41 partial=0 stub=0 pending=131 out-of-scope=0 opt-out=3) across 13 modules.
 
 ### `util/_root`
 
@@ -48,7 +48,7 @@
 | `lib/util/streams.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/string-match.ts` | full | [`crates/renovate-core/src/string_match.rs`](../../../crates/renovate-core/src/string_match.rs) | — |
 | `lib/util/string.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/stringify.ts` | pending | — | — |
+| `lib/util/stringify.ts` | full | [`crates/renovate-core/src/util/stringify.rs`](../../../crates/renovate-core/src/util/stringify.rs) | — |
 | `lib/util/timestamp.ts` | pending | — | — |
 | `lib/util/toml.ts` | pending | — | — |
 | `lib/util/unicode.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
