@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/elm/index.ts full
+
 use semver::Version;
 
 fn parse_elm_range(input: &str) -> Option<(String, String)> {
