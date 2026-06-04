@@ -153,3 +153,8 @@ reason = "Build-configuration smoke test imports tsdown.config.mts and inspects 
 spec   = "test/other/validate-docker.spec.ts"
 test   = "validate dockerfile has consistent base image versions"
 reason = "Build-repo Dockerfile sanity check is a repository packaging invariant and does not map to Renovate runtime behavior."
+
+[[test]]
+spec   = "test/other/validate-schemas.spec.ts"
+test   = "validate json files in lib/data against their schemas"
+reason = "Schema validation run is an upstream TypeScript tooling check over schema resources, with no direct Rust analogue in runtime behavior."
