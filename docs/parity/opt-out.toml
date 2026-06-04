@@ -143,3 +143,8 @@ reason = "asserts TypeScript logger spy behavior and injected migrateConfig thro
 spec   = "lib/util/regex.spec.ts"
 test   = "Falls back to RegExp"
 reason = "Node runtime fallback test depends on dynamic RE2 module import behavior that has no direct Rust equivalent; Rust path uses a single local regex engine."
+
+[[test]]
+spec   = "test/other/validate-config-files.spec.ts"
+test   = "tsdown entry points"
+reason = "Build-configuration smoke test imports tsdown.config.mts and inspects TypeScript bundler entry arrays; no Rust runtime analogue."
