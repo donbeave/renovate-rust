@@ -186,6 +186,7 @@ pub fn migrate_rule(mut rule: HostRule, legacy: &LegacyHostRule) -> Result<HostR
 }
 
 // ---------------------------------------------------------------------------
+/// @parity lib/util/host-rules.ts full
 // Public API
 // ---------------------------------------------------------------------------
 

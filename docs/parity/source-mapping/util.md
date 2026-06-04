@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 11/175 in-scope files mapped (full=11 partial=0 stub=0 pending=164 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 12/175 in-scope files mapped (full=12 partial=0 stub=0 pending=163 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
@@ -21,7 +21,7 @@
 | `lib/util/filter-map.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/fingerprint.ts` | pending | — | — |
 | `lib/util/hash.ts` | full | [`crates/renovate-core/src/util/hash.rs`](../../../crates/renovate-core/src/util/hash.rs) | — |
-| `lib/util/host-rules.ts` | pending | — | — |
+| `lib/util/host-rules.ts` | full | [`crates/renovate-core/src/util/host_rules.rs`](../../../crates/renovate-core/src/util/host_rules.rs) | — |
 | `lib/util/html.ts` | pending | — | — |
 | `lib/util/ignore.ts` | pending | — | — |
 | `lib/util/interpolator.ts` | pending | — | — |
