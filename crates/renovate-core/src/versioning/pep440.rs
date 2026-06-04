@@ -1,4 +1,6 @@
 //! PEP 440 versioning and update decision logic.
+//! @parity lib/modules/versioning/pep440/index.ts full
+//! @parity lib/modules/versioning/pep440/range.ts full
 //!
 //! Renovate reference: `lib/modules/versioning/pep440/index.ts` and
 //! `lib/modules/versioning/pep440/range.ts`.

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 58/94 in-scope files mapped (full=58 partial=0 stub=0 pending=36 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 60/94 in-scope files mapped (full=60 partial=0 stub=0 pending=34 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -239,8 +239,8 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/pep440/index.ts` | pending | — | — |
-| `lib/modules/versioning/pep440/range.ts` | pending | — | — |
+| `lib/modules/versioning/pep440/index.ts` | full | [`crates/renovate-core/src/versioning/pep440.rs`](../../../crates/renovate-core/src/versioning/pep440.rs) | — |
+| `lib/modules/versioning/pep440/range.ts` | full | [`crates/renovate-core/src/versioning/pep440.rs`](../../../crates/renovate-core/src/versioning/pep440.rs) | — |
 
 ### `versioning/perl`
 
