@@ -158,3 +158,8 @@ reason = "Build-repo Dockerfile sanity check is a repository packaging invariant
 spec   = "test/other/validate-schemas.spec.ts"
 test   = "validate json files in lib/data against their schemas"
 reason = "Schema validation run is an upstream TypeScript tooling check over schema resources, with no direct Rust analogue in runtime behavior."
+
+[[test]]
+spec   = "test/docs/documentation.spec.ts"
+all    = true
+reason = "Repository documentation quality assertions (markdown layout/options coverage) are build-time/static checks without a Rust runtime implementation target."
