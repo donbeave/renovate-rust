@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 32/174 in-scope files mapped (full=32 partial=0 stub=0 pending=142 out-of-scope=0 opt-out=1) across 13 modules.
+**Coverage:** 32/173 in-scope files mapped (full=32 partial=0 stub=0 pending=141 out-of-scope=0 opt-out=2) across 13 modules.
 
 ### `util/_root`
 
@@ -31,7 +31,7 @@
 | `lib/util/mask.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/memoize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/minimatch.ts` | full | [`crates/renovate-core/src/util/minimatch.rs`](../../../crates/renovate-core/src/util/minimatch.rs) | — |
-| `lib/util/modules.ts` | pending | — | — |
+| `lib/util/modules.ts` | opt-out | — | Node.js module loading helper using filesystem discovery and dynamic imports; Rust uses compile-time module wiring and does not expose a generic runtime module loader. |
 | `lib/util/mutex.ts` | pending | — | — |
 | `lib/util/number.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/object.ts` | full | [`crates/renovate-core/src/util/object.rs`](../../../crates/renovate-core/src/util/object.rs) | — |

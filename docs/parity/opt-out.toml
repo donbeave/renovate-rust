@@ -55,6 +55,10 @@ reason = "TypeScript ambient declarations for global interfaces and module shims
 file   = "lib/util/html.ts"
 reason = "Thin wrapper around node-html-parser specific to TypeScript runtime APIs; no Rust equivalent in the current implementation set."
 
+[[source]]
+file   = "lib/util/modules.ts"
+reason = "Node.js module loading helper using filesystem discovery and dynamic imports; Rust uses compile-time module wiring and does not expose a generic runtime module loader."
+
 [[test]]
 spec   = "lib/modules/datasource/github-tags/index.spec.ts"
 test   = "returns null for missing hash"
