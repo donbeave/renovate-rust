@@ -800,6 +800,7 @@ pub fn is_github_fine_grained_personal_access_token(token: &str) -> bool {
     token.starts_with("github_pat_")
 }
 
+/// @parity lib/util/check-token.ts full
 /// Extract the raw token from a host-rule token value, stripping `x-access-token:` prefix.
 pub fn find_github_token(token: Option<&str>) -> Option<&str> {
     let t = token?;
