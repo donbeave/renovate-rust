@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 72/94 in-scope files mapped (full=70 partial=2 stub=0 pending=22 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 73/94 in-scope files mapped (full=71 partial=2 stub=0 pending=21 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -254,7 +254,7 @@
 |---|---|---|---|
 | `lib/modules/versioning/poetry/index.ts` | full | [`crates/renovate-core/src/versioning/poetry.rs`](../../../crates/renovate-core/src/versioning/poetry.rs) | — |
 | `lib/modules/versioning/poetry/patterns.ts` | full | [`crates/renovate-core/src/versioning/poetry.rs`](../../../crates/renovate-core/src/versioning/poetry.rs) | — |
-| `lib/modules/versioning/poetry/transform.ts` | pending | — | — |
+| `lib/modules/versioning/poetry/transform.ts` | full | [`crates/renovate-core/src/versioning/poetry.rs`](../../../crates/renovate-core/src/versioning/poetry.rs) | — |
 
 ### `versioning/pvp`
 
