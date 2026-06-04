@@ -8,6 +8,7 @@
 /// In Rust, `Clone::clone()` already performs a deep clone for owned types.
 /// This function exists as a named counterpart to the TypeScript `clone()`
 /// utility from `lib/util/clone.ts`.
+/// @parity lib/util/clone.ts full
 pub fn deep_clone<T: Clone>(value: &T) -> T {
     value.clone()
 }

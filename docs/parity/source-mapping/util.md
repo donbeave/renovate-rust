@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 4/175 in-scope files mapped (full=4 partial=0 stub=0 pending=171 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 5/175 in-scope files mapped (full=5 partial=0 stub=0 pending=170 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
@@ -11,7 +11,7 @@
 | `lib/util/array.ts` | full | [`crates/renovate-core/src/util/array.rs`](../../../crates/renovate-core/src/util/array.rs) | — |
 | `lib/util/assign-keys.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/check-token.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/clone.ts` | pending | — | — |
+| `lib/util/clone.ts` | full | [`crates/renovate-core/src/util/clone.rs`](../../../crates/renovate-core/src/util/clone.rs) | — |
 | `lib/util/coerce.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/common.ts` | pending | — | — |
 | `lib/util/compress.ts` | pending | — | — |
