@@ -5119,6 +5119,7 @@ pub fn massage_toml(input: &str) -> String {
 
 // ---------------------------------------------------------------------------
 // Lazy — lib/util/lazy.ts
+/// @parity lib/util/lazy.ts full
 // ---------------------------------------------------------------------------
 
 /// Lazily-evaluated computation with cached result or error.

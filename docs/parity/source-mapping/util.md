@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 13/175 in-scope files mapped (full=13 partial=0 stub=0 pending=162 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 14/175 in-scope files mapped (full=14 partial=0 stub=0 pending=161 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
@@ -26,7 +26,7 @@
 | `lib/util/ignore.ts` | pending | — | — |
 | `lib/util/interpolator.ts` | pending | — | — |
 | `lib/util/jsonata.ts` | pending | — | — |
-| `lib/util/lazy.ts` | pending | — | — |
+| `lib/util/lazy.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/markdown.ts` | pending | — | — |
 | `lib/util/mask.ts` | pending | — | — |
 | `lib/util/memoize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
