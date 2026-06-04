@@ -96,3 +96,8 @@ reason = "mocks TypeScript-internal simpleGit infrastructure; no equivalent Rust
 spec   = "lib/modules/platform/types.spec.ts"
 test   = "`RepoParams` and `RepoGlobalConfig` types should be incompatible"
 reason = "Type-level assertion (`expectTypeOf`) has no Rust runtime equivalent"
+
+[[test]]
+spec   = "lib/util/streams.spec.ts"
+test   = "handles Readables"
+reason = "Node.js Readable stream runtime behavior with no direct Rust stream API analogue in this module"
