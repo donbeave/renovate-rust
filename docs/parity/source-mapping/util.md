@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 29/174 in-scope files mapped (full=29 partial=0 stub=0 pending=145 out-of-scope=0 opt-out=1) across 13 modules.
+**Coverage:** 30/174 in-scope files mapped (full=30 partial=0 stub=0 pending=144 out-of-scope=0 opt-out=1) across 13 modules.
 
 ### `util/_root`
 
@@ -30,7 +30,7 @@
 | `lib/util/markdown.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/mask.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/memoize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/minimatch.ts` | pending | — | — |
+| `lib/util/minimatch.ts` | full | [`crates/renovate-core/src/util/minimatch.rs`](../../../crates/renovate-core/src/util/minimatch.rs) | — |
 | `lib/util/modules.ts` | pending | — | — |
 | `lib/util/mutex.ts` | pending | — | — |
 | `lib/util/number.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
