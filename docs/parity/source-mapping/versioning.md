@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 79/94 in-scope files mapped (full=77 partial=2 stub=0 pending=14 out-of-scope=0 opt-out=3) across 54 modules.
+**Coverage:** 80/94 in-scope files mapped (full=78 partial=2 stub=0 pending=13 out-of-scope=0 opt-out=3) across 54 modules.
 
 ### `versioning/_root`
 
@@ -289,7 +289,7 @@
 |---|---|---|---|
 | `lib/modules/versioning/rez/index.ts` | full | [`crates/renovate-core/src/versioning/rez.rs`](../../../crates/renovate-core/src/versioning/rez.rs) | — |
 | `lib/modules/versioning/rez/pattern.ts` | full | [`crates/renovate-core/src/versioning/rez.rs`](../../../crates/renovate-core/src/versioning/rez.rs) | — |
-| `lib/modules/versioning/rez/transform.ts` | pending | — | — |
+| `lib/modules/versioning/rez/transform.ts` | full | [`crates/renovate-core/src/versioning/rez.rs`](../../../crates/renovate-core/src/versioning/rez.rs) | — |
 
 ### `versioning/rpm`
 

@@ -1,5 +1,6 @@
 //! @parity lib/modules/versioning/rez/index.ts full
 //! @parity lib/modules/versioning/rez/pattern.ts full
+//! @parity lib/modules/versioning/rez/transform.ts full
 //
 use std::sync::LazyLock;
 
