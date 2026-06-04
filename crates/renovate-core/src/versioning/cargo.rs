@@ -1,4 +1,5 @@
 //! Cargo (semver) versioning and update decision logic.
+//! @parity lib/modules/versioning/cargo/index.ts full
 //!
 //! Renovate reference: `lib/modules/versioning/cargo/index.ts`
 //!
