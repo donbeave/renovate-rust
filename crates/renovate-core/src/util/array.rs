@@ -1,5 +1,7 @@
 //! Array utility functions — mirrors `lib/util/array.ts`.
 
+//! @parity lib/util/array.ts full
+
 use std::collections::HashSet;
 use std::hash::Hash;
 
@@ -14,6 +16,56 @@ pub fn split_at<T: Clone>(arr: &[T], predicate: impl Fn(&T) -> bool) -> (Vec<T>,
         Some(pos) => (arr[..pos].to_vec(), arr[pos..].to_vec()),
         None => (arr.to_vec(), Vec::new()),
     }
+}
+
+/// Coerce a nullable value to an array.
+///
+/// Mirrors `coerceArray` from `lib/util/array.ts`.
+pub fn coerce_array<T>(input: Option<Vec<T>>) -> Vec<T> {
+    input.unwrap_or_default()
+}
+
+/// Return false for `None`, true otherwise.
+///
+/// Mirrors `isNotNullOrUndefined` from `lib/util/array.ts`.
+pub fn is_not_null_or_undefined<T>(value: Option<T>) -> bool {
+    value.is_some()
+}
+
+/// Input value that can be converted to a scalar array.
+#[derive(Debug)]
+pub enum ToArrayInput<T> {
+    Value(T),
+    Values(Vec<T>),
+}
+
+impl<T> From<T> for ToArrayInput<T> {
+    fn from(value: T) -> Self {
+        Self::Value(value)
+    }
+}
+
+impl<T> From<Vec<T>> for ToArrayInput<T> {
+    fn from(value: Vec<T>) -> Self {
+        Self::Values(value)
+    }
+}
+
+/// Convert a single value or an array into an array.
+///
+/// Mirrors `toArray` from `lib/util/array.ts`.
+pub fn to_array<T>(value: impl Into<ToArrayInput<T>>) -> Vec<T> {
+    match value.into() {
+        ToArrayInput::Value(value) => vec![value],
+        ToArrayInput::Values(values) => values,
+    }
+}
+
+/// Preserve first-occurrence order while removing duplicates.
+///
+/// Mirrors `deduplicateArray` from `lib/util/array.ts`.
+pub fn deduplicate_array<T: Eq + Hash + Clone>(array: &[T]) -> Vec<T> {
+    deduplicate(array)
 }
 
 /// Deduplicate array elements preserving first-occurrence order.
@@ -122,5 +174,21 @@ mod tests {
         let arr = ["foo", "bar", "foo", "baz", "bar"];
         let result = deduplicate(&arr);
         assert_eq!(result, vec!["foo", "bar", "baz"]);
+    }
+
+    #[test]
+    fn array_helpers_match_renovate_util_array() {
+        assert!(is_not_null_or_undefined(Some(1)));
+        assert!(!is_not_null_or_undefined::<i32>(None));
+        assert_eq!(coerce_array::<i32>(None), Vec::<i32>::new());
+        assert_eq!(coerce_array(Some(vec![1, 2, 2])), vec![1, 2, 2]);
+
+        let single = to_array(42);
+        assert_eq!(single, vec![42]);
+        let array_values: ToArrayInput<i32> = ToArrayInput::Values(vec![1, 2, 3]);
+        assert_eq!(to_array::<i32>(array_values), vec![1, 2, 3]);
+
+        let deduplicated = deduplicate_array(&["a", "b", "a", "c", "b"]);
+        assert_eq!(deduplicated, vec!["a", "b", "c"]);
     }
 }

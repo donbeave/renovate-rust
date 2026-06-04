@@ -2,13 +2,13 @@
 
 [← all groups](README.md)
 
-**Coverage:** 0/175 in-scope files mapped (full=0 partial=0 stub=0 pending=175 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 1/175 in-scope files mapped (full=1 partial=0 stub=0 pending=174 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/util/array.ts` | pending | — | — |
+| `lib/util/array.ts` | full | [`crates/renovate-core/src/util/array.rs`](../../../crates/renovate-core/src/util/array.rs) | — |
 | `lib/util/assign-keys.ts` | pending | — | — |
 | `lib/util/check-token.ts` | pending | — | — |
 | `lib/util/clone.ts` | pending | — | — |
