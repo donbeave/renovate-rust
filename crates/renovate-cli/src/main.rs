@@ -83,6 +83,7 @@ async fn main() -> ExitCode {
     // 4. Global config pipeline: defaults → file → CLI.
     let cwd = std::env::current_dir().unwrap_or_else(|_| Path::new(".").to_path_buf());
     let config_file_env = std::env::var("RENOVATE_CONFIG_FILE").ok();
+    let additional_config_file_env = std::env::var("RENOVATE_ADDITIONAL_CONFIG_FILE").ok();
 
     let base = match config_file::resolve_config_path(config_file_env.as_deref(), &cwd) {
         Ok(Some(path)) => {
@@ -110,6 +111,15 @@ async fn main() -> ExitCode {
         }
     };
 
+    let base = match config_file::load_additional_config(additional_config_file_env.as_deref(), &cwd) {
+        Ok(additional) => config_file::merge_over_base(base, additional),
+        Err(err) => {
+            tracing::error!(%err, "failed to parse additional config file");
+            eprintln!("renovate: error parsing additional config file: {err}");
+            return ExitCode::from(1);
+        }
+    };
+
     let env_map = std::env::vars().collect();
     let base = match config_env::apply_to_base(&env_map, base) {
         Ok(config) => config,
@@ -126,6 +136,11 @@ async fn main() -> ExitCode {
             return ExitCode::from(1);
         }
     };
+    let _ = config_file::delete_non_default_config(config_file_env.as_deref(), config.delete_config_file);
+    let _ = config_file::delete_non_default_additional_config(
+        additional_config_file_env.as_deref(),
+        config.delete_additional_config_file,
+    );
     tracing::info!(
         platform = %config.platform,
         dry_run = ?config.dry_run,

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 10/151 in-scope files mapped (full=2 partial=8 stub=0 pending=141 out-of-scope=0 opt-out=9) across 15 modules.
+**Coverage:** 16/150 in-scope files mapped (full=3 partial=13 stub=0 pending=134 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -86,20 +86,20 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/workers/global/autodiscover.ts` | pending | — | — |
-| `lib/workers/global/config/parse/additional-config-file.ts` | pending | — | — |
+| `lib/workers/global/autodiscover.ts` | partial | [`crates/renovate-core/src/workers/global/autodiscover.rs`](../../../crates/renovate-core/src/workers/global/autodiscover.rs) | current implementation only filters configured repositories and logs basic discovery; missing platform fetch, local mode handling, and onboarding merge behavior. |
+| `lib/workers/global/config/parse/additional-config-file.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs) | parse-and-load support for `RENOVATE_ADDITIONAL_CONFIG_FILE` is implemented, including `processEnv` export and optional post-load deletion, but JS/yaml configs remain unsupported. |
 | `lib/workers/global/config/parse/cli.ts` | pending | — | — |
 | `lib/workers/global/config/parse/codespaces.ts` | pending | — | — |
 | `lib/workers/global/config/parse/coersions.ts` | pending | — | — |
 | `lib/workers/global/config/parse/env.ts` | pending | — | — |
-| `lib/workers/global/config/parse/file.ts` | pending | — | — |
+| `lib/workers/global/config/parse/file.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs) | JSON/JSON5 parser and non-default file cleanup are implemented; CLI/global env integration and some migrate/validation flows are staged elsewhere. |
 | `lib/workers/global/config/parse/host-rules-from-env.ts` | pending | — | — |
-| `lib/workers/global/config/parse/index.ts` | pending | — | — |
+| `lib/workers/global/config/parse/index.ts` | partial | [`crates/renovate-core/src/workers/global/config/parse/index.rs`](../../../crates/renovate-core/src/workers/global/config/parse/index.rs) | currently JSON parsing scaffold only; full parse orchestration and ENV/file merge remain in progress. |
 | `lib/workers/global/config/parse/types.ts` | opt-out | — | Type-only parse options type aliases used only by TypeScript configuration validation typing. |
 | `lib/workers/global/config/parse/util.ts` | pending | — | — |
 | `lib/workers/global/index.ts` | pending | — | — |
 | `lib/workers/global/initialize.ts` | pending | — | — |
-| `lib/workers/global/limits.ts` | pending | — | — |
+| `lib/workers/global/limits.ts` | full | [`crates/renovate-core/src/limits.rs`](../../../crates/renovate-core/src/limits.rs) | — |
 
 ### `workers/repository`
 
@@ -162,7 +162,7 @@
 | `lib/workers/repository/process/fingerprint-fields.ts` | pending | — | — |
 | `lib/workers/repository/process/index.ts` | pending | — | — |
 | `lib/workers/repository/process/libyear.ts` | pending | — | — |
-| `lib/workers/repository/process/limits.ts` | pending | — | — |
+| `lib/workers/repository/process/limits.ts` | partial | [`crates/renovate-core/src/workers/repository/process/limits.rs`](../../../crates/renovate-core/src/workers/repository/process/limits.rs) | repository-level limit structs/checkers are implemented; live count acquisition from platform/scm/cache is still missing. |
 | `lib/workers/repository/process/lookup/abandonment.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/bucket.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/current.ts` | pending | — | — |
@@ -226,7 +226,7 @@
 | `lib/workers/repository/update/pr/changelog/release-notes.ts` | pending | — | — |
 | `lib/workers/repository/update/pr/changelog/releases.ts` | pending | — | — |
 | `lib/workers/repository/update/pr/changelog/source.ts` | pending | — | — |
-| `lib/workers/repository/update/pr/changelog/types.ts` | pending | — | — |
+| `lib/workers/repository/update/pr/changelog/types.ts` | opt-out | — | Type-only changelog result types used only for TypeScript compile-time data contracts. |
 | `lib/workers/repository/update/pr/code-owners.ts` | pending | — | — |
 | `lib/workers/repository/update/pr/index.ts` | pending | — | — |
 | `lib/workers/repository/update/pr/labels.ts` | pending | — | — |

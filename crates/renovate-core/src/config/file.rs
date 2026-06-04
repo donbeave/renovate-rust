@@ -1,6 +1,8 @@
 //! Global config file discovery and loading.
 //!
 //! Renovate reference: `lib/workers/global/config/parse/file.ts`.
+//! @parity lib/workers/global/config/parse/file.ts partial — JSON/JSON5 parser and non-default file cleanup are implemented; CLI/global env integration and some migrate/validation flows are staged elsewhere.
+//! @parity lib/workers/global/config/parse/additional-config-file.ts partial — parse-and-load support for `RENOVATE_ADDITIONAL_CONFIG_FILE` is implemented, including `processEnv` export and optional post-load deletion, but JS/yaml configs remain unsupported.
 //!
 //! ## Supported formats
 //!
@@ -20,6 +22,7 @@
 //! `config.js` is intentionally not searched (CD-0003).
 
 use std::path::{Path, PathBuf};
+use std::env;
 
 use super::GlobalConfig;
 
@@ -114,6 +117,69 @@ pub fn delete_non_default_config(config_file_env: Option<&str>, delete_config_fi
     };
 
     result.is_ok()
+}
+
+/// Load and parse `RENOVATE_ADDITIONAL_CONFIG_FILE`, including `processEnv`
+/// side effects. Mirrors the intent of
+/// `lib/workers/global/config/parse/additional-config-file.ts`:
+/// - return defaults when unset
+/// - fail when the path is missing/invalid
+/// - apply process environment variable overrides from `processEnv`
+/// - merge into the already-loaded base config with file-style precedence
+pub fn load_additional_config(config_file_env: Option<&str>, cwd: &Path) -> Result<GlobalConfig, ConfigFileError> {
+    let Some(config_file) = resolve_config_path(config_file_env, cwd)? else {
+        return Ok(GlobalConfig::default());
+    };
+
+    let file_name = config_file
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("");
+    let contents = std::fs::read_to_string(&config_file).map_err(|source| ConfigFileError::Io {
+        path: config_file.to_owned(),
+        source,
+    })?;
+
+    let parsed = parse_file_config(file_name, &contents);
+    let mut parsed_contents = match parsed {
+        ParsedFileConfig::Success { parsed_contents, .. } => parsed_contents,
+        ParsedFileConfig::Error {
+            validation_message, ..
+        } => {
+            return Err(ConfigFileError::Parse {
+                path: config_file,
+                message: validation_message,
+            });
+        }
+    };
+
+    if let Some(process_env) = parsed_contents
+        .get_mut("processEnv")
+        .and_then(serde_json::Value::as_object_mut)
+    {
+        for (key, value) in process_env {
+            if let Some(processed) = value.as_str() {
+                let _ = env::set_var(key, processed);
+            }
+        }
+        parsed_contents
+            .as_object_mut()
+            .and_then(|object| object.remove("processEnv"));
+    }
+
+    serde_json::from_value(parsed_contents).map_err(|source| ConfigFileError::Parse {
+        path: config_file.to_owned(),
+        message: source.to_string(),
+    })
+}
+
+/// Keep behavior parity with `deleteNonDefaultConfig` in
+/// `additional-config-file.ts`.
+pub fn delete_non_default_additional_config(
+    config_file_env: Option<&str>,
+    delete_config_file: bool,
+) -> bool {
+    delete_non_default_config(config_file_env, delete_config_file)
 }
 
 /// Load and parse a global config file into a [`GlobalConfig`].
@@ -548,6 +614,37 @@ mod tests {
 
         std::fs::set_permissions(&parent, original_permissions).unwrap();
         assert!(file.exists());
+    }
+
+    #[test]
+    fn load_additional_config_parses_json_and_exports_process_env() {
+        let old_key = std::env::var_os("RENOVATE_TEST_ADDENV_KEY");
+        std::env::remove_var("RENOVATE_TEST_ADDENV_KEY");
+
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("additional.json");
+        std::fs::write(
+            &path,
+            r#"{"processEnv":{"RENOVATE_TEST_ADDENV_KEY":"renovate-test"}, "labels":["renovate"]}"#,
+        )
+        .unwrap();
+
+        let config = load_additional_config(path.to_str(), dir.path()).unwrap();
+        assert_eq!(
+            config.labels,
+            Vec::from([String::from("renovate")]),
+            "processEnv should be stripped and normal config fields preserved"
+        );
+        assert_eq!(
+            std::env::var("RENOVATE_TEST_ADDENV_KEY").ok(),
+            Some(String::from("renovate-test"))
+        );
+
+        if let Some(value) = old_key {
+            std::env::set_var("RENOVATE_TEST_ADDENV_KEY", value);
+        } else {
+            std::env::remove_var("RENOVATE_TEST_ADDENV_KEY");
+        }
     }
 
     // ── load ─────────────────────────────────────────────────────────────────
