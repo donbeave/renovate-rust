@@ -5037,6 +5037,7 @@ pub fn satisfies_date_range(date: &str, range: &str, now_ms: i64) -> Option<bool
 const ONE_MINUTE_MS: i64 = 60_000;
 const ONE_HOUR_MS: i64 = 3_600_000;
 
+/// @parity lib/util/date.ts full
 /// Return elapsed days between `timestamp` ISO string and `now_ms`.
 /// When `floor` is true, truncates to integer days.
 pub fn get_elapsed_days(timestamp: &str, floor: bool, now_ms: i64) -> f64 {
