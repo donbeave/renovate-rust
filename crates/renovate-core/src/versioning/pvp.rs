@@ -1,3 +1,5 @@
+//! @parity lib/modules/versioning/pvp/index.ts full
+//!
 //! Package Versioning Policy (Haskell) versioning.
 //!
 //! Renovate reference:
