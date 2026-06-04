@@ -1,6 +1,7 @@
 //! HTTP proxy bootstrap utilities.
 //!
 //! Mirrors `lib/proxy.ts` from the Renovate TypeScript reference.
+//! @parity lib/proxy.ts full
 
 use std::collections::HashMap;
 

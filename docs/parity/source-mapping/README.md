@@ -5,13 +5,13 @@ Status lives in `@parity` tags in the Rust source; exclusions in `docs/parity/op
 
 Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (tag) · `opt-out` (registry — will never be ported, with a reason).
 
-**Coverage:** 1510/1510 in-scope files mapped (full=257 partial=1253 stub=0 pending=0 out-of-scope=0 opt-out=4). Total upstream files: 1514.
+**Coverage:** 1510/1510 in-scope files mapped (full=258 partial=1252 stub=0 pending=0 out-of-scope=0 opt-out=4). Total upstream files: 1514.
 
 ## By group
 
 | Group | Files | full | partial | stub | pending | oos | opt-out |
 |---|--:|--:|--:|--:|--:|--:|--:|
-| [cli](cli.md) | 160 | 0 | 158 | 0 | 0 | 0 | 2 |
+| [cli](cli.md) | 160 | 1 | 157 | 0 | 0 | 0 | 2 |
 | [config](config.md) | 117 | 18 | 99 | 0 | 0 | 0 | 0 |
 | [datasources](datasources.md) | 227 | 109 | 118 | 0 | 0 | 0 | 0 |
 | [infra](infra.md) | 36 | 0 | 36 | 0 | 0 | 0 | 0 |
@@ -328,4 +328,3 @@ Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (t
 | [`workers/_root`](cli.md) | 1 | 0 | 1 | 0 | 0 | 0 | 0 |
 | [`workers/global`](cli.md) | 14 | 0 | 14 | 0 | 0 | 0 | 0 |
 | [`workers/repository`](cli.md) | 133 | 0 | 133 | 0 | 0 | 0 | 0 |
-

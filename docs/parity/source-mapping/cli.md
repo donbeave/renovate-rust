@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 158/158 in-scope files mapped (full=0 partial=158 stub=0 pending=0 out-of-scope=0 opt-out=2) across 15 modules.
+**Coverage:** 158/158 in-scope files mapped (full=1 partial=157 stub=0 pending=0 out-of-scope=0 opt-out=2) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -62,7 +62,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/proxy.ts` | partial | [`crates/renovate-core/src/proxy.rs`](../../../crates/renovate-core/src/proxy.rs) | — |
+| `lib/proxy.ts` | full | [`crates/renovate-core/src/proxy.rs`](../../../crates/renovate-core/src/proxy.rs) | — |
 
 ### `renovate.ts`
 
@@ -238,4 +238,3 @@
 | `lib/workers/repository/updates/branchify.ts` | partial | [`crates/renovate-core/src/workers/repository.rs`](../../../crates/renovate-core/src/workers/repository.rs) | — |
 | `lib/workers/repository/updates/flatten.ts` | partial | [`crates/renovate-core/src/workers/repository.rs`](../../../crates/renovate-core/src/workers/repository.rs) | — |
 | `lib/workers/repository/updates/generate.ts` | partial | [`crates/renovate-core/src/workers/repository.rs`](../../../crates/renovate-core/src/workers/repository.rs) | — |
-
