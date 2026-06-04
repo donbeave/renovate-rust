@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 85/94 in-scope files mapped (full=83 partial=0 stub=0 pending=10 out-of-scope=0 opt-out=3) across 54 modules.
+**Coverage:** 93/93 in-scope files mapped (full=93 partial=0 stub=0 pending=0 out-of-scope=0 opt-out=3) across 54 modules.
 
 ### `versioning/_root`
 
@@ -262,7 +262,7 @@
 |---|---|---|---|
 | `lib/modules/versioning/pvp/index.ts` | full | [`crates/renovate-core/src/versioning/pvp.rs`](../../../crates/renovate-core/src/versioning/pvp.rs) | — |
 | `lib/modules/versioning/pvp/range.ts` | full | [`crates/renovate-core/src/versioning/pvp.rs`](../../../crates/renovate-core/src/versioning/pvp.rs) | — |
-| `lib/modules/versioning/pvp/types.ts` | opt-out | — | Type-only declarations and interfaces without a Rust runtime analogue |
+| `lib/modules/versioning/pvp/types.ts` | opt-out | — | Type-only declarations with no dedicated Rust runtime equivalent |
 | `lib/modules/versioning/pvp/util.ts` | full | [`crates/renovate-core/src/versioning/pvp.rs`](../../../crates/renovate-core/src/versioning/pvp.rs) | — |
 
 ### `versioning/python`
@@ -301,14 +301,14 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/modules/versioning/ruby/index.ts` | pending | — | — |
-| `lib/modules/versioning/ruby/operator.ts` | pending | — | — |
-| `lib/modules/versioning/ruby/range.ts` | pending | — | — |
-| `lib/modules/versioning/ruby/strategies/bump.ts` | pending | — | — |
-| `lib/modules/versioning/ruby/strategies/index.ts` | pending | — | — |
-| `lib/modules/versioning/ruby/strategies/replace.ts` | pending | — | — |
-| `lib/modules/versioning/ruby/strategies/widen.ts` | pending | — | — |
-| `lib/modules/versioning/ruby/version.ts` | pending | — | — |
+| `lib/modules/versioning/ruby/index.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
+| `lib/modules/versioning/ruby/operator.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
+| `lib/modules/versioning/ruby/range.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
+| `lib/modules/versioning/ruby/strategies/bump.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
+| `lib/modules/versioning/ruby/strategies/index.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
+| `lib/modules/versioning/ruby/strategies/replace.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
+| `lib/modules/versioning/ruby/strategies/widen.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
+| `lib/modules/versioning/ruby/version.ts` | full | [`crates/renovate-core/src/versioning/ruby.rs`](../../../crates/renovate-core/src/versioning/ruby.rs) | — |
 
 ### `versioning/rust-release-channel`
 
@@ -316,8 +316,8 @@
 |---|---|---|---|
 | `lib/modules/versioning/rust-release-channel/index.ts` | full | [`crates/renovate-core/src/versioning/rust_release_channel.rs`](../../../crates/renovate-core/src/versioning/rust_release_channel.rs) | — |
 | `lib/modules/versioning/rust-release-channel/parse.ts` | full | [`crates/renovate-core/src/versioning/rust_release_channel.rs`](../../../crates/renovate-core/src/versioning/rust_release_channel.rs) | — |
-| `lib/modules/versioning/rust-release-channel/types.ts` | pending | — | — |
-| `lib/modules/versioning/rust-release-channel/util.ts` | pending | — | — |
+| `lib/modules/versioning/rust-release-channel/types.ts` | full | [`crates/renovate-core/src/versioning/rust_release_channel.rs`](../../../crates/renovate-core/src/versioning/rust_release_channel.rs) | — |
+| `lib/modules/versioning/rust-release-channel/util.ts` | full | [`crates/renovate-core/src/versioning/rust_release_channel.rs`](../../../crates/renovate-core/src/versioning/rust_release_channel.rs) | — |
 
 ### `versioning/same-major`
 
@@ -369,3 +369,4 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/unity3d-packages/index.ts` | full | [`crates/renovate-core/src/versioning/unity3d_packages.rs`](../../../crates/renovate-core/src/versioning/unity3d_packages.rs) | — |
+

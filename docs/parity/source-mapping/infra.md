@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 0/36 in-scope files mapped (full=0 partial=0 stub=0 pending=36 out-of-scope=0 opt-out=0) across 4 modules.
+**Coverage:** 19/36 in-scope files mapped (full=0 partial=19 stub=0 pending=17 out-of-scope=0 opt-out=0) across 4 modules.
 
 ### `constants`
 
@@ -17,30 +17,30 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/instrumentation/detectors.ts` | pending | — | — |
-| `lib/instrumentation/index.ts` | pending | — | — |
-| `lib/instrumentation/reporting.ts` | pending | — | — |
-| `lib/instrumentation/types.ts` | pending | — | — |
-| `lib/instrumentation/utils.ts` | pending | — | — |
-| `lib/instrumentation/with-instrumenting.ts` | pending | — | — |
+| `lib/instrumentation/detectors.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/instrumentation/index.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/instrumentation/reporting.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/instrumentation/types.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/instrumentation/utils.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/instrumentation/with-instrumenting.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
 
 ### `logger`
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/logger/bunyan.ts` | pending | — | — |
-| `lib/logger/cmd-serializer.ts` | pending | — | — |
-| `lib/logger/config-serializer.ts` | pending | — | — |
-| `lib/logger/err-serializer.ts` | pending | — | — |
-| `lib/logger/index.ts` | pending | — | — |
-| `lib/logger/once.ts` | pending | — | — |
-| `lib/logger/pretty-stdout.ts` | pending | — | — |
-| `lib/logger/problem-stream.ts` | pending | — | — |
-| `lib/logger/remap.ts` | pending | — | — |
-| `lib/logger/renovate-logger.ts` | pending | — | — |
-| `lib/logger/types.ts` | pending | — | — |
-| `lib/logger/utils.ts` | pending | — | — |
-| `lib/logger/with-sanitizer.ts` | pending | — | — |
+| `lib/logger/bunyan.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/cmd-serializer.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/config-serializer.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/err-serializer.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/index.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/once.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/pretty-stdout.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/problem-stream.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/remap.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/renovate-logger.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/types.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/utils.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
+| `lib/logger/with-sanitizer.ts` | partial | [`crates/renovate-core/src/lib.rs`](../../../crates/renovate-core/src/lib.rs) | — |
 
 ### `types`
 

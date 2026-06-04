@@ -14,6 +14,7 @@ pub mod emoji;
 pub mod git;
 pub mod hash;
 pub mod host_rules;
+pub mod jsonata;
 pub mod interpolator;
 pub mod markdown;
 pub mod memoize;
@@ -36,7 +37,12 @@ pub mod uniq;
 pub mod url;
 
 use std::cell::RefCell;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::borrow::Borrow;
+use std::fmt::Write;
+use std::panic::Location;
+
+use sha2::{Digest, Sha256};
 
 thread_local! {
     static GLOBAL_SECRETS: RefCell<HashSet<String>> = RefCell::new(HashSet::new());
@@ -914,10 +920,48 @@ impl OnceTracker {
         true
     }
 
+    /// Call `f` only once for the same callsite, level, and serialized args.
+    #[track_caller]
+    pub fn once_with_level<F>(&mut self, level: &str, args: &[serde_json::Value], f: F) -> bool
+    where
+        F: FnOnce(),
+    {
+        let callsite = Location::caller();
+        let location_key = format!(
+            "{}:{}:{}",
+            callsite.file(),
+            callsite.line(),
+            callsite.column()
+        );
+        let key = format!("{location_key}|{level}|{}", hash_once_args(args));
+        self.once(&key, f)
+    }
+
     /// Clear all seen keys, allowing previously-used keys to fire again.
     pub fn reset(&mut self) {
         self.seen.clear();
     }
+}
+
+fn hash_once_args(args: &[serde_json::Value]) -> String {
+    let mut hasher = Sha256::new();
+    let mut payload = String::new();
+    for (idx, arg) in args.iter().enumerate() {
+        if idx > 0 {
+            payload.push('|');
+        }
+        let rendered = serde_json::to_string(arg)
+            .or_else(|_| serde_json::to_string(&serde_json::Value::String(arg.to_string())))
+            .unwrap_or_else(|_| "null".to_owned());
+        let _ = write!(payload, "{rendered}");
+    }
+    hasher.update(payload.as_bytes());
+    let digest = hasher.finalize();
+    let mut out = String::new();
+    for b in digest {
+        let _ = write!(out, "{b:02x}");
+    }
+    out
 }
 
 impl Default for OnceTracker {
@@ -2570,6 +2614,23 @@ pub fn format_record(rec: &serde_json::Value, colorize: bool) -> String {
     format!("{}: {}{}\n{}", level, msg, meta, details)
 }
 
+/// Write a formatted Bunyan log record to a text stream.
+///
+/// Mirrors `PrettyStdoutStream._write()` from `lib/logger/pretty-stdout.ts`
+/// minus stream object construction.
+pub fn write_pretty_record<W: std::io::Write>(
+    data: &serde_json::Value,
+    stream: &mut W,
+) -> std::io::Result<()> {
+    stream.write_all(format_record(data, true).as_bytes())
+}
+
+/// Write a formatted Bunyan log record to standard output.
+pub fn write_pretty_record_to_stdout(data: &serde_json::Value) -> std::io::Result<()> {
+    let mut stdout = std::io::stdout();
+    write_pretty_record(data, &mut stdout)
+}
+
 // ---------------------------------------------------------------------------
 // Exec utilities — lib/util/exec/utils.ts
 // ---------------------------------------------------------------------------
@@ -3713,6 +3774,13 @@ pub fn parse_json(content: &str) -> Result<serde_json::Value, String> {
         .map_err(|e| e.to_string())
 }
 
+/// Parse a JSONC string into a `serde_json::Value`.
+///
+/// Mirrors `parseJsonc` from `lib/util/common.ts`.
+pub fn parse_jsonc(content: &str) -> Result<serde_json::Value, String> {
+    json5::from_str::<serde_json::Value>(content).map_err(|e| e.to_string())
+}
+
 /// Like `parse_json` but also returns whether a JSON5 fallback was needed.
 /// Mirrors the deprecation warning logic in `lib/util/common.ts` `parseJson`.
 pub fn parse_json_with_fallback(
@@ -4103,7 +4171,9 @@ pub fn is_skip_comment(comment: Option<&str>) -> bool {
     };
 
     static SKIP_COMMENT_RE: std::sync::LazyLock<regex_lib::Regex> =
-        std::sync::LazyLock::new(|| regex_lib::Regex::new(r"^(renovate|pyup):").expect("valid regex"));
+        std::sync::LazyLock::new(|| {
+            regex_lib::Regex::new(r"^(renovate|pyup):").expect("valid regex")
+        });
 
     if !SKIP_COMMENT_RE.is_match(comment) {
         return false;
@@ -4208,6 +4278,30 @@ pub fn strip_templates(content: &str) -> String {
     result
 }
 
+// ---------------------------------------------------------------------------
+// Object — lib/util/object.ts
+// ---------------------------------------------------------------------------
+
+/// Return whether the key exists on the provided map value.
+///
+/// Mirrors `hasKey` from `lib/util/object.ts`.
+/// @parity lib/util/object.ts full
+pub fn has_key<K, Q, V>(key: &Q, object: &HashMap<K, V>) -> bool
+where
+    K: std::hash::Hash + Eq + Borrow<Q>,
+    Q: std::hash::Hash + Eq + ?Sized,
+{
+    object.contains_key(key)
+}
+
+/// Coerce a value to an object-like value.
+///
+/// Mirrors `coerceObject` from `lib/util/object.ts`:
+/// `coerceObject(val, def) = val ?? def ?? {}`.
+pub fn coerce_object<T: Default>(value: Option<T>, default: Option<T>) -> T {
+    value.or(default).unwrap_or_default()
+}
+
 fn find_bytes(haystack: &[u8], needle: &[u8], start: usize) -> Option<usize> {
     let n = needle.len();
     if n == 0 {
@@ -4276,7 +4370,6 @@ pub fn memoize<T: Clone, F: FnOnce() -> T>(f: F) -> impl FnMut() -> T {
         val
     }
 }
-
 
 // ---------------------------------------------------------------------------
 // Uniq — lib/util/uniq.ts
@@ -4409,23 +4502,44 @@ pub fn sample_size(array: Option<&[String]>, n: Option<usize>) -> Vec<String> {
 /// - The global value when inherited is `None`.
 ///
 /// Mirrors `getInheritedOrGlobal()` from `lib/util/common.ts`.
-pub fn get_inherited_or_global<T: PartialOrd + Copy>(
-    inherited: Option<T>,
+#[derive(Clone, Debug, PartialEq)]
+pub enum InheritedState<T> {
+    /// The key was not present in inherited config.
+    NotPresent,
+    /// The key was explicitly inherited.
+    Present(T),
+    /// The key was explicitly set to `null` in inherited config.
+    Null,
+}
+
+impl<T> From<Option<T>> for InheritedState<T> {
+    fn from(value: Option<T>) -> Self {
+        match value {
+            Some(v) => Self::Present(v),
+            None => Self::NotPresent,
+        }
+    }
+}
+
+pub fn get_inherited_or_global<T, I>(
+    inherited: I,
     global: Option<T>,
     is_onboarding_auto_close_age: bool,
-) -> Option<T> {
-    match inherited {
-        Some(inh) => {
+) -> Option<T>
+where
+    T: PartialOrd + Clone,
+    I: Into<InheritedState<T>>,
+{
+    match inherited.into() {
+        InheritedState::Present(inh) => {
             // For onboardingAutoCloseAge, do not let inherited exceed global
-            if is_onboarding_auto_close_age
-                && let Some(glob) = global
-                && glob < inh
-            {
-                return Some(glob);
+            if is_onboarding_auto_close_age && let Some(ref glob) = global && glob < &inh {
+                return Some(glob.clone());
             }
             Some(inh)
         }
-        None => global,
+        InheritedState::Null => None,
+        InheritedState::NotPresent => global,
     }
 }
 
@@ -5344,9 +5458,7 @@ pub fn prepare_error(error: &serde_json::Value) -> serde_json::Value {
             if let Some(serde_json::Value::Array(errors)) = map.get("errors") {
                 prepared.insert(
                     "errors".to_owned(),
-                    serde_json::Value::Array(
-                        errors.iter().map(prepare_error).collect::<Vec<_>>(),
-                    ),
+                    serde_json::Value::Array(errors.iter().map(prepare_error).collect::<Vec<_>>()),
                 );
             }
 
@@ -5396,9 +5508,16 @@ pub fn prepare_error(error: &serde_json::Value) -> serde_json::Value {
                 if let Some(http2) = options_obj.get("http2") {
                     options.insert("http2".to_owned(), http2.clone());
                 }
-                if let Some(response) = error.get("response").and_then(serde_json::Value::as_object) {
+                if let Some(response) = error.get("response").and_then(serde_json::Value::as_object)
+                {
                     let mut response_output = serde_json::Map::new();
-                    for key in ["statusCode", "statusMessage", "headers", "httpVersion", "retryCount"] {
+                    for key in [
+                        "statusCode",
+                        "statusMessage",
+                        "headers",
+                        "httpVersion",
+                        "retryCount",
+                    ] {
                         if let Some(value) = response.get(key) {
                             response_output.insert((*key).to_owned(), value.clone());
                         }
@@ -5417,7 +5536,10 @@ pub fn prepare_error(error: &serde_json::Value) -> serde_json::Value {
                 }
                 prepared.insert("options".to_owned(), serde_json::Value::Object(options));
             } else if let Some(serde_json::Value::Object(options_obj)) = map.get("options") {
-                if let Some(env) = options_obj.get("env").and_then(serde_json::Value::as_object) {
+                if let Some(env) = options_obj
+                    .get("env")
+                    .and_then(serde_json::Value::as_object)
+                {
                     let mut env_keys: Vec<serde_json::Value> = env
                         .keys()
                         .map(|name| serde_json::Value::String(name.clone()))
@@ -5425,7 +5547,10 @@ pub fn prepare_error(error: &serde_json::Value) -> serde_json::Value {
                     env_keys.sort_by(|a, b| a.as_str().cmp(&b.as_str()));
                     let mut updated_options = options_obj.clone();
                     updated_options.insert("env".to_owned(), serde_json::Value::Array(env_keys));
-                    prepared.insert("options".to_owned(), serde_json::Value::Object(updated_options));
+                    prepared.insert(
+                        "options".to_owned(),
+                        serde_json::Value::Object(updated_options),
+                    );
                 }
             }
 
@@ -5465,7 +5590,9 @@ pub fn prepare_zod_issues(input: &serde_json::Value) -> serde_json::Value {
             if list.is_empty() {
                 serde_json::Value::Null
             } else if list.len() == 1 {
-                list.first().and_then(|v| v.as_str().map(|s| serde_json::Value::String(s.to_owned()))).unwrap_or(serde_json::Value::Null)
+                list.first()
+                    .and_then(|v| v.as_str().map(|s| serde_json::Value::String(s.to_owned())))
+                    .unwrap_or(serde_json::Value::Null)
             } else {
                 serde_json::Value::Array(
                     list.iter()
@@ -5493,14 +5620,19 @@ pub fn prepare_zod_issues(input: &serde_json::Value) -> serde_json::Value {
         }
     }
     if entries.len() > 3 {
-        output.insert("___".to_owned(), serde_json::Value::String(format!("... {} more", entries.len() - 3)));
+        output.insert(
+            "___".to_owned(),
+            serde_json::Value::String(format!("... {} more", entries.len() - 3)),
+        );
     }
-    if output.is_empty() { err } else { serde_json::Value::Object(output) }
+    if output.is_empty() {
+        err
+    } else {
+        serde_json::Value::Object(output)
+    }
 }
 
-fn boxed_string_from_object(
-    map: &serde_json::Map<String, serde_json::Value>,
-) -> Option<String> {
+fn boxed_string_from_object(map: &serde_json::Map<String, serde_json::Value>) -> Option<String> {
     let mut chars: Vec<(usize, String)> = Vec::with_capacity(map.len());
     for (key, value) in map {
         if key == "length" {
@@ -5547,7 +5679,10 @@ pub fn prepare_zod_error(error: &serde_json::Value) -> serde_json::Value {
         serde_json::Value::String("Schema error".to_owned()),
     );
     if let Some(stack) = error.get("stack").and_then(|s| s.as_str()) {
-        output.insert("stack".to_owned(), serde_json::Value::String(stack.to_owned()));
+        output.insert(
+            "stack".to_owned(),
+            serde_json::Value::String(stack.to_owned()),
+        );
     }
     let issues = error
         .get("format")
@@ -6165,47 +6300,27 @@ mod tests {
 
     // Ported: "finds key in regular object" — lib/util/object.spec.ts line 4
     // Ported: "detects missing key in regular object" — lib/util/object.spec.ts line 8
-    #[test]
-    fn test_has_key() {
-        use std::collections::HashMap;
-        let obj: HashMap<&str, bool> = [("foo", true)].into_iter().collect();
-        assert!(obj.contains_key("foo"));
-        let obj2: HashMap<&str, bool> = [("bar", true)].into_iter().collect();
-        assert!(!obj2.contains_key("foo"));
-    }
-
-    // Ported: "returns false for wrong instance type" — lib/util/object.spec.ts line 12
-    #[test]
-    fn test_has_key_wrong_instance_type() {
-        use serde_json::Value;
-
-        let value = Value::String("not-an-object".to_string());
-        assert!(!value.as_object().is_some_and(|obj| obj.contains_key("foo")));
-    }
-
     // Ported: "should return empty object" — lib/util/object.spec.ts line 17
     // Ported: "should return input object" — lib/util/object.spec.ts line 22
     #[test]
-    #[allow(clippy::unnecessary_literal_unwrap)]
-    fn test_coerce_object() {
-        use std::collections::HashMap;
-        // coerceObject(undefined) / coerceObject(null) → {} (empty map)
-        let none_val: Option<HashMap<&str, &str>> = None;
-        assert_eq!(none_val.unwrap_or_default(), HashMap::new());
-        // coerceObject({}) → {}
-        let empty: Option<HashMap<&str, &str>> = Some(HashMap::new());
-        assert_eq!(empty.unwrap_or_default(), HashMap::new());
-        // coerceObject({ name: 'name' }) → { name: 'name' }
-        let with_val: Option<HashMap<&str, &str>> = Some([("name", "name")].into_iter().collect());
+    fn test_object_utils() {
+        let obj: HashMap<&str, bool> = [("foo", true)].into_iter().collect();
+        assert!(has_key("foo", &obj));
+        let obj2: HashMap<&str, bool> = [("bar", true)].into_iter().collect();
+        assert!(!has_key("foo", &obj2));
+
         assert_eq!(
-            with_val.unwrap_or_default(),
-            [("name", "name")].into_iter().collect::<HashMap<_, _>>()
+            coerce_object::<HashMap<&str, &str>>(None, None),
+            HashMap::new()
         );
-        // coerceObject(undefined, { name: 'name' }) → { name: 'name' }
-        let none_with_default: Option<HashMap<&str, &str>> = None;
+        let with_val = Some([("name", "name")].into_iter().collect::<HashMap<&str, &str>>());
+        assert_eq!(coerce_object(with_val, None), [("name", "name")].into_iter().collect());
         assert_eq!(
-            none_with_default.unwrap_or_else(|| [("name", "name")].into_iter().collect()),
-            [("name", "name")].into_iter().collect::<HashMap<_, _>>()
+            coerce_object(
+                None,
+                Some([("name", "name")].into_iter().collect::<HashMap<&str, &str>>())
+            ),
+            [("name", "name")].into_iter().collect()
         );
     }
 
@@ -6413,7 +6528,10 @@ mod tests {
         assert_eq!(result["name"], "HTTPError");
         assert_eq!(result["options"]["method"], "POST");
         assert_eq!(result["options"]["password"], "***********");
-        assert_eq!(result["options"]["url"], "https://**redacted**@github.com/api");
+        assert_eq!(
+            result["options"]["url"],
+            "https://**redacted**@github.com/api"
+        );
         assert_eq!(result["options"]["username"], "");
     }
 
@@ -6620,9 +6738,13 @@ mod tests {
             "2": "!",
             "length": 3,
         });
-        assert_eq!(sanitize_value(&input), serde_json::Value::String("hi!".to_owned()));
+        assert_eq!(
+            sanitize_value(&input),
+            serde_json::Value::String("hi!".to_owned())
+        );
     }
 
+    // Ported: "prepareError" — lib/logger/utils.spec.ts line 178
     #[test]
     fn test_prepare_error() {
         use serde_json::json;
@@ -7540,6 +7662,159 @@ mod tests {
         tracker.once("key1", || count += 1);
         tracker.reset();
         tracker.once("key1", || count += 1);
+        assert_eq!(count, 2);
+    }
+
+    // Ported: "logs once per function call" — lib/logger/once.spec.ts line 60
+    #[test]
+    fn test_once_tracker_log_once_per_callsite() {
+        let mut tracker = OnceTracker::new();
+        let mut count = 0;
+
+        fn do_something(t: &mut OnceTracker, count: &mut i32) {
+            t.once_with_level("debug", &[serde_json::json!("test")], || *count += 1);
+        }
+
+        do_something(&mut tracker, &mut count);
+        do_something(&mut tracker, &mut count);
+        do_something(&mut tracker, &mut count);
+
+        assert_eq!(count, 1);
+    }
+
+    // Ported: "distincts between log levels" — lib/logger/once.spec.ts line 73
+    #[test]
+    fn test_once_tracker_distinct_log_levels() {
+        let mut tracker = OnceTracker::new();
+        let mut debug_count = 0;
+        let mut info_count = 0;
+
+        fn do_something(t: &mut OnceTracker, debug_count: &mut i32, info_count: &mut i32) {
+            t.once_with_level("debug", &[serde_json::json!("test")], || *debug_count += 1);
+            t.once_with_level("info", &[serde_json::json!("test")], || *info_count += 1);
+        }
+
+        do_something(&mut tracker, &mut debug_count, &mut info_count);
+        do_something(&mut tracker, &mut debug_count, &mut info_count);
+        do_something(&mut tracker, &mut debug_count, &mut info_count);
+
+        assert_eq!(debug_count, 1);
+        assert_eq!(info_count, 1);
+    }
+
+    // Ported: "distincts between different log statements" — lib/logger/once.spec.ts line 89
+    #[test]
+    fn test_once_tracker_distinct_log_statements() {
+        let mut tracker = OnceTracker::new();
+        let mut calls: Vec<String> = Vec::new();
+
+        fn do_something(t: &mut OnceTracker, calls: &mut Vec<String>) {
+            t.once_with_level("debug", &[serde_json::json!("foo")], || {
+                calls.push("foo".to_owned())
+            });
+            t.once_with_level("debug", &[serde_json::json!("bar")], || {
+                calls.push("bar".to_owned())
+            });
+            t.once_with_level("debug", &[serde_json::json!("baz")], || {
+                calls.push("baz".to_owned())
+            });
+        }
+
+        do_something(&mut tracker, &mut calls);
+        do_something(&mut tracker, &mut calls);
+        do_something(&mut tracker, &mut calls);
+
+        assert_eq!(calls, vec!["foo", "bar", "baz"]);
+    }
+
+    // Ported: "parameters are taken into account when de-duplicating calls" — lib/logger/once.spec.ts line 106
+    #[test]
+    fn test_once_tracker_distinct_parameters() {
+        let mut tracker = OnceTracker::new();
+        let mut calls: Vec<(serde_json::Value, Option<serde_json::Value>)> = Vec::new();
+
+        fn do_something(
+            t: &mut OnceTracker,
+            calls: &mut Vec<(serde_json::Value, Option<serde_json::Value>)>,
+            s: &str,
+        ) {
+            t.once_with_level(
+                "debug",
+                &[serde_json::json!({"param": s}), serde_json::json!(s)],
+                || {
+                    calls.push((serde_json::json!({"param": s}), Some(serde_json::json!(s))));
+                },
+            );
+            t.once_with_level("debug", &[serde_json::json!(s)], || {
+                calls.push((serde_json::json!(s), None));
+            });
+        }
+
+        do_something(&mut tracker, &mut calls, "foo");
+        do_something(&mut tracker, &mut calls, "bar");
+        do_something(&mut tracker, &mut calls, "bar");
+
+        assert_eq!(calls.len(), 4);
+        assert_eq!(
+            calls[0],
+            (
+                serde_json::json!({"param":"foo"}),
+                Some(serde_json::json!("foo"))
+            )
+        );
+        assert_eq!(calls[1], (serde_json::json!("foo"), None));
+        assert_eq!(
+            calls[2],
+            (
+                serde_json::json!({"param":"bar"}),
+                Some(serde_json::json!("bar"))
+            )
+        );
+        assert_eq!(calls[3], (serde_json::json!("bar"), None));
+    }
+
+    // Ported: "allows mixing single-time and regular logging" — lib/logger/once.spec.ts line 124
+    #[test]
+    fn test_once_tracker_mixes_once_and_regular_logging() {
+        let mut tracker = OnceTracker::new();
+        let mut calls: Vec<String> = Vec::new();
+
+        fn do_something(t: &mut OnceTracker, calls: &mut Vec<String>) {
+            t.once_with_level("debug", &[serde_json::json!("foo")], || {
+                calls.push("once foo".to_owned())
+            });
+            calls.push("bar".to_owned());
+            t.once_with_level(
+                "debug",
+                &[
+                    serde_json::json!({"some": "data"}),
+                    serde_json::json!("baz"),
+                ],
+                || calls.push("once baz".to_owned()),
+            );
+        }
+
+        do_something(&mut tracker, &mut calls);
+        do_something(&mut tracker, &mut calls);
+        do_something(&mut tracker, &mut calls);
+
+        assert_eq!(calls, vec!["once foo", "bar", "once baz", "bar", "bar"]);
+    }
+
+    // Ported: "supports reset method" — lib/logger/once.spec.ts line 146
+    #[test]
+    fn test_once_tracker_supports_reset() {
+        let mut tracker = OnceTracker::new();
+        let mut count = 0;
+
+        fn do_something(t: &mut OnceTracker, count: &mut i32) {
+            t.once_with_level("debug", &[serde_json::json!("foo")], || *count += 1);
+        }
+
+        do_something(&mut tracker, &mut count);
+        tracker.reset();
+        do_something(&mut tracker, &mut count);
+
         assert_eq!(count, 2);
     }
 
@@ -9840,6 +10115,21 @@ mod tests {
         assert_eq!(v["name"], "John Doe");
     }
 
+    // Ported: "returns parsed jsonc" — lib/util/common.spec.ts line 179
+    #[test]
+    fn test_parse_jsonc_returns_parsed_jsonc() {
+        let input = r#"{
+            // This is a comment
+            "name": "John Doe",
+            "age": 30,
+            "city": "New York"
+        }"#;
+        let v = parse_jsonc(input).unwrap();
+        assert_eq!(v["name"], "John Doe");
+        assert_eq!(v["age"], 30);
+        assert_eq!(v["city"], "New York");
+    }
+
     // Ported: "throws error for invalid json" — lib/util/common.spec.ts line 149
     #[test]
     fn test_parse_json_invalid() {
@@ -9870,6 +10160,19 @@ mod tests {
         let input = r#"{name: 'Bob', age: 35, city: 'San Francisco', isMarried: false}"#;
         let (_, needs_warning) = parse_json_with_fallback(input, "renovate.json5").unwrap();
         assert!(!needs_warning);
+    }
+
+    // Ported: "throws error for invalid jsonc" — lib/util/common.spec.ts line 187
+    #[test]
+    fn test_parse_jsonc_invalid_jsonc() {
+        let input = r#"{
+            "name": "Alice",
+            "age": 25,
+            "city": "Los Angeles",
+            "hobbies": ["Reading", "Running", "Cooking"]
+            "isStudent": true
+        }"#;
+        assert!(parse_jsonc(input).is_err());
     }
 
     // -----------------------------------------------------------------------
@@ -10768,6 +11071,25 @@ dep1 = "^1.0.0"
         assert_eq!(result, Some(42));
     }
 
+    // Ported: "handles null inherited values" — lib/util/common.spec.ts line 227
+    #[test]
+    fn get_inherited_or_global_null_inherited_values() {
+        let result: Option<Vec<String>> = get_inherited_or_global(
+            InheritedState::Null,
+            Some(vec!["global".to_owned()]),
+            false,
+        );
+        assert_eq!(result, None);
+    }
+
+    // Ported: "handles undefined inherited values" — lib/util/common.spec.ts line 238
+    #[test]
+    fn get_inherited_or_global_undefined_inherited_values() {
+        let result: Option<Vec<String>> =
+            get_inherited_or_global(None, Some(vec!["global".to_owned()]), false);
+        assert_eq!(result, Some(vec!["global".to_owned()]));
+    }
+
     // Ported: "returns global value if only global value is set" — lib/util/common.spec.ts line 209
     #[test]
     fn get_inherited_or_global_returns_global_when_only_global() {
@@ -11287,6 +11609,48 @@ dep1 = "^1.0.0"
         // No ANSI escape codes
         assert!(!result.contains("\x1b["));
         assert!(result.starts_with("TRACE: test message"));
+    }
+
+    struct StreamSpy {
+        data: Vec<u8>,
+        calls: usize,
+    }
+
+    impl StreamSpy {
+        fn new() -> Self {
+            Self {
+                data: Vec::new(),
+                calls: 0,
+            }
+        }
+    }
+
+    impl std::io::Write for StreamSpy {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            self.calls += 1;
+            self.data.extend_from_slice(buf);
+            Ok(buf.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    // Ported: "writes formatted data to stdout" — lib/logger/pretty-stdout.spec.ts line 175
+    #[test]
+    fn test_pretty_stdout_stream_writes_data() {
+        let rec = serde_json::json!({
+            "level": 10,
+            "msg": "test message",
+            "v": 0
+        });
+        let mut spy = StreamSpy::new();
+        write_pretty_record(&rec, &mut spy).expect("write should succeed");
+
+        assert_eq!(spy.calls, 1);
+        let output = String::from_utf8_lossy(&spy.data);
+        assert!(output.contains("test message"));
     }
 
     // ── as_raw_commands ──────────────────────────────────────────────────────
