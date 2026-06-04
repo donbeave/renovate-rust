@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 54/94 in-scope files mapped (full=54 partial=0 stub=0 pending=40 out-of-scope=0 opt-out=2) across 54 modules.
+**Coverage:** 55/94 in-scope files mapped (full=55 partial=0 stub=0 pending=39 out-of-scope=0 opt-out=2) across 54 modules.
 
 ### `versioning/_root`
 
@@ -12,7 +12,7 @@
 | `lib/modules/versioning/common.ts` | full | [`crates/renovate-core/src/versioning/hashicorp.rs`](../../../crates/renovate-core/src/versioning/hashicorp.rs) | — |
 | `lib/modules/versioning/distro.ts` | full | [`crates/renovate-core/src/versioning/ubuntu.rs`](../../../crates/renovate-core/src/versioning/ubuntu.rs) | — |
 | `lib/modules/versioning/generic.ts` | full | [`crates/renovate-core/src/versioning/regex_versioning.rs`](../../../crates/renovate-core/src/versioning/regex_versioning.rs) | — |
-| `lib/modules/versioning/index.ts` | pending | — | — |
+| `lib/modules/versioning/index.ts` | full | [`crates/renovate-core/src/versioning.rs`](../../../crates/renovate-core/src/versioning.rs) | — |
 | `lib/modules/versioning/schema.ts` | full | [`crates/renovate-core/src/versioning.rs`](../../../crates/renovate-core/src/versioning.rs) | — |
 | `lib/modules/versioning/types.ts` | opt-out | — | Type-only declarations and interfaces without a Rust runtime analogue |
 
@@ -369,3 +369,4 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/modules/versioning/unity3d-packages/index.ts` | full | [`crates/renovate-core/src/versioning/unity3d_packages.rs`](../../../crates/renovate-core/src/versioning/unity3d_packages.rs) | — |
+

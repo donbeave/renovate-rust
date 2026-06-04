@@ -3,6 +3,8 @@
 //! Each sub-module handles a specific versioning scheme's constraint syntax
 //! and update planning. The Cargo module is first; others will follow.
 //! @parity lib/modules/versioning/api.ts full
+//! @parity lib/modules/versioning/schema.ts full
+//! @parity lib/modules/versioning/index.ts full
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Versioning registry — lib/modules/versioning/index.ts
@@ -98,6 +100,71 @@ pub fn get_versioning_id(versioning: Option<&str>) -> &'static str {
     }
 }
 
+/// Representation of a parsed versioning scheme spec.
+///
+/// Mirrors `Versioning.parse(...)` from `lib/modules/versioning/schema.ts`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum VersioningSelection {
+    /// A known scheme selected by name without any constructor config.
+    Default { id: &'static str },
+    /// A scheme initialized with constructor config.
+    Constructed {
+        id: &'static str,
+        config: Option<String>,
+    },
+}
+
+impl VersioningSelection {
+    pub fn id(&self) -> &'static str {
+        match self {
+            Self::Default { id } => id,
+            Self::Constructed { id, .. } => id,
+        }
+    }
+}
+
+/// Parse a versioning spec into its resolved selection.
+///
+/// Mirrors `Versioning.parse(...)` from `lib/modules/versioning/schema.ts`.
+pub fn parse_versioning(spec: &str) -> Result<VersioningSelection, String> {
+    if spec.is_empty() {
+        return Ok(VersioningSelection::Default {
+            id: DEFAULT_VERSIONING,
+        });
+    }
+
+    let (name, raw_config) = match spec.split_once(':') {
+        Some((name, config)) => (name, Some(config)),
+        None => (spec, None),
+    };
+
+    let Some(versioning_id) = ALL_VERSIONING_IDS.iter().copied().find(|id| *id == name) else {
+        return Ok(VersioningSelection::Default {
+            id: DEFAULT_VERSIONING,
+        });
+    };
+
+    if name == "regex" {
+        let input = match raw_config {
+            Some(config) => format!("regex:{config}"),
+            None => "regex".to_string(),
+        };
+        crate::versioning::regex_versioning::RegexVersioning::from_config(&input)
+            .map_err(|err| format!("invalid regex config: {err}"))?;
+        return Ok(VersioningSelection::Constructed {
+            id: versioning_id,
+            config: raw_config.filter(|v| !v.is_empty()).map(str::to_owned),
+        });
+    }
+
+    Ok(VersioningSelection::Constructed {
+        id: versioning_id,
+        config: raw_config
+            .filter(|value| !value.is_empty())
+            .map(str::to_owned),
+    })
+}
+
 pub mod apk;
 pub mod aws_eks_addon;
 pub mod aws_machine_image;
@@ -188,6 +255,36 @@ mod tests {
         // "semver:test" → strips ":test" → "semver" which is valid
         let result = get_versioning_id(Some("semver:test"));
         assert_eq!(result, "semver");
+    }
+
+    // Ported: "returns existing version scheme" — lib/modules/versioning/schema.spec.ts line 5
+    #[test]
+    fn versioning_schema_parse() {
+        let versioning1 = parse_versioning("hermit").expect("hermit is supported");
+        let versioning2 =
+            parse_versioning("hermit:foobar").expect("hermit supports constructor config");
+
+        assert_ne!(versioning1, versioning2);
+        assert_eq!(versioning1.id(), "hermit");
+        assert_eq!(versioning2.id(), "hermit");
+
+        let fallback = parse_versioning("foobarbaz").expect("unknown scheme falls back");
+        assert_eq!(
+            fallback,
+            VersioningSelection::Default {
+                id: "semver-coerced"
+            }
+        );
+
+        let fallback_empty = parse_versioning("").expect("empty input falls back");
+        assert_eq!(
+            fallback_empty,
+            VersioningSelection::Default {
+                id: "semver-coerced"
+            }
+        );
+
+        assert!(parse_versioning("regex:foobar").is_err());
     }
 
     #[test]
