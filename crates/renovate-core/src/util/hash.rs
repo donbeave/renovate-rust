@@ -1,27 +1,87 @@
 //! Hash utilities — mirrors `lib/util/hash.ts`.
 
-use sha2::{Digest, Sha256, Sha512};
+/// @parity lib/util/hash.ts full
+
+use sha1::Digest as Sha1Digest;
+use sha1::Sha1;
+use sha2::{Digest, Sha224, Sha256, Sha384, Sha512};
+
+/// Compute a hex digest using the requested algorithm.
+///
+/// Mirrors `hash(data, algorithm)` from `lib/util/hash.ts`.
+///
+/// Defaults to SHA-512 when `algorithm` is not provided.
+pub fn hash(data: impl AsRef<[u8]>, algorithm: Option<&str>) -> String {
+    match algorithm.unwrap_or("sha512") {
+        "sha1" => {
+            let mut hasher = Sha1::new();
+            hasher.update(data.as_ref());
+            hasher.finalize().iter().map(|b| format!("{b:02x}")).collect()
+        }
+        "sha224" => {
+            let mut hasher = Sha224::new();
+            hasher.update(data.as_ref());
+            hasher
+                .finalize()
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect()
+        }
+        "sha256" => {
+            let mut hasher = Sha256::new();
+            hasher.update(data.as_ref());
+            hasher
+                .finalize()
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect()
+        }
+        "sha384" => {
+            let mut hasher = Sha384::new();
+            hasher.update(data.as_ref());
+            hasher
+                .finalize()
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect()
+        }
+        _ => {
+            let mut hasher = Sha512::new();
+            hasher.update(data.as_ref());
+            hasher
+                .finalize()
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect()
+        }
+    }
+}
+
+/// Return the SHA-256 hex digest.
+pub fn to_sha256(data: impl AsRef<[u8]>) -> String {
+    hash(data, Some("sha256"))
+}
+
+/// Compute SHA digest from a readable stream.
+pub async fn hash_stream(
+    mut input: impl tokio::io::AsyncRead + Unpin,
+    algorithm: Option<&str>,
+) -> Result<String, std::io::Error> {
+    use tokio::io::AsyncReadExt;
+
+    let mut bytes = Vec::new();
+    input.read_to_end(&mut bytes).await?;
+    Ok(hash(bytes, algorithm))
+}
 
 /// Compute SHA-256 hex digest of the input data.
 pub fn sha256(data: &[u8]) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(data);
-    let result = hasher.finalize();
-    hex::encode(result)
+    hash(data, Some("sha256"))
 }
 
 /// Compute SHA-512 hex digest of the input data.
 pub fn sha512(data: &[u8]) -> String {
-    let mut hasher = Sha512::new();
-    hasher.update(data);
-    let result = hasher.finalize();
-    hex::encode(result)
-}
-
-mod hex {
-    pub(crate) fn encode(bytes: impl AsRef<[u8]>) -> String {
-        bytes.as_ref().iter().map(|b| format!("{b:02x}")).collect()
-    }
+    hash(data, Some("sha512"))
 }
 
 #[cfg(test)]
@@ -87,6 +147,21 @@ mod tests {
         let result = sha512(b"test");
         assert_eq!(result, result.to_lowercase());
         assert_eq!(result.len(), 128);
+    }
+
+    // Ported: "hashes data with sha256" — lib/util/hash.spec.ts line 6
+    #[tokio::test]
+    async fn test_hash_streams_and_to_sha256() {
+        use std::io::Cursor;
+        let content = b"This is some test content.";
+        let content_hash = hash(content, Some("sha256"));
+        let cursor = Cursor::new(content);
+        let stream_hash = hash_stream(cursor, Some("sha256"))
+            .await
+            .expect("hash_stream should return a hash");
+        assert_eq!(content_hash, stream_hash);
+        assert_eq!(to_sha256(content), content_hash);
+        assert_eq!(hash(content, None), hash(content, Some("sha512")));
     }
 
     #[test]

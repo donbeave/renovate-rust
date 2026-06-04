@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 8/175 in-scope files mapped (full=8 partial=0 stub=0 pending=167 out-of-scope=0 opt-out=0) across 13 modules.
+**Coverage:** 10/175 in-scope files mapped (full=10 partial=0 stub=0 pending=165 out-of-scope=0 opt-out=0) across 13 modules.
 
 ### `util/_root`
 
@@ -13,14 +13,14 @@
 | `lib/util/check-token.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/clone.ts` | full | [`crates/renovate-core/src/util/clone.rs`](../../../crates/renovate-core/src/util/clone.rs) | — |
 | `lib/util/coerce.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/common.ts` | pending | — | — |
+| `lib/util/common.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/compress.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/date.ts` | pending | — | — |
 | `lib/util/emoji.ts` | pending | — | — |
 | `lib/util/env.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/filter-map.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/fingerprint.ts` | pending | — | — |
-| `lib/util/hash.ts` | pending | — | — |
+| `lib/util/hash.ts` | full | [`crates/renovate-core/src/util/hash.rs`](../../../crates/renovate-core/src/util/hash.rs) | — |
 | `lib/util/host-rules.ts` | pending | — | — |
 | `lib/util/html.ts` | pending | — | — |
 | `lib/util/ignore.ts` | pending | — | — |
@@ -243,4 +243,3 @@
 |---|---|---|---|
 | `lib/util/vulnerability/ecosystem.ts` | pending | — | — |
 | `lib/util/vulnerability/utils.ts` | pending | — | — |
-
