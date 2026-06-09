@@ -308,6 +308,7 @@ mod tests {
     }
 
     // Ported: "works for default binarySource" — lib/modules/manager/bundler/artifacts.spec.ts line 123
+    // Ported: "works explicit global binarySource" — lib/modules/manager/bundler/artifacts.spec.ts line 149
     #[tokio::test]
     async fn returns_updated_file() {
         let dir = tempdir().unwrap();
