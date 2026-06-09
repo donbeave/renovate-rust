@@ -561,3 +561,8 @@ spec   = "lib/config/decrypt.spec.ts"
 test   = "throws exception if encrypted found but no privateKey- mend hosted"
 reason = "same as sibling 'throws exception if encrypted found but no privateKey' but with process.env.MEND_HOSTED=true + RENOVATE_X_ENCRYPTED_STRICT; MEND hosted special case + env + the decryptConfig throw path is runtime/TS-specific secret handling (high-level in CLI/config load); core value handling ported in decrypt; env/strict not unit exposed without unsafe or broad."
 
+[[test]]
+spec   = "lib/workers/repository/update/pr/labels.spec.ts"
+test   = "null labels ignored"
+reason = "TS array inputs to prepareLabels can contain null/undefined (cast as never, with comment on empty slots as null); the prepare_labels in util.rs takes &[&str] (no nulls possible), and empty string filtering is already ported via 'empty labels ignored' (L48). Pure TypeScript runtime null/undef array handling with no direct Rust Vec analogue or need."
+
