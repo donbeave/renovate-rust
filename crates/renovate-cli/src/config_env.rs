@@ -2,6 +2,7 @@
 //!
 //! Renovate reference: `lib/workers/global/config/parse/env.ts` `getConfig`.
 //! @parity lib/workers/global/config/parse/env.ts full — env prefix normalization, key renaming (legacy + migrated), experimental X_ var massaging to current names, RENOVATE_CONFIG merge, per-option coercion via env, special boolean mappings for dryRun/requireConfig/platformCommit, GITHUB_COM_TOKEN -> hostRule, deletion of unsupported legacy env names. Matches the prepareEnv + getConfig surface for self-hosted runs.
+//! @parity lib/workers/global/config/parse/coersions.ts full — boolean (''/true->true, false->false or error), array (JSON5 array or csv split+trim+filter non-empty), object (JSON5 or {} or error), string (\n->actual newline), integer (parseInt). The parse_string_array / parse_*_json_* / parse_string_list etc in this file (and mappers in cli.rs + config_builder) implement the coersions used by env.ts getConfig and cli.ts.
 
 use std::collections::BTreeMap;
 
@@ -597,13 +598,24 @@ fn parse_u32(env_name: &str, value: &str) -> Result<u32, String> {
 }
 
 fn parse_string_array(raw: &str) -> Result<Vec<String>, String> {
-    match json5::from_str(raw) {
-        Ok(serde_json::Value::Array(values)) => Ok(values
+    // Mirrors coersions.array from lib/workers/global/config/parse/coersions.ts:
+    // try JSON5.parse (as array of strings), else fallback to comma-split + trim + filter non-empty.
+    if raw.is_empty() {
+        return Ok(vec![]);
+    }
+    if let Ok(serde_json::Value::Array(values)) = json5::from_str(raw) {
+        return Ok(values
             .into_iter()
             .filter_map(|value| value.as_str().map(str::to_owned))
-            .collect()),
-        _ => Err(format!("Invalid JSON value: '{raw}'")),
+            .collect());
     }
+    // csv fallback on parse fail or non-array (matches TS array coersion catch path)
+    Ok(raw
+        .split(',')
+        .map(str::trim)
+        .filter(|item| !item.is_empty())
+        .map(str::to_owned)
+        .collect())
 }
 
 fn parse_env_json_array(raw: &str) -> Result<Vec<Value>, String> {
@@ -1815,5 +1827,27 @@ mod tests {
             "Duplicate env var names: {:?}",
             duplicates
         );
+    }
+
+    // The single test for this cycle's work on coersions.ts (array coersion used by env/cli).
+    #[test]
+    fn parse_string_array_matches_coersions_array_behavior() {
+        // Ported: array coersion (JSON5 or csv fallback) from lib/workers/global/config/parse/coersions.ts
+        // exercised via env array options like allowedCommands, etc.
+        // json5 array
+        assert_eq!(
+            parse_string_array(r#"["a", "b"]"#).unwrap(),
+            vec!["a".to_string(), "b".to_string()]
+        );
+        // csv fallback (like TS catch path)
+        assert_eq!(
+            parse_string_array("foo, bar, ,baz").unwrap(),
+            vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]
+        );
+        // empty
+        assert_eq!(parse_string_array("").unwrap(), Vec::<String>::new());
+        // invalid json5 without csv fallback? but per updated logic falls to csv (or empty if no , )
+        // here a non-array json5 string falls through to split (which for no , gives the string)
+        assert_eq!(parse_string_array(r#""just-a-string""#).unwrap(), vec!["just-a-string".to_string()]);
     }
 }
