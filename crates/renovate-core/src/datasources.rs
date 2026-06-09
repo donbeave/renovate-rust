@@ -1221,6 +1221,78 @@ mod registry_tests {
         );
     }
 
+    // Ported: "Should handle failed parsing of sourceUrls for other" — lib/modules/datasource/metadata.spec.ts line 274
+    #[test]
+    fn add_metadata_should_handle_failed_parsing_of_sourceurls_for_other() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "5.7.0".into(),
+                    release_timestamp: Some("2020-02-14T13:12:00.000Z".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "5.6.1".into(),
+                    release_timestamp: Some("2020-02-14T10:04:00.000Z".into()),
+                    ..Default::default()
+                },
+            ],
+            source_url: Some("https://nope-nope-nope".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "npm", "dropzone");
+        // For 'other' (non-gitlab) invalid host 'https://nope-nope-nope', no special parse/tree strip; sourceUrl kept (matches upstream snapshot expectation and general keep for non-parsable).
+        assert_eq!(dep.source_url.as_deref(), Some("https://nope-nope-nope"));
+    }
+
+    // Ported: "Should normalize releaseTimestamp" — lib/modules/datasource/metadata.spec.ts line 357
+    #[test]
+    fn add_metadata_should_normalize_releasetimestamp() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.1".into(),
+                    release_timestamp: Some("2000-01-01T12:34:56".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.2".into(),
+                    release_timestamp: Some("2000-01-02T12:34:56.000Z".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.3".into(),
+                    release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.4".into(),
+                    release_timestamp: Some("20000103150210".into()),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "foobar");
+        // Exercises massage_timestamps + normalize_timestamp (handles plain, .000Z, offset->UTC, compact yyyymmddhhmmss as in upstream it()).
+        assert_eq!(
+            dep.releases[0].release_timestamp.as_deref(),
+            Some("2000-01-01T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[1].release_timestamp.as_deref(),
+            Some("2000-01-02T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[2].release_timestamp.as_deref(),
+            Some("2000-01-03T12:34:56.000Z")
+        );
+        assert_eq!(
+            dep.releases[3].release_timestamp.as_deref(),
+            Some("2000-01-03T15:02:10.000Z")
+        );
+    }
+
     // Ported: "Should handle non-url" — lib/modules/datasource/metadata.spec.ts line 297
     #[test]
     fn add_metadata_should_handle_non_url() {

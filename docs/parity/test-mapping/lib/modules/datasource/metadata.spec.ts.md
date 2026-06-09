@@ -13,15 +13,15 @@
 | 134 | _(it.each / template — verify manually)_ | ? | — |
 | 158 | _(it.each / template — verify manually)_ | ? | — |
 | 180 | should not overwrite any existing sourcedirectory | ported | [`crates/renovate-core/src/datasources.rs:1051`](../../../../../../crates/renovate-core/src/datasources.rs#L1051) |
-| 197 | should massage github sourceurls | ported | [`crates/renovate-core/src/datasources.rs:1660`](../../../../../../crates/renovate-core/src/datasources.rs#L1660) |
+| 197 | should massage github sourceurls | ported | [`crates/renovate-core/src/datasources.rs:1659`](../../../../../../crates/renovate-core/src/datasources.rs#L1659) |
 | 228 | should handle parsing of sourceurls correctly for gitlab also | ported | [`crates/renovate-core/src/datasources.rs:1092`](../../../../../../crates/renovate-core/src/datasources.rs#L1092) |
 | 251 | should handle failed parsing of sourceurls for gitlab | ported | [`crates/renovate-core/src/datasources.rs:1203`](../../../../../../crates/renovate-core/src/datasources.rs#L1203) |
-| 274 | should handle failed parsing of sourceurls for other | ported | [`crates/renovate-core/src/datasources.rs:1237`](../../../../../../crates/renovate-core/src/datasources.rs#L1237) |
-| 297 | should handle non-url | ported | [`crates/renovate-core/src/datasources.rs:1224`](../../../../../../crates/renovate-core/src/datasources.rs#L1224) |
-| 319 | should handle parsing/converting of github sourceurls with http and www correctly | ported | [`crates/renovate-core/src/datasources.rs:1703`](../../../../../../crates/renovate-core/src/datasources.rs#L1703) |
+| 274 | should handle failed parsing of sourceurls for other | ported | [`crates/renovate-core/src/datasources.rs:1224`](../../../../../../crates/renovate-core/src/datasources.rs#L1224) |
+| 297 | should handle non-url | ported | [`crates/renovate-core/src/datasources.rs:1296`](../../../../../../crates/renovate-core/src/datasources.rs#L1296) |
+| 319 | should handle parsing/converting of github sourceurls with http and www correctly | ported | [`crates/renovate-core/src/datasources.rs:1702`](../../../../../../crates/renovate-core/src/datasources.rs#L1702) |
 | 331 | should move github homepage to sourceurl | ported | [`crates/renovate-core/src/datasources.rs:1072`](../../../../../../crates/renovate-core/src/datasources.rs#L1072) |
 | 345 | should handle parsing/converting of gitlab sourceurls with http and www correctly | ported | [`crates/renovate-core/src/datasources.rs:1118`](../../../../../../crates/renovate-core/src/datasources.rs#L1118) |
-| 357 | should normalize releasetimestamp | ported | [`crates/renovate-core/src/datasources.rs:1261`](../../../../../../crates/renovate-core/src/datasources.rs#L1261) |
+| 357 | should normalize releasetimestamp | ported | [`crates/renovate-core/src/datasources.rs:1248`](../../../../../../crates/renovate-core/src/datasources.rs#L1248) |
 | 385 | should return an empty string when massaging an invalid url | ported | [`crates/renovate-core/src/util.rs:12339`](../../../../../../crates/renovate-core/src/util.rs#L12339) |
 | 389 | _(it.each / template — verify manually)_ | ? | — |
 | 403 | _(it.each / template — verify manually)_ | ? | — |
@@ -34,8 +34,8 @@
 | 458 | should massage gitlab git url to valid https url | ported | [`crates/renovate-core/src/util.rs:12486`](../../../../../../crates/renovate-core/src/util.rs#L12486) |
 | 464 | should remove homepage when homepage and sourceurl are same | ported | [`crates/renovate-core/src/datasources.rs:1137`](../../../../../../crates/renovate-core/src/datasources.rs#L1137) |
 | 503 | should delete gitlab homepage if its same as sourceurl | ported | [`crates/renovate-core/src/datasources.rs:1170`](../../../../../../crates/renovate-core/src/datasources.rs#L1170) |
-| 542 | does not set homepage to sourceurl when undefined | ported | [`crates/renovate-core/src/datasources.rs:1310`](../../../../../../crates/renovate-core/src/datasources.rs#L1310) |
-| 580 | does not set homepage to sourceurl when not github or gitlab | ported | [`crates/renovate-core/src/datasources.rs:1328`](../../../../../../crates/renovate-core/src/datasources.rs#L1328) |
+| 542 | does not set homepage to sourceurl when undefined | ported | [`crates/renovate-core/src/datasources.rs:1309`](../../../../../../crates/renovate-core/src/datasources.rs#L1309) |
+| 580 | does not set homepage to sourceurl when not github or gitlab | ported | [`crates/renovate-core/src/datasources.rs:1327`](../../../../../../crates/renovate-core/src/datasources.rs#L1327) |
 | 618 | _(it.each / template — verify manually)_ | ? | — |
-| 638 | should handle dep with no releases | ported | [`crates/renovate-core/src/datasources.rs:1343`](../../../../../../crates/renovate-core/src/datasources.rs#L1343) |
+| 638 | should handle dep with no releases | ported | [`crates/renovate-core/src/datasources.rs:1342`](../../../../../../crates/renovate-core/src/datasources.rs#L1342) |
 

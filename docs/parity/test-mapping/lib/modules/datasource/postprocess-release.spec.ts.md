@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 27 | returns original release for empty datasource field | ported | [`crates/renovate-core/src/datasources.rs:1957`](../../../../../../crates/renovate-core/src/datasources.rs#L1957) |
-| 36 | returns original release for missing datasource | ported | [`crates/renovate-core/src/datasources.rs:1969`](../../../../../../crates/renovate-core/src/datasources.rs#L1969) |
-| 48 | returns original release for datasource with missing `postprocessrelease` method | ported | [`crates/renovate-core/src/datasources.rs:1981`](../../../../../../crates/renovate-core/src/datasources.rs#L1981) |
-| 60 | returns original release for datasource with missing `packagename` field | ported | [`crates/renovate-core/src/datasources.rs:1993`](../../../../../../crates/renovate-core/src/datasources.rs#L1993) |
-| 81 | updates release via `postprocessrelease` method | ported | [`crates/renovate-core/src/datasources.rs:2005`](../../../../../../crates/renovate-core/src/datasources.rs#L2005) |
-| 110 | rejects release via `postprocessrelease` method | ported | [`crates/renovate-core/src/datasources.rs:2020`](../../../../../../crates/renovate-core/src/datasources.rs#L2020) |
-| 131 | falls back when error was thrown | ported | [`crates/renovate-core/src/datasources.rs:2031`](../../../../../../crates/renovate-core/src/datasources.rs#L2031) |
+| 27 | returns original release for empty datasource field | ported | [`crates/renovate-core/src/datasources.rs:1956`](../../../../../../crates/renovate-core/src/datasources.rs#L1956) |
+| 36 | returns original release for missing datasource | ported | [`crates/renovate-core/src/datasources.rs:1968`](../../../../../../crates/renovate-core/src/datasources.rs#L1968) |
+| 48 | returns original release for datasource with missing `postprocessrelease` method | ported | [`crates/renovate-core/src/datasources.rs:1980`](../../../../../../crates/renovate-core/src/datasources.rs#L1980) |
+| 60 | returns original release for datasource with missing `packagename` field | ported | [`crates/renovate-core/src/datasources.rs:1992`](../../../../../../crates/renovate-core/src/datasources.rs#L1992) |
+| 81 | updates release via `postprocessrelease` method | ported | [`crates/renovate-core/src/datasources.rs:2004`](../../../../../../crates/renovate-core/src/datasources.rs#L2004) |
+| 110 | rejects release via `postprocessrelease` method | ported | [`crates/renovate-core/src/datasources.rs:2019`](../../../../../../crates/renovate-core/src/datasources.rs#L2019) |
+| 131 | falls back when error was thrown | ported | [`crates/renovate-core/src/datasources.rs:2030`](../../../../../../crates/renovate-core/src/datasources.rs#L2030) |
 

@@ -10,7 +10,7 @@
 | [`lib/modules/datasource/datasource.spec.ts`](../../lib/modules/datasource/datasource.spec.ts.md) | 2 | 0 | 2 | 0 | — | pending |
 | [`lib/modules/datasource/index.spec.ts`](../../lib/modules/datasource/index.spec.ts.md) | 44 | 0 | 44 | 0 | — | pending |
 | [`lib/modules/datasource/metadata.spec.ts`](../../lib/modules/datasource/metadata.spec.ts.md) | 32 | 29 | 3 | 0 | [`crates/renovate-core/src/datasources.rs:959`](../../../../../crates/renovate-core/src/datasources.rs#L959)<br>[`crates/renovate-core/src/util.rs:12339`](../../../../../crates/renovate-core/src/util.rs#L12339) | partial |
-| [`lib/modules/datasource/postprocess-release.spec.ts`](../../lib/modules/datasource/postprocess-release.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/datasources.rs:1957`](../../../../../crates/renovate-core/src/datasources.rs#L1957) | ported |
+| [`lib/modules/datasource/postprocess-release.spec.ts`](../../lib/modules/datasource/postprocess-release.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/datasources.rs:1956`](../../../../../crates/renovate-core/src/datasources.rs#L1956) | ported |
 | [`lib/modules/datasource/span-processor.spec.ts`](../../lib/modules/datasource/span-processor.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
 | [`lib/modules/datasource/utils.spec.ts`](../../lib/modules/datasource/utils.spec.ts.md) | 6 | 2 | 4 | 0 | [`crates/renovate-core/src/util.rs:9527`](../../../../../crates/renovate-core/src/util.rs#L9527) | partial |
 
