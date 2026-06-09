@@ -11,6 +11,7 @@
 //!
 //! @parity lib/workers/repository/config-migration/branch/index.ts partial — checkConfigMigrationBranch orchestrator (checkbox state, PR/branch existence via platform, closed PR handling, create vs rebase decision, return migrationBranch); uses the ConfigMigrationCommitMessageFactory and helpers from here (full worker orchestration noted as pending in siblings).
 //! @parity lib/workers/repository/config-migration/common.ts full — getMigrationBranchName (the template for the migrate-config branch name used by create, rebase, pr, index etc.).
+//! @parity `lib/workers/repository/onboarding/pr/base-branch.ts` full — getBaseBranchDesc (0/1/>1 baseBranchPatterns description strings for onboarding PR body; strings + logic match the TS exactly; all covering it() ported in this file's tests).
 
 use std::sync::LazyLock;
 
