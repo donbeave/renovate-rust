@@ -1733,6 +1733,18 @@ mod tests {
         assert!(!rule.current_version_matches("aaaaaa", None, Some("bbbbbb")));
     }
 
+    // Ported: "return false on version exception" — lib/util/package-rules/current-version.spec.ts line 22
+    #[test]
+    fn current_version_matcher_returns_false_on_version_exception() {
+        // Bad/invalid version string for the chosen versioning (pep440 in upstream) causes the versioning
+        // validation to "throw" (error path in is_valid / parse). The matcher must catch and return false
+        // (no match) rather than propagating — robustness for package rules with bad currentValue.
+        let rule = rule_with_current_version("1.2.3");
+
+        // The invalid currentValue should be treated as no match (graceful false).
+        assert!(!rule.current_version_matches("===>1.2.3", Some("pep440"), None));
+    }
+
     // Ported: "case insensitive match" — lib/util/package-rules/current-version.spec.ts line 66
     #[test]
     fn current_version_matcher_regex_is_case_insensitive() {
