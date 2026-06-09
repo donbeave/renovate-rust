@@ -2740,7 +2740,7 @@ pub struct BunyanRecord<'a> {
     pub module: Option<&'a str>,
 }
 
-impl<'a> BunyanRecord<'a> {
+impl BunyanRecord<'_> {
     fn meta_pairs(&self) -> Vec<String> {
         let mut pairs = Vec::new();
         macro_rules! push_if {
@@ -7469,8 +7469,9 @@ mod tests {
             .unwrap();
         assert_eq!(crate_long.0, Some("hit"));
         let npm_long = long
-            .get("npm")
-            .unwrap()
+            .as_ref()
+            .and_then(|m| m.get("npm"))
+            .expect("fixture")
             .get("https://baz.example.com")
             .unwrap()
             .get("baz")
@@ -7500,6 +7501,7 @@ mod tests {
 
         let npm_long = long
             .get("npm")
+            .unwrap()
             .get("https://bar.example.com")
             .unwrap()
             .get("pkg")
