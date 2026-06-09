@@ -5,13 +5,13 @@ Status lives in `@parity` tags in the Rust source; exclusions in `docs/parity/op
 
 Status: `full` · `partial` · `stub` · `pending` (no tag) · `out-of-scope` (tag) · `opt-out` (registry — will never be ported, with a reason).
 
-**Coverage:** 7/1498 in-scope files mapped (full=2 partial=5 stub=0 pending=1491 out-of-scope=0 opt-out=16). Total upstream files: 1514.
+**Coverage:** 8/1498 in-scope files mapped (full=2 partial=6 stub=0 pending=1490 out-of-scope=0 opt-out=16). Total upstream files: 1514.
 
 ## By group
 
 | Group | Files | full | partial | stub | pending | oos | opt-out |
 |---|--:|--:|--:|--:|--:|--:|--:|
-| [cli](cli.md) | 160 | 2 | 5 | 0 | 143 | 0 | 10 |
+| [cli](cli.md) | 160 | 2 | 6 | 0 | 142 | 0 | 10 |
 | [config](config.md) | 117 | 0 | 0 | 0 | 117 | 0 | 0 |
 | [datasources](datasources.md) | 227 | 0 | 0 | 0 | 227 | 0 | 0 |
 | [infra](infra.md) | 36 | 0 | 0 | 0 | 36 | 0 | 0 |

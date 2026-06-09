@@ -1,0 +1,24 @@
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-print-in-tests = true
+allow-unwrap-in-tests = true
+disallowed-methods = [
+    { path = "std::process::Command::output", reason = "blocking subprocess output must not run on render/runtime threads; use async process helpers or spawn_blocking" },
+    { path = "std::process::Command::spawn", reason = "blocking process spawn must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::process::Command::status", reason = "blocking process status must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::thread::sleep", reason = "blocking sleep must not run on render/runtime threads; use async sleep, polling hooks, or an owned OS thread" },
+    { path = "std::thread::spawn", reason = "prefer tokio::task::spawn_blocking or async-aware thread pools for CPU/IO blocking work" },
+    { path = "std::fs::File::open", reason = "blocking filesystem opens must not run on render/runtime threads; use async file work or spawn_blocking" },
+    { path = "std::fs::OpenOptions::open", reason = "blocking filesystem opens must not run on render/runtime threads; use async file work or spawn_blocking" },
+    { path = "std::fs::read", reason = "blocking filesystem read must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::read_to_string", reason = "blocking filesystem read must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::write", reason = "blocking filesystem write must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::create_dir", reason = "blocking filesystem dir create must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::create_dir_all", reason = "blocking filesystem dir create must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::remove_file", reason = "blocking filesystem remove must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::copy", reason = "blocking filesystem copy must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::rename", reason = "blocking filesystem rename must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::fs::metadata", reason = "blocking filesystem metadata must not run on render/runtime threads; use async or spawn_blocking" },
+    { path = "std::env::set_var", reason = "global env mutation is racy and forbidden outside controlled test setup; use with_env or explicit process env maps" },
+    { path = "std::env::remove_var", reason = "global env mutation is racy and forbidden outside controlled test setup; use with_env or explicit process env maps" },
+]

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 7/150 in-scope files mapped (full=2 partial=5 stub=0 pending=143 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 8/150 in-scope files mapped (full=2 partial=6 stub=0 pending=142 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -194,7 +194,7 @@
 | `lib/workers/repository/update/branch/execute-post-upgrade-commands.ts` | pending | — | — |
 | `lib/workers/repository/update/branch/get-updated.ts` | partial | [`crates/renovate-core/src/workers/repository/update/branch/get_updated.rs`](../../../crates/renovate-core/src/workers/repository/update/branch/get_updated.rs) | getUpdatedPackageFiles (loop upgrades for content via autoReplace/updateDependency/updateLocked, assemble FileAdditions, updateArtifacts + check pending versions for minReleaseAge, return PackageFilesResult); single test ported (covering "handles empty" — lib/workers/repository/update/branch/get-updated.spec.ts line 119). Full manager extract/updateLocked, artifact update, rebase recursion, lockFileMaintenance, remediation, git-submodules special, bumpVersion, pending version artifactErrors, and cross wiring pending other units. |
 | `lib/workers/repository/update/branch/handle-existing.ts` | partial | [`crates/renovate-core/src/workers/repository/update/branch/handle_existing.rs`](../../../crates/renovate-core/src/workers/repository/update/branch/handle_existing.rs) | handleClosedPr (closed PR: compile ignore* comment per updateType, ensureComment unless prIgnoreNotification suppressed, delete branch; dryRun logs), handleModifiedPr (edited PR: ensure 'Edited/Blocked Notification' or remove if dd check/rebaseRequested, unless prEditedNotification suppressed; dryRun logs); single test ported (covering "skips branch if edited PR found" — lib/workers/repository/update/branch/index.spec.ts line 451). Full platform/scm/GlobalConfig/template/userStrings/dependencyDashboardChecks wiring, other callers, closed non-dry paths pending other units. |
-| `lib/workers/repository/update/branch/index.ts` | pending | — | — |
+| `lib/workers/repository/update/branch/index.ts` | partial | [`crates/renovate-core/src/workers/repository/update/branch/index.rs`](../../../crates/renovate-core/src/workers/repository/update/branch/index.rs) | processBranch (schedule check + early not-scheduled/min-group/pending/silent/closed-existing/edited paths + calls to prAlreadyExisted/handleClosed/handleModified/getUpdated/commit/automerge/status); single test ported (covering "skips branch if not scheduled and branch does not exist" — lib/workers/repository/update/branch/index.spec.ts line 157). Full rebaseCheck, limits, more schedule cases, post-upgrade, PR creation, error handling, full config fields and subs wiring pending other units (reuse, schedule, status-checks, pr/* etc). |
 | `lib/workers/repository/update/branch/reuse.ts` | pending | — | — |
 | `lib/workers/repository/update/branch/schedule.ts` | pending | — | — |
 | `lib/workers/repository/update/branch/status-checks.ts` | pending | — | — |
