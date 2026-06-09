@@ -566,3 +566,13 @@ spec   = "lib/workers/repository/update/pr/labels.spec.ts"
 test   = "null labels ignored"
 reason = "TS array inputs to prepareLabels can contain null/undefined (cast as never, with comment on empty slots as null); the prepare_labels in util.rs takes &[&str] (no nulls possible), and empty string filtering is already ported via 'empty labels ignored' (L48). Pure TypeScript runtime null/undef array handling with no direct Rust Vec analogue or need."
 
+[[test]]
+spec   = "lib/workers/repository/update/pr/labels.spec.ts"
+test   = "template labels"
+reason = "tests templating in prepareLabels for labels using {{{datasource}}} syntax (rendered with provided datasource value); the core prepare_labels in util.rs is plain string filter/merge (ported), templating/render is separate runtime (likely using label template util or in pr layer); no direct Rust equivalent in the prepare path (labels passed pre-rendered or without this syntax)."
+
+[[test]]
+spec   = "lib/workers/repository/update/pr/labels.spec.ts"
+test   = "template labels with empty datasource"
+reason = "tests templating with undefined/empty datasource (results in empty after render/filter); same as sibling 'template labels' — templating runtime behavior with no direct in Rust prepare_labels (which doesn't do {{{ }}} render); empty filter covered by ported 'empty labels ignored'."
+
