@@ -1048,6 +1048,44 @@ mod registry_tests {
         assert_eq!(dep.source_directory.as_deref(), Some("existing-dir"));
     }
 
+    // Ported: "Should not overwrite any existing sourceDirectory" — lib/modules/datasource/metadata.spec.ts line 180
+    #[test]
+    fn add_metadata_should_not_overwrite_any_existing_sourcedirectory() {
+        // Exercises the guard `if dep.source_directory.is_none()` before extract_source_directory,
+        // plus the github tree parse that would otherwise set sourceDirectory.
+        let mut dep = ReleaseResult {
+            releases: vec![],
+            source_url: Some(
+                "https://github.com/neutrinojs/neutrino/tree/master/packages/react".into(),
+            ),
+            source_directory: Some("packages/foo".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "npm", "@neutrinojs/react");
+        assert_eq!(
+            dep.source_url.as_deref(),
+            Some("https://github.com/neutrinojs/neutrino")
+        );
+        assert_eq!(dep.source_directory.as_deref(), Some("packages/foo"));
+    }
+
+    // Ported: "Should move github homepage to sourceUrl" — lib/modules/datasource/metadata.spec.ts line 331
+    #[test]
+    fn add_metadata_should_move_github_homepage_to_sourceurl() {
+        let mut dep = ReleaseResult {
+            releases: vec![Release {
+                version: "1.9.3".into(),
+                ..Default::default()
+            }],
+            homepage: Some("http://www.github.com/mockk/mockk/".into()),
+            source_url: None,
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "io.mockk:mockk");
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/mockk/mockk"));
+        assert!(dep.homepage.is_none());
+    }
+
     #[test]
     fn add_metadata_no_source_directory_for_simple_urls() {
         for url in &[

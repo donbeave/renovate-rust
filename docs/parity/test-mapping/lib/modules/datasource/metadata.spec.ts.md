@@ -2,7 +2,7 @@
 
 [← `datasource/_common`](../../../_by-module/datasource/_common.md) · [all modules](../../../README.md)
 
-**10/32 in-scope tests ported** (22 pending, 0 opt-out) · status: partial
+**12/32 in-scope tests ported** (20 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -12,14 +12,14 @@
 | 113 | _(it.each / template — verify manually)_ | ? | — |
 | 134 | _(it.each / template — verify manually)_ | ? | — |
 | 158 | _(it.each / template — verify manually)_ | ? | — |
-| 180 | should not overwrite any existing sourcedirectory | pending | — |
-| 197 | should massage github sourceurls | ported | [`crates/renovate-core/src/datasources.rs:1350`](../../../../../../crates/renovate-core/src/datasources.rs#L1350) |
+| 180 | should not overwrite any existing sourcedirectory | ported | [`crates/renovate-core/src/datasources.rs:1051`](../../../../../../crates/renovate-core/src/datasources.rs#L1051) |
+| 197 | should massage github sourceurls | ported | [`crates/renovate-core/src/datasources.rs:1388`](../../../../../../crates/renovate-core/src/datasources.rs#L1388) |
 | 228 | should handle parsing of sourceurls correctly for gitlab also | pending | — |
 | 251 | should handle failed parsing of sourceurls for gitlab | pending | — |
 | 274 | should handle failed parsing of sourceurls for other | pending | — |
 | 297 | should handle non-url | pending | — |
-| 319 | should handle parsing/converting of github sourceurls with http and www correctly | ported | [`crates/renovate-core/src/datasources.rs:1393`](../../../../../../crates/renovate-core/src/datasources.rs#L1393) |
-| 331 | should move github homepage to sourceurl | pending | — |
+| 319 | should handle parsing/converting of github sourceurls with http and www correctly | ported | [`crates/renovate-core/src/datasources.rs:1431`](../../../../../../crates/renovate-core/src/datasources.rs#L1431) |
+| 331 | should move github homepage to sourceurl | ported | [`crates/renovate-core/src/datasources.rs:1072`](../../../../../../crates/renovate-core/src/datasources.rs#L1072) |
 | 345 | should handle parsing/converting of gitlab sourceurls with http and www correctly | pending | — |
 | 357 | should normalize releasetimestamp | pending | — |
 | 385 | should return an empty string when massaging an invalid url | ported | [`crates/renovate-core/src/util.rs:12339`](../../../../../../crates/renovate-core/src/util.rs#L12339) |
