@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 20/150 in-scope files mapped (full=7 partial=13 stub=0 pending=130 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 21/150 in-scope files mapped (full=7 partial=14 stub=0 pending=129 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -94,7 +94,7 @@
 | `lib/workers/global/config/parse/env.ts` | full | [`crates/renovate-cli/src/config_env.rs`](../../../crates/renovate-cli/src/config_env.rs) | env prefix normalization, key renaming (legacy + migrated), experimental X_ var massaging to current names, RENOVATE_CONFIG merge, per-option coercion via env, special boolean mappings for dryRun/requireConfig/platformCommit, GITHUB_COM_TOKEN -> hostRule, deletion of unsupported legacy env names. Matches the prepareEnv + getConfig surface for self-hosted runs. |
 | `lib/workers/global/config/parse/file.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs) | JSON/JSON5 parser and non-default file cleanup are implemented; CLI/global env integration and some migrate/validation flows are staged elsewhere. |
 | `lib/workers/global/config/parse/host-rules-from-env.ts` | full | [`crates/renovate-core/src/config/host_rules_from_env.rs`](../../../crates/renovate-core/src/config/host_rules_from_env.rs) | parsing of RENOVATE_<HOST>[_PARTS]_[TOKEN|USERNAME|PASSWORD|https*] env vars into hostRules (with __ -> - , hosttype validation, https field restore), including precedence for GITHUB_COM_TOKEN. Matches hostRulesFromEnv surface. |
-| `lib/workers/global/config/parse/index.ts` | pending | — | — |
+| `lib/workers/global/config/parse/index.ts` | partial | [`crates/renovate-core/src/workers/global/config/parse/index.rs`](../../../crates/renovate-core/src/workers/global/config/parse/index.rs) | low-level `parse_config` / `parse_config_file` (now with JSON5 support for trailing commas/comments to match upstream config file flexibility and the usage inside the `parseConfigs` composition). The high-level `parseConfigs` (merging of defaults + file + additional + cli + env, globalExtends resolution, detectGlobalManagerConfig, detectHostRulesFromEnv, repository override warning, various massaging, private key loading, secrets/variables application, configFileNames, etc.) is implemented in the CLI layer (`config_builder.rs`, `main.rs`, and the sub-parsers) in the current Rust architecture. |
 | `lib/workers/global/config/parse/types.ts` | opt-out | — | Type-only parse options type aliases used only by TypeScript configuration validation typing. |
 | `lib/workers/global/config/parse/util.ts` | pending | — | — |
 | `lib/workers/global/index.ts` | pending | — | — |

@@ -1,6 +1,7 @@
 //! Config parsing.
 //!
 //! Mirrors `lib/workers/global/config/parse/index.ts`.
+//! @parity lib/workers/global/config/parse/index.ts partial — low-level `parse_config` / `parse_config_file` (now with JSON5 support for trailing commas/comments to match upstream config file flexibility and the usage inside the `parseConfigs` composition). The high-level `parseConfigs` (merging of defaults + file + additional + cli + env, globalExtends resolution, detectGlobalManagerConfig, detectHostRulesFromEnv, repository override warning, various massaging, private key loading, secrets/variables application, configFileNames, etc.) is implemented in the CLI layer (`config_builder.rs`, `main.rs`, and the sub-parsers) in the current Rust architecture.
 
 use serde::{Deserialize, Serialize};
 
@@ -13,7 +14,10 @@ pub struct ParsedConfig {
 }
 
 pub fn parse_config(input: &str) -> ParsedConfig {
-    let (config, errors) = match serde_json::from_str::<serde_json::Value>(input) {
+    // Use json5 (like the rest of the port and upstream config file support) so that
+    // the low-level primitive matches the flexibility expected by the composition in
+    // parseConfigs (file + additional + etc.).
+    let (config, errors) = match json5::from_str::<serde_json::Value>(input) {
         Ok(v) => (v, Vec::new()),
         Err(e) => (
             serde_json::Value::Null,
@@ -94,5 +98,22 @@ mod tests {
         let json = serde_json::to_string(&c).unwrap();
         let back: ParsedConfig = serde_json::from_str(&json).unwrap();
         assert_eq!(back.config_file, Some("config.json".into()));
+    }
+
+    // The single test added for this cycle (proves the JSON5 support added to the
+    // low-level parse primitive that is used by the composition equivalent to parseConfigs).
+    #[test]
+    fn parse_config_supports_json5() {
+        // Ported: JSON5 support in low-level config text parsing (trailing commas, comments)
+        // as used by fileParser / the overall parseConfigs flow in lib/workers/global/config/parse/index.ts.
+        let result = parse_config(
+            r#"{
+                "enabled": true,
+                "repositories": ["a/b"], // comment
+            }"#,
+        );
+        assert!(result.errors.is_empty());
+        assert_eq!(result.config["enabled"], true);
+        assert_eq!(result.config["repositories"][0], "a/b");
     }
 }
