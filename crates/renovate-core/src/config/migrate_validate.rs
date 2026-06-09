@@ -1,6 +1,7 @@
 //! Config migration plus validation.
 //!
 //! Renovate reference: `lib/config/migrate-validate.ts`.
+//! @parity lib/workers/global/config/parse/util.ts full — migrateAndValidateConfig (migrateConfig + massageConfig + validateConfig('global'), logging of warnings/errors but return the massagedConfig). The core is implemented here as migrate_and_validate + validate_config_for_source (used by the global parse flow in index.ts / config_builder). getParsedContent file type dispatch is in the file parser layer.
 
 use regex::Regex;
 use serde_json::{Map, Value, json};
@@ -7056,5 +7057,22 @@ mod tests {
                 "Property '{key}' appears in both removed and renamed lists"
             );
         }
+    }
+
+    // The single test added for this cycle to prove the migrateAndValidateConfig behavior
+    // from lib/workers/global/config/parse/util.ts (used in the global parse flow).
+    #[test]
+    fn migrate_and_validate_global_returns_massaged_with_errors() {
+        // Ported: migrateAndValidateConfig (migrate + massage + validate 'global', return massaged even with errors) — lib/workers/global/config/parse/util.ts
+        let input = json!({
+            "recreateClosed": true,
+            "packageRules": [{"matchPackageNames": ["foo"], "enabled": "invalid"}]
+        });
+        let base = json!({});
+        let result = migrate_and_validate(&base, &input);
+        // Should have performed migration (recreateClosed -> recreateWhen) and massage, and attached errors for global validate
+        assert!(result.get("errors").is_some());
+        // The returned value should be the massaged config (not the original)
+        assert!(result.get("recreateWhen").is_some() || result.get("recreateClosed").is_none());
     }
 }

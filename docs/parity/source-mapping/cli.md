@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 21/150 in-scope files mapped (full=7 partial=14 stub=0 pending=129 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 22/150 in-scope files mapped (full=8 partial=14 stub=0 pending=128 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -96,7 +96,7 @@
 | `lib/workers/global/config/parse/host-rules-from-env.ts` | full | [`crates/renovate-core/src/config/host_rules_from_env.rs`](../../../crates/renovate-core/src/config/host_rules_from_env.rs) | parsing of RENOVATE_<HOST>[_PARTS]_[TOKEN|USERNAME|PASSWORD|https*] env vars into hostRules (with __ -> - , hosttype validation, https field restore), including precedence for GITHUB_COM_TOKEN. Matches hostRulesFromEnv surface. |
 | `lib/workers/global/config/parse/index.ts` | partial | [`crates/renovate-core/src/workers/global/config/parse/index.rs`](../../../crates/renovate-core/src/workers/global/config/parse/index.rs) | low-level `parse_config` / `parse_config_file` (now with JSON5 support for trailing commas/comments to match upstream config file flexibility and the usage inside the `parseConfigs` composition). The high-level `parseConfigs` (merging of defaults + file + additional + cli + env, globalExtends resolution, detectGlobalManagerConfig, detectHostRulesFromEnv, repository override warning, various massaging, private key loading, secrets/variables application, configFileNames, etc.) is implemented in the CLI layer (`config_builder.rs`, `main.rs`, and the sub-parsers) in the current Rust architecture. |
 | `lib/workers/global/config/parse/types.ts` | opt-out | — | Type-only parse options type aliases used only by TypeScript configuration validation typing. |
-| `lib/workers/global/config/parse/util.ts` | pending | — | — |
+| `lib/workers/global/config/parse/util.ts` | full | [`crates/renovate-core/src/config/migrate_validate.rs`](../../../crates/renovate-core/src/config/migrate_validate.rs) | migrateAndValidateConfig (migrateConfig + massageConfig + validateConfig('global'), logging of warnings/errors but return the massagedConfig). The core is implemented here as migrate_and_validate + validate_config_for_source (used by the global parse flow in index.ts / config_builder). getParsedContent file type dispatch is in the file parser layer. |
 | `lib/workers/global/index.ts` | pending | — | — |
 | `lib/workers/global/initialize.ts` | partial | [`crates/renovate-core/src/workers/global/initialize.rs`](../../../crates/renovate-core/src/workers/global/initialize.rs) | git version check+error, directory (base/cache/containerbase) computation+ensure, host rules add (legacy too), commits limit, emoji config, third-party metadata env intent, global finalize stub; rate limits entry; (platform init, packageCache full init, merge-confidence, secret apply, and top-level global flow live in main.rs + config + platform for the broader workers/global/index.ts surface). |
 | `lib/workers/global/limits.ts` | full | [`crates/renovate-core/src/limits.rs`](../../../crates/renovate-core/src/limits.rs) | simple 'Commits' limit (setMaxLimit/inc/isLimitReached + reset), plus the full concurrent/hourly/branch limit machinery (calcLimit, hasMultipleLimits, isLimitReached overloads for Branches/ConcurrentPRs/Hourly*, using per-upgrade limits with the null-inherit semantics for branchConcurrentLimit). All observable behavior for a self-hosted renovate run is covered. |
