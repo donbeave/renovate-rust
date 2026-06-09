@@ -274,4 +274,29 @@ mod tests {
         // after massage the second dep (which had packageName) gets depName
         assert!(res[0].deps.iter().any(|d| d.dep_name.as_deref() == Some("p")));
     }
+
+    // Ported: "returns files with extractAllPackageFiles" — lib/workers/repository/extract/manager-files.spec.ts line 66
+    #[test]
+    fn get_manager_package_files_returns_files_with_extract_all_package_files() {
+        // Exercises the extractAllPackageFiles branch (use_all for npm/pnpm/yarn), the file attachment,
+        // and dep construction/massage for a manager like npm that returns the full deps array from one file read.
+        // Matches the TS: read content, extractAll produces deps (with currentValue etc), result has packageFile + deps.
+        let manager_config = ManagerFile {
+            manager: "npm".into(),
+            file_list: vec!["package.json".into()],
+            enabled: true,
+            ..Default::default()
+        };
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let res = rt.block_on(get_manager_package_files(&manager_config));
+        let res = res.expect("some");
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].package_file, "package.json");
+        // the dep synthesized in the npm all path (currentValue, datasource, depName, depType from the fixture)
+        let dep = &res[0].deps[0];
+        assert_eq!(dep.current_value.as_deref(), Some("2.0.0"));
+        assert_eq!(dep.datasource.as_deref(), Some("npm"));
+        assert_eq!(dep.dep_name.as_deref(), Some("chalk"));
+        assert_eq!(dep.dep_type.as_deref(), Some("dependencies"));
+    }
 }

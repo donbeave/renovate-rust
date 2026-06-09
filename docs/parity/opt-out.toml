@@ -601,3 +601,8 @@ spec   = "lib/workers/repository/extract/index.spec.ts"
 test   = "warns if packageFiles is null"
 reason = "asserts logger warn spy for the case when packageFiles is null (for a manager); the core (no result or empty) is business but the test is around the spy and the null check message; no direct Rust equivalent (tracing, the extract paths return empty or handle null without this exact spy). Opt as TS logger spy + null packageFiles warn."
 
+[[test]]
+spec   = "lib/workers/repository/extract/manager-files.spec.ts"
+test   = "returns empty of manager is not enabled"
+reason = "the enabledManagers list filter (when the list is set in config, a manager not present in it returns empty even if its local .enabled=true and fileList non-empty) is decided when building the list of ManagerFile entries in the extract orchestrator (getEnabledManagersList, skips_non_enabled_managers test in managers.rs, and the loop in workers/repository/extract); this unit's get_manager_package_files only sees the effective per-ManagerFile .enabled (already ported as 'returns empty of manager is disabled'); the list interaction test in this spec has no additional unique business logic in the isolated fn to port beyond the caller coverage."
+

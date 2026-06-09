@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 20 | sanitizes urls | ported | [`crates/renovate-core/src/branch.rs:1321`](../../../../../../../crates/renovate-core/src/branch.rs#L1321) |
+| 20 | sanitizes urls | ported | [`crates/renovate-core/src/branch.rs:1320`](../../../../../../../crates/renovate-core/src/branch.rs#L1320) |
 | 28 | flattens | pending | — |
 | 241 | when a dependency is enabled=false, it is filtered | pending | — |
 | 280 | when a skipreason is found on a dependency, it is filtered | pending | — |

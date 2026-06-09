@@ -2,11 +2,11 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/26 in-scope tests ported** (26 pending, 0 opt-out) · status: pending
+**1/26 in-scope tests ported** (25 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 57 | throws if no package files | pending | — |
+| 57 | throws if no package files | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/index.rs:148`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/index.rs#L148) |
 | 63 | doesn't throw if there are no package files and onboardingnodeps config option is set | pending | — |
 | 73 | throws if fork | pending | — |
 | 80 | throws if bot disabled | pending | — |
