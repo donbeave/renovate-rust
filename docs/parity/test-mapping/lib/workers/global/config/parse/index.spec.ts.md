@@ -2,7 +2,7 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**16/35 in-scope tests ported** (19 pending, 0 opt-out) · status: partial
+**17/35 in-scope tests ported** (18 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -16,12 +16,12 @@
 | 163 | massages trailing slash into endpoint | ported | [`crates/renovate-cli/src/config_builder.rs:1241`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1241) |
 | 172 | parses global manager config | ported | [`crates/renovate-cli/src/config_builder.rs:865`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L865) |
 | 179 | parses host rules from env | ported | [`crates/renovate-cli/src/config_builder.rs:1255`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1255) |
-| 187 | env dryrun = true replaced to full | ported | [`crates/renovate-cli/src/config_env.rs:1642`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1642) |
+| 187 | env dryrun = true replaced to full | ported | [`crates/renovate-cli/src/config_env.rs:1649`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1649) |
 | 197 | cli dryrun = true replaced to full | ported | [`crates/renovate-cli/src/config_builder.rs:1208`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1208) |
 | 204 | resolves global presets | ported | [`crates/renovate-cli/src/config_builder.rs:866`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L866) |
 | 232 | throws exception if global presets cannot be resolved | pending | — |
 | 247 | cli dryrun replaced to full | ported | [`crates/renovate-cli/src/config_builder.rs:1219`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1219) |
-| 254 | env dryrun = false replaced to null | ported | [`crates/renovate-cli/src/config_env.rs:1657`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1657) |
+| 254 | env dryrun = false replaced to null | ported | [`crates/renovate-cli/src/config_env.rs:1664`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1664) |
 | 264 | cli dryrun = false replaced to null | ported | [`crates/renovate-cli/src/config_builder.rs:1232`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1232) |
 | 271 | only initializes the file when the env var log_file is properly set | pending | — |
 | 278 | massage onboardingnodeps when autodiscover is false | pending | — |
@@ -30,7 +30,7 @@
 | 319 | overrides file config with additional file config | pending | — |
 | 334 | merges extends from file config with additional file config | pending | — |
 | 352 | adds extends from fileconfig only | pending | — |
-| 363 | appends files from configfilenames to config filenames list | pending | — |
+| 363 | appends files from configfilenames to config filenames list | ported | [`crates/renovate-cli/src/config_builder.rs:1286`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1286) |
 | 380 | supports setting configfilenames through cli | ported | [`crates/renovate-cli/src/config_builder.rs:1268`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1268) |
 | 391 | supports setting configfilenames through env | ported | [`crates/renovate-cli/src/config_env.rs:1590`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1590) |
 | 405 | warns when cli config overrides repositories from file config | pending | — |

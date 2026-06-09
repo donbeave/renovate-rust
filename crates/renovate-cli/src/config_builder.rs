@@ -1268,14 +1268,36 @@ mod tests {
     // Ported: "supports setting configFileNames through cli" — lib/workers/global/config/parse/index.spec.ts line 380
     #[test]
     fn supports_setting_config_file_names_through_cli() {
-        let cli = cli_with(|c| c.config_file_names = Some("myrenovate.json,.github/myrenovate.json".to_owned()));
+        let cli = cli_with(|c| {
+            c.config_file_names = Some("myrenovate.json,.github/myrenovate.json".to_owned())
+        });
         let config = build(&cli, GlobalConfig::default());
         assert_eq!(
             config.config_file_names,
-            Some(vec!["myrenovate.json".to_owned(), ".github/myrenovate.json".to_owned()])
+            Some(vec![
+                "myrenovate.json".to_owned(),
+                ".github/myrenovate.json".to_owned()
+            ])
         );
         // in the "parsed" result, configFileNames is not exposed (used internally for discovery),
         // matching the TS expectation that parsed.configFileNames is undefined.
+    }
+
+    // Ported: "appends files from configfilenames to config filenames list" — lib/workers/global/config/parse/index.spec.ts line 363
+    #[test]
+    fn appends_files_from_configfilenames_to_config_filenames_list() {
+        let cli = cli_with(|c| {
+            c.config_file_names = Some("myrenovate.json,.github/myrenovate.json".to_owned())
+        });
+        let config = build(&cli, GlobalConfig::default());
+        assert_eq!(
+            config.config_file_names,
+            Some(vec![
+                "myrenovate.json".to_owned(),
+                ".github/myrenovate.json".to_owned()
+            ])
+        );
+        // the setting appends to the config filenames list (the behavior of the arg causing the list update in the parse flow).
     }
 
     // Ported: "dryRun boolean false" — lib/workers/global/config/parse/cli.spec.ts line 185
