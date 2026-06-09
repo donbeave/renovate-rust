@@ -529,4 +529,10 @@ reason = "remaining it.each / template in the additional-config-file.spec (L26, 
 [[test]]
 spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
 test   = "migrates"
-reason = "the additional config (json/json5) is passed through migration (like main file); migration logic present (migrate in file load/merge, history ports for additional migrate json5). If a specific test for additional + migrate exists or the load path exercises it, port; otherwise this opt covers if it's data-driven. (Kept separate from templates for real migration behavior.)"
+reason = "the additional config (json/json5) is passed through migration (like main file); migration logic present (migrate in file load/merge, history ports for additional migrate json5). If a specific test for additional + migrate exists or the load path exercises it, port; otherwise this opt covers if it's data-driven. (Kept separate from templates for real migration behavior)."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/file.spec.ts"
+test   = "it.each / template — verify manually"
+reason = "it.each / template (L27, L89, L153, L220, L245) for .js/.cjs/.mjs/.ts/.cts/.mts/.yaml parsing and fatal+exit in unsupported formats; pure TS runtime (require/exec .js/.ts, yaml, process.exit) + intentionally unsupported in Rust per file.rs ('JS/yaml configs remain unsupported', 'YAML support is deferred', UnsupportedFormat for .js etc). Core JSON/JSON5/.renovaterc, empty if no env, skip, delete, silent fail covered by 10 ported."
+

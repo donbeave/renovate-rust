@@ -8,7 +8,7 @@
 |--:|---|---|---|
 | 27 | _(it.each / template — verify manually)_ | ? | — |
 | 61 | migrates | ported | [`crates/renovate-core/src/repo_config.rs:13576`](../../../../../../../../crates/renovate-core/src/repo_config.rs#L13576) |
-| 73 | warns if config is invalid | ported | [`crates/renovate-core/src/config/file.rs:730`](../../../../../../../../crates/renovate-core/src/config/file.rs#L730) |
+| 73 | warns if config is invalid | ported | [`crates/renovate-core/src/config/file.rs:731`](../../../../../../../../crates/renovate-core/src/config/file.rs#L731) |
 | 85 | parse and returns empty config if there is no renovate_config_file in env | ported | [`crates/renovate-core/src/config/file.rs:540`](../../../../../../../../crates/renovate-core/src/config/file.rs#L540) |
 | 89 | _(it.each / template — verify manually)_ | ? | — |
 | 118 | fatal error and exit if custom config file does not exist | ported | [`crates/renovate-core/src/config/file.rs:568`](../../../../../../../../crates/renovate-core/src/config/file.rs#L568) |
