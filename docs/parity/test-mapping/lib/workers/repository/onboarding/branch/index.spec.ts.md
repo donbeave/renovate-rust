@@ -6,12 +6,12 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 57 | throws if no package files | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/index.rs:176`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/index.rs#L176) |
+| 57 | throws if no package files | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/index.rs:94`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/index.rs#L94) |
 | 63 | doesn't throw if there are no package files and onboardingnodeps config option is set | pending | — |
 | 73 | throws if fork | pending | — |
 | 80 | throws if bot disabled | pending | — |
 | 87 | _(it.each / template — verify manually)_ | ? | — |
-| 127 | uses discovered onboarding config | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/index.rs:188`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/index.rs#L188) |
+| 127 | uses discovered onboarding config | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/index.rs:109`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/index.rs#L109) |
 | 170 | handles skipped onboarding combined with requireconfig = optional | pending | — |
 | 181 | handles skipped onboarding, requireconfig=required, and a config file | pending | — |
 | 192 | handles skipped onboarding, requireconfig=ignored | pending | — |

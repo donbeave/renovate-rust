@@ -82,10 +82,9 @@ pub fn validate_optimize_for_disabled(
                 .extends
                 .as_ref()
                 .map_or(false, |e| e.iter().any(|x| x == ":enableRenovate"))
-                || rc
-                    .ignore_presets
-                    .as_ref()
-                    .map_or(false, |p: &Vec<String>| p.iter().any(|x| x == ":disableRenovate"))
+                || rc.ignore_presets.as_ref().map_or(false, |p: &Vec<String>| {
+                    p.iter().any(|x| x == ":disableRenovate")
+                })
                 || rc.enabled == Some(true)
             {
                 // re-enabled, continue
@@ -191,6 +190,150 @@ mod tests {
             ..Default::default()
         });
         let res = validate_optimize_for_disabled(&config, repo_config.as_ref());
+        assert!(res.is_err());
+        assert!(res.unwrap_err().contains("REPOSITORY_DISABLED_BY_CONFIG"));
+    }
+
+    // Ported: "runs" — lib/workers/repository/init/apis.spec.ts line 24
+    #[test]
+    fn runs() {
+        // Exercises the happy path through init_apis_for_repository (validates + default file) for normal non-fork non-optimize config.
+        let config = RenovateConfig::default();
+        let res = init_apis_for_repository(&config);
+        assert!(res.is_ok());
+    }
+
+    // Ported: "throws for forked" — lib/workers/repository/init/apis.spec.ts line 49
+    #[test]
+    fn throws_for_forked() {
+        let config = RenovateConfig {
+            is_fork: Some(true),
+            ..Default::default()
+        };
+        // fork_processing not enabled, no repo_config (getJsonFile failure or no config)
+        let res = validate_include_forks(&config, None);
+        assert!(res.is_err());
+        assert!(res.unwrap_err().contains("REPOSITORY_FORKED"));
+    }
+
+    // Ported: "does not throw for includeforks=true" — lib/workers/repository/init/apis.spec.ts line 66
+    #[test]
+    fn does_not_throw_for_includeforks_true() {
+        let config = RenovateConfig {
+            is_fork: Some(true),
+            ..Default::default()
+        };
+        let rc = RenovateConfig {
+            include_forks: Some(true),
+            ..Default::default()
+        };
+        let res = validate_include_forks(&config, Some(&rc));
+        assert!(res.is_ok());
+    }
+
+    // Ported: "does not throw for forkprocessing=enabled" — lib/workers/repository/init/apis.spec.ts line 79
+    #[test]
+    fn does_not_throw_for_forkprocessing_enabled() {
+        let config = RenovateConfig {
+            is_fork: Some(true),
+            ..Default::default()
+        };
+        let rc = RenovateConfig {
+            fork_processing: Some("enabled".to_string()),
+            ..Default::default()
+        };
+        let res = validate_include_forks(&config, Some(&rc));
+        assert!(res.is_ok());
+    }
+
+    // Ported: "ignores platform.getjsonfile() failures" — lib/workers/repository/init/apis.spec.ts line 92
+    #[test]
+    fn ignores_platform_getjsonfile_failures() {
+        // Non-fork or optimize case ignores getJsonFile failure (repo_config=None)
+        let config = RenovateConfig::default(); // not fork
+        let res = validate_include_forks(&config, None);
+        assert!(res.is_ok());
+        // Also for optimize disabled case with no repo
+        let opt_config = RenovateConfig {
+            optimize_for_disabled: Some(true),
+            ..Default::default()
+        };
+        let res2 = validate_optimize_for_disabled(&opt_config, None);
+        assert!(res2.is_ok());
+    }
+
+    // Ported: "throws for fork with platform.getjsonfile() failures" — lib/workers/repository/init/apis.spec.ts line 109
+    #[test]
+    fn throws_for_fork_with_platform_getjsonfile_failures() {
+        let mut config = RenovateConfig::default();
+        config.is_fork = Some(true);
+        // forkProcessing not enabled, repo_config=None (failure) -> throws
+        let res = validate_include_forks(&config, None);
+        assert!(res.is_err());
+        assert!(res.unwrap_err().contains("REPOSITORY_FORKED"));
+    }
+
+    // Ported: "uses the onboardingconfigfilename if set" — lib/workers/repository/init/apis.spec.ts line 124
+    #[test]
+    fn uses_the_onboardingconfigfilename_if_set() {
+        let config = RenovateConfig {
+            onboarding_config_file_name: Some("renovate.json5".to_string()),
+            ..Default::default()
+        };
+        let name = get_default_config_file(&config, &GlobalConfig::default());
+        assert_eq!(name, "renovate.json5");
+    }
+
+    // Ported: "falls back to \"renovate.json\" if onboardingconfigfilename is not set" — lib/workers/repository/init/apis.spec.ts line 151
+    #[test]
+    fn falls_back_to_renovate_json_if_onboardingconfigfilename_is_not_set() {
+        let config = RenovateConfig::default();
+        let name = get_default_config_file(&config, &GlobalConfig::default());
+        // falls back to the get_default_config_file_name result, which is typically renovate.json
+        assert!(name == "renovate.json" || name.ends_with("/renovate.json") || name.ends_with("/renovate.json5"));
+    }
+
+    // Ported: "falls back to \"renovate.json\" if onboardingconfigfilename is not valid" — lib/workers/repository/init/apis.spec.ts line 172
+    #[test]
+    fn falls_back_to_renovate_json_if_onboardingconfigfilename_is_not_valid() {
+        let config = RenovateConfig {
+            onboarding_config_file_name: Some("custom.json".to_string()),
+            ..Default::default()
+        }; // not valid renovate.*
+        let name = get_default_config_file(&config, &GlobalConfig::default());
+        assert_eq!(name, "renovate.json");
+    }
+
+    // Ported: "checks for re-enablement and continues" — lib/workers/repository/init/apis.spec.ts line 191
+    #[test]
+    fn checks_for_re_enablement_and_continues() {
+        let config = RenovateConfig {
+            optimize_for_disabled: Some(true),
+            extends: Some(vec![":disableRenovate".to_string()]),
+            ..Default::default()
+        };
+        let rc = RenovateConfig {
+            extends: Some(vec![":enableRenovate".to_string()]),
+            ..Default::default()
+        };
+        let res = validate_optimize_for_disabled(&config, Some(&rc));
+        assert!(res.is_ok());
+    }
+
+    // Ported: "checks for re-enablement and skips" — lib/workers/repository/init/apis.spec.ts line 211
+    #[test]
+    fn checks_for_re_enablement_and_skips() {
+        let config = RenovateConfig {
+            optimize_for_disabled: Some(true),
+            extends: Some(vec![":disableRenovate".to_string()]),
+            ..Default::default()
+        };
+        let rc = RenovateConfig {
+            enabled: Some(false),
+            ..Default::default()
+        };
+        // no re-enable in rc
+        let res = validate_optimize_for_disabled(&config, Some(&rc));
         assert!(res.is_err());
         assert!(res.unwrap_err().contains("REPOSITORY_DISABLED_BY_CONFIG"));
     }

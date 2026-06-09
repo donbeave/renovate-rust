@@ -31,7 +31,7 @@
 | 792 | checks an issue with 2 pr closed / ignored | pending | — |
 | 832 | checks an issue with group size not met branches | pending | — |
 | 873 | checks an issue with 3 pr in approval | pending | — |
-| 928 | adds a checkbox for config migration | ported | [`crates/renovate-core/src/config/migration.rs:467`](../../../../../../crates/renovate-core/src/config/migration.rs#L467) |
+| 928 | adds a checkbox for config migration | ported | [`crates/renovate-core/src/config/migration.rs:471`](../../../../../../crates/renovate-core/src/config/migration.rs#L471) |
 | 959 | adds config migration pr link when it exists | pending | — |
 | 991 | adds related text when config migration pr has been modified | pending | — |
 | 1023 | does not add a config migration checkbox when not needed | pending | — |

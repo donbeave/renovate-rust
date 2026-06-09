@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 31 | returns true if in silent mode | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/check.rs:89`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/check.rs#L89) |
+| 31 | returns true if in silent mode | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/check.rs:90`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/check.rs#L90) |
 | 36 | skips normal onboarding check if onboardingcache is valid | pending | — |
 | 56 | continues with normal logic if onboardingcache is invalid | pending | — |
 | 72 | continues with normal logic if closedpr exists - adds closing comment | pending | — |
