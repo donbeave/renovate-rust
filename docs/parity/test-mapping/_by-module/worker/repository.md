@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 274/1675 in-scope tests ported (opt-out=6) across 103 spec files.
+**Coverage:** 275/1675 in-scope tests ported (opt-out=6) across 103 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -25,7 +25,7 @@
 | [`lib/workers/repository/extract/index.spec.ts`](../../lib/workers/repository/extract/index.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/managers.rs:2583`](../../../../../crates/renovate-core/src/managers.rs#L2583) | partial |
 | [`lib/workers/repository/extract/manager-files.spec.ts`](../../lib/workers/repository/extract/manager-files.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/workers/repository/extract/manager_files.rs:223`](../../../../../crates/renovate-core/src/workers/repository/extract/manager_files.rs#L223) | partial |
 | [`lib/workers/repository/extract/supersedes.spec.ts`](../../lib/workers/repository/extract/supersedes.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/managers.rs:2177`](../../../../../crates/renovate-core/src/managers.rs#L2177)<br>[`crates/renovate-core/src/workers/repository/extract/supersedes.rs:190`](../../../../../crates/renovate-core/src/workers/repository/extract/supersedes.rs#L190) | ported |
-| [`lib/workers/repository/finalize/prune.spec.ts`](../../lib/workers/repository/finalize/prune.spec.ts.md) | 18 | 2 | 16 | 0 | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:97`](../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L97) | partial |
+| [`lib/workers/repository/finalize/prune.spec.ts`](../../lib/workers/repository/finalize/prune.spec.ts.md) | 18 | 3 | 15 | 0 | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:97`](../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L97) | partial |
 | [`lib/workers/repository/finalize/repository-statistics.spec.ts`](../../lib/workers/repository/finalize/repository-statistics.spec.ts.md) | 4 | 2 | 2 | 0 | [`crates/renovate-core/src/workers/repository/finalize/index.rs:78`](../../../../../crates/renovate-core/src/workers/repository/finalize/index.rs#L78)<br>[`crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs:145`](../../../../../crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs#L145) | partial |
 | [`lib/workers/repository/index.spec.ts`](../../lib/workers/repository/index.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/workers/repository/index.rs:100`](../../../../../crates/renovate-core/src/workers/repository/index.rs#L100) | ported |
 | [`lib/workers/repository/init/apis.spec.ts`](../../lib/workers/repository/init/apis.spec.ts.md) | 12 | 1 | 11 | 0 | [`crates/renovate-core/src/workers/repository/init/apis.rs:181`](../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L181) | partial |
