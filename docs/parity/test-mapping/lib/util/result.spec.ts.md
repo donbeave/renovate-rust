@@ -8,7 +8,7 @@
 |--:|---|---|---|
 | 12 | ok result | pending | — |
 | 22 | error result | pending | — |
-| 34 | wraps callback returning value | ported | [`crates/renovate-core/src/util/result.rs:547`](../../../../../crates/renovate-core/src/util/result.rs#L547) |
+| 34 | wraps callback returning value | ported | [`crates/renovate-core/src/util/result.rs:545`](../../../../../crates/renovate-core/src/util/result.rs#L545) |
 | 39 | handles throw in callback | pending | — |
 | 46 | wraps callback returning promise | pending | — |
 | 51 | wraps callback returning failed promise | pending | — |
@@ -65,7 +65,7 @@
 | 456 | unwrapornull returns null for error result | pending | — |
 | 463 | transforms asyncresult to pure value | pending | — |
 | 470 | transforms asyncresult to result | pending | — |
-| 477 | transforms result to asyncresult | ported | [`crates/renovate-core/src/util/result.rs:607`](../../../../../crates/renovate-core/src/util/result.rs#L607) |
+| 477 | transforms result to asyncresult | ported | [`crates/renovate-core/src/util/result.rs:605`](../../../../../crates/renovate-core/src/util/result.rs#L605) |
 | 484 | transforms asyncresult to asyncresult | pending | — |
 | 491 | skips transform for failed promises | pending | — |
 | 498 | asyncronously transforms successfull promise to value | pending | — |

@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | checks a case where prbodycolumns are undefined | ported | [`crates/renovate-core/src/branch.rs:2611`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2611) |
+| 6 | checks a case where prbodycolumns are undefined | ported | [`crates/renovate-core/src/branch.rs:2632`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2632) |
 | 18 | checks results for getprupdatestable | pending | — |
 | 155 | selects the best upgrade in case of duplicate table rows | pending | — |
 | 257 | handles replacements with new names | pending | — |

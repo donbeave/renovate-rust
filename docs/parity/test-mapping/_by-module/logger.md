@@ -11,9 +11,9 @@
 | [`lib/logger/config-serializer.spec.ts`](../lib/logger/config-serializer.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:6792`](../../../../crates/renovate-core/src/util.rs#L6792) | ported |
 | [`lib/logger/err-serializer.spec.ts`](../lib/logger/err-serializer.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/util.rs:6902`](../../../../crates/renovate-core/src/util.rs#L6902) | ported |
 | [`lib/logger/index.spec.ts`](../lib/logger/index.spec.ts.md) | 26 | 0 | 26 | 0 | — | pending |
-| [`lib/logger/once.spec.ts`](../lib/logger/once.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/util.rs:8133`](../../../../crates/renovate-core/src/util.rs#L8133) | ported |
-| [`lib/logger/pretty-stdout.spec.ts`](../lib/logger/pretty-stdout.spec.ts.md) | 15 | 13 | 2 | 0 | [`crates/renovate-core/src/util.rs:12045`](../../../../crates/renovate-core/src/util.rs#L12045) | partial |
-| [`lib/logger/remap.spec.ts`](../lib/logger/remap.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/util.rs:10040`](../../../../crates/renovate-core/src/util.rs#L10040) | ported |
+| [`lib/logger/once.spec.ts`](../lib/logger/once.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/util.rs:8132`](../../../../crates/renovate-core/src/util.rs#L8132) | ported |
+| [`lib/logger/pretty-stdout.spec.ts`](../lib/logger/pretty-stdout.spec.ts.md) | 15 | 13 | 2 | 0 | [`crates/renovate-core/src/util.rs:12044`](../../../../crates/renovate-core/src/util.rs#L12044) | partial |
+| [`lib/logger/remap.spec.ts`](../lib/logger/remap.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/util.rs:10039`](../../../../crates/renovate-core/src/util.rs#L10039) | ported |
 | [`lib/logger/renovate-logger.spec.ts`](../lib/logger/renovate-logger.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
 | [`lib/logger/utils.spec.ts`](../lib/logger/utils.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/util.rs:7011`](../../../../crates/renovate-core/src/util.rs#L7011) | ported |
 

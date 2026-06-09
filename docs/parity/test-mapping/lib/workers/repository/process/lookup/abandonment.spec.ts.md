@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 27 | returns the original release result when no abandonment threshold is provided | ported | [`crates/renovate-core/src/util.rs:9742`](../../../../../../../../crates/renovate-core/src/util.rs#L9742) |
-| 39 | returns the original release result when abandonment threshold is invalid | ported | [`crates/renovate-core/src/util.rs:9749`](../../../../../../../../crates/renovate-core/src/util.rs#L9749) |
-| 54 | returns the original release result when no mostrecenttimestamp timestamp is available | ported | [`crates/renovate-core/src/util.rs:9760`](../../../../../../../../crates/renovate-core/src/util.rs#L9760) |
-| 69 | marks a package as abandoned when mostrecenttimestamp plus threshold is before now | ported | [`crates/renovate-core/src/util.rs:9767`](../../../../../../../../crates/renovate-core/src/util.rs#L9767) |
-| 83 | does not mark a package as abandoned when mostrecenttimestamp plus threshold is after now | ported | [`crates/renovate-core/src/util.rs:9779`](../../../../../../../../crates/renovate-core/src/util.rs#L9779) |
-| 97 | preserves other properties in the release result | ported | [`crates/renovate-core/src/util.rs:9791`](../../../../../../../../crates/renovate-core/src/util.rs#L9791) |
-| 117 | handles exactly at the threshold boundary | ported | [`crates/renovate-core/src/util.rs:9804`](../../../../../../../../crates/renovate-core/src/util.rs#L9804) |
+| 27 | returns the original release result when no abandonment threshold is provided | ported | [`crates/renovate-core/src/util.rs:9741`](../../../../../../../../crates/renovate-core/src/util.rs#L9741) |
+| 39 | returns the original release result when abandonment threshold is invalid | ported | [`crates/renovate-core/src/util.rs:9748`](../../../../../../../../crates/renovate-core/src/util.rs#L9748) |
+| 54 | returns the original release result when no mostrecenttimestamp timestamp is available | ported | [`crates/renovate-core/src/util.rs:9759`](../../../../../../../../crates/renovate-core/src/util.rs#L9759) |
+| 69 | marks a package as abandoned when mostrecenttimestamp plus threshold is before now | ported | [`crates/renovate-core/src/util.rs:9766`](../../../../../../../../crates/renovate-core/src/util.rs#L9766) |
+| 83 | does not mark a package as abandoned when mostrecenttimestamp plus threshold is after now | ported | [`crates/renovate-core/src/util.rs:9778`](../../../../../../../../crates/renovate-core/src/util.rs#L9778) |
+| 97 | preserves other properties in the release result | ported | [`crates/renovate-core/src/util.rs:9790`](../../../../../../../../crates/renovate-core/src/util.rs#L9790) |
+| 117 | handles exactly at the threshold boundary | ported | [`crates/renovate-core/src/util.rs:9803`](../../../../../../../../crates/renovate-core/src/util.rs#L9803) |
 

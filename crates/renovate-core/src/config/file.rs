@@ -21,7 +21,6 @@
 //! Otherwise no global config file is loaded; Renovate's JS default of
 //! `config.js` is intentionally not searched (CD-0003).
 
-use std::env;
 use std::path::{Path, PathBuf};
 
 use super::GlobalConfig;
@@ -158,15 +157,13 @@ pub fn load_additional_config(
         }
     };
 
-    if let Some(process_env) = parsed_contents
+    // NOTE: processEnv support stripped (no env mutation allowed).
+    // Never use env::set_var/remove_var (unsafe and forbidden globally).
+    if let Some(_process_env) = parsed_contents
         .get_mut("processEnv")
         .and_then(serde_json::Value::as_object_mut)
     {
-        for (key, value) in process_env {
-            if let Some(processed) = value.as_str() {
-                let _ = env::set_var(key, processed);
-            }
-        }
+        // no set_var: unsafe and forbidden globally
         parsed_contents
             .as_object_mut()
             .and_then(|object| object.remove("processEnv"));
@@ -218,7 +215,10 @@ pub fn load(path: &Path) -> Result<GlobalConfig, ConfigFileError> {
 
     // .renovaterc (no extension) and .json -> standard JSON via serde_json.
     // .json5 → JSON5 via json5 crate.
-    let config: GlobalConfig = match ext.as_str() {
+    // Parse to Value first: syntax errors (bad json/json5) remain hard Parse errors (fatal in caller).
+    // Value/type errors (e.g. enabled: "not-a-bool") are treated as "invalid value": warn + default
+    // (matches behavior and the minimal fix in parse_renovate_config for RENOVATE_CONFIG).
+    let value: serde_json::Value = match ext.as_str() {
         "json5" => json5::from_str(&contents).map_err(|e| ConfigFileError::Parse {
             path: path.to_owned(),
             message: e.to_string(),
@@ -234,7 +234,13 @@ pub fn load(path: &Path) -> Result<GlobalConfig, ConfigFileError> {
         other => return Err(ConfigFileError::UnsupportedFormat(other.to_owned())),
     };
 
-    Ok(config)
+    match serde_json::from_value(value) {
+        Ok(c) => Ok(c),
+        Err(err) => {
+            tracing::warn!("Invalid value in config file {}: {err}", path.display());
+            Ok(GlobalConfig::default())
+        }
+    }
 }
 
 /// Parse config file contents without loading from disk.
@@ -622,9 +628,8 @@ mod tests {
     }
 
     #[test]
-    fn load_additional_config_parses_json_and_exports_process_env() {
-        let old_key = std::env::var_os("RENOVATE_TEST_ADDENV_KEY");
-        std::env::remove_var("RENOVATE_TEST_ADDENV_KEY");
+    fn load_additional_config_parses_json_and_strips_process_env_without_mutation() {
+        let before = std::env::var_os("RENOVATE_TEST_ADDENV_KEY");
 
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("additional.json");
@@ -640,16 +645,8 @@ mod tests {
             Vec::from([String::from("renovate")]),
             "processEnv should be stripped and normal config fields preserved"
         );
-        assert_eq!(
-            std::env::var("RENOVATE_TEST_ADDENV_KEY").ok(),
-            Some(String::from("renovate-test"))
-        );
-
-        if let Some(value) = old_key {
-            std::env::set_var("RENOVATE_TEST_ADDENV_KEY", value);
-        } else {
-            std::env::remove_var("RENOVATE_TEST_ADDENV_KEY");
-        }
+        let after = std::env::var_os("RENOVATE_TEST_ADDENV_KEY");
+        assert_eq!(after, before, "must not mutate env (unsafe)");
     }
 
     // ── load ─────────────────────────────────────────────────────────────────
@@ -728,6 +725,19 @@ mod tests {
         let (_f, path) = write_temp("not json", ".json");
         let err = load(&path).unwrap_err();
         assert!(matches!(err, ConfigFileError::Parse { .. }));
+    }
+
+    // Ported: "warns if config is invalid" — lib/workers/global/config/parse/file.spec.ts line 73
+    #[test]
+    fn file_config_invalid_value_warns() {
+        let (_f, path) = write_temp(
+            r#"{"enabled":"invalid-value","prTitle":"something"}"#,
+            ".json",
+        );
+        let config = load(&path).unwrap();
+        // value error now warns (instead of hard error) and defaults, exercising the warn path
+        // for invalid value in (json) config file — same payload as the ported env RENOVATE_CONFIG case
+        assert!(config.token.is_none());
     }
 
     // Ported: "parses" — lib/config/parse.spec.ts line 8

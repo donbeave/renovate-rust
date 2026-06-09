@@ -7,7 +7,7 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 54 | calls getasync a first when migration not needed | pending | — |
-| 62 | calls getasync a first time to initialize the factory | ported | [`crates/renovate-core/src/json_writer.rs:173`](../../../../../../../../crates/renovate-core/src/json_writer.rs#L173) |
+| 62 | calls getasync a first time to initialize the factory | ported | [`crates/renovate-core/src/json_writer.rs:172`](../../../../../../../../crates/renovate-core/src/json_writer.rs#L172) |
 | 69 | calls getasync a second time to get the saved data from before | pending | — |
 | 77 | gets the filename from the class instance | pending | — |
 | 82 | gets the content from the class instance | pending | — |

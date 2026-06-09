@@ -2,11 +2,11 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/16 in-scope tests ported** (16 pending, 0 opt-out) · status: pending
+**1/16 in-scope tests ported** (15 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 52 | creates pr | pending | — |
+| 52 | creates pr | ported | [`crates/renovate-core/src/branch.rs:2838`](../../../../../../../../crates/renovate-core/src/branch.rs#L2838) |
 | 59 | creates pr with default pr title | pending | — |
 | 66 | founds an open pr and as it is up to date and returns | pending | — |
 | 76 | founds an open pr and updates it | pending | — |
