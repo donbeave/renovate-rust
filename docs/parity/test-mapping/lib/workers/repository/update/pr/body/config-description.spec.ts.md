@@ -6,22 +6,22 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 14 | renders stopupdating=true | ported | [`crates/renovate-core/src/util.rs:12676`](../../../../../../../../../crates/renovate-core/src/util.rs#L12676) |
-| 25 | renders rebasewhen="never" | ported | [`crates/renovate-core/src/util.rs:12684`](../../../../../../../../../crates/renovate-core/src/util.rs#L12684) |
-| 36 | renders rebasewhen="behind-base-branch" | ported | [`crates/renovate-core/src/util.rs:12702`](../../../../../../../../../crates/renovate-core/src/util.rs#L12702) |
-| 45 | renders timezone | ported | [`crates/renovate-core/src/util.rs:12720`](../../../../../../../../../crates/renovate-core/src/util.rs#L12720) |
-| 54 | renders utc as the default timezone | ported | [`crates/renovate-core/src/util.rs:12739`](../../../../../../../../../crates/renovate-core/src/util.rs#L12739) |
+| 14 | renders stopupdating=true | ported | [`crates/renovate-core/src/util.rs:12682`](../../../../../../../../../crates/renovate-core/src/util.rs#L12682) |
+| 25 | renders rebasewhen="never" | ported | [`crates/renovate-core/src/util.rs:12690`](../../../../../../../../../crates/renovate-core/src/util.rs#L12690) |
+| 36 | renders rebasewhen="behind-base-branch" | ported | [`crates/renovate-core/src/util.rs:12708`](../../../../../../../../../crates/renovate-core/src/util.rs#L12708) |
+| 45 | renders timezone | ported | [`crates/renovate-core/src/util.rs:12726`](../../../../../../../../../crates/renovate-core/src/util.rs#L12726) |
+| 54 | renders utc as the default timezone | ported | [`crates/renovate-core/src/util.rs:12745`](../../../../../../../../../crates/renovate-core/src/util.rs#L12745) |
 | 62 | summarizes cron schedules | pending | — |
-| 73 | displays later schedules | ported | [`crates/renovate-core/src/util.rs:12759`](../../../../../../../../../crates/renovate-core/src/util.rs#L12759) |
-| 81 | renders undefined schedule | ported | [`crates/renovate-core/src/util.rs:12781`](../../../../../../../../../crates/renovate-core/src/util.rs#L12781) |
+| 73 | displays later schedules | ported | [`crates/renovate-core/src/util.rs:12765`](../../../../../../../../../crates/renovate-core/src/util.rs#L12765) |
+| 81 | renders undefined schedule | ported | [`crates/renovate-core/src/util.rs:12787`](../../../../../../../../../crates/renovate-core/src/util.rs#L12787) |
 | 94 | renders empty schedule | pending | — |
 | 112 | does not take into account `force` | pending | — |
 | 131 | summarizes cron schedules (for automergeschedule) | pending | — |
 | 142 | summarizes both branch creation and automerge schedules | pending | — |
-| 161 | renders recreateclosed=true | ported | [`crates/renovate-core/src/util.rs:12789`](../../../../../../../../../crates/renovate-core/src/util.rs#L12789) |
-| 169 | does not render recreateclosed=false | ported | [`crates/renovate-core/src/util.rs:12807`](../../../../../../../../../crates/renovate-core/src/util.rs#L12807) |
-| 177 | does not render recreateclosed=undefined | ported | [`crates/renovate-core/src/util.rs:12815`](../../../../../../../../../crates/renovate-core/src/util.rs#L12815) |
-| 182 | renders singular | ported | [`crates/renovate-core/src/util.rs:12823`](../../../../../../../../../crates/renovate-core/src/util.rs#L12823) |
-| 190 | renders automerge | ported | [`crates/renovate-core/src/util.rs:12832`](../../../../../../../../../crates/renovate-core/src/util.rs#L12832) |
-| 195 | renders blocked automerge | ported | [`crates/renovate-core/src/util.rs:12840`](../../../../../../../../../crates/renovate-core/src/util.rs#L12840) |
+| 161 | renders recreateclosed=true | ported | [`crates/renovate-core/src/util.rs:12795`](../../../../../../../../../crates/renovate-core/src/util.rs#L12795) |
+| 169 | does not render recreateclosed=false | ported | [`crates/renovate-core/src/util.rs:12813`](../../../../../../../../../crates/renovate-core/src/util.rs#L12813) |
+| 177 | does not render recreateclosed=undefined | ported | [`crates/renovate-core/src/util.rs:12821`](../../../../../../../../../crates/renovate-core/src/util.rs#L12821) |
+| 182 | renders singular | ported | [`crates/renovate-core/src/util.rs:12829`](../../../../../../../../../crates/renovate-core/src/util.rs#L12829) |
+| 190 | renders automerge | ported | [`crates/renovate-core/src/util.rs:12838`](../../../../../../../../../crates/renovate-core/src/util.rs#L12838) |
+| 195 | renders blocked automerge | ported | [`crates/renovate-core/src/util.rs:12846`](../../../../../../../../../crates/renovate-core/src/util.rs#L12846) |
 

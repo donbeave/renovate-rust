@@ -12,7 +12,7 @@
 | [`lib/util/cache/package/impl/redis.spec.ts`](../../lib/util/cache/package/impl/redis.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
 | [`lib/util/cache/package/impl/sqlite.spec.ts`](../../lib/util/cache/package/impl/sqlite.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
 | [`lib/util/cache/package/index.spec.ts`](../../lib/util/cache/package/index.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/cache/package.rs:555`](../../../../../crates/renovate-core/src/cache/package.rs#L555) | ported |
-| [`lib/util/cache/package/key.spec.ts`](../../lib/util/cache/package/key.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2616`](../../../../../crates/renovate-core/src/branch.rs#L2616) | ported |
+| [`lib/util/cache/package/key.spec.ts`](../../lib/util/cache/package/key.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2617`](../../../../../crates/renovate-core/src/branch.rs#L2617) | ported |
 | [`lib/util/cache/package/ttl.spec.ts`](../../lib/util/cache/package/ttl.spec.ts.md) | 31 | 18 | 13 | 0 | [`crates/renovate-core/src/cache/package.rs:1340`](../../../../../crates/renovate-core/src/cache/package.rs#L1340) | partial |
 | [`lib/util/cache/package/with-cache.spec.ts`](../../lib/util/cache/package/with-cache.spec.ts.md) | 14 | 12 | 2 | 0 | [`crates/renovate-core/src/cache/package.rs:912`](../../../../../crates/renovate-core/src/cache/package.rs#L912) | partial |
 | [`lib/util/cache/repository/http-cache.spec.ts`](../../lib/util/cache/repository/http-cache.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/http.rs:1540`](../../../../../crates/renovate-core/src/http.rs#L1540) | ported |

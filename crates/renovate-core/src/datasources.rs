@@ -1086,6 +1086,104 @@ mod registry_tests {
         assert!(dep.homepage.is_none());
     }
 
+    // Ported: "Should handle parsing of sourceUrls correctly for GitLab also" — lib/modules/datasource/metadata.spec.ts line 228
+    #[test]
+    fn add_metadata_should_handle_parsing_of_sourceurls_correctly_for_gitlab_also() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "5.7.0".into(),
+                    release_timestamp: Some("2020-02-14T13:12:00.000Z".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "5.6.1".into(),
+                    release_timestamp: Some("2020-02-14T10:04:00.000Z".into()),
+                    ..Default::default()
+                },
+            ],
+            source_url: Some("https://gitlab.com/meno/dropzone/tree/master".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "npm", "dropzone");
+        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/dropzone"));
+    }
+
+    // Ported: "Should handle parsing/converting of GitLab sourceUrls with http and www correctly" — lib/modules/datasource/metadata.spec.ts line 345
+    #[test]
+    fn add_metadata_should_handle_parsing_converting_of_gitlab_sourceurls_with_http_and_www_correctly() {
+        let mut dep = ReleaseResult {
+            releases: vec![Release {
+                version: "5.7.0".into(),
+                ..Default::default()
+            }],
+            source_url: Some("http://gitlab.com/meno/dropzone/".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "maven", "dropzone");
+        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/dropzone"));
+    }
+
+    // Ported: "Should remove homepage when homepage and sourceUrl are same" — lib/modules/datasource/metadata.spec.ts line 464
+    #[test]
+    fn add_metadata_should_remove_homepage_when_homepage_and_sourceurl_are_same() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.1".into(),
+                    release_timestamp: Some("2000-01-01T12:34:56".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.2".into(),
+                    release_timestamp: Some("2000-01-02T12:34:56.000Z".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.3".into(),
+                    release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()),
+                    ..Default::default()
+                },
+            ],
+            homepage: Some("https://github.com/foo/bar".into()),
+            source_url: Some("https://github.com/foo/bar".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "npm", "some-pkg");
+        assert_eq!(dep.source_url.as_deref(), Some("https://github.com/foo/bar"));
+        assert!(dep.homepage.is_none());
+    }
+
+    // Ported: "Should delete gitlab homepage if its same as sourceUrl" — lib/modules/datasource/metadata.spec.ts line 503
+    #[test]
+    fn add_metadata_should_delete_gitlab_homepage_if_its_same_as_sourceurl() {
+        let mut dep = ReleaseResult {
+            releases: vec![
+                Release {
+                    version: "1.0.1".into(),
+                    release_timestamp: Some("2000-01-01T12:34:56".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.2".into(),
+                    release_timestamp: Some("2000-01-02T12:34:56.000Z".into()),
+                    ..Default::default()
+                },
+                Release {
+                    version: "1.0.3".into(),
+                    release_timestamp: Some("2000-01-03T14:34:56.000+02:00".into()),
+                    ..Default::default()
+                },
+            ],
+            source_url: Some("https://gitlab.com/meno/repo".into()),
+            homepage: Some("https://gitlab.com/meno/repo".into()),
+            ..Default::default()
+        };
+        add_metadata(&mut dep, "npm", "some-pkg");
+        assert_eq!(dep.source_url.as_deref(), Some("https://gitlab.com/meno/repo"));
+        assert!(dep.homepage.is_none());
+    }
+
     #[test]
     fn add_metadata_no_source_directory_for_simple_urls() {
         for url in &[
