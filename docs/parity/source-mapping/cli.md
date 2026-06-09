@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 39/150 in-scope files mapped (full=16 partial=23 stub=0 pending=111 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 40/150 in-scope files mapped (full=17 partial=23 stub=0 pending=110 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -122,7 +122,7 @@
 | `lib/workers/repository/error-config.ts` | full | [`crates/renovate-core/src/workers/repository/error_config.rs`](../../../crates/renovate-core/src/workers/repository/error_config.rs) | raiseConfigWarningIssue / raiseCredentialsWarningIssue / raiseWarningIssue (silent, body with validation details, dryRun early return + log, suppress, ensureIssue side, warn log) + handleOnboardingPr. handle_config_error + builders + full raise surfaces + single Ported test. (platform ensure/update and caller wiring in pending modules; debt isolated). |
 | `lib/workers/repository/error.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | handleError (switch on REPOSITORY_* and special, calls to raise* for validation/credentials, git rewrites via classify, logs, unknown default). The classify and log_level were pre-existing; full handle_error added here. Single test ported. (instrument, branchList delete, full caller in pending worker). |
 | `lib/workers/repository/errors-warnings.ts` | full | [`crates/renovate-core/src/workers/repository/errors_warnings.rs`](../../../crates/renovate-core/src/workers/repository/errors_warnings.rs) | getWarnings/getErrors (text formatters), getDepWarnings* (onboarding/PR/dashboard with emojify, suppress, stripping, files, dashboard link if issue). collect stub + get_*_text present; dep collection + 3 getDep* implemented here. Single test ported from spec. (calls from dashboard/worker in other pending). |
-| `lib/workers/repository/extract/extract-fingerprint-config.ts` | pending | — | — |
+| `lib/workers/repository/extract/extract-fingerprint-config.ts` | full | [`crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs`](../../../crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs) | generateFingerprintConfig (managerList from enabledManagers, managers with getFilteredManagerConfig for normal + getCustomManagerFields for regex/custom, templates, filePatterns, npmrc, etc). The get_extract_fingerprint_config is the per-upgrade fingerprint string helper (sorted fields). Single test ported for the generate filtering. (full manager list, custom handling in the impl). |
 | `lib/workers/repository/extract/file-match.ts` | pending | — | — |
 | `lib/workers/repository/extract/index.ts` | pending | — | — |
 | `lib/workers/repository/extract/manager-files.ts` | pending | — | — |
