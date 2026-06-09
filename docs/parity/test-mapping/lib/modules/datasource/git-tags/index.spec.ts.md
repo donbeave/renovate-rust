@@ -13,5 +13,5 @@
 | 74 | returns digest for tag | ported | [`crates/renovate-core/src/datasources/git_tags.rs:142`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L142) |
 | 84 | returns digest for head | ported | [`crates/renovate-core/src/datasources/git_tags.rs:149`](../../../../../../../crates/renovate-core/src/datasources/git_tags.rs#L149) |
 | 94 | returns digest for head with authentication environment variables | opt-out | mocks TypeScript-internal simpleGit infrastructure; no equivalent Rust mock surface |
-| 121 | returns digest for head with authentication environment variables for datasource type git-tags | ported | [`crates/renovate-core/src/util.rs:9387`](../../../../../../../crates/renovate-core/src/util.rs#L9387) |
+| 121 | returns digest for head with authentication environment variables for datasource type git-tags | ported | [`crates/renovate-core/src/util.rs:9386`](../../../../../../../crates/renovate-core/src/util.rs#L9386) |
 

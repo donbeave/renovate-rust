@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | handles readables | ported | [`crates/renovate-core/src/util.rs:10941`](../../../../../crates/renovate-core/src/util.rs#L10941) |
+| 6 | handles readables | ported | [`crates/renovate-core/src/util.rs:10940`](../../../../../crates/renovate-core/src/util.rs#L10940) |
 

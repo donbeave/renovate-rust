@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 11 | return combined env | ported | [`crates/renovate-core/src/util.rs:13844`](../../../../../crates/renovate-core/src/util.rs#L13844) |
-| 26 | maintains precendence | ported | [`crates/renovate-core/src/util.rs:13876`](../../../../../crates/renovate-core/src/util.rs#L13876) |
+| 11 | return combined env | ported | [`crates/renovate-core/src/util.rs:13843`](../../../../../crates/renovate-core/src/util.rs#L13843) |
+| 26 | maintains precendence | ported | [`crates/renovate-core/src/util.rs:13875`](../../../../../crates/renovate-core/src/util.rs#L13875) |
 

@@ -6,6 +6,6 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/platform/local/index.spec.ts`](../../lib/modules/platform/local/index.spec.ts.md) | 28 | 28 | 0 | 0 | [`crates/renovate-core/src/util.rs:11867`](../../../../../crates/renovate-core/src/util.rs#L11867) | ported |
+| [`lib/modules/platform/local/index.spec.ts`](../../lib/modules/platform/local/index.spec.ts.md) | 28 | 28 | 0 | 0 | [`crates/renovate-core/src/util.rs:11866`](../../../../../crates/renovate-core/src/util.rs#L11866) | ported |
 | [`lib/modules/platform/local/scm.spec.ts`](../../lib/modules/platform/local/scm.spec.ts.md) | 13 | 13 | 0 | 0 | [`crates/renovate-core/src/platform/local.rs:422`](../../../../../crates/renovate-core/src/platform/local.rs#L422) | ported |
 
