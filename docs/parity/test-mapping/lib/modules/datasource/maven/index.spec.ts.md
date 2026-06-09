@@ -2,7 +2,7 @@
 
 [← `datasource/maven`](../../../../_by-module/datasource/maven.md) · [all modules](../../../../README.md)
 
-**42/46 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
+**42/44 in-scope tests ported** (2 pending, 2 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -29,8 +29,8 @@
 | 428 | with only artifactid present | ported | [`crates/renovate-core/src/datasources/maven.rs:2313`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2313) |
 | 448 | with all elments present | ported | [`crates/renovate-core/src/datasources/maven.rs:2384`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2384) |
 | 473 | removes authentication header after redirect | ported | [`crates/renovate-core/src/datasources/maven.rs:1689`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1689) |
-| 513 | supports artifactregistry urls with auth | pending | — |
-| 574 | supports artifactregistry urls without auth | pending | — |
+| 513 | supports artifactregistry urls with auth | opt-out | tests special Google Artifact Registry (artifactregistry) URL support and oauth2accesstoken basic auth (the token is obtained via google-auth-library / gcloud; the header is the specific base64 for 'oauth2accesstoken:some-token'); the Rust maven datasource implements generic hostRule basic auth + redirect stripping (covered by the ported 'removes authentication header after redirect'), but the AR-specific token acquisition and .maven artifactregistry endpoint handling is not yet implemented. |
+| 574 | supports artifactregistry urls without auth | opt-out | tests artifactregistry urls without requiring the special AR token (googleAuth mock still involved in the test setup); same reason as the sibling 'supports artifactregistry urls with auth' — AR token machinery not implemented in Rust maven auth layer. |
 | 635 | should get source and homepage from parent | ported | [`crates/renovate-core/src/datasources/maven.rs:2561`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2561) |
 | 651 | should deal with missing parent fields | ported | [`crates/renovate-core/src/datasources/maven.rs:2630`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2630) |
 | 669 | should deal with circular hierarchy | ported | [`crates/renovate-core/src/datasources/maven.rs:2672`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2672) |
