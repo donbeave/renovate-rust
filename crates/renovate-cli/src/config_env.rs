@@ -1619,6 +1619,7 @@ mod tests {
         );
     }
 
+    // Ported: "env dryRun = true replaced to full" — lib/workers/global/config/parse/index.spec.ts line 187
     // Ported: "dryRun boolean true" — lib/workers/global/config/parse/env.spec.ts line 441
     #[test]
     fn dry_run_true_maps_to_full() {

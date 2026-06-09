@@ -2,7 +2,7 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**4/35 in-scope tests ported** (31 pending, 0 opt-out) · status: partial
+**5/35 in-scope tests ported** (30 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -16,7 +16,7 @@
 | 163 | massages trailing slash into endpoint | pending | — |
 | 172 | parses global manager config | pending | — |
 | 179 | parses host rules from env | pending | — |
-| 187 | env dryrun = true replaced to full | pending | — |
+| 187 | env dryrun = true replaced to full | ported | [`crates/renovate-cli/src/config_env.rs:1622`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1622) |
 | 197 | cli dryrun = true replaced to full | pending | — |
 | 204 | resolves global presets | pending | — |
 | 232 | throws exception if global presets cannot be resolved | pending | — |
