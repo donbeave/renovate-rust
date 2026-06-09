@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 69/150 in-scope files mapped (full=19 partial=50 stub=0 pending=81 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 70/150 in-scope files mapped (full=19 partial=51 stub=0 pending=80 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -157,7 +157,7 @@
 | `lib/workers/repository/onboarding/pr/index.ts` | pending | — | — |
 | `lib/workers/repository/onboarding/pr/pr-list.ts` | pending | — | — |
 | `lib/workers/repository/package-files.ts` | pending | — | — |
-| `lib/workers/repository/process/extract-update.ts` | pending | — | — |
+| `lib/workers/repository/process/extract-update.ts` | partial | [`crates/renovate-core/src/workers/repository/process/extract_update.rs`](../../../crates/renovate-core/src/workers/repository/process/extract_update.rs) | extract (cache check stub + TODO checkout/extractAll/stats/ensureGithubToken), lookup (fetchVulns x2 + fetchUpdates + calculateLibYears + branchify TODO + reportMaliciousSkippedDependencies + sort), update (write if onboarded), is_cache_extract_valid (flat), report fn; single test ported. Full async/cache/branchify/vulns pending other units. |
 | `lib/workers/repository/process/fetch.ts` | pending | — | — |
 | `lib/workers/repository/process/fingerprint-fields.ts` | pending | — | — |
 | `lib/workers/repository/process/index.ts` | pending | — | — |

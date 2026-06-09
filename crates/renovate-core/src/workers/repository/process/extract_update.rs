@@ -1,6 +1,8 @@
 //! Extract-update bridge logic.
 //!
 //! Mirrors `lib/workers/repository/process/extract-update.ts`.
+//!
+//! @parity `lib/workers/repository/process/extract-update.ts` partial — extract (cache check stub + TODO checkout/extractAll/stats/ensureGithubToken), lookup (fetchVulns x2 + fetchUpdates + calculateLibYears + branchify TODO + reportMaliciousSkippedDependencies + sort), update (write if onboarded), is_cache_extract_valid (flat), report fn; single test ported. Full async/cache/branchify/vulns pending other units.
 
 use std::collections::HashMap;
 
