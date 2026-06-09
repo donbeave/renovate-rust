@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 62/150 in-scope files mapped (full=18 partial=44 stub=0 pending=88 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 63/150 in-scope files mapped (full=18 partial=45 stub=0 pending=87 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -147,7 +147,7 @@
 | `lib/workers/repository/onboarding/branch/check.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/branch/check.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/branch/check.rs) | isOnboarded (silent mode early return, requireConfig optional/ignored bypass, onboarding cache valid + sha match, closed onboarding PR handling + ensureComment, configFileExists + packageJsonConfigExists using scm/fs, throws REPOSITORY_CLOSED_ONBOARDING / REPOSITORY_NO_CONFIG); getOnboardingPr; single test ported (verified). Full platform/scm async wiring, cache details, error consts, callers (init/config checkOnboardingBranch, onboarding index) pending other units. |
 | `lib/workers/repository/onboarding/branch/commit-message.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/branch/commit_message.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/branch/commit_message.rs) | OnboardingCommitMessageFactory (wraps CommitMessageFactory, sets subject to onboardingCommitMessage or `add ${configFile}`); single test ported. Uses model commit message factory (ported); full integration in onboarding create/rebase and body appending pending. |
 | `lib/workers/repository/onboarding/branch/config.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/branch/config.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/branch/config.rs) | getOnboardingConfig (clone inherited/global + searchDefaultOnboardingPreset for group/renovate-config or org/.platform:renovate-config using getPreset with PRESET_DEP_NOT_FOUND fallback), getOnboardingConfigContents (EditorConfig + JSONWriter); single test ported. Uses json_writer for formatting; preset search simulated for unit (full async getPreset + platform in pending); callers in onboarding create/rebase pending. |
-| `lib/workers/repository/onboarding/branch/create.ts` | pending | — | — |
+| `lib/workers/repository/onboarding/branch/create.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/branch/create.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/branch/create.rs) | createOnboardingBranch (get configFile + contents via sibling, OnboardingCommitMessageFactory for message or supplied, optional commitBody append via template, dryRun early return null, prTitle (semantic or inherited), scm.commitAndPush with force + platformCommit); single test ported. Full scm/platform wiring, template, higher caller (index/branch) pending other units. |
 | `lib/workers/repository/onboarding/branch/index.ts` | pending | — | — |
 | `lib/workers/repository/onboarding/branch/onboarding-branch-cache.ts` | pending | — | — |
 | `lib/workers/repository/onboarding/branch/rebase.ts` | pending | — | — |

@@ -1,6 +1,7 @@
 //! Create onboarding branch.
 //!
 //! Mirrors `lib/workers/repository/onboarding/branch/create.ts`.
+//! @parity `lib/workers/repository/onboarding/branch/create.ts` partial — createOnboardingBranch (get configFile + contents via sibling, OnboardingCommitMessageFactory for message or supplied, optional commitBody append via template, dryRun early return null, prTitle (semantic or inherited), scm.commitAndPush with force + platformCommit); single test ported. Full scm/platform wiring, template, higher caller (index/branch) pending other units.
 
 use serde::{Deserialize, Serialize};
 
