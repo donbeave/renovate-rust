@@ -16,6 +16,6 @@
 | 124 | getmanagerconfig() | ported | [`crates/renovate-core/src/config.rs:898`](../../../../../crates/renovate-core/src/config.rs#L898) |
 | 142 | filterconfig() | ported | [`crates/renovate-core/src/config.rs:915`](../../../../../crates/renovate-core/src/config.rs#L915) |
 | 148 | highest vulnerabilityseverity maintained when config is vulnerability alert | ported | [`crates/renovate-core/src/config.rs:921`](../../../../../crates/renovate-core/src/config.rs#L921) |
-| 163 | removes all global config | ported | [`crates/renovate-core/src/config.rs:986`](../../../../../crates/renovate-core/src/config.rs#L986) |
-| 170 | retains inherited config | ported | [`crates/renovate-core/src/config.rs:995`](../../../../../crates/renovate-core/src/config.rs#L995) |
+| 163 | removes all global config | ported | [`crates/renovate-core/src/config.rs:930`](../../../../../crates/renovate-core/src/config.rs#L930) |
+| 170 | retains inherited config | ported | [`crates/renovate-core/src/config.rs:939`](../../../../../crates/renovate-core/src/config.rs#L939) |
 

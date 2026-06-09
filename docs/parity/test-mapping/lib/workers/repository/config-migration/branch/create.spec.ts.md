@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 36 | applies the default commit message | ported | [`crates/renovate-core/src/branch.rs:2813`](../../../../../../../../crates/renovate-core/src/branch.rs#L2813) |
-| 58 | applies supplied commit message | ported | [`crates/renovate-core/src/branch.rs:2830`](../../../../../../../../crates/renovate-core/src/branch.rs#L2830) |
+| 36 | applies the default commit message | ported | [`crates/renovate-core/src/branch.rs:2824`](../../../../../../../../crates/renovate-core/src/branch.rs#L2824) |
+| 58 | applies supplied commit message | ported | [`crates/renovate-core/src/branch.rs:2841`](../../../../../../../../crates/renovate-core/src/branch.rs#L2841) |
 | 85 | migrates renovate config in package.json | opt-out | the special case for when the migrated config is embedded in package.json 'renovate' field (read the package, extract the renovate config to a new renovate.json, strip the 'renovate' key from package.json in the commit files, and the specific files array in commitAndPush) is in the pending worker/index orchestration for createConfigMigrationBranch (per @parity comment in branch.rs; the file changes/stripping logic not yet in the Rust create surface). The message production for migration is covered by the other ported tests in the spec and the config_migration_* helpers. Opt as the package.json cleanup behavior requires the pending orchestration wiring. |
-| 125 | to the default commit message | ported | [`crates/renovate-core/src/branch.rs:2854`](../../../../../../../../crates/renovate-core/src/branch.rs#L2854) |
-| 154 | to the default commit message | ported | [`crates/renovate-core/src/branch.rs:2854`](../../../../../../../../crates/renovate-core/src/branch.rs#L2854) |
-| 182 | uses user defined semantic commit type | ported | [`crates/renovate-core/src/branch.rs:2843`](../../../../../../../../crates/renovate-core/src/branch.rs#L2843) |
+| 125 | to the default commit message | ported | [`crates/renovate-core/src/branch.rs:2865`](../../../../../../../../crates/renovate-core/src/branch.rs#L2865) |
+| 154 | to the default commit message | ported | [`crates/renovate-core/src/branch.rs:2865`](../../../../../../../../crates/renovate-core/src/branch.rs#L2865) |
+| 182 | uses user defined semantic commit type | ported | [`crates/renovate-core/src/branch.rs:2854`](../../../../../../../../crates/renovate-core/src/branch.rs#L2854) |
 

@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | all values in options are sorted | ported | [`crates/renovate-core/src/config.rs:1004`](../../../../../crates/renovate-core/src/config.rs#L1004) |
+| 4 | all values in options are sorted | ported | [`crates/renovate-core/src/config.rs:948`](../../../../../crates/renovate-core/src/config.rs#L948) |
 

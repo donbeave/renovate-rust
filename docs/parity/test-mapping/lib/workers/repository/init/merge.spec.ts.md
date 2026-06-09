@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**12/39 in-scope tests ported** (27 pending, 0 opt-out) · status: partial
+**8/39 in-scope tests ported** (31 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -24,10 +24,10 @@
 | 289 | throws on error | pending | — |
 | 306 | uses onboarding config if silent | pending | — |
 | 318 | throws error if misconfigured | pending | — |
-| 334 | migrates nested config | ported | [`crates/renovate-core/src/config.rs:930`](../../../../../../../crates/renovate-core/src/config.rs#L930) |
-| 364 | ignores presets | ported | [`crates/renovate-core/src/config.rs:949`](../../../../../../../crates/renovate-core/src/config.rs#L949) |
-| 383 | continues if no errors | ported | [`crates/renovate-core/src/config.rs:964`](../../../../../../../crates/renovate-core/src/config.rs#L964) |
-| 394 | continues if no errors-2 | ported | [`crates/renovate-core/src/config.rs:975`](../../../../../../../crates/renovate-core/src/config.rs#L975) |
+| 334 | migrates nested config | pending | — |
+| 364 | ignores presets | pending | — |
+| 383 | continues if no errors | pending | — |
+| 394 | continues if no errors-2 | pending | — |
 | 414 | sets npmtoken to npmrc when it is not inside encrypted | pending | — |
 | 437 | sets npmtoken to npmrc when it is inside encrypted | pending | — |
 | 464 | deletes user conifgured env after setting in mem cache | pending | — |

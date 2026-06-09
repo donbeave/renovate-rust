@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 8 | renders empty footer | ported | [`crates/renovate-core/src/branch.rs:2693`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2693) |
-| 19 | renders prfooter | ported | [`crates/renovate-core/src/branch.rs:2699`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2699) |
+| 8 | renders empty footer | ported | [`crates/renovate-core/src/branch.rs:2704`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2704) |
+| 19 | renders prfooter | ported | [`crates/renovate-core/src/branch.rs:2710`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2710) |
 
