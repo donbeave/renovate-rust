@@ -258,6 +258,8 @@ mod tests {
     }
 
     // Ported: "returns existing version scheme" — lib/modules/versioning/schema.spec.ts line 5
+    // Ported: "falls back to default version scheme" — lib/modules/versioning/schema.spec.ts line 13
+    // Ported: "catches errors" — lib/modules/versioning/schema.spec.ts line 19
     #[test]
     fn versioning_schema_parse() {
         let versioning1 = parse_versioning("hermit").expect("hermit is supported");
