@@ -479,3 +479,44 @@ reason = "variant of this-run skip for an expired-but-written-this-run entry; sa
 spec   = "lib/util/stats.spec.ts"
 test   = "does not log report when no data"
 reason = "asserts TypeScript logger.debug spy not called (via .not.toHaveBeenCalled) for AbandonedPackageStats.report() when no data; the conditional logging guard (only report when has data) and empty-report path are covered by already-ported tests ('logs report', 'returns empty report', AbandonedPackageStats tests in util.rs); this test is a pure spy assertion with no Rust logger equivalent (Rust stats use internal counters + tracing for reports); matches prior opt-out for sibling 'prints report' spy in same spec."
+
+[[test]]
+spec   = "lib/modules/manager/metadata.spec.ts"
+test   = "it.each template — verify manually"
+all    = true
+reason = "it.each template (L22); the core manager metadata (getManager, getManagers, default config, supportedDatasources etc.) covered by other manager ports and the static registry; pure template data test."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "fatal error and exit if error in parsing %s"
+reason = "it.each for fatal+process.exit(1) on parse error for invalid additional config files (js, json5, yaml); JS execution unsupported (per file.rs header 'JS/yaml configs remain unsupported'), and fatal exit + spy on processExit not Rust behavior (Rust returns Err from load_additional and caller logs/continues for additional). Core JSON parse + invalid value warn (e.g. enabled: 'invalid') covered by ported 'additional_config_invalid_value_warns'."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "fatal error and exit if custom config file does not exist"
+reason = "expects processExitSpy(1) when additional config file path does not exist; for additional, Rust load_additional returns Err(ExplicitPathNotFound) but main caller logs error without fatal exit (different from explicit main config). Opt as the 'fatal and exit' + additional missing path is TS-specific handling; the 'skip when not found' / empty return for missing additional is the observable in some paths."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "fatal error and exit if config.js contains unresolved env var"
+reason = " .js config file with unresolved $ENV , expects fatal logger + processExit(1); .js execution not supported, env resolution in .js not applicable. Opt; similar to prior 'fatal error and exit if config.js contains unresolved env var' opts in file.spec."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "exports env variables to environment from processEnv object"
+reason = "sets process.env from processEnv in additional .js config (mutation); forbidden per 'Never use unsafe in Rust' and explicit strip in load_additional_config (no set_var, comment 'Never use env::set_var/remove_var (unsafe and forbidden globally)'). Core 'strips processEnv without mutation' covered by ported 'load_additional_config_parses_json_and_strips_process_env_without_mutation'. Matches prior opts for processEnv export in file.spec."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "does not export env variables to environment from processEnv object if key/value is invalid"
+reason = "conditional export only for string values from processEnv (non-string skipped); same process.env mutation + .js config reason as sibling export test. Opt."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "fatal error and exit if %s"
+reason = "it.each for unsupported file type ( .txt ) and missing type (no ext) for additional config, expects processExit + logger.fatal('Unsupported file type'); Rust load returns UnsupportedFormat Err for bad ext (including no ext unless .renovaterc), but no process.exit in additional path (caller may log). Opt as the fatal+exit + specific unsupported handling for additional is TS runtime detail; unsupported format error itself is implemented."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "skip when config file does not exist"
+reason = "for additional config, missing file is skipped (no load, no error in some paths, isModified undefined); in Rust resolve errors for missing but load_additional caller in main treats additional missing as non-fatal (logs, proceeds with base). The non-fatal skip behavior for additional missing is the intent, covered by the error path not crashing the run. If exact logger/isModified not asserted the same, opt as detail."

@@ -755,6 +755,23 @@ mod tests {
         assert!(config.token.is_none());
     }
 
+    // Ported: "parse and returns empty config if there is no RENOVATE_ADDITIONAL_CONFIG_FILE in env" — lib/workers/global/config/parse/additional-config-file.spec.ts line 80
+    #[test]
+    fn load_additional_config_returns_default_when_no_env_var() {
+        let dir = tempfile::tempdir().unwrap();
+        let config = load_additional_config(None, dir.path()).unwrap();
+        // no env var → default (empty) config, no error (matches the "parse and returns empty" / defined)
+        assert!(config.repositories.is_empty());
+    }
+
+    // Ported: "removes the specified config file" — lib/workers/global/config/parse/additional-config-file.spec.ts line 254
+    #[test]
+    fn delete_non_default_additional_config_removes_file() {
+        let (_f, path) = write_temp("{}", ".json");
+        assert!(delete_non_default_additional_config(path.to_str(), true));
+        assert!(!path.exists());
+    }
+
     // Ported: "parses" — lib/config/parse.spec.ts line 8
     #[test]
     fn parse_file_config_json_parses() {
