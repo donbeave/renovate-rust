@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 23 | returns undefined if not initialized | ported | [`crates/renovate-core/src/cache/package.rs:827`](../../../../../../../crates/renovate-core/src/cache/package.rs#L827) |
-| 33 | delegates init to backend | ported | [`crates/renovate-core/src/cache/package.rs:835`](../../../../../../../crates/renovate-core/src/cache/package.rs#L835) |
-| 41 | delegates get to backend | ported | [`crates/renovate-core/src/cache/package.rs:555`](../../../../../../../crates/renovate-core/src/cache/package.rs#L555) |
-| 51 | delegates set to backend | ported | [`crates/renovate-core/src/cache/package.rs:564`](../../../../../../../crates/renovate-core/src/cache/package.rs#L564) |
-| 64 | delegates setwithrawttl to backend | ported | [`crates/renovate-core/src/cache/package.rs:581`](../../../../../../../crates/renovate-core/src/cache/package.rs#L581) |
-| 77 | deduplicates get via memcache | ported | [`crates/renovate-core/src/cache/package.rs:882`](../../../../../../../crates/renovate-core/src/cache/package.rs#L882) |
-| 89 | setwithrawttl updates memcache | ported | [`crates/renovate-core/src/cache/package.rs:898`](../../../../../../../crates/renovate-core/src/cache/package.rs#L898) |
-| 99 | delegates cleanup to backend.destroy | ported | [`crates/renovate-core/src/cache/package.rs:857`](../../../../../../../crates/renovate-core/src/cache/package.rs#L857) |
-| 105 | delegates getcachetype to backend | ported | [`crates/renovate-core/src/cache/package.rs:846`](../../../../../../../crates/renovate-core/src/cache/package.rs#L846) |
+| 23 | returns undefined if not initialized | ported | [`crates/renovate-core/src/cache/package.rs:823`](../../../../../../../crates/renovate-core/src/cache/package.rs#L823) |
+| 33 | delegates init to backend | ported | [`crates/renovate-core/src/cache/package.rs:831`](../../../../../../../crates/renovate-core/src/cache/package.rs#L831) |
+| 41 | delegates get to backend | ported | [`crates/renovate-core/src/cache/package.rs:556`](../../../../../../../crates/renovate-core/src/cache/package.rs#L556) |
+| 51 | delegates set to backend | ported | [`crates/renovate-core/src/cache/package.rs:565`](../../../../../../../crates/renovate-core/src/cache/package.rs#L565) |
+| 64 | delegates setwithrawttl to backend | ported | [`crates/renovate-core/src/cache/package.rs:582`](../../../../../../../crates/renovate-core/src/cache/package.rs#L582) |
+| 77 | deduplicates get via memcache | ported | [`crates/renovate-core/src/cache/package.rs:878`](../../../../../../../crates/renovate-core/src/cache/package.rs#L878) |
+| 89 | setwithrawttl updates memcache | ported | [`crates/renovate-core/src/cache/package.rs:894`](../../../../../../../crates/renovate-core/src/cache/package.rs#L894) |
+| 99 | delegates cleanup to backend.destroy | ported | [`crates/renovate-core/src/cache/package.rs:853`](../../../../../../../crates/renovate-core/src/cache/package.rs#L853) |
+| 105 | delegates getcachetype to backend | ported | [`crates/renovate-core/src/cache/package.rs:842`](../../../../../../../crates/renovate-core/src/cache/package.rs#L842) |
 

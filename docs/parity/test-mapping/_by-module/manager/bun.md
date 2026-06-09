@@ -8,5 +8,5 @@
 |---|--:|--:|--:|--:|---|---|
 | [`lib/modules/manager/bun/artifacts.spec.ts`](../../lib/modules/manager/bun/artifacts.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
 | [`lib/modules/manager/bun/extract.spec.ts`](../../lib/modules/manager/bun/extract.spec.ts.md) | 13 | 0 | 13 | 0 | — | pending |
-| [`lib/modules/manager/bun/utils.spec.ts`](../../lib/modules/manager/bun/utils.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/extractors/npm.rs:4749`](../../../../../crates/renovate-core/src/extractors/npm.rs#L4749) | ported |
+| [`lib/modules/manager/bun/utils.spec.ts`](../../lib/modules/manager/bun/utils.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/extractors/npm.rs:4776`](../../../../../crates/renovate-core/src/extractors/npm.rs#L4776) | ported |
 

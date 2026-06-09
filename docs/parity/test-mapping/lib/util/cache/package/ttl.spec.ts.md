@@ -6,35 +6,35 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 12 | returns undefined when no cachettloverride config exists | ported | [`crates/renovate-core/src/cache/package.rs:1345`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1345) |
+| 12 | returns undefined when no cachettloverride config exists | ported | [`crates/renovate-core/src/cache/package.rs:1341`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1341) |
 | 20 | returns undefined when cachettloverride is empty | pending | — |
-| 30 | returns exact match when namespace exists in config | ported | [`crates/renovate-core/src/cache/package.rs:1353`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1353) |
+| 30 | returns exact match when namespace exists in config | ported | [`crates/renovate-core/src/cache/package.rs:1349`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1349) |
 | 45 | returns undefined when exact match is not a number | pending | — |
 | 58 | returns undefined when no matching namespace found | pending | — |
-| 72 | matches simple glob patterns | ported | [`crates/renovate-core/src/cache/package.rs:1365`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1365) |
-| 88 | matches wildcard pattern for all namespaces | ported | [`crates/renovate-core/src/cache/package.rs:1378`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1378) |
-| 108 | matches complex glob patterns with braces | ported | [`crates/renovate-core/src/cache/package.rs:1394`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1394) |
+| 72 | matches simple glob patterns | ported | [`crates/renovate-core/src/cache/package.rs:1361`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1361) |
+| 88 | matches wildcard pattern for all namespaces | ported | [`crates/renovate-core/src/cache/package.rs:1374`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1374) |
+| 108 | matches complex glob patterns with braces | ported | [`crates/renovate-core/src/cache/package.rs:1390`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1390) |
 | 124 | handles special characters in namespace patterns | pending | — |
-| 143 | matches regex patterns | ported | [`crates/renovate-core/src/cache/package.rs:1407`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1407) |
-| 161 | matches patterns with regex escape sequences | ported | [`crates/renovate-core/src/cache/package.rs:1452`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1452) |
-| 179 | prioritizes exact match over glob patterns | ported | [`crates/renovate-core/src/cache/package.rs:1419`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1419) |
-| 195 | returns longest matching pattern when multiple patterns apply | ported | [`crates/renovate-core/src/cache/package.rs:1436`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1436) |
-| 209 | selects longest matching pattern across all configs | ported | [`crates/renovate-core/src/cache/package.rs:1464`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1464) |
+| 143 | matches regex patterns | ported | [`crates/renovate-core/src/cache/package.rs:1403`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1403) |
+| 161 | matches patterns with regex escape sequences | ported | [`crates/renovate-core/src/cache/package.rs:1448`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1448) |
+| 179 | prioritizes exact match over glob patterns | ported | [`crates/renovate-core/src/cache/package.rs:1415`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1415) |
+| 195 | returns longest matching pattern when multiple patterns apply | ported | [`crates/renovate-core/src/cache/package.rs:1432`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1432) |
+| 209 | selects longest matching pattern across all configs | ported | [`crates/renovate-core/src/cache/package.rs:1460`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1460) |
 | 228 | skips non-numeric values and selects next longest matching pattern | pending | — |
 | 243 | returns undefined when no patterns match | pending | — |
-| 256 | applies patterns consistently regardless of case in config order | ported | [`crates/renovate-core/src/cache/package.rs:1583`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1583) |
-| 271 | handles empty string pattern | ported | [`crates/renovate-core/src/cache/package.rs:1610`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1610) |
+| 256 | applies patterns consistently regardless of case in config order | ported | [`crates/renovate-core/src/cache/package.rs:1579`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1579) |
+| 271 | handles empty string pattern | ported | [`crates/renovate-core/src/cache/package.rs:1606`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1606) |
 | 286 | treats null and undefined values as invalid | pending | — |
-| 306 | handles very large numbers | ported | [`crates/renovate-core/src/cache/package.rs:1491`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1491) |
-| 318 | handles negative numbers | ported | [`crates/renovate-core/src/cache/package.rs:1481`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1481) |
+| 306 | handles very large numbers | ported | [`crates/renovate-core/src/cache/package.rs:1487`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1487) |
+| 318 | handles negative numbers | ported | [`crates/renovate-core/src/cache/package.rs:1477`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1477) |
 | 330 | treats string numbers as invalid, only accepts number types | pending | — |
 | 350 | returns default values when no overrides set | pending | — |
 | 363 | uses override for softttlminutes when available | pending | — |
 | 378 | applies custom cachehardttlminutes from config | pending | — |
-| 391 | resolves ttl with glob pattern overrides | ported | [`crates/renovate-core/src/cache/package.rs:1501`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1501) |
-| 407 | resolves ttl correctly with multiple overlapping overrides | ported | [`crates/renovate-core/src/cache/package.rs:1514`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1514) |
+| 391 | resolves ttl with glob pattern overrides | ported | [`crates/renovate-core/src/cache/package.rs:1497`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1497) |
+| 407 | resolves ttl correctly with multiple overlapping overrides | ported | [`crates/renovate-core/src/cache/package.rs:1510`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1510) |
 | 427 | uses maximum of softttlminutes and cachehardttlminutes for hardttlminutes | pending | — |
-| 443 | handles negative cachehardttlminutes config | ported | [`crates/renovate-core/src/cache/package.rs:1532`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1532) |
-| 461 | handles zero as valid override value | ported | [`crates/renovate-core/src/cache/package.rs:1546`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1546) |
+| 443 | handles negative cachehardttlminutes config | ported | [`crates/renovate-core/src/cache/package.rs:1528`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1528) |
+| 461 | handles zero as valid override value | ported | [`crates/renovate-core/src/cache/package.rs:1542`](../../../../../../../crates/renovate-core/src/cache/package.rs#L1542) |
 | 477 | uses fallback when override is not a number | pending | — |
 

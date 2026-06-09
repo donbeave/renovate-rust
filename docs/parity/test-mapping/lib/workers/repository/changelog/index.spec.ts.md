@@ -7,5 +7,5 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 13 | embedchangelogs | pending | — |
-| 55 | only fetches changelogs for upgrades whose fetchchangelogs matches the stage name | ported | [`crates/renovate-core/src/workers/repository/changelog/index.rs:164`](../../../../../../../crates/renovate-core/src/workers/repository/changelog/index.rs#L164) |
+| 55 | only fetches changelogs for upgrades whose fetchchangelogs matches the stage name | ported | [`crates/renovate-core/src/workers/repository/changelog/index.rs:165`](../../../../../../../crates/renovate-core/src/workers/repository/changelog/index.rs#L165) |
 
