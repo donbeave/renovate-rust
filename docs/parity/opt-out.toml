@@ -641,3 +641,63 @@ spec   = "lib/workers/repository/init/index.spec.ts"
 test   = "warns on unsupported options"
 reason = "asserts exact logger.logger.warn spy call (with { platform: 'github' } and the message naming 'filterUnavailableUsers' / 'expandCodeOwnersGroups' as not supported on the platform) after initRepo with those in the repo config result; core init continues (options ignored for platform); no direct Rust equivalent for the spy assertion or the exact unsupported-options-for-platform message shape (tracing in init or config layer may log but without this test's spy harness). Opt as pure TS logger spy + platform-specific unsupported message."
 
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "warns when cli config overrides repositories from file config"
+reason = "asserts TypeScript logger.warn spy behavior (exact call shape with config and message about override) when cli config overrides repositories from file config; no direct Rust equivalent (tracing), core override logic covered by other ports or not the spy part. Opt as pure TS logger spy."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "warns when cli config overrides repositories from env config"
+reason = "asserts TypeScript logger.warn spy behavior (exact call shape with config and message about override) when cli config overrides repositories from env config; no direct Rust equivalent (tracing), core override logic covered by other ports or not the spy part. Opt as pure TS logger spy."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "does not warn when cli config sets repositories without override"
+reason = "asserts TypeScript logger does not warn (spy absence) when cli config sets repositories without override; no direct Rust equivalent (tracing), core logic covered elsewhere. Opt as pure TS logger spy absence check."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "does not warn when cli config has no repositories"
+reason = "asserts TypeScript logger does not warn (spy absence) when cli config has no repositories; no direct Rust equivalent (tracing), core logic covered elsewhere. Opt as pure TS logger spy absence check."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "does not warn when cli config has same repositories as file config"
+reason = "asserts TypeScript logger does not warn (spy absence) when cli config has same repositories as file config; no direct Rust equivalent (tracing), core logic covered elsewhere. Opt as pure TS logger spy absence check."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "warns when cli overrides repositories with repo-specific configuration"
+reason = "asserts TypeScript logger.warn spy behavior (exact call shape) when cli overrides repositories with repo-specific configuration; no direct Rust equivalent (tracing), core logic covered by other ports or not the spy part. Opt as pure TS logger spy."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "does not warn when both values are the same"
+reason = "asserts TypeScript logger does not warn (spy absence) when both values are the same; no direct Rust equivalent (tracing), core logic covered elsewhere. Opt as pure TS logger spy absence check."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "warns when both values are effectively the same"
+reason = "asserts TypeScript logger.warn spy behavior (exact call shape) when both values are effectively the same; no direct Rust equivalent (tracing), core logic covered by other ports or not the spy part. Opt as pure TS logger spy."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "only initializes the file when the env var log_file is properly set"
+reason = "asserts side-effect fs init (getParentDir not called when LOG_FILE not set); Rust logging (tracing) setup has no direct equivalent conditional dir init in the global parse path; TS-runtime behavior. Opt as pure TS fs side-effect test."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "overrides file config with additional file config"
+reason = "relies on executing .js file for additional config (additional-config.js for RENOVATE_ADDITIONAL_CONFIG_FILE); out of scope (no JS runtime/require in Rust; supports json for additional per design, similar .js cases opted in file.spec and other). Opt as .js config exec dependency."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "merges extends from file config with additional file config"
+reason = "relies on executing .js file for additional config (additional-config.js for RENOVATE_ADDITIONAL_CONFIG_FILE); out of scope (no JS runtime/require in Rust; supports json for additional per design, similar .js cases opted in file.spec and other). Opt as .js config exec dependency."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/index.spec.ts"
+test   = "adds extends from fileconfig only"
+reason = "relies on executing .js file for additional config (additional-config.js for RENOVATE_ADDITIONAL_CONFIG_FILE); out of scope (no JS runtime/require in Rust; supports json for additional per design, similar .js cases opted in file.spec and other). Opt as .js config exec dependency."
