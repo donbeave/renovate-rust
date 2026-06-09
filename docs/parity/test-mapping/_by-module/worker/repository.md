@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 253/1681 in-scope tests ported (opt-out=0) across 103 spec files.
+**Coverage:** 254/1681 in-scope tests ported (opt-out=0) across 103 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -11,8 +11,8 @@
 | [`lib/workers/repository/config-migration/branch/commit-message.spec.ts`](../../lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2192`](../../../../../crates/renovate-core/src/branch.rs#L2192) | ported |
 | [`lib/workers/repository/config-migration/branch/create.spec.ts`](../../lib/workers/repository/config-migration/branch/create.spec.ts.md) | 6 | 1 | 5 | 0 | [`crates/renovate-core/src/branch.rs:2693`](../../../../../crates/renovate-core/src/branch.rs#L2693) | partial |
 | [`lib/workers/repository/config-migration/branch/index.spec.ts`](../../lib/workers/repository/config-migration/branch/index.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
-| [`lib/workers/repository/config-migration/branch/migrated-data.spec.ts`](../../lib/workers/repository/config-migration/branch/migrated-data.spec.ts.md) | 19 | 0 | 19 | 0 | — | pending |
-| [`lib/workers/repository/config-migration/branch/rebase.spec.ts`](../../lib/workers/repository/config-migration/branch/rebase.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/json_writer.rs:119`](../../../../../crates/renovate-core/src/json_writer.rs#L119) | partial |
+| [`lib/workers/repository/config-migration/branch/migrated-data.spec.ts`](../../lib/workers/repository/config-migration/branch/migrated-data.spec.ts.md) | 19 | 1 | 18 | 0 | [`crates/renovate-core/src/json_writer.rs:172`](../../../../../crates/renovate-core/src/json_writer.rs#L172) | partial |
+| [`lib/workers/repository/config-migration/branch/rebase.spec.ts`](../../lib/workers/repository/config-migration/branch/rebase.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/json_writer.rs:163`](../../../../../crates/renovate-core/src/json_writer.rs#L163) | partial |
 | [`lib/workers/repository/config-migration/index.spec.ts`](../../lib/workers/repository/config-migration/index.spec.ts.md) | 7 | 0 | 7 | 0 | — | pending |
 | [`lib/workers/repository/config-migration/pr/index.spec.ts`](../../lib/workers/repository/config-migration/pr/index.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
 | [`lib/workers/repository/configured.spec.ts`](../../lib/workers/repository/configured.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:10154`](../../../../../crates/renovate-core/src/util.rs#L10154) | ported |

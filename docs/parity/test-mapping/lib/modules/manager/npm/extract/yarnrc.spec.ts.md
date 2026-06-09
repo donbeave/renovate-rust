@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | considers default registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3364`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3364) |
-| 17 | chooses matching scoped registry over default registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3374`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3374) |
-| 29 | ignores non matching scoped registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3387`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3387) |
-| 40 | ignores partial scope match | ported | [`crates/renovate-core/src/extractors/npm.rs:3397`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3397) |
-| 51 | ignores missing scope registryserver | ported | [`crates/renovate-core/src/extractors/npm.rs:3404`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3404) |
+| 10 | considers default registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3368`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3368) |
+| 17 | chooses matching scoped registry over default registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3378`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3378) |
+| 29 | ignores non matching scoped registry | ported | [`crates/renovate-core/src/extractors/npm.rs:3391`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3391) |
+| 40 | ignores partial scope match | ported | [`crates/renovate-core/src/extractors/npm.rs:3401`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3401) |
+| 51 | ignores missing scope registryserver | ported | [`crates/renovate-core/src/extractors/npm.rs:3408`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3408) |
 | 63 | _(it.each / template — verify manually)_ | ? | — |
 | 117 | _(it.each / template — verify manually)_ | ? | — |
 

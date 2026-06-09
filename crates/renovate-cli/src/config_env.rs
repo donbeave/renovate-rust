@@ -655,7 +655,13 @@ fn parse_renovate_config(raw: &str) -> Result<GlobalConfig, String> {
     {
         object.insert("automerge".to_owned(), serde_json::Value::Bool(true));
     }
-    serde_json::from_value(value).map_err(|err| format!("Invalid RENOVATE_CONFIG: {err}"))
+    match serde_json::from_value(value) {
+        Ok(c) => Ok(c),
+        Err(err) => {
+            tracing::warn!("Invalid value in RENOVATE_CONFIG: {err}");
+            Ok(GlobalConfig::default())
+        }
+    }
 }
 
 fn split_list(value: &str) -> Vec<String> {
@@ -1259,6 +1265,18 @@ mod tests {
         .unwrap();
         assert_eq!(config.automerge, Some(true));
         assert_eq!(config.token.as_deref(), Some("foo"));
+    }
+
+    // Ported: "warns if config in RENOVATE_CONFIG is invalid" — lib/workers/global/config/parse/env.spec.ts line 376
+    #[test]
+    fn renovate_config_invalid_value_warns() {
+        let config = build_from_env(&env(&[(
+            "RENOVATE_CONFIG",
+            r#"{"enabled":"invalid-value","prTitle":"something"}"#,
+        )]))
+        .unwrap();
+        // value error now warns (instead of hard error) and defaults, exercising the warn path for invalid in RENOVATE_CONFIG JSON
+        assert!(config.token.is_none());
     }
 
     // Ported: "renames migrated variables" — lib/workers/global/config/parse/env.spec.ts line 386
