@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | gets a value | ported | [`crates/renovate-core/src/util.rs:9729`](../../../../../crates/renovate-core/src/util.rs#L9729) |
-| 13 | caches the value | ported | [`crates/renovate-core/src/util.rs:9742`](../../../../../crates/renovate-core/src/util.rs#L9742) |
-| 21 | throws an error | ported | [`crates/renovate-core/src/util.rs:9756`](../../../../../crates/renovate-core/src/util.rs#L9756) |
-| 30 | caches the error | ported | [`crates/renovate-core/src/util.rs:9763`](../../../../../crates/renovate-core/src/util.rs#L9763) |
-| 42 | has a value | ported | [`crates/renovate-core/src/util.rs:9778`](../../../../../crates/renovate-core/src/util.rs#L9778) |
-| 51 | does not have a value | ported | [`crates/renovate-core/src/util.rs:9787`](../../../../../crates/renovate-core/src/util.rs#L9787) |
+| 5 | gets a value | ported | [`crates/renovate-core/src/util.rs:9632`](../../../../../crates/renovate-core/src/util.rs#L9632) |
+| 13 | caches the value | ported | [`crates/renovate-core/src/util.rs:9645`](../../../../../crates/renovate-core/src/util.rs#L9645) |
+| 21 | throws an error | ported | [`crates/renovate-core/src/util.rs:9659`](../../../../../crates/renovate-core/src/util.rs#L9659) |
+| 30 | caches the error | ported | [`crates/renovate-core/src/util.rs:9666`](../../../../../crates/renovate-core/src/util.rs#L9666) |
+| 42 | has a value | ported | [`crates/renovate-core/src/util.rs:9681`](../../../../../crates/renovate-core/src/util.rs#L9681) |
+| 51 | does not have a value | ported | [`crates/renovate-core/src/util.rs:9690`](../../../../../crates/renovate-core/src/util.rs#L9690) |
 

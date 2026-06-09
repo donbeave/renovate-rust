@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 7 | returns correct sized array | ported | [`crates/renovate-core/src/util.rs:9551`](../../../../../crates/renovate-core/src/util.rs#L9551) |
-| 12 | returns full array for undefined number | ported | [`crates/renovate-core/src/util.rs:9564`](../../../../../crates/renovate-core/src/util.rs#L9564) |
-| 16 | returns full array for null number | ported | [`crates/renovate-core/src/util.rs:9576`](../../../../../crates/renovate-core/src/util.rs#L9576) |
-| 20 | returns full array for 0 number | ported | [`crates/renovate-core/src/util.rs:9588`](../../../../../crates/renovate-core/src/util.rs#L9588) |
-| 24 | returns empty array for null array | ported | [`crates/renovate-core/src/util.rs:9600`](../../../../../crates/renovate-core/src/util.rs#L9600) |
-| 28 | returns empty array for undefined array | ported | [`crates/renovate-core/src/util.rs:9606`](../../../../../crates/renovate-core/src/util.rs#L9606) |
-| 32 | returns empty array for empty array | ported | [`crates/renovate-core/src/util.rs:9612`](../../../../../crates/renovate-core/src/util.rs#L9612) |
+| 7 | returns correct sized array | ported | [`crates/renovate-core/src/util.rs:9454`](../../../../../crates/renovate-core/src/util.rs#L9454) |
+| 12 | returns full array for undefined number | ported | [`crates/renovate-core/src/util.rs:9467`](../../../../../crates/renovate-core/src/util.rs#L9467) |
+| 16 | returns full array for null number | ported | [`crates/renovate-core/src/util.rs:9479`](../../../../../crates/renovate-core/src/util.rs#L9479) |
+| 20 | returns full array for 0 number | ported | [`crates/renovate-core/src/util.rs:9491`](../../../../../crates/renovate-core/src/util.rs#L9491) |
+| 24 | returns empty array for null array | ported | [`crates/renovate-core/src/util.rs:9503`](../../../../../crates/renovate-core/src/util.rs#L9503) |
+| 28 | returns empty array for undefined array | ported | [`crates/renovate-core/src/util.rs:9509`](../../../../../crates/renovate-core/src/util.rs#L9509) |
+| 32 | returns empty array for empty array | ported | [`crates/renovate-core/src/util.rs:9515`](../../../../../crates/renovate-core/src/util.rs#L9515) |
 

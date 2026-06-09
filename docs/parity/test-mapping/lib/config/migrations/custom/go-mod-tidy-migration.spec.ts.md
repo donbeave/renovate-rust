@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should add postupdateoptions option when true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6311`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6311) |
-| 16 | should handle case when postupdateoptions is not defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6320`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6320) |
-| 27 | should only remove when false | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6329`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6329) |
+| 4 | should add postupdateoptions option when true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6309`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6309) |
+| 16 | should handle case when postupdateoptions is not defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6318`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6318) |
+| 27 | should only remove when false | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6327`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6327) |
 

@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | compresses strings | ported | [`crates/renovate-core/src/util.rs:14061`](../../../../../crates/renovate-core/src/util.rs#L14061) |
+| 4 | compresses strings | ported | [`crates/renovate-core/src/util.rs:13927`](../../../../../crates/renovate-core/src/util.rs#L13927) |
 

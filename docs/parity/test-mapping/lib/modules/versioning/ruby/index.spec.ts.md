@@ -19,6 +19,6 @@
 | 186 | _(it.each / template — verify manually)_ | ? | — |
 | 200 | _(it.each / template — verify manually)_ | ? | — |
 | 224 | _(it.each / template — verify manually)_ | ? | — |
-| 253 | returns a pinned value | ported | [`crates/renovate-core/src/versioning/ruby.rs:1191`](../../../../../../../crates/renovate-core/src/versioning/ruby.rs#L1191) |
+| 253 | returns a pinned value | ported | [`crates/renovate-core/src/versioning/ruby.rs:1183`](../../../../../../../crates/renovate-core/src/versioning/ruby.rs#L1183) |
 | 258 | _(it.each / template — verify manually)_ | ? | — |
 

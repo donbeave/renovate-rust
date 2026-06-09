@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should work | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5256`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5256) |
-| 13 | should remove non-string values | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5265`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5265) |
-| 22 | should migrate prefix with no-scope to null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5271`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5271) |
-| 31 | works for random string | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5280`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5280) |
+| 4 | should work | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5254`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5254) |
+| 13 | should remove non-string values | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5263`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5263) |
+| 22 | should migrate prefix with no-scope to null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5269`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5269) |
+| 31 | works for random string | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5278`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5278) |
 

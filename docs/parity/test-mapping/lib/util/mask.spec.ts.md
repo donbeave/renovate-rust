@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | returns empty string if passed value is falsy | ported | [`crates/renovate-core/src/util.rs:7924`](../../../../../crates/renovate-core/src/util.rs#L7924) |
-| 10 | hides value content | ported | [`crates/renovate-core/src/util.rs:7931`](../../../../../crates/renovate-core/src/util.rs#L7931) |
+| 5 | returns empty string if passed value is falsy | ported | [`crates/renovate-core/src/util.rs:7827`](../../../../../crates/renovate-core/src/util.rs#L7827) |
+| 10 | hides value content | ported | [`crates/renovate-core/src/util.rs:7834`](../../../../../crates/renovate-core/src/util.rs#L7834) |
 

@@ -163,3 +163,8 @@ reason = "Schema validation run is an upstream TypeScript tooling check over sch
 spec   = "test/docs/documentation.spec.ts"
 all    = true
 reason = "Repository documentation quality assertions (markdown layout/options coverage) are build-time/static checks without a Rust runtime implementation target."
+
+[[test]]
+spec   = "lib/modules/datasource/sbt-package/index.spec.ts"
+test   = "uses proper hostType"
+reason = "asserts a TypeScript class property shape (http.hostType) with no Rust equivalent"

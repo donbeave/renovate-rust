@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | returns empty content | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:541`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L541) |
-| 16 | returns two modules | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:550`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L550) |
+| 5 | returns empty content | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:515`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L515) |
+| 16 | returns two modules | ported | [`crates/renovate-core/src/extractors/git_submodules.rs:524`](../../../../../../../crates/renovate-core/src/extractors/git_submodules.rs#L524) |
 

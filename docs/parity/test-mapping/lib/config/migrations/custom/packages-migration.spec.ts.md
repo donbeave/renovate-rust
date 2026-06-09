@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate to package rules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5887`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5887) |
-| 15 | should concat with existing package rules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5896`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5896) |
-| 27 | should ignore non array value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5908`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5908) |
+| 4 | should migrate to package rules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5885`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5885) |
+| 15 | should concat with existing package rules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5894`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5894) |
+| 27 | should ignore non array value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5906`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5906) |
 

@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should handle hight level | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6201`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6201) |
-| 17 | should not rewrite provided properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6214`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6214) |
+| 4 | should handle hight level | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6199`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6199) |
+| 17 | should not rewrite provided properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6212`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6212) |
 

@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 11 | creates module labels with the expected metadata | ported | [`crates/renovate-core/src/util.rs:10042`](../../../../../crates/renovate-core/src/util.rs#L10042) |
-| 19 | reports missing labels without flagging existing ones | ported | [`crates/renovate-core/src/util.rs:10051`](../../../../../crates/renovate-core/src/util.rs#L10051) |
-| 36 | renders stable label creation commands for missing labels | ported | [`crates/renovate-core/src/util.rs:10069`](../../../../../crates/renovate-core/src/util.rs#L10069) |
-| 62 | includes labels for known runtime module ids | ported | [`crates/renovate-core/src/util.rs:10092`](../../../../../crates/renovate-core/src/util.rs#L10092) |
+| 11 | creates module labels with the expected metadata | ported | [`crates/renovate-core/src/util.rs:9945`](../../../../../crates/renovate-core/src/util.rs#L9945) |
+| 19 | reports missing labels without flagging existing ones | ported | [`crates/renovate-core/src/util.rs:9954`](../../../../../crates/renovate-core/src/util.rs#L9954) |
+| 36 | renders stable label creation commands for missing labels | ported | [`crates/renovate-core/src/util.rs:9972`](../../../../../crates/renovate-core/src/util.rs#L9972) |
+| 62 | includes labels for known runtime module ids | ported | [`crates/renovate-core/src/util.rs:9995`](../../../../../crates/renovate-core/src/util.rs#L9995) |
 

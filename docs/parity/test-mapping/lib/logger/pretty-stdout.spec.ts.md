@@ -6,19 +6,19 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 9 | returns empty string if null rec | ported | [`crates/renovate-core/src/util.rs:12141`](../../../../../crates/renovate-core/src/util.rs#L12141) |
-| 13 | returns empty string if empty rec | ported | [`crates/renovate-core/src/util.rs:12147`](../../../../../crates/renovate-core/src/util.rs#L12147) |
-| 17 | returns empty string if no meta fields | ported | [`crates/renovate-core/src/util.rs:12154`](../../../../../crates/renovate-core/src/util.rs#L12154) |
-| 24 | supports single meta | ported | [`crates/renovate-core/src/util.rs:12161`](../../../../../crates/renovate-core/src/util.rs#L12161) |
-| 34 | supports multi meta | ported | [`crates/renovate-core/src/util.rs:12175`](../../../../../crates/renovate-core/src/util.rs#L12175) |
-| 46 | returns plain text when colorize is false | ported | [`crates/renovate-core/src/util.rs:12190`](../../../../../crates/renovate-core/src/util.rs#L12190) |
-| 57 | returns empty string if null rec | ported | [`crates/renovate-core/src/util.rs:12141`](../../../../../crates/renovate-core/src/util.rs#L12141) |
-| 61 | returns empty string if empty rec | ported | [`crates/renovate-core/src/util.rs:12147`](../../../../../crates/renovate-core/src/util.rs#L12147) |
-| 67 | returns empty string if all are meta fields | ported | [`crates/renovate-core/src/util.rs:12215`](../../../../../crates/renovate-core/src/util.rs#L12215) |
-| 75 | supports a config | ported | [`crates/renovate-core/src/util.rs:12222`](../../../../../crates/renovate-core/src/util.rs#L12222) |
-| 88 | formats err.stack as readable multi-line output | ported | [`crates/renovate-core/src/util.rs:12233`](../../../../../crates/renovate-core/src/util.rs#L12233) |
-| 108 | formats err.stack without other err fields | ported | [`crates/renovate-core/src/util.rs:12250`](../../../../../crates/renovate-core/src/util.rs#L12250) |
-| 136 | formats record | ported | [`crates/renovate-core/src/util.rs:12266`](../../../../../crates/renovate-core/src/util.rs#L12266) |
-| 155 | formats record without colors | ported | [`crates/renovate-core/src/util.rs:12280`](../../../../../crates/renovate-core/src/util.rs#L12280) |
-| 175 | writes formatted data to stdout | ported | [`crates/renovate-core/src/util.rs:12321`](../../../../../crates/renovate-core/src/util.rs#L12321) |
+| 9 | returns empty string if null rec | ported | [`crates/renovate-core/src/util.rs:12044`](../../../../../crates/renovate-core/src/util.rs#L12044) |
+| 13 | returns empty string if empty rec | ported | [`crates/renovate-core/src/util.rs:12050`](../../../../../crates/renovate-core/src/util.rs#L12050) |
+| 17 | returns empty string if no meta fields | ported | [`crates/renovate-core/src/util.rs:12057`](../../../../../crates/renovate-core/src/util.rs#L12057) |
+| 24 | supports single meta | ported | [`crates/renovate-core/src/util.rs:12064`](../../../../../crates/renovate-core/src/util.rs#L12064) |
+| 34 | supports multi meta | ported | [`crates/renovate-core/src/util.rs:12078`](../../../../../crates/renovate-core/src/util.rs#L12078) |
+| 46 | returns plain text when colorize is false | ported | [`crates/renovate-core/src/util.rs:12093`](../../../../../crates/renovate-core/src/util.rs#L12093) |
+| 57 | returns empty string if null rec | ported | [`crates/renovate-core/src/util.rs:12044`](../../../../../crates/renovate-core/src/util.rs#L12044) |
+| 61 | returns empty string if empty rec | ported | [`crates/renovate-core/src/util.rs:12050`](../../../../../crates/renovate-core/src/util.rs#L12050) |
+| 67 | returns empty string if all are meta fields | ported | [`crates/renovate-core/src/util.rs:12118`](../../../../../crates/renovate-core/src/util.rs#L12118) |
+| 75 | supports a config | ported | [`crates/renovate-core/src/util.rs:12125`](../../../../../crates/renovate-core/src/util.rs#L12125) |
+| 88 | formats err.stack as readable multi-line output | ported | [`crates/renovate-core/src/util.rs:12136`](../../../../../crates/renovate-core/src/util.rs#L12136) |
+| 108 | formats err.stack without other err fields | ported | [`crates/renovate-core/src/util.rs:12153`](../../../../../crates/renovate-core/src/util.rs#L12153) |
+| 136 | formats record | ported | [`crates/renovate-core/src/util.rs:12169`](../../../../../crates/renovate-core/src/util.rs#L12169) |
+| 155 | formats record without colors | ported | [`crates/renovate-core/src/util.rs:12183`](../../../../../crates/renovate-core/src/util.rs#L12183) |
+| 175 | writes formatted data to stdout | ported | [`crates/renovate-core/src/util.rs:12224`](../../../../../crates/renovate-core/src/util.rs#L12224) |
 

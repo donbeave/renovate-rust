@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | returns array | ported | [`crates/renovate-core/src/util.rs:6977`](../../../../../crates/renovate-core/src/util.rs#L6977) |
-| 8 | redacts | ported | [`crates/renovate-core/src/util.rs:6986`](../../../../../crates/renovate-core/src/util.rs#L6986) |
+| 4 | returns array | ported | [`crates/renovate-core/src/util.rs:6880`](../../../../../crates/renovate-core/src/util.rs#L6880) |
+| 8 | redacts | ported | [`crates/renovate-core/src/util.rs:6889`](../../../../../crates/renovate-core/src/util.rs#L6889) |
 

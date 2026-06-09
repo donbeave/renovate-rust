@@ -2,10 +2,10 @@
 
 [← `config/migrations`](../../../../_by-module/config/migrations.md) · [all modules](../../../../README.md)
 
-**2/2 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
+**0/2 in-scope tests ported** (2 pending, 0 opt-out) · status: pending
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate dryrun=true to dryrun=full | ported | [`crates/renovate-core/src/config/migration/migrations/dry_run_migration.rs:65`](../../../../../../../crates/renovate-core/src/config/migration/migrations/dry_run_migration.rs#L65) |
-| 15 | should migrate dryrun=false to dryrun=null | ported | [`crates/renovate-core/src/config/migration/migrations/dry_run_migration.rs:74`](../../../../../../../crates/renovate-core/src/config/migration/migrations/dry_run_migration.rs#L74) |
+| 4 | should migrate dryrun=true to dryrun=full | pending | — |
+| 15 | should migrate dryrun=false to dryrun=null | pending | — |
 

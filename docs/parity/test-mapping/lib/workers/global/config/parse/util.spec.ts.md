@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | massages config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4934`](../../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4934) |
+| 5 | massages config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4932`](../../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4932) |
 

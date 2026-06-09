@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate non undefined gitlabautomerge | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5289`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5289) |
-| 15 | should just remove undefined gitlabautomerge | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5325`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5325) |
-| 24 | should override platformautomerge when gitlabautomerge defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5298`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5298) |
-| 36 | should migrate non undefined azureautocomplete | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5307`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5307) |
-| 47 | should just remove undefined azureautocomplete | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5333`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5333) |
-| 56 | should override platformautomerge when azureautocomplete defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5316`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5316) |
+| 4 | should migrate non undefined gitlabautomerge | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5287`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5287) |
+| 15 | should just remove undefined gitlabautomerge | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5323`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5323) |
+| 24 | should override platformautomerge when gitlabautomerge defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5296`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5296) |
+| 36 | should migrate non undefined azureautocomplete | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5305`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5305) |
+| 47 | should just remove undefined azureautocomplete | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5331`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5331) |
+| 56 | should override platformautomerge when azureautocomplete defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5314`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5314) |
 

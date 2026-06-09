@@ -22,7 +22,7 @@
 | 331 | should move github homepage to sourceurl | pending | — |
 | 345 | should handle parsing/converting of gitlab sourceurls with http and www correctly | pending | — |
 | 357 | should normalize releasetimestamp | pending | — |
-| 385 | should return an empty string when massaging an invalid url | ported | [`crates/renovate-core/src/util.rs:12434`](../../../../../../crates/renovate-core/src/util.rs#L12434) |
+| 385 | should return an empty string when massaging an invalid url | ported | [`crates/renovate-core/src/util.rs:12337`](../../../../../../crates/renovate-core/src/util.rs#L12337) |
 | 389 | _(it.each / template — verify manually)_ | ? | — |
 | 403 | _(it.each / template — verify manually)_ | ? | — |
 | 415 | _(it.each / template — verify manually)_ | ? | — |

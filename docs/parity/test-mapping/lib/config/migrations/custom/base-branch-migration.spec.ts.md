@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate value to array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6446`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6446) |
-| 15 | should migrate array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6455`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6455) |
-| 26 | should push to existing bassbranchpatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6464`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6464) |
+| 4 | should migrate value to array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6444`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6444) |
+| 15 | should migrate array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6453`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6453) |
+| 26 | should push to existing bassbranchpatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6462`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6462) |
 
