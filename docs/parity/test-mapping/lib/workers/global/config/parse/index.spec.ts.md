@@ -2,7 +2,7 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**3/35 in-scope tests ported** (32 pending, 0 opt-out) · status: partial
+**4/35 in-scope tests ported** (31 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -10,7 +10,7 @@
 | 51 | supports token in cli options | ported | [`crates/renovate-cli/src/config_builder.rs:661`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L661) |
 | 69 | supports forcecli | pending | — |
 | 84 | sets customenvvariables | ported | [`crates/renovate-cli/src/config_env.rs:855`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L855) |
-| 98 | supports config.force | pending | — |
+| 98 | supports config.force | ported | [`crates/renovate-core/src/config.rs:857`](../../../../../../../../crates/renovate-core/src/config.rs#L857) |
 | 120 | reads private key from file | pending | — |
 | 145 | supports bitbucket username/password | pending | — |
 | 163 | massages trailing slash into endpoint | pending | — |

@@ -854,6 +854,7 @@ mod tests {
         );
     }
 
+    // Ported: "supports config.force" — lib/workers/global/config/parse/index.spec.ts line 98
     // Ported: "merges forced options" — lib/config/index.spec.ts line 73
     #[test]
     fn merge_child_config_merges_force_options() {
