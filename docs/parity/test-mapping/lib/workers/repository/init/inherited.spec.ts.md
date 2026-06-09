@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
+**1/18 in-scope tests ported** (17 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -14,7 +14,7 @@
 | 71 | should throw an error if config includes an invalid option | pending | — |
 | 78 | should throw an error if config includes an invalid value | pending | — |
 | 85 | should warn if validateconfig returns warnings | pending | — |
-| 92 | should merge inherited config | pending | — |
+| 92 | should merge inherited config | ported | [`crates/renovate-core/src/workers/repository/init/inherited.rs:169`](../../../../../../../crates/renovate-core/src/workers/repository/init/inherited.rs#L169) |
 | 102 | should set hostrules from inherited config | pending | — |
 | 123 | should decrypt encrypted values from inherited config | pending | — |
 | 158 | should apply secrets to inherited config | pending | — |

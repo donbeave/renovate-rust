@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 40 | runs | ported | [`crates/renovate-core/src/workers/repository/init/config.rs:40`](../../../../../../../crates/renovate-core/src/workers/repository/init/config.rs#L40) |
+| 40 | runs | ported | [`crates/renovate-core/src/workers/repository/init/config.rs:39`](../../../../../../../crates/renovate-core/src/workers/repository/init/config.rs#L39) |
 | 52 | warns on unsupported options | pending | — |
 

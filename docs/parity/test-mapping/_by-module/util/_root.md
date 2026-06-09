@@ -19,7 +19,7 @@
 | [`lib/util/filter-map.spec.ts`](../../lib/util/filter-map.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/util.rs:7805`](../../../../../crates/renovate-core/src/util.rs#L7805) | ported |
 | [`lib/util/fingerprint.spec.ts`](../../lib/util/fingerprint.spec.ts.md) | 10 | 2 | 8 | 0 | [`crates/renovate-core/src/util.rs:7846`](../../../../../crates/renovate-core/src/util.rs#L7846) | partial |
 | [`lib/util/hash.spec.ts`](../../lib/util/hash.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/util.rs:11085`](../../../../../crates/renovate-core/src/util.rs#L11085)<br>[`crates/renovate-core/src/util/hash.rs:155`](../../../../../crates/renovate-core/src/util/hash.rs#L155) | ported |
-| [`lib/util/host-rules.spec.ts`](../../lib/util/host-rules.spec.ts.md) | 29 | 27 | 2 | 0 | [`crates/renovate-core/src/util/host_rules.rs:427`](../../../../../crates/renovate-core/src/util/host_rules.rs#L427) | partial |
+| [`lib/util/host-rules.spec.ts`](../../lib/util/host-rules.spec.ts.md) | 29 | 27 | 2 | 0 | [`crates/renovate-core/src/util/host_rules.rs:426`](../../../../../crates/renovate-core/src/util/host_rules.rs#L426) | partial |
 | [`lib/util/html.spec.ts`](../../lib/util/html.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
 | [`lib/util/ignore.spec.ts`](../../lib/util/ignore.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/string_match.rs:588`](../../../../../crates/renovate-core/src/string_match.rs#L588) | ported |
 | [`lib/util/interpolator.spec.ts`](../../lib/util/interpolator.spec.ts.md) | 10 | 10 | 0 | 0 | [`crates/renovate-core/src/config/secrets.rs:387`](../../../../../crates/renovate-core/src/config/secrets.rs#L387)<br>[`crates/renovate-core/src/util.rs:10690`](../../../../../crates/renovate-core/src/util.rs#L10690) | ported |
@@ -36,7 +36,7 @@
 | [`lib/util/promises.spec.ts`](../../lib/util/promises.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
 | [`lib/util/range.spec.ts`](../../lib/util/range.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/util.rs:6529`](../../../../../crates/renovate-core/src/util.rs#L6529) | ported |
 | [`lib/util/regex.spec.ts`](../../lib/util/regex.spec.ts.md) | 6 | 1 | 4 | 1 | [`crates/renovate-core/src/util.rs:10959`](../../../../../crates/renovate-core/src/util.rs#L10959) | partial |
-| [`lib/util/result.spec.ts`](../../lib/util/result.spec.ts.md) | 85 | 2 | 83 | 0 | [`crates/renovate-core/src/util/result.rs:548`](../../../../../crates/renovate-core/src/util/result.rs#L548) | partial |
+| [`lib/util/result.spec.ts`](../../lib/util/result.spec.ts.md) | 85 | 2 | 83 | 0 | [`crates/renovate-core/src/util/result.rs:547`](../../../../../crates/renovate-core/src/util/result.rs#L547) | partial |
 | [`lib/util/s3.spec.ts`](../../lib/util/s3.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/util.rs:11786`](../../../../../crates/renovate-core/src/util.rs#L11786) | ported |
 | [`lib/util/sample.spec.ts`](../../lib/util/sample.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/util.rs:9456`](../../../../../crates/renovate-core/src/util.rs#L9456) | ported |
 | [`lib/util/sanitize.spec.ts`](../../lib/util/sanitize.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:11032`](../../../../../crates/renovate-core/src/util.rs#L11032) | ported |

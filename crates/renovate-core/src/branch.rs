@@ -792,6 +792,8 @@ pub fn semantic_commit_message_title(typ: &str, scope: &str, subject: &str) -> S
 /// Mirrors `lib/workers/repository/model/semantic-commit-message.ts`
 /// `SemanticCommitMessage.fromString()`.
 pub fn parse_semantic_commit_message(s: &str) -> Option<SemanticCommitParsed> {
+    #[allow(unused_imports)]
+    use std::collections::HashMap;
     use std::sync::LazyLock;
     static RE: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(
@@ -892,6 +894,8 @@ pub fn detect_semantic_commits(commit_messages: &[&str]) -> bool {
 ///
 /// `^(\w*)(?:\((.*)\))?!?: (.*)$`
 fn detect_semantic_commit_score(commit_messages: &[&str]) -> i32 {
+    #[allow(unused_imports)]
+    use std::collections::HashMap;
     use std::sync::LazyLock;
     static ANGULAR_RE: LazyLock<Regex> =
         LazyLock::new(|| Regex::new(r"^(\w*)(?:\(.*\))?!?: .+$").unwrap());
@@ -2796,11 +2800,20 @@ mod tests {
         );
     }
 
+    // Ported: "applies the default commit message" — lib/workers/repository/config-migration/branch/create.spec.ts line 36
     #[test]
     fn config_migration_commit_message_default() {
-        let msg = config_migration_commit_message("enabled", "renovate.json", None);
-        assert!(msg.contains("chore(config)"));
-        assert!(msg.contains("renovate.json"));
+        // Default (no custom commitMessage) produces the plain topic 'Migrate config ...' (when semantic disabled)
+        // matching the TS createConfigMigrationBranch default case assert on scm.commitAndPush message + prTitle.
+        let msg = config_migration_commit_message("disabled", "renovate.json", None);
+        assert_eq!(msg, "Migrate config renovate.json");
+        let pr = config_migration_pr_title("disabled", None);
+        assert_eq!(pr, "Migrate Renovate config");
+
+        // Also the enabled semantic case (chore prefix)
+        let msg_enabled = config_migration_commit_message("enabled", "renovate.json", None);
+        assert!(msg_enabled.contains("chore(config)"));
+        assert!(msg_enabled.contains("renovate.json"));
     }
 
     // Ported: "applies supplied commit message" — lib/workers/repository/config-migration/branch/create.spec.ts line 58

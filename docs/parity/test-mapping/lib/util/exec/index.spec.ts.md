@@ -17,8 +17,8 @@
 | 1087 | logs ignored tool constraints for binarysource=global | ported | [`crates/renovate-core/src/exec/orchestrator.rs:487`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L487) |
 | 1098 | supports binarysource=install precommands | ported | [`crates/renovate-core/src/exec/orchestrator.rs:298`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L298) |
 | 1112 | only calls removedockercontainer in catch block is usedocker is set | ported | [`crates/renovate-core/src/exec/orchestrator.rs:509`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L509) |
-| 1127 | wraps error if removedockercontainer throws an error | ported | [`crates/renovate-core/src/exec/orchestrator.rs:540`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L540) |
-| 1161 | converts to temporary_error | ported | [`crates/renovate-core/src/exec/orchestrator.rs:565`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L565) |
+| 1127 | wraps error if removedockercontainer throws an error | ported | [`crates/renovate-core/src/exec/orchestrator.rs:543`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L543) |
+| 1161 | converts to temporary_error | ported | [`crates/renovate-core/src/exec/orchestrator.rs:568`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L568) |
 | 1194 | returns default values if no global or repo config | ported | [`crates/renovate-core/src/exec/tool_settings.rs:125`](../../../../../../crates/renovate-core/src/exec/tool_settings.rs#L125) |
 | 1205 | returns default values if empty repo config | ported | [`crates/renovate-core/src/exec/tool_settings.rs:134`](../../../../../../crates/renovate-core/src/exec/tool_settings.rs#L134) |
 | 1216 | returns default values if empty global config | ported | [`crates/renovate-core/src/exec/tool_settings.rs:144`](../../../../../../crates/renovate-core/src/exec/tool_settings.rs#L144) |

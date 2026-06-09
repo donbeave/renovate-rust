@@ -2,12 +2,12 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**1/6 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
+**2/6 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 36 | applies the default commit message | pending | — |
-| 58 | applies supplied commit message | ported | [`crates/renovate-core/src/branch.rs:2806`](../../../../../../../../crates/renovate-core/src/branch.rs#L2806) |
+| 36 | applies the default commit message | ported | [`crates/renovate-core/src/branch.rs:2803`](../../../../../../../../crates/renovate-core/src/branch.rs#L2803) |
+| 58 | applies supplied commit message | ported | [`crates/renovate-core/src/branch.rs:2819`](../../../../../../../../crates/renovate-core/src/branch.rs#L2819) |
 | 85 | migrates renovate config in package.json | pending | — |
 | 125 | to the default commit message | pending | — |
 | 154 | to the default commit message | pending | — |
