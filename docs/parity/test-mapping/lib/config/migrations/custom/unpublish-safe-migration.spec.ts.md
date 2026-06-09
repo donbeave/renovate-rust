@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6230`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6230) |
-| 15 | should migrate true and handle extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6239`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6239) |
-| 27 | should migrate true and handle empty extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6248`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6248) |
-| 39 | should migrate true and save order of items inside extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6257`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6257) |
-| 71 | should migrate false and save order of items inside extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6280`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6280) |
-| 83 | prevent duplicates | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6289`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6289) |
-| 95 | should not migrate npm:unpublishsafe | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6300`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6300) |
+| 4 | should migrate true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6231`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6231) |
+| 15 | should migrate true and handle extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6240`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6240) |
+| 27 | should migrate true and handle empty extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6249`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6249) |
+| 39 | should migrate true and save order of items inside extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6258`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6258) |
+| 71 | should migrate false and save order of items inside extends field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6281`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6281) |
+| 83 | prevent duplicates | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6290`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6290) |
+| 95 | should not migrate npm:unpublishsafe | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6301`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6301) |
 

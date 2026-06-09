@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | returns error when basebranchpatterns is not defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3147`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3147) |
-| 18 | returns empty array for valid configuration | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3162`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3162) |
+| 4 | returns error when basebranchpatterns is not defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3148`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3148) |
+| 18 | returns empty array for valid configuration | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3163`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3163) |
 

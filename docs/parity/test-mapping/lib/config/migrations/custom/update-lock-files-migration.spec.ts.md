@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should replace false value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6597`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6597) |
-| 15 | should not replace true value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6606`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6606) |
-| 24 | should not replace skipartifactsupdate | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6612`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6612) |
+| 4 | should replace false value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6598`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6598) |
+| 15 | should not replace true value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6607`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6607) |
+| 24 | should not replace skipartifactsupdate | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6613`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6613) |
 

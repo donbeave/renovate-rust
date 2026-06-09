@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should replace pattern | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6471`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6471) |
-| 15 | should not replace another string | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6480`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6480) |
-| 27 | should not replace non string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6489`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6489) |
+| 4 | should replace pattern | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6472`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6472) |
+| 15 | should not replace another string | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6481`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6481) |
+| 27 | should not replace non string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6490`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6490) |
 

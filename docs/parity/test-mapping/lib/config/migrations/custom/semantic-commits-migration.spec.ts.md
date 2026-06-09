@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate true to "enabled" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5200`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5200) |
-| 13 | should migrate false to "disabled" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5209`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5209) |
-| 22 | should migrate null to "auto" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5218`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5218) |
-| 31 | should migrate random string to "auto" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5227`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5227) |
-| 40 | should not migrate valid enabled config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5236`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5236) |
-| 50 | should not migrate valid disabled config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5245`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5245) |
+| 4 | should migrate true to "enabled" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5201`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5201) |
+| 13 | should migrate false to "disabled" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5210`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5210) |
+| 22 | should migrate null to "auto" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5219`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5219) |
+| 31 | should migrate random string to "auto" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5228`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5228) |
+| 40 | should not migrate valid enabled config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5237`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5237) |
+| 50 | should not migrate valid disabled config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5246`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5246) |
 

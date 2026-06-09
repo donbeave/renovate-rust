@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | returns input for invalid | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:610`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L610) |
-| 11 | replaces whole rule | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:617`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L617) |
-| 17 | replaces rule key | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:625`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L625) |
-| 23 | returns input on wrong index | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:637`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L637) |
-| 29 | returns input on wrong key | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:649`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L649) |
-| 35 | replaces array values | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:661`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L661) |
-| 43 | updates using function | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:680`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L680) |
+| 5 | returns input for invalid | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:613`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L613) |
+| 11 | replaces whole rule | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:620`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L620) |
+| 17 | replaces rule key | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:628`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L628) |
+| 23 | returns input on wrong index | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:640`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L640) |
+| 29 | returns input on wrong key | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:652`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L652) |
+| 35 | replaces array values | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:664`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L664) |
+| 43 | updates using function | ported | [`crates/renovate-core/src/extractors/bazel_parser.rs:683`](../../../../../../../crates/renovate-core/src/extractors/bazel_parser.rs#L683) |
 

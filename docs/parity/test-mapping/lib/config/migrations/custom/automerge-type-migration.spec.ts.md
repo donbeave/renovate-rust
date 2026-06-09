@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate string like "branch-" to "branch" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5070`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5070) |
-| 15 | should not migrate another string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5079`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5079) |
-| 27 | should not migrate non string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5088`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5088) |
+| 4 | should migrate string like "branch-" to "branch" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5071`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5071) |
+| 15 | should not migrate another string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5080`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5080) |
+| 27 | should not migrate non string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5089`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5089) |
 

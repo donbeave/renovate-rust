@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 14 | handles empty | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4952`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4952) |
-| 22 | handles migration | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4961`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4961) |
-| 32 | handles invalid | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6690`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6690) |
-| 40 | isonboarded | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6697`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6697) |
+| 14 | handles empty | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4953`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4953) |
+| 22 | handles migration | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4962`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4962) |
+| 32 | handles invalid | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6691`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6691) |
+| 40 | isonboarded | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6698`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6698) |
 | 50 | logs errors | opt-out | asserts TypeScript logger spy behavior and injected migrateConfig throw path via runtime mocking; no direct Rust equivalent without changing production instrumentation |
 
