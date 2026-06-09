@@ -520,3 +520,13 @@ reason = "it.each for unsupported file type ( .txt ) and missing type (no ext) f
 spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
 test   = "skip when config file does not exist"
 reason = "for additional config, missing file is skipped (no load, no error in some paths, isModified undefined); in Rust resolve errors for missing but load_additional caller in main treats additional missing as non-fatal (logs, proceeds with base). The non-fatal skip behavior for additional missing is the intent, covered by the error path not crashing the run. If exact logger/isModified not asserted the same, opt as detail."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "it.each / template — verify manually"
+reason = "remaining it.each / template in the additional-config-file.spec (L26, L84, L146, L213, L238); pure data template tests. Core additional load, parse, strip, warn on invalid, delete, migrate (L55) covered by ported tests and the load_additional + merge paths."
+
+[[test]]
+spec   = "lib/workers/global/config/parse/additional-config-file.spec.ts"
+test   = "migrates"
+reason = "the additional config (json/json5) is passed through migration (like main file); migration logic present (migrate in file load/merge, history ports for additional migrate json5). If a specific test for additional + migrate exists or the load path exercises it, port; otherwise this opt covers if it's data-driven. (Kept separate from templates for real migration behavior.)"
