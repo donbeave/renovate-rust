@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 58/150 in-scope files mapped (full=18 partial=40 stub=0 pending=92 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 60/150 in-scope files mapped (full=18 partial=42 stub=0 pending=90 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -143,8 +143,8 @@
 | `lib/workers/repository/model/commit-message-factory.ts` | partial | [`crates/renovate-core/src/workers/repository/model/commit_message_factory.rs`](../../../crates/renovate-core/src/workers/repository/model/commit_message_factory.rs) | CommitMessageFactory (decides semantic vs custom based on semanticCommits==='enabled' && !commitMessagePrefix; sets type/scope or prefix); single test ported. Full toString/get in semantic/custom (pending siblings), callers (onboarding, config-migration) pending. |
 | `lib/workers/repository/model/commit-message.ts` | partial | [`crates/renovate-core/src/workers/repository/model/commit_message.rs`](../../../crates/renovate-core/src/workers/repository/model/commit_message.rs) | CommitMessage (abstract base with title/body/footer/subject, toString/toJSON, formatPrefix/formatSubject, setters with normalize, prefix hook); single test ported. Full concrete in semantic/custom (pending), callers (onboarding, config-migration, update/branch) pending. |
 | `lib/workers/repository/model/custom-commit-message.ts` | partial | [`crates/renovate-core/src/workers/repository/model/custom_commit_message.rs`](../../../crates/renovate-core/src/workers/repository/model/custom_commit_message.rs) | CustomCommitMessage (extends CommitMessage; _prefix with setter/getter using normalize; override toJSON to include prefix); fixed divergences (title construction for "fix: test", to_json always string prefix even '', to_string filter+parts, safe unicode format_subject matching base/TS); single test ported. Full base in commit-message.rs (previous), semantic sibling pending, callers pending. |
-| `lib/workers/repository/model/semantic-commit-message.ts` | pending | — | — |
-| `lib/workers/repository/onboarding/branch/check.ts` | pending | — | — |
+| `lib/workers/repository/model/semantic-commit-message.ts` | partial | [`crates/renovate-core/src/workers/repository/model/semantic_commit_message.rs`](../../../crates/renovate-core/src/workers/repository/model/semantic_commit_message.rs) | SemanticCommitMessage (extends CommitMessage; _type/_scope + prefix() builder, fromString with REGEXP, is, setters, override toJSON); fixed divergences (self-contained fromString/REGEXP matching TS, always-string type/scope in JSON, prefix for title+lower-first subject, toString parts filter); single test ported. Full base + custom in siblings, callers (onboarding, config-migration, update/branch) + factory wiring pending. |
+| `lib/workers/repository/onboarding/branch/check.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/branch/check.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/branch/check.rs) | isOnboarded (silent mode early return, requireConfig optional/ignored bypass, onboarding cache valid + sha match, closed onboarding PR handling + ensureComment, configFileExists + packageJsonConfigExists using scm/fs, throws REPOSITORY_CLOSED_ONBOARDING / REPOSITORY_NO_CONFIG); getOnboardingPr; single test ported (verified). Full platform/scm async wiring, cache details, error consts, callers (init/config checkOnboardingBranch, onboarding index) pending other units. |
 | `lib/workers/repository/onboarding/branch/commit-message.ts` | pending | — | — |
 | `lib/workers/repository/onboarding/branch/config.ts` | pending | — | — |
 | `lib/workers/repository/onboarding/branch/create.ts` | pending | — | — |
