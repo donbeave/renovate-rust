@@ -2,7 +2,7 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**9/35 in-scope tests ported** (26 pending, 0 opt-out) · status: partial
+**12/35 in-scope tests ported** (23 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -20,9 +20,9 @@
 | 197 | cli dryrun = true replaced to full | ported | [`crates/renovate-cli/src/config_builder.rs:1201`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1201) |
 | 204 | resolves global presets | ported | [`crates/renovate-cli/src/config_builder.rs:859`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L859) |
 | 232 | throws exception if global presets cannot be resolved | pending | — |
-| 247 | cli dryrun replaced to full | pending | — |
-| 254 | env dryrun = false replaced to null | pending | — |
-| 264 | cli dryrun = false replaced to null | pending | — |
+| 247 | cli dryrun replaced to full | ported | [`crates/renovate-cli/src/config_builder.rs:1212`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1212) |
+| 254 | env dryrun = false replaced to null | ported | [`crates/renovate-cli/src/config_env.rs:1645`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1645) |
+| 264 | cli dryrun = false replaced to null | ported | [`crates/renovate-cli/src/config_builder.rs:1225`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1225) |
 | 271 | only initializes the file when the env var log_file is properly set | pending | — |
 | 278 | massage onboardingnodeps when autodiscover is false | pending | — |
 | 289 | does not massage onboardingnodeps when autodiscover is true | pending | — |

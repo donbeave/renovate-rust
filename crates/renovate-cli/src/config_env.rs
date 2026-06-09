@@ -1642,6 +1642,15 @@ mod tests {
         assert_eq!(config.dry_run, None);
     }
 
+    // Ported: "env dryRun = false replaced to null" — lib/workers/global/config/parse/index.spec.ts line 254
+    #[test]
+    fn env_dry_run_false_replaced_to_null() {
+        // Mirrors the exact it() in the global parse index spec: RENOVATE_DRY_RUN=false via env
+        // leads to dryRun: null in final config (parse_dry_run path).
+        let config = build_from_env(&env(&[("RENOVATE_DRY_RUN", "false")])).unwrap();
+        assert_eq!(config.dry_run, None);
+    }
+
     // Ported: "dryRun null" — lib/workers/global/config/parse/env.spec.ts line 457
     #[test]
     fn dry_run_null_disables_dry_run() {
