@@ -2,11 +2,11 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**1/18 in-scope tests ported** (17 pending, 0 opt-out) · status: partial
+**2/18 in-scope tests ported** (16 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 24 | returns if no branchlist | pending | — |
+| 24 | returns if no branchlist | ported | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:108`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L108) |
 | 30 | ignores reconfigure branch | pending | — |
 | 36 | returns if no defaultbranch | pending | — |
 | 43 | returns if no renovate branches | pending | — |

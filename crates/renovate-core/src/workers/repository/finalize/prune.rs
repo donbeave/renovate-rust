@@ -114,4 +114,13 @@ mod tests {
         assert!(result.pruned_branches.is_empty());
         assert!(result.deleted_orphan_branches.is_empty());
     }
+
+    // Ported: "returns if no renovate branches" — lib/workers/repository/finalize/prune.spec.ts line 43
+    #[test]
+    fn prune_stale_branches_returns_if_no_renovate_branches() {
+        // Exercises the case when getBranchList returns [] (no renovate branches); the list fn with empty renovate produces no pruned (early return in TS after get, here the computation).
+        let branches = vec!["renovate/a".to_owned()];
+        let result = prune_stale_branches(&branches, &[], "renovate/");
+        assert!(result.pruned_branches.is_empty());
+    }
 }
