@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate node to travis | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6394`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6394) |
-| 15 | should not delete node in case it has more than one property | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6403`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6403) |
+| 4 | should migrate node to travis | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6416`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6416) |
+| 15 | should not delete node in case it has more than one property | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6425`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6425) |
 

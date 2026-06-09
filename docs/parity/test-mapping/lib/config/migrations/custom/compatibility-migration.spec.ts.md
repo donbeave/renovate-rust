@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5340`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5340) |
-| 19 | should just remove property when compatibility is not an object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5349`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5349) |
+| 4 | should migrate object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5362`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5362) |
+| 19 | should just remove property when compatibility is not an object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5371`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5371) |
 

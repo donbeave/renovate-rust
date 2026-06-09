@@ -4124,6 +4124,28 @@ mod tests {
         );
     }
 
+    // Ported: "errors if allowedHeaders is empty" — lib/config/validation.spec.ts line 1754
+    #[test]
+    fn validate_config_errors_if_allowed_headers_is_empty() {
+        let result = validate_config_for_source(
+            "repo",
+            &json!({
+                "allowedHeaders": [],
+                "hostRules": [{
+                    "matchHost": "https://domain.com/all-versions",
+                    "headers": {
+                        "X-Auth-Token": "token",
+                    },
+                }]
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert_eq!(
+            validation_error_messages(&result),
+            vec!["hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`."]
+        );
+    }
+
     // Ported: "catches invalid variable name in env config option" — lib/config/validation.spec.ts line 1781
     #[test]
     fn validate_config_catches_invalid_env_variable_name_and_value() {

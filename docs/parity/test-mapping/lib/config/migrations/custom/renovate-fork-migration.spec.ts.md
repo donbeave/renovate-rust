@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6421`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6421) |
-| 15 | should migrate false | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6430`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6430) |
-| 26 | should not migrate non boolean value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6439`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6439) |
+| 4 | should migrate true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6443`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6443) |
+| 15 | should migrate false | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6452`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6452) |
+| 26 | should not migrate non boolean value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6461`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6461) |
 

@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate platformcommit=true to platformcommit=enabled | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6655`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6655) |
-| 15 | should migrate platformcommit=false to platformcommit=disabled | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6664`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6664) |
-| 26 | should not migrate platformcommit=auto | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6673`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6673) |
+| 4 | should migrate platformcommit=true to platformcommit=enabled | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6677`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6677) |
+| 15 | should migrate platformcommit=false to platformcommit=disabled | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6686`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6686) |
+| 26 | should not migrate platformcommit=auto | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6695`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6695) |
 

@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should remove if separatemajorreleases exists | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6075`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6075) |
-| 16 | should skip if separatemajorreleases does not exist | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6084`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6084) |
+| 4 | should remove if separatemajorreleases exists | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6097`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6097) |
+| 16 | should skip if separatemajorreleases does not exist | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6106`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6106) |
 

@@ -12,13 +12,13 @@
 | 39 | _(it.each / template — verify manually)_ | ? | — |
 | 78 | _(it.each / template — verify manually)_ | ? | — |
 | 115 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1181`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1181) |
-| 123 | parses exact range | ported | [`crates/renovate-core/src/versioning/nuget.rs:1456`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1456) |
+| 123 | parses exact range | ported | [`crates/renovate-core/src/versioning/nuget.rs:1466`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1466) |
 | 137 | rejects invalid input | ported | [`crates/renovate-core/src/versioning/nuget.rs:1181`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1181) |
-| 147 | parses range without lower bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1488`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1488) |
-| 157 | parses range without upper bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1509`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1509) |
+| 147 | parses range without lower bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1498`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1498) |
+| 157 | parses range without upper bound | ported | [`crates/renovate-core/src/versioning/nuget.rs:1519`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1519) |
 | 168 | _(it.each / template — verify manually)_ | ? | — |
-| 185 | handles whitespaces | ported | [`crates/renovate-core/src/versioning/nuget.rs:1569`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1569) |
-| 195 | handles floating ranges as lower bounds | ported | [`crates/renovate-core/src/versioning/nuget.rs:1597`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1597) |
+| 185 | handles whitespaces | ported | [`crates/renovate-core/src/versioning/nuget.rs:1579`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1579) |
+| 195 | handles floating ranges as lower bounds | ported | [`crates/renovate-core/src/versioning/nuget.rs:1607`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L1607) |
 | 224 | _(it.each / template — verify manually)_ | ? | — |
 | 242 | _(it.each / template — verify manually)_ | ? | — |
 

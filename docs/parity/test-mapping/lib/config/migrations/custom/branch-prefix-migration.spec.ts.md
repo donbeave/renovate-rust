@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate template | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6499`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6499) |
-| 16 | should ignore string without template | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6508`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6508) |
-| 28 | should ignore non string without template | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6517`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6517) |
+| 4 | should migrate template | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6521`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6521) |
+| 16 | should ignore string without template | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6530`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6530) |
+| 28 | should ignore non string without template | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6539`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6539) |
 

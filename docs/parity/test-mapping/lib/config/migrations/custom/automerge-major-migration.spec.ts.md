@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate value to object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4990`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4990) |
-| 17 | should migrate value to object and concat with existing minor object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4998`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4998) |
-| 34 | should ignore non object minor value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5009`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5009) |
+| 4 | should migrate value to object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5012`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5012) |
+| 17 | should migrate value to object and concat with existing minor object | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5020`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5020) |
+| 34 | should ignore non object minor value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5031`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5031) |
 
