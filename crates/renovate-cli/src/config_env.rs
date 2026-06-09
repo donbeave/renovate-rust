@@ -846,6 +846,7 @@ mod tests {
 
     // Ported: "supports string" — lib/workers/global/config/parse/env.spec.ts line 55
     #[test]
+    // Ported: "supports token in env" — lib/workers/global/config/parse/index.spec.ts line 44
     fn token_is_parsed() {
         let config = build_from_env(&env(&[("RENOVATE_TOKEN", "a")])).unwrap();
         assert_eq!(config.token.as_deref(), Some("a"));
