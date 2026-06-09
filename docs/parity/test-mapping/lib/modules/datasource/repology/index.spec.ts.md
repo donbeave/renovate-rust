@@ -2,7 +2,7 @@
 
 [← `datasource/repology`](../../../../_by-module/datasource/repology.md) · [all modules](../../../../README.md)
 
-**18/19 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
+**19/19 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -15,7 +15,7 @@
 | 175 | throws error on resolver request timeout | ported | [`crates/renovate-core/src/datasources/repology.rs:360`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L360) |
 | 189 | returns null on resolver ambiguous binary package | ported | [`crates/renovate-core/src/datasources/repology.rs:371`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L371) |
 | 204 | throws without repository and package name | ported | [`crates/renovate-core/src/datasources/repology.rs:384`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L384) |
-| 214 | throws on disabled host | pending | — |
+| 214 | throws on disabled host | ported | [`crates/renovate-core/src/datasources/repology.rs:637`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L637) |
 | 225 | returns correct version for binary package | ported | [`crates/renovate-core/src/datasources/repology.rs:392`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L392) |
 | 241 | returns correct version for source package | ported | [`crates/renovate-core/src/datasources/repology.rs:416`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L416) |
 | 260 | returns correct version for api package | ported | [`crates/renovate-core/src/datasources/repology.rs:449`](../../../../../../../crates/renovate-core/src/datasources/repology.rs#L449) |

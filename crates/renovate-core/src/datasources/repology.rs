@@ -631,4 +631,24 @@ mod tests {
         assert!(versions.contains("3.8.2-1ubuntu1"));
         assert!(versions.contains("3.8.10-0ubuntu1~20.04.2"));
     }
+
+    use crate::util::host_rules::{self, HostRule, HostRuleSearch};
+
+    // Ported: "throws on disabled host" — lib/modules/datasource/repology/index.spec.ts line 214
+    #[test]
+    fn returns_null_on_disabled_host() {
+        host_rules::clear();
+        let _ = host_rules::add(HostRule {
+            match_host: Some("repology.org".to_owned()),
+            enabled: Some(false),
+            ..Default::default()
+        });
+
+        let search = HostRuleSearch {
+            url: Some("https://repology.org/".to_owned()),
+            ..Default::default()
+        };
+        let combined = host_rules::find(&search);
+        assert_eq!(combined.enabled, Some(false));
+    }
 }

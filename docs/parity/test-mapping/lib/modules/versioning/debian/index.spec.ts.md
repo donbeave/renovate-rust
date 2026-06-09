@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 18 | test | ported | [`crates/renovate-core/src/versioning/debian.rs:586`](../../../../../../../crates/renovate-core/src/versioning/debian.rs#L586) |
+| 18 | test | ported | [`crates/renovate-core/src/versioning/debian.rs:589`](../../../../../../../crates/renovate-core/src/versioning/debian.rs#L589) |
 | 22 | _(it.each / template — verify manually)_ | ? | — |
 | 82 | _(it.each / template — verify manually)_ | ? | — |
 | 104 | _(it.each / template — verify manually)_ | ? | — |
@@ -21,5 +21,5 @@
 | 383 | _(it.each / template — verify manually)_ | ? | — |
 | 409 | _(it.each / template — verify manually)_ | ? | — |
 | 429 | _(it.each / template — verify manually)_ | ? | — |
-| 441 | checks runtime date handling & refresh rolling release data | ported | [`crates/renovate-core/src/versioning/debian.rs:1088`](../../../../../../../crates/renovate-core/src/versioning/debian.rs#L1088) |
+| 441 | checks runtime date handling & refresh rolling release data | ported | [`crates/renovate-core/src/versioning/debian.rs:1091`](../../../../../../../crates/renovate-core/src/versioning/debian.rs#L1091) |
 

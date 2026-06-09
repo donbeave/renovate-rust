@@ -9,16 +9,16 @@
 | 27 | _(it.each / template — verify manually)_ | ? | — |
 | 61 | migrates | pending | — |
 | 73 | warns if config is invalid | pending | — |
-| 85 | parse and returns empty config if there is no renovate_config_file in env | ported | [`crates/renovate-core/src/config/file.rs:536`](../../../../../../../../crates/renovate-core/src/config/file.rs#L536) |
+| 85 | parse and returns empty config if there is no renovate_config_file in env | ported | [`crates/renovate-core/src/config/file.rs:540`](../../../../../../../../crates/renovate-core/src/config/file.rs#L540) |
 | 89 | _(it.each / template — verify manually)_ | ? | — |
-| 118 | fatal error and exit if custom config file does not exist | ported | [`crates/renovate-core/src/config/file.rs:564`](../../../../../../../../crates/renovate-core/src/config/file.rs#L564) |
+| 118 | fatal error and exit if custom config file does not exist | ported | [`crates/renovate-core/src/config/file.rs:568`](../../../../../../../../crates/renovate-core/src/config/file.rs#L568) |
 | 132 | fatal error and exit if config.js contains unresolved env var | pending | — |
 | 153 | _(it.each / template — verify manually)_ | ? | — |
 | 167 | exports env variables to environment from processenv object | pending | — |
 | 190 | does not export env variables to environment from processenv object if key/value is invalid | pending | — |
 | 220 | _(it.each / template — verify manually)_ | ? | — |
-| 232 | skip when config file does not exist | ported | [`crates/renovate-core/src/config/file.rs:581`](../../../../../../../../crates/renovate-core/src/config/file.rs#L581) |
+| 232 | skip when config file does not exist | ported | [`crates/renovate-core/src/config/file.rs:585`](../../../../../../../../crates/renovate-core/src/config/file.rs#L585) |
 | 245 | _(it.each / template — verify manually)_ | ? | — |
-| 261 | removes the specified config file | ported | [`crates/renovate-core/src/config/file.rs:597`](../../../../../../../../crates/renovate-core/src/config/file.rs#L597) |
-| 284 | fails silently when attempting to delete the config file | ported | [`crates/renovate-core/src/config/file.rs:605`](../../../../../../../../crates/renovate-core/src/config/file.rs#L605) |
+| 261 | removes the specified config file | ported | [`crates/renovate-core/src/config/file.rs:601`](../../../../../../../../crates/renovate-core/src/config/file.rs#L601) |
+| 284 | fails silently when attempting to delete the config file | ported | [`crates/renovate-core/src/config/file.rs:609`](../../../../../../../../crates/renovate-core/src/config/file.rs#L609) |
 

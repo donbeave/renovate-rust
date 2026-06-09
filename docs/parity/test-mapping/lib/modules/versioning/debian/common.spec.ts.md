@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 15 | no rolling release data | ported | [`crates/renovate-core/src/versioning/debian.rs:592`](../../../../../../../crates/renovate-core/src/versioning/debian.rs#L592) |
+| 15 | no rolling release data | ported | [`crates/renovate-core/src/versioning/debian.rs:595`](../../../../../../../crates/renovate-core/src/versioning/debian.rs#L595) |
 | 31 | _(it.each / template — verify manually)_ | ? | — |
 | 48 | _(it.each / template — verify manually)_ | ? | — |
 | 69 | _(it.each / template — verify manually)_ | ? | — |
