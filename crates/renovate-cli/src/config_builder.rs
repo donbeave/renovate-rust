@@ -353,6 +353,16 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
         config.repositories = cli.repositories.clone();
     }
 
+    // Minimal massage to match upstream "massage onboardingNoDeps when autodiscover is false"
+    // (and the complement when true). The 'auto' value from file/env is turned into 'enabled'
+    // only when autodiscover is explicitly false.
+    // See lib/workers/global/config/parse/index.spec.ts L278/289.
+    if config.onboarding_no_deps.as_deref() == Some("auto") {
+        if config.autodiscover == Some(false) {
+            config.onboarding_no_deps = Some("enabled".to_owned());
+        }
+    }
+
     Ok(config)
 }
 
@@ -1365,5 +1375,31 @@ mod tests {
             config.allowed_commands,
             vec!["foo".to_owned(), "bar baz".to_owned()],
         );
+    }
+
+    // Ported: "massage onboardingnodeps when autodiscover is false" — lib/workers/global/config/parse/index.spec.ts line 278
+    #[test]
+    fn massage_onboarding_no_deps_when_autodiscover_is_false() {
+        let base = GlobalConfig {
+            onboarding_no_deps: Some("auto".to_owned()),
+            autodiscover: Some(false),
+            ..Default::default()
+        };
+        let cli = cli_with(|_| {});
+        let config = build(&cli, base);
+        assert_eq!(config.onboarding_no_deps.as_deref(), Some("enabled"));
+    }
+
+    // Ported: "does not massage onboardingnodeps when autodiscover is true" — lib/workers/global/config/parse/index.spec.ts line 289
+    #[test]
+    fn does_not_massage_onboarding_no_deps_when_autodiscover_is_true() {
+        let base = GlobalConfig {
+            onboarding_no_deps: Some("auto".to_owned()),
+            autodiscover: Some(true),
+            ..Default::default()
+        };
+        let cli = cli_with(|_| {});
+        let config = build(&cli, base);
+        assert_eq!(config.onboarding_no_deps.as_deref(), Some("auto"));
     }
 }
