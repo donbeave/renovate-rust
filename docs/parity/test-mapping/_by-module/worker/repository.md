@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 276/1675 in-scope tests ported (opt-out=6) across 103 spec files.
+**Coverage:** 276/1674 in-scope tests ported (opt-out=7) across 103 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -22,7 +22,7 @@
 | [`lib/workers/repository/errors-warnings.spec.ts`](../../lib/workers/repository/errors-warnings.spec.ts.md) | 16 | 14 | 2 | 0 | [`crates/renovate-core/src/util.rs:12875`](../../../../../crates/renovate-core/src/util.rs#L12875)<br>[`crates/renovate-core/src/workers/repository/errors_warnings.rs:269`](../../../../../crates/renovate-core/src/workers/repository/errors_warnings.rs#L269) | partial |
 | [`lib/workers/repository/extract/extract-fingerprint-config.spec.ts`](../../lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) | 2 | 1 | 1 | 0 | [`crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs:124`](../../../../../crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs#L124) | partial |
 | [`lib/workers/repository/extract/file-match.spec.ts`](../../lib/workers/repository/extract/file-match.spec.ts.md) | 8 | 7 | 1 | 0 | [`crates/renovate-core/src/managers.rs:2278`](../../../../../crates/renovate-core/src/managers.rs#L2278) | partial |
-| [`lib/workers/repository/extract/index.spec.ts`](../../lib/workers/repository/extract/index.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/managers.rs:2583`](../../../../../crates/renovate-core/src/managers.rs#L2583) | partial |
+| [`lib/workers/repository/extract/index.spec.ts`](../../lib/workers/repository/extract/index.spec.ts.md) | 5 | 1 | 3 | 1 | [`crates/renovate-core/src/managers.rs:2583`](../../../../../crates/renovate-core/src/managers.rs#L2583) | partial |
 | [`lib/workers/repository/extract/manager-files.spec.ts`](../../lib/workers/repository/extract/manager-files.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/workers/repository/extract/manager_files.rs:223`](../../../../../crates/renovate-core/src/workers/repository/extract/manager_files.rs#L223) | partial |
 | [`lib/workers/repository/extract/supersedes.spec.ts`](../../lib/workers/repository/extract/supersedes.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/managers.rs:2177`](../../../../../crates/renovate-core/src/managers.rs#L2177)<br>[`crates/renovate-core/src/workers/repository/extract/supersedes.rs:190`](../../../../../crates/renovate-core/src/workers/repository/extract/supersedes.rs#L190) | ported |
 | [`lib/workers/repository/finalize/prune.spec.ts`](../../lib/workers/repository/finalize/prune.spec.ts.md) | 18 | 3 | 15 | 0 | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:97`](../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L97) | partial |
