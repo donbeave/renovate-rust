@@ -208,3 +208,8 @@ reason = "asserts TypeScript logger spy behavior (exact logger.logger.trace call
 spec   = "lib/util/stats.spec.ts"
 test   = "prints report"
 reason = "asserts TypeScript logger.debug spy behavior (exact call with 'HTTP cache statistics' message and specific aggregated data object for HttpCacheStats.report()); the core stats tracking (inc* methods) and report generation are covered by other ported tests like 'logs report'; no direct Rust logger spy equivalent without altering production instrumentation (Rust uses tracing) or test harness"
+
+[[test]]
+spec   = "lib/config/migration.spec.ts"
+test   = "logs errors"
+reason = "asserts TypeScript logger.debug spy behavior (exact call with {config, err: any Error} and 'migrateConfig() error' message) when MigrationsService.run throws (via vi.spyOn); the error is expected to propagate; no direct Rust equivalent for the spy setup or logger spy without changing production instrumentation or test harness"

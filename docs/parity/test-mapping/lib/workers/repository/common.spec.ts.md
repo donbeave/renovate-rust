@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | handles trace level | ported | [`crates/renovate-core/src/branch.rs:2494`](../../../../../../crates/renovate-core/src/branch.rs#L2494) |
-| 10 | handles debug level | ported | [`crates/renovate-core/src/branch.rs:2495`](../../../../../../crates/renovate-core/src/branch.rs#L2495) |
-| 14 | handles info level | ported | [`crates/renovate-core/src/branch.rs:2496`](../../../../../../crates/renovate-core/src/branch.rs#L2496) |
-| 18 | handles warn level | ported | [`crates/renovate-core/src/branch.rs:2497`](../../../../../../crates/renovate-core/src/branch.rs#L2497) |
-| 22 | handles error level | ported | [`crates/renovate-core/src/branch.rs:2498`](../../../../../../crates/renovate-core/src/branch.rs#L2498) |
-| 26 | handles fatal level | ported | [`crates/renovate-core/src/branch.rs:2499`](../../../../../../crates/renovate-core/src/branch.rs#L2499) |
+| 6 | handles trace level | ported | [`crates/renovate-core/src/branch.rs:2572`](../../../../../../crates/renovate-core/src/branch.rs#L2572) |
+| 10 | handles debug level | ported | [`crates/renovate-core/src/branch.rs:2573`](../../../../../../crates/renovate-core/src/branch.rs#L2573) |
+| 14 | handles info level | ported | [`crates/renovate-core/src/branch.rs:2574`](../../../../../../crates/renovate-core/src/branch.rs#L2574) |
+| 18 | handles warn level | ported | [`crates/renovate-core/src/branch.rs:2575`](../../../../../../crates/renovate-core/src/branch.rs#L2575) |
+| 22 | handles error level | ported | [`crates/renovate-core/src/branch.rs:2576`](../../../../../../crates/renovate-core/src/branch.rs#L2576) |
+| 26 | handles fatal level | ported | [`crates/renovate-core/src/branch.rs:2577`](../../../../../../crates/renovate-core/src/branch.rs#L2577) |
 

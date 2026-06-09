@@ -8,5 +8,5 @@
 |--:|---|---|---|
 | 8 | renders notes | pending | — |
 | 25 | handles render error | pending | — |
-| 44 | handles extra notes | ported | [`crates/renovate-core/src/branch.rs:2568`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2568) |
+| 44 | handles extra notes | ported | [`crates/renovate-core/src/branch.rs:2646`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2646) |
 

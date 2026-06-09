@@ -2,7 +2,7 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**29/30 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
+**29/29 in-scope tests ported** (0 pending, 1 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -35,5 +35,5 @@
 | 791 | migrates gitlabautomerge | ported | [`crates/renovate-core/src/repo_config.rs:10738`](../../../../../crates/renovate-core/src/repo_config.rs#L10738) |
 | 820 | migrates dryrun | ported | [`crates/renovate-core/src/config/migration.rs:446`](../../../../../crates/renovate-core/src/config/migration.rs#L446) |
 | 835 | migrates basebranches and basebranch | ported | [`crates/renovate-core/src/repo_config.rs:10255`](../../../../../crates/renovate-core/src/repo_config.rs#L10255) |
-| 844 | logs errors | pending | — |
+| 844 | logs errors | opt-out | asserts TypeScript logger.debug spy behavior (exact call with {config, err: any Error} and 'migrateConfig() error' message) when MigrationsService.run throws (via vi.spyOn); the error is expected to propagate; no direct Rust equivalent for the spy setup or logger spy without changing production instrumentation or test harness |
 

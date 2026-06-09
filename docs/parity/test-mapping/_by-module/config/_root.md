@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 213/228 in-scope tests ported (opt-out=1) across 12 spec files.
+**Coverage:** 213/227 in-scope tests ported (opt-out=2) across 12 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -14,7 +14,7 @@
 | [`lib/config/inherit.spec.ts`](../../lib/config/inherit.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/config.rs:1011`](../../../../../crates/renovate-core/src/config.rs#L1011) | ported |
 | [`lib/config/massage.spec.ts`](../../lib/config/massage.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/config/massage.rs:149`](../../../../../crates/renovate-core/src/config/massage.rs#L149) | ported |
 | [`lib/config/migrate-validate.spec.ts`](../../lib/config/migrate-validate.spec.ts.md) | 5 | 4 | 0 | 1 | [`crates/renovate-core/src/config/migrate_validate.rs:4953`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4953) | ported |
-| [`lib/config/migration.spec.ts`](../../lib/config/migration.spec.ts.md) | 30 | 29 | 1 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:6722`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6722)<br>[`crates/renovate-core/src/config/migration.rs:446`](../../../../../crates/renovate-core/src/config/migration.rs#L446)<br>[`crates/renovate-core/src/repo_config.rs:9876`](../../../../../crates/renovate-core/src/repo_config.rs#L9876) | partial |
+| [`lib/config/migration.spec.ts`](../../lib/config/migration.spec.ts.md) | 30 | 29 | 0 | 1 | [`crates/renovate-core/src/config/migrate_validate.rs:6722`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6722)<br>[`crates/renovate-core/src/config/migration.rs:446`](../../../../../crates/renovate-core/src/config/migration.rs#L446)<br>[`crates/renovate-core/src/repo_config.rs:9876`](../../../../../crates/renovate-core/src/repo_config.rs#L9876) | ported |
 | [`lib/config/parse.spec.ts`](../../lib/config/parse.spec.ts.md) | 4 | 2 | 2 | 0 | [`crates/renovate-core/src/config/file.rs:726`](../../../../../crates/renovate-core/src/config/file.rs#L726) | partial |
 | [`lib/config/secrets.spec.ts`](../../lib/config/secrets.spec.ts.md) | 13 | 13 | 0 | 0 | [`crates/renovate-core/src/config/secrets.rs:204`](../../../../../crates/renovate-core/src/config/secrets.rs#L204) | ported |
 | [`lib/config/validation.spec.ts`](../../lib/config/validation.spec.ts.md) | 132 | 126 | 6 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:2859`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L2859) | partial |
