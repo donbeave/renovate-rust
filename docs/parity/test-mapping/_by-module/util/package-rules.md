@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 131/143 in-scope tests ported (opt-out=0) across 11 spec files.
+**Coverage:** 131/131 in-scope tests ported (opt-out=12) across 11 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -12,7 +12,7 @@
 | [`lib/util/package-rules/dep-names.spec.ts`](../../lib/util/package-rules/dep-names.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/package_rule.rs:1359`](../../../../../crates/renovate-core/src/package_rule.rs#L1359)<br>[`crates/renovate-core/src/repo_config.rs:9683`](../../../../../crates/renovate-core/src/repo_config.rs#L9683) | ported |
 | [`lib/util/package-rules/files.spec.ts`](../../lib/util/package-rules/files.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/package_rule.rs:1541`](../../../../../crates/renovate-core/src/package_rule.rs#L1541) | ported |
 | [`lib/util/package-rules/index.spec.ts`](../../lib/util/package-rules/index.spec.ts.md) | 73 | 73 | 0 | 0 | [`crates/renovate-core/src/repo_config.rs:7728`](../../../../../crates/renovate-core/src/repo_config.rs#L7728) | ported |
-| [`lib/util/package-rules/jsonata.spec.ts`](../../lib/util/package-rules/jsonata.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
+| [`lib/util/package-rules/jsonata.spec.ts`](../../lib/util/package-rules/jsonata.spec.ts.md) | 12 | 0 | 0 | 12 | — | opt-out |
 | [`lib/util/package-rules/managers.spec.ts`](../../lib/util/package-rules/managers.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/package_rule.rs:1318`](../../../../../crates/renovate-core/src/package_rule.rs#L1318) | ported |
 | [`lib/util/package-rules/new-value.spec.ts`](../../lib/util/package-rules/new-value.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/package_rule.rs:1452`](../../../../../crates/renovate-core/src/package_rule.rs#L1452)<br>[`crates/renovate-core/src/repo_config.rs:12347`](../../../../../crates/renovate-core/src/repo_config.rs#L12347) | ported |
 | [`lib/util/package-rules/package-names.spec.ts`](../../lib/util/package-rules/package-names.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/package_rule.rs:1509`](../../../../../crates/renovate-core/src/package_rule.rs#L1509) | ported |

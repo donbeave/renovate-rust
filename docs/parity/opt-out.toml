@@ -188,3 +188,8 @@ reason = "counts TypeScript source files in the custom/ directory vs the static 
 spec   = "lib/config/migrations/migrations-service.spec.ts"
 test   = "should allow custom migrations by regexp"
 reason = "tests support for regexp-based propertyName in custom AbstractMigration subclasses (TypeScript custom migration extension mechanism with no direct 1:1 in Rust's static Migration impls and string property_name matching)"
+
+[[test]]
+spec   = "lib/util/package-rules/jsonata.spec.ts"
+all    = true
+reason = "the jsonata expression evaluation and matching for packageRules (matchJsonata) is not yet implemented (util/jsonata.rs is a stub that always returns null; the tests require a real jsonata engine capable of evaluating expressions against dep objects, handling invalid expressions/errors, supporting complex/nested, and custom functions like $detectPlatform — no direct Rust analogue until the engine is ported)"
