@@ -2,12 +2,12 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/20 in-scope tests ported** (20 pending, 0 opt-out) · status: pending
+**1/20 in-scope tests ported** (19 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | does not create new cache | pending | — |
-| 31 | sets new cache | pending | — |
+| 31 | sets new cache | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/onboarding_branch_cache.rs:153`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/onboarding_branch_cache.rs#L153) |
 | 45 | updates old cache | pending | — |
 | 68 | deletes cache | pending | — |
 | 84 | return true if cache is absent | pending | — |
