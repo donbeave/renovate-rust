@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 53/150 in-scope files mapped (full=18 partial=35 stub=0 pending=97 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 54/150 in-scope files mapped (full=18 partial=36 stub=0 pending=96 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -137,7 +137,7 @@
 | `lib/workers/repository/init/config.ts` | partial | [`crates/renovate-core/src/workers/repository/init/config.rs`](../../../crates/renovate-core/src/workers/repository/init/config.rs) | getRepoConfig (baseBranch = defaultBranch + calls to mergeInheritedConfig / checkOnboardingBranch / mergeRenovateConfig); single test ported from the covering spec. Full sibling surfaces + wiring in pending init/inherited/merge/onboarding units. |
 | `lib/workers/repository/init/index.ts` | partial | [`crates/renovate-core/src/workers/repository/init/index.rs`](../../../crates/renovate-core/src/workers/repository/init/index.rs) | initRepo orchestrator (initializeConfig + PackageFiles.clear + resetCaches + memCache.init + initMutexes + initApis + initializeCaches + getRepoConfig + setRepositoryLogLevelRemaps + silent mode log + checkIfConfigured + warnOnUnsupportedOptions + applySecretsAndVariablesToConfig + setUserRepoConfig + detectVulnerabilityAlerts + printConfig log + cloneSubmodules); single test ported. Full async/platform enrichment in init/apis + git clone/user config + mutex/mem global + logger remap + vulnerability + main worker/repository wiring pending in other units. |
 | `lib/workers/repository/init/inherited.ts` | partial | [`crates/renovate-core/src/workers/repository/init/inherited.rs`](../../../crates/renovate-core/src/workers/repository/init/inherited.rs) | mergeInheritedConfig (early returns for !inheritConfig, invalid repo/file, fetch via platform.getRawFile, parseFileConfig, validateConfig('inherit'), removeGlobalConfig + decrypt + secrets + applyHostRules + InheritConfig.set + mergeChildConfig or resolveConfigPresets path, setUserConfigFileNames); single test ported. Full async platform, preset resolve network, decrypt, host rules apply (in merge), template, logger, error constants, and wiring from getRepoConfig live in pending units or core config layer. |
-| `lib/workers/repository/init/merge.ts` | pending | — | — |
+| `lib/workers/repository/init/merge.ts` | partial | [`crates/renovate-core/src/workers/repository/init/merge.rs`](../../../crates/renovate-core/src/workers/repository/init/merge.rs) | applyHostRules (add each to hostRules, clear queue/throttle for concurrency update, delete hostRules from config; also the mergeRenovateConfig/detectRepoFileConfig/applyNpmrc etc surfaces); single test ported. Full wiring in the large merge logic and callers (inherited, config) pending other units or already in core host_rules/http. |
 | `lib/workers/repository/init/types.ts` | opt-out | — | Type-only repository initialization interfaces used only for TypeScript compile-time handoff typing. |
 | `lib/workers/repository/init/vulnerability.ts` | pending | — | — |
 | `lib/workers/repository/model/commit-message-factory.ts` | pending | — | — |

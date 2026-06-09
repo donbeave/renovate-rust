@@ -1,3 +1,5 @@
+//! @parity `lib/workers/repository/init/merge.ts` partial — applyHostRules (add each to hostRules, clear queue/throttle for concurrency update, delete hostRules from config; also the mergeRenovateConfig/detectRepoFileConfig/applyNpmrc etc surfaces); single test ported. Full wiring in the large merge logic and callers (inherited, config) pending other units or already in core host_rules/http.
+//!
 //! Config merge.
 //!
 //! Mirrors `lib/workers/repository/init/merge.ts`.
