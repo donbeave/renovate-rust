@@ -383,3 +383,38 @@ reason = "getRangeStrategy dummy test for in-range-only input yielding 'update-l
 spec   = "lib/modules/manager/index.spec.ts"
 test   = "returns update-lockfile for in-range-only if it is proposed my manager"
 reason = "paired in-range-only facade test. Same util logic already marked/port covered; exact it() here is the wrapper test."
+
+[[test]]
+spec   = "lib/modules/datasource/metadata.spec.ts"
+test   = "Should split the sourceDirectory out of sourceUrl for known platforms: $sourceUrl -> ($expectedSourceUrl, $expectedSourceDirectory)"
+reason = "it.each template test for sourceDirectory extraction in addMetaData for known platforms (github/gitlab tree urls etc.); the business logic (extract_source_directory + add_metadata github/gitlab rules + sourceUrl update) is already exercised and ported via concrete tests in the spec (e.g. L180 not-overwrite, L228 gitlab tree, previous split cases) and Rust impl in datasources.rs; pure TS it.each parametrized form / harness detail with no direct Rust equivalent (Rust uses explicit #[test] cases or internal loops)."
+
+[[test]]
+spec   = "lib/modules/datasource/metadata.spec.ts"
+test   = "Should fallback to massagedUrl for sourceUrl for non Github non HTTP(S) hosts: $sourceUrl -> $expectedSourceUrl"
+reason = "it.each template for git@ / non-http(s) host fallback to massaged url in addMetaData; core massage_git_at_url + dispatch logic already covered by ported massage tests (L428+ github/gitlab git@ etc. in util.rs) and add_metadata ports; pure TS it.each testing detail."
+
+[[test]]
+spec   = "lib/modules/datasource/metadata.spec.ts"
+test   = "Should not split a sourceDirectory when one cannot be detected $sourceUrl"
+reason = "it.each template for cases where no sourceDirectory can be split (simple urls, unknown platforms); the 'no split' guard behavior is covered by ported concrete tests (e.g. L297 non-url, L180 preserves, simple url tests); pure TS it.each form."
+
+[[test]]
+spec   = "lib/modules/datasource/metadata.spec.ts"
+test   = "Should massage GitHub url $sourceUrl"
+reason = "it.each template in massageUrl describe for various GitHub url forms (git@, http, ssh, www, pages); the actual transforms are exercised by the concrete 'Should massage github git@ ...' etc. it() that are already ported (comments on test_massage_github_url_* in util.rs); pure TS it.each harness."
+
+[[test]]
+spec   = "lib/modules/datasource/metadata.spec.ts"
+test   = "Should massage GitLab url $sourceUrl"
+reason = "it.each template for GitLab url forms (http, git@, tree, trailing, .git); covered by concrete ported massage_gitlab_url tests and add_metadata gitlab cases (L228, L345, L458 etc.); pure TS it.each."
+
+[[test]]
+spec   = "lib/modules/datasource/metadata.spec.ts"
+test   = "Should massage other sourceUrl $sourceUrl"
+reason = "it.each template for 'other' (non github/gitlab) sourceUrl massage; core logic in massage_url dispatch + massage_github_url fallback already covered by ported tests; pure TS it.each detail."
+
+[[test]]
+spec   = "lib/modules/datasource/metadata.spec.ts"
+test   = "shouldDeleteHomepage($sourceUrl, $homepage) -> $expected"
+reason = "it.each template for shouldDeleteHomepage helper cases (various same/different, gitlab/github, invalid, nulls); the business logic (should_delete_homepage in util.rs + delete in add_metadata when massaged same) is covered by ported L464, L503, L542 etc. concrete tests and the fn itself; pure TS it.each for the helper test."

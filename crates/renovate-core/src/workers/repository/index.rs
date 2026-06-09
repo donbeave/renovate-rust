@@ -1,11 +1,15 @@
 //! Main repository worker.
 //!
 //! Mirrors `lib/workers/repository/index.ts`.
+//! @parity lib/workers/repository/index.ts partial — renovateRepository/process_repository skeleton (disabled early return via configured check; wiring to finalize + result; divergence note for full init/extract/update/onboarding/configMigration/ensureDashboard/handleError/prune/splits/instrument/queue + recursive automerge; the single proving test ported). Full flow pending other units.
 
 use serde::{Deserialize, Serialize};
 
 use crate::config::GlobalConfig;
-use crate::workers::repository::result::{ProcessResult, ProcessStatus, RepositoryResult, process_result};
+use crate::workers::repository::configured::{ConfiguredResult, is_configured};
+use crate::workers::repository::result::{
+    ProcessResult, ProcessStatus, RepositoryResult, process_result,
+};
 use crate::workers::types::RenovateConfig;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -25,17 +29,10 @@ impl RepositoryWorker {
     }
 }
 
-pub fn process_repository(
-    config: &RenovateConfig,
-    _global_config: &GlobalConfig,
-) -> ProcessResult {
-    if config.enabled == Some(false) {
-        return ProcessResult {
-            result: RepositoryResult::Disabled,
-            status: ProcessStatus::Disabled,
-            enabled: Some(false),
-            onboarded: None,
-        };
+pub fn process_repository(config: &RenovateConfig, _global_config: &GlobalConfig) -> ProcessResult {
+    // Wire the full ported configured.ts check early (matches TS early disabled/fork paths in renovateRepository/init flow).
+    if is_configured(config) == ConfiguredResult::Disabled {
+        return process_result(config, RepositoryResult::Disabled);
     }
 
     // Fix divergence vs TS renovateRepository: the TS does full init/extract/update/finalize/configMigration/ensureOnboardingPr/ensureDependencyDashboard/handleError + prune on errors, etc.
@@ -43,7 +40,7 @@ pub fn process_repository(
     // Pending: full async init, instrumentation, splits, queue/throttle, semantic auto, recursive automerge retry, full error paths with pruneStaleBranches, etc.
     // Use full paths to subs (no edit to other files).
     let _finalize = crate::workers::repository::finalize::index::finalize_repository(config, &[]);
-    // e.g. extract from process, onboarding, update, config_migration from config/migration, handle from error, etc. would be called here in full.
+    // e.g. extract from process, onboarding, update, config_migration from config/migration, handle from error (util), ensureDependencyDashboard etc. would be called here in full.
 
     process_result(config, RepositoryResult::Done)
 }
@@ -109,5 +106,3 @@ mod tests {
         assert_eq!(result.result, RepositoryResult::Done);
     }
 }
-
-// @parity lib/workers/repository/index.ts partial — renovateRepository orchestrator (main flow: init, extractDependencies or empty, ensureOnboardingPr, updateRepo, configMigration, ensureDependencyDashboard, finalizeRepo, handleError + pruneStaleBranches on disabled/forked/no-config, automerge retry, splits, stats). Subs wired where ported (finalize, process, configured, error, result, etc.); full instrumentation/queue/throttle/semantic/recursive/pending onboarding details pending in subs or global. Single test ported. (Tag last after impl + test.)
