@@ -435,6 +435,12 @@ test   = "contains mandatory fields"
 reason = "asserts presence of mandatory fields in versioning metadata (from its package.json/README or similar); same doc/reflection nature as sibling, no Rust analogue or core impact (covered by the fact that all versionings have their id/name etc. in the static registry)."
 
 [[test]]
+spec   = "lib/util/vulnerability/utils.spec.ts"
+test   = "it.each template — verify manually"
+all    = true
+reason = "the remaining pending are it.each templates (L198/L215 etc.) over vulnerability data/aliases; the core ecosystem matching, getVulnerability, isVulnerable etc. are covered by the fully ported ecosystem.spec (12/12) and other vulnerability ports; pure data template tests."
+
+[[test]]
 spec   = "lib/modules/versioning/distro.spec.ts"
 all    = true
 reason = "entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic."
