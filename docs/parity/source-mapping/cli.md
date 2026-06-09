@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 55/150 in-scope files mapped (full=18 partial=37 stub=0 pending=95 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 57/150 in-scope files mapped (full=18 partial=39 stub=0 pending=93 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -141,7 +141,7 @@
 | `lib/workers/repository/init/types.ts` | opt-out | — | Type-only repository initialization interfaces used only for TypeScript compile-time handoff typing. |
 | `lib/workers/repository/init/vulnerability.ts` | partial | [`crates/renovate-core/src/workers/repository/init/vulnerability.rs`](../../../crates/renovate-core/src/workers/repository/init/vulnerability.rs) | detectVulnerabilityAlerts (early returns, platform.getVulnerabilityAlerts, combine by ecosystem/dep, build alertPackageRules with match*/vulnerabilityFixVersion/severity/isVulnerabilityAlert/prBodyNotes/force, concat to packageRules, remediations, getFixedVersionByDatasource, generatePrBodyNotes); single test ported. Full platform fetch (in github.rs), async, some ecosystem edge cases pending. |
 | `lib/workers/repository/model/commit-message-factory.ts` | partial | [`crates/renovate-core/src/workers/repository/model/commit_message_factory.rs`](../../../crates/renovate-core/src/workers/repository/model/commit_message_factory.rs) | CommitMessageFactory (decides semantic vs custom based on semanticCommits==='enabled' && !commitMessagePrefix; sets type/scope or prefix); single test ported. Full toString/get in semantic/custom (pending siblings), callers (onboarding, config-migration) pending. |
-| `lib/workers/repository/model/commit-message.ts` | pending | — | — |
+| `lib/workers/repository/model/commit-message.ts` | partial | [`crates/renovate-core/src/workers/repository/model/commit_message.rs`](../../../crates/renovate-core/src/workers/repository/model/commit_message.rs) | CommitMessage (abstract base with title/body/footer/subject, toString/toJSON, formatPrefix/formatSubject, setters with normalize, prefix hook); single test ported. Full concrete in semantic/custom (pending), callers (onboarding, config-migration, update/branch) pending. |
 | `lib/workers/repository/model/custom-commit-message.ts` | pending | — | — |
 | `lib/workers/repository/model/semantic-commit-message.ts` | pending | — | — |
 | `lib/workers/repository/onboarding/branch/check.ts` | pending | — | — |
