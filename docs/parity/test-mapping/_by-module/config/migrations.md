@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 155/159 in-scope tests ported (opt-out=2) across 58 spec files.
+**Coverage:** 157/159 in-scope tests ported (opt-out=2) across 58 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -22,7 +22,7 @@
 | [`lib/config/migrations/custom/custom-managers-migration.spec.ts`](../../lib/config/migrations/custom/custom-managers-migration.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:5381`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5381) | ported |
 | [`lib/config/migrations/custom/datasource-migration.spec.ts`](../../lib/config/migrations/custom/datasource-migration.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:5423`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5423) | ported |
 | [`lib/config/migrations/custom/dep-types-migration.spec.ts`](../../lib/config/migrations/custom/dep-types-migration.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:5477`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5477) | ported |
-| [`lib/config/migrations/custom/dry-run-migration.spec.ts`](../../lib/config/migrations/custom/dry-run-migration.spec.ts.md) | 2 | 0 | 2 | 0 | — | pending |
+| [`lib/config/migrations/custom/dry-run-migration.spec.ts`](../../lib/config/migrations/custom/dry-run-migration.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/config/migration/migrations/dry_run_migration.rs:63`](../../../../../crates/renovate-core/src/config/migration/migrations/dry_run_migration.rs#L63) | ported |
 | [`lib/config/migrations/custom/enabled-managers-migration.spec.ts`](../../lib/config/migrations/custom/enabled-managers-migration.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:5450`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5450) | ported |
 | [`lib/config/migrations/custom/extends-migration.spec.ts`](../../lib/config/migrations/custom/extends-migration.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:5106`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5106)<br>[`crates/renovate-core/src/repo_config.rs:8301`](../../../../../crates/renovate-core/src/repo_config.rs#L8301) | ported |
 | [`lib/config/migrations/custom/fetch-release-notes-migration.spec.ts`](../../lib/config/migrations/custom/fetch-release-notes-migration.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:5526`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5526) | ported |

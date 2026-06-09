@@ -60,6 +60,7 @@ mod tests {
         assert_eq!(m.property_name(), "dryRun");
     }
 
+    // Ported: "should migrate dryRun=true to dryRun=full" — lib/config/migrations/custom/dry-run-migration.spec.ts line 4
     #[test]
     fn migrate_true_to_full() {
         let m = DryRunMigration::new();
@@ -68,6 +69,7 @@ mod tests {
         assert_eq!(migrated["dryRun"], json!("full"));
     }
 
+    // Ported: "should migrate dryRun=false to dryRun=null" — lib/config/migrations/custom/dry-run-migration.spec.ts line 15
     #[test]
     fn migrate_false_to_null() {
         let m = DryRunMigration::new();
