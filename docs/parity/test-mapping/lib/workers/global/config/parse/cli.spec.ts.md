@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 15 | generates cli value | ported | [`crates/renovate-core/src/util.rs:6849`](../../../../../../../../crates/renovate-core/src/util.rs#L6849) |
-| 22 | generates returns empty if cli false | ported | [`crates/renovate-core/src/util.rs:6855`](../../../../../../../../crates/renovate-core/src/util.rs#L6855) |
+| 15 | generates cli value | ported | [`crates/renovate-core/src/util.rs:6850`](../../../../../../../../crates/renovate-core/src/util.rs#L6850) |
+| 22 | generates returns empty if cli false | ported | [`crates/renovate-core/src/util.rs:6856`](../../../../../../../../crates/renovate-core/src/util.rs#L6856) |
 | 32 | returns empty argv | ported | [`crates/renovate-cli/src/config_builder.rs:631`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L631) |
 | 36 | supports boolean no value | ported | [`crates/renovate-cli/src/config_builder.rs:919`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L919) |
 | 42 | supports boolean space true | ported | [`crates/renovate-cli/src/config_builder.rs:991`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L991) |

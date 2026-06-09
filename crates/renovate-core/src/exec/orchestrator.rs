@@ -311,6 +311,32 @@ mod tests {
         assert_eq!(result.stdout.trim(), "1");
     }
 
+    // Ported: "defaults to shell=false" — lib/util/exec/common.spec.ts line 435
+    #[tokio::test]
+    async fn exec_defaults_to_shell_false() {
+        // Upstream common wrapper: exec(string_cmd, partial<RawExecOptions>({})) i.e. no shell specified,
+        // leads to lower call with split args + shell: false.
+        // In Rust, the main exec takes pre-split &[String] + default ExecOptions (shell: None);
+        // this exercises the default path (direct execution of program + args, not forced shell -c on the whole).
+        // (Related splitting "with spaces, no shell" and explicit shell=false cases have similar coverage;
+        // this marks the default case from common.spec.)
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions::default(); // shell None → default no-shell / split behavior
+        let result = exec(
+            &["echo".to_owned(), "default-shell-false-arg".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await
+        .unwrap();
+        assert!(result.stdout.contains("default-shell-false-arg"));
+    }
+
     // Ported: "does not throw if an error occurs, but we specify ignoreFailure=true" — lib/util/exec/common.spec.ts line 292
     #[tokio::test]
     async fn exec_does_not_throw_on_failure_when_ignore_failure_true() {

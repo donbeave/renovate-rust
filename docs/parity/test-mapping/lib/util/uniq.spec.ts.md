@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should return an array with unique elements | ported | [`crates/renovate-core/src/util.rs:6569`](../../../../../crates/renovate-core/src/util.rs#L6569) |
-| 10 | should use the provided equality function to compare elements | ported | [`crates/renovate-core/src/util.rs:6576`](../../../../../crates/renovate-core/src/util.rs#L6576) |
+| 4 | should return an array with unique elements | ported | [`crates/renovate-core/src/util.rs:6570`](../../../../../crates/renovate-core/src/util.rs#L6570) |
+| 10 | should use the provided equality function to compare elements | ported | [`crates/renovate-core/src/util.rs:6577`](../../../../../crates/renovate-core/src/util.rs#L6577) |
 

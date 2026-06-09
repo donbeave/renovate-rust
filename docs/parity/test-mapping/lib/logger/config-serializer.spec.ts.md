@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | squashes templates | ported | [`crates/renovate-core/src/util.rs:6792`](../../../../../crates/renovate-core/src/util.rs#L6792) |
-| 15 | suppresses content | ported | [`crates/renovate-core/src/util.rs:6802`](../../../../../crates/renovate-core/src/util.rs#L6802) |
-| 24 | suppresses packagefiles | ported | [`crates/renovate-core/src/util.rs:6811`](../../../../../crates/renovate-core/src/util.rs#L6811) |
+| 4 | squashes templates | ported | [`crates/renovate-core/src/util.rs:6793`](../../../../../crates/renovate-core/src/util.rs#L6793) |
+| 15 | suppresses content | ported | [`crates/renovate-core/src/util.rs:6803`](../../../../../crates/renovate-core/src/util.rs#L6803) |
+| 24 | suppresses packagefiles | ported | [`crates/renovate-core/src/util.rs:6812`](../../../../../crates/renovate-core/src/util.rs#L6812) |
 

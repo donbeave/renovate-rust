@@ -41,9 +41,9 @@
 | 376 | warns if config in renovate_config is invalid | ported | [`crates/renovate-cli/src/config_env.rs:1270`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1270) |
 | 386 | renames migrated variables | ported | [`crates/renovate-cli/src/config_env.rs:1282`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1282) |
 | 396 | has no duplicate env names across options | ported | [`crates/renovate-cli/src/config_env.rs:1718`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1718) |
-| 418 | returns empty | ported | [`crates/renovate-core/src/util.rs:6824`](../../../../../../../../crates/renovate-core/src/util.rs#L6824) |
-| 426 | returns existing env | ported | [`crates/renovate-core/src/util.rs:6830`](../../../../../../../../crates/renovate-core/src/util.rs#L6830) |
-| 434 | generates renovate_ env | ported | [`crates/renovate-core/src/util.rs:6836`](../../../../../../../../crates/renovate-core/src/util.rs#L6836) |
+| 418 | returns empty | ported | [`crates/renovate-core/src/util.rs:6825`](../../../../../../../../crates/renovate-core/src/util.rs#L6825) |
+| 426 | returns existing env | ported | [`crates/renovate-core/src/util.rs:6831`](../../../../../../../../crates/renovate-core/src/util.rs#L6831) |
+| 434 | generates renovate_ env | ported | [`crates/renovate-core/src/util.rs:6837`](../../../../../../../../crates/renovate-core/src/util.rs#L6837) |
 | 441 | dryrun boolean true | ported | [`crates/renovate-cli/src/config_env.rs:1611`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1611) |
 | 449 | dryrun boolean false | ported | [`crates/renovate-cli/src/config_env.rs:1618`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1618) |
 | 457 | dryrun null | ported | [`crates/renovate-cli/src/config_env.rs:1625`](../../../../../../../../crates/renovate-cli/src/config_env.rs#L1625) |
