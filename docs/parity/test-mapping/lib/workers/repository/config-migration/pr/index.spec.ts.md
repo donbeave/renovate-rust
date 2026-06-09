@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 52 | creates pr | ported | [`crates/renovate-core/src/branch.rs:2897`](../../../../../../../../crates/renovate-core/src/branch.rs#L2897) |
+| 52 | creates pr | ported | [`crates/renovate-core/src/branch.rs:2896`](../../../../../../../../crates/renovate-core/src/branch.rs#L2896) |
 | 59 | creates pr with default pr title | pending | — |
 | 66 | founds an open pr and as it is up to date and returns | pending | — |
 | 76 | founds an open pr and updates it | pending | — |

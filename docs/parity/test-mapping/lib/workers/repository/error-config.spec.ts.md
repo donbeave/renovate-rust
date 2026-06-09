@@ -7,9 +7,9 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 30 | returns if mode is silent | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:239`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L239) |
-| 45 | creates issues | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:258`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L258) |
+| 45 | creates issues | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:257`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L257) |
 | 71 | creates issues (dryrun) | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:213`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L213) |
 | 88 | handles onboarding | pending | — |
 | 107 | handles onboarding (dryrun) | pending | — |
-| 127 | disable issue creation on config failure | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:275`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L275) |
+| 127 | disable issue creation on config failure | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:274`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L274) |
 
