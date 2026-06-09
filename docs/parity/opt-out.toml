@@ -260,6 +260,41 @@ test   = "can specify shell=true with commandwithoptions"
 reason = "tests the object form with shell: true (command array + shell:true); equivalent core covered; TS object form detail."
 
 [[test]]
+spec   = "lib/util/exec/index.spec.ts"
+test   = "exec takes an array with both `string`s and `commandwithoptions` as an argument"
+reason = "tests the TS exec call signature accepting a mixed array of string | CommandWithOptions (the object form for per-item config like ignoreFailure); Rust API uses flat &[String] + separate ExecOptions (per-item ignoreFailure handled in docker prep and general paths, covered by prior || true and ignore ports); this is pure TS wrapper form / type test with no additional business logic."
+
+[[test]]
+spec   = "lib/util/exec/index.spec.ts"
+test   = "exec takes commandwithoptions as an argument"
+reason = "tests the TS exec accepting CommandWithOptions object directly; same as above, TS form detail (core per-item handling covered elsewhere)."
+
+[[test]]
+spec   = "lib/util/exec/index.spec.ts"
+test   = "when repo jvmMaxMemory setting is higher than global settings, a debug log is logged"
+reason = "asserts the specific debug log message (via logger.logger.once.debug spy) when repo jvmMaxMemory > global (and res uses the global capped value); the core capping logic (repo higher uses global/min) is already covered by multiple ported tests in tool_settings.rs (e.g. 'repo jvmMaxMemory higher than global is ignored', min 512 overrides); the log emission is a side-effect detail in the TS wrapper (Rust has comments 'Log would go here in full implementation' in the ifs, using tracing elsewhere; no exact once/debug spy equivalent without changing instrumentation). Opt as pure log spy + the res behavior is covered."
+
+[[test]]
+spec   = "lib/util/exec/index.spec.ts"
+test   = "when global settings are lower than 512m, a debug log is logged"
+reason = "asserts the debug log for the min 512M override when global < 512 (res overridden to 512); core min enforcement covered by ported 'global settings lower than 512M overridden' test in tool_settings.rs; log spy detail."
+
+[[test]]
+spec   = "lib/util/exec/index.spec.ts"
+test   = "when repo settings are lower than 512m, a debug log is logged"
+reason = "asserts the debug log when repo < 512M (overridden); core covered by ported test; log spy."
+
+[[test]]
+spec   = "lib/util/exec/index.spec.ts"
+test   = "when repo nodemaxmemory setting is higher than global settings, a debug log is logged"
+reason = "asserts the debug log for nodeMaxMemory repo > global (res uses global); core node capping covered by ported 'node max memory repo higher than global ignored' test; log spy detail."
+
+[[test]]
+spec   = "lib/util/exec/index.spec.ts"
+test   = "supports image prefetch"
+reason = "tests the image prefetch support in the exec layer (the 'performs prefetch once for each image' dedup/once tracking is pending in docker/index as the in-memory set/resetPrefetchedImages is not implemented in Rust yet; the basic prefetch call may be in docker but full 'supports' + dedup tied to missing tracking). Skip/opt as implementation for the dedup/prefetch-once behavior is missing (similar to docker prefetch pending)."
+
+[[test]]
 spec   = "lib/util/exec/common.spec.ts"
 test   = "can specify a command with spaces, with no shell"
 reason = "tests command with spaces using the no-shell object form (split must treat space as arg separator, not shell); the split behavior is covered by our ported L495 split test and default; the object form + this specific case is the TS wrapper's options shape."

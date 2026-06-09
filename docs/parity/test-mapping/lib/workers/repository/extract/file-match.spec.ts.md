@@ -6,12 +6,12 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 8 | returns filelist if no includepaths | ported | [`crates/renovate-core/src/managers.rs:2276`](../../../../../../../crates/renovate-core/src/managers.rs#L2276) |
-| 13 | returns exact matches | ported | [`crates/renovate-core/src/managers.rs:2284`](../../../../../../../crates/renovate-core/src/managers.rs#L2284) |
-| 20 | returns minimatch matches | ported | [`crates/renovate-core/src/managers.rs:2293`](../../../../../../../crates/renovate-core/src/managers.rs#L2293) |
-| 29 | returns filelist if no ignoredpaths | ported | [`crates/renovate-core/src/managers.rs:2302`](../../../../../../../crates/renovate-core/src/managers.rs#L2302) |
-| 34 | ignores partial matches | ported | [`crates/renovate-core/src/managers.rs:2310`](../../../../../../../crates/renovate-core/src/managers.rs#L2310) |
-| 41 | returns minimatch matches | ported | [`crates/renovate-core/src/managers.rs:2293`](../../../../../../../crates/renovate-core/src/managers.rs#L2293) |
-| 57 | returns npm files | ported | [`crates/renovate-core/src/managers.rs:2344`](../../../../../../../crates/renovate-core/src/managers.rs#L2344) |
-| 64 | deduplicates | ported | [`crates/renovate-core/src/managers.rs:2319`](../../../../../../../crates/renovate-core/src/managers.rs#L2319) |
+| 8 | returns filelist if no includepaths | ported | [`crates/renovate-core/src/managers.rs:2278`](../../../../../../../crates/renovate-core/src/managers.rs#L2278) |
+| 13 | returns exact matches | ported | [`crates/renovate-core/src/managers.rs:2286`](../../../../../../../crates/renovate-core/src/managers.rs#L2286) |
+| 20 | returns minimatch matches | ported | [`crates/renovate-core/src/managers.rs:2295`](../../../../../../../crates/renovate-core/src/managers.rs#L2295) |
+| 29 | returns filelist if no ignoredpaths | ported | [`crates/renovate-core/src/managers.rs:2304`](../../../../../../../crates/renovate-core/src/managers.rs#L2304) |
+| 34 | ignores partial matches | ported | [`crates/renovate-core/src/managers.rs:2312`](../../../../../../../crates/renovate-core/src/managers.rs#L2312) |
+| 41 | returns minimatch matches | ported | [`crates/renovate-core/src/managers.rs:2295`](../../../../../../../crates/renovate-core/src/managers.rs#L2295) |
+| 57 | returns npm files | ported | [`crates/renovate-core/src/managers.rs:2346`](../../../../../../../crates/renovate-core/src/managers.rs#L2346) |
+| 64 | deduplicates | ported | [`crates/renovate-core/src/managers.rs:2321`](../../../../../../../crates/renovate-core/src/managers.rs#L2321) |
 

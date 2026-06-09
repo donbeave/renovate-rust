@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | finds unscoped | ported | [`crates/renovate-core/src/extractors/npm.rs:5148`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5148) |
-| 28 | finds scoped | ported | [`crates/renovate-core/src/extractors/npm.rs:5163`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5163) |
+| 10 | finds unscoped | ported | [`crates/renovate-core/src/extractors/npm.rs:5149`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5149) |
+| 28 | finds scoped | ported | [`crates/renovate-core/src/extractors/npm.rs:5164`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5164) |
 
