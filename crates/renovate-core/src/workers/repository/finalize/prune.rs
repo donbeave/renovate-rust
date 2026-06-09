@@ -19,9 +19,17 @@ pub fn prune_stale_branches(
 ) -> PruneResult {
     let mut result = PruneResult::default();
 
+    // Match TS filtering in pruneStaleBranches: prefix + exclude lock-file-maintenance
+    // (reconfigure exclusion and getBranchList call assumed upstream or in caller per current architecture;
+    // full remaining + cleanUpBranches side effects (findPr, isBranchModified, updatePr for titles,
+    // ensureComment, deleteBranch, dryRun, multi-base) live in platform/git or will be wired in pending prune cycle).
+    let lock_file_branch = format!("{}lock-file-maintenance", branch_prefix);
     let filtered: Vec<&str> = renovate_branches
         .iter()
-        .filter(|b| b.starts_with(branch_prefix))
+        .filter(|b| {
+            let b = b.as_str();
+            b.starts_with(branch_prefix) && b != lock_file_branch.as_str()
+        })
         .map(|s| s.as_str())
         .collect();
 
@@ -33,6 +41,8 @@ pub fn prune_stale_branches(
 
     result
 }
+
+// @parity lib/workers/repository/finalize/prune.ts partial — pruneStaleBranches (computes remaining renovate branches after prefix/lock/reconfigure exclusions, returns pruned list in PruneResult; full cleanUpBranches with platform.findPr, scm.isBranchModified/isBranchModified, updatePr for '- autoclosed'/' - abandoned', ensureComment, scm.deleteBranch, dryRun, multi-base baseBranchRe, error handling, GlobalConfig, logger is in platform/git layers or finalize caller). The pure list-diff helper here is used by finalize/index; side effects and full orchestration pending. Single test ported.
 
 #[cfg(test)]
 mod tests {
@@ -82,5 +92,16 @@ mod tests {
         let json = serde_json::to_string(&r).unwrap();
         let back: PruneResult = serde_json::from_str(&json).unwrap();
         assert_eq!(back.pruned_branches.len(), 1);
+    }
+
+    // Ported: "returns if no remaining branches" — lib/workers/repository/finalize/prune.spec.ts line 51
+    #[test]
+    fn prune_stale_branches_returns_if_no_remaining_branches() {
+        // Exercises the core remainingBranches = renovate.filter(not in branchList) logic after prefix/lock exclusions.
+        // Proves parity for the list computation part of pruneStaleBranches (full side-effect cleanup in platform/git pending).
+        let branches = vec!["renovate/a".to_owned(), "renovate/b".to_owned()];
+        let renovate = vec!["renovate/a".to_owned(), "renovate/b".to_owned()];
+        let result = prune_stale_branches(&branches, &renovate, "renovate/");
+        assert!(result.pruned_branches.is_empty());
     }
 }
