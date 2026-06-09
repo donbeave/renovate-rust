@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 43/150 in-scope files mapped (full=18 partial=25 stub=0 pending=107 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 44/150 in-scope files mapped (full=18 partial=26 stub=0 pending=106 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -126,7 +126,7 @@
 | `lib/workers/repository/extract/file-match.ts` | full | [`crates/renovate-core/src/managers.rs`](../../../crates/renovate-core/src/managers.rs) | getIncludedFiles, filterIgnoredFiles, getFilteredFileList, getMatchingFiles (include/ignore filtering + per managerFilePatterns matchRegexOrGlob + dedup/sort). get_filtered_file_list added + get_matching_files refactored to reuse helpers (fixing duplication divergence vs TS). Single test ported for dedup behavior. (logger.debug, config handling in caller layers). |
 | `lib/workers/repository/extract/index.ts` | partial | [`crates/renovate-core/src/managers.rs`](../../../crates/renovate-core/src/managers.rs) | extractAllDependencies orchestrator (getEnabledManagersList + matching via getMatchingFiles for enabled managers incl. custom. names, extractionFingerprints for matched managers, instrumented parallel getManagerPackageFiles, processSupersedesManagers on intermediate, sorted duration logging, accumulation into packageFiles map + total count, final enabledManagers check that emits the "explicitly enabled ... but found no results. Possible config error?" debug). get_manager_package_files stub (real per-manager extract/read + massage in pending manager-files.ts); customManagers array + mergeChildConfig + isCustomManager full path pending; real scm.getFileList wiring pending in repository worker. Single test ported. |
 | `lib/workers/repository/extract/manager-files.ts` | partial | [`crates/renovate-core/src/workers/repository/extract/manager_files.rs`](../../../crates/renovate-core/src/workers/repository/extract/manager_files.rs) | getManagerPackageFiles (enabled/fileList guards, matched log, extractAllPackageFiles vs per-file extractPackageFile + readLocalFile, massageDepNames for packageName->depName, attach packageFile, return). The actual registry dispatch + fs read are simulated for the proving test (full in manager registry + util/fs when this + callers wired); get_manager_files list helper pre-existing for other use. Single test ported. (file-match already full in sibling). |
-| `lib/workers/repository/extract/supersedes.ts` | pending | — | — |
+| `lib/workers/repository/extract/supersedes.ts` | partial | [`crates/renovate-core/src/workers/repository/extract/supersedes.rs`](../../../crates/renovate-core/src/workers/repository/extract/supersedes.rs) | processSupersedesManagers (uses get( , 'supersedesManagers') via supersedes_managers, builds rejected for primary-on-secondary-locks or secondary-on-primary-overlap, filters packageFiles at end; get_default_supersedes_rules + apply_supersedes helper). Full dynamic per-manager supersedesManagers from registry pending (defaults cover test cases); apply shape conversion for index flow in managers.rs. Single test ported. |
 | `lib/workers/repository/extract/types.ts` | opt-out | — | Type-only interface used for TypeScript compile-time typing in worker extraction output. |
 | `lib/workers/repository/finalize/index.ts` | pending | — | — |
 | `lib/workers/repository/finalize/prune.ts` | pending | — | — |
