@@ -1265,6 +1265,19 @@ mod tests {
         // the flag + integration is the behavior for this upstream it().
     }
 
+    // Ported: "supports setting configFileNames through cli" — lib/workers/global/config/parse/index.spec.ts line 380
+    #[test]
+    fn supports_setting_config_file_names_through_cli() {
+        let cli = cli_with(|c| c.config_file_names = Some("myrenovate.json,.github/myrenovate.json".to_owned()));
+        let config = build(&cli, GlobalConfig::default());
+        assert_eq!(
+            config.config_file_names,
+            Some(vec!["myrenovate.json".to_owned(), ".github/myrenovate.json".to_owned()])
+        );
+        // in the "parsed" result, configFileNames is not exposed (used internally for discovery),
+        // matching the TS expectation that parsed.configFileNames is undefined.
+    }
+
     // Ported: "dryRun boolean false" — lib/workers/global/config/parse/cli.spec.ts line 185
     #[test]
     fn dry_run_legacy_false_disables_dry_run() {

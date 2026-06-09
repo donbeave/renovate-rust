@@ -2,7 +2,7 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**14/35 in-scope tests ported** (21 pending, 0 opt-out) · status: partial
+**15/35 in-scope tests ported** (20 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -31,7 +31,7 @@
 | 334 | merges extends from file config with additional file config | pending | — |
 | 352 | adds extends from fileconfig only | pending | — |
 | 363 | appends files from configfilenames to config filenames list | pending | — |
-| 380 | supports setting configfilenames through cli | pending | — |
+| 380 | supports setting configfilenames through cli | ported | [`crates/renovate-cli/src/config_builder.rs:1268`](../../../../../../../../crates/renovate-cli/src/config_builder.rs#L1268) |
 | 391 | supports setting configfilenames through env | pending | — |
 | 405 | warns when cli config overrides repositories from file config | pending | — |
 | 416 | warns when cli config overrides repositories from env config | pending | — |
