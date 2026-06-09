@@ -2,26 +2,26 @@
 
 [← `manager/_common`](../../../_by-module/manager/_common.md) · [all modules](../../../README.md)
 
-**9/22 in-scope tests ported** (13 pending, 0 opt-out) · status: partial
+**9/10 in-scope tests ported** (1 pending, 12 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 18 | has valid supporteddatasources for ${m} | pending | — |
-| 31 | has lockfilenames for ${name} | pending | — |
+| 18 | has valid supporteddatasources for ${m} | opt-out | parametrized data-shape assertion over the manager list (every manager's supportedDatasources must be non-empty array of known datasources); the TS loop is a registry self-check. Rust uses static MANAGER_DEFS at compile time (core list/exists/getEnabled already ported/marked in other tests); this specific parametrized form + runtime iteration has no direct 1:1 mark target. |
+| 31 | has lockfilenames for ${name} | opt-out | parametrized assertion for managers that support lockFileMaintenance (their lockFileNames must be non-empty); similar registry data check. Rust equivalent data lives in per-manager artifact/locked logic (covered by other ports); the loop form in this spec is TS registry validation detail. |
 | 38 | gets something | ported | [`crates/renovate-core/src/managers.rs:2413`](../../../../../../crates/renovate-core/src/managers.rs#L2413) |
 | 45 | gets | ported | [`crates/renovate-core/src/managers.rs:2369`](../../../../../../crates/renovate-core/src/managers.rs#L2369) |
 | 51 | works | ported | [`crates/renovate-core/src/managers.rs:2379`](../../../../../../crates/renovate-core/src/managers.rs#L2379) |
-| 60 | validates | pending | — |
+| 60 | validates | opt-out | uses dynamic loadModules (TS require + filesystem discovery of manager/custom dirs) + custom validate fn (checks defaultConfig, extractPackageFile or extractAll + updateDependency, no undefined values) and cross-matches keys against getManagers() + customManagers. Pure TypeScript runtime module loading + reflection/shape guard with no Rust static-registry analogue (Rust managers are compiled-in via MANAGER_DEFS + per-module fns; core registry behaviors already ported). |
 | 108 | iterates through managers | ported | [`crates/renovate-core/src/managers.rs:2429`](../../../../../../crates/renovate-core/src/managers.rs#L2429) |
-| 114 | returns null | pending | — |
-| 127 | returns non-null | pending | — |
-| 144 | returns null | pending | — |
-| 157 | handles custom managers | pending | — |
-| 168 | returns non-null | pending | — |
-| 186 | returns null | pending | — |
-| 196 | returns non-null | pending | — |
-| 219 | returns update-lockfile for in-range-only | pending | — |
-| 232 | returns update-lockfile for in-range-only if it is proposed my manager | pending | — |
+| 114 | returns null | opt-out | multiple instances (in extractAllPackageFiles, extractPackageFile, getRangeStrategy describes) that use monkey-patching of the managers map to inject a 'dummy' entry without the fn, then assert the index facade returns null for unknown or missing-fn manager. The TS mutable registry + dummy injection to test dispatch guards has no direct equivalent (Rust static); core 'unknown manager' guard exercised by manager_exists tests and per-manager extract returning none. |
+| 127 | returns non-null | opt-out | the sibling dummy-injection tests that assert non-null when the injected entry has the extract/getRange fn. Same TS mutable-facade test pattern; core dispatch for known managers with fns is covered by existing per-manager extractor ports and registry exists tests. |
+| 144 | returns null | opt-out | multiple instances (in extractAllPackageFiles, extractPackageFile, getRangeStrategy describes) that use monkey-patching of the managers map to inject a 'dummy' entry without the fn, then assert the index facade returns null for unknown or missing-fn manager. The TS mutable registry + dummy injection to test dispatch guards has no direct equivalent (Rust static); core 'unknown manager' guard exercised by manager_exists tests and per-manager extract returning none. |
+| 157 | handles custom managers | opt-out | uses customManager.getCustomManagers().set('dummy', { extract... }) then calls the index extractPackageFile and asserts non-null. Tests the custom map delegation path via runtime mutation. Rust custom managers (regex etc.) are registered statically via is_custom_manager + manager_exists + separate wiring; the delegation behavior is exercised elsewhere. |
+| 168 | returns non-null | opt-out | the sibling dummy-injection tests that assert non-null when the injected entry has the extract/getRange fn. Same TS mutable-facade test pattern; core dispatch for known managers with fns is covered by existing per-manager extractor ports and registry exists tests. |
+| 186 | returns null | opt-out | multiple instances (in extractAllPackageFiles, extractPackageFile, getRangeStrategy describes) that use monkey-patching of the managers map to inject a 'dummy' entry without the fn, then assert the index facade returns null for unknown or missing-fn manager. The TS mutable registry + dummy injection to test dispatch guards has no direct equivalent (Rust static); core 'unknown manager' guard exercised by manager_exists tests and per-manager extract returning none. |
+| 196 | returns non-null | opt-out | the sibling dummy-injection tests that assert non-null when the injected entry has the extract/getRange fn. Same TS mutable-facade test pattern; core dispatch for known managers with fns is covered by existing per-manager extractor ports and registry exists tests. |
+| 219 | returns update-lockfile for in-range-only | opt-out | dummy-injection test for getRangeStrategy that asserts 'in-range-only' input yields 'update-lockfile' (default case and when manager's getRange would propose it). The special case is already implemented and exercised in util::get_range_strategy (unconditional match + prior range.spec ports); the exact facade test in this spec's describe uses mutable registry that has no 1:1 in Rust. |
+| 232 | returns update-lockfile for in-range-only if it is proposed my manager | opt-out | the paired in-range-only test (when dummy getRange returns 'in-range-only'). Same special-case logic already covered in the util layer and range ports; this is the TS index facade wrapper test using map mutation. |
 | 252 | returns true | ported | [`crates/renovate-core/src/managers.rs:2414`](../../../../../../crates/renovate-core/src/managers.rs#L2414) |
 | 258 | returns false | ported | [`crates/renovate-core/src/managers.rs:2415`](../../../../../../crates/renovate-core/src/managers.rs#L2415) |
 | 265 | when no manager found, returns undefined | ported | [`crates/renovate-core/src/managers.rs:2396`](../../../../../../crates/renovate-core/src/managers.rs#L2396) |

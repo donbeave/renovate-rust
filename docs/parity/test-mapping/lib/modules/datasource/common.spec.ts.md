@@ -25,13 +25,13 @@
 | 152 | should use specified versioning if provided | ported | [`crates/renovate-core/src/util.rs:12546`](../../../../../../crates/renovate-core/src/util.rs#L12546) |
 | 162 | sorts releases by version and removes duplicates | ported | [`crates/renovate-core/src/util.rs:12664`](../../../../../../crates/renovate-core/src/util.rs#L12664) |
 | 183 | uses default versioning if none is specified | ported | [`crates/renovate-core/src/util.rs:12584`](../../../../../../crates/renovate-core/src/util.rs#L12584) |
-| 201 | should remove constraints from releases if constraintsfiltering is not strict | ported | [`crates/renovate-core/src/datasources.rs:1550`](../../../../../../crates/renovate-core/src/datasources.rs#L1550) |
-| 230 | should filter releases based on constraints if constraintsfiltering is strict | ported | [`crates/renovate-core/src/datasources.rs:1579`](../../../../../../crates/renovate-core/src/datasources.rs#L1579) |
-| 250 | should return all releases when no configconstraints | ported | [`crates/renovate-core/src/datasources.rs:1616`](../../../../../../crates/renovate-core/src/datasources.rs#L1616) |
-| 268 | should match exact constraints | ported | [`crates/renovate-core/src/datasources.rs:1642`](../../../../../../crates/renovate-core/src/datasources.rs#L1642) |
-| 287 | should handle config with a range constraint, and a release with an exact version | ported | [`crates/renovate-core/src/datasources.rs:1672`](../../../../../../crates/renovate-core/src/datasources.rs#L1672) |
-| 306 | should handle config with an exact version, and a release with a range constraint | ported | [`crates/renovate-core/src/datasources.rs:1751`](../../../../../../crates/renovate-core/src/datasources.rs#L1751) |
-| 325 | should allow constraintsversioning to override the datasource's default versioning | ported | [`crates/renovate-core/src/datasources.rs:1702`](../../../../../../crates/renovate-core/src/datasources.rs#L1702) |
+| 201 | should remove constraints from releases if constraintsfiltering is not strict | ported | [`crates/renovate-core/src/datasources.rs:1651`](../../../../../../crates/renovate-core/src/datasources.rs#L1651) |
+| 230 | should filter releases based on constraints if constraintsfiltering is strict | ported | [`crates/renovate-core/src/datasources.rs:1680`](../../../../../../crates/renovate-core/src/datasources.rs#L1680) |
+| 250 | should return all releases when no configconstraints | ported | [`crates/renovate-core/src/datasources.rs:1717`](../../../../../../crates/renovate-core/src/datasources.rs#L1717) |
+| 268 | should match exact constraints | ported | [`crates/renovate-core/src/datasources.rs:1743`](../../../../../../crates/renovate-core/src/datasources.rs#L1743) |
+| 287 | should handle config with a range constraint, and a release with an exact version | ported | [`crates/renovate-core/src/datasources.rs:1773`](../../../../../../crates/renovate-core/src/datasources.rs#L1773) |
+| 306 | should handle config with an exact version, and a release with a range constraint | ported | [`crates/renovate-core/src/datasources.rs:1852`](../../../../../../crates/renovate-core/src/datasources.rs#L1852) |
+| 325 | should allow constraintsversioning to override the datasource's default versioning | ported | [`crates/renovate-core/src/datasources.rs:1803`](../../../../../../crates/renovate-core/src/datasources.rs#L1803) |
 | 378 | returns immediately if no versioncompatibility | ported | [`crates/renovate-core/src/util.rs:12596`](../../../../../../crates/renovate-core/src/util.rs#L12596) |
 | 383 | filters out non-matching | ported | [`crates/renovate-core/src/util.rs:12604`](../../../../../../crates/renovate-core/src/util.rs#L12604) |
 | 395 | filters out incompatible | ported | [`crates/renovate-core/src/util.rs:12620`](../../../../../../crates/renovate-core/src/util.rs#L12620) |
