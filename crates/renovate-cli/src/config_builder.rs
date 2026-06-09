@@ -43,7 +43,10 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
         config.token = Some(t.clone());
     }
     if let Some(ref e) = cli.endpoint {
-        config.endpoint = Some(e.clone());
+        // Minimal massage to match upstream "massages trailing slash into endpoint" behavior.
+        // TS parseConfigs ensures endpoint always ends with / for the platform client.
+        let ep = if e.ends_with('/') { e.clone() } else { format!("{}/", e) };
+        config.endpoint = Some(ep);
     }
     if let Some(ref username) = cli.username {
         config.username = Some(username.clone());
@@ -1228,6 +1231,16 @@ mod tests {
         migrate_args(&mut cli);
         let cfg = build(&cli, GlobalConfig::default());
         assert_eq!(cfg.dry_run, None);
+    }
+
+    // Ported: "massages trailing slash into endpoint" — lib/workers/global/config/parse/index.spec.ts line 163
+    #[test]
+    fn endpoint_massages_trailing_slash() {
+        // Exercises the cli --endpoint value (without trailing /) being massaged to end with / in final config.
+        // Matches the exact upstream it() expectation.
+        let cli = cli_with(|c| c.endpoint = Some("https://github.renovatebot.com/api/v3".to_owned()));
+        let cfg = build(&cli, GlobalConfig::default());
+        assert_eq!(cfg.endpoint.as_deref(), Some("https://github.renovatebot.com/api/v3/"));
     }
 
     // Ported: "dryRun boolean false" — lib/workers/global/config/parse/cli.spec.ts line 185
