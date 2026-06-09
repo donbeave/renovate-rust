@@ -1,6 +1,7 @@
 //! Repository worker common types.
 //!
 //! Mirrors `lib/workers/repository/common.ts` and related cache types.
+//! @parity lib/workers/repository/common.ts partial — extractRepoProblems + formatProblemLevel added (format also present in branch.rs for other use; extract is stub pending full logger problems integration in problem-stream). The cache types (BaseBranchCache, PackageFile) were already here as "related".
 
 use std::collections::HashMap;
 
@@ -28,6 +29,27 @@ pub struct PackageFile {
     pub skip_installs: Option<bool>,
     pub manager: Option<String>,
     pub npmrc: Option<String>,
+}
+
+/// Mirrors extractRepoProblems + formatProblemLevel from lib/workers/repository/common.ts .
+/// (format_problem_level also mirrored in branch.rs for PR body use; extract uses logger problems when available).
+pub fn extract_repo_problems(_repository: Option<&str>) -> std::collections::HashSet<String> {
+    // Full impl requires logger problem stream (partial in lib.rs @parity for problem-stream.ts).
+    // Stub returns empty for now; wiring in repository/index will use when problems collection is complete.
+    // The filter (by repo && !artifactErrors) + format is the observable.
+    std::collections::HashSet::new()
+}
+
+pub fn format_problem_level(level: u8) -> String {
+    match level {
+        10 => "🔬 TRACE".to_owned(),
+        20 => "🔍 DEBUG".to_owned(),
+        30 => "ℹ️ INFO".to_owned(),
+        40 => "⚠️ WARN".to_owned(),
+        50 => "❌ ERROR".to_owned(),
+        60 => "💀 FATAL".to_owned(),
+        _ => format!("❓ LEVEL{level}"),
+    }
 }
 
 #[cfg(test)]
@@ -105,5 +127,23 @@ mod tests {
         assert!(pf.deps.is_empty());
         assert!(pf.lock_files.is_none());
         assert!(pf.datasource.is_none());
+    }
+
+    // Ported: "formatProblemLevel()" — lib/workers/repository/common.spec.ts line 5
+    #[test]
+    fn format_problem_level_matches_upstream() {
+        assert_eq!(format_problem_level(10), "🔬 TRACE");
+        assert_eq!(format_problem_level(20), "🔍 DEBUG");
+        assert_eq!(format_problem_level(30), "ℹ️ INFO");
+        assert_eq!(format_problem_level(40), "⚠️ WARN");
+        assert_eq!(format_problem_level(50), "❌ ERROR");
+        assert_eq!(format_problem_level(60), "💀 FATAL");
+    }
+
+    #[test]
+    fn extract_repo_problems_returns_empty_for_now() {
+        // extract uses logger problems (partial elsewhere); current stub returns empty set.
+        let probs = extract_repo_problems(Some("org/repo"));
+        assert!(probs.is_empty());
     }
 }
