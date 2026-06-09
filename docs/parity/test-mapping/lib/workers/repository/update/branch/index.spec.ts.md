@@ -2,11 +2,11 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/101 in-scope tests ported** (101 pending, 0 opt-out) · status: pending
+**2/101 in-scope tests ported** (99 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 157 | skips branch if not scheduled and branch does not exist | pending | — |
+| 157 | skips branch if not scheduled and branch does not exist | ported | [`crates/renovate-core/src/workers/repository/update/branch/index.rs:345`](../../../../../../../../crates/renovate-core/src/workers/repository/update/branch/index.rs#L345) |
 | 167 | skips branch creation if minimumgroupsize is not met | pending | — |
 | 180 | skips branch if not scheduled and not updating out of schedule | pending | — |
 | 198 | skips branch for fresh release with minimumreleaseage | pending | — |
@@ -24,7 +24,7 @@
 | 402 | allows branch even if merged pr found | pending | — |
 | 418 | throws error if closed pr found | pending | — |
 | 432 | does not skip branch if edited pr found with rebaselabel | pending | — |
-| 451 | skips branch if edited pr found | pending | — |
+| 451 | skips branch if edited pr found | ported | [`crates/renovate-core/src/workers/repository/update/branch/handle_existing.rs:187`](../../../../../../../../crates/renovate-core/src/workers/repository/update/branch/handle_existing.rs#L187) |
 | 478 | skips branch if tagretbranch of update pr is changed by user | pending | — |
 | 510 | skips branch if edited pr found without commenting | pending | — |
 | 534 | skips branch if target branch changed | pending | — |

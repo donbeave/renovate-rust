@@ -2,14 +2,14 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
+**1/18 in-scope tests ported** (17 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 57 | runs with no basebranchpatterns | pending | — |
 | 80 | runs with basebranchpatterns | pending | — |
 | 99 | uses repository cache | pending | — |
-| 122 | fetches vulnerabilities | pending | — |
+| 122 | fetches vulnerabilities | ported | [`crates/renovate-core/src/workers/repository/process/vulnerabilities.rs:134`](../../../../../../../crates/renovate-core/src/workers/repository/process/vulnerabilities.rs#L134) |
 | 141 | handles exception when fetching vulnerabilities | pending | — |
 | 159 | skips malicious package updates | pending | — |
 | 259 | logs a warning | pending | — |

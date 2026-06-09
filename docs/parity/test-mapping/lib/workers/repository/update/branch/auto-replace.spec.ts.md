@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/71 in-scope tests ported** (71 pending, 0 opt-out) · status: pending
+**1/71 in-scope tests ported** (70 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -15,7 +15,7 @@
 | 128 | handles no work | pending | — |
 | 144 | returns existing content if replacestring mismatch | pending | — |
 | 163 | updates version and integrity | pending | — |
-| 182 | updates with autoreplacenewstring | pending | — |
+| 182 | updates with autoreplacenewstring | ported | [`crates/renovate-core/src/workers/repository/update/branch/auto_replace.rs:315`](../../../../../../../../crates/renovate-core/src/workers/repository/update/branch/auto_replace.rs#L315) |
 | 204 | succeeds when using autoreplacestringtemplate to update depname when using regex | pending | — |
 | 244 | fails with oldversion in depname | pending | — |
 | 266 | updates digest when only digest changes and no replacestring is set | pending | — |

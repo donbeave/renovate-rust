@@ -2,11 +2,11 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/17 in-scope tests ported** (17 pending, 0 opt-out) · status: pending
+**1/17 in-scope tests ported** (16 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 34 | handles an artifact which is a directory | pending | — |
+| 34 | handles an artifact which is a directory | ported | [`crates/renovate-core/src/workers/repository/update/branch/execute_post_upgrade_commands.rs:333`](../../../../../../../../crates/renovate-core/src/workers/repository/update/branch/execute_post_upgrade_commands.rs#L333) |
 | 92 | executes commands on update package files | pending | — |
 | 140 | does not execute command with shell mode by default | pending | — |
 | 197 | executes command with shell mode when allowshellexecutorforpostupgradecommands=true | pending | — |

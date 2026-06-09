@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/53 in-scope tests ported** (53 pending, 0 opt-out) · status: pending
+**1/53 in-scope tests ported** (52 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -10,7 +10,7 @@
 | 79 | handles autoreplace branch no update | pending | — |
 | 96 | handles autoreplace failure | pending | — |
 | 102 | handles autoreplace branch needs update | pending | — |
-| 119 | handles empty | pending | — |
+| 119 | handles empty | ported | [`crates/renovate-core/src/workers/repository/update/branch/get_updated.rs:373`](../../../../../../../../crates/renovate-core/src/workers/repository/update/branch/get_updated.rs#L373) |
 | 130 | handles null content | pending | — |
 | 139 | handles content change | pending | — |
 | 159 | handles lock files | pending | — |

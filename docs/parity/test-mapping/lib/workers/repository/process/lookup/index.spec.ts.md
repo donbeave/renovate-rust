@@ -2,18 +2,18 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/171 in-scope tests ported** (171 pending, 0 opt-out) · status: pending
+**7/171 in-scope tests ported** (164 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 101 | returns null if invalid currentvalue | pending | — |
+| 101 | returns null if invalid currentvalue | ported | [`crates/renovate-core/src/workers/repository/process/lookup/index.rs:261`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/index.rs#L261) |
 | 112 | returns null if unknown datasource | pending | — |
 | 123 | handles error result from getpkgreleaseswithresult | pending | — |
-| 135 | returns rollback for pinned version | pending | — |
+| 135 | returns rollback for pinned version | ported | [`crates/renovate-core/src/workers/repository/process/lookup/index.rs:247`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/index.rs#L247) |
 | 174 | returns rollback for ranged version | pending | — |
 | 200 | supports minor and major upgrades for tilde ranges | pending | — |
-| 250 | supports lock file updates mixed with regular updates | pending | — |
-| 310 | returns multiple updates if grouping but separatemajorminor=true | pending | — |
+| 250 | supports lock file updates mixed with regular updates | ported | [`crates/renovate-core/src/workers/repository/process/lookup/generate.rs:148`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/generate.rs#L148) |
+| 310 | returns multiple updates if grouping but separatemajorminor=true | ported | [`crates/renovate-core/src/workers/repository/process/lookup/bucket.rs:85`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/bucket.rs#L85) |
 | 352 | returns additional update if grouping but separateminorpatch=true | pending | — |
 | 408 | returns one update if grouping and separatemajorminor=false | pending | — |
 | 438 | returns both updates if automerging minor | pending | — |
@@ -154,13 +154,13 @@
 | 4687 | handles current age packagerules with version restrictions | pending | — |
 | 4735 | does not apply package rules for matchcurrentage if packagerules doesn not have a current age matcher | pending | — |
 | 4794 | does not apply package rules for matchcurrentage if the releasetimestamp for current version is missing | pending | — |
-| 4847 | handles replacements - name only without pindigests enabled | pending | — |
+| 4847 | handles replacements - name only without pindigests enabled | ported | [`crates/renovate-core/src/workers/repository/process/lookup/utils.rs:84`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/utils.rs#L84) |
 | 4889 | handles replacements - name only with pindigests enabled | pending | — |
 | 4944 | handles replacements - name only no version/tag | pending | — |
 | 4966 | handles replacements - digest configured and validating getdigest funtion call | pending | — |
 | 5026 | handles replacements - digest configured with replacementnametemplate and validating getdigest function call | pending | — |
-| 5115 | handles replacements - skips if package and replacement names match | pending | — |
-| 5128 | handles replacements - name and version | pending | — |
+| 5115 | handles replacements - skips if package and replacement names match | ported | [`crates/renovate-core/src/workers/repository/process/lookup/index.rs:272`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/index.rs#L272) |
+| 5128 | handles replacements - name and version | ported | [`crates/renovate-core/src/workers/repository/process/lookup/index.rs:283`](../../../../../../../../crates/renovate-core/src/workers/repository/process/lookup/index.rs#L283) |
 | 5149 | handles replacements - can template replacement name without a replacement version | pending | — |
 | 5188 | handles replacements - can template replacement name with a replacement version | pending | — |
 | 5228 | handles replacements - replacementname takes precedence over replacementnametemplate | pending | — |

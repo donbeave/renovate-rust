@@ -2,13 +2,13 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**1/16 in-scope tests ported** (15 pending, 0 opt-out) · status: partial
+**2/16 in-scope tests ported** (14 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 48 | stops after automerge | pending | — |
 | 106 | increments branch counter | pending | — |
-| 147 | return no-work if branch fingerprint is not different | pending | — |
+| 147 | return no-work if branch fingerprint is not different | ported | [`crates/renovate-core/src/workers/repository/process/fingerprint_fields.rs:31`](../../../../../../../crates/renovate-core/src/workers/repository/process/fingerprint_fields.rs#L31) |
 | 176 | updates branch fingerprint when new commit is made | pending | — |
 | 219 | caches same fingerprint when no commit is made and branch cache existed | ported | [`crates/renovate-core/src/workers/repository/cache.rs:142`](../../../../../../../crates/renovate-core/src/workers/repository/cache.rs#L142) |
 | 264 | caches same fingerprint when no commit is made | pending | — |

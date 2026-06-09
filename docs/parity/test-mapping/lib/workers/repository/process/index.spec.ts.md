@@ -2,11 +2,11 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**0/13 in-scope tests ported** (13 pending, 0 opt-out) · status: pending
+**1/13 in-scope tests ported** (12 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 28 | processes single branches | pending | — |
+| 28 | processes single branches | ported | [`crates/renovate-core/src/workers/repository/process/index.rs:272`](../../../../../../../crates/renovate-core/src/workers/repository/process/index.rs#L272) |
 | 33 | processes basebranchpatterns | pending | — |
 | 49 | reads config from default branch if usebasebranchconfig not specified | pending | — |
 | 68 | reads config from branches in basebranchpatterns if usebasebranchconfig specified | pending | — |

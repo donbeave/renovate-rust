@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/23 in-scope tests ported** (23 pending, 0 opt-out) · status: pending
+**1/23 in-scope tests ported** (22 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -15,7 +15,7 @@
 | 165 | should log debug if no matchstring could be applied | pending | — |
 | 201 | should catch template error in bumptype | pending | — |
 | 239 | should bump version in a non edited file and add to updatedartifacts | pending | — |
-| 271 | should bump version with patch by default | pending | — |
+| 271 | should bump version with patch by default | ported | [`crates/renovate-core/src/workers/repository/update/branch/bump_versions.rs:382`](../../../../../../../../crates/renovate-core/src/workers/repository/update/branch/bump_versions.rs#L382) |
 | 302 | should bump version in an already changed packagefiles | pending | — |
 | 347 | should bump version in an already changed artifact file | pending | — |
 | 392 | should bump version in deleted and recreated file changed artifact file | pending | — |
