@@ -1,7 +1,6 @@
 //! Dependency fetching logic.
 //!
-//! Mirrors `lib/workers/repository/process/fetch.ts`.
-
+//! @parity `lib/workers/repository/process/fetch.ts` partial — fetchUpdates orchestrator, fetchManagerPackagerFileUpdates / fetchManagerUpdates, per-dep early skip (invalid-name, preserve existing skipReason + updates:[]), name trim + packageName fallback, datasource guard, delegation to lookup_dependency for updates; single test ported. Full pre-lookup merge/applyPackageRules, constraintsVersioning, concurrency (p.all), LookupStats, ExternalHostError warnings, PackageFiles.add side-effect pending.
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -194,5 +193,24 @@ mod tests {
         let json = serde_json::to_string(&r).unwrap();
         let back: FetchResult = serde_json::from_str(&json).unwrap();
         assert_eq!(back.errors, vec!["error1"]);
+    }
+    #[test]
+    fn handles_empty_deps() {
+        // Ported: "handles empty deps" — lib/workers/repository/process/fetch.spec.ts line 21
+        let config = RenovateConfig::default();
+        let mut pf: HashMap<String, Vec<PackageFile>> = HashMap::new();
+        pf.insert(
+            "npm".into(),
+            vec![PackageFile {
+                package_file: "package.json".into(),
+                deps: vec![],
+                ..Default::default()
+            }],
+        );
+        let result = fetch_updates(&config, &mut pf);
+        assert_eq!(result.package_files.len(), 1);
+        let npm = pf.get("npm").unwrap();
+        assert_eq!(npm.len(), 1);
+        assert!(npm[0].deps.is_empty());
     }
 }

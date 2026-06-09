@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 70/150 in-scope files mapped (full=19 partial=51 stub=0 pending=80 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 71/150 in-scope files mapped (full=19 partial=52 stub=0 pending=79 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -158,7 +158,7 @@
 | `lib/workers/repository/onboarding/pr/pr-list.ts` | pending | — | — |
 | `lib/workers/repository/package-files.ts` | pending | — | — |
 | `lib/workers/repository/process/extract-update.ts` | partial | [`crates/renovate-core/src/workers/repository/process/extract_update.rs`](../../../crates/renovate-core/src/workers/repository/process/extract_update.rs) | extract (cache check stub + TODO checkout/extractAll/stats/ensureGithubToken), lookup (fetchVulns x2 + fetchUpdates + calculateLibYears + branchify TODO + reportMaliciousSkippedDependencies + sort), update (write if onboarded), is_cache_extract_valid (flat), report fn; single test ported. Full async/cache/branchify/vulns pending other units. |
-| `lib/workers/repository/process/fetch.ts` | pending | — | — |
+| `lib/workers/repository/process/fetch.ts` | partial | [`crates/renovate-core/src/workers/repository/process/fetch.rs`](../../../crates/renovate-core/src/workers/repository/process/fetch.rs) | fetchUpdates orchestrator, fetchManagerPackagerFileUpdates / fetchManagerUpdates, per-dep early skip (invalid-name, preserve existing skipReason + updates:[]), name trim + packageName fallback, datasource guard, delegation to lookup_dependency for updates; single test ported. Full pre-lookup merge/applyPackageRules, constraintsVersioning, concurrency (p.all), LookupStats, ExternalHostError warnings, PackageFiles.add side-effect pending. |
 | `lib/workers/repository/process/fingerprint-fields.ts` | pending | — | — |
 | `lib/workers/repository/process/index.ts` | pending | — | — |
 | `lib/workers/repository/process/libyear.ts` | pending | — | — |
