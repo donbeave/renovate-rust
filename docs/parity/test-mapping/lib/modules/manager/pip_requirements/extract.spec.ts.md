@@ -24,7 +24,7 @@
 | 184 | should handle package with extras and no version specifiers | ported | [`crates/renovate-core/src/extractors/pip.rs:458`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L458) |
 | 198 | should handle dependency and ignore env markers | ported | [`crates/renovate-core/src/extractors/pip.rs:450`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L450) |
 | 213 | should handle git packages | ported | [`crates/renovate-core/src/extractors/pip.rs:483`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L483) |
-| 258 | extracts a file with only --index-url flags | ported | [`crates/renovate-core/src/extractors/npm.rs:4098`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4098) |
+| 258 | extracts a file with only --index-url flags | ported | [`crates/renovate-core/src/extractors/npm.rs:4101`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4101) |
 | 266 | extracts a file with only --extra-index-url flags | ported | [`crates/renovate-core/src/extractors/pip.rs:536`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L536) |
 | 276 | extracts a file with only -r flags | ported | [`crates/renovate-core/src/extractors/pip.rs:550`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L550) |
 | 286 | extracts a file with only -c flags | ported | [`crates/renovate-core/src/extractors/pip.rs:561`](../../../../../../../crates/renovate-core/src/extractors/pip.rs#L561) |

@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 8 | detects .npmrc in home directory | ported | [`crates/renovate-core/src/extractors/npm.rs:5193`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5193) |
-| 24 | handles no .npmrc | ported | [`crates/renovate-core/src/extractors/npm.rs:5327`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5327) |
+| 8 | detects .npmrc in home directory | ported | [`crates/renovate-core/src/extractors/npm.rs:5196`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5196) |
+| 24 | handles no .npmrc | ported | [`crates/renovate-core/src/extractors/npm.rs:5330`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5330) |
 

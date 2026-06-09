@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 244/410 in-scope tests ported (opt-out=1) across 45 spec files.
+**Coverage:** 244/409 in-scope tests ported (opt-out=2) across 45 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -41,7 +41,7 @@
 | [`lib/util/sample.spec.ts`](../../lib/util/sample.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/util.rs:9455`](../../../../../crates/renovate-core/src/util.rs#L9455) | ported |
 | [`lib/util/sanitize.spec.ts`](../../lib/util/sanitize.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:11031`](../../../../../crates/renovate-core/src/util.rs#L11031) | ported |
 | [`lib/util/split.spec.ts`](../../lib/util/split.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/util.rs:11764`](../../../../../crates/renovate-core/src/util.rs#L11764) | ported |
-| [`lib/util/stats.spec.ts`](../../lib/util/stats.spec.ts.md) | 33 | 14 | 19 | 0 | [`crates/renovate-core/src/util.rs:7335`](../../../../../crates/renovate-core/src/util.rs#L7335) | partial |
+| [`lib/util/stats.spec.ts`](../../lib/util/stats.spec.ts.md) | 33 | 14 | 18 | 1 | [`crates/renovate-core/src/util.rs:7335`](../../../../../crates/renovate-core/src/util.rs#L7335) | partial |
 | [`lib/util/streams.spec.ts`](../../lib/util/streams.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/util.rs:10942`](../../../../../crates/renovate-core/src/util.rs#L10942) | ported |
 | [`lib/util/string-match.spec.ts`](../../lib/util/string-match.spec.ts.md) | 25 | 24 | 1 | 0 | [`crates/renovate-core/src/string_match.rs:257`](../../../../../crates/renovate-core/src/string_match.rs#L257) | partial |
 | [`lib/util/string.spec.ts`](../../lib/util/string.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/util.rs:6625`](../../../../../crates/renovate-core/src/util.rs#L6625) | ported |

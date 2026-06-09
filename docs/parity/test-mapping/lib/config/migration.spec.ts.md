@@ -33,7 +33,7 @@
 | 751 | migrates empty requiredstatuschecks | ported | [`crates/renovate-core/src/repo_config.rs:10747`](../../../../../crates/renovate-core/src/repo_config.rs#L10747) |
 | 762 | migrates azureautocomplete | ported | [`crates/renovate-core/src/repo_config.rs:10729`](../../../../../crates/renovate-core/src/repo_config.rs#L10729) |
 | 791 | migrates gitlabautomerge | ported | [`crates/renovate-core/src/repo_config.rs:10738`](../../../../../crates/renovate-core/src/repo_config.rs#L10738) |
-| 820 | migrates dryrun | ported | [`crates/renovate-core/src/config/migration.rs:381`](../../../../../crates/renovate-core/src/config/migration.rs#L381) |
+| 820 | migrates dryrun | ported | [`crates/renovate-core/src/config/migration.rs:446`](../../../../../crates/renovate-core/src/config/migration.rs#L446) |
 | 835 | migrates basebranches and basebranch | ported | [`crates/renovate-core/src/repo_config.rs:10255`](../../../../../crates/renovate-core/src/repo_config.rs#L10255) |
 | 844 | logs errors | pending | — |
 

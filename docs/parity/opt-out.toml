@@ -203,3 +203,8 @@ reason = "asserts TypeScript logger.warn spy behavior (exact call shape with pac
 spec   = "lib/modules/manager/npm/update/dependency/yarn.spec.ts"
 test   = "ensure trace logging"
 reason = "asserts TypeScript logger spy behavior (exact logger.logger.trace call with the formatted message 'npm.updateYarnrcCatalogDependency(): yarn.catalog.default::default.react = 19.0.0') on successful catalog update; the core business logic of updateYarnrcCatalogDependency is already covered by other ported tests in the same spec; no direct Rust logger spy equivalent without altering production instrumentation (Rust uses tracing/debug macros) or test harness"
+
+[[test]]
+spec   = "lib/util/stats.spec.ts"
+test   = "prints report"
+reason = "asserts TypeScript logger.debug spy behavior (exact call with 'HTTP cache statistics' message and specific aggregated data object for HttpCacheStats.report()); the core stats tracking (inc* methods) and report generation are covered by other ported tests like 'logs report'; no direct Rust logger spy equivalent without altering production instrumentation (Rust uses tracing) or test harness"
