@@ -8,8 +8,8 @@
 |--:|---|---|---|
 | 175 | command exits with code 0 | ported | [`crates/renovate-core/src/exec/raw.rs:145`](../../../../../../crates/renovate-core/src/exec/raw.rs#L145) |
 | 194 | never extends the process environment | ported | [`crates/renovate-core/src/exec/raw.rs:166`](../../../../../../crates/renovate-core/src/exec/raw.rs#L166) |
-| 214 | throws if an error occurs, when using commandwithoptions | ported | [`crates/renovate-core/src/exec/error.rs:123`](../../../../../../crates/renovate-core/src/exec/error.rs#L123) |
-| 241 | throws if an error occurs | ported | [`crates/renovate-core/src/exec/error.rs:115`](../../../../../../crates/renovate-core/src/exec/error.rs#L115) |
+| 214 | throws if an error occurs, when using commandwithoptions | ported | [`crates/renovate-core/src/exec/error.rs:124`](../../../../../../crates/renovate-core/src/exec/error.rs#L124) |
+| 241 | throws if an error occurs | ported | [`crates/renovate-core/src/exec/error.rs:116`](../../../../../../crates/renovate-core/src/exec/error.rs#L116) |
 | 265 | throws if an error occurs, and we specify ignorefailure=false | pending | — |
 | 292 | does not throw if an error occurs, but we specify ignorefailure=true | pending | — |
 | 320 | can specify a shell | ported | [`crates/renovate-core/src/exec/raw.rs:182`](../../../../../../crates/renovate-core/src/exec/raw.rs#L182) |
@@ -25,7 +25,7 @@
 | 538 | can specify shell=false | pending | — |
 | 561 | should invoke the output listeners | pending | — |
 | 602 | command exits with code 1 | ported | [`crates/renovate-core/src/exec/raw.rs:155`](../../../../../../crates/renovate-core/src/exec/raw.rs#L155) |
-| 618 | process terminated with sigterm | ported | [`crates/renovate-core/src/exec/error.rs:136`](../../../../../../crates/renovate-core/src/exec/error.rs#L136) |
+| 618 | process terminated with sigterm | ported | [`crates/renovate-core/src/exec/error.rs:137`](../../../../../../crates/renovate-core/src/exec/error.rs#L137) |
 | 632 | process does nothing when signaled with sigstop and eventually times out | ported | [`crates/renovate-core/src/exec/raw.rs:194`](../../../../../../crates/renovate-core/src/exec/raw.rs#L194) |
 | 644 | process exits due to error | ported | [`crates/renovate-core/src/exec/raw.rs:219`](../../../../../../crates/renovate-core/src/exec/raw.rs#L219) |
 | 659 | process exits with error due to exceeded stdout maxbuffer | pending | — |
