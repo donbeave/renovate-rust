@@ -8,11 +8,11 @@
 |--:|---|---|---|
 | 18 | has valid supporteddatasources for ${m} | pending | — |
 | 31 | has lockfilenames for ${name} | pending | — |
-| 38 | gets something | ported | [`crates/renovate-core/src/managers.rs:2199`](../../../../../../crates/renovate-core/src/managers.rs#L2199) |
-| 45 | gets | ported | [`crates/renovate-core/src/managers.rs:2155`](../../../../../../crates/renovate-core/src/managers.rs#L2155) |
-| 51 | works | ported | [`crates/renovate-core/src/managers.rs:2165`](../../../../../../crates/renovate-core/src/managers.rs#L2165) |
+| 38 | gets something | ported | [`crates/renovate-core/src/managers.rs:2406`](../../../../../../crates/renovate-core/src/managers.rs#L2406) |
+| 45 | gets | ported | [`crates/renovate-core/src/managers.rs:2362`](../../../../../../crates/renovate-core/src/managers.rs#L2362) |
+| 51 | works | ported | [`crates/renovate-core/src/managers.rs:2372`](../../../../../../crates/renovate-core/src/managers.rs#L2372) |
 | 60 | validates | pending | — |
-| 108 | iterates through managers | ported | [`crates/renovate-core/src/managers.rs:2215`](../../../../../../crates/renovate-core/src/managers.rs#L2215) |
+| 108 | iterates through managers | ported | [`crates/renovate-core/src/managers.rs:2422`](../../../../../../crates/renovate-core/src/managers.rs#L2422) |
 | 114 | returns null | pending | — |
 | 127 | returns non-null | pending | — |
 | 144 | returns null | pending | — |
@@ -22,10 +22,10 @@
 | 196 | returns non-null | pending | — |
 | 219 | returns update-lockfile for in-range-only | pending | — |
 | 232 | returns update-lockfile for in-range-only if it is proposed my manager | pending | — |
-| 252 | returns true | ported | [`crates/renovate-core/src/managers.rs:2200`](../../../../../../crates/renovate-core/src/managers.rs#L2200) |
-| 258 | returns false | ported | [`crates/renovate-core/src/managers.rs:2201`](../../../../../../crates/renovate-core/src/managers.rs#L2201) |
-| 265 | when no manager found, returns undefined | ported | [`crates/renovate-core/src/managers.rs:2182`](../../../../../../crates/renovate-core/src/managers.rs#L2182) |
-| 271 | when manager found, but no prettydeptype found, returns undefined | ported | [`crates/renovate-core/src/managers.rs:2183`](../../../../../../crates/renovate-core/src/managers.rs#L2183) |
-| 275 | when manager found, but no prettydeptype found, returns undefined | ported | [`crates/renovate-core/src/managers.rs:2183`](../../../../../../crates/renovate-core/src/managers.rs#L2183) |
-| 279 | when manager found, and a prettydeptype found in knowndeptypes, returns the defined prettydeptype | ported | [`crates/renovate-core/src/managers.rs:2184`](../../../../../../crates/renovate-core/src/managers.rs#L2184) |
+| 252 | returns true | ported | [`crates/renovate-core/src/managers.rs:2407`](../../../../../../crates/renovate-core/src/managers.rs#L2407) |
+| 258 | returns false | ported | [`crates/renovate-core/src/managers.rs:2408`](../../../../../../crates/renovate-core/src/managers.rs#L2408) |
+| 265 | when no manager found, returns undefined | ported | [`crates/renovate-core/src/managers.rs:2389`](../../../../../../crates/renovate-core/src/managers.rs#L2389) |
+| 271 | when manager found, but no prettydeptype found, returns undefined | ported | [`crates/renovate-core/src/managers.rs:2390`](../../../../../../crates/renovate-core/src/managers.rs#L2390) |
+| 275 | when manager found, but no prettydeptype found, returns undefined | ported | [`crates/renovate-core/src/managers.rs:2390`](../../../../../../crates/renovate-core/src/managers.rs#L2390) |
+| 279 | when manager found, and a prettydeptype found in knowndeptypes, returns the defined prettydeptype | ported | [`crates/renovate-core/src/managers.rs:2391`](../../../../../../crates/renovate-core/src/managers.rs#L2391) |
 

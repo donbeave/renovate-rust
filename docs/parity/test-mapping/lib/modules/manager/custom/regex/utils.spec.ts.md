@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 16 | does not crash for lazy regex | ported | [`crates/renovate-core/src/managers.rs:2046`](../../../../../../../../crates/renovate-core/src/managers.rs#L2046) |
+| 16 | does not crash for lazy regex | ported | [`crates/renovate-core/src/managers.rs:2253`](../../../../../../../../crates/renovate-core/src/managers.rs#L2253) |
 | 27 | sets registryurls when registryurl group is a valid url | ported | [`crates/renovate-core/src/repo_config.rs:15570`](../../../../../../../../crates/renovate-core/src/repo_config.rs#L15570) |
 | 39 | warns and skips registryurls when registryurl group is an invalid url | ported | [`crates/renovate-core/src/repo_config.rs:15591`](../../../../../../../../crates/renovate-core/src/repo_config.rs#L15591) |
 | 55 | sets datasource when datasource group is provided | ported | [`crates/renovate-core/src/repo_config.rs:15610`](../../../../../../../../crates/renovate-core/src/repo_config.rs#L15610) |

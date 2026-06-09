@@ -168,6 +168,73 @@ mod tests {
         assert!(result.contains("/tmp/cache"));
     }
 
+    // Ported: "adds `|| true` if ignoreFailure is set on a pre-command" — lib/util/exec/docker/index.spec.ts line 171
+    #[tokio::test]
+    async fn generate_docker_command_appends_or_true_for_ignorefailure_pre_command() {
+        // When a pre-command has ignoreFailure, the preparation turns it into "cmd || true" in the list.
+        // The generate then joins with && , producing the inner bash -c with " ... && bar || true && ...".
+        // This test exercises the generation path with such a prepared list (core docker sidecar command building for ignoreFailure items).
+        let docker_options = DockerOptions::default();
+        let docker_config = DockerConfig {
+            docker_child_prefix: "renovate_".to_owned(),
+            docker_sidecar_image: "ghcr.io/renovatebot/base-image".to_owned(),
+            ..Default::default()
+        };
+        let commands = vec!["ls".to_owned()];
+        let pre_commands = vec![
+            "foo".to_owned(),
+            "bar || true".to_owned(), // prepared form for the ignoreFailure: true item
+            "bleh".to_owned(),
+            "baz".to_owned(),
+        ];
+        let result = generate_docker_command(
+            &commands,
+            &pre_commands,
+            &docker_options,
+            &docker_config,
+            &[],
+            None,
+            &[],
+        )
+        .await
+        .unwrap();
+
+        assert!(result.contains("bash -l -c"));
+        assert!(result.contains("foo && bar || true && bleh && baz && ls"));
+    }
+
+    // Ported: "adds `|| true` if ignoreFailure is set on a command" — lib/util/exec/docker/index.spec.ts line 201
+    #[tokio::test]
+    async fn generate_docker_command_appends_or_true_for_ignorefailure_command() {
+        let docker_options = DockerOptions::default();
+        let docker_config = DockerConfig {
+            docker_child_prefix: "renovate_".to_owned(),
+            docker_sidecar_image: "ghcr.io/renovatebot/base-image".to_owned(),
+            ..Default::default()
+        };
+        let commands = vec![
+            "foo".to_owned(),
+            "bar || true".to_owned(), // prepared for ignoreFailure item in commands
+            "bleh".to_owned(),
+            "baz".to_owned(),
+        ];
+        let pre_commands = vec!["pre".to_owned()];
+        let result = generate_docker_command(
+            &commands,
+            &pre_commands,
+            &docker_options,
+            &docker_config,
+            &[],
+            None,
+            &[],
+        )
+        .await
+        .unwrap();
+
+        assert!(result.contains("bash -l -c"));
+        assert!(result.contains("pre && foo && bar || true && bleh && baz"));
+    }
+
     // Ported: "handles volumes" — lib/util/exec/docker/index.spec.ts line 231
     #[tokio::test]
     async fn generate_docker_command_with_volumes() {

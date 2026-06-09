@@ -16,11 +16,11 @@
 | 347 | _(it.each / template — verify manually)_ | ? | — |
 | 392 | _(it.each / template — verify manually)_ | ? | — |
 | 420 | _(it.each / template — verify manually)_ | ? | — |
-| 435 | returns a pinned value | ported | [`crates/renovate-core/src/versioning/nuget.rs:2150`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2150) |
-| 441 | returns newversion if the range is version too | ported | [`crates/renovate-core/src/versioning/nuget.rs:2160`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2160) |
-| 451 | returns null if version is invalid | ported | [`crates/renovate-core/src/versioning/nuget.rs:2169`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2169) |
-| 461 | returns null if range is invalid | ported | [`crates/renovate-core/src/versioning/nuget.rs:2175`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2175) |
-| 472 | returns the new version | ported | [`crates/renovate-core/src/versioning/nuget.rs:2181`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2181) |
+| 435 | returns a pinned value | ported | [`crates/renovate-core/src/versioning/nuget.rs:2140`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2140) |
+| 441 | returns newversion if the range is version too | ported | [`crates/renovate-core/src/versioning/nuget.rs:2150`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2150) |
+| 451 | returns null if version is invalid | ported | [`crates/renovate-core/src/versioning/nuget.rs:2159`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2159) |
+| 461 | returns null if range is invalid | ported | [`crates/renovate-core/src/versioning/nuget.rs:2165`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2165) |
+| 472 | returns the new version | ported | [`crates/renovate-core/src/versioning/nuget.rs:2171`](../../../../../../../crates/renovate-core/src/versioning/nuget.rs#L2171) |
 | 478 | _(it.each / template — verify manually)_ | ? | — |
 | 522 | _(it.each / template — verify manually)_ | ? | — |
 | 547 | _(it.each / template — verify manually)_ | ? | — |
