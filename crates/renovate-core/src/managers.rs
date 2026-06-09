@@ -1473,6 +1473,7 @@ pub fn detect(files: &[String]) -> Vec<DetectedManager> {
 }
 
 // ── file-match (mirrors lib/workers/repository/extract/file-match.ts) ────────
+// @parity lib/workers/repository/extract/file-match.ts full — getIncludedFiles, filterIgnoredFiles, getFilteredFileList, getMatchingFiles (include/ignore filtering + per managerFilePatterns matchRegexOrGlob + dedup/sort). get_filtered_file_list added + get_matching_files refactored to reuse helpers (fixing duplication divergence vs TS). Single test ported for dedup behavior. (logger.debug, config handling in caller layers).
 
 /// Return only files that match any of the `include_paths` (exact or glob).
 ///
@@ -1517,38 +1518,32 @@ pub fn filter_ignored_files<'a>(file_list: &'a [String], ignore_paths: &[&str]) 
 ///
 /// Results are deduped and sorted.
 /// Mirrors `getMatchingFiles` from `lib/workers/repository/extract/file-match.ts`.
+pub fn get_filtered_file_list(
+    file_list: &[String],
+    include_paths: &[&str],
+    ignore_paths: &[&str],
+) -> Vec<String> {
+    let included = get_included_files(file_list, include_paths);
+    let included_strings: Vec<String> = included.into_iter().map(|s| s.to_string()).collect();
+    let filtered = filter_ignored_files(&included_strings, ignore_paths);
+    filtered.into_iter().map(|s| s.to_string()).collect()
+}
+
 pub fn get_matching_files(
     file_list: &[String],
     include_paths: &[&str],
     ignore_paths: &[&str],
     manager_patterns: &[&str],
 ) -> Vec<String> {
-    let filtered: Vec<&str> = file_list
-        .iter()
-        .filter(|f| {
-            let included = if include_paths.is_empty() {
-                true
-            } else {
-                include_paths
-                    .iter()
-                    .any(|p| f.as_str() == *p || glob_matches(p, f))
-            };
-            if !included {
-                return false;
-            }
-            !ignore_paths
-                .iter()
-                .any(|p| f.contains(p) || glob_matches(p, f))
-        })
-        .map(|s| s.as_str())
-        .collect();
+    // Reuse helpers to match TS structure (getFilteredFileList then per-pattern match).
+    let filtered_list = get_filtered_file_list(file_list, include_paths, ignore_paths);
 
     use crate::string_match::match_regex_or_glob;
     let mut matched: Vec<String> = Vec::new();
     for pattern in manager_patterns {
-        for file in &filtered {
+        for file in &filtered_list {
             if match_regex_or_glob(file, pattern) {
-                matched.push((*file).to_owned());
+                matched.push(file.clone());
             }
         }
     }
@@ -2107,6 +2102,22 @@ mod tests {
         let res = filter_ignored_files(&fl, &["frontend"]);
         assert_eq!(res.len(), 1);
         assert_eq!(res[0], "package.json");
+    }
+
+    // Ported: "deduplicates" — lib/workers/repository/extract/file-match.spec.ts line 64
+    #[test]
+    fn get_matching_files_deduplicates() {
+        // Exercises dedup after getFilteredFileList + per-pattern match + dedup/sort in getMatchingFiles.
+        // Proves the refactor to reuse get_filtered_file_list + get_matching_files (matching TS structure).
+        let mut fl = file_list();
+        fl.push("package.json".to_owned()); // duplicate
+        let include: Vec<&str> = vec![];
+        let ignore: Vec<&str> = vec![];
+        let patterns = vec!["/(^|/)package\\.json$/", "package.json"];
+        let res = get_matching_files(&fl, &include, &ignore, &patterns);
+        assert_eq!(res.len(), 2); // deduplicated
+        assert!(res.contains(&"package.json".to_string()));
+        assert!(res.contains(&"frontend/package.json".to_string()));
     }
 
     // Ported: "returns minimatch matches" — lib/workers/repository/extract/file-match.spec.ts line 41

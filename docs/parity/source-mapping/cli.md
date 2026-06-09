@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 40/150 in-scope files mapped (full=17 partial=23 stub=0 pending=110 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 41/150 in-scope files mapped (full=18 partial=23 stub=0 pending=109 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -123,7 +123,7 @@
 | `lib/workers/repository/error.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | handleError (switch on REPOSITORY_* and special, calls to raise* for validation/credentials, git rewrites via classify, logs, unknown default). The classify and log_level were pre-existing; full handle_error added here. Single test ported. (instrument, branchList delete, full caller in pending worker). |
 | `lib/workers/repository/errors-warnings.ts` | full | [`crates/renovate-core/src/workers/repository/errors_warnings.rs`](../../../crates/renovate-core/src/workers/repository/errors_warnings.rs) | getWarnings/getErrors (text formatters), getDepWarnings* (onboarding/PR/dashboard with emojify, suppress, stripping, files, dashboard link if issue). collect stub + get_*_text present; dep collection + 3 getDep* implemented here. Single test ported from spec. (calls from dashboard/worker in other pending). |
 | `lib/workers/repository/extract/extract-fingerprint-config.ts` | full | [`crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs`](../../../crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs) | generateFingerprintConfig (managerList from enabledManagers, managers with getFilteredManagerConfig for normal + getCustomManagerFields for regex/custom, templates, filePatterns, npmrc, etc). The get_extract_fingerprint_config is the per-upgrade fingerprint string helper (sorted fields). Single test ported for the generate filtering. (full manager list, custom handling in the impl). |
-| `lib/workers/repository/extract/file-match.ts` | pending | — | — |
+| `lib/workers/repository/extract/file-match.ts` | full | [`crates/renovate-core/src/managers.rs`](../../../crates/renovate-core/src/managers.rs) | getIncludedFiles, filterIgnoredFiles, getFilteredFileList, getMatchingFiles (include/ignore filtering + per managerFilePatterns matchRegexOrGlob + dedup/sort). get_filtered_file_list added + get_matching_files refactored to reuse helpers (fixing duplication divergence vs TS). Single test ported for dedup behavior. (logger.debug, config handling in caller layers). |
 | `lib/workers/repository/extract/index.ts` | pending | — | — |
 | `lib/workers/repository/extract/manager-files.ts` | pending | — | — |
 | `lib/workers/repository/extract/supersedes.ts` | pending | — | — |
