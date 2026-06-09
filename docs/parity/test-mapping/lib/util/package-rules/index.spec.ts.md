@@ -65,7 +65,7 @@
 | 1165 | matches lock files | ported | [`crates/renovate-core/src/repo_config.rs:12392`](../../../../../../crates/renovate-core/src/repo_config.rs#L12392) |
 | 1181 | matches paths | ported | [`crates/renovate-core/src/repo_config.rs:12412`](../../../../../../crates/renovate-core/src/repo_config.rs#L12412) |
 | 1211 | empty rules | ported | [`crates/renovate-core/src/repo_config.rs:7728`](../../../../../../crates/renovate-core/src/repo_config.rs#L7728) |
-| 1220 | creates groupslug if necessary | ported | [`crates/renovate-core/src/repo_config.rs:13988`](../../../../../../crates/renovate-core/src/repo_config.rs#L13988) |
+| 1220 | creates groupslug if necessary | ported | [`crates/renovate-core/src/repo_config.rs:13989`](../../../../../../crates/renovate-core/src/repo_config.rs#L13989) |
 | 1239 | matches matchsourceurls with patterns (case-insensitive) | ported | [`crates/renovate-core/src/repo_config.rs:12128`](../../../../../../crates/renovate-core/src/repo_config.rs#L12128) |
 | 1262 | matches matchsourceurls(case-insensitive) | ported | [`crates/renovate-core/src/repo_config.rs:12129`](../../../../../../crates/renovate-core/src/repo_config.rs#L12129) |
 | 1285 | needs language to match | ported | [`crates/renovate-core/src/repo_config.rs:12616`](../../../../../../crates/renovate-core/src/repo_config.rs#L12616) |
@@ -73,8 +73,8 @@
 | 1321 | needs manager to match | ported | [`crates/renovate-core/src/repo_config.rs:12596`](../../../../../../crates/renovate-core/src/repo_config.rs#L12596) |
 | 1339 | matches matchdepnames(depname) | ported | [`crates/renovate-core/src/repo_config.rs:9582`](../../../../../../crates/renovate-core/src/repo_config.rs#L9582) |
 | 1364 | matches if there are no matchers | ported | [`crates/renovate-core/src/repo_config.rs:9597`](../../../../../../crates/renovate-core/src/repo_config.rs#L9597) |
-| 1382 | overrides | ported | [`crates/renovate-core/src/repo_config.rs:15352`](../../../../../../crates/renovate-core/src/repo_config.rs#L15352) |
-| 1425 | overrides with templates | ported | [`crates/renovate-core/src/repo_config.rs:15395`](../../../../../../crates/renovate-core/src/repo_config.rs#L15395) |
+| 1382 | overrides | ported | [`crates/renovate-core/src/repo_config.rs:15353`](../../../../../../crates/renovate-core/src/repo_config.rs#L15353) |
+| 1425 | overrides with templates | ported | [`crates/renovate-core/src/repo_config.rs:15396`](../../../../../../crates/renovate-core/src/repo_config.rs#L15396) |
 | 1442 | propagates fetchchangelogs from matching packagerule | ported | [`crates/renovate-core/src/repo_config.rs:9605`](../../../../../../crates/renovate-core/src/repo_config.rs#L9605) |
 | 1457 | does not set fetchchangelogs when packagerule does not match | ported | [`crates/renovate-core/src/repo_config.rs:9622`](../../../../../../crates/renovate-core/src/repo_config.rs#L9622) |
 | 1472 | compiles sourceurl with template helper functions | ported | [`crates/renovate-core/src/repo_config.rs:9636`](../../../../../../crates/renovate-core/src/repo_config.rs#L9636) |

@@ -7,5 +7,5 @@
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
 | [`lib/util/json-writer/editor-config.spec.ts`](../../lib/util/json-writer/editor-config.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
-| [`lib/util/json-writer/json-writer.spec.ts`](../../lib/util/json-writer/json-writer.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/json_writer.rs:119`](../../../../../crates/renovate-core/src/json_writer.rs#L119) | ported |
+| [`lib/util/json-writer/json-writer.spec.ts`](../../lib/util/json-writer/json-writer.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/json_writer.rs:120`](../../../../../crates/renovate-core/src/json_writer.rs#L120) | ported |
 

@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 9 | returns empty string when there is no release notes | ported | [`crates/renovate-core/src/branch.rs:2606`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2606) |
+| 9 | returns empty string when there is no release notes | ported | [`crates/renovate-core/src/branch.rs:2605`](../../../../../../../../../crates/renovate-core/src/branch.rs#L2605) |
 | 22 | returns release notes | pending | — |
 

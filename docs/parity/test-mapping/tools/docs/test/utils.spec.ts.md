@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | parents row header should be a td block | ported | [`crates/renovate-core/src/branch.rs:2164`](../../../../../../crates/renovate-core/src/branch.rs#L2164) |
-| 12 | parents content should be multiple code blocks, and . be display with "(the root document)" | ported | [`crates/renovate-core/src/branch.rs:2173`](../../../../../../crates/renovate-core/src/branch.rs#L2173) |
-| 19 | parent named ".foo" should be not display with ".foo (the root document)" | ported | [`crates/renovate-core/src/branch.rs:2183`](../../../../../../crates/renovate-core/src/branch.rs#L2183) |
+| 4 | parents row header should be a td block | ported | [`crates/renovate-core/src/branch.rs:2163`](../../../../../../crates/renovate-core/src/branch.rs#L2163) |
+| 12 | parents content should be multiple code blocks, and . be display with "(the root document)" | ported | [`crates/renovate-core/src/branch.rs:2172`](../../../../../../crates/renovate-core/src/branch.rs#L2172) |
+| 19 | parent named ".foo" should be not display with ".foo (the root document)" | ported | [`crates/renovate-core/src/branch.rs:2182`](../../../../../../crates/renovate-core/src/branch.rs#L2182) |
 

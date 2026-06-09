@@ -17,7 +17,7 @@
 | [`lib/config/presets/internal/index.spec.ts`](../../lib/config/presets/internal/index.spec.ts.md) | 11 | 0 | 11 | 0 | — | pending |
 | [`lib/config/presets/internal/monorepos.spec.ts`](../../lib/config/presets/internal/monorepos.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/monorepos.rs:209`](../../../../../crates/renovate-core/src/monorepos.rs#L209) | ported |
 | [`lib/config/presets/internal/schedule.spec.ts`](../../lib/config/presets/internal/schedule.spec.ts.md) | 9 | 1 | 8 | 0 | [`crates/renovate-core/src/schedule.rs:995`](../../../../../crates/renovate-core/src/schedule.rs#L995) | partial |
-| [`lib/config/presets/internal/workarounds.spec.ts`](../../lib/config/presets/internal/workarounds.spec.ts.md) | 10 | 3 | 7 | 0 | [`crates/renovate-core/src/repo_config.rs:14932`](../../../../../crates/renovate-core/src/repo_config.rs#L14932) | partial |
+| [`lib/config/presets/internal/workarounds.spec.ts`](../../lib/config/presets/internal/workarounds.spec.ts.md) | 10 | 3 | 7 | 0 | [`crates/renovate-core/src/repo_config.rs:14933`](../../../../../crates/renovate-core/src/repo_config.rs#L14933) | partial |
 | [`lib/config/presets/local/common.spec.ts`](../../lib/config/presets/local/common.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
 | [`lib/config/presets/local/index.spec.ts`](../../lib/config/presets/local/index.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
 | [`lib/config/presets/npm/index.spec.ts`](../../lib/config/presets/npm/index.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |

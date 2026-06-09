@@ -13573,6 +13573,7 @@ mod rule_effects_tests {
 
     // ── deprecated field migrations ───────────────────────────────────────────
 
+    // Ported: "migrates" — lib/workers/global/config/parse/file.spec.ts line 61
     // Rust-specific: repo config behavior test
     #[test]
     fn upgrade_in_range_true_sets_range_strategy_bump() {

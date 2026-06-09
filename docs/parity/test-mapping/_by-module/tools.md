@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`tools/docs/test/utils.spec.ts`](../tools/docs/test/utils.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2164`](../../../../crates/renovate-core/src/branch.rs#L2164) | ported |
+| [`tools/docs/test/utils.spec.ts`](../tools/docs/test/utils.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2163`](../../../../crates/renovate-core/src/branch.rs#L2163) | ported |
 

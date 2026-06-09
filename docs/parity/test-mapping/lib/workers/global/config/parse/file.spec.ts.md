@@ -2,12 +2,12 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**8/15 in-scope tests ported** (7 pending, 0 opt-out) · status: partial
+**9/15 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 27 | _(it.each / template — verify manually)_ | ? | — |
-| 61 | migrates | pending | — |
+| 61 | migrates | ported | [`crates/renovate-core/src/repo_config.rs:13576`](../../../../../../../../crates/renovate-core/src/repo_config.rs#L13576) |
 | 73 | warns if config is invalid | pending | — |
 | 85 | parse and returns empty config if there is no renovate_config_file in env | ported | [`crates/renovate-core/src/config/file.rs:534`](../../../../../../../../crates/renovate-core/src/config/file.rs#L534) |
 | 89 | _(it.each / template — verify manually)_ | ? | — |

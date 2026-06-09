@@ -21,13 +21,13 @@
 | 360 | migrates more packagefiles | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6768`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6768) |
 | 389 | removes invalid configs | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6870`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6870) |
 | 419 | migrates preset strings to array | ported | [`crates/renovate-core/src/repo_config.rs:11642`](../../../../../crates/renovate-core/src/repo_config.rs#L11642) |
-| 441 | migrates unpublishsafe | ported | [`crates/renovate-core/src/repo_config.rs:13606`](../../../../../crates/renovate-core/src/repo_config.rs#L13606) |
+| 441 | migrates unpublishsafe | ported | [`crates/renovate-core/src/repo_config.rs:13607`](../../../../../crates/renovate-core/src/repo_config.rs#L13607) |
 | 532 | migrates npm:unpublishsafe | ported | [`crates/renovate-core/src/repo_config.rs:11730`](../../../../../crates/renovate-core/src/repo_config.rs#L11730) |
 | 551 | migrates packagerules | ported | [`crates/renovate-core/src/repo_config.rs:13320`](../../../../../crates/renovate-core/src/repo_config.rs#L13320) |
 | 593 | migrates in order of precedence | ported | [`crates/renovate-core/src/repo_config.rs:13391`](../../../../../crates/renovate-core/src/repo_config.rs#L13391) |
 | 624 | migrates nested packagerules | ported | [`crates/renovate-core/src/repo_config.rs:13407`](../../../../../crates/renovate-core/src/repo_config.rs#L13407) |
 | 655 | migrates presets | ported | [`crates/renovate-core/src/repo_config.rs:11678`](../../../../../crates/renovate-core/src/repo_config.rs#L11678) |
-| 671 | migrates custommanagers | ported | [`crates/renovate-core/src/repo_config.rs:15719`](../../../../../crates/renovate-core/src/repo_config.rs#L15719) |
+| 671 | migrates custommanagers | ported | [`crates/renovate-core/src/repo_config.rs:15720`](../../../../../crates/renovate-core/src/repo_config.rs#L15720) |
 | 696 | migrates pip-compile | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6787`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6787) |
 | 731 | migrates gradle-lite | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6722`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6722) |
 | 751 | migrates empty requiredstatuschecks | ported | [`crates/renovate-core/src/repo_config.rs:10747`](../../../../../crates/renovate-core/src/repo_config.rs#L10747) |

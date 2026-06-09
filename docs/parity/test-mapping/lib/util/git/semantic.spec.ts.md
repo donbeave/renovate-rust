@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 18 | detects false if unknown | ported | [`crates/renovate-core/src/branch.rs:2332`](../../../../../../crates/renovate-core/src/branch.rs#L2332) |
-| 31 | detects true if known | ported | [`crates/renovate-core/src/branch.rs:2340`](../../../../../../crates/renovate-core/src/branch.rs#L2340) |
-| 38 | detects false on malformed commits | ported | [`crates/renovate-core/src/branch.rs:2346`](../../../../../../crates/renovate-core/src/branch.rs#L2346) |
-| 49 | detects true on breaking changes | ported | [`crates/renovate-core/src/branch.rs:2356`](../../../../../../crates/renovate-core/src/branch.rs#L2356) |
-| 56 | detects true on breaking changes with scope | ported | [`crates/renovate-core/src/branch.rs:2362`](../../../../../../crates/renovate-core/src/branch.rs#L2362) |
+| 18 | detects false if unknown | ported | [`crates/renovate-core/src/branch.rs:2331`](../../../../../../crates/renovate-core/src/branch.rs#L2331) |
+| 31 | detects true if known | ported | [`crates/renovate-core/src/branch.rs:2339`](../../../../../../crates/renovate-core/src/branch.rs#L2339) |
+| 38 | detects false on malformed commits | ported | [`crates/renovate-core/src/branch.rs:2345`](../../../../../../crates/renovate-core/src/branch.rs#L2345) |
+| 49 | detects true on breaking changes | ported | [`crates/renovate-core/src/branch.rs:2355`](../../../../../../crates/renovate-core/src/branch.rs#L2355) |
+| 56 | detects true on breaking changes with scope | ported | [`crates/renovate-core/src/branch.rs:2361`](../../../../../../crates/renovate-core/src/branch.rs#L2361) |
 
