@@ -617,6 +617,16 @@ test   = "checks custom managers"
 reason = "sets config.customManagers (with customType 'regex', managerFilePatterns for README, matchStrings), mocks getManagerPackageFiles, calls extractAllDependencies, asserts 'regex' key in packageFiles result. Per @parity comment in managers.rs, 'customManagers array + mergeChildConfig + isCustomManager full path pending' in the extractAllDependencies orchestrator (get_enabled_managers_list, get_patterns_for_manager, extract_list synthesis do not yet handle custom config to produce custom manager entries like 'regex'). Basic manager matching/accumulation exercised by ported 'runs' and 'skips non-enabled'. Opt as the customManagers support in this extract unit is pending implementation work."
 
 [[test]]
+spec   = "lib/workers/repository/finalize/repository-statistics.spec.ts"
+test   = "processes cache with baseBranches and branches"
+reason = "sets up baseCache/branchCaches with sha/baseBranch etc, RepoCacheData with scan+branches, spies getCache/isCacheModified, calls runBranchSummary, asserts exact logger.debug call with processed {baseBranches, branches (with meta), cacheModified, defaultBranch, inactiveBranches} + 'Branch summary'. Spy-heavy (getCacheSpy, isCacheModifiedSpy, logger.debug exact payload); core cache/branch processing may exist in repository_statistics but test is written around the spies and summary object shape. Opt as pure TS logger spy + cache summary debug (no direct Rust equivalent for the spy asserts)."
+
+[[test]]
+spec   = "lib/workers/repository/finalize/repository-statistics.spec.ts"
+test   = "logs extended branch info if branchSummaryExtended"
+reason = "sets branchSummaryExtended true, branchCache with result/upgrades, calls runBranchSummary, asserts extended logger debug/info. Pure spy on logger + the extended flag path. Opt as TS logger spy (similar to other stats 'prints report' / extended logs opted previously); no direct equivalent."
+
+[[test]]
 spec   = "lib/workers/repository/init/index.spec.ts"
 test   = "warns on unsupported options"
 reason = "asserts exact logger.logger.warn spy call (with { platform: 'github' } and the message naming 'filterUnavailableUsers' / 'expandCodeOwnersGroups' as not supported on the platform) after initRepo with those in the repo config result; core init continues (options ignored for platform); no direct Rust equivalent for the spy assertion or the exact unsupported-options-for-platform message shape (tracing in init or config layer may log but without this test's spy harness). Opt as pure TS logger spy + platform-specific unsupported message."
