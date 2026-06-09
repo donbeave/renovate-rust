@@ -2,12 +2,12 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**9/15 in-scope tests ported** (6 pending, 0 opt-out) · status: partial
+**9/14 in-scope tests ported** (5 pending, 1 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 23 | returns empty with no privatekey | pending | — |
-| 29 | warns if no privatekey found | pending | — |
+| 29 | warns if no privatekey found | opt-out | asserts TypeScript logger spy (logger.logger.once.warn called with the encryptedWarning text) + side effect that encrypted is cleared and unknown keys dropped; the spy + GlobalConfig + test setup for 'warn' path when encrypted present but no privateKey has no direct Rust equivalent (tracing, no 'once' spy harness). The core 'no privateKey + encrypted present -> clear/ignore' behavior may be covered when the high-level decryptConfig is wired in config load/CLI; left for impl or future if pure business emerges in core. |
 | 41 | throws exception if encrypted found but no privatekey | pending | — |
 | 51 | throws exception if encrypted found but no privatekey- mend hosted | pending | — |
 | 68 | _(it.each / template — verify manually)_ | ? | — |

@@ -537,6 +537,11 @@ test   = "it.each / template — verify manually"
 reason = "it.each / template (L27, L89, L153, L220, L245) for .js/.cjs/.mjs/.ts/.cts/.mts/.yaml parsing and fatal+exit in unsupported formats; pure TS runtime (require/exec .js/.ts, yaml, process.exit) + intentionally unsupported in Rust per file.rs ('JS/yaml configs remain unsupported', 'YAML support is deferred', UnsupportedFormat for .js etc). Core JSON/JSON5/.renovaterc, empty if no env, skip, delete, silent fail covered by 10 ported."
 
 [[test]]
+spec   = "lib/config/decrypt.spec.ts"
+test   = "warns if no privateKey found"
+reason = "asserts TypeScript logger spy (logger.logger.once.warn called with the encryptedWarning text) + side effect that encrypted is cleared and unknown keys dropped; the spy + GlobalConfig + test setup for 'warn' path when encrypted present but no privateKey has no direct Rust equivalent (tracing, no 'once' spy harness). The core 'no privateKey + encrypted present -> clear/ignore' behavior may be covered when the high-level decryptConfig is wired in config load/CLI; left for impl or future if pure business emerges in core."
+
+[[test]]
 spec   = "lib/modules/versioning/debian/common.spec.ts"
 test   = "no rolling release data"
 reason = "asserts TypeScript logger.debug spy behavior (toHaveBeenCalledTimes(1) + exact 'RollingReleasesData - data written' message) when dataFiles is overridden to empty distro json (no rolling releases); also checks RollingReleasesData.has() returns false for known codenames. The spy + test harness dataFiles injection + DistroInfo/RollingReleasesData construction has no direct Rust equivalent (Rust debian versioning uses embedded/parsed data without this spy surface or 'data written' debug side-effect); core fallback behavior for missing data is simple and exercised by other data-driven versioning tests."

@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 11 | finds indirect dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5389`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5389) |
-| 29 | finds direct dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5402`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5402) |
-| 41 | skips non-matching direct dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5414`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5414) |
-| 53 | finds direct devdependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5424`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5424) |
+| 11 | finds indirect dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5392`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5392) |
+| 29 | finds direct dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5405`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5405) |
+| 41 | skips non-matching direct dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5417`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5417) |
+| 53 | finds direct devdependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5427`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5427) |
 

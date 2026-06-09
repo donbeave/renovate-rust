@@ -2,12 +2,12 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 215/227 in-scope tests ported (opt-out=2) across 12 spec files.
+**Coverage:** 215/226 in-scope tests ported (opt-out=3) across 12 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
 | [`lib/config/app-strings.spec.ts`](../../lib/config/app-strings.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/repo_config.rs:7148`](../../../../../crates/renovate-core/src/repo_config.rs#L7148) | ported |
-| [`lib/config/decrypt.spec.ts`](../../lib/config/decrypt.spec.ts.md) | 15 | 9 | 6 | 0 | [`crates/renovate-core/src/config/decrypt.rs:120`](../../../../../crates/renovate-core/src/config/decrypt.rs#L120) | partial |
+| [`lib/config/decrypt.spec.ts`](../../lib/config/decrypt.spec.ts.md) | 15 | 9 | 5 | 1 | [`crates/renovate-core/src/config/decrypt.rs:120`](../../../../../crates/renovate-core/src/config/decrypt.rs#L120) | partial |
 | [`lib/config/defaults.spec.ts`](../../lib/config/defaults.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/config.rs:956`](../../../../../crates/renovate-core/src/config.rs#L956) | ported |
 | [`lib/config/global.spec.ts`](../../lib/config/global.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/config.rs:948`](../../../../../crates/renovate-core/src/config.rs#L948) | ported |
 | [`lib/config/index.spec.ts`](../../lib/config/index.spec.ts.md) | 12 | 12 | 0 | 0 | [`crates/renovate-core/src/config.rs:797`](../../../../../crates/renovate-core/src/config.rs#L797) | ported |
