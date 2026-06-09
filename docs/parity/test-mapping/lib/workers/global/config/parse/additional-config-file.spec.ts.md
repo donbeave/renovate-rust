@@ -2,14 +2,14 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**3/10 in-scope tests ported** (7 pending, 5 opt-out) · status: partial
+**4/10 in-scope tests ported** (6 pending, 5 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | _(it.each / template — verify manually)_ | ? | — |
 | 55 | migrates | pending | — |
-| 68 | warns if config is invalid | ported | [`crates/renovate-core/src/config/file.rs:743`](../../../../../../../../crates/renovate-core/src/config/file.rs#L743) |
-| 80 | parse and returns empty config if there is no renovate_additional_config_file in env | ported | [`crates/renovate-core/src/config/file.rs:758`](../../../../../../../../crates/renovate-core/src/config/file.rs#L758) |
+| 68 | warns if config is invalid | ported | [`crates/renovate-core/src/config/file.rs:744`](../../../../../../../../crates/renovate-core/src/config/file.rs#L744) |
+| 80 | parse and returns empty config if there is no renovate_additional_config_file in env | ported | [`crates/renovate-core/src/config/file.rs:759`](../../../../../../../../crates/renovate-core/src/config/file.rs#L759) |
 | 84 | _(it.each / template — verify manually)_ | ? | — |
 | 112 | fatal error and exit if custom config file does not exist | opt-out | expects processExitSpy(1) when additional config file path does not exist; for additional, Rust load_additional returns Err(ExplicitPathNotFound) but main caller logs error without fatal exit (different from explicit main config). Opt as the 'fatal and exit' + additional missing path is TS-specific handling; the 'skip when not found' / empty return for missing additional is the observable in some paths. |
 | 125 | fatal error and exit if config.js contains unresolved env var | opt-out |  .js config file with unresolved $ENV , expects fatal logger + processExit(1); .js execution not supported, env resolution in .js not applicable. Opt; similar to prior 'fatal error and exit if config.js contains unresolved env var' opts in file.spec. |
@@ -19,6 +19,6 @@
 | 213 | _(it.each / template — verify manually)_ | ? | — |
 | 225 | skip when config file does not exist | opt-out | for additional config, missing file is skipped (no load, no error in some paths, isModified undefined); in Rust resolve errors for missing but load_additional caller in main treats additional missing as non-fatal (logs, proceeds with base). The non-fatal skip behavior for additional missing is the intent, covered by the error path not crashing the run. If exact logger/isModified not asserted the same, opt as detail. |
 | 238 | _(it.each / template — verify manually)_ | ? | — |
-| 254 | removes the specified config file | ported | [`crates/renovate-core/src/config/file.rs:767`](../../../../../../../../crates/renovate-core/src/config/file.rs#L767) |
-| 276 | fails silently when attempting to delete the config file | pending | — |
+| 254 | removes the specified config file | ported | [`crates/renovate-core/src/config/file.rs:768`](../../../../../../../../crates/renovate-core/src/config/file.rs#L768) |
+| 276 | fails silently when attempting to delete the config file | ported | [`crates/renovate-core/src/config/file.rs:610`](../../../../../../../../crates/renovate-core/src/config/file.rs#L610) |
 

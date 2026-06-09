@@ -607,6 +607,7 @@ mod tests {
     }
 
     // Ported: "fails silently when attempting to delete the config file" — lib/workers/global/config/parse/file.spec.ts line 284
+    // Ported: "fails silently when attempting to delete the config file" — lib/workers/global/config/parse/additional-config-file.spec.ts line 276
     #[cfg(unix)]
     #[test]
     fn delete_non_default_config_fails_silently() {
