@@ -852,6 +852,16 @@ mod tests {
         assert_eq!(config.token.as_deref(), Some("a"));
     }
 
+    // Ported: "sets customEnvVariables" — lib/workers/global/config/parse/index.spec.ts line 84
+    #[test]
+    fn custom_env_variables_are_set() {
+        let config = build_from_env(&env(&[("RENOVATE_CUSTOM_ENV_VARIABLES", r#"{"customKey":"customValue"}"#)])).unwrap();
+        assert_eq!(
+            config.custom_env_variables.get("customKey").map(String::as_str),
+            Some("customValue")
+        );
+    }
+
     // Ported: "coerces string newlines" — lib/workers/global/config/parse/env.spec.ts line 60
     #[test]
     fn string_newlines_are_coerced() {
