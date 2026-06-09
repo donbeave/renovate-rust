@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 30/150 in-scope files mapped (full=9 partial=21 stub=0 pending=120 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 31/150 in-scope files mapped (full=9 partial=22 stub=0 pending=119 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -113,7 +113,7 @@
 | `lib/workers/repository/config-migration/branch/create.ts` | partial | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | createConfigMigrationBranch uses the ConfigMigrationCommitMessageFactory (getCommitMessage/getPrTitle with custom support) to get the message and prTitle for the migration branch; dryRun early return, checkout, MigratedData prettier, file changes (config + optional package.json renovate field cleanup), and scm.commitAndPush (force, platformCommit) are in the (pending) worker/index orchestration. |
 | `lib/workers/repository/config-migration/branch/index.ts` | partial | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | checkConfigMigrationBranch orchestrator (checkbox state, PR/branch existence via platform, closed PR handling, create vs rebase decision, return migrationBranch); uses the ConfigMigrationCommitMessageFactory and helpers from here (full worker orchestration noted as pending in siblings). |
 | `lib/workers/repository/config-migration/branch/migrated-data.ts` | partial | [`crates/renovate-core/src/json_writer.rs`](../../../crates/renovate-core/src/json_writer.rs) | MigratedData, MigratedDataFactory (getAsync singleton, reset, applyPrettierFormatting using detect/migrate/weave/stringify + prettier if config/editorconfig/package.json), Indent; the build of migrated config data for create/index (full platform/scm/migrate integration pending in worker). |
-| `lib/workers/repository/config-migration/branch/rebase.ts` | pending | — | — |
+| `lib/workers/repository/config-migration/branch/rebase.ts` | partial | [`crates/renovate-core/src/json_writer.rs`](../../../crates/renovate-core/src/json_writer.rs) | jsonStripWhitespaces (the strip for migration rebase); uses the json write/strip surface here (full rebase logic in pending worker). |
 | `lib/workers/repository/config-migration/common.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/index.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/pr/index.ts` | pending | — | — |

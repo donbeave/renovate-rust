@@ -60,6 +60,8 @@ pub fn write_json<T: Serialize>(
 /// Mirrors `lib/workers/repository/config-migration/branch/rebase.ts`
 /// `jsonStripWhitespaces()`.
 ///
+/// @parity lib/workers/repository/config-migration/branch/rebase.ts partial — jsonStripWhitespaces (the strip for migration rebase); uses the json write/strip surface here (full rebase logic in pending worker).
+///
 /// @parity lib/workers/repository/config-migration/branch/migrated-data.ts partial — MigratedData, MigratedDataFactory (getAsync singleton, reset, applyPrettierFormatting using detect/migrate/weave/stringify + prettier if config/editorconfig/package.json), Indent; the build of migrated config data for create/index (full platform/scm/migrate integration pending in worker).
 pub fn json_strip_whitespaces(json: &str) -> Option<String> {
     if json.is_empty() {
