@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | migrates old custom manager syntax to new one | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5623`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5623) |
-| 28 | only migrates when necessary | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5648`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5648) |
+| 4 | migrates old custom manager syntax to new one | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5642`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5642) |
+| 28 | only migrates when necessary | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5667`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5667) |
 

@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate versionstrategy="widen" to rangestrategy="widen" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6659`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6659) |
-| 15 | should just remove property when versionstrategy not equals to "widen" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6668`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6668) |
+| 4 | should migrate versionstrategy="widen" to rangestrategy="widen" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6678`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6678) |
+| 15 | should just remove property when versionstrategy not equals to "widen" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6687`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6687) |
 

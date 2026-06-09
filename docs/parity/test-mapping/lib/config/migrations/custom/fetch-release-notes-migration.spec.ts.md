@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | migrates | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5549`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5549) |
+| 4 | migrates | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5568`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5568) |
 

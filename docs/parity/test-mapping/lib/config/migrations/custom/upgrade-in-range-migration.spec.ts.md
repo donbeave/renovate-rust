@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate upgradeinrange=true to rangestrategy="bump" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6644`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6644) |
-| 15 | should just remove property when upgradeinrange not equals to true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6653`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6653) |
+| 4 | should migrate upgradeinrange=true to rangestrategy="bump" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6663`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6663) |
+| 15 | should just remove property when upgradeinrange not equals to true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6672`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6672) |
 

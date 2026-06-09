@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate adoptium-java | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5446`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5446) |
-| 15 | should migrate donet | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5455`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5455) |
-| 26 | should migrate node | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5464`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5464) |
+| 4 | should migrate adoptium-java | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5465`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5465) |
+| 15 | should migrate donet | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5474`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5474) |
+| 26 | should migrate node | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5483`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5483) |
 

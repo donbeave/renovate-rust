@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should init npmrc field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6365`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6365) |
-| 15 | should not change npmrc field if it represents string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6374`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6374) |
-| 27 | should change npmrc field if it not represents string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6383`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6383) |
+| 4 | should init npmrc field | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6384`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6384) |
+| 15 | should not change npmrc field if it represents string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6393`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6393) |
+| 27 | should change npmrc field if it not represents string value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6402`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6402) |
 

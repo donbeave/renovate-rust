@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | should migrate array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6132`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6132) |
-| 68 | throws when multiple hosts are present | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6170`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6170) |
+| 5 | should migrate array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6151`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6151) |
+| 68 | throws when multiple hosts are present | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6189`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6189) |
 

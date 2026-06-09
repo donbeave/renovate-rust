@@ -2,7 +2,7 @@
 
 [← `config/_root`](../../_by-module/config/_root.md) · [all modules](../../README.md)
 
-**127/132 in-scope tests ported** (5 pending, 0 opt-out) · status: partial
+**128/132 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -28,20 +28,20 @@
 | 397 | validates invalid statuschecknames | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3229`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3229) |
 | 421 | catches invalid customdatasources record type | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3249`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3249) |
 | 436 | catches invalid basebranchpatterns regex | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3262`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3262) |
-| 449 | returns nested errors | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4816`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4816) |
+| 449 | returns nested errors | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4835`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4835) |
 | 479 | included managers of the wrong type | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3278`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3278) |
 | 497 | _(it.each / template — verify manually)_ | ? | — |
 | 516 | _(it.each / template — verify manually)_ | ? | — |
-| 536 | errors for all types | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4841`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4841) |
-| 571 | selectors outside packagerules array trigger errors | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4873`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4873) |
-| 601 | ignore packagerule nesting validation for presets | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4900`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4900) |
+| 536 | errors for all types | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4860`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4860) |
+| 571 | selectors outside packagerules array trigger errors | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4892`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4892) |
+| 601 | ignore packagerule nesting validation for presets | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4919`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4919) |
 | 621 | errors for unsafe managerfilepatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3314`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3314) |
 | 640 | validates regex for each managerfilepatterns of format regex | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3328`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3328) |
 | 662 | errors if custommanager has empty managerfilepatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3347`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3347) |
 | 688 | errors if no custommanager customtype | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3361`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3361) |
 | 716 | errors if invalid custommanager customtype | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3382`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3382) |
 | 745 | errors if empty custommanager matchstrings | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3404`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3404) |
-| 787 | errors if no custommanager managerfilepatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4919`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4919) |
+| 787 | errors if no custommanager managerfilepatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4938`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4938) |
 | 806 | validates regex for each matchstrings | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3434`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3434) |
 | 828 | error if no fileformat in custom jsonata manager | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3454`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3454) |
 | 854 | validates jsonata query for each matchstrings | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3474`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3474) |
@@ -90,52 +90,52 @@
 | 1699 | errors if forbidden header in hostrules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4087`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4087) |
 | 1727 | errors if headers values are not string | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4108`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4108) |
 | 1754 | errors if allowedheaders is empty | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4127`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4127) |
-| 1781 | catches invalid variable name in env config option | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4149`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4149) |
-| 1809 | catches env config option if configured inside a parent | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4170`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4170) |
-| 1846 | catches when * or ** is combined with others patterns in a regexorglob option | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4190`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4190) |
-| 1874 | catches when negative number is used for integer type | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4237`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4237) |
-| 1888 | validates prpriority | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4249`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4249) |
-| 1909 | errors if no bumpversion filepattern is provided | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4265`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4265) |
-| 1935 | errors if no matchstrings are provided for bumpversion | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4288`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4288) |
-| 1959 | allow bumpversion | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4305`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4305) |
-| 1985 | returns errors for invalid options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4322`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4322) |
-| 2007 | validates hostrules.headers | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4338`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4338) |
-| 2027 | errors if hostrules.headers is defined but allowedheaders is not | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4355`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4355) |
-| 2051 | validates env | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4373`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4373) |
-| 2066 | handles prefixed onboardingconfigfilename | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4384`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4384) |
-| 2080 | allows unique onboardingconfigfilename if it is set in configfilenames | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4395`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4395) |
-| 2093 | errors if env object is defined but allowedenv is empty or undefined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4409`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4409) |
-| 2112 | validates env against the allowedenv regex | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4420`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4420) |
-| 2127 | validates options with different type but defaultvalue=null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4431`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4431) |
-| 2163 | binarysource=docker is deprecated | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4462`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4462) |
-| 2180 | binarysource | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4475`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4475) |
-| 2198 | binarysource | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4475`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4475) |
-| 2215 | basedir | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4499`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4499) |
-| 2231 | requireconfig | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4509`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4509) |
-| 2248 | dryrun | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4521`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4521) |
-| 2265 | repositorycache | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4533`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4533) |
-| 2282 | onboardingconfigfilename | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4545`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4545) |
-| 2298 | onboardingconfig | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4559`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4559) |
-| 2325 | force | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4575`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4575) |
-| 2350 | giturl | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4592`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4592) |
-| 2368 | validates boolean type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4604`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4604) |
-| 2388 | validates integer type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4614`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4614) |
-| 2408 | validates array type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4624`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4624) |
-| 2439 | validates object type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4639`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4639) |
-| 2469 | warns if negative number is used for integer type | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4657`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4657) |
-| 2486 | warns on invalid customenvvariables objects | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4669`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4669) |
-| 2507 | validates valid customenvvariables objects | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4682`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4682) |
-| 2522 | validates options with different type but defaultvalue=null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4431`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4431) |
-| 2542 | fails for missing reportpath if reporttype is "s3" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4713`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4713) |
-| 2554 | validates reportpath if reporttype is "s3" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4721`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4721) |
-| 2567 | fails for missing reportpath if reporttype is "file" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4732`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4732) |
-| 2579 | validates reportpath if reporttype is "file" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4740`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4740) |
-| 2592 | warns when registryurls is set at the top level of global config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4751`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4751) |
-| 2607 | warns when defaultregistryurls is set at the top level of global config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4762`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4762) |
-| 2622 | validates postupgradetasks.installtools tool names | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4773`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4773) |
-| 2640 | rejects invalid postupgradetasks.installtools tool names | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4784`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4784) |
-| 2664 | catches when * or ** is combined with others patterns in a regexorglob option | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4190`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4190) |
+| 1781 | catches invalid variable name in env config option | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4168`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4168) |
+| 1809 | catches env config option if configured inside a parent | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4189`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4189) |
+| 1846 | catches when * or ** is combined with others patterns in a regexorglob option | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4209`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4209) |
+| 1874 | catches when negative number is used for integer type | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4256`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4256) |
+| 1888 | validates prpriority | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4268`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4268) |
+| 1909 | errors if no bumpversion filepattern is provided | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4284`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4284) |
+| 1935 | errors if no matchstrings are provided for bumpversion | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4307`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4307) |
+| 1959 | allow bumpversion | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4324`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4324) |
+| 1985 | returns errors for invalid options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4341`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4341) |
+| 2007 | validates hostrules.headers | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4357`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4357) |
+| 2027 | errors if hostrules.headers is defined but allowedheaders is not | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4374`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4374) |
+| 2051 | validates env | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4392`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4392) |
+| 2066 | handles prefixed onboardingconfigfilename | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4403`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4403) |
+| 2080 | allows unique onboardingconfigfilename if it is set in configfilenames | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4414`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4414) |
+| 2093 | errors if env object is defined but allowedenv is empty or undefined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4428`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4428) |
+| 2112 | validates env against the allowedenv regex | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4439`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4439) |
+| 2127 | validates options with different type but defaultvalue=null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4450`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4450) |
+| 2163 | binarysource=docker is deprecated | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4481`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4481) |
+| 2180 | binarysource | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4494`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4494) |
+| 2198 | binarysource | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4494`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4494) |
+| 2215 | basedir | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4518`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4518) |
+| 2231 | requireconfig | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4528`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4528) |
+| 2248 | dryrun | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4540`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4540) |
+| 2265 | repositorycache | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4552`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4552) |
+| 2282 | onboardingconfigfilename | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4564`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4564) |
+| 2298 | onboardingconfig | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4578`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4578) |
+| 2325 | force | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4594`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4594) |
+| 2350 | giturl | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4611`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4611) |
+| 2368 | validates boolean type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4623`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4623) |
+| 2388 | validates integer type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4633`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4633) |
+| 2408 | validates array type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4643`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4643) |
+| 2439 | validates object type options | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4658`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4658) |
+| 2469 | warns if negative number is used for integer type | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4676`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4676) |
+| 2486 | warns on invalid customenvvariables objects | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4688`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4688) |
+| 2507 | validates valid customenvvariables objects | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4701`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4701) |
+| 2522 | validates options with different type but defaultvalue=null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4450`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4450) |
+| 2542 | fails for missing reportpath if reporttype is "s3" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4732`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4732) |
+| 2554 | validates reportpath if reporttype is "s3" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4740`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4740) |
+| 2567 | fails for missing reportpath if reporttype is "file" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4751`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4751) |
+| 2579 | validates reportpath if reporttype is "file" | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4759`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4759) |
+| 2592 | warns when registryurls is set at the top level of global config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4770`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4770) |
+| 2607 | warns when defaultregistryurls is set at the top level of global config | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4781`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4781) |
+| 2622 | validates postupgradetasks.installtools tool names | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4792`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4792) |
+| 2640 | rejects invalid postupgradetasks.installtools tool names | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4803`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4803) |
+| 2664 | catches when * or ** is combined with others patterns in a regexorglob option | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4209`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4209) |
 | 2705 | errors when using an invalid cache namespace | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3027`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3027) |
 | 2728 | allows a valid cache namespace | ported | [`crates/renovate-core/src/config/migrate_validate.rs:3054`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L3054) |
-| 2744 | allows wildcards | pending | — |
+| 2744 | allows wildcards | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4149`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4149) |
 

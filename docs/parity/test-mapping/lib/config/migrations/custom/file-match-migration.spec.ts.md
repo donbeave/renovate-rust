@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | migrates filematch of type string | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5574`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5574) |
-| 15 | migrates filematch of type array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5583`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5583) |
-| 26 | concats filematch to managerfilepatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5592`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5592) |
-| 38 | does nothing if filematch not defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5603`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5603) |
+| 4 | migrates filematch of type string | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5593`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5593) |
+| 15 | migrates filematch of type array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5602`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5602) |
+| 26 | concats filematch to managerfilepatterns | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5611`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5611) |
+| 38 | does nothing if filematch not defined | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5622`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5622) |
 

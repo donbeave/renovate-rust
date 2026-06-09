@@ -4146,6 +4146,25 @@ mod tests {
         );
     }
 
+    // Ported: "allows wildcards" — lib/config/validation.spec.ts line 2744
+    #[test]
+    fn validate_config_allows_wildcards_in_cache_ttl_override() {
+        let result = validate_config_for_source(
+            "global",
+            &json!({
+                "cacheTtlOverride": {
+                    "datasource-rubygems": 120,
+                    "datasource-*": 60,
+                    "datasource-{crate,go}": 90,
+                    "/^changelog-/": 45,
+                    "*": 30,
+                },
+            }),
+        );
+        assert!(result.warnings.is_empty());
+        assert!(result.errors.is_empty());
+    }
+
     // Ported: "catches invalid variable name in env config option" — lib/config/validation.spec.ts line 1781
     #[test]
     fn validate_config_catches_invalid_env_variable_name_and_value() {

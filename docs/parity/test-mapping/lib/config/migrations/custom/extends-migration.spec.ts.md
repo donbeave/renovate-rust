@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | migrates preset strings to array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5129`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5129) |
-| 25 | migrates presets array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5142`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5142) |
-| 36 | should remove non string values | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5151`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5151) |
-| 47 | should remove removed presets | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5160`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5160) |
+| 5 | migrates preset strings to array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5148`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5148) |
+| 25 | migrates presets array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5161`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5161) |
+| 36 | should remove non string values | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5170`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5170) |
+| 47 | should remove removed presets | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5179`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5179) |
 | 58 | migrates presets | ported | [`crates/renovate-core/src/repo_config.rs:11679`](../../../../../../../crates/renovate-core/src/repo_config.rs#L11679) |
-| 76 | migrate merge confidence config preset to internal preset | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5169`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5169) |
+| 76 | migrate merge confidence config preset to internal preset | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5188`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5188) |
 
