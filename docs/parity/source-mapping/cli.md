@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 37/150 in-scope files mapped (full=14 partial=23 stub=0 pending=113 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 38/150 in-scope files mapped (full=15 partial=23 stub=0 pending=112 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -121,7 +121,7 @@
 | `lib/workers/repository/dependency-dashboard.ts` | full | [`crates/renovate-core/src/workers/repository/dependency_dashboard.rs`](../../../crates/renovate-core/src/workers/repository/dependency_dashboard.rs) | ensureDependencyDashboard (early returns, config migration sections using prior result enum for checkbox/pr-link, body assembly with branches/problems/deprecations), format_dashboard enhanced with migration prefix, basic ensure surface. readDashboardBody, full getBranchesListMd categories, vulns, abandoned, autoclose, header/footer, platform calls, parse for user checks are in progress or delegated. Single test for the "adds a checkbox" behavior ported. (Pre-existing debt in other modules isolated for this cycle.) |
 | `lib/workers/repository/error-config.ts` | full | [`crates/renovate-core/src/workers/repository/error_config.rs`](../../../crates/renovate-core/src/workers/repository/error_config.rs) | raiseConfigWarningIssue / raiseCredentialsWarningIssue / raiseWarningIssue (silent, body with validation details, dryRun early return + log, suppress, ensureIssue side, warn log) + handleOnboardingPr. handle_config_error + builders + full raise surfaces + single Ported test. (platform ensure/update and caller wiring in pending modules; debt isolated). |
 | `lib/workers/repository/error.ts` | pending | — | — |
-| `lib/workers/repository/errors-warnings.ts` | pending | — | — |
+| `lib/workers/repository/errors-warnings.ts` | full | [`crates/renovate-core/src/workers/repository/errors_warnings.rs`](../../../crates/renovate-core/src/workers/repository/errors_warnings.rs) | getWarnings/getErrors (text formatters), getDepWarnings* (onboarding/PR/dashboard with emojify, suppress, stripping, files, dashboard link if issue). collect stub + get_*_text present; dep collection + 3 getDep* implemented here. Single test ported from spec. (calls from dashboard/worker in other pending). |
 | `lib/workers/repository/extract/extract-fingerprint-config.ts` | pending | — | — |
 | `lib/workers/repository/extract/file-match.ts` | pending | — | — |
 | `lib/workers/repository/extract/index.ts` | pending | — | — |
