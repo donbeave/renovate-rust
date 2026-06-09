@@ -15,7 +15,7 @@
 | 109 | throws for fork with platform.getjsonfile() failures | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:265`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L265) |
 | 124 | uses the onboardingconfigfilename if set | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:276`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L276) |
 | 151 | falls back to "renovate.json" if onboardingconfigfilename is not set | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:287`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L287) |
-| 172 | falls back to "renovate.json" if onboardingconfigfilename is not valid | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:300`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L300) |
-| 191 | checks for re-enablement and continues | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:311`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L311) |
-| 211 | checks for re-enablement and skips | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:327`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L327) |
+| 172 | falls back to "renovate.json" if onboardingconfigfilename is not valid | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:296`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L296) |
+| 191 | checks for re-enablement and continues | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:307`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L307) |
+| 211 | checks for re-enablement and skips | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:323`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L323) |
 

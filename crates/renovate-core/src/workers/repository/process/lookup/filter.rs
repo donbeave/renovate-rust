@@ -342,4 +342,106 @@ mod tests {
         assert_eq!(parse_major("0.1.0"), 0);
         assert_eq!(parse_major(""), 0);
     }
+
+    // Ported: "should filter versions allowed by semver syntax when allowedversions is not valid version, range or pypi syntax" — lib/workers/repository/process/lookup/filter.spec.ts line 12
+    #[test]
+    fn filter_versions_allowed_by_semver_when_not_valid_range() {
+        let config = FilterConfig {
+            ignore_unstable: Some(false),
+            ignore_deprecated: Some(false),
+            respect_latest: Some(false),
+            allowed_versions: Some(">1".to_string()),
+            ..Default::default()
+        };
+        let releases = vec![
+            Release::new("1.0.1"),
+            Release::new("1.2.0"),
+            Release::new("2.0.0"),
+            Release::new("2.1.0"),
+            Release::new("invalid.version"),
+        ];
+        let result = filter_versions(&config, "1.0.0", "", &releases, "");
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "2.0.0");
+        assert_eq!(result[1].version, "2.1.0");
+    }
+
+    // Ported: "should filter versions when allowedversions templating is used" — lib/workers/repository/process/lookup/filter.spec.ts line 60
+    #[test]
+    fn filter_versions_when_allowedversions_templating_used() {
+        let config = FilterConfig {
+            ignore_unstable: Some(false),
+            ignore_deprecated: Some(false),
+            respect_latest: Some(false),
+            allowed_versions: Some("<={{major}}.{{add minor 1}}.{{patch}}".to_string()),
+            ..Default::default()
+        };
+        let releases = vec![
+            Release::new("1.1.0"),
+            Release::new("1.2.0"),
+            Release::new("1.3.0"),
+        ];
+        let result = filter_versions(&config, "1.0.0", "", &releases, "");
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].version, "1.1.0");
+    }
+
+    // Ported: "allows unstable major upgrades" — lib/workers/repository/process/lookup/filter.spec.ts line 98
+    #[test]
+    fn filter_versions_allows_unstable_major_upgrades() {
+        let config = FilterConfig {
+            ignore_unstable: Some(true),
+            ignore_deprecated: Some(true),
+            ..Default::default()
+        };
+        let releases = vec![
+            { let mut r = Release::new("1.0.0-alpha"); r.is_stable = Some(false); r },
+            { let mut r = Release::new("1.2.3-beta"); r.is_stable = Some(false); r },
+        ];
+        let result = filter_versions(&config, "1.0.0-alpha", "", &releases, "");
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].version, "1.2.3-beta");
+    }
+
+    // Ported: "ignores version insufficient prefixes" — lib/workers/repository/process/lookup/filter.spec.ts line 124
+    #[test]
+    fn filter_versions_ignores_version_insufficient_prefixes() {
+        let config = FilterConfig {
+            ignore_unstable: Some(true),
+            ignore_deprecated: Some(true),
+            ..Default::default()
+        };
+        let releases = vec![
+            Release::new("1.0.1"),
+            Release::new("1.2.0"),
+            { let mut r = Release::new("2.0.0"); r.is_deprecated = Some(true); r },
+            Release::new("2.1.0"),
+        ];
+        let result = filter_versions(&config, "v1.0.1", "", &releases, "");
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].version, "1.2.0");
+        assert_eq!(result[1].version, "2.1.0");
+    }
+
+    // Ported: "single version range, but invalid current version (for coverage)" — lib/workers/repository/process/lookup/filter.spec.ts line 153
+    #[test]
+    fn filter_versions_single_version_range_invalid_current() {
+        let config = FilterConfig {
+            ignore_unstable: Some(false),
+            ignore_deprecated: Some(false),
+            respect_latest: Some(true),
+            ..Default::default()
+        };
+        let releases = vec![
+            Release::new("1.0.1"),
+            Release::new("1.2.0"),
+            Release::new("2.0.0"),
+            Release::new("2.2.0"),
+        ];
+        let result = filter_versions(&config, "[1.0.1]", "2.0.0", &releases, "");
+        assert_eq!(result.len(), 3);
+        assert_eq!(result[0].version, "1.0.1");
+        assert_eq!(result[1].version, "1.2.0");
+        assert_eq!(result[2].version, "2.0.0");
+    }
 }
