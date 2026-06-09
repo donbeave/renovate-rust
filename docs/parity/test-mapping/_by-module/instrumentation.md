@@ -9,6 +9,6 @@
 | [`lib/instrumentation/detectors.spec.ts`](../lib/instrumentation/detectors.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
 | [`lib/instrumentation/index.spec.ts`](../lib/instrumentation/index.spec.ts.md) | 10 | 0 | 10 | 0 | — | pending |
 | [`lib/instrumentation/reporting.spec.ts`](../lib/instrumentation/reporting.spec.ts.md) | 11 | 0 | 11 | 0 | — | pending |
-| [`lib/instrumentation/utils.spec.ts`](../lib/instrumentation/utils.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/util.rs:6869`](../../../../crates/renovate-core/src/util.rs#L6869) | ported |
+| [`lib/instrumentation/utils.spec.ts`](../lib/instrumentation/utils.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/util.rs:6866`](../../../../crates/renovate-core/src/util.rs#L6866) | ported |
 | [`lib/instrumentation/with-instrumenting.spec.ts`](../lib/instrumentation/with-instrumenting.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
 

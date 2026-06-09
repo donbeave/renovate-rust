@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | logs a warning for hidden unicode characters in text files | ported | [`crates/renovate-core/src/util.rs:11533`](../../../../../crates/renovate-core/src/util.rs#L11533) |
-| 16 | logs a trace message for bom character only | ported | [`crates/renovate-core/src/util.rs:11544`](../../../../../crates/renovate-core/src/util.rs#L11544) |
-| 30 | does not log a warning for binary files with null bytes but no hidden unicode | ported | [`crates/renovate-core/src/util.rs:11553`](../../../../../crates/renovate-core/src/util.rs#L11553) |
-| 43 | logs a trace message (not warning) for binary files with hidden unicode characters | ported | [`crates/renovate-core/src/util.rs:11567`](../../../../../crates/renovate-core/src/util.rs#L11567) |
-| 63 | does not log a warning when no hidden characters are present | ported | [`crates/renovate-core/src/util.rs:11580`](../../../../../crates/renovate-core/src/util.rs#L11580) |
+| 6 | logs a warning for hidden unicode characters in text files | ported | [`crates/renovate-core/src/util.rs:11530`](../../../../../crates/renovate-core/src/util.rs#L11530) |
+| 16 | logs a trace message for bom character only | ported | [`crates/renovate-core/src/util.rs:11541`](../../../../../crates/renovate-core/src/util.rs#L11541) |
+| 30 | does not log a warning for binary files with null bytes but no hidden unicode | ported | [`crates/renovate-core/src/util.rs:11550`](../../../../../crates/renovate-core/src/util.rs#L11550) |
+| 43 | logs a trace message (not warning) for binary files with hidden unicode characters | ported | [`crates/renovate-core/src/util.rs:11564`](../../../../../crates/renovate-core/src/util.rs#L11564) |
+| 63 | does not log a warning when no hidden characters are present | ported | [`crates/renovate-core/src/util.rs:11577`](../../../../../crates/renovate-core/src/util.rs#L11577) |
 

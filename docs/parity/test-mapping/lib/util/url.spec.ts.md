@@ -8,15 +8,15 @@
 |--:|---|---|---|
 | 18 | _(it.each / template — verify manually)_ | ? | — |
 | 57 | _(it.each / template — verify manually)_ | ? | — |
-| 97 | getquerystring | ported | [`crates/renovate-core/src/util.rs:10788`](../../../../../crates/renovate-core/src/util.rs#L10788) |
-| 101 | validates http-based urls | ported | [`crates/renovate-core/src/util.rs:10799`](../../../../../crates/renovate-core/src/util.rs#L10799) |
-| 112 | parses url | ported | [`crates/renovate-core/src/util.rs:10809`](../../../../../crates/renovate-core/src/util.rs#L10809) |
-| 123 | trimtrailingslash | ported | [`crates/renovate-core/src/util.rs:10819`](../../../../../crates/renovate-core/src/util.rs#L10819) |
-| 130 | trimslashes | ported | [`crates/renovate-core/src/util.rs:10828`](../../../../../crates/renovate-core/src/util.rs#L10828) |
-| 141 | ensuretrailingslash | ported | [`crates/renovate-core/src/util.rs:10841`](../../../../../crates/renovate-core/src/util.rs#L10841) |
-| 146 | ensures path prefix | ported | [`crates/renovate-core/src/util.rs:10852`](../../../../../crates/renovate-core/src/util.rs#L10852) |
-| 164 | joinurlparts | ported | [`crates/renovate-core/src/util.rs:10869`](../../../../../crates/renovate-core/src/util.rs#L10869) |
-| 180 | createurlfromhostorurl | ported | [`crates/renovate-core/src/util.rs:10890`](../../../../../crates/renovate-core/src/util.rs#L10890) |
-| 189 | parselinkheader | ported | [`crates/renovate-core/src/util.rs:10903`](../../../../../crates/renovate-core/src/util.rs#L10903) |
-| 221 | massagehosturl | ported | [`crates/renovate-core/src/util.rs:10927`](../../../../../crates/renovate-core/src/util.rs#L10927) |
+| 97 | getquerystring | ported | [`crates/renovate-core/src/util.rs:10785`](../../../../../crates/renovate-core/src/util.rs#L10785) |
+| 101 | validates http-based urls | ported | [`crates/renovate-core/src/util.rs:10796`](../../../../../crates/renovate-core/src/util.rs#L10796) |
+| 112 | parses url | ported | [`crates/renovate-core/src/util.rs:10806`](../../../../../crates/renovate-core/src/util.rs#L10806) |
+| 123 | trimtrailingslash | ported | [`crates/renovate-core/src/util.rs:10816`](../../../../../crates/renovate-core/src/util.rs#L10816) |
+| 130 | trimslashes | ported | [`crates/renovate-core/src/util.rs:10825`](../../../../../crates/renovate-core/src/util.rs#L10825) |
+| 141 | ensuretrailingslash | ported | [`crates/renovate-core/src/util.rs:10838`](../../../../../crates/renovate-core/src/util.rs#L10838) |
+| 146 | ensures path prefix | ported | [`crates/renovate-core/src/util.rs:10849`](../../../../../crates/renovate-core/src/util.rs#L10849) |
+| 164 | joinurlparts | ported | [`crates/renovate-core/src/util.rs:10866`](../../../../../crates/renovate-core/src/util.rs#L10866) |
+| 180 | createurlfromhostorurl | ported | [`crates/renovate-core/src/util.rs:10887`](../../../../../crates/renovate-core/src/util.rs#L10887) |
+| 189 | parselinkheader | ported | [`crates/renovate-core/src/util.rs:10900`](../../../../../crates/renovate-core/src/util.rs#L10900) |
+| 221 | massagehosturl | ported | [`crates/renovate-core/src/util.rs:10924`](../../../../../crates/renovate-core/src/util.rs#L10924) |
 

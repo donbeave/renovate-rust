@@ -399,4 +399,45 @@ mod tests {
         assert_eq!(results.len(), 1);
         assert!(results[0].artifact_error.is_some());
     }
+
+    // Ported: "handle TEMPORARY_ERROR" — lib/modules/manager/pixi/artifacts.spec.ts line 122
+    #[tokio::test]
+    async fn handle_temporary_error() {
+        let dir = tempdir().unwrap();
+        let lock_dir = dir.path().to_path_buf();
+
+        std::fs::write(lock_dir.join("pixi.toml"), "[project]\n").unwrap();
+        std::fs::write(lock_dir.join("pixi.lock"), "Old pixi.lock\n").unwrap();
+
+        // Simulate write failure for the package file (as the TS test injects writeLocalFile reject with TEMPORARY_ERROR).
+        // The runner returns Err(ArtifactError) for any write failure (the "rethrow" path for temp).
+        let toml_path = lock_dir.join("pixi.toml");
+        #[cfg(unix)]
+        {
+            let mut perms = std::fs::metadata(&toml_path).unwrap().permissions();
+            perms.set_mode(0o444);
+            std::fs::set_permissions(&toml_path, perms).unwrap();
+        }
+
+        let runner = make_runner();
+        let input = UpdateArtifact {
+            package_file_name: "pixi.toml".to_owned(),
+            updated_deps: vec![],
+            new_package_file_content: "updated content".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: lock_dir.clone(),
+                is_lockfile_maintenance: true,
+                ..Default::default()
+            },
+        };
+        let result = runner.update_artifacts(&input).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.lock_file.contains("pixi"));
+        assert!(
+            err.stderr.contains("failed to write pixi.toml")
+                || err.stderr.contains("Permission denied")
+                || err.stderr.contains("Read-only")
+        );
+    }
 }

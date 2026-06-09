@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | returns same if not auto | ported | [`crates/renovate-core/src/extractors/npm.rs:4732`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4732) |
-| 10 | widens peerdependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:4738`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4738) |
-| 18 | widens complex ranges | ported | [`crates/renovate-core/src/extractors/npm.rs:4745`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4745) |
-| 27 | widens complex bump | ported | [`crates/renovate-core/src/extractors/npm.rs:4752`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4752) |
-| 36 | defaults to update-lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:4759`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4759) |
+| 5 | returns same if not auto | ported | [`crates/renovate-core/src/extractors/npm.rs:4733`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4733) |
+| 10 | widens peerdependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:4739`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4739) |
+| 18 | widens complex ranges | ported | [`crates/renovate-core/src/extractors/npm.rs:4746`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4746) |
+| 27 | widens complex bump | ported | [`crates/renovate-core/src/extractors/npm.rs:4753`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4753) |
+| 36 | defaults to update-lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:4760`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4760) |
 

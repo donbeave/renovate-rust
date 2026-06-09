@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 16 | runs | ported | [`crates/renovate-core/src/util.rs:7245`](../../../../../../crates/renovate-core/src/util.rs#L7245) |
+| 16 | runs | ported | [`crates/renovate-core/src/util.rs:7242`](../../../../../../crates/renovate-core/src/util.rs#L7242) |
 

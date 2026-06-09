@@ -6,28 +6,28 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 13 | replaces a dependency value | ported | [`crates/renovate-core/src/extractors/npm.rs:6003`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6003) |
-| 28 | replaces a github dependency value | ported | [`crates/renovate-core/src/extractors/npm.rs:6021`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6021) |
-| 52 | replaces a npm package alias | ported | [`crates/renovate-core/src/extractors/npm.rs:6038`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6038) |
-| 77 | replaces a github short hash | ported | [`crates/renovate-core/src/extractors/npm.rs:6056`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6056) |
-| 101 | replaces a github fully specified version | ported | [`crates/renovate-core/src/extractors/npm.rs:6073`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6073) |
-| 123 | updates resolutions too | ported | [`crates/renovate-core/src/extractors/npm.rs:6094`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6094) |
-| 138 | updates glob resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6109`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6109) |
-| 153 | updates glob resolutions without dep | ported | [`crates/renovate-core/src/extractors/npm.rs:6124`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6124) |
-| 170 | replaces only the first instance of a value | ported | [`crates/renovate-core/src/extractors/npm.rs:6142`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6142) |
-| 185 | replaces only the second instance of a value | ported | [`crates/renovate-core/src/extractors/npm.rs:6158`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6158) |
-| 200 | handles the case where the desired version is already supported | ported | [`crates/renovate-core/src/extractors/npm.rs:6174`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6174) |
-| 214 | returns null if throws error | ported | [`crates/renovate-core/src/extractors/npm.rs:6187`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6187) |
-| 228 | updates packagemanager | ported | [`crates/renovate-core/src/extractors/npm.rs:6200`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6200) |
-| 243 | returns null if empty file | ported | [`crates/renovate-core/src/extractors/npm.rs:6214`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6214) |
-| 257 | replaces package | ported | [`crates/renovate-core/src/extractors/npm.rs:6227`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6227) |
-| 273 | supports alias-based replacement | ported | [`crates/renovate-core/src/extractors/npm.rs:6244`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6244) |
-| 291 | replaces glob package resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6260`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6260) |
-| 307 | pins also the version in patch with npm protocol in resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6276`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6276) |
-| 322 | replaces also the version in patch with range in resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6313`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6313) |
-| 337 | handles override dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:6340`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6340) |
-| 361 | handles override dependency object | ported | [`crates/renovate-core/src/extractors/npm.rs:6363`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6363) |
-| 390 | handles override dependency object where lastparent === depname | ported | [`crates/renovate-core/src/extractors/npm.rs:6394`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6394) |
-| 419 | handles pnpm.override dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:6425`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6425) |
-| 446 | handles yarn.catalogs dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:6892`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6892) |
+| 13 | replaces a dependency value | ported | [`crates/renovate-core/src/extractors/npm.rs:6004`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6004) |
+| 28 | replaces a github dependency value | ported | [`crates/renovate-core/src/extractors/npm.rs:6022`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6022) |
+| 52 | replaces a npm package alias | ported | [`crates/renovate-core/src/extractors/npm.rs:6039`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6039) |
+| 77 | replaces a github short hash | ported | [`crates/renovate-core/src/extractors/npm.rs:6057`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6057) |
+| 101 | replaces a github fully specified version | ported | [`crates/renovate-core/src/extractors/npm.rs:6074`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6074) |
+| 123 | updates resolutions too | ported | [`crates/renovate-core/src/extractors/npm.rs:6095`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6095) |
+| 138 | updates glob resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6110`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6110) |
+| 153 | updates glob resolutions without dep | ported | [`crates/renovate-core/src/extractors/npm.rs:6125`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6125) |
+| 170 | replaces only the first instance of a value | ported | [`crates/renovate-core/src/extractors/npm.rs:6143`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6143) |
+| 185 | replaces only the second instance of a value | ported | [`crates/renovate-core/src/extractors/npm.rs:6159`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6159) |
+| 200 | handles the case where the desired version is already supported | ported | [`crates/renovate-core/src/extractors/npm.rs:6175`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6175) |
+| 214 | returns null if throws error | ported | [`crates/renovate-core/src/extractors/npm.rs:6188`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6188) |
+| 228 | updates packagemanager | ported | [`crates/renovate-core/src/extractors/npm.rs:6201`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6201) |
+| 243 | returns null if empty file | ported | [`crates/renovate-core/src/extractors/npm.rs:6215`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6215) |
+| 257 | replaces package | ported | [`crates/renovate-core/src/extractors/npm.rs:6228`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6228) |
+| 273 | supports alias-based replacement | ported | [`crates/renovate-core/src/extractors/npm.rs:6245`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6245) |
+| 291 | replaces glob package resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6261`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6261) |
+| 307 | pins also the version in patch with npm protocol in resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6277`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6277) |
+| 322 | replaces also the version in patch with range in resolutions | ported | [`crates/renovate-core/src/extractors/npm.rs:6314`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6314) |
+| 337 | handles override dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:6341`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6341) |
+| 361 | handles override dependency object | ported | [`crates/renovate-core/src/extractors/npm.rs:6364`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6364) |
+| 390 | handles override dependency object where lastparent === depname | ported | [`crates/renovate-core/src/extractors/npm.rs:6395`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6395) |
+| 419 | handles pnpm.override dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:6426`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6426) |
+| 446 | handles yarn.catalogs dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:6893`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6893) |
 

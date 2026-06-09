@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 13 | handles unsupported sourceurl | ported | [`crates/renovate-core/src/util.rs:9710`](../../../../../../../../../crates/renovate-core/src/util.rs#L9710) |
-| 22 | handles sourceurl | ported | [`crates/renovate-core/src/util.rs:9711`](../../../../../../../../../crates/renovate-core/src/util.rs#L9711) |
-| 28 | handles unsupported sourceurl | ported | [`crates/renovate-core/src/util.rs:9710`](../../../../../../../../../crates/renovate-core/src/util.rs#L9710) |
-| 37 | handles sourceurl | ported | [`crates/renovate-core/src/util.rs:9711`](../../../../../../../../../crates/renovate-core/src/util.rs#L9711) |
-| 45 | handles invalid repository | ported | [`crates/renovate-core/src/util.rs:9732`](../../../../../../../../../crates/renovate-core/src/util.rs#L9732) |
-| 50 | handles valid repository | ported | [`crates/renovate-core/src/util.rs:9733`](../../../../../../../../../crates/renovate-core/src/util.rs#L9733) |
+| 13 | handles unsupported sourceurl | ported | [`crates/renovate-core/src/util.rs:9707`](../../../../../../../../../crates/renovate-core/src/util.rs#L9707) |
+| 22 | handles sourceurl | ported | [`crates/renovate-core/src/util.rs:9708`](../../../../../../../../../crates/renovate-core/src/util.rs#L9708) |
+| 28 | handles unsupported sourceurl | ported | [`crates/renovate-core/src/util.rs:9707`](../../../../../../../../../crates/renovate-core/src/util.rs#L9707) |
+| 37 | handles sourceurl | ported | [`crates/renovate-core/src/util.rs:9708`](../../../../../../../../../crates/renovate-core/src/util.rs#L9708) |
+| 45 | handles invalid repository | ported | [`crates/renovate-core/src/util.rs:9729`](../../../../../../../../../crates/renovate-core/src/util.rs#L9729) |
+| 50 | handles valid repository | ported | [`crates/renovate-core/src/util.rs:9730`](../../../../../../../../../crates/renovate-core/src/util.rs#L9730) |
 

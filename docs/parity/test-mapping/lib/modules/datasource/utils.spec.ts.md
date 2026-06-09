@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | is artifactory server invalid | ported | [`crates/renovate-core/src/util.rs:9530`](../../../../../../crates/renovate-core/src/util.rs#L9530) |
-| 19 | is artifactory server valid | ported | [`crates/renovate-core/src/util.rs:9539`](../../../../../../crates/renovate-core/src/util.rs#L9539) |
+| 10 | is artifactory server invalid | ported | [`crates/renovate-core/src/util.rs:9527`](../../../../../../crates/renovate-core/src/util.rs#L9527) |
+| 19 | is artifactory server valid | ported | [`crates/renovate-core/src/util.rs:9536`](../../../../../../crates/renovate-core/src/util.rs#L9536) |
 | 28 | retrieves a google access token | pending | — |
 | 42 | no google access token results in null | pending | — |
 | 56 | google access token error throws an exception | pending | — |

@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | matches package in nested directory | ported | [`crates/renovate-core/src/extractors/npm.rs:4766`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4766) |
-| 17 | matches package in non-nested directory | ported | [`crates/renovate-core/src/extractors/npm.rs:4775`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4775) |
-| 29 | matches package in explicitly defined directory | ported | [`crates/renovate-core/src/extractors/npm.rs:4784`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4784) |
+| 5 | matches package in nested directory | ported | [`crates/renovate-core/src/extractors/npm.rs:4767`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4767) |
+| 17 | matches package in non-nested directory | ported | [`crates/renovate-core/src/extractors/npm.rs:4776`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4776) |
+| 29 | matches package in explicitly defined directory | ported | [`crates/renovate-core/src/extractors/npm.rs:4785`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4785) |
 

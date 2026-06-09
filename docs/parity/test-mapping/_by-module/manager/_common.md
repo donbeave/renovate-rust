@@ -9,6 +9,6 @@
 | [`lib/modules/manager/fingerprint.spec.ts`](../../lib/modules/manager/fingerprint.spec.ts.md) | 1 | 0 | 0 | 1 | — | opt-out |
 | [`lib/modules/manager/index.spec.ts`](../../lib/modules/manager/index.spec.ts.md) | 22 | 9 | 1 | 12 | [`crates/renovate-core/src/managers.rs:2369`](../../../../../crates/renovate-core/src/managers.rs#L2369) | partial |
 | [`lib/modules/manager/metadata.spec.ts`](../../lib/modules/manager/metadata.spec.ts.md) | 1 | 0 | 0 | 1 | — | opt-out |
-| [`lib/modules/manager/range.spec.ts`](../../lib/modules/manager/range.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/util.rs:9597`](../../../../../crates/renovate-core/src/util.rs#L9597) | ported |
-| [`lib/modules/manager/util.spec.ts`](../../lib/modules/manager/util.spec.ts.md) | 10 | 10 | 0 | 0 | [`crates/renovate-core/src/util.rs:10183`](../../../../../crates/renovate-core/src/util.rs#L10183) | ported |
+| [`lib/modules/manager/range.spec.ts`](../../lib/modules/manager/range.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/util.rs:9594`](../../../../../crates/renovate-core/src/util.rs#L9594) | ported |
+| [`lib/modules/manager/util.spec.ts`](../../lib/modules/manager/util.spec.ts.md) | 10 | 10 | 0 | 0 | [`crates/renovate-core/src/util.rs:10180`](../../../../../crates/renovate-core/src/util.rs#L10180) | ported |
 

@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 32 | works | ported | [`crates/renovate-core/src/util.rs:10983`](../../../../../crates/renovate-core/src/util.rs#L10983) |
-| 37 | works with gitlab | ported | [`crates/renovate-core/src/util.rs:10991`](../../../../../crates/renovate-core/src/util.rs#L10991) |
-| 47 | sanitizemarkdown check massaged release notes | ported | [`crates/renovate-core/src/util.rs:11003`](../../../../../crates/renovate-core/src/util.rs#L11003) |
+| 32 | works | ported | [`crates/renovate-core/src/util.rs:10980`](../../../../../crates/renovate-core/src/util.rs#L10980) |
+| 37 | works with gitlab | ported | [`crates/renovate-core/src/util.rs:10988`](../../../../../crates/renovate-core/src/util.rs#L10988) |
+| 47 | sanitizemarkdown check massaged release notes | ported | [`crates/renovate-core/src/util.rs:11000`](../../../../../crates/renovate-core/src/util.rs#L11000) |
 

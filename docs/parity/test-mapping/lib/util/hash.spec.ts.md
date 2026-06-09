@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | hashes data with sha256 | ported | [`crates/renovate-core/src/util.rs:11088`](../../../../../crates/renovate-core/src/util.rs#L11088) |
-| 15 | hashes data with sha512 | ported | [`crates/renovate-core/src/util.rs:11098`](../../../../../crates/renovate-core/src/util.rs#L11098) |
-| 21 | correctly hashes the content of a readable stream | ported | [`crates/renovate-core/src/util.rs:11106`](../../../../../crates/renovate-core/src/util.rs#L11106) |
-| 38 | uses sha512 if no algorithm is specified | ported | [`crates/renovate-core/src/util.rs:11114`](../../../../../crates/renovate-core/src/util.rs#L11114) |
+| 6 | hashes data with sha256 | ported | [`crates/renovate-core/src/util.rs:11085`](../../../../../crates/renovate-core/src/util.rs#L11085) |
+| 15 | hashes data with sha512 | ported | [`crates/renovate-core/src/util.rs:11095`](../../../../../crates/renovate-core/src/util.rs#L11095) |
+| 21 | correctly hashes the content of a readable stream | ported | [`crates/renovate-core/src/util.rs:11103`](../../../../../crates/renovate-core/src/util.rs#L11103) |
+| 38 | uses sha512 if no algorithm is specified | ported | [`crates/renovate-core/src/util.rs:11111`](../../../../../crates/renovate-core/src/util.rs#L11111) |
 
