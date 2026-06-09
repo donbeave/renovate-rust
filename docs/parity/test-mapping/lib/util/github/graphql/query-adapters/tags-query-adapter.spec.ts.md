@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | transforms commit type | ported | [`crates/renovate-core/src/util.rs:13364`](../../../../../../../../crates/renovate-core/src/util.rs#L13364) |
-| 23 | transforms tag type | ported | [`crates/renovate-core/src/util.rs:13382`](../../../../../../../../crates/renovate-core/src/util.rs#L13382) |
-| 41 | transforms nested tag type | ported | [`crates/renovate-core/src/util.rs:13400`](../../../../../../../../crates/renovate-core/src/util.rs#L13400) |
-| 59 | returns null for other types | ported | [`crates/renovate-core/src/util.rs:13417`](../../../../../../../../crates/renovate-core/src/util.rs#L13417) |
+| 5 | transforms commit type | ported | [`crates/renovate-core/src/util.rs:13365`](../../../../../../../../crates/renovate-core/src/util.rs#L13365) |
+| 23 | transforms tag type | ported | [`crates/renovate-core/src/util.rs:13383`](../../../../../../../../crates/renovate-core/src/util.rs#L13383) |
+| 41 | transforms nested tag type | ported | [`crates/renovate-core/src/util.rs:13401`](../../../../../../../../crates/renovate-core/src/util.rs#L13401) |
+| 59 | returns null for other types | ported | [`crates/renovate-core/src/util.rs:13418`](../../../../../../../../crates/renovate-core/src/util.rs#L13418) |
 

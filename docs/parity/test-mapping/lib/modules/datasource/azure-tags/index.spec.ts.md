@@ -9,6 +9,6 @@
 | 20 | returns tags from azure devops | pending | — |
 | 47 | filters out undefined names | pending | — |
 | 70 | handles api errors | pending | — |
-| 83 | getcachekey returns the expected format | ported | [`crates/renovate-core/src/util.rs:8325`](../../../../../../../crates/renovate-core/src/util.rs#L8325) |
-| 92 | getsourceurl returns the correct url format | ported | [`crates/renovate-core/src/util.rs:8334`](../../../../../../../crates/renovate-core/src/util.rs#L8334) |
+| 83 | getcachekey returns the expected format | ported | [`crates/renovate-core/src/util.rs:8326`](../../../../../../../crates/renovate-core/src/util.rs#L8326) |
+| 92 | getsourceurl returns the correct url format | ported | [`crates/renovate-core/src/util.rs:8335`](../../../../../../../crates/renovate-core/src/util.rs#L8335) |
 

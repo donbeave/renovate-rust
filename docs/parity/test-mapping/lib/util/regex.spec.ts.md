@@ -7,7 +7,7 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 6 | uses re2 | pending | — |
-| 10 | throws unsafe 2 | ported | [`crates/renovate-core/src/util.rs:10958`](../../../../../crates/renovate-core/src/util.rs#L10958) |
+| 10 | throws unsafe 2 | ported | [`crates/renovate-core/src/util.rs:10959`](../../../../../crates/renovate-core/src/util.rs#L10959) |
 | 14 | reuses flags from regex | pending | — |
 | 18 | caches non-stateful regex | pending | — |
 | 23 | does not cache stateful regex | pending | — |

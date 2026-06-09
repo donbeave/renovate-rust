@@ -7,8 +7,8 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 44 | persists trimmed metadata and pom bodies | ported | [`crates/renovate-core/src/datasources/maven.rs:1650`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1650) |
-| 90 | serves cached trimmed xml without refetching | ported | [`crates/renovate-core/src/datasources/maven.rs:1723`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1723) |
-| 128 | preserves empty relocation markers on cache hits | ported | [`crates/renovate-core/src/datasources/maven.rs:1689`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1689) |
+| 90 | serves cached trimmed xml without refetching | ported | [`crates/renovate-core/src/datasources/maven.rs:1742`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1742) |
+| 128 | preserves empty relocation markers on cache hits | ported | [`crates/renovate-core/src/datasources/maven.rs:1708`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1708) |
 | 169 | revalidates trimmed cached xml after 304 responses | pending | — |
 | 220 | serves cached trimmed snapshot xml without refetching | pending | — |
 
