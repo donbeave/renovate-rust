@@ -2,11 +2,11 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 250/1681 in-scope tests ported (opt-out=0) across 103 spec files.
+**Coverage:** 252/1681 in-scope tests ported (opt-out=0) across 103 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/workers/repository/changelog/index.spec.ts`](../../lib/workers/repository/changelog/index.spec.ts.md) | 2 | 0 | 2 | 0 | — | pending |
+| [`lib/workers/repository/changelog/index.spec.ts`](../../lib/workers/repository/changelog/index.spec.ts.md) | 2 | 1 | 1 | 0 | [`crates/renovate-core/src/workers/repository/changelog/index.rs:164`](../../../../../crates/renovate-core/src/workers/repository/changelog/index.rs#L164) | partial |
 | [`lib/workers/repository/common.spec.ts`](../../lib/workers/repository/common.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2457`](../../../../../crates/renovate-core/src/branch.rs#L2457) | ported |
 | [`lib/workers/repository/config-migration/branch/commit-message.spec.ts`](../../lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2171`](../../../../../crates/renovate-core/src/branch.rs#L2171) | ported |
 | [`lib/workers/repository/config-migration/branch/create.spec.ts`](../../lib/workers/repository/config-migration/branch/create.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
@@ -59,7 +59,7 @@
 | [`lib/workers/repository/process/lookup/utils.spec.ts`](../../lib/workers/repository/process/lookup/utils.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2279`](../../../../../crates/renovate-core/src/branch.rs#L2279) | ported |
 | [`lib/workers/repository/process/sort.spec.ts`](../../lib/workers/repository/process/sort.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2312`](../../../../../crates/renovate-core/src/branch.rs#L2312) | ported |
 | [`lib/workers/repository/process/vulnerabilities.spec.ts`](../../lib/workers/repository/process/vulnerabilities.spec.ts.md) | 41 | 0 | 41 | 0 | — | pending |
-| [`lib/workers/repository/process/write.spec.ts`](../../lib/workers/repository/process/write.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
+| [`lib/workers/repository/process/write.spec.ts`](../../lib/workers/repository/process/write.spec.ts.md) | 16 | 1 | 15 | 0 | [`crates/renovate-core/src/workers/repository/cache.rs:142`](../../../../../crates/renovate-core/src/workers/repository/cache.rs#L142) | partial |
 | [`lib/workers/repository/reconfigure/comment.spec.ts`](../../lib/workers/repository/reconfigure/comment.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
 | [`lib/workers/repository/reconfigure/index.spec.ts`](../../lib/workers/repository/reconfigure/index.spec.ts.md) | 8 | 0 | 8 | 0 | — | pending |
 | [`lib/workers/repository/reconfigure/reconfigure-cache.spec.ts`](../../lib/workers/repository/reconfigure/reconfigure-cache.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/util.rs:10090`](../../../../../crates/renovate-core/src/util.rs#L10090) | ported |

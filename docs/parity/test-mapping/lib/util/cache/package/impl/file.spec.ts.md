@@ -10,17 +10,17 @@
 | 34 | stores payload with value and expiry | pending | — |
 | 47 | returns undefined on cache miss | pending | — |
 | 53 | expires cached entries | pending | — |
-| 65 | returns undefined for null cached value | ported | [`crates/renovate-core/src/cache/package.rs:604`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L604) |
-| 73 | returns undefined for invalid json | ported | [`crates/renovate-core/src/cache/package.rs:625`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L625) |
-| 81 | returns undefined for corrupted cache payload | ported | [`crates/renovate-core/src/cache/package.rs:640`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L640) |
-| 93 | returns undefined for missing expiry | ported | [`crates/renovate-core/src/cache/package.rs:656`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L656) |
-| 102 | returns undefined for invalid expiry | ported | [`crates/renovate-core/src/cache/package.rs:672`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L672) |
+| 65 | returns undefined for null cached value | ported | [`crates/renovate-core/src/cache/package.rs:621`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L621) |
+| 73 | returns undefined for invalid json | ported | [`crates/renovate-core/src/cache/package.rs:642`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L642) |
+| 81 | returns undefined for corrupted cache payload | ported | [`crates/renovate-core/src/cache/package.rs:657`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L657) |
+| 93 | returns undefined for missing expiry | ported | [`crates/renovate-core/src/cache/package.rs:673`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L673) |
+| 102 | returns undefined for invalid expiry | ported | [`crates/renovate-core/src/cache/package.rs:689`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L689) |
 | 114 | retrieves value from cache payload | pending | — |
-| 127 | removes expired and invalid entries | ported | [`crates/renovate-core/src/cache/package.rs:693`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L693) |
+| 127 | removes expired and invalid entries | ported | [`crates/renovate-core/src/cache/package.rs:710`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L710) |
 | 148 | keeps entries with valid non-expired expiry read from disk | pending | — |
-| 159 | keeps entries without expiry field | ported | [`crates/renovate-core/src/cache/package.rs:761`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L761) |
-| 169 | removes entries with invalid expiry | ported | [`crates/renovate-core/src/cache/package.rs:738`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L738) |
-| 182 | continues on cleanup errors | ported | [`crates/renovate-core/src/cache/package.rs:779`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L779) |
+| 159 | keeps entries without expiry field | ported | [`crates/renovate-core/src/cache/package.rs:778`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L778) |
+| 169 | removes entries with invalid expiry | ported | [`crates/renovate-core/src/cache/package.rs:755`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L755) |
+| 182 | continues on cleanup errors | ported | [`crates/renovate-core/src/cache/package.rs:796`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L796) |
 | 194 | skips disk read for entry written this run | pending | — |
 | 208 | skips disk read for expired entry written this run | pending | — |
 

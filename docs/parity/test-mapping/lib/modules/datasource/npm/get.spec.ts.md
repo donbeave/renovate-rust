@@ -18,7 +18,7 @@
 | 276 | do not throw externalhosterror when error happens on custom host | ported | [`crates/renovate-core/src/datasources/npm.rs:1428`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L1428) |
 | 288 | do not throw externalhosterror when error happens on registry.npmjs.org when hostrules disables abortonerror | ported | [`crates/renovate-core/src/datasources/npm.rs:2093`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L2093) |
 | 303 | do not throw externalhosterror when error happens on registry.npmjs.org when hostrules without protocol disables abortonerror | ported | [`crates/renovate-core/src/datasources/npm.rs:2115`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L2115) |
-| 319 | throw externalhosterror when error happens on custom host when hostrules enables abortonerror | ported | [`crates/renovate-core/src/datasources/npm.rs:2139`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L2139) |
+| 319 | throw externalhosterror when error happens on custom host when hostrules enables abortonerror | ported | [`crates/renovate-core/src/datasources/npm.rs:2143`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L2143) |
 | 335 | massages non-compliant repository urls | ported | [`crates/renovate-core/src/datasources/npm.rs:1365`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L1365) |
 | 379 | handles missing dist-tags latest | ported | [`crates/renovate-core/src/datasources/npm.rs:702`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L702) |
 | 402 | handles mixed sourceurls in releases | ported | [`crates/renovate-core/src/datasources/npm.rs:1185`](../../../../../../../crates/renovate-core/src/datasources/npm.rs#L1185) |

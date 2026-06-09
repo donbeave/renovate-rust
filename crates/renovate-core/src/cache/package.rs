@@ -578,6 +578,23 @@ mod tests {
         assert_eq!(result, Some("hello".to_owned()));
     }
 
+    // Ported: "delegates setWithRawTtl to backend" — lib/util/cache/package/index.spec.ts line 64
+    #[tokio::test]
+    async fn package_cache_set_with_raw_ttl_delegates_and_roundtrips() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        cache
+            .set_with_raw_ttl(
+                "_test-namespace",
+                "my-key-raw",
+                "hello-raw".to_owned(),
+                10,
+            )
+            .await;
+        let result: Option<String> = cache.get("_test-namespace", "my-key-raw").await;
+        assert_eq!(result, Some("hello-raw".to_owned()));
+    }
+
     #[tokio::test]
     async fn file_cache_returns_none_for_expired_entry() {
         let dir = TempDir::new().unwrap();
