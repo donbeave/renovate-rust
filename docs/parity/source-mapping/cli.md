@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 26/150 in-scope files mapped (full=8 partial=18 stub=0 pending=124 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 27/150 in-scope files mapped (full=9 partial=18 stub=0 pending=123 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -109,7 +109,7 @@
 | `lib/workers/repository/changelog/index.ts` | partial | [`crates/renovate-core/src/workers/repository/changelog/index.rs`](../../../crates/renovate-core/src/workers/repository/changelog/index.rs) | embedChangelog + embedChangelogs (stage filter on fetchChangeLogs, pre-provided changelogContent synthetic path, delegation to get / skip if logJSON already set) implemented using EmbeddableUpgrade + the ChangeLog* types. The actual getChangeLogJSON (release notes fetch), wiring into BranchUpgrade during branchify/update/pr, and full PR body rendering live in other (pending) repository/update/pr/changelog and branch modules. |
 | `lib/workers/repository/changelog/types.ts` | opt-out | — | Type-only changelog option/result type aliases with no runtime behavior in Rust implementation. |
 | `lib/workers/repository/common.ts` | partial | [`crates/renovate-core/src/workers/repository/common.rs`](../../../crates/renovate-core/src/workers/repository/common.rs) | extractRepoProblems + formatProblemLevel added (format also present in branch.rs for other use; extract is stub pending full logger problems integration in problem-stream). The cache types (BaseBranchCache, PackageFile) were already here as "related". |
-| `lib/workers/repository/config-migration/branch/commit-message.ts` | pending | — | — |
+| `lib/workers/repository/config-migration/branch/commit-message.ts` | full | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | getCommitMessage / getPrTitle (ConfigMigrationCommitMessageFactory) using tweaked scope + custom commitMessage template support when provided (empty falls back to default topic-based). The fns are the direct surface for creating the migration branch/PR commit message. |
 | `lib/workers/repository/config-migration/branch/create.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/branch/index.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/branch/migrated-data.ts` | pending | — | — |

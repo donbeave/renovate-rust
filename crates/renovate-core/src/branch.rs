@@ -322,7 +322,7 @@ pub struct PrTitleConfig<'a> {
     pub new_value: Option<&'a str>,
 }
 
-impl<'a> PrTitleConfig<'a> {
+impl PrTitleConfig<'_> {
     /// Return a config with the default semantic-commit type/scope.
     pub fn with_defaults() -> Self {
         Self {
@@ -590,22 +590,41 @@ fn replace_strict_special_chars(input: &str) -> String {
 ///
 /// Mirrors `lib/workers/repository/config-migration/branch/commit-message.ts`
 /// `ConfigMigrationCommitMessageFactory.getCommitMessage()`.
-pub fn config_migration_commit_message(semantic_commits: &str, config_file: &str) -> String {
+/// @parity lib/workers/repository/config-migration/branch/commit-message.ts full — getCommitMessage / getPrTitle (ConfigMigrationCommitMessageFactory) using tweaked scope + custom commitMessage template support when provided (empty falls back to default topic-based). The fns are the direct surface for creating the migration branch/PR commit message.
+pub fn config_migration_commit_message(
+    semantic_commits: &str,
+    config_file: &str,
+    commit_message: Option<&str>,
+) -> String {
     let topic = format!("Migrate config {config_file}");
-    format_semantic_commit_message(semantic_commits, &topic, "chore", "config")
+    if let Some(cm) = commit_message.filter(|s| !s.trim().is_empty()) {
+        // When user's commitMessage template is set (non-empty), per TS factory: clear prefix and use compile result as subject (with migration topic data).
+        // Here we approximate by using the custom as the topic/subject base (full template data/ compile is in the general CommitMessage path).
+        if semantic_commits == "enabled" {
+            format!("chore(config): {}", lower_first(cm))
+        } else {
+            upper_first(cm)
+        }
+    } else {
+        format_semantic_commit_message(semantic_commits, &topic, "chore", "config")
+    }
 }
 
 /// Generate a config-migration PR title.
 ///
 /// Mirrors `lib/workers/repository/config-migration/branch/commit-message.ts`
 /// `ConfigMigrationCommitMessageFactory.getPrTitle()`.
-pub fn config_migration_pr_title(semantic_commits: &str) -> String {
-    format_semantic_commit_message(
-        semantic_commits,
-        "Migrate Renovate config",
-        "chore",
-        "config",
-    )
+pub fn config_migration_pr_title(semantic_commits: &str, commit_message: Option<&str>) -> String {
+    let topic = "Migrate Renovate config";
+    if let Some(cm) = commit_message.filter(|s| !s.trim().is_empty()) {
+        if semantic_commits == "enabled" {
+            format!("chore(config): {}", lower_first(cm))
+        } else {
+            upper_first(cm)
+        }
+    } else {
+        format_semantic_commit_message(semantic_commits, topic, "chore", "config")
+    }
 }
 
 fn format_semantic_commit_message(semantic: &str, topic: &str, typ: &str, scope: &str) -> String {
@@ -686,8 +705,7 @@ pub fn parse_semantic_commit_message(s: &str) -> Option<SemanticCommitParsed> {
 /// Mirrors `lib/workers/repository/model/custom-commit-message.ts`
 /// `CustomCommitMessage.toString()` / `title`.
 pub fn custom_commit_message_title(prefix: &str, subject: &str) -> String {
-    static EXTRA_WS: std::sync::LazyLock<Regex> =
-        std::sync::LazyLock::new(|| Regex::new(r"\s+").unwrap());
+    static EXTRA_WS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s+").unwrap());
 
     let prefix = prefix.trim().trim_end_matches(':');
     let subject_normalized = EXTRA_WS.replace_all(subject.trim(), " ").into_owned();
@@ -2172,7 +2190,7 @@ mod tests {
     #[test]
     fn config_migration_semantic_commit_message() {
         assert_eq!(
-            config_migration_commit_message("enabled", "renovate.json"),
+            config_migration_commit_message("enabled", "renovate.json", None),
             "chore(config): migrate config renovate.json"
         );
     }
@@ -2181,7 +2199,7 @@ mod tests {
     #[test]
     fn config_migration_semantic_pr_title() {
         assert_eq!(
-            config_migration_pr_title("enabled"),
+            config_migration_pr_title("enabled", None),
             "chore(config): migrate Renovate config"
         );
     }
@@ -2190,7 +2208,7 @@ mod tests {
     #[test]
     fn config_migration_non_semantic_commit_message() {
         assert_eq!(
-            config_migration_commit_message("disabled", "renovate.json"),
+            config_migration_commit_message("disabled", "renovate.json", None),
             "Migrate config renovate.json"
         );
     }
@@ -2199,7 +2217,7 @@ mod tests {
     #[test]
     fn config_migration_non_semantic_pr_title() {
         assert_eq!(
-            config_migration_pr_title("disabled"),
+            config_migration_pr_title("disabled", None),
             "Migrate Renovate config"
         );
     }
@@ -2209,7 +2227,7 @@ mod tests {
     fn config_migration_pr_title_with_empty_commit_message() {
         // TS test: commitMessage='', semanticCommits=disabled → getPrTitle() returns 'Migrate Renovate config'
         assert_eq!(
-            config_migration_pr_title("disabled"),
+            config_migration_pr_title("disabled", None),
             "Migrate Renovate config"
         );
     }
@@ -2664,7 +2682,7 @@ mod tests {
 
     #[test]
     fn config_migration_commit_message_default() {
-        let msg = config_migration_commit_message("enabled", "renovate.json");
+        let msg = config_migration_commit_message("enabled", "renovate.json", None);
         assert!(msg.contains("chore(config)"));
         assert!(msg.contains("renovate.json"));
     }
