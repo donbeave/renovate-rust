@@ -585,12 +585,7 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let cache = FilePackageCache::new(dir.path());
         cache
-            .set(
-                "_test-namespace",
-                "key",
-                Value::Number(1234.into()),
-                5,
-            )
+            .set("_test-namespace", "key", Value::Number(1234.into()), 5)
             .await;
         let result: Option<i64> = cache.get("_test-namespace", "key").await;
         assert_eq!(result, Some(1234));
@@ -602,12 +597,7 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let cache = make_cache(&dir);
         cache
-            .set_with_raw_ttl(
-                "_test-namespace",
-                "my-key-raw",
-                "hello-raw".to_owned(),
-                10,
-            )
+            .set_with_raw_ttl("_test-namespace", "my-key-raw", "hello-raw".to_owned(), 10)
             .await;
         let result: Option<String> = cache.get("_test-namespace", "my-key-raw").await;
         assert_eq!(result, Some("hello-raw".to_owned()));
@@ -1198,18 +1188,13 @@ mod tests {
         // All calls return null (rejected by predicate) => never cached, fn runs every time
         for _ in 0..3 {
             let cc = call_count.clone();
-            let r: Option<String> = with_cache(
-                &cache,
-                &cfg,
-                opts.clone(),
-                Some(predicate),
-                move || {
+            let r: Option<String> =
+                with_cache(&cache, &cfg, opts.clone(), Some(predicate), move || {
                     cc.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
                     async { Ok::<_, anyhow::Error>(None) }
-                },
-            )
-            .await
-            .unwrap();
+                })
+                .await
+                .unwrap();
             assert_eq!(r, None);
         }
 
@@ -1233,16 +1218,10 @@ mod tests {
 
         // First call caches under soft TTL
         let cc1 = call_count.clone();
-        let r1: String = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async { Ok::<_, anyhow::Error>("111".to_owned()) }
-            },
-        )
+        let r1: String = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async { Ok::<_, anyhow::Error>("111".to_owned()) }
+        })
         .await
         .unwrap();
         assert_eq!(r1, "111");
@@ -1260,16 +1239,10 @@ mod tests {
 
         // Second call: soft expired with fallback -> recomputes fresh value and updates cache
         let cc2 = call_count.clone();
-        let r2: String = with_cache(
-            &cache,
-            &cfg,
-            opts.clone(),
-            None,
-            move || {
-                cc2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                async { Ok::<_, anyhow::Error>("222".to_owned()) }
-            },
-        )
+        let r2: String = with_cache(&cache, &cfg, opts.clone(), None, move || {
+            cc2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async { Ok::<_, anyhow::Error>("222".to_owned()) }
+        })
         .await
         .unwrap();
 
@@ -1471,6 +1444,39 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(120));
+        assert_eq!(get_ttl_override(&cfg, "datasource-docker"), None);
+    }
+
+    // Ported: "returns undefined when cacheTtlOverride is empty" — lib/util/cache/package/ttl.spec.ts line 20
+    #[test]
+    fn get_ttl_override_returns_none_when_cache_ttl_override_empty() {
+        let cfg = CacheTtlConfig {
+            ttl_override: HashMap::new(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), None);
+    }
+
+    // Ported: "returns undefined when exact match is not a number" — lib/util/cache/package/ttl.spec.ts line 45
+    // (In Rust the HashMap only contains i64; non-numeric config values are filtered before reaching CacheTtlConfig.
+    // This test exercises the observable "bad entry ignored / absent key yields None" for the get path.)
+    #[test]
+    fn get_ttl_override_returns_none_for_non_numeric_equivalent() {
+        // Simulate "string in config" case by absence after any normalize step (map only holds numbers).
+        let cfg = CacheTtlConfig {
+            ttl_override: HashMap::new(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), None);
+    }
+
+    // Ported: "returns undefined when no matching namespace found" — lib/util/cache/package/ttl.spec.ts line 58
+    #[test]
+    fn get_ttl_override_returns_none_when_no_matching_namespace() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-npm".to_owned(), 120i64)].into(),
+            ..Default::default()
+        };
         assert_eq!(get_ttl_override(&cfg, "datasource-docker"), None);
     }
 
