@@ -1,6 +1,7 @@
 //! Configured state check.
 //!
 //! Mirrors `lib/workers/repository/configured.ts`.
+//! @parity lib/workers/repository/configured.ts full — checkIfConfigured (throws REPOSITORY_DISABLED_BY_CONFIG when enabled===false; throws REPOSITORY_FORKED when isFork && forkProcessing !== 'enabled'). is_configured also returns Forked. Single test ported. (fields on stand-in + calls from init/error are in other modules).
 
 use serde::{Deserialize, Serialize};
 
