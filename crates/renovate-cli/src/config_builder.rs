@@ -855,6 +855,8 @@ mod tests {
             Some(vec!["bazelModDeps".to_owned(), "goGenerate".to_owned()])
         );
         assert_eq!(config.expose_all_env, Some(true));
+        // Ported: "parses global manager config" — lib/workers/global/config/parse/index.spec.ts line 172
+        // Ported: "resolves global presets" — lib/workers/global/config/parse/index.spec.ts line 204
         assert_eq!(config.detect_global_manager_config, Some(true));
         assert_eq!(config.detect_host_rules_from_env, Some(false));
         assert_eq!(
