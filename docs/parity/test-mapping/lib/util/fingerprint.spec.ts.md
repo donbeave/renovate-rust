@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 27 | returns empty string | ported | [`crates/renovate-core/src/util.rs:7846`](../../../../../crates/renovate-core/src/util.rs#L7846) |
-| 32 | maintains deterministic order | ported | [`crates/renovate-core/src/util.rs:7852`](../../../../../crates/renovate-core/src/util.rs#L7852) |
+| 27 | returns empty string | ported | [`crates/renovate-core/src/util.rs:7845`](../../../../../crates/renovate-core/src/util.rs#L7845) |
+| 32 | maintains deterministic order | ported | [`crates/renovate-core/src/util.rs:7851`](../../../../../crates/renovate-core/src/util.rs#L7851) |
 | 39 | _(it.each / template — verify manually)_ | ? | — |
 | 58 | returns empty string for root function/symbol | pending | — |
 | 63 | drops undefined/function/symbol object values like json.stringify | pending | — |

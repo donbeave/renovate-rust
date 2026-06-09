@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | filters out entries with empty module arrays | ported | [`crates/renovate-core/src/datasources/cpan.rs:226`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L226) |
-| 26 | filters out entries where module has no version | ported | [`crates/renovate-core/src/datasources/cpan.rs:240`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L240) |
-| 47 | includes valid entries | ported | [`crates/renovate-core/src/datasources/cpan.rs:256`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L256) |
+| 5 | filters out entries with empty module arrays | ported | [`crates/renovate-core/src/datasources/cpan.rs:224`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L224) |
+| 26 | filters out entries where module has no version | ported | [`crates/renovate-core/src/datasources/cpan.rs:238`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L238) |
+| 47 | includes valid entries | ported | [`crates/renovate-core/src/datasources/cpan.rs:254`](../../../../../../../crates/renovate-core/src/datasources/cpan.rs#L254) |
 

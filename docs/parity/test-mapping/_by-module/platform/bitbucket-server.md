@@ -8,5 +8,5 @@
 |---|--:|--:|--:|--:|---|---|
 | [`lib/modules/platform/bitbucket-server/index.spec.ts`](../../lib/modules/platform/bitbucket-server/index.spec.ts.md) | 139 | 3 | 136 | 0 | [`crates/renovate-core/src/platform/bitbucket_server.rs:727`](../../../../../crates/renovate-core/src/platform/bitbucket_server.rs#L727) | partial |
 | [`lib/modules/platform/bitbucket-server/pr-cache.spec.ts`](../../lib/modules/platform/bitbucket-server/pr-cache.spec.ts.md) | 4 | 0 | 4 | 0 | — | pending |
-| [`lib/modules/platform/bitbucket-server/utils.spec.ts`](../../lib/modules/platform/bitbucket-server/utils.spec.ts.md) | 17 | 3 | 14 | 0 | [`crates/renovate-core/src/util.rs:11390`](../../../../../crates/renovate-core/src/util.rs#L11390) | partial |
+| [`lib/modules/platform/bitbucket-server/utils.spec.ts`](../../lib/modules/platform/bitbucket-server/utils.spec.ts.md) | 17 | 3 | 14 | 0 | [`crates/renovate-core/src/util.rs:11389`](../../../../../crates/renovate-core/src/util.rs#L11389) | partial |
 

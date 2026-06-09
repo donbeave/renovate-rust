@@ -13,8 +13,8 @@
 | 64 | returns from package.json | ported | [`crates/renovate-core/src/extractors/npm_post_update/node_version.rs:140`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/node_version.rs#L140) |
 | 74 | returns from package.json volta | ported | [`crates/renovate-core/src/extractors/npm_post_update/node_version.rs:198`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/node_version.rs#L198) |
 | 84 | prefers volta over engines | ported | [`crates/renovate-core/src/extractors/npm_post_update/node_version.rs:208`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/node_version.rs#L208) |
-| 101 | returns version | ported | [`crates/renovate-core/src/extractors/npm.rs:4932`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4932) |
-| 107 | returns undefined | ported | [`crates/renovate-core/src/extractors/npm.rs:4939`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4939) |
+| 101 | returns version | ported | [`crates/renovate-core/src/extractors/npm.rs:4928`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4928) |
+| 107 | returns undefined | ported | [`crates/renovate-core/src/extractors/npm.rs:4935`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4935) |
 | 113 | returns getnodeupdate | ported | [`crates/renovate-core/src/extractors/npm_post_update/node_version.rs:185`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/node_version.rs#L185) |
 | 127 | returns getnodeconstraint | ported | [`crates/renovate-core/src/extractors/npm_post_update/node_version.rs:232`](../../../../../../../../crates/renovate-core/src/extractors/npm_post_update/node_version.rs#L232) |
 
