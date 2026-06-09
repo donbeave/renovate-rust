@@ -307,6 +307,7 @@ mod tests {
         assert!(result.unwrap().is_none());
     }
 
+    // Ported: "works for default binarySource" — lib/modules/manager/bundler/artifacts.spec.ts line 123
     #[tokio::test]
     async fn returns_updated_file() {
         let dir = tempdir().unwrap();
