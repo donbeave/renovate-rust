@@ -31,7 +31,10 @@ impl Minimatch {
             target = file_name.rsplit('/').next().unwrap_or(file_name);
         }
 
-        if !self.options.dot && pattern_has_hidden_segments(target) && !self.pattern.starts_with('.') {
+        if !self.options.dot
+            && pattern_has_hidden_segments(target)
+            && !self.pattern.starts_with('.')
+        {
             return false;
         }
 
@@ -95,16 +98,15 @@ fn build_matcher(pattern: &str, options: &MinimatchOptions) -> Option<GlobMatche
         builder.case_insensitive(true);
     }
 
-    builder.build().ok().map(|glob: Glob| glob.compile_matcher())
+    builder
+        .build()
+        .ok()
+        .map(|glob: Glob| glob.compile_matcher())
 }
 
 /// @parity lib/util/minimatch.ts full
 /// Create a compiled minimatch-like matcher with optional caching.
-pub fn minimatch(
-    pattern: &str,
-    options: Option<&MinimatchOptions>,
-    use_cache: bool,
-) -> Minimatch {
+pub fn minimatch(pattern: &str, options: Option<&MinimatchOptions>, use_cache: bool) -> Minimatch {
     let options = options.copied().unwrap_or_default();
     let key = cache_key(pattern, &options);
 
@@ -158,8 +160,9 @@ mod tests {
     fn minimatch_filter_matches() {
         assert!(minimatch("foo", None, true).r#match("foo"));
         assert!(minimatch("@opentelemetry{/,}**", None, true).r#match("@opentelemetry/http"));
-        assert!(minimatch("*.{cs,vb,fs}proj", Some(&cs_options()), true)
-            .r#match("foo/bar.BAR.fsproj"));
+        assert!(
+            minimatch("*.{cs,vb,fs}proj", Some(&cs_options()), true).r#match("foo/bar.BAR.fsproj")
+        );
         assert!(minimatch("foo", Some(&MinimatchOptions::default()), true).r#match("foo"));
         assert!(!minimatch("foo", Some(&MinimatchOptions::default()), false).r#match(".foo"));
     }

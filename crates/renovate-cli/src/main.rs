@@ -13,8 +13,8 @@
 )]
 
 mod cli;
-mod config_codespaces;
 mod config_builder;
+mod config_codespaces;
 mod config_env;
 mod context;
 mod logging;

@@ -1,7 +1,6 @@
 //! Hash utilities — mirrors `lib/util/hash.ts`.
 
 /// @parity lib/util/hash.ts full
-
 use sha1::Digest as Sha1Digest;
 use sha1::Sha1;
 use sha2::{Digest, Sha224, Sha256, Sha384, Sha512};
@@ -16,7 +15,11 @@ pub fn hash(data: impl AsRef<[u8]>, algorithm: Option<&str>) -> String {
         "sha1" => {
             let mut hasher = Sha1::new();
             hasher.update(data.as_ref());
-            hasher.finalize().iter().map(|b| format!("{b:02x}")).collect()
+            hasher
+                .finalize()
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect()
         }
         "sha224" => {
             let mut hasher = Sha224::new();

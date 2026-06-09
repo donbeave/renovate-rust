@@ -23,7 +23,9 @@ pub(crate) fn apply_codespaces_config_with_stdin<R: BufRead>(
         return Ok(());
     }
 
-    if config.token.is_none() && let Some(token) = env.get("GITHUB_TOKEN") {
+    if config.token.is_none()
+        && let Some(token) = env.get("GITHUB_TOKEN")
+    {
         config.token = Some(token.clone());
     }
 

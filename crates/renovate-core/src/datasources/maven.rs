@@ -1694,7 +1694,7 @@ mod tests {
         Mock::given(method("GET"))
             .and(path("/org/example/package/maven-metadata.xml"))
             .respond_with(ResponseTemplate::new(200).set_body_string(r#"<?xml ... metadata ..."#))
-            .expect(1)  // only first; second serves from cached trimmed (etag/timestamp or cached entry), no refetch, no re-store.
+            .expect(1) // only first; second serves from cached trimmed (etag/timestamp or cached entry), no refetch, no re-store.
             .mount(&server)
             .await;
         // Similar for the pom mock with expect(1).

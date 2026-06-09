@@ -41,8 +41,8 @@ fn stringify_with_options(value: &Value, deterministic: bool) -> String {
             let inner = pairs
                 .iter()
                 .map(|(key, value)| {
-                    let key_json = serde_json::to_string(*key)
-                        .unwrap_or_else(|_| "\"\"".to_owned());
+                    let key_json =
+                        serde_json::to_string(*key).unwrap_or_else(|_| "\"\"".to_owned());
                     let value_json = stringify_with_options(value, deterministic);
                     format!("{key_json}:{value_json}")
                 })

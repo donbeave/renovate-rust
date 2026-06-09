@@ -1848,6 +1848,9 @@ mod tests {
         assert_eq!(parse_string_array("").unwrap(), Vec::<String>::new());
         // invalid json5 without csv fallback? but per updated logic falls to csv (or empty if no , )
         // here a non-array json5 string falls through to split (which for no , gives the string)
-        assert_eq!(parse_string_array(r#""just-a-string""#).unwrap(), vec!["just-a-string".to_string()]);
+        assert_eq!(
+            parse_string_array(r#""just-a-string""#).unwrap(),
+            vec!["just-a-string".to_string()]
+        );
     }
 }

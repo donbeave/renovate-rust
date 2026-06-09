@@ -23,19 +23,18 @@ pub enum RegExpEngineStatus {
 const REGEX_ENGINE_IGNORE_ENV: &str = "RENOVATE_X_IGNORE_RE2";
 
 /// Mirrors `regexEngineStatus`.
-pub static REGEX_ENGINE_STATUS: LazyLock<RegExpEngineStatus> =
-    LazyLock::new(|| {
-        if env::var(REGEX_ENGINE_IGNORE_ENV).is_ok() {
-            RegExpEngineStatus::Ignored
-        } else {
-            match Regex::new(".*") {
-                Ok(_) => RegExpEngineStatus::Available,
-                Err(err) => RegExpEngineStatus::Unavailable {
-                    err: err.to_string(),
-                },
-            }
+pub static REGEX_ENGINE_STATUS: LazyLock<RegExpEngineStatus> = LazyLock::new(|| {
+    if env::var(REGEX_ENGINE_IGNORE_ENV).is_ok() {
+        RegExpEngineStatus::Ignored
+    } else {
+        match Regex::new(".*") {
+            Ok(_) => RegExpEngineStatus::Available,
+            Err(err) => RegExpEngineStatus::Unavailable {
+                err: err.to_string(),
+            },
         }
-    });
+    }
+});
 
 /// Cache mirrors `regEx()` call memoization keyed by pattern and flags.
 static REGEX_CACHE: LazyLock<Mutex<HashMap<String, Regex>>> =
@@ -58,9 +57,8 @@ impl std::fmt::Display for RegExError {
 impl std::error::Error for RegExError {}
 
 /// Regex used to escape special characters.
-pub static ESCAPE_REG_EXP: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"[.*+\-?^${}()|[\\]\\").expect("valid regex escape pattern")
-});
+pub static ESCAPE_REG_EXP: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"[.*+\-?^${}()|[\\]\\").expect("valid regex escape pattern"));
 
 /// Regex matching newlines.
 pub static NEWLINE_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\r?\n").unwrap());
@@ -75,11 +73,7 @@ pub static HIDDEN_UNICODE_CHARACTERS_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 
 /// @parity lib/util/regex.ts full
 /// Compile `pattern` and optionally cache the compiled instance.
-pub fn reg_ex(
-    pattern: &str,
-    flags: Option<&str>,
-    use_cache: bool,
-) -> Result<Regex, RegExError> {
+pub fn reg_ex(pattern: &str, flags: Option<&str>, use_cache: bool) -> Result<Regex, RegExError> {
     let mut can_be_cached = use_cache;
     if can_be_cached && flags.is_some_and(|f| f.contains('g')) {
         can_be_cached = false;

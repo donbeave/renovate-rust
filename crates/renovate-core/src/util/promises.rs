@@ -7,7 +7,10 @@ use tokio::sync::Semaphore;
 
 /// @parity lib/util/promises.ts full
 /// Mirrors `all` / `map` from `lib/util/promises.ts`.
-pub async fn all<T, E>(tasks: Vec<Task<T, E>>, options: Option<AllOptions>) -> Result<Vec<T>, PromiseError>
+pub async fn all<T, E>(
+    tasks: Vec<Task<T, E>>,
+    options: Option<AllOptions>,
+) -> Result<Vec<T>, PromiseError>
 where
     T: Send + 'static,
     E: Error + Send + Sync + 'static,
@@ -75,7 +78,10 @@ where
     results
 }
 
-fn handle_results<T, E>(results: Vec<Result<T, E>>, stop_on_error: bool) -> Result<Vec<T>, PromiseError>
+fn handle_results<T, E>(
+    results: Vec<Result<T, E>>,
+    stop_on_error: bool,
+) -> Result<Vec<T>, PromiseError>
 where
     E: Error + Send + Sync + 'static,
 {
@@ -97,23 +103,20 @@ where
     }
 
     if stop_on_error {
-        let (_, first_error) = errors
-            .into_iter()
-            .next()
-            .expect("errors is non-empty");
+        let (_, first_error) = errors.into_iter().next().expect("errors is non-empty");
         return Err(PromiseError::Single(first_error));
     }
 
-    if let Some(index) = errors.iter().position(|(message, _)| is_external_host_error(message)) {
+    if let Some(index) = errors
+        .iter()
+        .position(|(message, _)| is_external_host_error(message))
+    {
         let (_, err) = errors.remove(index);
         return Err(PromiseError::ExternalHost(err));
     }
 
     if errors.len() == 1 || errors.iter().all(|(message, _)| message == &errors[0].0) {
-        let (_, err) = errors
-            .into_iter()
-            .next()
-            .expect("errors is non-empty");
+        let (_, err) = errors.into_iter().next().expect("errors is non-empty");
         return Err(PromiseError::Single(err));
     }
 
@@ -190,7 +193,10 @@ mod tests {
     impl Error for TestPromiseError {}
 
     fn make_i32_task(value: i32) -> Task<i32, io::Error> {
-        Box::new(move || Box::pin(async move { Ok::<_, io::Error>(value) }) as Pin<Box<TaskFuture<i32, io::Error>>>)
+        Box::new(move || {
+            Box::pin(async move { Ok::<_, io::Error>(value) })
+                as Pin<Box<TaskFuture<i32, io::Error>>>
+        })
     }
 
     fn make_string_task_ok(value: &'static str) -> Task<&'static str, TestPromiseError> {
@@ -209,8 +215,9 @@ mod tests {
 
     fn make_err_task(message: String) -> Task<(), TestPromiseError> {
         Box::new(move || {
-            Box::pin(async move { Err::<(), TestPromiseError>(TestPromiseError::Message(message.clone())) })
-                as Pin<Box<TaskFuture<(), TestPromiseError>>>
+            Box::pin(async move {
+                Err::<(), TestPromiseError>(TestPromiseError::Message(message.clone()))
+            }) as Pin<Box<TaskFuture<(), TestPromiseError>>>
         })
     }
 
@@ -218,11 +225,7 @@ mod tests {
     async fn test_promises_all_works() {
         assert_eq!(
             all(
-                vec![
-                    make_i32_task(1),
-                    make_i32_task(2),
-                    make_i32_task(3),
-                ],
+                vec![make_i32_task(1), make_i32_task(2), make_i32_task(3),],
                 None,
             )
             .await
