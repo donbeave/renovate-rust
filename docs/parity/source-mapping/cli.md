@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 15/150 in-scope files mapped (full=3 partial=12 stub=0 pending=135 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 16/150 in-scope files mapped (full=3 partial=13 stub=0 pending=134 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -86,7 +86,7 @@
 
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
-| `lib/workers/global/autodiscover.ts` | pending | — | — |
+| `lib/workers/global/autodiscover.ts` | partial | [`crates/renovate-core/src/workers/global/autodiscover.rs`](../../../crates/renovate-core/src/workers/global/autodiscover.rs) | local platform special case + proper regex/glob filter via shared match_regex_or_glob_list (the full platform.getRepos + AutodiscoverConfig building + pre-configured repo merge logic is orchestrated at CLI level in the current Rust architecture). |
 | `lib/workers/global/config/parse/additional-config-file.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs) | parse-and-load support for `RENOVATE_ADDITIONAL_CONFIG_FILE` is implemented, including `processEnv` export and optional post-load deletion, but JS/yaml configs remain unsupported. |
 | `lib/workers/global/config/parse/cli.ts` | pending | — | — |
 | `lib/workers/global/config/parse/codespaces.ts` | full | [`crates/renovate-cli/src/config_codespaces.rs`](../../../crates/renovate-cli/src/config_codespaces.rs) | in GitHub Codespaces, infer token from `GITHUB_TOKEN` and prompt for repository when none are configured. |
