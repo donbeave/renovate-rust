@@ -8,6 +8,8 @@
 //! - `lib/workers/repository/updates/branch-name.ts` — `generateBranchName()`,
 //!   `cleanBranchName()`
 //! - `lib/config/options/index.ts` — `branchName`, `branchTopic` defaults
+//!
+//! @parity lib/workers/repository/config-migration/branch/index.ts partial — checkConfigMigrationBranch orchestrator (checkbox state, PR/branch existence via platform, closed PR handling, create vs rebase decision, return migrationBranch); uses the ConfigMigrationCommitMessageFactory and helpers from here (full worker orchestration noted as pending in siblings).
 
 use std::sync::LazyLock;
 
