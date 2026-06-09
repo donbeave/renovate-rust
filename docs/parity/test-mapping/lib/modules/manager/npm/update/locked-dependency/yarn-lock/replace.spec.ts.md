@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 11 | returns same if yarn 2+ | ported | [`crates/renovate-core/src/extractors/npm.rs:5055`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5055) |
-| 21 | replaces without dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:5062`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5062) |
-| 46 | replaces with dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:5086`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5086) |
-| 71 | replaces constraint too | ported | [`crates/renovate-core/src/extractors/npm.rs:5107`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5107) |
-| 99 | handles escaped constraints | ported | [`crates/renovate-core/src/extractors/npm.rs:5123`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5123) |
-| 124 | handles quoted | ported | [`crates/renovate-core/src/extractors/npm.rs:5179`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5179) |
+| 11 | returns same if yarn 2+ | ported | [`crates/renovate-core/src/extractors/npm.rs:5054`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5054) |
+| 21 | replaces without dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:5061`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5061) |
+| 46 | replaces with dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:5085`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5085) |
+| 71 | replaces constraint too | ported | [`crates/renovate-core/src/extractors/npm.rs:5106`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5106) |
+| 99 | handles escaped constraints | ported | [`crates/renovate-core/src/extractors/npm.rs:5122`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5122) |
+| 124 | handles quoted | ported | [`crates/renovate-core/src/extractors/npm.rs:5178`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5178) |
 

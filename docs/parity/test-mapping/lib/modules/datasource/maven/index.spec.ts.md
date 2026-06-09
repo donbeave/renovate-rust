@@ -6,50 +6,50 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 123 | returns null when metadata is not found | ported | [`crates/renovate-core/src/datasources/maven.rs:1970`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1970) |
-| 136 | when using primary registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2466`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2466) |
-| 145 | when using mirror url | ported | [`crates/renovate-core/src/datasources/maven.rs:2480`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2480) |
-| 156 | when using primary registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2466`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2466) |
-| 165 | when using mirror url | ported | [`crates/renovate-core/src/datasources/maven.rs:2480`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2480) |
-| 176 | fetches gradle plugins from non-maven-central registries | ported | [`crates/renovate-core/src/datasources/maven.rs:2522`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2522) |
-| 190 | returns releases | ported | [`crates/renovate-core/src/datasources/maven.rs:1941`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1941) |
-| 198 | returns releases when only snapshot | ported | [`crates/renovate-core/src/datasources/maven.rs:2117`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2117) |
-| 229 | handles invalid snapshot | ported | [`crates/renovate-core/src/datasources/maven.rs:2156`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2156) |
-| 265 | returns releases from custom repository | ported | [`crates/renovate-core/src/datasources/maven.rs:2189`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2189) |
-| 273 | falls back to next registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2027`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2027) |
-| 304 | merges releases from multiple registries | ported | [`crates/renovate-core/src/datasources/maven.rs:2065`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2065) |
-| 325 | throws external_host_error for 50x | ported | [`crates/renovate-core/src/datasources/maven.rs:3351`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3351) |
-| 334 | ignores unsupported protocols | ported | [`crates/renovate-core/src/datasources/maven.rs:1987`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1987) |
-| 347 | skips registry with invalid metadata structure | ported | [`crates/renovate-core/src/datasources/maven.rs:2215`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2215) |
-| 363 | skips registry with invalid xml | ported | [`crates/renovate-core/src/datasources/maven.rs:2001`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2001) |
-| 379 | handles optional slash at the end of registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2235`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2235) |
-| 389 | returns null for invalid registryurls | ported | [`crates/renovate-core/src/datasources/maven.rs:2294`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2294) |
-| 398 | supports scm.url values prefixed with "scm:" | ported | [`crates/renovate-core/src/datasources/maven.rs:2410`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2410) |
-| 408 | with only groupid present | ported | [`crates/renovate-core/src/datasources/maven.rs:2302`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2302) |
-| 428 | with only artifactid present | ported | [`crates/renovate-core/src/datasources/maven.rs:2313`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2313) |
-| 448 | with all elments present | ported | [`crates/renovate-core/src/datasources/maven.rs:2384`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2384) |
-| 473 | removes authentication header after redirect | ported | [`crates/renovate-core/src/datasources/maven.rs:1689`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1689) |
+| 123 | returns null when metadata is not found | ported | [`crates/renovate-core/src/datasources/maven.rs:1996`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1996) |
+| 136 | when using primary registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2492`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2492) |
+| 145 | when using mirror url | ported | [`crates/renovate-core/src/datasources/maven.rs:2506`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2506) |
+| 156 | when using primary registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2492`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2492) |
+| 165 | when using mirror url | ported | [`crates/renovate-core/src/datasources/maven.rs:2506`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2506) |
+| 176 | fetches gradle plugins from non-maven-central registries | ported | [`crates/renovate-core/src/datasources/maven.rs:2548`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2548) |
+| 190 | returns releases | ported | [`crates/renovate-core/src/datasources/maven.rs:1967`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1967) |
+| 198 | returns releases when only snapshot | ported | [`crates/renovate-core/src/datasources/maven.rs:2143`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2143) |
+| 229 | handles invalid snapshot | ported | [`crates/renovate-core/src/datasources/maven.rs:2182`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2182) |
+| 265 | returns releases from custom repository | ported | [`crates/renovate-core/src/datasources/maven.rs:2215`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2215) |
+| 273 | falls back to next registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2053`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2053) |
+| 304 | merges releases from multiple registries | ported | [`crates/renovate-core/src/datasources/maven.rs:2091`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2091) |
+| 325 | throws external_host_error for 50x | ported | [`crates/renovate-core/src/datasources/maven.rs:3377`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3377) |
+| 334 | ignores unsupported protocols | ported | [`crates/renovate-core/src/datasources/maven.rs:2013`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2013) |
+| 347 | skips registry with invalid metadata structure | ported | [`crates/renovate-core/src/datasources/maven.rs:2241`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2241) |
+| 363 | skips registry with invalid xml | ported | [`crates/renovate-core/src/datasources/maven.rs:2027`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2027) |
+| 379 | handles optional slash at the end of registry url | ported | [`crates/renovate-core/src/datasources/maven.rs:2261`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2261) |
+| 389 | returns null for invalid registryurls | ported | [`crates/renovate-core/src/datasources/maven.rs:2320`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2320) |
+| 398 | supports scm.url values prefixed with "scm:" | ported | [`crates/renovate-core/src/datasources/maven.rs:2436`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2436) |
+| 408 | with only groupid present | ported | [`crates/renovate-core/src/datasources/maven.rs:2328`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2328) |
+| 428 | with only artifactid present | ported | [`crates/renovate-core/src/datasources/maven.rs:2339`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2339) |
+| 448 | with all elments present | ported | [`crates/renovate-core/src/datasources/maven.rs:2410`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2410) |
+| 473 | removes authentication header after redirect | ported | [`crates/renovate-core/src/datasources/maven.rs:1715`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1715) |
 | 513 | supports artifactregistry urls with auth | opt-out | tests special Google Artifact Registry (artifactregistry) URL support and oauth2accesstoken basic auth (the token is obtained via google-auth-library / gcloud; the header is the specific base64 for 'oauth2accesstoken:some-token'); the Rust maven datasource implements generic hostRule basic auth + redirect stripping (covered by the ported 'removes authentication header after redirect'), but the AR-specific token acquisition and .maven artifactregistry endpoint handling is not yet implemented. |
 | 574 | supports artifactregistry urls without auth | opt-out | tests artifactregistry urls without requiring the special AR token (googleAuth mock still involved in the test setup); same reason as the sibling 'supports artifactregistry urls with auth' — AR token machinery not implemented in Rust maven auth layer. |
-| 635 | should get source and homepage from parent | ported | [`crates/renovate-core/src/datasources/maven.rs:2561`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2561) |
-| 651 | should deal with missing parent fields | ported | [`crates/renovate-core/src/datasources/maven.rs:2630`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2630) |
-| 669 | should deal with circular hierarchy | ported | [`crates/renovate-core/src/datasources/maven.rs:2672`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2672) |
-| 704 | should get source from own pom and homepage from parent | ported | [`crates/renovate-core/src/datasources/maven.rs:2739`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2739) |
-| 720 | should get homepage from own pom and source from parent | ported | [`crates/renovate-core/src/datasources/maven.rs:2805`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2805) |
-| 736 | should get homepage and source from own pom | ported | [`crates/renovate-core/src/datasources/maven.rs:2324`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2324) |
-| 751 | should be able to detect git@github.com:child-scm as valid sourceurl | ported | [`crates/renovate-core/src/datasources/maven.rs:2419`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2419) |
-| 765 | should be able to detect git@github.com/child-scm as valid sourceurl | ported | [`crates/renovate-core/src/datasources/maven.rs:2341`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2341) |
-| 779 | should be able to detect git://@github.com/child-scm as valid sourceurl | ported | [`crates/renovate-core/src/datasources/maven.rs:2350`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2350) |
-| 795 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/maven.rs:2261`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2261) |
-| 806 | returns original value for unknown error | ported | [`crates/renovate-core/src/datasources/maven.rs:2886`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2886) |
-| 821 | returns original value for 200 response | ported | [`crates/renovate-core/src/datasources/maven.rs:2902`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2902) |
-| 833 | returns original value for 200 response with versionorig | ported | [`crates/renovate-core/src/datasources/maven.rs:2959`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2959) |
-| 845 | returns original value for invalid configs | ported | [`crates/renovate-core/src/datasources/maven.rs:2920`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2920) |
-| 861 | adds releasetimestamp | ported | [`crates/renovate-core/src/datasources/maven.rs:2934`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2934) |
-| 892 | checks package | ported | [`crates/renovate-core/src/datasources/maven.rs:3255`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3255) |
-| 910 | supports timestamp | ported | [`crates/renovate-core/src/datasources/maven.rs:3273`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3273) |
-| 934 | returns null for deleted object | ported | [`crates/renovate-core/src/datasources/maven.rs:3291`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3291) |
-| 952 | returns null for notfound response | ported | [`crates/renovate-core/src/datasources/maven.rs:3309`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3309) |
-| 970 | returns null for nosuchkey response | ported | [`crates/renovate-core/src/datasources/maven.rs:3323`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3323) |
-| 988 | returns original value for any other error | ported | [`crates/renovate-core/src/datasources/maven.rs:3337`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3337) |
+| 635 | should get source and homepage from parent | ported | [`crates/renovate-core/src/datasources/maven.rs:2587`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2587) |
+| 651 | should deal with missing parent fields | ported | [`crates/renovate-core/src/datasources/maven.rs:2656`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2656) |
+| 669 | should deal with circular hierarchy | ported | [`crates/renovate-core/src/datasources/maven.rs:2698`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2698) |
+| 704 | should get source from own pom and homepage from parent | ported | [`crates/renovate-core/src/datasources/maven.rs:2765`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2765) |
+| 720 | should get homepage from own pom and source from parent | ported | [`crates/renovate-core/src/datasources/maven.rs:2831`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2831) |
+| 736 | should get homepage and source from own pom | ported | [`crates/renovate-core/src/datasources/maven.rs:2350`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2350) |
+| 751 | should be able to detect git@github.com:child-scm as valid sourceurl | ported | [`crates/renovate-core/src/datasources/maven.rs:2445`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2445) |
+| 765 | should be able to detect git@github.com/child-scm as valid sourceurl | ported | [`crates/renovate-core/src/datasources/maven.rs:2367`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2367) |
+| 779 | should be able to detect git://@github.com/child-scm as valid sourceurl | ported | [`crates/renovate-core/src/datasources/maven.rs:2376`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2376) |
+| 795 | returns null for 404 | ported | [`crates/renovate-core/src/datasources/maven.rs:2287`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2287) |
+| 806 | returns original value for unknown error | ported | [`crates/renovate-core/src/datasources/maven.rs:2912`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2912) |
+| 821 | returns original value for 200 response | ported | [`crates/renovate-core/src/datasources/maven.rs:2928`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2928) |
+| 833 | returns original value for 200 response with versionorig | ported | [`crates/renovate-core/src/datasources/maven.rs:2985`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2985) |
+| 845 | returns original value for invalid configs | ported | [`crates/renovate-core/src/datasources/maven.rs:2946`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2946) |
+| 861 | adds releasetimestamp | ported | [`crates/renovate-core/src/datasources/maven.rs:2960`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L2960) |
+| 892 | checks package | ported | [`crates/renovate-core/src/datasources/maven.rs:3281`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3281) |
+| 910 | supports timestamp | ported | [`crates/renovate-core/src/datasources/maven.rs:3299`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3299) |
+| 934 | returns null for deleted object | ported | [`crates/renovate-core/src/datasources/maven.rs:3317`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3317) |
+| 952 | returns null for notfound response | ported | [`crates/renovate-core/src/datasources/maven.rs:3335`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3335) |
+| 970 | returns null for nosuchkey response | ported | [`crates/renovate-core/src/datasources/maven.rs:3349`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3349) |
+| 988 | returns original value for any other error | ported | [`crates/renovate-core/src/datasources/maven.rs:3363`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L3363) |
 

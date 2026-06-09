@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | returns correct dependencies for pnpm | ported | [`crates/renovate-core/src/extractors/npm.rs:4840`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4840) |
-| 39 | returns correct dependencies for yarn | ported | [`crates/renovate-core/src/extractors/npm.rs:4853`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4853) |
-| 73 | handles empty catalogs list | ported | [`crates/renovate-core/src/extractors/npm.rs:4861`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4861) |
-| 80 | handles catalog with no dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:4868`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4868) |
+| 5 | returns correct dependencies for pnpm | ported | [`crates/renovate-core/src/extractors/npm.rs:4839`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4839) |
+| 39 | returns correct dependencies for yarn | ported | [`crates/renovate-core/src/extractors/npm.rs:4852`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4852) |
+| 73 | handles empty catalogs list | ported | [`crates/renovate-core/src/extractors/npm.rs:4860`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4860) |
+| 80 | handles catalog with no dependencies | ported | [`crates/renovate-core/src/extractors/npm.rs:4867`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4867) |
 

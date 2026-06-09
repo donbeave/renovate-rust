@@ -311,6 +311,25 @@ mod tests {
         assert_eq!(result.stdout.trim(), "1");
     }
 
+    // Ported: "throws if an error occurs, and we specify ignoreFailure=false" — lib/util/exec/common.spec.ts line 265
+    #[tokio::test]
+    async fn exec_throws_on_failure_when_ignore_failure_false() {
+        // Mirrors the common.spec test: command array form + ignoreFailure: false + RawExecOptions.
+        // A failing command must produce Err(ExecError) with cmd, exitCode, stdout, stderr, options.
+        // (The ignoreFailure=true counterpart that resolves with output is already ported from the index.spec.)
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions {
+            ignore_failure: false,
+            ..Default::default()
+        };
+        let res = exec(&["sh".to_owned(), "-c".to_owned(), "exit 1".to_owned()], &opts, &config, &process_env).await;
+        assert!(res.is_err(), "ignoreFailure=false must error on non-zero exit");
+    }
+
     // Ported: "does not reject and throw if rawExec returns an exit code, and we specify ignoreFailure=true" — lib/util/exec/index.spec.ts line 1010
     #[tokio::test]
     async fn exec_ignore_stdout() {
