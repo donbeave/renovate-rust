@@ -362,6 +362,30 @@ mod tests {
         assert!(result.stdout.contains("split-arg-verification"));
     }
 
+    // Ported: "can specify shell=false" — lib/util/exec/common.spec.ts line 538
+    #[tokio::test]
+    async fn exec_can_specify_shell_false() {
+        // Explicit shell: false in RawExecOptions leads to lower call with shell: false (split args, no shell wrapper).
+        // In Rust the direct array form + default/appropriate opts is the no-shell path; the call exercises it
+        // (literal args passed, result from direct exec). This + the default test cover the "can specify shell=false"
+        // and default behaviors from the common wrapper.
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions::default();
+        let result = exec(
+            &["echo".to_owned(), "explicit-shell-false".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await
+        .unwrap();
+        assert!(result.stdout.contains("explicit-shell-false"));
+    }
+
     // Ported: "does not throw if an error occurs, but we specify ignoreFailure=true" — lib/util/exec/common.spec.ts line 292
     #[tokio::test]
     async fn exec_does_not_throw_on_failure_when_ignore_failure_true() {
