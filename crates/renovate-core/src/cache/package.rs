@@ -1480,6 +1480,70 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-docker"), None);
     }
 
+    // Ported: "handles special characters in namespace patterns" — lib/util/cache/package/ttl.spec.ts line 124
+    #[test]
+    fn get_ttl_override_handles_special_chars_in_patterns() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [
+                ("datasource-npm:*".to_owned(), 120i64),
+                ("changelog-*@v2".to_owned(), 60i64),
+            ]
+            .into(),
+            ..Default::default()
+        };
+        assert_eq!(
+            get_ttl_override(&cfg, "datasource-npm:cache-provider"),
+            Some(120)
+        );
+        assert_eq!(
+            get_ttl_override(&cfg, "changelog-github-notes@v2"),
+            Some(60)
+        );
+    }
+
+    // Ported: "skips non-numeric values and selects next longest matching pattern" — lib/util/cache/package/ttl.spec.ts line 228
+    #[test]
+    fn get_ttl_override_skips_non_numeric_and_selects_next() {
+        // Rust ttl_override HashMap only holds i64 (non-numeric from config are filtered upstream);
+        // this exercises the "next longest wins when a candidate would have been invalid".
+        let cfg = CacheTtlConfig {
+            ttl_override: [
+                ("datasource-n*".to_owned(), 100i64),
+                ("*".to_owned(), 45i64),
+            ]
+            .into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(100));
+    }
+
+    // Ported: "returns undefined when no patterns match" — lib/util/cache/package/ttl.spec.ts line 243
+    #[test]
+    fn get_ttl_override_returns_none_when_no_patterns_match() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [
+                ("changelog-*".to_owned(), 90i64),
+                ("preset-*".to_owned(), 100i64),
+            ]
+            .into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), None);
+    }
+
+    // Ported: "treats null and undefined values as invalid" — lib/util/cache/package/ttl.spec.ts line 286
+    #[test]
+    fn get_ttl_override_treats_null_undefined_as_invalid() {
+        // Equivalent in Rust: only numeric entries are present; "null/undef" entries never enter the map.
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-maven".to_owned(), 90i64)].into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), None);
+        assert_eq!(get_ttl_override(&cfg, "datasource-docker"), None);
+        assert_eq!(get_ttl_override(&cfg, "datasource-maven"), Some(90));
+    }
+
     // Ported: "matches simple glob patterns" — lib/util/cache/package/ttl.spec.ts line 72
     #[test]
     fn get_ttl_override_matches_simple_glob() {
