@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | works | ported | [`crates/renovate-core/src/branch.rs:2481`](../../../../../../../crates/renovate-core/src/branch.rs#L2481) |
+| 5 | works | ported | [`crates/renovate-core/src/branch.rs:2482`](../../../../../../../crates/renovate-core/src/branch.rs#L2482) |
 

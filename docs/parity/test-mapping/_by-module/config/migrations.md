@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 157/159 in-scope tests ported (opt-out=2) across 58 spec files.
+**Coverage:** 157/157 in-scope tests ported (opt-out=4) across 58 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -63,5 +63,5 @@
 | [`lib/config/migrations/custom/update-lock-files-migration.spec.ts`](../../lib/config/migrations/custom/update-lock-files-migration.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:6597`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6597) | ported |
 | [`lib/config/migrations/custom/upgrade-in-range-migration.spec.ts`](../../lib/config/migrations/custom/upgrade-in-range-migration.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:6621`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6621) | ported |
 | [`lib/config/migrations/custom/version-strategy-migration.spec.ts`](../../lib/config/migrations/custom/version-strategy-migration.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:6636`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6636) | ported |
-| [`lib/config/migrations/migrations-service.spec.ts`](../../lib/config/migrations/migrations-service.spec.ts.md) | 6 | 4 | 2 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:6900`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6900) | partial |
+| [`lib/config/migrations/migrations-service.spec.ts`](../../lib/config/migrations/migrations-service.spec.ts.md) | 6 | 4 | 0 | 2 | [`crates/renovate-core/src/config/migrate_validate.rs:6900`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6900) | ported |
 

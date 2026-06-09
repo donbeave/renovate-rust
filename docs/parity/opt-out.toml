@@ -178,3 +178,13 @@ reason = "tests enforcement in AbstractMigration base class that subclasses must
 spec   = "lib/config/migrations/base/abstract-migration.spec.ts"
 test   = "should not allow to use method delete"
 reason = "tests enforcement in AbstractMigration base class that subclasses must not directly invoke internal rewrite/delete helpers (TypeScript inheritance and runtime guard mechanics with no direct equivalent in Rust Migration trait + map-based design)"
+
+[[test]]
+spec   = "lib/config/migrations/migrations-service.spec.ts"
+test   = "includes all defined migration classes in MigrationsService.customMigrations"
+reason = "counts TypeScript source files in the custom/ directory vs the static customMigrations list (filesystem + module discovery / build-time reflection with no direct Rust equivalent; Rust migrations are statically registered)"
+
+[[test]]
+spec   = "lib/config/migrations/migrations-service.spec.ts"
+test   = "should allow custom migrations by regexp"
+reason = "tests support for regexp-based propertyName in custom AbstractMigration subclasses (TypeScript custom migration extension mechanism with no direct 1:1 in Rust's static Migration impls and string property_name matching)"
