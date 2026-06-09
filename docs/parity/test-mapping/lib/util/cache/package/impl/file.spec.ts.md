@@ -2,12 +2,12 @@
 
 [← `util/cache`](../../../../../_by-module/util/cache.md) · [all modules](../../../../../README.md)
 
-**10/17 in-scope tests ported** (7 pending, 0 opt-out) · status: partial
+**10/16 in-scope tests ported** (6 pending, 1 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | sets and gets | ported | [`crates/renovate-core/src/cache/package.rs:581`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L581) |
-| 34 | stores payload with value and expiry | pending | — |
+| 34 | stores payload with value and expiry | opt-out | asserts the exact internal cacache envelope keys (['expiry','value']) and that they are JSON strings after set (using cacache.get + JSON.parse); Rust FilePackageCache uses its own FileEntry {value, expiry} + direct file serde (not cacache/npm cacache); the value+expiry roundtrip persistence and get/set for file backend are covered by multiple ported tests (file_cache_set_and_get_roundtrip, file_cache_returns_*, cleanup tests); this is a TS-specific storage adapter detail with no Rust analogue. |
 | 47 | returns undefined on cache miss | pending | — |
 | 53 | expires cached entries | pending | — |
 | 65 | returns undefined for null cached value | ported | [`crates/renovate-core/src/cache/package.rs:638`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L638) |

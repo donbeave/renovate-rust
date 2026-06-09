@@ -420,6 +420,11 @@ test   = "shouldDeleteHomepage($sourceUrl, $homepage) -> $expected"
 reason = "it.each template for shouldDeleteHomepage helper cases (various same/different, gitlab/github, invalid, nulls); the business logic (should_delete_homepage in util.rs + delete in add_metadata when massaged same) is covered by ported L464, L503, L542 etc. concrete tests and the fn itself; pure TS it.each for the helper test."
 
 [[test]]
+spec   = "lib/util/cache/package/impl/file.spec.ts"
+test   = "stores payload with value and expiry"
+reason = "asserts the exact internal cacache envelope keys (['expiry','value']) and that they are JSON strings after set (using cacache.get + JSON.parse); Rust FilePackageCache uses its own FileEntry {value, expiry} + direct file serde (not cacache/npm cacache); the value+expiry roundtrip persistence and get/set for file backend are covered by multiple ported tests (file_cache_set_and_get_roundtrip, file_cache_returns_*, cleanup tests); this is a TS-specific storage adapter detail with no Rust analogue."
+
+[[test]]
 spec   = "lib/util/stats.spec.ts"
 test   = "does not log report when no data"
 reason = "asserts TypeScript logger.debug spy not called (via .not.toHaveBeenCalled) for AbandonedPackageStats.report() when no data; the conditional logging guard (only report when has data) and empty-report path are covered by already-ported tests ('logs report', 'returns empty report', AbandonedPackageStats tests in util.rs); this test is a pure spy assertion with no Rust logger equivalent (Rust stats use internal counters + tracing for reports); matches prior opt-out for sibling 'prints report' spy in same spec."
