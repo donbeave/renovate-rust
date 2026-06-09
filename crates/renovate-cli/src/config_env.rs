@@ -1587,6 +1587,18 @@ mod tests {
         assert_eq!(config.pr_commits_per_run_limit, Some(4));
     }
 
+    // Ported: "supports setting configFileNames through env" — lib/workers/global/config/parse/index.spec.ts line 391
+    #[test]
+    fn supports_setting_config_file_names_through_env() {
+        let config = build_from_env(&env(&[("RENOVATE_CONFIG_FILE_NAMES", r#"["myrenovate.json", ".github/myrenovate.json"]"#)])).unwrap();
+        assert_eq!(
+            config.config_file_names,
+            Some(vec!["myrenovate.json".to_owned(), ".github/myrenovate.json".to_owned()])
+        );
+        // in the "parsed" result, configFileNames is not exposed (used internally for discovery),
+        // matching the TS expectation that parsed.configFileNames is undefined.
+    }
+
     // Rust-specific: config_env behavior test
     #[test]
     fn onboarding_config_env_is_parsed() {
