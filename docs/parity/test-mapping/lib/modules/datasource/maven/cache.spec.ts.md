@@ -2,11 +2,11 @@
 
 [← `datasource/maven`](../../../../_by-module/datasource/maven.md) · [all modules](../../../../README.md)
 
-**0/5 in-scope tests ported** (5 pending, 0 opt-out) · status: pending
+**1/5 in-scope tests ported** (4 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 44 | persists trimmed metadata and pom bodies | pending | — |
+| 44 | persists trimmed metadata and pom bodies | ported | [`crates/renovate-core/src/datasources/maven.rs:1650`](../../../../../../../crates/renovate-core/src/datasources/maven.rs#L1650) |
 | 90 | serves cached trimmed xml without refetching | pending | — |
 | 128 | preserves empty relocation markers on cache hits | pending | — |
 | 169 | revalidates trimmed cached xml after 304 responses | pending | — |

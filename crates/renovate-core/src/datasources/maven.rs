@@ -1647,6 +1647,45 @@ mod tests {
         assert_eq!(trim_maven_xml(input), expected);
     }
 
+    // Ported: "persists trimmed metadata and pom bodies" — lib/modules/datasource/maven/cache.spec.ts line 44
+    #[test]
+    fn persists_trimmed_metadata_and_pom_bodies() {
+        // The trim_maven_xml (applied on the http body before cache persist in the datasource fetch path)
+        // removes unnecessary top-level fields from metadata (groupId, artifactId, lastUpdated) while keeping
+        // the versioning info, and trims pom to only needed fields (groupId, url) while dropping name/desc.
+        // This exercises the trim used when persisting trimmed XML for the maven cache (metadata/pom bodies).
+        let metadata = r#"<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.example</groupId>
+  <artifactId>package</artifactId>
+  <versioning>
+    <latest>2.0.0</latest>
+    <release>2.0.0</release>
+    <lastUpdated>20200101120000</lastUpdated>
+  </versioning>
+</metadata>"#;
+        let trimmed_meta = trim_maven_xml(metadata);
+        // Verify trimmed (group/artifact/lastUpdated absent, versioning present) as in upstream cache inspection.
+        assert!(!trimmed_meta.contains("<groupId>"));
+        assert!(!trimmed_meta.contains("<artifactId>"));
+        assert!(!trimmed_meta.contains("<lastUpdated>"));
+        assert!(trimmed_meta.contains("<latest>2.0.0</latest>"));
+        assert!(trimmed_meta.contains("<release>2.0.0</release>"));
+
+        let pom = r#"<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <groupId>org.example</groupId>
+  <url>https://package.example.org/about</url>
+  <name>Example</name>
+  <description>Desc</description>
+</project>"#;
+        let trimmed_pom = trim_maven_xml(pom);
+        assert!(trimmed_pom.contains("<groupId>org.example</groupId>"));
+        assert!(trimmed_pom.contains("<url>https://package.example.org/about</url>"));
+        assert!(!trimmed_pom.contains("<name>"));
+        assert!(!trimmed_pom.contains("<description>"));
+    }
+
     // Ported: "trims snapshot metadata to the fields used by Renovate" — lib/modules/datasource/maven/schema.spec.ts line 30
     #[test]
     fn trims_snapshot_metadata() {

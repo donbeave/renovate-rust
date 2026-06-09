@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 8 | parses | ported | [`crates/renovate-core/src/config/file.rs:732`](../../../../../crates/renovate-core/src/config/file.rs#L732) |
-| 15 | returns error | ported | [`crates/renovate-core/src/config/file.rs:743`](../../../../../crates/renovate-core/src/config/file.rs#L743) |
-| 43 | parses | ported | [`crates/renovate-core/src/config/file.rs:732`](../../../../../crates/renovate-core/src/config/file.rs#L732) |
-| 50 | returns error | ported | [`crates/renovate-core/src/config/file.rs:743`](../../../../../crates/renovate-core/src/config/file.rs#L743) |
+| 8 | parses | ported | [`crates/renovate-core/src/config/file.rs:725`](../../../../../crates/renovate-core/src/config/file.rs#L725) |
+| 15 | returns error | ported | [`crates/renovate-core/src/config/file.rs:736`](../../../../../crates/renovate-core/src/config/file.rs#L736) |
+| 43 | parses | ported | [`crates/renovate-core/src/config/file.rs:725`](../../../../../crates/renovate-core/src/config/file.rs#L725) |
+| 50 | returns error | ported | [`crates/renovate-core/src/config/file.rs:736`](../../../../../crates/renovate-core/src/config/file.rs#L736) |
 
