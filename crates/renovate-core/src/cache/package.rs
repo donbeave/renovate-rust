@@ -578,6 +578,23 @@ mod tests {
         assert_eq!(result, Some("hello".to_owned()));
     }
 
+    // Ported: "sets and gets" — lib/util/cache/package/impl/file.spec.ts line 26
+    #[tokio::test]
+    async fn file_cache_sets_and_gets() {
+        let dir = TempDir::new().unwrap();
+        let cache = FilePackageCache::new(dir.path());
+        cache
+            .set(
+                "_test-namespace",
+                "key",
+                Value::Number(1234.into()),
+                5,
+            )
+            .await;
+        let result: Option<i64> = cache.get("_test-namespace", "key").await;
+        assert_eq!(result, Some(1234));
+    }
+
     // Ported: "delegates setWithRawTtl to backend" — lib/util/cache/package/index.spec.ts line 64
     #[tokio::test]
     async fn package_cache_set_with_raw_ttl_delegates_and_roundtrips() {
