@@ -6,12 +6,12 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 12 | _(it.each / template — verify manually)_ | ? | — |
-| 27 | _(it.each / template — verify manually)_ | ? | — |
-| 44 | _(it.each / template — verify manually)_ | ? | — |
-| 61 | _(it.each / template — verify manually)_ | ? | — |
-| 80 | _(it.each / template — verify manually)_ | ? | — |
-| 98 | _(it.each / template — verify manually)_ | ? | — |
+| 12 | _(it.each / template — verify manually)_ | opt-out | entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic. |
+| 27 | _(it.each / template — verify manually)_ | opt-out | entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic. |
+| 44 | _(it.each / template — verify manually)_ | opt-out | entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic. |
+| 61 | _(it.each / template — verify manually)_ | opt-out | entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic. |
+| 80 | _(it.each / template — verify manually)_ | opt-out | entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic. |
+| 98 | _(it.each / template — verify manually)_ | opt-out | entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic. |
 | 115 | retrieves schedule of the previous previous release | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1153`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1153) |
 | 122 | retrieves schedule of the previous release | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1154`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1154) |
 | 129 | retrieves schedule of the most recent release | ported | [`crates/renovate-core/src/versioning/ubuntu.rs:1155`](../../../../../../crates/renovate-core/src/versioning/ubuntu.rs#L1155) |

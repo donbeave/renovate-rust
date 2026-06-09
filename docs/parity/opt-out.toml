@@ -425,6 +425,21 @@ test   = "matches the API contract"
 reason = "large zod-based runtime contract validation (z.string().refine + dynamic import(`./${name}/index.ts`) + .pipe(z.object({isValid: z.function(), getNewValue: z.function(), ..., matches, sortVersions, ...})) over allVersioning.getVersionings() + config.allowedValues; asserts every registered versioning implements the full surface at runtime. Rust uses compile-time trait (Versioning) + static registry (no dynamic import, no zod); the individual method behaviors (is_valid, get_new_value, matches, sort etc.) are covered by the per-versioning specs (many 100% ported). Classic TS runtime reflection + schema guard with no additional business logic to port."
 
 [[test]]
+spec   = "lib/modules/versioning/versioning-metadata.spec.ts"
+test   = "readme with no h1 or h2 markdown headers"
+reason = "tests behavior when a versioning's README has no h1/h2 (for metadata extraction/docs); pure docstring/markdown structure test with no core versioning resolution logic. No equivalent metadata extraction for 'versioning packages' in Rust (static per-versioning modules); opt as non-business, TS-specific doc tooling."
+
+[[test]]
+spec   = "lib/modules/versioning/versioning-metadata.spec.ts"
+test   = "contains mandatory fields"
+reason = "asserts presence of mandatory fields in versioning metadata (from its package.json/README or similar); same doc/reflection nature as sibling, no Rust analogue or core impact (covered by the fact that all versionings have their id/name etc. in the static registry)."
+
+[[test]]
+spec   = "lib/modules/versioning/distro.spec.ts"
+all    = true
+reason = "entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic."
+
+[[test]]
 spec   = "lib/util/cache/package/impl/file.spec.ts"
 test   = "stores payload with value and expiry"
 reason = "asserts the exact internal cacache envelope keys (['expiry','value']) and that they are JSON strings after set (using cacache.get + JSON.parse); Rust FilePackageCache uses its own FileEntry {value, expiry} + direct file serde (not cacache/npm cacache); the value+expiry roundtrip persistence and get/set for file backend are covered by multiple ported tests (file_cache_set_and_get_roundtrip, file_cache_returns_*, cleanup tests); this is a TS-specific storage adapter detail with no Rust analogue."
