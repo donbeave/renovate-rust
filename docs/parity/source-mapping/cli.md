@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 74/150 in-scope files mapped (full=19 partial=55 stub=0 pending=76 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 75/150 in-scope files mapped (full=19 partial=56 stub=0 pending=75 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -159,7 +159,7 @@
 | `lib/workers/repository/package-files.ts` | partial | [`crates/renovate-core/src/workers/repository/package_files.rs`](../../../crates/renovate-core/src/workers/repository/package_files.rs) | PackageFiles (add/clear/getDashboardMarkdown(maxLength, setHeader) with truncation/pop/note/emojify, internal build with <details> branches/managers/files/deps + updates/version@digest/lock + skip filter); single test ported ("does not truncates as there is enough space to fit"). Full integration with dashboard callers pending. |
 | `lib/workers/repository/process/extract-update.ts` | partial | [`crates/renovate-core/src/workers/repository/process/extract_update.rs`](../../../crates/renovate-core/src/workers/repository/process/extract_update.rs) | extract (cache check stub + TODO checkout/extractAll/stats/ensureGithubToken), lookup (fetchVulns x2 + fetchUpdates + calculateLibYears + branchify TODO + reportMaliciousSkippedDependencies + sort), update (write if onboarded), is_cache_extract_valid (flat), report fn; single test ported. Full async/cache/branchify/vulns pending other units. |
 | `lib/workers/repository/process/fetch.ts` | partial | [`crates/renovate-core/src/workers/repository/process/fetch.rs`](../../../crates/renovate-core/src/workers/repository/process/fetch.rs) | fetchUpdates orchestrator, fetchManagerPackagerFileUpdates / fetchManagerUpdates, per-dep early skip (invalid-name, preserve existing skipReason + updates:[]), name trim + packageName fallback, datasource guard, delegation to lookup_dependency for updates; single test ported. Full pre-lookup merge/applyPackageRules, constraintsVersioning, concurrency (p.all), LookupStats, ExternalHostError warnings, PackageFiles.add side-effect pending. |
-| `lib/workers/repository/process/fingerprint-fields.ts` | pending | — | — |
+| `lib/workers/repository/process/fingerprint-fields.ts` | partial | [`crates/renovate-core/src/workers/repository/process/fingerprint_fields.rs`](../../../crates/renovate-core/src/workers/repository/process/fingerprint_fields.rs) | upgradeFingerprintFields const list (15 fields for commit/branch fingerprints from UpgradeFingerprintConfig); single test ported (covering it() from write.spec that exercises fingerprint logic using the fields). Full usage/wiring in write.rs (generate_commit_fingerprint_config etc.) pending that unit. |
 | `lib/workers/repository/process/index.ts` | pending | — | — |
 | `lib/workers/repository/process/libyear.ts` | pending | — | — |
 | `lib/workers/repository/process/limits.ts` | pending | — | — |
