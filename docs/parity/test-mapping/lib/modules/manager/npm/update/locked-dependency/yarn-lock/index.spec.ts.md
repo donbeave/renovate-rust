@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 17 | returns if cannot parse lock file | ported | [`crates/renovate-core/src/extractors/npm.rs:5790`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5790) |
-| 22 | returns if yarn lock 2 | ported | [`crates/renovate-core/src/extractors/npm.rs:5801`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5801) |
-| 30 | fails if cannot find dep | ported | [`crates/renovate-core/src/extractors/npm.rs:5815`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5815) |
-| 38 | returns already-updated | ported | [`crates/renovate-core/src/extractors/npm.rs:5829`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5829) |
-| 46 | fails if cannot update dep in-range | ported | [`crates/renovate-core/src/extractors/npm.rs:5843`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5843) |
-| 54 | succeeds if can update within range | ported | [`crates/renovate-core/src/extractors/npm.rs:5857`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5857) |
+| 17 | returns if cannot parse lock file | ported | [`crates/renovate-core/src/extractors/npm.rs:5792`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5792) |
+| 22 | returns if yarn lock 2 | ported | [`crates/renovate-core/src/extractors/npm.rs:5803`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5803) |
+| 30 | fails if cannot find dep | ported | [`crates/renovate-core/src/extractors/npm.rs:5817`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5817) |
+| 38 | returns already-updated | ported | [`crates/renovate-core/src/extractors/npm.rs:5831`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5831) |
+| 46 | fails if cannot update dep in-range | ported | [`crates/renovate-core/src/extractors/npm.rs:5845`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5845) |
+| 54 | succeeds if can update within range | ported | [`crates/renovate-core/src/extractors/npm.rs:5859`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5859) |
 

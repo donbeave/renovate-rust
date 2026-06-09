@@ -36,7 +36,7 @@
 | [`lib/util/promises.spec.ts`](../../lib/util/promises.spec.ts.md) | 6 | 0 | 6 | 0 | — | pending |
 | [`lib/util/range.spec.ts`](../../lib/util/range.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/util.rs:6529`](../../../../../crates/renovate-core/src/util.rs#L6529) | ported |
 | [`lib/util/regex.spec.ts`](../../lib/util/regex.spec.ts.md) | 6 | 1 | 4 | 1 | [`crates/renovate-core/src/util.rs:10959`](../../../../../crates/renovate-core/src/util.rs#L10959) | partial |
-| [`lib/util/result.spec.ts`](../../lib/util/result.spec.ts.md) | 85 | 2 | 83 | 0 | [`crates/renovate-core/src/util/result.rs:548`](../../../../../crates/renovate-core/src/util/result.rs#L548) | partial |
+| [`lib/util/result.spec.ts`](../../lib/util/result.spec.ts.md) | 85 | 2 | 83 | 0 | [`crates/renovate-core/src/util/result.rs:551`](../../../../../crates/renovate-core/src/util/result.rs#L551) | partial |
 | [`lib/util/s3.spec.ts`](../../lib/util/s3.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/util.rs:11786`](../../../../../crates/renovate-core/src/util.rs#L11786) | ported |
 | [`lib/util/sample.spec.ts`](../../lib/util/sample.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/util.rs:9456`](../../../../../crates/renovate-core/src/util.rs#L9456) | ported |
 | [`lib/util/sanitize.spec.ts`](../../lib/util/sanitize.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:11032`](../../../../../crates/renovate-core/src/util.rs#L11032) | ported |

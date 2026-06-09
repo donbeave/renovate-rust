@@ -9,6 +9,6 @@
 | 22 | returns empty of manager is disabled | pending | — |
 | 28 | returns empty of manager is not enabled | pending | — |
 | 35 | skips files if null content returned | pending | — |
-| 46 | returns files with extractpackagefile | ported | [`crates/renovate-core/src/workers/repository/extract/manager_files.rs:222`](../../../../../../../crates/renovate-core/src/workers/repository/extract/manager_files.rs#L222) |
+| 46 | returns files with extractpackagefile | ported | [`crates/renovate-core/src/workers/repository/extract/manager_files.rs:223`](../../../../../../../crates/renovate-core/src/workers/repository/extract/manager_files.rs#L223) |
 | 66 | returns files with extractallpackagefiles | pending | — |
 

@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | returns empty if no rules | ported | [`crates/renovate-core/src/extractors/npm.rs:5340`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5340) |
-| 16 | returns empty if no resolvedhost | ported | [`crates/renovate-core/src/extractors/npm.rs:5349`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5349) |
-| 23 | returns rules content | ported | [`crates/renovate-core/src/extractors/npm.rs:5364`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5364) |
-| 64 | returns mixed rules content | ported | [`crates/renovate-core/src/extractors/npm.rs:5262`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5262) |
-| 146 | uses rules without host type | ported | [`crates/renovate-core/src/extractors/npm.rs:5212`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5212) |
-| 167 | deduplicates host rules while prefering npm type ones | ported | [`crates/renovate-core/src/extractors/npm.rs:5234`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5234) |
+| 10 | returns empty if no rules | ported | [`crates/renovate-core/src/extractors/npm.rs:5342`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5342) |
+| 16 | returns empty if no resolvedhost | ported | [`crates/renovate-core/src/extractors/npm.rs:5351`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5351) |
+| 23 | returns rules content | ported | [`crates/renovate-core/src/extractors/npm.rs:5366`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5366) |
+| 64 | returns mixed rules content | ported | [`crates/renovate-core/src/extractors/npm.rs:5264`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5264) |
+| 146 | uses rules without host type | ported | [`crates/renovate-core/src/extractors/npm.rs:5214`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5214) |
+| 167 | deduplicates host rules while prefering npm type ones | ported | [`crates/renovate-core/src/extractors/npm.rs:5236`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5236) |
 
