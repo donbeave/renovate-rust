@@ -1425,6 +1425,63 @@ mod tests {
         assert_eq!(hard, 30);
     }
 
+    // Ported: "returns default values when no overrides set" — lib/util/cache/package/ttl.spec.ts line 350
+    #[test]
+    fn resolve_ttl_values_returns_default_when_no_overrides() {
+        let cfg = CacheTtlConfig::default();
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 60);
+        assert_eq!(hard, 60); // hard defaults to 0 in Rust cfg; max(soft,0)
+    }
+
+    // Ported: "uses override for softTtlMinutes when available" — lib/util/cache/package/ttl.spec.ts line 363
+    #[test]
+    fn resolve_ttl_values_uses_soft_override() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-npm".to_owned(), 120i64)].into(),
+            hard_ttl_minutes: 0,
+            ..Default::default()
+        };
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 120);
+        assert_eq!(hard, 120);
+    }
+
+    // Ported: "applies custom cacheHardTtlMinutes from config" — lib/util/cache/package/ttl.spec.ts line 378
+    #[test]
+    fn resolve_ttl_values_applies_custom_hard_ttl() {
+        let cfg = CacheTtlConfig {
+            hard_ttl_minutes: 1440,
+            ..Default::default()
+        };
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 60);
+        assert_eq!(hard, 1440);
+    }
+
+    // Ported: "uses maximum of softTtlMinutes and cacheHardTtlMinutes for hardTtlMinutes" — lib/util/cache/package/ttl.spec.ts line 427
+    #[test]
+    fn resolve_ttl_values_max_of_soft_override_and_hard() {
+        let cfg = CacheTtlConfig {
+            ttl_override: [("datasource-npm".to_owned(), 20160i64)].into(),
+            hard_ttl_minutes: 1440,
+            ..Default::default()
+        };
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 20160);
+        assert_eq!(hard, 20160);
+    }
+
+    // Ported: "uses fallback when override is not a number" — lib/util/cache/package/ttl.spec.ts line 477
+    #[test]
+    fn resolve_ttl_values_falls_back_when_override_would_be_non_numeric() {
+        // Non-numeric never enters ttl_override HashMap; equivalent to no override → use provided default.
+        let cfg = CacheTtlConfig::default();
+        let (soft, hard) = resolve_ttl_values(&cfg, "datasource-npm", 60);
+        assert_eq!(soft, 60);
+        assert_eq!(hard, 60);
+    }
+
     // ── get_ttl_override ─────────────────────────────────────────────────
 
     // Ported: "returns undefined when no cacheTtlOverride config exists" — lib/util/cache/package/ttl.spec.ts line 12
