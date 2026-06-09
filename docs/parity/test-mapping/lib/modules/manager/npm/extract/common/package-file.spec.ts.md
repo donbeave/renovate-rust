@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 20 | returns true for a valid packagemanager with name@version(e.g. pnpm@8.15.4) | ported | [`crates/renovate-core/src/extractors/npm.rs:6455`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6455) |
-| 31 | returns true for a valid range like npm@^9 | ported | [`crates/renovate-core/src/extractors/npm.rs:6461`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6461) |
-| 38 | returns true for yarn classic pin yarn@1.22.19 | ported | [`crates/renovate-core/src/extractors/npm.rs:6467`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6467) |
-| 45 | returns false when packagemanager does not contain '@' (e.g. 'npm') | ported | [`crates/renovate-core/src/extractors/npm.rs:6473`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6473) |
-| 52 | returns false when packagemanager is missing | ported | [`crates/renovate-core/src/extractors/npm.rs:6479`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6479) |
-| 57 | returns false when package.json is invalid | ported | [`crates/renovate-core/src/extractors/npm.rs:6485`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6485) |
-| 62 | returns false if packagemanager is an empty string | ported | [`crates/renovate-core/src/extractors/npm.rs:6491`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6491) |
+| 20 | returns true for a valid packagemanager with name@version(e.g. pnpm@8.15.4) | ported | [`crates/renovate-core/src/extractors/npm.rs:6452`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6452) |
+| 31 | returns true for a valid range like npm@^9 | ported | [`crates/renovate-core/src/extractors/npm.rs:6458`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6458) |
+| 38 | returns true for yarn classic pin yarn@1.22.19 | ported | [`crates/renovate-core/src/extractors/npm.rs:6464`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6464) |
+| 45 | returns false when packagemanager does not contain '@' (e.g. 'npm') | ported | [`crates/renovate-core/src/extractors/npm.rs:6470`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6470) |
+| 52 | returns false when packagemanager is missing | ported | [`crates/renovate-core/src/extractors/npm.rs:6476`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6476) |
+| 57 | returns false when package.json is invalid | ported | [`crates/renovate-core/src/extractors/npm.rs:6482`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6482) |
+| 62 | returns false if packagemanager is an empty string | ported | [`crates/renovate-core/src/extractors/npm.rs:6488`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L6488) |
 
