@@ -1196,6 +1196,67 @@ mod tests {
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 3);
     }
 
+    // Ported: "updates cached result after soft TTL expires" — lib/util/cache/package/with-cache.spec.ts line 256
+    #[tokio::test]
+    async fn with_cache_updates_cached_result_after_soft_ttl_expires() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = CacheTtlConfig {
+            hard_ttl_minutes: 2,
+            ..Default::default()
+        };
+        let mut opts = WithCacheOptions::new("_test-namespace", "key");
+        opts.ttl_minutes = 1;
+        opts.fallback = true;
+
+        let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+
+        // First call caches under soft TTL
+        let cc1 = call_count.clone();
+        let r1: String = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            None,
+            move || {
+                cc1.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                async { Ok::<_, anyhow::Error>("111".to_owned()) }
+            },
+        )
+        .await
+        .unwrap();
+        assert_eq!(r1, "111");
+        assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 1);
+
+        // Backdate past soft TTL (but inside hard) to simulate expiry of soft
+        let past = Utc::now() - Duration::minutes(2);
+        let record = CachedRecord {
+            value: serde_json::json!("111"),
+            cached_at: past.to_rfc3339(),
+        };
+        cache
+            .set_with_raw_ttl("_test-namespace", "cache-decorator:key", &record, 2)
+            .await;
+
+        // Second call: soft expired with fallback -> recomputes fresh value and updates cache
+        let cc2 = call_count.clone();
+        let r2: String = with_cache(
+            &cache,
+            &cfg,
+            opts.clone(),
+            None,
+            move || {
+                cc2.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                async { Ok::<_, anyhow::Error>("222".to_owned()) }
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(r2, "222");
+        assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 2);
+    }
+
     // Ported: "uses custom ttlMinutes" — lib/util/cache/package/with-cache.spec.ts line 232
     #[tokio::test]
     async fn with_cache_uses_custom_ttl_minutes() {

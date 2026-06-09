@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 60/151 in-scope tests ported (opt-out=0) across 13 spec files.
+**Coverage:** 61/151 in-scope tests ported (opt-out=0) across 13 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -13,8 +13,8 @@
 | [`lib/util/cache/package/impl/sqlite.spec.ts`](../../lib/util/cache/package/impl/sqlite.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
 | [`lib/util/cache/package/index.spec.ts`](../../lib/util/cache/package/index.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/cache/package.rs:555`](../../../../../crates/renovate-core/src/cache/package.rs#L555) | ported |
 | [`lib/util/cache/package/key.spec.ts`](../../lib/util/cache/package/key.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2616`](../../../../../crates/renovate-core/src/branch.rs#L2616) | ported |
-| [`lib/util/cache/package/ttl.spec.ts`](../../lib/util/cache/package/ttl.spec.ts.md) | 31 | 18 | 13 | 0 | [`crates/renovate-core/src/cache/package.rs:1376`](../../../../../crates/renovate-core/src/cache/package.rs#L1376) | partial |
-| [`lib/util/cache/package/with-cache.spec.ts`](../../lib/util/cache/package/with-cache.spec.ts.md) | 14 | 13 | 1 | 0 | [`crates/renovate-core/src/cache/package.rs:917`](../../../../../crates/renovate-core/src/cache/package.rs#L917) | partial |
+| [`lib/util/cache/package/ttl.spec.ts`](../../lib/util/cache/package/ttl.spec.ts.md) | 31 | 18 | 13 | 0 | [`crates/renovate-core/src/cache/package.rs:1437`](../../../../../crates/renovate-core/src/cache/package.rs#L1437) | partial |
+| [`lib/util/cache/package/with-cache.spec.ts`](../../lib/util/cache/package/with-cache.spec.ts.md) | 14 | 14 | 0 | 0 | [`crates/renovate-core/src/cache/package.rs:917`](../../../../../crates/renovate-core/src/cache/package.rs#L917) | ported |
 | [`lib/util/cache/repository/http-cache.spec.ts`](../../lib/util/cache/repository/http-cache.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/http.rs:1540`](../../../../../crates/renovate-core/src/http.rs#L1540) | ported |
 | [`lib/util/cache/repository/impl/local.spec.ts`](../../lib/util/cache/repository/impl/local.spec.ts.md) | 13 | 0 | 13 | 0 | — | pending |
 | [`lib/util/cache/repository/impl/s3.spec.ts`](../../lib/util/cache/repository/impl/s3.spec.ts.md) | 11 | 0 | 11 | 0 | — | pending |
