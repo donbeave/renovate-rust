@@ -1,6 +1,7 @@
 //! Onboarding common utilities.
 //!
 //! Mirrors `lib/workers/repository/onboarding/common.ts`.
+//! @parity `lib/workers/repository/onboarding/common.ts` partial — getSemanticCommitPrTitle, getDefaultConfigFileName, OnboardingState (prUpdateRequested/onboardingCacheValid statics), get_onboarding_pr_title/get_onboarding_pr_body; single test ported. Callers (rebase, pr, init/apis) and full memCache integration pending.
 
 use crate::config::GlobalConfig;
 use crate::workers::types::RenovateConfig;
