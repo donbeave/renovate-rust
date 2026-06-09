@@ -1,5 +1,7 @@
 //! Libyear calculation logic.
 //!
+//! @parity `lib/workers/repository/process/libyear.ts` partial — calculateLibYears (build DepInfo skipping disabled, compute libYear from timestamps on updates vs current, max per dep, getLibYears with dedup by key, counts, manager totals); addLibYears reporting separate. Single test ported ("returns early if no packageFiles"). compute_lib_years_for_dep, dedup, disabled skip, stats match core; full per-update libYears attach and instrumentation pending other units.
+//!
 //! Mirrors `lib/workers/repository/process/libyear.ts`.
 
 use std::collections::HashMap;

@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 76/150 in-scope files mapped (full=19 partial=57 stub=0 pending=74 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 77/150 in-scope files mapped (full=19 partial=58 stub=0 pending=73 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -161,7 +161,7 @@
 | `lib/workers/repository/process/fetch.ts` | partial | [`crates/renovate-core/src/workers/repository/process/fetch.rs`](../../../crates/renovate-core/src/workers/repository/process/fetch.rs) | fetchUpdates orchestrator, fetchManagerPackagerFileUpdates / fetchManagerUpdates, per-dep early skip (invalid-name, preserve existing skipReason + updates:[]), name trim + packageName fallback, datasource guard, delegation to lookup_dependency for updates; single test ported. Full pre-lookup merge/applyPackageRules, constraintsVersioning, concurrency (p.all), LookupStats, ExternalHostError warnings, PackageFiles.add side-effect pending. |
 | `lib/workers/repository/process/fingerprint-fields.ts` | partial | [`crates/renovate-core/src/workers/repository/process/fingerprint_fields.rs`](../../../crates/renovate-core/src/workers/repository/process/fingerprint_fields.rs) | upgradeFingerprintFields const list (15 fields for commit/branch fingerprints from UpgradeFingerprintConfig); single test ported (covering it() from write.spec that exercises fingerprint logic using the fields). Full usage/wiring in write.rs (generate_commit_fingerprint_config etc.) pending that unit. |
 | `lib/workers/repository/process/index.ts` | partial | [`crates/renovate-core/src/workers/repository/process/index.rs`](../../../crates/renovate-core/src/workers/repository/process/index.rs) | getBaseBranchConfig, unfoldBaseBranches, isMultiBaseBranch, extractDependencies (multi/single base, getBase per branch, extract+lookup per, instrument/split), updateRepo; single test ported. Full async, platform/scm, cache, instrument, readDashboard, base config merge/resolve pending (stubs/TODOs; wiring to extract-update siblings). |
-| `lib/workers/repository/process/libyear.ts` | pending | — | — |
+| `lib/workers/repository/process/libyear.ts` | partial | [`crates/renovate-core/src/workers/repository/process/libyear.rs`](../../../crates/renovate-core/src/workers/repository/process/libyear.rs) | calculateLibYears (build DepInfo skipping disabled, compute libYear from timestamps on updates vs current, max per dep, getLibYears with dedup by key, counts, manager totals); addLibYears reporting separate. Single test ported ("returns early if no packageFiles"). compute_lib_years_for_dep, dedup, disabled skip, stats match core; full per-update libYears attach and instrumentation pending other units. |
 | `lib/workers/repository/process/limits.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/abandonment.ts` | pending | — | — |
 | `lib/workers/repository/process/lookup/bucket.ts` | pending | — | — |
