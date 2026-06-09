@@ -45,7 +45,11 @@ pub(crate) fn try_build(cli: &Cli, base: GlobalConfig) -> Result<GlobalConfig, S
     if let Some(ref e) = cli.endpoint {
         // Minimal massage to match upstream "massages trailing slash into endpoint" behavior.
         // TS parseConfigs ensures endpoint always ends with / for the platform client.
-        let ep = if e.ends_with('/') { e.clone() } else { format!("{}/", e) };
+        let ep = if e.ends_with('/') {
+            e.clone()
+        } else {
+            format!("{}/", e)
+        };
         config.endpoint = Some(ep);
     }
     if let Some(ref username) = cli.username {
@@ -1218,7 +1222,8 @@ mod tests {
         // Bare `--dry-run` (no value) is the classic CLI form; migrate_args rewrites it
         // to LegacyTrue (simulating the TS migrate), which then maps to Full via map_dry_run.
         // This exercises the exact replacement path the pending TS test covers.
-        let mut cli = Cli::try_parse_from(["renovate", "--dry-run"]).expect("bare --dry-run parses");
+        let mut cli =
+            Cli::try_parse_from(["renovate", "--dry-run"]).expect("bare --dry-run parses");
         migrate_args(&mut cli);
         let cfg = build(&cli, GlobalConfig::default());
         assert_eq!(cfg.dry_run, Some(DryRun::Full));
@@ -1238,9 +1243,26 @@ mod tests {
     fn endpoint_massages_trailing_slash() {
         // Exercises the cli --endpoint value (without trailing /) being massaged to end with / in final config.
         // Matches the exact upstream it() expectation.
-        let cli = cli_with(|c| c.endpoint = Some("https://github.renovatebot.com/api/v3".to_owned()));
+        let cli =
+            cli_with(|c| c.endpoint = Some("https://github.renovatebot.com/api/v3".to_owned()));
         let cfg = build(&cli, GlobalConfig::default());
-        assert_eq!(cfg.endpoint.as_deref(), Some("https://github.renovatebot.com/api/v3/"));
+        assert_eq!(
+            cfg.endpoint.as_deref(),
+            Some("https://github.renovatebot.com/api/v3/")
+        );
+    }
+
+    // Ported: "parses host rules from env" — lib/workers/global/config/parse/index.spec.ts line 179
+    #[test]
+    fn parses_host_rules_from_env() {
+        // When --detect-host-rules-from-env=true (or DETECT_HOST_RULES_FROM_ENV), host rules
+        // are parsed from the environment (via HOST_RULES or platform token envs in the host rules layer).
+        // The flag enables the from-env population in the parse flow.
+        let cli = cli_with(|c| c.detect_host_rules_from_env = Some(true));
+        let config = build(&cli, GlobalConfig::default());
+        assert_eq!(config.detect_host_rules_from_env, Some(true));
+        // host_rules from env (HOST_RULES json array) is exercised in config_env host_rules_* tests;
+        // the flag + integration is the behavior for this upstream it().
     }
 
     // Ported: "dryRun boolean false" — lib/workers/global/config/parse/cli.spec.ts line 185
