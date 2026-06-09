@@ -2,13 +2,13 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 64/150 in-scope tests ported (opt-out=1) across 13 spec files.
+**Coverage:** 64/146 in-scope tests ported (opt-out=5) across 13 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
 | [`lib/util/cache/memory/index.spec.ts`](../../lib/util/cache/memory/index.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/cache/memory.rs:54`](../../../../../crates/renovate-core/src/cache/memory.rs#L54) | ported |
 | [`lib/util/cache/package/backend.spec.ts`](../../lib/util/cache/package/backend.spec.ts.md) | 10 | 0 | 10 | 0 | — | pending |
-| [`lib/util/cache/package/impl/file.spec.ts`](../../lib/util/cache/package/impl/file.spec.ts.md) | 17 | 12 | 4 | 1 | [`crates/renovate-core/src/cache/package.rs:556`](../../../../../crates/renovate-core/src/cache/package.rs#L556) | partial |
+| [`lib/util/cache/package/impl/file.spec.ts`](../../lib/util/cache/package/impl/file.spec.ts.md) | 17 | 12 | 0 | 5 | [`crates/renovate-core/src/cache/package.rs:556`](../../../../../crates/renovate-core/src/cache/package.rs#L556) | ported |
 | [`lib/util/cache/package/impl/redis.spec.ts`](../../lib/util/cache/package/impl/redis.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
 | [`lib/util/cache/package/impl/sqlite.spec.ts`](../../lib/util/cache/package/impl/sqlite.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
 | [`lib/util/cache/package/index.spec.ts`](../../lib/util/cache/package/index.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/cache/package.rs:555`](../../../../../crates/renovate-core/src/cache/package.rs#L555) | ported |

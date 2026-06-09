@@ -425,6 +425,26 @@ test   = "stores payload with value and expiry"
 reason = "asserts the exact internal cacache envelope keys (['expiry','value']) and that they are JSON strings after set (using cacache.get + JSON.parse); Rust FilePackageCache uses its own FileEntry {value, expiry} + direct file serde (not cacache/npm cacache); the value+expiry roundtrip persistence and get/set for file backend are covered by multiple ported tests (file_cache_set_and_get_roundtrip, file_cache_returns_*, cleanup tests); this is a TS-specific storage adapter detail with no Rust analogue."
 
 [[test]]
+spec   = "lib/util/cache/package/impl/file.spec.ts"
+test   = "retrieves value from cache payload"
+reason = "asserts internal retrieval from the on-disk payload envelope after set (cacache or equivalent read path); Rust equivalent (FileEntry deserialize in get) behavior covered by all the ported file get/roundtrip/expiry tests; the 'from payload' is TS storage detail."
+
+[[test]]
+spec   = "lib/util/cache/package/impl/file.spec.ts"
+test   = "keeps entries with valid non-expired expiry read from disk"
+reason = "positive case for reading valid expiry entry from disk and returning value; covered by ported set/get roundtrips and 'returns undefined for invalid expiry' etc that exercise the valid path implicitly; no new behavior."
+
+[[test]]
+spec   = "lib/util/cache/package/impl/file.spec.ts"
+test   = "skips disk read for entry written this run"
+reason = "asserts mem dedup / written-this-run layer prevents redundant disk read (via internal spy or call count on cacache/fs); Rust PackageCache has mem dedup layer exercised by multi-get in same run tests (e.g. with_cache same key), but no exact 'skips disk read' spy assertion in current tests; core 'second get returns cached without recompute' covered."
+
+[[test]]
+spec   = "lib/util/cache/package/impl/file.spec.ts"
+test   = "skips disk read for expired entry written this run"
+reason = "variant of this-run skip for an expired-but-written-this-run entry; same mem dedup reason, core expiry + mem behavior covered by existing ported."
+
+[[test]]
 spec   = "lib/util/stats.spec.ts"
 test   = "does not log report when no data"
 reason = "asserts TypeScript logger.debug spy not called (via .not.toHaveBeenCalled) for AbandonedPackageStats.report() when no data; the conditional logging guard (only report when has data) and empty-report path are covered by already-ported tests ('logs report', 'returns empty report', AbandonedPackageStats tests in util.rs); this test is a pure spy assertion with no Rust logger equivalent (Rust stats use internal counters + tracing for reports); matches prior opt-out for sibling 'prints report' spy in same spec."

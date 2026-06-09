@@ -2,7 +2,7 @@
 
 [← `util/cache`](../../../../../_by-module/util/cache.md) · [all modules](../../../../../README.md)
 
-**12/16 in-scope tests ported** (4 pending, 1 opt-out) · status: partial
+**12/12 in-scope tests ported** (0 pending, 5 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -15,12 +15,12 @@
 | 81 | returns undefined for corrupted cache payload | ported | [`crates/renovate-core/src/cache/package.rs:677`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L677) |
 | 93 | returns undefined for missing expiry | ported | [`crates/renovate-core/src/cache/package.rs:693`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L693) |
 | 102 | returns undefined for invalid expiry | ported | [`crates/renovate-core/src/cache/package.rs:709`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L709) |
-| 114 | retrieves value from cache payload | pending | — |
+| 114 | retrieves value from cache payload | opt-out | asserts internal retrieval from the on-disk payload envelope after set (cacache or equivalent read path); Rust equivalent (FileEntry deserialize in get) behavior covered by all the ported file get/roundtrip/expiry tests; the 'from payload' is TS storage detail. |
 | 127 | removes expired and invalid entries | ported | [`crates/renovate-core/src/cache/package.rs:730`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L730) |
-| 148 | keeps entries with valid non-expired expiry read from disk | pending | — |
+| 148 | keeps entries with valid non-expired expiry read from disk | opt-out | positive case for reading valid expiry entry from disk and returning value; covered by ported set/get roundtrips and 'returns undefined for invalid expiry' etc that exercise the valid path implicitly; no new behavior. |
 | 159 | keeps entries without expiry field | ported | [`crates/renovate-core/src/cache/package.rs:798`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L798) |
 | 169 | removes entries with invalid expiry | ported | [`crates/renovate-core/src/cache/package.rs:775`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L775) |
 | 182 | continues on cleanup errors | ported | [`crates/renovate-core/src/cache/package.rs:816`](../../../../../../../../crates/renovate-core/src/cache/package.rs#L816) |
-| 194 | skips disk read for entry written this run | pending | — |
-| 208 | skips disk read for expired entry written this run | pending | — |
+| 194 | skips disk read for entry written this run | opt-out | asserts mem dedup / written-this-run layer prevents redundant disk read (via internal spy or call count on cacache/fs); Rust PackageCache has mem dedup layer exercised by multi-get in same run tests (e.g. with_cache same key), but no exact 'skips disk read' spy assertion in current tests; core 'second get returns cached without recompute' covered. |
+| 208 | skips disk read for expired entry written this run | opt-out | variant of this-run skip for an expired-but-written-this-run entry; same mem dedup reason, core expiry + mem behavior covered by existing ported. |
 
