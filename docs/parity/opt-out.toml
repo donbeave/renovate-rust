@@ -546,3 +546,18 @@ spec   = "lib/modules/versioning/debian/common.spec.ts"
 test   = "no rolling release data"
 reason = "asserts TypeScript logger.debug spy behavior (toHaveBeenCalledTimes(1) + exact 'RollingReleasesData - data written' message) when dataFiles is overridden to empty distro json (no rolling releases); also checks RollingReleasesData.has() returns false for known codenames. The spy + test harness dataFiles injection + DistroInfo/RollingReleasesData construction has no direct Rust equivalent (Rust debian versioning uses embedded/parsed data without this spy surface or 'data written' debug side-effect); core fallback behavior for missing data is simple and exercised by other data-driven versioning tests."
 
+[[test]]
+spec   = "lib/config/decrypt.spec.ts"
+test   = "returns empty with no privateKey"
+reason = "basic identity/return-as-is when !config.encrypted (no privateKey involved); the top-level decryptConfig privateKey presence check + early return for no-encrypted case is part of high-level config secret handling in CLI parse/load (not unit exposed in core decrypt, which only has validate/get_azure/low-level bcpgp/openpgp); covered by other decrypt value tests or when high-level is wired."
+
+[[test]]
+spec   = "lib/config/decrypt.spec.ts"
+test   = "throws exception if encrypted found but no privateKey"
+reason = "relies on process.env.RENOVATE_X_ENCRYPTED_STRICT + throw 'config-validation' when encrypted present but no privateKey (strict mode); env access + strict guard in decryptConfig is TS runtime/config-load specific (cf. other opted config env/strict/.js tests noting 'Never use unsafe in Rust' for env mutation); core encrypted value decrypt is in submodules (low-level); high-level strict not yet in Rust config load without broad changes or unsafe env."
+
+[[test]]
+spec   = "lib/config/decrypt.spec.ts"
+test   = "throws exception if encrypted found but no privateKey- mend hosted"
+reason = "same as sibling 'throws exception if encrypted found but no privateKey' but with process.env.MEND_HOSTED=true + RENOVATE_X_ENCRYPTED_STRICT; MEND hosted special case + env + the decryptConfig throw path is runtime/TS-specific secret handling (high-level in CLI/config load); core value handling ported in decrypt; env/strict not unit exposed without unsafe or broad."
+

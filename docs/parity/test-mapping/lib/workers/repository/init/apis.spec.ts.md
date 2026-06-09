@@ -7,7 +7,7 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | runs | pending | — |
-| 34 | throws for disabled | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:180`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L180) |
+| 34 | throws for disabled | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:181`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L181) |
 | 49 | throws for forked | pending | — |
 | 66 | does not throw for includeforks=true | pending | — |
 | 79 | does not throw for forkprocessing=enabled | pending | — |

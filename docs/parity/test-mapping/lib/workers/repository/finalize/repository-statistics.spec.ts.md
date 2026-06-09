@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 41 | calls runrenovaterepostats | ported | [`crates/renovate-core/src/workers/repository/finalize/index.rs:81`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/index.rs#L81) |
-| 63 | processes cache with basebranches only | ported | [`crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs:148`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs#L148) |
+| 41 | calls runrenovaterepostats | ported | [`crates/renovate-core/src/workers/repository/finalize/index.rs:78`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/index.rs#L78) |
+| 63 | processes cache with basebranches only | ported | [`crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs:145`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs#L145) |
 | 94 | processes cache with basebranches and branches | pending | — |
 | 159 | logs extended branch info if branchsummaryextended | pending | — |
 
