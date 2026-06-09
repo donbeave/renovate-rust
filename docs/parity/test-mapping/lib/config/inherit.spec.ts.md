@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | all values in options are sorted | ported | [`crates/renovate-core/src/config.rs:1012`](../../../../../crates/renovate-core/src/config.rs#L1012) |
-| 15 | return not_present if key is not set | ported | [`crates/renovate-core/src/config.rs:1020`](../../../../../crates/renovate-core/src/config.rs#L1020) |
-| 20 | return value if key is set | ported | [`crates/renovate-core/src/config.rs:1027`](../../../../../crates/renovate-core/src/config.rs#L1027) |
+| 4 | all values in options are sorted | ported | [`crates/renovate-core/src/config.rs:1068`](../../../../../crates/renovate-core/src/config.rs#L1068) |
+| 15 | return not_present if key is not set | ported | [`crates/renovate-core/src/config.rs:1076`](../../../../../crates/renovate-core/src/config.rs#L1076) |
+| 20 | return value if key is set | ported | [`crates/renovate-core/src/config.rs:1083`](../../../../../crates/renovate-core/src/config.rs#L1083) |
 
