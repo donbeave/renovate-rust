@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 44/150 in-scope files mapped (full=18 partial=26 stub=0 pending=106 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 45/150 in-scope files mapped (full=18 partial=27 stub=0 pending=105 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -128,7 +128,7 @@
 | `lib/workers/repository/extract/manager-files.ts` | partial | [`crates/renovate-core/src/workers/repository/extract/manager_files.rs`](../../../crates/renovate-core/src/workers/repository/extract/manager_files.rs) | getManagerPackageFiles (enabled/fileList guards, matched log, extractAllPackageFiles vs per-file extractPackageFile + readLocalFile, massageDepNames for packageName->depName, attach packageFile, return). The actual registry dispatch + fs read are simulated for the proving test (full in manager registry + util/fs when this + callers wired); get_manager_files list helper pre-existing for other use. Single test ported. (file-match already full in sibling). |
 | `lib/workers/repository/extract/supersedes.ts` | partial | [`crates/renovate-core/src/workers/repository/extract/supersedes.rs`](../../../crates/renovate-core/src/workers/repository/extract/supersedes.rs) | processSupersedesManagers (uses get( , 'supersedesManagers') via supersedes_managers, builds rejected for primary-on-secondary-locks or secondary-on-primary-overlap, filters packageFiles at end; get_default_supersedes_rules + apply_supersedes helper). Full dynamic per-manager supersedesManagers from registry pending (defaults cover test cases); apply shape conversion for index flow in managers.rs. Single test ported. |
 | `lib/workers/repository/extract/types.ts` | opt-out | — | Type-only interface used for TypeScript compile-time typing in worker extraction output. |
-| `lib/workers/repository/finalize/index.ts` | pending | — | — |
+| `lib/workers/repository/finalize/index.ts` | partial | [`crates/renovate-core/src/workers/repository/finalize/index.rs`](../../../crates/renovate-core/src/workers/repository/finalize/index.rs) | finalizeRepo (wires pruneStaleBranches + runRenovateRepoStats + result; stubs for checkReconfigureBranch, repositoryCache, ensureIssuesClosing, clearRenovateRefs, PackageFiles.clear, platform.getPrList for repoIsActivated, runBranchSummary). Prune/stats are simplified (full in their pending .ts + platform); no direct it() for the glue found (sub specs cover called fns). Single test ported for stats call wiring. |
 | `lib/workers/repository/finalize/prune.ts` | pending | — | — |
 | `lib/workers/repository/finalize/repository-statistics.ts` | pending | — | — |
 | `lib/workers/repository/index.ts` | pending | — | — |
