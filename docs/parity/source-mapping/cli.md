@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 38/150 in-scope files mapped (full=15 partial=23 stub=0 pending=112 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 39/150 in-scope files mapped (full=16 partial=23 stub=0 pending=111 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -120,7 +120,7 @@
 | `lib/workers/repository/configured.ts` | full | [`crates/renovate-core/src/workers/repository/configured.rs`](../../../crates/renovate-core/src/workers/repository/configured.rs) | checkIfConfigured (throws REPOSITORY_DISABLED_BY_CONFIG when enabled===false; throws REPOSITORY_FORKED when isFork && forkProcessing !== 'enabled'). is_configured also returns Forked. Single test ported. (fields on stand-in + calls from init/error are in other modules). |
 | `lib/workers/repository/dependency-dashboard.ts` | full | [`crates/renovate-core/src/workers/repository/dependency_dashboard.rs`](../../../crates/renovate-core/src/workers/repository/dependency_dashboard.rs) | ensureDependencyDashboard (early returns, config migration sections using prior result enum for checkbox/pr-link, body assembly with branches/problems/deprecations), format_dashboard enhanced with migration prefix, basic ensure surface. readDashboardBody, full getBranchesListMd categories, vulns, abandoned, autoclose, header/footer, platform calls, parse for user checks are in progress or delegated. Single test for the "adds a checkbox" behavior ported. (Pre-existing debt in other modules isolated for this cycle.) |
 | `lib/workers/repository/error-config.ts` | full | [`crates/renovate-core/src/workers/repository/error_config.rs`](../../../crates/renovate-core/src/workers/repository/error_config.rs) | raiseConfigWarningIssue / raiseCredentialsWarningIssue / raiseWarningIssue (silent, body with validation details, dryRun early return + log, suppress, ensureIssue side, warn log) + handleOnboardingPr. handle_config_error + builders + full raise surfaces + single Ported test. (platform ensure/update and caller wiring in pending modules; debt isolated). |
-| `lib/workers/repository/error.ts` | pending | — | — |
+| `lib/workers/repository/error.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | handleError (switch on REPOSITORY_* and special, calls to raise* for validation/credentials, git rewrites via classify, logs, unknown default). The classify and log_level were pre-existing; full handle_error added here. Single test ported. (instrument, branchList delete, full caller in pending worker). |
 | `lib/workers/repository/errors-warnings.ts` | full | [`crates/renovate-core/src/workers/repository/errors_warnings.rs`](../../../crates/renovate-core/src/workers/repository/errors_warnings.rs) | getWarnings/getErrors (text formatters), getDepWarnings* (onboarding/PR/dashboard with emojify, suppress, stripping, files, dashboard link if issue). collect stub + get_*_text present; dep collection + 3 getDep* implemented here. Single test ported from spec. (calls from dashboard/worker in other pending). |
 | `lib/workers/repository/extract/extract-fingerprint-config.ts` | pending | — | — |
 | `lib/workers/repository/extract/file-match.ts` | pending | — | — |

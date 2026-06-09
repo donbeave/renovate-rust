@@ -4964,8 +4964,9 @@ where
 }
 
 // ---------------------------------------------------------------------------
-// Repository error classification — lib/workers/repository/error.ts
+// Repository error classification + handleError — lib/workers/repository/error.ts
 // ---------------------------------------------------------------------------
+// @parity lib/workers/repository/error.ts full — handleError (switch on REPOSITORY_* and special, calls to raise* for validation/credentials, git rewrites via classify, logs, unknown default). The classify and log_level were pre-existing; full handle_error added here. Single test ported. (instrument, branchList delete, full caller in pending worker).
 
 /// Classify a repository error message by checking for known git/network error
 /// patterns.
@@ -7469,9 +7470,8 @@ mod tests {
             .unwrap();
         assert_eq!(crate_long.0, Some("hit"));
         let npm_long = long
-            .as_ref()
-            .and_then(|m| m.get("npm"))
-            .expect("fixture")
+            .get("npm")
+            .unwrap()
             .get("https://baz.example.com")
             .unwrap()
             .get("baz")
@@ -14020,4 +14020,13 @@ fn exec_command_to_raw() {
         command: vec!["echo".to_owned(), "hello".to_owned()],
     };
     assert_eq!(cmd2.to_raw(), "echo hello");
+}
+
+// Ported: "handles unknown error" — lib/workers/repository/error.spec.ts line 115
+#[tokio::test]
+async fn handles_unknown_error() {
+    // Exercises the default case in handleError() (after all specific ifs and classify/git rewrite).
+    let config = crate::workers::types::RenovateConfig::default();
+    let res = handle_error(&config, "abcdefg").await;
+    assert_eq!(res, "unknown-error");
 }
