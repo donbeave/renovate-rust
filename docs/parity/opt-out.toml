@@ -420,6 +420,11 @@ test   = "shouldDeleteHomepage($sourceUrl, $homepage) -> $expected"
 reason = "it.each template for shouldDeleteHomepage helper cases (various same/different, gitlab/github, invalid, nulls); the business logic (should_delete_homepage in util.rs + delete in add_metadata when massaged same) is covered by ported L464, L503, L542 etc. concrete tests and the fn itself; pure TS it.each for the helper test."
 
 [[test]]
+spec   = "lib/modules/versioning/index.spec.ts"
+test   = "matches the API contract"
+reason = "large zod-based runtime contract validation (z.string().refine + dynamic import(`./${name}/index.ts`) + .pipe(z.object({isValid: z.function(), getNewValue: z.function(), ..., matches, sortVersions, ...})) over allVersioning.getVersionings() + config.allowedValues; asserts every registered versioning implements the full surface at runtime. Rust uses compile-time trait (Versioning) + static registry (no dynamic import, no zod); the individual method behaviors (is_valid, get_new_value, matches, sort etc.) are covered by the per-versioning specs (many 100% ported). Classic TS runtime reflection + schema guard with no additional business logic to port."
+
+[[test]]
 spec   = "lib/util/cache/package/impl/file.spec.ts"
 test   = "stores payload with value and expiry"
 reason = "asserts the exact internal cacache envelope keys (['expiry','value']) and that they are JSON strings after set (using cacache.get + JSON.parse); Rust FilePackageCache uses its own FileEntry {value, expiry} + direct file serde (not cacache/npm cacache); the value+expiry roundtrip persistence and get/set for file backend are covered by multiple ported tests (file_cache_set_and_get_roundtrip, file_cache_returns_*, cleanup tests); this is a TS-specific storage adapter detail with no Rust analogue."
