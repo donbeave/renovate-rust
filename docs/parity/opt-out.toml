@@ -168,3 +168,13 @@ reason = "Repository documentation quality assertions (markdown layout/options c
 spec   = "lib/modules/datasource/sbt-package/index.spec.ts"
 test   = "uses proper hostType"
 reason = "asserts a TypeScript class property shape (http.hostType) with no Rust equivalent"
+
+[[test]]
+spec   = "lib/config/migrations/base/abstract-migration.spec.ts"
+test   = "should not allow to use method rewrite"
+reason = "tests enforcement in AbstractMigration base class that subclasses must not directly invoke internal rewrite/delete helpers (TypeScript inheritance and runtime guard mechanics with no direct equivalent in Rust Migration trait + map-based design)"
+
+[[test]]
+spec   = "lib/config/migrations/base/abstract-migration.spec.ts"
+test   = "should not allow to use method delete"
+reason = "tests enforcement in AbstractMigration base class that subclasses must not directly invoke internal rewrite/delete helpers (TypeScript inheritance and runtime guard mechanics with no direct equivalent in Rust Migration trait + map-based design)"
