@@ -553,6 +553,7 @@ mod tests {
     // ── FilePackageCache ──────────────────────────────────────────────────
 
     // Ported: "delegates get to backend" — lib/util/cache/package/index.spec.ts line 41
+    // Ported: "returns undefined on cache miss" — lib/util/cache/package/impl/file.spec.ts line 47
     #[tokio::test]
     async fn file_cache_get_returns_none_for_missing_key() {
         let dir = TempDir::new().unwrap();
