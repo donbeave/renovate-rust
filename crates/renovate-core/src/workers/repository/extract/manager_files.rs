@@ -220,6 +220,22 @@ mod tests {
         assert!(!matches_pattern("/\\.json$/", "src/index.ts"));
     }
 
+    // Ported: "returns empty of manager is disabled" — lib/workers/repository/extract/manager-files.spec.ts line 22
+    #[test]
+    fn get_manager_package_files_returns_empty_of_manager_is_disabled() {
+        // Exercises the !enabled early return guard in getManagerPackageFiles (returns Some(vec![])).
+        // Matches the TS: when manager config has enabled: false, no files, length 0.
+        let manager_config = ManagerFile {
+            manager: "travis".to_string(),
+            enabled: false,
+            file_list: vec![],
+            ..Default::default()
+        };
+        let res = get_manager_package_files(&manager_config);
+        assert!(res.is_some());
+        assert!(res.unwrap().is_empty());
+    }
+
     // Ported: "returns files with extractPackageFile" — lib/workers/repository/extract/manager-files.spec.ts line 46
     #[test]
     fn get_manager_package_files_returns_files_with_extract_package_file() {
