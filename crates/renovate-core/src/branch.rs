@@ -10,6 +10,7 @@
 //! - `lib/config/options/index.ts` — `branchName`, `branchTopic` defaults
 //!
 //! @parity lib/workers/repository/config-migration/branch/index.ts partial — checkConfigMigrationBranch orchestrator (checkbox state, PR/branch existence via platform, closed PR handling, create vs rebase decision, return migrationBranch); uses the ConfigMigrationCommitMessageFactory and helpers from here (full worker orchestration noted as pending in siblings).
+//! @parity lib/workers/repository/config-migration/common.ts full — getMigrationBranchName (the template for the migrate-config branch name used by create, rebase, pr, index etc.).
 
 use std::sync::LazyLock;
 
@@ -230,6 +231,19 @@ pub fn branch_name_with_strict(
 ) -> String {
     let raw = format!("{branch_prefix}{additional_prefix}{topic}");
     clean_branch_name(&raw, branch_prefix, branch_name_strict)
+}
+
+/// Returns the name of the branch used for config migration.
+///
+/// Mirrors `lib/workers/repository/config-migration/common.ts` `getMigrationBranchName`.
+///
+/// @parity lib/workers/repository/config-migration/common.ts full — getMigrationBranchName (the template for the migrate-config branch name used by create, rebase, pr, index etc.).
+pub fn get_migration_branch_name(config: &RenovateConfig) -> String {
+    branch_name(
+        config.branch_prefix.as_deref().unwrap_or(""),
+        "",
+        "migrate-config",
+    )
 }
 
 /// Minimum hash length (in hex chars) after subtracting the prefix length.
@@ -2700,5 +2714,21 @@ mod tests {
         assert_eq!(msg, custom);
         let pr = config_migration_pr_title("disabled", Some(custom));
         assert_eq!(pr, custom);
+    }
+
+    // Ported: "creates migration branch when migration disabled but checkbox checked" — lib/workers/repository/config-migration/branch/index.spec.ts line 50
+    #[test]
+    fn get_migration_branch_name_matches_upstream() {
+        // Exercises getMigrationBranchName (from common.ts) which is used to compute the migrationBranch
+        // in the check/create paths (asserted in many specs as `${prefix}migrate-config`).
+        let mut config = RenovateConfig::default();
+        config.branch_prefix = Some("renovate/".to_string());
+        assert_eq!(get_migration_branch_name(&config), "renovate/migrate-config");
+
+        config.branch_prefix = Some("some/".to_string());
+        assert_eq!(get_migration_branch_name(&config), "some/migrate-config");
+
+        config.branch_prefix = None;
+        assert_eq!(get_migration_branch_name(&config), "migrate-config");
     }
 }
