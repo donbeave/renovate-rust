@@ -2,19 +2,19 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 270/1681 in-scope tests ported (opt-out=0) across 103 spec files.
+**Coverage:** 272/1681 in-scope tests ported (opt-out=0) across 103 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
 | [`lib/workers/repository/changelog/index.spec.ts`](../../lib/workers/repository/changelog/index.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/workers/repository/changelog/index.rs:165`](../../../../../crates/renovate-core/src/workers/repository/changelog/index.rs#L165) | ported |
 | [`lib/workers/repository/common.spec.ts`](../../lib/workers/repository/common.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2595`](../../../../../crates/renovate-core/src/branch.rs#L2595) | ported |
 | [`lib/workers/repository/config-migration/branch/commit-message.spec.ts`](../../lib/workers/repository/config-migration/branch/commit-message.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2309`](../../../../../crates/renovate-core/src/branch.rs#L2309) | ported |
-| [`lib/workers/repository/config-migration/branch/create.spec.ts`](../../lib/workers/repository/config-migration/branch/create.spec.ts.md) | 6 | 2 | 4 | 0 | [`crates/renovate-core/src/branch.rs:2803`](../../../../../crates/renovate-core/src/branch.rs#L2803) | partial |
-| [`lib/workers/repository/config-migration/branch/index.spec.ts`](../../lib/workers/repository/config-migration/branch/index.spec.ts.md) | 12 | 1 | 11 | 0 | [`crates/renovate-core/src/branch.rs:2831`](../../../../../crates/renovate-core/src/branch.rs#L2831) | partial |
+| [`lib/workers/repository/config-migration/branch/create.spec.ts`](../../lib/workers/repository/config-migration/branch/create.spec.ts.md) | 6 | 3 | 3 | 0 | [`crates/renovate-core/src/branch.rs:2803`](../../../../../crates/renovate-core/src/branch.rs#L2803) | partial |
+| [`lib/workers/repository/config-migration/branch/index.spec.ts`](../../lib/workers/repository/config-migration/branch/index.spec.ts.md) | 12 | 1 | 11 | 0 | [`crates/renovate-core/src/branch.rs:2842`](../../../../../crates/renovate-core/src/branch.rs#L2842) | partial |
 | [`lib/workers/repository/config-migration/branch/migrated-data.spec.ts`](../../lib/workers/repository/config-migration/branch/migrated-data.spec.ts.md) | 19 | 1 | 18 | 0 | [`crates/renovate-core/src/json_writer.rs:172`](../../../../../crates/renovate-core/src/json_writer.rs#L172) | partial |
 | [`lib/workers/repository/config-migration/branch/rebase.spec.ts`](../../lib/workers/repository/config-migration/branch/rebase.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/json_writer.rs:163`](../../../../../crates/renovate-core/src/json_writer.rs#L163) | partial |
 | [`lib/workers/repository/config-migration/index.spec.ts`](../../lib/workers/repository/config-migration/index.spec.ts.md) | 7 | 0 | 7 | 0 | — | pending |
-| [`lib/workers/repository/config-migration/pr/index.spec.ts`](../../lib/workers/repository/config-migration/pr/index.spec.ts.md) | 16 | 1 | 15 | 0 | [`crates/renovate-core/src/branch.rs:2850`](../../../../../crates/renovate-core/src/branch.rs#L2850) | partial |
+| [`lib/workers/repository/config-migration/pr/index.spec.ts`](../../lib/workers/repository/config-migration/pr/index.spec.ts.md) | 16 | 1 | 15 | 0 | [`crates/renovate-core/src/branch.rs:2861`](../../../../../crates/renovate-core/src/branch.rs#L2861) | partial |
 | [`lib/workers/repository/configured.spec.ts`](../../lib/workers/repository/configured.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:10156`](../../../../../crates/renovate-core/src/util.rs#L10156) | ported |
 | [`lib/workers/repository/dependency-dashboard.spec.ts`](../../lib/workers/repository/dependency-dashboard.spec.ts.md) | 63 | 1 | 62 | 0 | [`crates/renovate-core/src/config/migration.rs:467`](../../../../../crates/renovate-core/src/config/migration.rs#L467)<br>[`crates/renovate-core/src/workers/repository/dependency_dashboard.rs:225`](../../../../../crates/renovate-core/src/workers/repository/dependency_dashboard.rs#L225) | partial |
 | [`lib/workers/repository/error-config.spec.ts`](../../lib/workers/repository/error-config.spec.ts.md) | 6 | 1 | 5 | 0 | [`crates/renovate-core/src/workers/repository/error_config.rs:213`](../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L213) | partial |
@@ -32,7 +32,7 @@
 | [`lib/workers/repository/init/cache.spec.ts`](../../lib/workers/repository/init/cache.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/workers/repository/init/cache.rs:67`](../../../../../crates/renovate-core/src/workers/repository/init/cache.rs#L67) | ported |
 | [`lib/workers/repository/init/index.spec.ts`](../../lib/workers/repository/init/index.spec.ts.md) | 2 | 1 | 1 | 0 | [`crates/renovate-core/src/workers/repository/init/config.rs:40`](../../../../../crates/renovate-core/src/workers/repository/init/config.rs#L40) | partial |
 | [`lib/workers/repository/init/inherited.spec.ts`](../../lib/workers/repository/init/inherited.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
-| [`lib/workers/repository/init/merge.spec.ts`](../../lib/workers/repository/init/merge.spec.ts.md) | 39 | 8 | 31 | 0 | [`crates/renovate-core/src/repo_config.rs:7348`](../../../../../crates/renovate-core/src/repo_config.rs#L7348) | partial |
+| [`lib/workers/repository/init/merge.spec.ts`](../../lib/workers/repository/init/merge.spec.ts.md) | 39 | 9 | 30 | 0 | [`crates/renovate-core/src/repo_config.rs:7348`](../../../../../crates/renovate-core/src/repo_config.rs#L7348)<br>[`crates/renovate-core/src/workers/repository/init/merge.rs:158`](../../../../../crates/renovate-core/src/workers/repository/init/merge.rs#L158) | partial |
 | [`lib/workers/repository/init/vulnerability.spec.ts`](../../lib/workers/repository/init/vulnerability.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
 | [`lib/workers/repository/model/custom-commit-message.spec.ts`](../../lib/workers/repository/model/custom-commit-message.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2282`](../../../../../crates/renovate-core/src/branch.rs#L2282) | ported |
 | [`lib/workers/repository/model/semantic-commit-message.spec.ts`](../../lib/workers/repository/model/semantic-commit-message.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2216`](../../../../../crates/renovate-core/src/branch.rs#L2216) | ported |

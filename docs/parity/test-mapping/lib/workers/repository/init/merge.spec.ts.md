@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**8/39 in-scope tests ported** (31 pending, 0 opt-out) · status: partial
+**9/39 in-scope tests ported** (30 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -40,7 +40,7 @@
 | 673 | does nothing if npmrc is missing after token migration | pending | — |
 | 681 | migrates npmtoken and sets npmrc | pending | — |
 | 699 | does nothing when hostrules is not configured | pending | — |
-| 711 | adds hostrules and clears queue and throttle | pending | — |
+| 711 | adds hostrules and clears queue and throttle | ported | [`crates/renovate-core/src/workers/repository/init/merge.rs:158`](../../../../../../../crates/renovate-core/src/workers/repository/init/merge.rs#L158) |
 | 731 | warns on invalid hostrule and continues applying others | pending | — |
 | 797 | _(it.each / template — verify manually)_ | ? | — |
 | 821 | _(it.each / template — verify manually)_ | ? | — |
