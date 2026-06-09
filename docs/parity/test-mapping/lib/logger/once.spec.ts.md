@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 15 | should call a function only once | ported | [`crates/renovate-core/src/util.rs:8134`](../../../../../crates/renovate-core/src/util.rs#L8134) |
-| 28 | supports support distinct calls | ported | [`crates/renovate-core/src/util.rs:8145`](../../../../../crates/renovate-core/src/util.rs#L8145) |
-| 44 | resets keys | ported | [`crates/renovate-core/src/util.rs:8162`](../../../../../crates/renovate-core/src/util.rs#L8162) |
-| 60 | logs once per function call | ported | [`crates/renovate-core/src/util.rs:8173`](../../../../../crates/renovate-core/src/util.rs#L8173) |
-| 73 | distincts between log levels | ported | [`crates/renovate-core/src/util.rs:8190`](../../../../../crates/renovate-core/src/util.rs#L8190) |
-| 89 | distincts between different log statements | ported | [`crates/renovate-core/src/util.rs:8210`](../../../../../crates/renovate-core/src/util.rs#L8210) |
-| 106 | parameters are taken into account when de-duplicating calls | ported | [`crates/renovate-core/src/util.rs:8235`](../../../../../crates/renovate-core/src/util.rs#L8235) |
-| 124 | allows mixing single-time and regular logging | ported | [`crates/renovate-core/src/util.rs:8281`](../../../../../crates/renovate-core/src/util.rs#L8281) |
-| 146 | supports reset method | ported | [`crates/renovate-core/src/util.rs:8309`](../../../../../crates/renovate-core/src/util.rs#L8309) |
+| 15 | should call a function only once | ported | [`crates/renovate-core/src/util.rs:8137`](../../../../../crates/renovate-core/src/util.rs#L8137) |
+| 28 | supports support distinct calls | ported | [`crates/renovate-core/src/util.rs:8148`](../../../../../crates/renovate-core/src/util.rs#L8148) |
+| 44 | resets keys | ported | [`crates/renovate-core/src/util.rs:8165`](../../../../../crates/renovate-core/src/util.rs#L8165) |
+| 60 | logs once per function call | ported | [`crates/renovate-core/src/util.rs:8176`](../../../../../crates/renovate-core/src/util.rs#L8176) |
+| 73 | distincts between log levels | ported | [`crates/renovate-core/src/util.rs:8193`](../../../../../crates/renovate-core/src/util.rs#L8193) |
+| 89 | distincts between different log statements | ported | [`crates/renovate-core/src/util.rs:8213`](../../../../../crates/renovate-core/src/util.rs#L8213) |
+| 106 | parameters are taken into account when de-duplicating calls | ported | [`crates/renovate-core/src/util.rs:8238`](../../../../../crates/renovate-core/src/util.rs#L8238) |
+| 124 | allows mixing single-time and regular logging | ported | [`crates/renovate-core/src/util.rs:8284`](../../../../../crates/renovate-core/src/util.rs#L8284) |
+| 146 | supports reset method | ported | [`crates/renovate-core/src/util.rs:8312`](../../../../../crates/renovate-core/src/util.rs#L8312) |
 

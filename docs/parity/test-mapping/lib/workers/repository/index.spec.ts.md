@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 24 | does not process a repository, but also does not error | ported | [`crates/renovate-core/src/workers/repository/index.rs:103`](../../../../../../crates/renovate-core/src/workers/repository/index.rs#L103) |
+| 24 | does not process a repository, but also does not error | ported | [`crates/renovate-core/src/workers/repository/index.rs:100`](../../../../../../crates/renovate-core/src/workers/repository/index.rs#L100) |
 

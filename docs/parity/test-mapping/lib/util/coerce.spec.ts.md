@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | should return null | ported | [`crates/renovate-core/src/util.rs:9428`](../../../../../crates/renovate-core/src/util.rs#L9428) |
-| 10 | should return original value | ported | [`crates/renovate-core/src/util.rs:9429`](../../../../../crates/renovate-core/src/util.rs#L9429) |
-| 18 | should return undefined | ported | [`crates/renovate-core/src/util.rs:9440`](../../../../../crates/renovate-core/src/util.rs#L9440) |
-| 23 | should return original value | ported | [`crates/renovate-core/src/util.rs:9429`](../../../../../crates/renovate-core/src/util.rs#L9429) |
+| 5 | should return null | ported | [`crates/renovate-core/src/util.rs:9431`](../../../../../crates/renovate-core/src/util.rs#L9431) |
+| 10 | should return original value | ported | [`crates/renovate-core/src/util.rs:9432`](../../../../../crates/renovate-core/src/util.rs#L9432) |
+| 18 | should return undefined | ported | [`crates/renovate-core/src/util.rs:9443`](../../../../../crates/renovate-core/src/util.rs#L9443) |
+| 23 | should return original value | ported | [`crates/renovate-core/src/util.rs:9432`](../../../../../crates/renovate-core/src/util.rs#L9432) |
 

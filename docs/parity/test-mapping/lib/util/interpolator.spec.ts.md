@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 13 | does nothing if not input | ported | [`crates/renovate-core/src/util.rs:10690`](../../../../../crates/renovate-core/src/util.rs#L10690) |
-| 19 | does not throw error when keys and values are valid | ported | [`crates/renovate-core/src/util.rs:10696`](../../../../../crates/renovate-core/src/util.rs#L10696) |
-| 25 | throws when input is not a valid object | ported | [`crates/renovate-core/src/util.rs:10704`](../../../../../crates/renovate-core/src/util.rs#L10704) |
-| 31 | throws when keys do not follow specified regex patterns | ported | [`crates/renovate-core/src/util.rs:10712`](../../../../../crates/renovate-core/src/util.rs#L10712) |
-| 40 | throws when values are not of type string | ported | [`crates/renovate-core/src/util.rs:10720`](../../../../../crates/renovate-core/src/util.rs#L10720) |
+| 13 | does nothing if not input | ported | [`crates/renovate-core/src/util.rs:10693`](../../../../../crates/renovate-core/src/util.rs#L10693) |
+| 19 | does not throw error when keys and values are valid | ported | [`crates/renovate-core/src/util.rs:10699`](../../../../../crates/renovate-core/src/util.rs#L10699) |
+| 25 | throws when input is not a valid object | ported | [`crates/renovate-core/src/util.rs:10707`](../../../../../crates/renovate-core/src/util.rs#L10707) |
+| 31 | throws when keys do not follow specified regex patterns | ported | [`crates/renovate-core/src/util.rs:10715`](../../../../../crates/renovate-core/src/util.rs#L10715) |
+| 40 | throws when values are not of type string | ported | [`crates/renovate-core/src/util.rs:10723`](../../../../../crates/renovate-core/src/util.rs#L10723) |
 | 48 | replaces values and deletes secrets | ported | [`crates/renovate-core/src/config/secrets.rs:387`](../../../../../crates/renovate-core/src/config/secrets.rs#L387) |
 | 97 | replaces values and keeps secrets | ported | [`crates/renovate-core/src/config/secrets.rs:413`](../../../../../crates/renovate-core/src/config/secrets.rs#L413) |
 | 115 | does not resolve secrets in onboaringconfig | ported | [`crates/renovate-core/src/config/secrets.rs:425`](../../../../../crates/renovate-core/src/config/secrets.rs#L425) |

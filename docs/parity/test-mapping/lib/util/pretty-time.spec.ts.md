@@ -7,6 +7,6 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
-| 45 | returns null for error | ported | [`crates/renovate-core/src/util.rs:11299`](../../../../../crates/renovate-core/src/util.rs#L11299) |
+| 45 | returns null for error | ported | [`crates/renovate-core/src/util.rs:11302`](../../../../../crates/renovate-core/src/util.rs#L11302) |
 | 60 | _(it.each / template — verify manually)_ | ? | — |
 

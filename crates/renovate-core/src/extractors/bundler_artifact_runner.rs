@@ -179,9 +179,16 @@ impl ArtifactRunner for BundlerArtifactRunner {
 
             for cmd in &cmds {
                 if let Err(err) = self.run_command(cmd, &package_dir, &env).await {
+                    let ae = ArtifactError {
+                        lock_file: lock_path.to_string_lossy().to_string(),
+                        stderr: err.stderr,
+                    };
+                    if ae.stderr.contains("temporary-error") {
+                        return Err(ae);
+                    }
                     return Ok(Some(vec![ArtifactResult::error(
                         lock_path.to_string_lossy().as_ref(),
-                        err.stderr,
+                        ae.stderr,
                     )]));
                 }
             }
@@ -678,5 +685,50 @@ mod tests {
         let results = result.expect("runner should return error results");
         assert_eq!(results.len(), 1);
         assert!(results[0].artifact_error.is_some());
+    }
+
+    // Ported: "rethrows for temporary error" — lib/modules/manager/bundler/artifacts.spec.ts line 577
+    #[tokio::test]
+    async fn rethrows_for_temporary_error() {
+        let dir = tempdir().unwrap();
+        let lock_dir = dir.path().to_path_buf();
+
+        std::fs::write(lock_dir.join("Gemfile"), "source 'https://rubygems.org'\n").unwrap();
+        std::fs::write(lock_dir.join("Gemfile.lock"), "Old Gemfile.lock\n").unwrap();
+
+        let fake_bundler = dir.path().join("bundler");
+        #[cfg(unix)]
+        {
+            let mut f = std::fs::File::create(&fake_bundler).unwrap();
+            f.write_all(b"#!/bin/sh\necho 'temporary-error' >&2; exit 1\n")
+                .unwrap();
+            let mut perms = std::fs::metadata(&fake_bundler).unwrap().permissions();
+            perms.set_mode(0o755);
+            std::fs::set_permissions(&fake_bundler, perms).unwrap();
+        }
+
+        let mut env = std::env::vars().collect::<HashMap<String, String>>();
+        let mut path = lock_dir.to_string_lossy().to_string();
+        if let Some(old_path) = env.get("PATH") {
+            path = format!("{}:{}", path, old_path);
+        }
+        env.insert("PATH".to_owned(), path);
+
+        let runner = make_runner();
+        let input = UpdateArtifact {
+            package_file_name: "Gemfile".to_owned(),
+            updated_deps: vec![],
+            new_package_file_content: "{}".to_owned(),
+            config: ArtifactConfig {
+                lock_file_dir: lock_dir.clone(),
+                env: env.into_iter().collect(),
+                is_lockfile_maintenance: true,
+                ..Default::default()
+            },
+        };
+        let result = runner.update_artifacts(&input).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.stderr.contains("temporary-error"));
     }
 }

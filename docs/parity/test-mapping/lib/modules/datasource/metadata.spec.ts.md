@@ -22,16 +22,16 @@
 | 331 | should move github homepage to sourceurl | ported | [`crates/renovate-core/src/datasources.rs:1072`](../../../../../../crates/renovate-core/src/datasources.rs#L1072) |
 | 345 | should handle parsing/converting of gitlab sourceurls with http and www correctly | ported | [`crates/renovate-core/src/datasources.rs:1118`](../../../../../../crates/renovate-core/src/datasources.rs#L1118) |
 | 357 | should normalize releasetimestamp | ported | [`crates/renovate-core/src/datasources.rs:1248`](../../../../../../crates/renovate-core/src/datasources.rs#L1248) |
-| 385 | should return an empty string when massaging an invalid url | ported | [`crates/renovate-core/src/util.rs:12339`](../../../../../../crates/renovate-core/src/util.rs#L12339) |
+| 385 | should return an empty string when massaging an invalid url | ported | [`crates/renovate-core/src/util.rs:12342`](../../../../../../crates/renovate-core/src/util.rs#L12342) |
 | 389 | _(it.each / template — verify manually)_ | ? | — |
 | 403 | _(it.each / template — verify manually)_ | ? | — |
 | 415 | _(it.each / template — verify manually)_ | ? | — |
-| 428 | should massage github git@ url to valid https url | ported | [`crates/renovate-core/src/util.rs:12443`](../../../../../../crates/renovate-core/src/util.rs#L12443) |
-| 434 | should massage github http url to valid https url | ported | [`crates/renovate-core/src/util.rs:12451`](../../../../../../crates/renovate-core/src/util.rs#L12451) |
-| 440 | should massage github http and git url to valid https url | ported | [`crates/renovate-core/src/util.rs:12460`](../../../../../../crates/renovate-core/src/util.rs#L12460) |
-| 446 | should massage github ssh git@ url to valid https url | ported | [`crates/renovate-core/src/util.rs:12469`](../../../../../../crates/renovate-core/src/util.rs#L12469) |
-| 452 | should massage github git url to valid https url | ported | [`crates/renovate-core/src/util.rs:12478`](../../../../../../crates/renovate-core/src/util.rs#L12478) |
-| 458 | should massage gitlab git url to valid https url | ported | [`crates/renovate-core/src/util.rs:12486`](../../../../../../crates/renovate-core/src/util.rs#L12486) |
+| 428 | should massage github git@ url to valid https url | ported | [`crates/renovate-core/src/util.rs:12446`](../../../../../../crates/renovate-core/src/util.rs#L12446) |
+| 434 | should massage github http url to valid https url | ported | [`crates/renovate-core/src/util.rs:12454`](../../../../../../crates/renovate-core/src/util.rs#L12454) |
+| 440 | should massage github http and git url to valid https url | ported | [`crates/renovate-core/src/util.rs:12463`](../../../../../../crates/renovate-core/src/util.rs#L12463) |
+| 446 | should massage github ssh git@ url to valid https url | ported | [`crates/renovate-core/src/util.rs:12472`](../../../../../../crates/renovate-core/src/util.rs#L12472) |
+| 452 | should massage github git url to valid https url | ported | [`crates/renovate-core/src/util.rs:12481`](../../../../../../crates/renovate-core/src/util.rs#L12481) |
+| 458 | should massage gitlab git url to valid https url | ported | [`crates/renovate-core/src/util.rs:12489`](../../../../../../crates/renovate-core/src/util.rs#L12489) |
 | 464 | should remove homepage when homepage and sourceurl are same | ported | [`crates/renovate-core/src/datasources.rs:1137`](../../../../../../crates/renovate-core/src/datasources.rs#L1137) |
 | 503 | should delete gitlab homepage if its same as sourceurl | ported | [`crates/renovate-core/src/datasources.rs:1170`](../../../../../../crates/renovate-core/src/datasources.rs#L1170) |
 | 542 | does not set homepage to sourceurl when undefined | ported | [`crates/renovate-core/src/datasources.rs:1309`](../../../../../../crates/renovate-core/src/datasources.rs#L1309) |

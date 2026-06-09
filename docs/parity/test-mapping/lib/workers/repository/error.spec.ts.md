@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 77 | errors ${err} | ported | [`crates/renovate-core/src/util.rs:11714`](../../../../../../crates/renovate-core/src/util.rs#L11714) |
-| 83 | handles externalhosterror | ported | [`crates/renovate-core/src/util.rs:11734`](../../../../../../crates/renovate-core/src/util.rs#L11734) |
-| 91 | rewrites git 5xx error | ported | [`crates/renovate-core/src/util.rs:11669`](../../../../../../crates/renovate-core/src/util.rs#L11669) |
-| 99 | rewrites git remote error | ported | [`crates/renovate-core/src/util.rs:11676`](../../../../../../crates/renovate-core/src/util.rs#L11676) |
-| 107 | rewrites git fatal error | ported | [`crates/renovate-core/src/util.rs:11683`](../../../../../../crates/renovate-core/src/util.rs#L11683) |
-| 115 | handles unknown error | ported | [`crates/renovate-core/src/util.rs:11690`](../../../../../../crates/renovate-core/src/util.rs#L11690) |
-| 120 | logs config validation errors as warnings by default | ported | [`crates/renovate-core/src/util.rs:11696`](../../../../../../crates/renovate-core/src/util.rs#L11696) |
-| 130 | logs config validation errors as warnings when configvalidationerror is false | ported | [`crates/renovate-core/src/util.rs:11702`](../../../../../../crates/renovate-core/src/util.rs#L11702) |
-| 140 | logs config validation errors as errors when configvalidationerror is true | ported | [`crates/renovate-core/src/util.rs:11708`](../../../../../../crates/renovate-core/src/util.rs#L11708) |
+| 77 | errors ${err} | ported | [`crates/renovate-core/src/util.rs:11717`](../../../../../../crates/renovate-core/src/util.rs#L11717) |
+| 83 | handles externalhosterror | ported | [`crates/renovate-core/src/util.rs:11737`](../../../../../../crates/renovate-core/src/util.rs#L11737) |
+| 91 | rewrites git 5xx error | ported | [`crates/renovate-core/src/util.rs:11672`](../../../../../../crates/renovate-core/src/util.rs#L11672) |
+| 99 | rewrites git remote error | ported | [`crates/renovate-core/src/util.rs:11679`](../../../../../../crates/renovate-core/src/util.rs#L11679) |
+| 107 | rewrites git fatal error | ported | [`crates/renovate-core/src/util.rs:11686`](../../../../../../crates/renovate-core/src/util.rs#L11686) |
+| 115 | handles unknown error | ported | [`crates/renovate-core/src/util.rs:11693`](../../../../../../crates/renovate-core/src/util.rs#L11693) |
+| 120 | logs config validation errors as warnings by default | ported | [`crates/renovate-core/src/util.rs:11699`](../../../../../../crates/renovate-core/src/util.rs#L11699) |
+| 130 | logs config validation errors as warnings when configvalidationerror is false | ported | [`crates/renovate-core/src/util.rs:11705`](../../../../../../crates/renovate-core/src/util.rs#L11705) |
+| 140 | logs config validation errors as errors when configvalidationerror is true | ported | [`crates/renovate-core/src/util.rs:11711`](../../../../../../crates/renovate-core/src/util.rs#L11711) |
 

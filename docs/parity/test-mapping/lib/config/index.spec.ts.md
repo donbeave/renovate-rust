@@ -9,13 +9,13 @@
 | 16 | merges | ported | [`crates/renovate-core/src/config.rs:797`](../../../../../crates/renovate-core/src/config.rs#L797) |
 | 32 | merges packagerules | ported | [`crates/renovate-core/src/config.rs:818`](../../../../../crates/renovate-core/src/config.rs#L818) |
 | 55 | merges constraints | ported | [`crates/renovate-core/src/config.rs:845`](../../../../../crates/renovate-core/src/config.rs#L845) |
-| 73 | merges forced options | ported | [`crates/renovate-core/src/config.rs:857`](../../../../../crates/renovate-core/src/config.rs#L857) |
-| 92 | handles null parent packagerules | ported | [`crates/renovate-core/src/config.rs:867`](../../../../../crates/renovate-core/src/config.rs#L867) |
-| 105 | handles null child packagerules | ported | [`crates/renovate-core/src/config.rs:876`](../../../../../crates/renovate-core/src/config.rs#L876) |
-| 118 | handles undefined childconfig | ported | [`crates/renovate-core/src/config.rs:890`](../../../../../crates/renovate-core/src/config.rs#L890) |
-| 124 | getmanagerconfig() | ported | [`crates/renovate-core/src/config.rs:897`](../../../../../crates/renovate-core/src/config.rs#L897) |
-| 142 | filterconfig() | ported | [`crates/renovate-core/src/config.rs:914`](../../../../../crates/renovate-core/src/config.rs#L914) |
-| 148 | highest vulnerabilityseverity maintained when config is vulnerability alert | ported | [`crates/renovate-core/src/config.rs:920`](../../../../../crates/renovate-core/src/config.rs#L920) |
-| 163 | removes all global config | ported | [`crates/renovate-core/src/config.rs:929`](../../../../../crates/renovate-core/src/config.rs#L929) |
-| 170 | retains inherited config | ported | [`crates/renovate-core/src/config.rs:938`](../../../../../crates/renovate-core/src/config.rs#L938) |
+| 73 | merges forced options | ported | [`crates/renovate-core/src/config.rs:858`](../../../../../crates/renovate-core/src/config.rs#L858) |
+| 92 | handles null parent packagerules | ported | [`crates/renovate-core/src/config.rs:868`](../../../../../crates/renovate-core/src/config.rs#L868) |
+| 105 | handles null child packagerules | ported | [`crates/renovate-core/src/config.rs:877`](../../../../../crates/renovate-core/src/config.rs#L877) |
+| 118 | handles undefined childconfig | ported | [`crates/renovate-core/src/config.rs:891`](../../../../../crates/renovate-core/src/config.rs#L891) |
+| 124 | getmanagerconfig() | ported | [`crates/renovate-core/src/config.rs:898`](../../../../../crates/renovate-core/src/config.rs#L898) |
+| 142 | filterconfig() | ported | [`crates/renovate-core/src/config.rs:915`](../../../../../crates/renovate-core/src/config.rs#L915) |
+| 148 | highest vulnerabilityseverity maintained when config is vulnerability alert | ported | [`crates/renovate-core/src/config.rs:921`](../../../../../crates/renovate-core/src/config.rs#L921) |
+| 163 | removes all global config | ported | [`crates/renovate-core/src/config.rs:930`](../../../../../crates/renovate-core/src/config.rs#L930) |
+| 170 | retains inherited config | ported | [`crates/renovate-core/src/config.rs:939`](../../../../../crates/renovate-core/src/config.rs#L939) |
 

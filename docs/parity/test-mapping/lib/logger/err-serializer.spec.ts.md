@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 9 | expands errors | ported | [`crates/renovate-core/src/util.rs:6903`](../../../../../crates/renovate-core/src/util.rs#L6903) |
-| 40 | handles missing fields | ported | [`crates/renovate-core/src/util.rs:6924`](../../../../../crates/renovate-core/src/util.rs#L6924) |
-| 66 | handles http error | ported | [`crates/renovate-core/src/util.rs:6936`](../../../../../crates/renovate-core/src/util.rs#L6936) |
-| 83 | sanitize http error | ported | [`crates/renovate-core/src/util.rs:6958`](../../../../../crates/renovate-core/src/util.rs#L6958) |
-| 113 | handles aggregateerrors | ported | [`crates/renovate-core/src/util.rs:6983`](../../../../../crates/renovate-core/src/util.rs#L6983) |
+| 9 | expands errors | ported | [`crates/renovate-core/src/util.rs:6906`](../../../../../crates/renovate-core/src/util.rs#L6906) |
+| 40 | handles missing fields | ported | [`crates/renovate-core/src/util.rs:6927`](../../../../../crates/renovate-core/src/util.rs#L6927) |
+| 66 | handles http error | ported | [`crates/renovate-core/src/util.rs:6939`](../../../../../crates/renovate-core/src/util.rs#L6939) |
+| 83 | sanitize http error | ported | [`crates/renovate-core/src/util.rs:6961`](../../../../../crates/renovate-core/src/util.rs#L6961) |
+| 113 | handles aggregateerrors | ported | [`crates/renovate-core/src/util.rs:6986`](../../../../../crates/renovate-core/src/util.rs#L6986) |
 

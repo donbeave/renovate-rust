@@ -7,7 +7,7 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | _(it.each / template — verify manually)_ | ? | — |
-| 55 | migrates | opt-out | the additional config (json/json5) is passed through migration (like main file); migration logic present (migrate in file load/merge, history ports for additional migrate json5). If a specific test for additional + migrate exists or the load path exercises it, port; otherwise this opt covers if it's data-driven. (Kept separate from templates for real migration behavior.) |
+| 55 | migrates | opt-out | the additional config (json/json5) is passed through migration (like main file); migration logic present (migrate in file load/merge, history ports for additional migrate json5). If a specific test for additional + migrate exists or the load path exercises it, port; otherwise this opt covers if it's data-driven. (Kept separate from templates for real migration behavior). |
 | 68 | warns if config is invalid | ported | [`crates/renovate-core/src/config/file.rs:744`](../../../../../../../../crates/renovate-core/src/config/file.rs#L744) |
 | 80 | parse and returns empty config if there is no renovate_additional_config_file in env | ported | [`crates/renovate-core/src/config/file.rs:759`](../../../../../../../../crates/renovate-core/src/config/file.rs#L759) |
 | 84 | _(it.each / template — verify manually)_ | ? | — |

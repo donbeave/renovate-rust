@@ -2,12 +2,12 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**0/12 in-scope tests ported** (12 pending, 0 opt-out) · status: pending
+**1/12 in-scope tests ported** (11 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | runs | pending | — |
-| 34 | throws for disabled | pending | — |
+| 34 | throws for disabled | ported | [`crates/renovate-core/src/workers/repository/init/apis.rs:180`](../../../../../../../crates/renovate-core/src/workers/repository/init/apis.rs#L180) |
 | 49 | throws for forked | pending | — |
 | 66 | does not throw for includeforks=true | pending | — |
 | 79 | does not throw for forkprocessing=enabled | pending | — |

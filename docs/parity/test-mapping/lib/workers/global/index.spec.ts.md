@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 56 | should generate correct toplevelorg/parentorg with multiple levels | ported | [`crates/renovate-core/src/util.rs:11745`](../../../../../../crates/renovate-core/src/util.rs#L11745) |
-| 67 | should generate correct toplevelorg/parentorg with two levels | ported | [`crates/renovate-core/src/util.rs:11754`](../../../../../../crates/renovate-core/src/util.rs#L11754) |
+| 56 | should generate correct toplevelorg/parentorg with multiple levels | ported | [`crates/renovate-core/src/util.rs:11748`](../../../../../../crates/renovate-core/src/util.rs#L11748) |
+| 67 | should generate correct toplevelorg/parentorg with two levels | ported | [`crates/renovate-core/src/util.rs:11757`](../../../../../../crates/renovate-core/src/util.rs#L11757) |
 | 78 | stores repositoryentryconfig for repositories[] object entries | pending | — |
 | 91 | does not store repositoryentryconfig for repositories[] string entries | pending | — |
 | 101 | handles config warnings and errors | pending | — |

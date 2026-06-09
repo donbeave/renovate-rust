@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | returns valid query for valid payload query | ported | [`crates/renovate-core/src/util.rs:13916`](../../../../../../../crates/renovate-core/src/util.rs#L13916) |
-| 28 | returns invalid query for invalid payload query | ported | [`crates/renovate-core/src/util.rs:13927`](../../../../../../../crates/renovate-core/src/util.rs#L13927) |
+| 10 | returns valid query for valid payload query | ported | [`crates/renovate-core/src/util.rs:13919`](../../../../../../../crates/renovate-core/src/util.rs#L13919) |
+| 28 | returns invalid query for invalid payload query | ported | [`crates/renovate-core/src/util.rs:13930`](../../../../../../../crates/renovate-core/src/util.rs#L13930) |
 | 35 | _(it.each / template — verify manually)_ | ? | — |
 

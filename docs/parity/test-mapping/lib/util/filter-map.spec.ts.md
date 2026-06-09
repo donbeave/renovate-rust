@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should return an empty array when given an empty array | ported | [`crates/renovate-core/src/util.rs:7805`](../../../../../crates/renovate-core/src/util.rs#L7805) |
-| 11 | should return an array with only the mapped values that pass the filter | ported | [`crates/renovate-core/src/util.rs:7813`](../../../../../crates/renovate-core/src/util.rs#L7813) |
+| 4 | should return an empty array when given an empty array | ported | [`crates/renovate-core/src/util.rs:7808`](../../../../../crates/renovate-core/src/util.rs#L7808) |
+| 11 | should return an array with only the mapped values that pass the filter | ported | [`crates/renovate-core/src/util.rs:7816`](../../../../../crates/renovate-core/src/util.rs#L7816) |
 

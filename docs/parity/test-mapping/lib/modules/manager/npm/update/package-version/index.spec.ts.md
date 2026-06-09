@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 11 | mirrors | ported | [`crates/renovate-core/src/extractors/npm.rs:4884`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4884) |
-| 21 | aborts mirror | ported | [`crates/renovate-core/src/extractors/npm.rs:4894`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4894) |
-| 30 | increments | ported | [`crates/renovate-core/src/extractors/npm.rs:4901`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4901) |
-| 40 | no ops | ported | [`crates/renovate-core/src/extractors/npm.rs:4911`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4911) |
-| 49 | updates | ported | [`crates/renovate-core/src/extractors/npm.rs:4918`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4918) |
-| 59 | returns content if bumping errors | ported | [`crates/renovate-core/src/extractors/npm.rs:4928`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4928) |
+| 11 | mirrors | ported | [`crates/renovate-core/src/extractors/npm.rs:4879`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4879) |
+| 21 | aborts mirror | ported | [`crates/renovate-core/src/extractors/npm.rs:4889`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4889) |
+| 30 | increments | ported | [`crates/renovate-core/src/extractors/npm.rs:4896`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4896) |
+| 40 | no ops | ported | [`crates/renovate-core/src/extractors/npm.rs:4906`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4906) |
+| 49 | updates | ported | [`crates/renovate-core/src/extractors/npm.rs:4913`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4913) |
+| 59 | returns content if bumping errors | ported | [`crates/renovate-core/src/extractors/npm.rs:4923`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4923) |
 
