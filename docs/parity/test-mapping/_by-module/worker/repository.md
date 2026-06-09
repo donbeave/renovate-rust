@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 271/1678 in-scope tests ported (opt-out=3) across 103 spec files.
+**Coverage:** 272/1678 in-scope tests ported (opt-out=3) across 103 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -17,7 +17,7 @@
 | [`lib/workers/repository/config-migration/pr/index.spec.ts`](../../lib/workers/repository/config-migration/pr/index.spec.ts.md) | 16 | 1 | 15 | 0 | [`crates/renovate-core/src/branch.rs:2862`](../../../../../crates/renovate-core/src/branch.rs#L2862) | partial |
 | [`lib/workers/repository/configured.spec.ts`](../../lib/workers/repository/configured.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/util.rs:10156`](../../../../../crates/renovate-core/src/util.rs#L10156) | ported |
 | [`lib/workers/repository/dependency-dashboard.spec.ts`](../../lib/workers/repository/dependency-dashboard.spec.ts.md) | 63 | 1 | 62 | 0 | [`crates/renovate-core/src/config/migration.rs:467`](../../../../../crates/renovate-core/src/config/migration.rs#L467)<br>[`crates/renovate-core/src/workers/repository/dependency_dashboard.rs:225`](../../../../../crates/renovate-core/src/workers/repository/dependency_dashboard.rs#L225) | partial |
-| [`lib/workers/repository/error-config.spec.ts`](../../lib/workers/repository/error-config.spec.ts.md) | 6 | 1 | 5 | 0 | [`crates/renovate-core/src/workers/repository/error_config.rs:213`](../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L213) | partial |
+| [`lib/workers/repository/error-config.spec.ts`](../../lib/workers/repository/error-config.spec.ts.md) | 6 | 1 | 5 | 0 | [`crates/renovate-core/src/workers/repository/error_config.rs:212`](../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L212) | partial |
 | [`lib/workers/repository/error.spec.ts`](../../lib/workers/repository/error.spec.ts.md) | 9 | 9 | 0 | 0 | [`crates/renovate-core/src/util.rs:11669`](../../../../../crates/renovate-core/src/util.rs#L11669) | ported |
 | [`lib/workers/repository/errors-warnings.spec.ts`](../../lib/workers/repository/errors-warnings.spec.ts.md) | 16 | 14 | 2 | 0 | [`crates/renovate-core/src/util.rs:12875`](../../../../../crates/renovate-core/src/util.rs#L12875)<br>[`crates/renovate-core/src/workers/repository/errors_warnings.rs:267`](../../../../../crates/renovate-core/src/workers/repository/errors_warnings.rs#L267) | partial |
 | [`lib/workers/repository/extract/extract-fingerprint-config.spec.ts`](../../lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) | 2 | 1 | 1 | 0 | [`crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs:124`](../../../../../crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs#L124) | partial |
@@ -33,7 +33,7 @@
 | [`lib/workers/repository/init/index.spec.ts`](../../lib/workers/repository/init/index.spec.ts.md) | 2 | 1 | 1 | 0 | [`crates/renovate-core/src/workers/repository/init/config.rs:40`](../../../../../crates/renovate-core/src/workers/repository/init/config.rs#L40) | partial |
 | [`lib/workers/repository/init/inherited.spec.ts`](../../lib/workers/repository/init/inherited.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |
 | [`lib/workers/repository/init/merge.spec.ts`](../../lib/workers/repository/init/merge.spec.ts.md) | 39 | 8 | 31 | 0 | [`crates/renovate-core/src/repo_config.rs:7348`](../../../../../crates/renovate-core/src/repo_config.rs#L7348) | partial |
-| [`lib/workers/repository/init/vulnerability.spec.ts`](../../lib/workers/repository/init/vulnerability.spec.ts.md) | 16 | 0 | 16 | 0 | — | pending |
+| [`lib/workers/repository/init/vulnerability.spec.ts`](../../lib/workers/repository/init/vulnerability.spec.ts.md) | 16 | 1 | 15 | 0 | [`crates/renovate-core/src/workers/repository/init/vulnerability.rs:321`](../../../../../crates/renovate-core/src/workers/repository/init/vulnerability.rs#L321) | partial |
 | [`lib/workers/repository/model/custom-commit-message.spec.ts`](../../lib/workers/repository/model/custom-commit-message.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2283`](../../../../../crates/renovate-core/src/branch.rs#L2283) | ported |
 | [`lib/workers/repository/model/semantic-commit-message.spec.ts`](../../lib/workers/repository/model/semantic-commit-message.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/branch.rs:2217`](../../../../../crates/renovate-core/src/branch.rs#L2217) | ported |
 | [`lib/workers/repository/onboarding/branch/check.spec.ts`](../../lib/workers/repository/onboarding/branch/check.spec.ts.md) | 11 | 0 | 11 | 0 | — | pending |

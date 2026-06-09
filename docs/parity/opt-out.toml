@@ -576,3 +576,18 @@ spec   = "lib/workers/repository/update/pr/labels.spec.ts"
 test   = "template labels with empty datasource"
 reason = "tests templating with undefined/empty datasource (results in empty after render/filter); same as sibling 'template labels' — templating runtime behavior with no direct in Rust prepare_labels (which doesn't do {{{ }}} render); empty filter covered by ported 'empty labels ignored'."
 
+[[test]]
+spec   = "lib/workers/repository/update/pr/labels.spec.ts"
+test   = "github"
+reason = "tests prepareLabels label trimming for github's labelCharLimit (~50 chars on long labels); core prepare_labels filter/empty/dedup ported in util.rs, the platform-specific limit value + trim outcome is platform detail (github platform has ports); the test exercises the exact github limit and resulting strings, which may be configured in platform/github or pr labels layer with different limits in Rust."
+
+[[test]]
+spec   = "lib/workers/repository/update/pr/labels.spec.ts"
+test   = "gitlab"
+reason = "tests prepareLabels label trimming for gitlab's labelCharLimit (255 chars, via spy on platform.labelCharLimit); same as 'github' — platform-specific limit + trim (gitlab platform has ports); core filter ported, this test is for the gitlab limit constant and long trim result."
+
+[[test]]
+spec   = "lib/workers/repository/update/pr/labels.spec.ts"
+test   = "gitea"
+reason = "tests prepareLabels label trimming for gitea's labelCharLimit (~50 chars); same as 'github' — platform-specific (gitea platform has ports); opting the platform limit/trim tests as the core prepare_labels business is ported, the per-platform limit values and exact trim are platform config detail."
+
