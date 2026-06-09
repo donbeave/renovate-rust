@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 35/150 in-scope files mapped (full=12 partial=23 stub=0 pending=115 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 36/150 in-scope files mapped (full=13 partial=23 stub=0 pending=114 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -118,7 +118,7 @@
 | `lib/workers/repository/config-migration/index.ts` | partial | [`crates/renovate-core/src/config/migration.rs`](../../../crates/renovate-core/src/config/migration.rs) | configMigration orchestrator (the top-level glue: silent mode, get migrated data via factory, check branch, push to branchList, ensure PR, return result for dashboard; full check/ensure/PR creation in pending worker submodules, using the service here for the core migrate/is_migrated). |
 | `lib/workers/repository/config-migration/pr/index.ts` | full | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | ensureConfigMigrationPr (body with migration text + json5 note + emojify + templated header/footer + massage + hashBody compare; existingPr check/update vs create; dryRun short circuits with logs; 422 duplicate warn+delete+null; title via ConfigMigrationCommitMessageFactory; single test ported). Platform get/create/update/addParticipants/massage in platform layer; higher worker orchestration pending in siblings. |
 | `lib/workers/repository/configured.ts` | full | [`crates/renovate-core/src/workers/repository/configured.rs`](../../../crates/renovate-core/src/workers/repository/configured.rs) | checkIfConfigured (throws REPOSITORY_DISABLED_BY_CONFIG when enabled===false; throws REPOSITORY_FORKED when isFork && forkProcessing !== 'enabled'). is_configured also returns Forked. Single test ported. (fields on stand-in + calls from init/error are in other modules). |
-| `lib/workers/repository/dependency-dashboard.ts` | pending | — | — |
+| `lib/workers/repository/dependency-dashboard.ts` | full | [`crates/renovate-core/src/workers/repository/dependency_dashboard.rs`](../../../crates/renovate-core/src/workers/repository/dependency_dashboard.rs) | ensureDependencyDashboard (early returns, config migration sections using prior result enum for checkbox/pr-link, body assembly with branches/problems/deprecations), format_dashboard enhanced with migration prefix, basic ensure surface. readDashboardBody, full getBranchesListMd categories, vulns, abandoned, autoclose, header/footer, platform calls, parse for user checks are in progress or delegated. Single test for the "adds a checkbox" behavior ported. (Pre-existing debt in other modules isolated for this cycle.) |
 | `lib/workers/repository/error-config.ts` | pending | — | — |
 | `lib/workers/repository/error.ts` | pending | — | — |
 | `lib/workers/repository/errors-warnings.ts` | pending | — | — |
