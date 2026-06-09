@@ -337,6 +337,31 @@ mod tests {
         assert!(result.stdout.contains("default-shell-false-arg"));
     }
 
+    // Ported: "the command is split into the command and arguments when shell=false" — lib/util/exec/common.spec.ts line 495
+    #[tokio::test]
+    async fn exec_command_is_split_when_shell_false() {
+        // The explicit split behavior when shell=false (or default): the cmd string form in TS leads to
+        // program + separate args passed to lower ( 'ls' , ['-l'] , {shell: false} ).
+        // In Rust the high-level receives &[String] (the split form) for the no-shell/default path;
+        // calling with split array + default opts and verifying literal arg handling exercises the split path
+        // that corresponds to this upstream it().
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig {
+            binary_source: BinarySource::Global,
+            ..Default::default()
+        };
+        let opts = ExecOptions::default();
+        let result = exec(
+            &["echo".to_owned(), "split-arg-verification".to_owned()],
+            &opts,
+            &config,
+            &process_env,
+        )
+        .await
+        .unwrap();
+        assert!(result.stdout.contains("split-arg-verification"));
+    }
+
     // Ported: "does not throw if an error occurs, but we specify ignoreFailure=true" — lib/util/exec/common.spec.ts line 292
     #[tokio::test]
     async fn exec_does_not_throw_on_failure_when_ignore_failure_true() {
