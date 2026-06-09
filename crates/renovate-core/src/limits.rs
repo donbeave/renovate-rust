@@ -1,6 +1,7 @@
 //! Global rate-limiting and concurrency limit tracking.
 //!
 //! Mirrors `lib/workers/global/limits.ts`.
+//! @parity lib/workers/global/limits.ts full — simple 'Commits' limit (setMaxLimit/inc/isLimitReached + reset), plus the full concurrent/hourly/branch limit machinery (calcLimit, hasMultipleLimits, isLimitReached overloads for Branches/ConcurrentPRs/Hourly*, using per-upgrade limits with the null-inherit semantics for branchConcurrentLimit). All observable behavior for a self-hosted renovate run is covered.
 
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex};
@@ -17,12 +18,15 @@ static LIMITS: LazyLock<Mutex<HashMap<String, LimitEntry>>> =
 
 static COUNTS: LazyLock<Mutex<HashMap<String, i64>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
-/// Clear all limit and count state.
+/// Clear all (simple) limit state.
 ///
-/// Mirrors `resetAllLimits` from `lib/workers/global/limits.ts`.
+/// Mirrors `resetAllLimits` from `lib/workers/global/limits.ts` (which only clears
+/// the `limits` map for 'Commits' style limits; the separate `counts` map for
+/// concurrent/hourly is not cleared by resetAllLimits).
 pub fn reset_all_limits() {
     LIMITS.lock().unwrap().clear();
-    COUNTS.lock().unwrap().clear();
+    // Note: COUNTS are intentionally not cleared here to match the TS
+    // resetAllLimits exactly (counts are a separate mechanism).
 }
 
 /// Set the maximum for a named limit key. `None` (null) = unlimited.
@@ -679,7 +683,30 @@ mod tests {
             set_count("Branches", 2);
             reset_all_limits();
             assert!(!is_commits_limit_reached());
-            assert_eq!(get_count("Branches"), 0);
+            // Per TS resetAllLimits, only the 'limits' (Commits-style) are cleared;
+            // the separate counts map is unaffected.
+            assert_eq!(get_count("Branches"), 2);
+        });
+    }
+
+    // The single test added in this cycle for the limits.ts parity work.
+    // Proves the resetAllLimits divergence fix (only affects the simple limits map).
+    #[test]
+    fn reset_all_limits_only_clears_limits_map() {
+        // Ported: "resetAllLimits" behavior (only clears the `limits` map for 'Commits' etc.;
+        // the `counts` map for concurrent limits is separate) — lib/workers/global/limits.ts
+        clean(|| {
+            set_max_limit("Commits", Some(5));
+            inc_limited_value("Commits", 3);
+            set_count("Branches", 7);
+            set_count("HourlyCommits", 4);
+
+            reset_all_limits();
+
+            assert!(!is_commits_limit_reached());
+            // counts are preserved (this is the observable difference from previous Rust behavior)
+            assert_eq!(get_count("Branches"), 7);
+            assert_eq!(get_count("HourlyCommits"), 4);
         });
     }
 }

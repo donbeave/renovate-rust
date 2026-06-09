@@ -178,7 +178,9 @@ impl<T, E> Result<T, E> {
                     ResultState::Ok(value) => Result::ok(value),
                     ResultState::Err(ResultErrorKind::Typed(err)) => {
                         match catch_unwind(AssertUnwindSafe(|| f(err))) {
-                            Ok(result) => result,
+                            // The catcher returned an AsyncResult; await its inner future to obtain
+                            // the custom Result value that this async block produces (matches other arms).
+                            Ok(result) => result.inner.await,
                             Err(err) => {
                                 let message = format_panic(err);
                                 warn!(message, "Result: unexpected error in async catch handler");
