@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 8 | handles no monorepo | ported | [`crates/renovate-core/src/extractors/npm.rs:8927`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8927) |
-| 19 | updates internal packages | ported | [`crates/renovate-core/src/extractors/npm.rs:8938`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8938) |
-| 74 | uses yarn workspaces package settings | ported | [`crates/renovate-core/src/extractors/npm.rs:9008`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L9008) |
-| 98 | uses yarn workspaces package settings with extractedconstraints | ported | [`crates/renovate-core/src/extractors/npm.rs:9046`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L9046) |
-| 142 | uses yarnzeroinstall and skipinstalls from yarn workspaces package settings | ported | [`crates/renovate-core/src/extractors/npm.rs:9093`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L9093) |
+| 8 | handles no monorepo | ported | [`crates/renovate-core/src/extractors/npm.rs:8934`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8934) |
+| 19 | updates internal packages | ported | [`crates/renovate-core/src/extractors/npm.rs:8945`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8945) |
+| 74 | uses yarn workspaces package settings | ported | [`crates/renovate-core/src/extractors/npm.rs:9015`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L9015) |
+| 98 | uses yarn workspaces package settings with extractedconstraints | ported | [`crates/renovate-core/src/extractors/npm.rs:9053`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L9053) |
+| 142 | uses yarnzeroinstall and skipinstalls from yarn workspaces package settings | ported | [`crates/renovate-core/src/extractors/npm.rs:9100`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L9100) |
 

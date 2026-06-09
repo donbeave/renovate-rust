@@ -198,3 +198,8 @@ reason = "the jsonata expression evaluation and matching for packageRules (match
 spec   = "lib/modules/manager/npm/extract/index.spec.ts"
 test   = "warns for invalid pnpm workspace yaml files"
 reason = "asserts TypeScript logger.warn spy behavior (exact call shape with packageFile + err: any Error, and specific message 'Failed to parse pnpm-workspace.yaml file') when fs.readLocalFile returns invalid yaml content for pnpm-workspace.yaml during extractAllPackageFiles; the core business logic (bad workspace file leads to no extracted packages / empty result, parse errors are tolerated) is already exercised by ported unit tests on extract_pnpm_workspace_file and related empty/valid parse cases in extractors/npm.rs; no direct Rust logger spy equivalent without altering production instrumentation or test harness"
+
+[[test]]
+spec   = "lib/modules/manager/npm/update/dependency/yarn.spec.ts"
+test   = "ensure trace logging"
+reason = "asserts TypeScript logger spy behavior (exact logger.logger.trace call with the formatted message 'npm.updateYarnrcCatalogDependency(): yarn.catalog.default::default.react = 19.0.0') on successful catalog update; the core business logic of updateYarnrcCatalogDependency is already covered by other ported tests in the same spec; no direct Rust logger spy equivalent without altering production instrumentation (Rust uses tracing/debug macros) or test harness"

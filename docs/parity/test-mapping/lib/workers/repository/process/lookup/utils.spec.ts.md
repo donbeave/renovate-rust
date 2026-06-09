@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 14 | returns the replacement name if defined | ported | [`crates/renovate-core/src/branch.rs:2297`](../../../../../../../../crates/renovate-core/src/branch.rs#L2297) |
-| 23 | returns the replacement name template if defined | ported | [`crates/renovate-core/src/branch.rs:2306`](../../../../../../../../crates/renovate-core/src/branch.rs#L2306) |
-| 32 | returns the package name if defined | ported | [`crates/renovate-core/src/branch.rs:2315`](../../../../../../../../crates/renovate-core/src/branch.rs#L2315) |
+| 14 | returns the replacement name if defined | ported | [`crates/renovate-core/src/branch.rs:2300`](../../../../../../../../crates/renovate-core/src/branch.rs#L2300) |
+| 23 | returns the replacement name template if defined | ported | [`crates/renovate-core/src/branch.rs:2309`](../../../../../../../../crates/renovate-core/src/branch.rs#L2309) |
+| 32 | returns the package name if defined | ported | [`crates/renovate-core/src/branch.rs:2318`](../../../../../../../../crates/renovate-core/src/branch.rs#L2318) |
 

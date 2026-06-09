@@ -6,11 +6,11 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 16 | parses lockfile string into an object | ported | [`crates/renovate-core/src/extractors/npm.rs:4946`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4946) |
-| 37 | can deal with invalid lockfiles | ported | [`crates/renovate-core/src/extractors/npm.rs:4959`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4959) |
-| 48 | composes lockfile string out of an object | ported | [`crates/renovate-core/src/extractors/npm.rs:4967`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4967) |
-| 66 | adds trailing newline to match npms behavior and avoid diffs | ported | [`crates/renovate-core/src/extractors/npm.rs:4990`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4990) |
-| 81 | loads and parses package.json correctly | ported | [`crates/renovate-core/src/extractors/npm.rs:5003`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5003) |
-| 100 | returns empty object when package.json is missing | ported | [`crates/renovate-core/src/extractors/npm.rs:5030`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5030) |
-| 105 | returns empty object when package.json is invalid | ported | [`crates/renovate-core/src/extractors/npm.rs:5038`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5038) |
+| 16 | parses lockfile string into an object | ported | [`crates/renovate-core/src/extractors/npm.rs:4953`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4953) |
+| 37 | can deal with invalid lockfiles | ported | [`crates/renovate-core/src/extractors/npm.rs:4966`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4966) |
+| 48 | composes lockfile string out of an object | ported | [`crates/renovate-core/src/extractors/npm.rs:4974`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4974) |
+| 66 | adds trailing newline to match npms behavior and avoid diffs | ported | [`crates/renovate-core/src/extractors/npm.rs:4997`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4997) |
+| 81 | loads and parses package.json correctly | ported | [`crates/renovate-core/src/extractors/npm.rs:5010`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5010) |
+| 100 | returns empty object when package.json is missing | ported | [`crates/renovate-core/src/extractors/npm.rs:5037`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5037) |
+| 105 | returns empty object when package.json is invalid | ported | [`crates/renovate-core/src/extractors/npm.rs:5045`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5045) |
 
