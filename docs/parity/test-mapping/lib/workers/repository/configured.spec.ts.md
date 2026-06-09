@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 16 | returns | ported | [`crates/renovate-core/src/util.rs:10169`](../../../../../../crates/renovate-core/src/util.rs#L10169) |
-| 20 | throws if disabled | ported | [`crates/renovate-core/src/util.rs:10175`](../../../../../../crates/renovate-core/src/util.rs#L10175) |
-| 25 | throws if unconfigured fork | ported | [`crates/renovate-core/src/util.rs:10181`](../../../../../../crates/renovate-core/src/util.rs#L10181) |
+| 16 | returns | ported | [`crates/renovate-core/src/util.rs:10156`](../../../../../../crates/renovate-core/src/util.rs#L10156) |
+| 20 | throws if disabled | ported | [`crates/renovate-core/src/util.rs:10162`](../../../../../../crates/renovate-core/src/util.rs#L10162) |
+| 25 | throws if unconfigured fork | ported | [`crates/renovate-core/src/util.rs:10168`](../../../../../../crates/renovate-core/src/util.rs#L10168) |
 

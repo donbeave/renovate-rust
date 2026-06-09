@@ -6,20 +6,20 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 20 | returns warning text | ported | [`crates/renovate-core/src/util.rs:12882`](../../../../../../crates/renovate-core/src/util.rs#L12882) |
-| 41 | getwarning returns empty string | ported | [`crates/renovate-core/src/util.rs:12892`](../../../../../../crates/renovate-core/src/util.rs#L12892) |
-| 49 | returns 2 pr warnings text dependencydashboard true | ported | [`crates/renovate-core/src/util.rs:12913`](../../../../../../crates/renovate-core/src/util.rs#L12913) |
-| 97 | returns 2 pr warnings text dependencydashboard true with issue link | ported | [`crates/renovate-core/src/util.rs:12937`](../../../../../../crates/renovate-core/src/util.rs#L12937) |
-| 120 | returns 2 pr warnings text dependencydashboard false | ported | [`crates/renovate-core/src/util.rs:12948`](../../../../../../crates/renovate-core/src/util.rs#L12948) |
-| 168 | pr warning returns empty string | ported | [`crates/renovate-core/src/util.rs:12959`](../../../../../../crates/renovate-core/src/util.rs#L12959) |
-| 175 | suppress notifications contains dependencylookupwarnings flag then return empty string | ported | [`crates/renovate-core/src/util.rs:12965`](../../../../../../crates/renovate-core/src/util.rs#L12965) |
-| 186 | returns dependency dashboard warning text | ported | [`crates/renovate-core/src/util.rs:12971`](../../../../../../crates/renovate-core/src/util.rs#L12971) |
-| 236 | dependency dashboard warning returns empty string | ported | [`crates/renovate-core/src/util.rs:12995`](../../../../../../crates/renovate-core/src/util.rs#L12995) |
-| 243 | suppress notifications contains dependencylookupwarnings flag then return empty string | ported | [`crates/renovate-core/src/util.rs:12965`](../../../../../../crates/renovate-core/src/util.rs#L12965) |
-| 260 | returns error text | ported | [`crates/renovate-core/src/util.rs:12898`](../../../../../../crates/renovate-core/src/util.rs#L12898) |
-| 281 | geterror returns empty string | ported | [`crates/renovate-core/src/util.rs:12907`](../../../../../../crates/renovate-core/src/util.rs#L12907) |
-| 289 | returns onboarding warning text | ported | [`crates/renovate-core/src/util.rs:13007`](../../../../../../crates/renovate-core/src/util.rs#L13007) |
-| 345 | handle empty package files | ported | [`crates/renovate-core/src/util.rs:13032`](../../../../../../crates/renovate-core/src/util.rs#L13032) |
-| 356 | suppress notifications contains dependencylookupwarnings flag then return empty string | ported | [`crates/renovate-core/src/util.rs:12965`](../../../../../../crates/renovate-core/src/util.rs#L12965) |
-| 365 | handles undefined | ported | [`crates/renovate-core/src/util.rs:13044`](../../../../../../crates/renovate-core/src/util.rs#L13044) |
+| 20 | returns warning text | ported | [`crates/renovate-core/src/util.rs:12869`](../../../../../../crates/renovate-core/src/util.rs#L12869) |
+| 41 | getwarning returns empty string | ported | [`crates/renovate-core/src/util.rs:12879`](../../../../../../crates/renovate-core/src/util.rs#L12879) |
+| 49 | returns 2 pr warnings text dependencydashboard true | ported | [`crates/renovate-core/src/util.rs:12900`](../../../../../../crates/renovate-core/src/util.rs#L12900) |
+| 97 | returns 2 pr warnings text dependencydashboard true with issue link | ported | [`crates/renovate-core/src/util.rs:12924`](../../../../../../crates/renovate-core/src/util.rs#L12924) |
+| 120 | returns 2 pr warnings text dependencydashboard false | ported | [`crates/renovate-core/src/util.rs:12935`](../../../../../../crates/renovate-core/src/util.rs#L12935) |
+| 168 | pr warning returns empty string | ported | [`crates/renovate-core/src/util.rs:12946`](../../../../../../crates/renovate-core/src/util.rs#L12946) |
+| 175 | suppress notifications contains dependencylookupwarnings flag then return empty string | ported | [`crates/renovate-core/src/util.rs:12952`](../../../../../../crates/renovate-core/src/util.rs#L12952) |
+| 186 | returns dependency dashboard warning text | ported | [`crates/renovate-core/src/util.rs:12958`](../../../../../../crates/renovate-core/src/util.rs#L12958) |
+| 236 | dependency dashboard warning returns empty string | ported | [`crates/renovate-core/src/util.rs:12982`](../../../../../../crates/renovate-core/src/util.rs#L12982) |
+| 243 | suppress notifications contains dependencylookupwarnings flag then return empty string | ported | [`crates/renovate-core/src/util.rs:12952`](../../../../../../crates/renovate-core/src/util.rs#L12952) |
+| 260 | returns error text | ported | [`crates/renovate-core/src/util.rs:12885`](../../../../../../crates/renovate-core/src/util.rs#L12885) |
+| 281 | geterror returns empty string | ported | [`crates/renovate-core/src/util.rs:12894`](../../../../../../crates/renovate-core/src/util.rs#L12894) |
+| 289 | returns onboarding warning text | ported | [`crates/renovate-core/src/util.rs:12994`](../../../../../../crates/renovate-core/src/util.rs#L12994) |
+| 345 | handle empty package files | ported | [`crates/renovate-core/src/util.rs:13019`](../../../../../../crates/renovate-core/src/util.rs#L13019) |
+| 356 | suppress notifications contains dependencylookupwarnings flag then return empty string | ported | [`crates/renovate-core/src/util.rs:12952`](../../../../../../crates/renovate-core/src/util.rs#L12952) |
+| 365 | handles undefined | ported | [`crates/renovate-core/src/util.rs:13031`](../../../../../../crates/renovate-core/src/util.rs#L13031) |
 

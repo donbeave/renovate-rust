@@ -7,5 +7,5 @@
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
 | [`lib/util/schema-utils/index.spec.ts`](../../lib/util/schema-utils/index.spec.ts.md) | 35 | 0 | 35 | 0 | — | pending |
-| [`lib/util/schema-utils/v4.spec.ts`](../../lib/util/schema-utils/v4.spec.ts.md) | 12 | 12 | 0 | 0 | [`crates/renovate-core/src/util.rs:11437`](../../../../../crates/renovate-core/src/util.rs#L11437) | ported |
+| [`lib/util/schema-utils/v4.spec.ts`](../../lib/util/schema-utils/v4.spec.ts.md) | 12 | 12 | 0 | 0 | [`crates/renovate-core/src/util.rs:11424`](../../../../../crates/renovate-core/src/util.rs#L11424) | ported |
 

@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 35 | returns default environment variables | ported | [`crates/renovate-core/src/util.rs:13744`](../../../../../../crates/renovate-core/src/util.rs#L13744) |
-| 57 | returns environment variable only if defined | ported | [`crates/renovate-core/src/util.rs:13800`](../../../../../../crates/renovate-core/src/util.rs#L13800) |
-| 62 | returns custom environment variables if passed and defined | ported | [`crates/renovate-core/src/util.rs:13814`](../../../../../../crates/renovate-core/src/util.rs#L13814) |
-| 79 | returns process.env if trustlevel set to high | ported | [`crates/renovate-core/src/util.rs:13841`](../../../../../../crates/renovate-core/src/util.rs#L13841) |
+| 35 | returns default environment variables | ported | [`crates/renovate-core/src/util.rs:13731`](../../../../../../crates/renovate-core/src/util.rs#L13731) |
+| 57 | returns environment variable only if defined | ported | [`crates/renovate-core/src/util.rs:13787`](../../../../../../crates/renovate-core/src/util.rs#L13787) |
+| 62 | returns custom environment variables if passed and defined | ported | [`crates/renovate-core/src/util.rs:13801`](../../../../../../crates/renovate-core/src/util.rs#L13801) |
+| 79 | returns process.env if trustlevel set to high | ported | [`crates/renovate-core/src/util.rs:13828`](../../../../../../crates/renovate-core/src/util.rs#L13828) |
 

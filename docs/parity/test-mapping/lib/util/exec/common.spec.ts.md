@@ -10,7 +10,7 @@
 | 194 | never extends the process environment | ported | [`crates/renovate-core/src/exec/raw.rs:166`](../../../../../../crates/renovate-core/src/exec/raw.rs#L166) |
 | 214 | throws if an error occurs, when using commandwithoptions | ported | [`crates/renovate-core/src/exec/error.rs:123`](../../../../../../crates/renovate-core/src/exec/error.rs#L123) |
 | 241 | throws if an error occurs | ported | [`crates/renovate-core/src/exec/error.rs:115`](../../../../../../crates/renovate-core/src/exec/error.rs#L115) |
-| 265 | throws if an error occurs, and we specify ignorefailure=false | ported | [`crates/renovate-core/src/exec/orchestrator.rs:422`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L422) |
+| 265 | throws if an error occurs, and we specify ignorefailure=false | ported | [`crates/renovate-core/src/exec/orchestrator.rs:423`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L423) |
 | 292 | does not throw if an error occurs, but we specify ignorefailure=true | ported | [`crates/renovate-core/src/exec/orchestrator.rs:396`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L396) |
 | 320 | can specify a shell | ported | [`crates/renovate-core/src/exec/raw.rs:182`](../../../../../../crates/renovate-core/src/exec/raw.rs#L182) |
 | 343 | can specify a specific shell with commandwithoptions | opt-out | tests the RawExecOptions object form ({command: [...], shell: 'specific'}) being accepted and passed to lower; Rust uses ExecOptions + &[String] array form directly (core shell behavior covered by existing ported shell tests in raw/orchestrator); the specific TS object shape + commandwithoptions is wrapper detail. |

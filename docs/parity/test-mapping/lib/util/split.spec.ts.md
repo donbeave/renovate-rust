@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | adds splits and returns results | ported | [`crates/renovate-core/src/util.rs:11778`](../../../../../crates/renovate-core/src/util.rs#L11778) |
+| 4 | adds splits and returns results | ported | [`crates/renovate-core/src/util.rs:11765`](../../../../../crates/renovate-core/src/util.rs#L11765) |
 
