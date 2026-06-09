@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 24/150 in-scope files mapped (full=8 partial=16 stub=0 pending=126 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 25/150 in-scope files mapped (full=8 partial=17 stub=0 pending=125 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -106,7 +106,7 @@
 | TS source | Status | Rust file(s) | Note |
 |---|---|---|---|
 | `lib/workers/repository/cache.ts` | partial | [`crates/renovate-core/src/workers/repository/cache.rs`](../../../crates/renovate-core/src/workers/repository/cache.rs) | set_cache + BranchCacheEntry/BranchUpgradeCacheEntry projection (generate_branch_upgrade_cache_entry + population of shas, is_* flags, commit_fingerprint, upgrades list etc from BranchConfig which carries precomputed values in Rust flow) implemented. The async generateBranchCache (scm.getBranchCommit + platform.getBranchPr + getCachedPristine/Modified/Behind/Conflict + commit date + prCache) + side-effect `getCache().branches = ...` + full RepoCacheData integration (load/save) live in other repository/* + util/cache/repository modules in the current architecture. |
-| `lib/workers/repository/changelog/index.ts` | pending | — | — |
+| `lib/workers/repository/changelog/index.ts` | partial | [`crates/renovate-core/src/workers/repository/changelog/index.rs`](../../../crates/renovate-core/src/workers/repository/changelog/index.rs) | embedChangelog + embedChangelogs (stage filter on fetchChangeLogs, pre-provided changelogContent synthetic path, delegation to get / skip if logJSON already set) implemented using EmbeddableUpgrade + the ChangeLog* types. The actual getChangeLogJSON (release notes fetch), wiring into BranchUpgrade during branchify/update/pr, and full PR body rendering live in other (pending) repository/update/pr/changelog and branch modules. |
 | `lib/workers/repository/changelog/types.ts` | opt-out | — | Type-only changelog option/result type aliases with no runtime behavior in Rust implementation. |
 | `lib/workers/repository/common.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/branch/commit-message.ts` | pending | — | — |
