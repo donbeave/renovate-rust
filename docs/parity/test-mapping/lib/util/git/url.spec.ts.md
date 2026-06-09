@@ -6,27 +6,27 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 9 | supports ports | ported | [`crates/renovate-core/src/util.rs:6825`](../../../../../../crates/renovate-core/src/util.rs#L6825) |
-| 40 | returns https url for git url | ported | [`crates/renovate-core/src/util.rs:6840`](../../../../../../crates/renovate-core/src/util.rs#L6840) |
-| 44 | returns https url for https url | ported | [`crates/renovate-core/src/util.rs:6846`](../../../../../../crates/renovate-core/src/util.rs#L6846) |
-| 48 | returns http url for http url | ported | [`crates/renovate-core/src/util.rs:6852`](../../../../../../crates/renovate-core/src/util.rs#L6852) |
-| 52 | returns http url for ssh url with port | ported | [`crates/renovate-core/src/util.rs:6858`](../../../../../../crates/renovate-core/src/util.rs#L6858) |
-| 60 | returns gitlab url with token | ported | [`crates/renovate-core/src/util.rs:6870`](../../../../../../crates/renovate-core/src/util.rs#L6870) |
-| 75 | returns github url with token | ported | [`crates/renovate-core/src/util.rs:6879`](../../../../../../crates/renovate-core/src/util.rs#L6879) |
-| 90 | returns bitbucket-server url | ported | [`crates/renovate-core/src/util.rs:6888`](../../../../../../crates/renovate-core/src/util.rs#L6888) |
-| 100 | removes username/password from url | ported | [`crates/renovate-core/src/util.rs:6909`](../../../../../../crates/renovate-core/src/util.rs#L6909) |
-| 106 | replaces username/password with given token | ported | [`crates/renovate-core/src/util.rs:6918`](../../../../../../crates/renovate-core/src/util.rs#L6918) |
-| 117 | returns original url if no host rule is found | ported | [`crates/renovate-core/src/util.rs:6947`](../../../../../../crates/renovate-core/src/util.rs#L6947) |
-| 123 | transforms an ssh git url to https for the purpose of finding hostrules | ported | [`crates/renovate-core/src/util.rs:6957`](../../../../../../crates/renovate-core/src/util.rs#L6957) |
-| 132 | does not transform urls that are not parseable as git urls | ported | [`crates/renovate-core/src/util.rs:6976`](../../../../../../crates/renovate-core/src/util.rs#L6976) |
-| 141 | returns http url with token | ported | [`crates/renovate-core/src/util.rs:6992`](../../../../../../crates/renovate-core/src/util.rs#L6992) |
-| 148 | returns https url with token | ported | [`crates/renovate-core/src/util.rs:7011`](../../../../../../crates/renovate-core/src/util.rs#L7011) |
-| 155 | returns https url with token for non-http protocols | ported | [`crates/renovate-core/src/util.rs:7030`](../../../../../../crates/renovate-core/src/util.rs#L7030) |
-| 162 | returns https url with encoded token | ported | [`crates/renovate-core/src/util.rs:7049`](../../../../../../crates/renovate-core/src/util.rs#L7049) |
-| 169 | returns http url with username and password | ported | [`crates/renovate-core/src/util.rs:7068`](../../../../../../crates/renovate-core/src/util.rs#L7068) |
-| 179 | returns https url with username and password | ported | [`crates/renovate-core/src/util.rs:7087`](../../../../../../crates/renovate-core/src/util.rs#L7087) |
-| 189 | returns https url with username and password for non-http protocols | ported | [`crates/renovate-core/src/util.rs:7106`](../../../../../../crates/renovate-core/src/util.rs#L7106) |
-| 199 | returns https url with encoded username and password | ported | [`crates/renovate-core/src/util.rs:7125`](../../../../../../crates/renovate-core/src/util.rs#L7125) |
-| 209 | returns https url with encoded gitlab token | ported | [`crates/renovate-core/src/util.rs:7144`](../../../../../../crates/renovate-core/src/util.rs#L7144) |
-| 218 | returns https url for ssh url with encoded github token | ported | [`crates/renovate-core/src/util.rs:7163`](../../../../../../crates/renovate-core/src/util.rs#L7163) |
+| 9 | supports ports | ported | [`crates/renovate-core/src/util.rs:8441`](../../../../../../crates/renovate-core/src/util.rs#L8441) |
+| 40 | returns https url for git url | ported | [`crates/renovate-core/src/util.rs:8456`](../../../../../../crates/renovate-core/src/util.rs#L8456) |
+| 44 | returns https url for https url | ported | [`crates/renovate-core/src/util.rs:8462`](../../../../../../crates/renovate-core/src/util.rs#L8462) |
+| 48 | returns http url for http url | ported | [`crates/renovate-core/src/util.rs:8468`](../../../../../../crates/renovate-core/src/util.rs#L8468) |
+| 52 | returns http url for ssh url with port | ported | [`crates/renovate-core/src/util.rs:8474`](../../../../../../crates/renovate-core/src/util.rs#L8474) |
+| 60 | returns gitlab url with token | ported | [`crates/renovate-core/src/util.rs:8486`](../../../../../../crates/renovate-core/src/util.rs#L8486) |
+| 75 | returns github url with token | ported | [`crates/renovate-core/src/util.rs:8495`](../../../../../../crates/renovate-core/src/util.rs#L8495) |
+| 90 | returns bitbucket-server url | ported | [`crates/renovate-core/src/util.rs:8504`](../../../../../../crates/renovate-core/src/util.rs#L8504) |
+| 100 | removes username/password from url | ported | [`crates/renovate-core/src/util.rs:8525`](../../../../../../crates/renovate-core/src/util.rs#L8525) |
+| 106 | replaces username/password with given token | ported | [`crates/renovate-core/src/util.rs:8534`](../../../../../../crates/renovate-core/src/util.rs#L8534) |
+| 117 | returns original url if no host rule is found | ported | [`crates/renovate-core/src/util.rs:8563`](../../../../../../crates/renovate-core/src/util.rs#L8563) |
+| 123 | transforms an ssh git url to https for the purpose of finding hostrules | ported | [`crates/renovate-core/src/util.rs:8573`](../../../../../../crates/renovate-core/src/util.rs#L8573) |
+| 132 | does not transform urls that are not parseable as git urls | ported | [`crates/renovate-core/src/util.rs:8592`](../../../../../../crates/renovate-core/src/util.rs#L8592) |
+| 141 | returns http url with token | ported | [`crates/renovate-core/src/util.rs:8608`](../../../../../../crates/renovate-core/src/util.rs#L8608) |
+| 148 | returns https url with token | ported | [`crates/renovate-core/src/util.rs:8627`](../../../../../../crates/renovate-core/src/util.rs#L8627) |
+| 155 | returns https url with token for non-http protocols | ported | [`crates/renovate-core/src/util.rs:8646`](../../../../../../crates/renovate-core/src/util.rs#L8646) |
+| 162 | returns https url with encoded token | ported | [`crates/renovate-core/src/util.rs:8665`](../../../../../../crates/renovate-core/src/util.rs#L8665) |
+| 169 | returns http url with username and password | ported | [`crates/renovate-core/src/util.rs:8684`](../../../../../../crates/renovate-core/src/util.rs#L8684) |
+| 179 | returns https url with username and password | ported | [`crates/renovate-core/src/util.rs:8703`](../../../../../../crates/renovate-core/src/util.rs#L8703) |
+| 189 | returns https url with username and password for non-http protocols | ported | [`crates/renovate-core/src/util.rs:8722`](../../../../../../crates/renovate-core/src/util.rs#L8722) |
+| 199 | returns https url with encoded username and password | ported | [`crates/renovate-core/src/util.rs:8741`](../../../../../../crates/renovate-core/src/util.rs#L8741) |
+| 209 | returns https url with encoded gitlab token | ported | [`crates/renovate-core/src/util.rs:8760`](../../../../../../crates/renovate-core/src/util.rs#L8760) |
+| 218 | returns https url for ssh url with encoded github token | ported | [`crates/renovate-core/src/util.rs:8779`](../../../../../../crates/renovate-core/src/util.rs#L8779) |
 

@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 8 | creates semantic commit message | ported | [`crates/renovate-core/src/branch.rs:2168`](../../../../../../../../crates/renovate-core/src/branch.rs#L2168) |
-| 19 | creates semantic pr title | ported | [`crates/renovate-core/src/branch.rs:2177`](../../../../../../../../crates/renovate-core/src/branch.rs#L2177) |
-| 30 | creates non-semantic commit message | ported | [`crates/renovate-core/src/branch.rs:2186`](../../../../../../../../crates/renovate-core/src/branch.rs#L2186) |
-| 41 | creates non-semantic pr title | ported | [`crates/renovate-core/src/branch.rs:2195`](../../../../../../../../crates/renovate-core/src/branch.rs#L2195) |
-| 50 | returns default values when commitmessage template string is empty | ported | [`crates/renovate-core/src/branch.rs:2204`](../../../../../../../../crates/renovate-core/src/branch.rs#L2204) |
+| 8 | creates semantic commit message | ported | [`crates/renovate-core/src/branch.rs:2171`](../../../../../../../../crates/renovate-core/src/branch.rs#L2171) |
+| 19 | creates semantic pr title | ported | [`crates/renovate-core/src/branch.rs:2180`](../../../../../../../../crates/renovate-core/src/branch.rs#L2180) |
+| 30 | creates non-semantic commit message | ported | [`crates/renovate-core/src/branch.rs:2189`](../../../../../../../../crates/renovate-core/src/branch.rs#L2189) |
+| 41 | creates non-semantic pr title | ported | [`crates/renovate-core/src/branch.rs:2198`](../../../../../../../../crates/renovate-core/src/branch.rs#L2198) |
+| 50 | returns default values when commitmessage template string is empty | ported | [`crates/renovate-core/src/branch.rs:2207`](../../../../../../../../crates/renovate-core/src/branch.rs#L2207) |
 

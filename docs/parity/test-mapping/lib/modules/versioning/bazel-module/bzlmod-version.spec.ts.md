@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | when all digits | ported | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:221`](../../../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L221) |
-| 12 | when not all digits | ported | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:230`](../../../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L230) |
+| 5 | when all digits | ported | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:222`](../../../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L222) |
+| 12 | when not all digits | ported | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:231`](../../../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L231) |
 | 19 | _(it.each / template — verify manually)_ | ? | — |
 | 32 | _(it.each / template — verify manually)_ | ? | — |
 | 49 | _(it.each / template — verify manually)_ | ? | — |

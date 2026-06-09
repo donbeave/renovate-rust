@@ -6,6 +6,6 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/proxy.spec.ts`](../../lib/proxy.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/proxy.rs:58`](../../../../../crates/renovate-core/src/proxy.rs#L58) | ported |
+| [`lib/proxy.spec.ts`](../../lib/proxy.spec.ts.md) | 5 | 5 | 0 | 0 | [`crates/renovate-core/src/proxy.rs:59`](../../../../../crates/renovate-core/src/proxy.rs#L59) | ported |
 | [`lib/renovate.spec.ts`](../../lib/renovate.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-cli/tests/cli.rs:59`](../../../../../crates/renovate-cli/tests/cli.rs#L59) | ported |
 

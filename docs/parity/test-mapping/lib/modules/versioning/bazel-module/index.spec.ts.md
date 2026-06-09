@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | getmajor() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:106`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L106) |
-| 9 | getminor() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:112`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L112) |
-| 13 | getpatch() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:118`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L118) |
+| 5 | getmajor() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:107`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L107) |
+| 9 | getminor() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:113`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L113) |
+| 13 | getpatch() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:119`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L119) |
 | 17 | _(it.each / template — verify manually)_ | ? | — |
 | 27 | _(it.each / template — verify manually)_ | ? | — |
 | 36 | _(it.each / template — verify manually)_ | ? | — |
@@ -17,5 +17,5 @@
 | 65 | _(it.each / template — verify manually)_ | ? | — |
 | 74 | _(it.each / template — verify manually)_ | ? | — |
 | 90 | _(it.each / template — verify manually)_ | ? | — |
-| 100 | getnewvalue() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:207`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L207) |
+| 100 | getnewvalue() | ported | [`crates/renovate-core/src/versioning/bazel_module.rs:208`](../../../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L208) |
 

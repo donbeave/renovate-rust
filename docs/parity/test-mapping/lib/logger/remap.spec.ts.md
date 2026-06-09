@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 15 | returns null if no remaps are set | ported | [`crates/renovate-core/src/util.rs:8485`](../../../../../crates/renovate-core/src/util.rs#L8485) |
-| 24 | performs global remaps | ported | [`crates/renovate-core/src/util.rs:8491`](../../../../../crates/renovate-core/src/util.rs#L8491) |
-| 33 | performs repository-level remaps | ported | [`crates/renovate-core/src/util.rs:8501`](../../../../../crates/renovate-core/src/util.rs#L8501) |
-| 44 | prioritizes repository-level remaps over global remaps | ported | [`crates/renovate-core/src/util.rs:8508`](../../../../../crates/renovate-core/src/util.rs#L8508) |
-| 55 | supports regex patterns | ported | [`crates/renovate-core/src/util.rs:8519`](../../../../../crates/renovate-core/src/util.rs#L8519) |
-| 64 | does not match against invalid regex patterns | ported | [`crates/renovate-core/src/util.rs:8529`](../../../../../crates/renovate-core/src/util.rs#L8529) |
+| 15 | returns null if no remaps are set | ported | [`crates/renovate-core/src/util.rs:10136`](../../../../../crates/renovate-core/src/util.rs#L10136) |
+| 24 | performs global remaps | ported | [`crates/renovate-core/src/util.rs:10142`](../../../../../crates/renovate-core/src/util.rs#L10142) |
+| 33 | performs repository-level remaps | ported | [`crates/renovate-core/src/util.rs:10152`](../../../../../crates/renovate-core/src/util.rs#L10152) |
+| 44 | prioritizes repository-level remaps over global remaps | ported | [`crates/renovate-core/src/util.rs:10159`](../../../../../crates/renovate-core/src/util.rs#L10159) |
+| 55 | supports regex patterns | ported | [`crates/renovate-core/src/util.rs:10170`](../../../../../crates/renovate-core/src/util.rs#L10170) |
+| 64 | does not match against invalid regex patterns | ported | [`crates/renovate-core/src/util.rs:10180`](../../../../../crates/renovate-core/src/util.rs#L10180) |
 

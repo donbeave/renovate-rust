@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 95 | getinvalidreviewers | ported | [`crates/renovate-core/src/util.rs:9785`](../../../../../../../crates/renovate-core/src/util.rs#L9785) |
+| 95 | getinvalidreviewers | ported | [`crates/renovate-core/src/util.rs:11485`](../../../../../../../crates/renovate-core/src/util.rs#L11485) |
 | 128 | works giturl:undefined generate endpoint | pending | — |
 | 147 | works giturl:undefined use endpoint with injected auth | pending | — |
 | 166 | works giturl:undefined use ssh | pending | — |
@@ -21,6 +21,6 @@
 | 307 | giturl:default no http url returns generated url | pending | — |
 | 321 | actually respects the giturl setting | pending | — |
 | 333 | throws on invalid endpoint url | pending | — |
-| 347 | should not configure bearer token | ported | [`crates/renovate-core/src/util.rs:9801`](../../../../../../../crates/renovate-core/src/util.rs#L9801) |
-| 352 | should configure bearer token | ported | [`crates/renovate-core/src/util.rs:9808`](../../../../../../../crates/renovate-core/src/util.rs#L9808) |
+| 347 | should not configure bearer token | ported | [`crates/renovate-core/src/util.rs:11501`](../../../../../../../crates/renovate-core/src/util.rs#L11501) |
+| 352 | should configure bearer token | ported | [`crates/renovate-core/src/util.rs:11508`](../../../../../../../crates/renovate-core/src/util.rs#L11508) |
 

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/swift/index.spec.ts`](../../lib/modules/versioning/swift/index.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/versioning/swift.rs:304`](../../../../../crates/renovate-core/src/versioning/swift.rs#L304) | ported |
+| [`lib/modules/versioning/swift/index.spec.ts`](../../lib/modules/versioning/swift/index.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/versioning/swift.rs:306`](../../../../../crates/renovate-core/src/versioning/swift.rs#L306) | ported |
 

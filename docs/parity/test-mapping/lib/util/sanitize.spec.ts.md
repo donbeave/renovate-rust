@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 15 | sanitizes empty string | ported | [`crates/renovate-core/src/util.rs:9427`](../../../../../crates/renovate-core/src/util.rs#L9427) |
-| 21 | sanitizes secrets from strings | ported | [`crates/renovate-core/src/util.rs:9437`](../../../../../crates/renovate-core/src/util.rs#L9437) |
-| 40 | sanitizes github app tokens | ported | [`crates/renovate-core/src/util.rs:9462`](../../../../../crates/renovate-core/src/util.rs#L9462) |
+| 15 | sanitizes empty string | ported | [`crates/renovate-core/src/util.rs:11127`](../../../../../crates/renovate-core/src/util.rs#L11127) |
+| 21 | sanitizes secrets from strings | ported | [`crates/renovate-core/src/util.rs:11137`](../../../../../crates/renovate-core/src/util.rs#L11137) |
+| 40 | sanitizes github app tokens | ported | [`crates/renovate-core/src/util.rs:11162`](../../../../../crates/renovate-core/src/util.rs#L11162) |
 

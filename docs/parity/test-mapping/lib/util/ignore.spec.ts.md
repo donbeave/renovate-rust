@@ -2,13 +2,13 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**4/5 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
+**5/5 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 11 | returns true for "renovate:ignore" comments | ported | [`crates/renovate-core/src/string_match.rs:579`](../../../../../crates/renovate-core/src/string_match.rs#L579) |
-| 15 | returns false for comments not starting with "renovate:" or "pyup:" | ported | [`crates/renovate-core/src/string_match.rs:591`](../../../../../crates/renovate-core/src/string_match.rs#L591) |
-| 19 | returns false for "renovate:" comments without "ignore" | ported | [`crates/renovate-core/src/string_match.rs:597`](../../../../../crates/renovate-core/src/string_match.rs#L597) |
-| 23 | logs unknown command for "renovate:" comments without "ignore" | pending | — |
-| 31 | returns false when comment is undefined | ported | [`crates/renovate-core/src/string_match.rs:603`](../../../../../crates/renovate-core/src/string_match.rs#L603) |
+| 11 | returns true for "renovate:ignore" comments | ported | [`crates/renovate-core/src/string_match.rs:588`](../../../../../crates/renovate-core/src/string_match.rs#L588) |
+| 15 | returns false for comments not starting with "renovate:" or "pyup:" | ported | [`crates/renovate-core/src/string_match.rs:600`](../../../../../crates/renovate-core/src/string_match.rs#L600) |
+| 19 | returns false for "renovate:" comments without "ignore" | ported | [`crates/renovate-core/src/string_match.rs:606`](../../../../../crates/renovate-core/src/string_match.rs#L606) |
+| 23 | logs unknown command for "renovate:" comments without "ignore" | ported | [`crates/renovate-core/src/string_match.rs:612`](../../../../../crates/renovate-core/src/string_match.rs#L612) |
+| 31 | returns false when comment is undefined | ported | [`crates/renovate-core/src/string_match.rs:619`](../../../../../crates/renovate-core/src/string_match.rs#L619) |
 

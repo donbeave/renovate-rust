@@ -7,6 +7,6 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | _(it.each / template — verify manually)_ | ? | — |
-| 26 | maintains same order | ported | [`crates/renovate-core/src/util.rs:9729`](../../../../../crates/renovate-core/src/util.rs#L9729) |
+| 26 | maintains same order | ported | [`crates/renovate-core/src/util.rs:11429`](../../../../../crates/renovate-core/src/util.rs#L11429) |
 | 41 | assigns "[circular]" to circular references | pending | — |
 

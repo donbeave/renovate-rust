@@ -6,6 +6,6 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/bazel-module/bzlmod-version.spec.ts`](../../lib/modules/versioning/bazel-module/bzlmod-version.spec.ts.md) | 18 | 14 | 4 | 0 | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:221`](../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L221) | partial |
-| [`lib/modules/versioning/bazel-module/index.spec.ts`](../../lib/modules/versioning/bazel-module/index.spec.ts.md) | 12 | 12 | 0 | 0 | [`crates/renovate-core/src/versioning/bazel_module.rs:106`](../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L106) | ported |
+| [`lib/modules/versioning/bazel-module/bzlmod-version.spec.ts`](../../lib/modules/versioning/bazel-module/bzlmod-version.spec.ts.md) | 18 | 14 | 4 | 0 | [`crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs:222`](../../../../../crates/renovate-core/src/versioning/bazel_module/bzlmod_version.rs#L222) | partial |
+| [`lib/modules/versioning/bazel-module/index.spec.ts`](../../lib/modules/versioning/bazel-module/index.spec.ts.md) | 12 | 12 | 0 | 0 | [`crates/renovate-core/src/versioning/bazel_module.rs:107`](../../../../../crates/renovate-core/src/versioning/bazel_module.rs#L107) | ported |
 

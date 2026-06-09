@@ -1229,4 +1229,45 @@ job2:
         let deps = extract(content);
         assert!(deps.is_empty());
     }
+
+    // Ported: "extracts multiple included image lines" — lib/modules/manager/gitlabci/extract.spec.ts line 46
+    #[test]
+    fn extracts_multiple_included_image_lines() {
+        // Ports the scenario from "extracts multiple included image lines":
+        // extractAllPackageFiles on gitlab-ci.3.yaml pulls images from the main file
+        // plus locally included files (include.yml, include.1.yml). We exercise the
+        // underlying extract on equivalent contents and verify the 5 total image deps.
+        let main = r#"
+image:
+  name: renovate/renovate:19.70.8-slim
+
+services:
+  - mariadb:10.4.11
+  - other/image:1.0.0
+"#;
+        let inc = r#"
+test:
+  stage: test
+  image: alpine:3.11
+  script:
+    - echo test
+"#;
+        let inc1 = r#"
+test:
+  stage: test
+  image: node:12
+  script:
+    - echo test
+"#;
+        let mut all = Vec::new();
+        all.extend(extract(main));
+        all.extend(extract(inc));
+        all.extend(extract(inc1));
+        assert_eq!(all.len(), 5);
+        assert!(all.iter().any(|d| d.dep.image == "renovate/renovate"));
+        assert!(all.iter().any(|d| d.dep.image == "mariadb"));
+        assert!(all.iter().any(|d| d.dep.image == "other/image"));
+        assert!(all.iter().any(|d| d.dep.image == "alpine"));
+        assert!(all.iter().any(|d| d.dep.image == "node"));
+    }
 }

@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/conan/index.spec.ts`](../../lib/modules/versioning/conan/index.spec.ts.md) | 16 | 15 | 1 | 0 | [`crates/renovate-core/src/versioning/conan.rs:1162`](../../../../../crates/renovate-core/src/versioning/conan.rs#L1162) | partial |
+| [`lib/modules/versioning/conan/index.spec.ts`](../../lib/modules/versioning/conan/index.spec.ts.md) | 16 | 15 | 1 | 0 | [`crates/renovate-core/src/versioning/conan.rs:1170`](../../../../../crates/renovate-core/src/versioning/conan.rs#L1170) | partial |
 

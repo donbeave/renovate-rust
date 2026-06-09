@@ -6,6 +6,6 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/hashicorp/convertor.spec.ts`](../../lib/modules/versioning/hashicorp/convertor.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/versioning/hashicorp.rs:876`](../../../../../crates/renovate-core/src/versioning/hashicorp.rs#L876) | ported |
-| [`lib/modules/versioning/hashicorp/index.spec.ts`](../../lib/modules/versioning/hashicorp/index.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/versioning/hashicorp.rs:705`](../../../../../crates/renovate-core/src/versioning/hashicorp.rs#L705) | ported |
+| [`lib/modules/versioning/hashicorp/convertor.spec.ts`](../../lib/modules/versioning/hashicorp/convertor.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/versioning/hashicorp.rs:877`](../../../../../crates/renovate-core/src/versioning/hashicorp.rs#L877) | ported |
+| [`lib/modules/versioning/hashicorp/index.spec.ts`](../../lib/modules/versioning/hashicorp/index.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/versioning/hashicorp.rs:706`](../../../../../crates/renovate-core/src/versioning/hashicorp.rs#L706) | ported |
 

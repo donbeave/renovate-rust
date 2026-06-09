@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/conda/index.spec.ts`](../../lib/modules/versioning/conda/index.spec.ts.md) | 15 | 15 | 0 | 0 | [`crates/renovate-core/src/versioning/conda.rs:383`](../../../../../crates/renovate-core/src/versioning/conda.rs#L383) | ported |
+| [`lib/modules/versioning/conda/index.spec.ts`](../../lib/modules/versioning/conda/index.spec.ts.md) | 15 | 15 | 0 | 0 | [`crates/renovate-core/src/versioning/conda.rs:385`](../../../../../crates/renovate-core/src/versioning/conda.rs#L385) | ported |
 

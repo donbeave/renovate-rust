@@ -7,7 +7,7 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 4 | should migrate none | ported | [`crates/renovate-core/src/repo_config.rs:10098`](../../../../../../../crates/renovate-core/src/repo_config.rs#L10098) |
-| 15 | should migrate patch | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4970`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4970) |
-| 34 | should migrate minor | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4980`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4980) |
+| 15 | should migrate patch | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4972`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4972) |
+| 34 | should migrate minor | ported | [`crates/renovate-core/src/config/migrate_validate.rs:4982`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4982) |
 | 50 | should migrate any | ported | [`crates/renovate-core/src/repo_config.rs:10105`](../../../../../../../crates/renovate-core/src/repo_config.rs#L10105) |
 

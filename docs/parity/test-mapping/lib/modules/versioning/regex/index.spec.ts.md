@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | requires a valid configuration to be initialized | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:323`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L323) |
-| 14 | works without config | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:329`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L329) |
-| 19 | works with missing version | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:336`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L336) |
+| 10 | requires a valid configuration to be initialized | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:325`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L325) |
+| 14 | works without config | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:331`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L331) |
+| 19 | works with missing version | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:338`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L338) |
 | 25 | _(it.each / template — verify manually)_ | ? | — |
 | 35 | _(it.each / template — verify manually)_ | ? | — |
 | 58 | _(it.each / template — verify manually)_ | ? | — |
@@ -21,13 +21,13 @@
 | 204 | _(it.each / template — verify manually)_ | ? | — |
 | 253 | _(it.each / template — verify manually)_ | ? | — |
 | 267 | _(it.each / template — verify manually)_ | ? | — |
-| 282 | returns newversion | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:512`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L512) |
-| 295 | sorts versions in an ascending order | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:522`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L522) |
+| 282 | returns newversion | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:514`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L514) |
+| 295 | sorts versions in an ascending order | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:524`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L524) |
 | 304 | _(it.each / template — verify manually)_ | ? | — |
 | 365 | _(it.each / template — verify manually)_ | ? | — |
 | 373 | _(it.each / template — verify manually)_ | ? | — |
 | 384 | _(it.each / template — verify manually)_ | ? | — |
 | 392 | _(it.each / template — verify manually)_ | ? | — |
-| 403 | getsatisfyingversion | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:590`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L590) |
-| 412 | minsatisfyingversion | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:612`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L612) |
+| 403 | getsatisfyingversion | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:592`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L592) |
+| 412 | minsatisfyingversion | ported | [`crates/renovate-core/src/versioning/regex_versioning.rs:614`](../../../../../../../crates/renovate-core/src/versioning/regex_versioning.rs#L614) |
 

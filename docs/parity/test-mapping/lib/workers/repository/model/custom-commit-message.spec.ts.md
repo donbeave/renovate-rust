@@ -7,6 +7,6 @@
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 5 | _(it.each / template — verify manually)_ | ? | — |
-| 31 | should provide ability to set body and footer | ported | [`crates/renovate-core/src/branch.rs:2154`](../../../../../../../crates/renovate-core/src/branch.rs#L2154) |
-| 46 | should remove empty subject by default | ported | [`crates/renovate-core/src/branch.rs:2162`](../../../../../../../crates/renovate-core/src/branch.rs#L2162) |
+| 31 | should provide ability to set body and footer | ported | [`crates/renovate-core/src/branch.rs:2157`](../../../../../../../crates/renovate-core/src/branch.rs#L2157) |
+| 46 | should remove empty subject by default | ported | [`crates/renovate-core/src/branch.rs:2165`](../../../../../../../crates/renovate-core/src/branch.rs#L2165) |
 

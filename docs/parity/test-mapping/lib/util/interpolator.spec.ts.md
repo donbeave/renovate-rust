@@ -6,14 +6,14 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 13 | does nothing if not input | ported | [`crates/renovate-core/src/util.rs:9105`](../../../../../crates/renovate-core/src/util.rs#L9105) |
-| 19 | does not throw error when keys and values are valid | ported | [`crates/renovate-core/src/util.rs:9111`](../../../../../crates/renovate-core/src/util.rs#L9111) |
-| 25 | throws when input is not a valid object | ported | [`crates/renovate-core/src/util.rs:9119`](../../../../../crates/renovate-core/src/util.rs#L9119) |
-| 31 | throws when keys do not follow specified regex patterns | ported | [`crates/renovate-core/src/util.rs:9127`](../../../../../crates/renovate-core/src/util.rs#L9127) |
-| 40 | throws when values are not of type string | ported | [`crates/renovate-core/src/util.rs:9135`](../../../../../crates/renovate-core/src/util.rs#L9135) |
-| 48 | replaces values and deletes secrets | ported | [`crates/renovate-core/src/config/secrets.rs:383`](../../../../../crates/renovate-core/src/config/secrets.rs#L383) |
-| 97 | replaces values and keeps secrets | ported | [`crates/renovate-core/src/config/secrets.rs:409`](../../../../../crates/renovate-core/src/config/secrets.rs#L409) |
-| 115 | does not resolve secrets in onboaringconfig | ported | [`crates/renovate-core/src/config/secrets.rs:421`](../../../../../crates/renovate-core/src/config/secrets.rs#L421) |
-| 155 | throws error if secrets are used in disallowed options | ported | [`crates/renovate-core/src/config/secrets.rs:444`](../../../../../crates/renovate-core/src/config/secrets.rs#L444) |
-| 175 | throws error if secret key is not present in config | ported | [`crates/renovate-core/src/config/secrets.rs:456`](../../../../../crates/renovate-core/src/config/secrets.rs#L456) |
+| 13 | does nothing if not input | ported | [`crates/renovate-core/src/util.rs:10785`](../../../../../crates/renovate-core/src/util.rs#L10785) |
+| 19 | does not throw error when keys and values are valid | ported | [`crates/renovate-core/src/util.rs:10791`](../../../../../crates/renovate-core/src/util.rs#L10791) |
+| 25 | throws when input is not a valid object | ported | [`crates/renovate-core/src/util.rs:10799`](../../../../../crates/renovate-core/src/util.rs#L10799) |
+| 31 | throws when keys do not follow specified regex patterns | ported | [`crates/renovate-core/src/util.rs:10807`](../../../../../crates/renovate-core/src/util.rs#L10807) |
+| 40 | throws when values are not of type string | ported | [`crates/renovate-core/src/util.rs:10815`](../../../../../crates/renovate-core/src/util.rs#L10815) |
+| 48 | replaces values and deletes secrets | ported | [`crates/renovate-core/src/config/secrets.rs:387`](../../../../../crates/renovate-core/src/config/secrets.rs#L387) |
+| 97 | replaces values and keeps secrets | ported | [`crates/renovate-core/src/config/secrets.rs:413`](../../../../../crates/renovate-core/src/config/secrets.rs#L413) |
+| 115 | does not resolve secrets in onboaringconfig | ported | [`crates/renovate-core/src/config/secrets.rs:425`](../../../../../crates/renovate-core/src/config/secrets.rs#L425) |
+| 155 | throws error if secrets are used in disallowed options | ported | [`crates/renovate-core/src/config/secrets.rs:448`](../../../../../crates/renovate-core/src/config/secrets.rs#L448) |
+| 175 | throws error if secret key is not present in config | ported | [`crates/renovate-core/src/config/secrets.rs:460`](../../../../../crates/renovate-core/src/config/secrets.rs#L460) |
 

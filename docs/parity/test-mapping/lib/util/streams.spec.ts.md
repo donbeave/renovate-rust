@@ -2,9 +2,9 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**0/1 in-scope tests ported** (1 pending, 0 opt-out) · status: pending
+**1/1 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | handles readables | pending | — |
+| 6 | handles readables | ported | [`crates/renovate-core/src/util.rs:11038`](../../../../../crates/renovate-core/src/util.rs#L11038) |
 

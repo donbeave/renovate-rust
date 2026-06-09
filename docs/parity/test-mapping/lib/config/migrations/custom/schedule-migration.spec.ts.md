@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | migrates every friday | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5155`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5155) |
-| 15 | does not migrate every weekday | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5164`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5164) |
-| 27 | does not migrate multi days | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5173`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5173) |
-| 39 | does not migrate hour range | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5182`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5182) |
-| 51 | does not migrate invalid range | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5191`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5191) |
+| 4 | migrates every friday | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5157`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5157) |
+| 15 | does not migrate every weekday | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5166`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5166) |
+| 27 | does not migrate multi days | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5175`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5175) |
+| 39 | does not migrate hour range | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5184`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5184) |
+| 51 | does not migrate invalid range | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5193`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5193) |
 

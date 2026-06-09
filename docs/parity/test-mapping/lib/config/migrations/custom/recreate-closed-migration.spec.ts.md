@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6525`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6525) |
-| 15 | should migrate false | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6534`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6534) |
+| 4 | should migrate true | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6527`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6527) |
+| 15 | should migrate false | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6536`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6536) |
 

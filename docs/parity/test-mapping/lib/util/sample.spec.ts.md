@@ -2,15 +2,15 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**4/7 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
+**7/7 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 7 | returns correct sized array | ported | [`crates/renovate-core/src/util.rs:7935`](../../../../../crates/renovate-core/src/util.rs#L7935) |
-| 12 | returns full array for undefined number | ported | [`crates/renovate-core/src/util.rs:7948`](../../../../../crates/renovate-core/src/util.rs#L7948) |
-| 16 | returns full array for null number | pending | — |
-| 20 | returns full array for 0 number | ported | [`crates/renovate-core/src/util.rs:7960`](../../../../../crates/renovate-core/src/util.rs#L7960) |
-| 24 | returns empty array for null array | pending | — |
-| 28 | returns empty array for undefined array | pending | — |
-| 32 | returns empty array for empty array | ported | [`crates/renovate-core/src/util.rs:7972`](../../../../../crates/renovate-core/src/util.rs#L7972) |
+| 7 | returns correct sized array | ported | [`crates/renovate-core/src/util.rs:9551`](../../../../../crates/renovate-core/src/util.rs#L9551) |
+| 12 | returns full array for undefined number | ported | [`crates/renovate-core/src/util.rs:9564`](../../../../../crates/renovate-core/src/util.rs#L9564) |
+| 16 | returns full array for null number | ported | [`crates/renovate-core/src/util.rs:9576`](../../../../../crates/renovate-core/src/util.rs#L9576) |
+| 20 | returns full array for 0 number | ported | [`crates/renovate-core/src/util.rs:9588`](../../../../../crates/renovate-core/src/util.rs#L9588) |
+| 24 | returns empty array for null array | ported | [`crates/renovate-core/src/util.rs:9600`](../../../../../crates/renovate-core/src/util.rs#L9600) |
+| 28 | returns empty array for undefined array | ported | [`crates/renovate-core/src/util.rs:9606`](../../../../../crates/renovate-core/src/util.rs#L9606) |
+| 32 | returns empty array for empty array | ported | [`crates/renovate-core/src/util.rs:9612`](../../../../../crates/renovate-core/src/util.rs#L9612) |
 

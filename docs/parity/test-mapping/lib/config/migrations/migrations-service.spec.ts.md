@@ -2,14 +2,14 @@
 
 [← `config/migrations`](../../../_by-module/config/migrations.md) · [all modules](../../../README.md)
 
-**4/6 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
+**6/6 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 9 | should remove deprecated properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6900`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6900) |
-| 23 | should rename renamed properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6930`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6930) |
-| 42 | should save original order of properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6965`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6965) |
-| 60 | should allow custom migrations by regexp | pending | — |
-| 89 | there should be a single migration per property name | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6995`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6995) |
-| 104 | includes all defined migration classes in migrationsservice.custommigrations | pending | — |
+| 9 | should remove deprecated properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6902`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6902) |
+| 23 | should rename renamed properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6932`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6932) |
+| 42 | should save original order of properties | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6967`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6967) |
+| 60 | should allow custom migrations by regexp | ported | [`crates/renovate-core/src/config/migrate_validate.rs:7063`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L7063) |
+| 89 | there should be a single migration per property name | ported | [`crates/renovate-core/src/config/migrate_validate.rs:6997`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L6997) |
+| 104 | includes all defined migration classes in migrationsservice.custommigrations | ported | [`crates/renovate-core/src/config/migrate_validate.rs:7092`](../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L7092) |
 

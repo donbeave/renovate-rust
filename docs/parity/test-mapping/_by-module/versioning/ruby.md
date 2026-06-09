@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/ruby/index.spec.ts`](../../lib/modules/versioning/ruby/index.spec.ts.md) | 15 | 14 | 1 | 0 | [`crates/renovate-core/src/versioning/ruby.rs:901`](../../../../../crates/renovate-core/src/versioning/ruby.rs#L901) | partial |
+| [`lib/modules/versioning/ruby/index.spec.ts`](../../lib/modules/versioning/ruby/index.spec.ts.md) | 15 | 14 | 1 | 0 | [`crates/renovate-core/src/versioning/ruby.rs:909`](../../../../../crates/renovate-core/src/versioning/ruby.rs#L909) | partial |
 

@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate to packagerules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5918`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5918) |
-| 25 | should rewrite packagerules when it is not array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5928`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5928) |
-| 47 | should not migrate non array value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5940`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5940) |
-| 56 | should concat with existing package rules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5946`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5946) |
+| 4 | should migrate to packagerules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5920`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5920) |
+| 25 | should rewrite packagerules when it is not array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5930`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5930) |
+| 47 | should not migrate non array value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5942`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5942) |
+| 56 | should concat with existing package rules | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5948`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5948) |
 

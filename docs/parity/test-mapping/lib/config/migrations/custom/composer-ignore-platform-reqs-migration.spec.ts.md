@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | should migrate true to empty array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5354`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5354) |
-| 15 | should migrate false to null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5363`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5363) |
-| 26 | should not change array value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5372`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5372) |
+| 4 | should migrate true to empty array | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5356`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5356) |
+| 15 | should migrate false to null | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5365`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5365) |
+| 26 | should not change array value | ported | [`crates/renovate-core/src/config/migrate_validate.rs:5374`](../../../../../../../crates/renovate-core/src/config/migrate_validate.rs#L5374) |
 

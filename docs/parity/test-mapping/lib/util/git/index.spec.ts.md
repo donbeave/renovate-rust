@@ -2,7 +2,7 @@
 
 [← `util/git`](../../../_by-module/util/git.md) · [all modules](../../../README.md)
 
-**0/107 in-scope tests ported** (107 pending, 0 opt-out) · status: pending
+**1/107 in-scope tests ported** (106 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -10,7 +10,7 @@
 | 183 | retries the func call if externalhosterror thrown | pending | — |
 | 198 | retries the func call up to retry count if externalhosterror thrown | pending | — |
 | 209 | doesn't retry and throws an error if non-externalhosterror thrown by git | pending | — |
-| 219 | has a git version greater or equal to the minimum required | pending | — |
+| 219 | has a git version greater or equal to the minimum required | ported | [`crates/renovate-core/src/workers/global/initialize.rs:443`](../../../../../../crates/renovate-core/src/workers/global/initialize.rs#L443) |
 | 226 | sets the base branch as master | pending | — |
 | 230 | sets non-master base branch | pending | — |
 | 265 | verifies that the --recurse-submodule flag is needed | pending | — |

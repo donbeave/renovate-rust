@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 16 | handles empty | ported | [`crates/renovate-core/src/util.rs:11460`](../../../../../../../../crates/renovate-core/src/util.rs#L11460) |
-| 28 | has special lock file maintenance description | ported | [`crates/renovate-core/src/util.rs:11468`](../../../../../../../../crates/renovate-core/src/util.rs#L11468) |
-| 66 | handles multiple | ported | [`crates/renovate-core/src/util.rs:11494`](../../../../../../../../crates/renovate-core/src/util.rs#L11494) |
-| 145 | shows commithourlylimit message when limit is low | ported | [`crates/renovate-core/src/util.rs:11548`](../../../../../../../../crates/renovate-core/src/util.rs#L11548) |
-| 184 | does not show commithourlylimit message when limit is high | ported | [`crates/renovate-core/src/util.rs:11581`](../../../../../../../../crates/renovate-core/src/util.rs#L11581) |
-| 206 | shows only commithourlylimit message when both limits are set | ported | [`crates/renovate-core/src/util.rs:11604`](../../../../../../../../crates/renovate-core/src/util.rs#L11604) |
+| 16 | handles empty | ported | [`crates/renovate-core/src/util.rs:13281`](../../../../../../../../crates/renovate-core/src/util.rs#L13281) |
+| 28 | has special lock file maintenance description | ported | [`crates/renovate-core/src/util.rs:13289`](../../../../../../../../crates/renovate-core/src/util.rs#L13289) |
+| 66 | handles multiple | ported | [`crates/renovate-core/src/util.rs:13315`](../../../../../../../../crates/renovate-core/src/util.rs#L13315) |
+| 145 | shows commithourlylimit message when limit is low | ported | [`crates/renovate-core/src/util.rs:13369`](../../../../../../../../crates/renovate-core/src/util.rs#L13369) |
+| 184 | does not show commithourlylimit message when limit is high | ported | [`crates/renovate-core/src/util.rs:13402`](../../../../../../../../crates/renovate-core/src/util.rs#L13402) |
+| 206 | shows only commithourlylimit message when both limits are set | ported | [`crates/renovate-core/src/util.rs:13425`](../../../../../../../../crates/renovate-core/src/util.rs#L13425) |
 

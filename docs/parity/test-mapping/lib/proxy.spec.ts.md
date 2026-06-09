@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 17 | respects http_proxy | ported | [`crates/renovate-core/src/proxy.rs:58`](../../../../crates/renovate-core/src/proxy.rs#L58) |
-| 23 | copies upper case http_proxy to http_proxy | ported | [`crates/renovate-core/src/proxy.rs:65`](../../../../crates/renovate-core/src/proxy.rs#L65) |
-| 36 | respects https_proxy | ported | [`crates/renovate-core/src/proxy.rs:78`](../../../../crates/renovate-core/src/proxy.rs#L78) |
-| 42 | copies upper case https_proxy to https_proxy | ported | [`crates/renovate-core/src/proxy.rs:85`](../../../../crates/renovate-core/src/proxy.rs#L85) |
-| 55 | does nothing | ported | [`crates/renovate-core/src/proxy.rs:98`](../../../../crates/renovate-core/src/proxy.rs#L98) |
+| 17 | respects http_proxy | ported | [`crates/renovate-core/src/proxy.rs:59`](../../../../crates/renovate-core/src/proxy.rs#L59) |
+| 23 | copies upper case http_proxy to http_proxy | ported | [`crates/renovate-core/src/proxy.rs:66`](../../../../crates/renovate-core/src/proxy.rs#L66) |
+| 36 | respects https_proxy | ported | [`crates/renovate-core/src/proxy.rs:79`](../../../../crates/renovate-core/src/proxy.rs#L79) |
+| 42 | copies upper case https_proxy to https_proxy | ported | [`crates/renovate-core/src/proxy.rs:86`](../../../../crates/renovate-core/src/proxy.rs#L86) |
+| 55 | does nothing | ported | [`crates/renovate-core/src/proxy.rs:99`](../../../../crates/renovate-core/src/proxy.rs#L99) |
 

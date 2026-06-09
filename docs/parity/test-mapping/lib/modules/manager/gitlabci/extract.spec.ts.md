@@ -2,14 +2,14 @@
 
 [← `manager/gitlabci`](../../../../_by-module/manager/gitlabci.md) · [all modules](../../../../README.md)
 
-**13/14 in-scope tests ported** (1 pending, 0 opt-out) · status: partial
+**14/14 in-scope tests ported** (0 pending, 0 opt-out) · status: ported
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 22 | extracts from empty file | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:770`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L770) |
 | 28 | returns null for empty | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:1172`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L1172) |
 | 36 | extracts from multidoc yaml | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:785`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L785) |
-| 46 | extracts multiple included image lines | pending | — |
+| 46 | extracts multiple included image lines | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:1233`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L1233) |
 | 57 | extracts named services | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:749`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L749) |
 | 66 | extracts multiple named services | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:1178`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L1178) |
 | 75 | extracts multiple image lines | ported | [`crates/renovate-core/src/extractors/gitlabci.rs:724`](../../../../../../../crates/renovate-core/src/extractors/gitlabci.rs#L724) |

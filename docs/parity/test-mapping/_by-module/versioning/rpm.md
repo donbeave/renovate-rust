@@ -6,5 +6,5 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/modules/versioning/rpm/index.spec.ts`](../../lib/modules/versioning/rpm/index.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/versioning/rpm.rs:238`](../../../../../crates/renovate-core/src/versioning/rpm.rs#L238) | ported |
+| [`lib/modules/versioning/rpm/index.spec.ts`](../../lib/modules/versioning/rpm/index.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/versioning/rpm.rs:240`](../../../../../crates/renovate-core/src/versioning/rpm.rs#L240) | ported |
 

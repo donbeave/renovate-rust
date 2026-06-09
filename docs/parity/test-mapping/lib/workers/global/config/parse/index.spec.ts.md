@@ -2,7 +2,7 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**0/35 in-scope tests ported** (35 pending, 0 opt-out) · status: pending
+**1/35 in-scope tests ported** (34 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -15,7 +15,7 @@
 | 145 | supports bitbucket username/password | pending | — |
 | 163 | massages trailing slash into endpoint | pending | — |
 | 172 | parses global manager config | pending | — |
-| 179 | parses host rules from env | pending | — |
+| 179 | parses host rules from env | ported | [`crates/renovate-core/src/workers/global/config/parse/index.rs:220`](../../../../../../../../crates/renovate-core/src/workers/global/config/parse/index.rs#L220) |
 | 187 | env dryrun = true replaced to full | pending | — |
 | 197 | cli dryrun = true replaced to full | pending | — |
 | 204 | resolves global presets | pending | — |
