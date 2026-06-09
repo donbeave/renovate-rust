@@ -193,3 +193,8 @@ reason = "tests support for regexp-based propertyName in custom AbstractMigratio
 spec   = "lib/util/package-rules/jsonata.spec.ts"
 all    = true
 reason = "the jsonata expression evaluation and matching for packageRules (matchJsonata) is not yet implemented (util/jsonata.rs is a stub that always returns null; the tests require a real jsonata engine capable of evaluating expressions against dep objects, handling invalid expressions/errors, supporting complex/nested, and custom functions like $detectPlatform — no direct Rust analogue until the engine is ported)"
+
+[[test]]
+spec   = "lib/modules/manager/npm/extract/index.spec.ts"
+test   = "warns for invalid pnpm workspace yaml files"
+reason = "asserts TypeScript logger.warn spy behavior (exact call shape with packageFile + err: any Error, and specific message 'Failed to parse pnpm-workspace.yaml file') when fs.readLocalFile returns invalid yaml content for pnpm-workspace.yaml during extractAllPackageFiles; the core business logic (bad workspace file leads to no extracted packages / empty result, parse errors are tolerated) is already exercised by ported unit tests on extract_pnpm_workspace_file and related empty/valid parse cases in extractors/npm.rs; no direct Rust logger spy equivalent without altering production instrumentation or test harness"

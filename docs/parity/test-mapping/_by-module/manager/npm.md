@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 353/439 in-scope tests ported (opt-out=0) across 32 spec files.
+**Coverage:** 353/438 in-scope tests ported (opt-out=1) across 32 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -10,7 +10,7 @@
 | [`lib/modules/manager/npm/detect.spec.ts`](../../lib/modules/manager/npm/detect.spec.ts.md) | 2 | 2 | 0 | 0 | [`crates/renovate-core/src/extractors/npm.rs:5150`](../../../../../crates/renovate-core/src/extractors/npm.rs#L5150) | ported |
 | [`lib/modules/manager/npm/extract/common/catalogs.spec.ts`](../../lib/modules/manager/npm/extract/common/catalogs.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/extractors/npm.rs:4793`](../../../../../crates/renovate-core/src/extractors/npm.rs#L4793) | ported |
 | [`lib/modules/manager/npm/extract/common/package-file.spec.ts`](../../lib/modules/manager/npm/extract/common/package-file.spec.ts.md) | 7 | 7 | 0 | 0 | [`crates/renovate-core/src/extractors/npm.rs:6410`](../../../../../crates/renovate-core/src/extractors/npm.rs#L6410) | ported |
-| [`lib/modules/manager/npm/extract/index.spec.ts`](../../lib/modules/manager/npm/extract/index.spec.ts.md) | 41 | 39 | 2 | 0 | [`crates/renovate-core/src/extractors/npm.rs:3421`](../../../../../crates/renovate-core/src/extractors/npm.rs#L3421) | partial |
+| [`lib/modules/manager/npm/extract/index.spec.ts`](../../lib/modules/manager/npm/extract/index.spec.ts.md) | 41 | 39 | 1 | 1 | [`crates/renovate-core/src/extractors/npm.rs:3421`](../../../../../crates/renovate-core/src/extractors/npm.rs#L3421) | partial |
 | [`lib/modules/manager/npm/extract/npm.spec.ts`](../../lib/modules/manager/npm/extract/npm.spec.ts.md) | 6 | 6 | 0 | 0 | [`crates/renovate-core/src/extractors/npm.rs:3431`](../../../../../crates/renovate-core/src/extractors/npm.rs#L3431) | ported |
 | [`lib/modules/manager/npm/extract/pnpm.spec.ts`](../../lib/modules/manager/npm/extract/pnpm.spec.ts.md) | 16 | 5 | 11 | 0 | [`crates/renovate-core/src/extractors/npm.rs:3799`](../../../../../crates/renovate-core/src/extractors/npm.rs#L3799) | partial |
 | [`lib/modules/manager/npm/extract/post/locked-versions.spec.ts`](../../lib/modules/manager/npm/extract/post/locked-versions.spec.ts.md) | 21 | 12 | 9 | 0 | [`crates/renovate-core/src/extractors/npm.rs:7257`](../../../../../crates/renovate-core/src/extractors/npm.rs#L7257) | partial |

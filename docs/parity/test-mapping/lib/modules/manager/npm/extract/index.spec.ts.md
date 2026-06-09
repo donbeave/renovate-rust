@@ -2,7 +2,7 @@
 
 [← `manager/npm`](../../../../../_by-module/manager/npm.md) · [all modules](../../../../../README.md)
 
-**39/41 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
+**39/40 in-scope tests ported** (1 pending, 1 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -40,7 +40,7 @@
 | 1063 | extracts dependencies from pnpm.overrides | ported | [`crates/renovate-core/src/extractors/npm.rs:4595`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4595) |
 | 1144 | extracts dependencies from pnpm.overrides, with version ranges in flat syntax | ported | [`crates/renovate-core/src/extractors/npm.rs:4650`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L4650) |
 | 1227 | runs | ported | [`crates/renovate-core/src/extractors/npm.rs:8879`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8879) |
-| 1277 | warns for invalid pnpm workspace yaml files | pending | — |
+| 1277 | warns for invalid pnpm workspace yaml files | opt-out | asserts TypeScript logger.warn spy behavior (exact call shape with packageFile + err: any Error, and specific message 'Failed to parse pnpm-workspace.yaml file') when fs.readLocalFile returns invalid yaml content for pnpm-workspace.yaml during extractAllPackageFiles; the core business logic (bad workspace file leads to no extracted packages / empty result, parse errors are tolerated) is already exercised by ported unit tests on extract_pnpm_workspace_file and related empty/valid parse cases in extractors/npm.rs; no direct Rust logger spy equivalent without altering production instrumentation or test harness |
 | 1294 | parses empty pnpm workspace yaml files | ported | [`crates/renovate-core/src/extractors/npm.rs:3855`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3855) |
 | 1303 | extracts pnpm workspace yaml files | ported | [`crates/renovate-core/src/extractors/npm.rs:3845`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3845) |
 | 1333 | extracts yarnrc.yml and adds it as packagefile | ported | [`crates/renovate-core/src/extractors/npm.rs:7971`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L7971) |
