@@ -418,3 +418,8 @@ reason = "it.each template for 'other' (non github/gitlab) sourceUrl massage; co
 spec   = "lib/modules/datasource/metadata.spec.ts"
 test   = "shouldDeleteHomepage($sourceUrl, $homepage) -> $expected"
 reason = "it.each template for shouldDeleteHomepage helper cases (various same/different, gitlab/github, invalid, nulls); the business logic (should_delete_homepage in util.rs + delete in add_metadata when massaged same) is covered by ported L464, L503, L542 etc. concrete tests and the fn itself; pure TS it.each for the helper test."
+
+[[test]]
+spec   = "lib/util/stats.spec.ts"
+test   = "does not log report when no data"
+reason = "asserts TypeScript logger.debug spy not called (via .not.toHaveBeenCalled) for AbandonedPackageStats.report() when no data; the conditional logging guard (only report when has data) and empty-report path are covered by already-ported tests ('logs report', 'returns empty report', AbandonedPackageStats tests in util.rs); this test is a pure spy assertion with no Rust logger equivalent (Rust stats use internal counters + tracing for reports); matches prior opt-out for sibling 'prints report' spy in same spec."

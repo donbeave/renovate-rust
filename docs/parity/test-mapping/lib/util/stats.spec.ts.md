@@ -2,7 +2,7 @@
 
 [← `util/_root`](../../_by-module/util/_root.md) · [all modules](../../README.md)
 
-**14/32 in-scope tests ported** (18 pending, 1 opt-out) · status: partial
+**14/31 in-scope tests ported** (17 pending, 2 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -34,7 +34,7 @@
 | 1016 | returns empty report | ported | [`crates/renovate-core/src/util.rs:7381`](../../../../../crates/renovate-core/src/util.rs#L7381) |
 | 1021 | writes data points | ported | [`crates/renovate-core/src/util.rs:7393`](../../../../../crates/renovate-core/src/util.rs#L7393) |
 | 1069 | logs report | ported | [`crates/renovate-core/src/util.rs:7753`](../../../../../crates/renovate-core/src/util.rs#L7753) |
-| 1096 | does not log report when no data | pending | — |
+| 1096 | does not log report when no data | opt-out | asserts TypeScript logger.debug spy not called (via .not.toHaveBeenCalled) for AbandonedPackageStats.report() when no data; the conditional logging guard (only report when has data) and empty-report path are covered by already-ported tests ('logs report', 'returns empty report', AbandonedPackageStats tests in util.rs); this test is a pure spy assertion with no Rust logger equivalent (Rust stats use internal counters + tracing for reports); matches prior opt-out for sibling 'prints report' spy in same spec. |
 | 1112 | returns empty report | ported | [`crates/renovate-core/src/util.rs:7381`](../../../../../crates/renovate-core/src/util.rs#L7381) |
 | 1117 | writes data points | ported | [`crates/renovate-core/src/util.rs:7393`](../../../../../crates/renovate-core/src/util.rs#L7393) |
 | 1141 | rounds total towards ceiling when preparing report | ported | [`crates/renovate-core/src/util.rs:7661`](../../../../../crates/renovate-core/src/util.rs#L7661) |
