@@ -2,23 +2,23 @@
 
 [← `util/exec`](../../../_by-module/util/exec.md) · [all modules](../../../README.md)
 
-**26/40 in-scope tests ported** (14 pending, 0 opt-out) · status: partial
+**27/40 in-scope tests ported** (13 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 910 | _(it.each / template — verify manually)_ | ? | — |
 | 943 | supports image prefetch | pending | — |
-| 985 | throws when an error is thrown | ported | [`crates/renovate-core/src/exec/orchestrator.rs:277`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L277) |
+| 985 | throws when an error is thrown | ported | [`crates/renovate-core/src/exec/orchestrator.rs:286`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L286) |
 | 995 | rejects and throws if an error is thrown, even if we specify ignorefailure=true | pending | — |
-| 1010 | does not reject and throw if rawexec returns an exit code, and we specify ignorefailure=true | ported | [`crates/renovate-core/src/exec/orchestrator.rs:445`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L445) |
+| 1010 | does not reject and throw if rawexec returns an exit code, and we specify ignorefailure=true | ported | [`crates/renovate-core/src/exec/orchestrator.rs:454`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L454) |
 | 1038 | exec takes an array with both `string`s and `commandwithoptions` as an argument | pending | — |
 | 1059 | exec takes commandwithoptions as an argument | pending | — |
-| 1076 | supports binarysource=install | ported | [`crates/renovate-core/src/exec/orchestrator.rs:215`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L215) |
-| 1087 | logs ignored tool constraints for binarysource=global | ported | [`crates/renovate-core/src/exec/orchestrator.rs:481`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L481) |
-| 1098 | supports binarysource=install precommands | ported | [`crates/renovate-core/src/exec/orchestrator.rs:292`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L292) |
-| 1112 | only calls removedockercontainer in catch block is usedocker is set | ported | [`crates/renovate-core/src/exec/orchestrator.rs:503`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L503) |
-| 1127 | wraps error if removedockercontainer throws an error | pending | — |
-| 1161 | converts to temporary_error | ported | [`crates/renovate-core/src/exec/orchestrator.rs:517`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L517) |
+| 1076 | supports binarysource=install | ported | [`crates/renovate-core/src/exec/orchestrator.rs:224`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L224) |
+| 1087 | logs ignored tool constraints for binarysource=global | ported | [`crates/renovate-core/src/exec/orchestrator.rs:490`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L490) |
+| 1098 | supports binarysource=install precommands | ported | [`crates/renovate-core/src/exec/orchestrator.rs:301`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L301) |
+| 1112 | only calls removedockercontainer in catch block is usedocker is set | ported | [`crates/renovate-core/src/exec/orchestrator.rs:512`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L512) |
+| 1127 | wraps error if removedockercontainer throws an error | ported | [`crates/renovate-core/src/exec/orchestrator.rs:526`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L526) |
+| 1161 | converts to temporary_error | ported | [`crates/renovate-core/src/exec/orchestrator.rs:551`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L551) |
 | 1194 | returns default values if no global or repo config | ported | [`crates/renovate-core/src/exec/tool_settings.rs:125`](../../../../../../crates/renovate-core/src/exec/tool_settings.rs#L125) |
 | 1205 | returns default values if empty repo config | ported | [`crates/renovate-core/src/exec/tool_settings.rs:134`](../../../../../../crates/renovate-core/src/exec/tool_settings.rs#L134) |
 | 1216 | returns default values if empty global config | ported | [`crates/renovate-core/src/exec/tool_settings.rs:144`](../../../../../../crates/renovate-core/src/exec/tool_settings.rs#L144) |

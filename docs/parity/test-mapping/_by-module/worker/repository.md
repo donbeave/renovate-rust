@@ -2,7 +2,7 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 259/1681 in-scope tests ported (opt-out=0) across 103 spec files.
+**Coverage:** 260/1681 in-scope tests ported (opt-out=0) across 103 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
@@ -22,7 +22,7 @@
 | [`lib/workers/repository/errors-warnings.spec.ts`](../../lib/workers/repository/errors-warnings.spec.ts.md) | 16 | 14 | 2 | 0 | [`crates/renovate-core/src/util.rs:12869`](../../../../../crates/renovate-core/src/util.rs#L12869)<br>[`crates/renovate-core/src/workers/repository/errors_warnings.rs:269`](../../../../../crates/renovate-core/src/workers/repository/errors_warnings.rs#L269) | partial |
 | [`lib/workers/repository/extract/extract-fingerprint-config.spec.ts`](../../lib/workers/repository/extract/extract-fingerprint-config.spec.ts.md) | 2 | 1 | 1 | 0 | [`crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs:124`](../../../../../crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs#L124) | partial |
 | [`lib/workers/repository/extract/file-match.spec.ts`](../../lib/workers/repository/extract/file-match.spec.ts.md) | 8 | 7 | 1 | 0 | [`crates/renovate-core/src/managers.rs:2276`](../../../../../crates/renovate-core/src/managers.rs#L2276) | partial |
-| [`lib/workers/repository/extract/index.spec.ts`](../../lib/workers/repository/extract/index.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
+| [`lib/workers/repository/extract/index.spec.ts`](../../lib/workers/repository/extract/index.spec.ts.md) | 5 | 1 | 4 | 0 | [`crates/renovate-core/src/managers.rs:2581`](../../../../../crates/renovate-core/src/managers.rs#L2581) | partial |
 | [`lib/workers/repository/extract/manager-files.spec.ts`](../../lib/workers/repository/extract/manager-files.spec.ts.md) | 5 | 0 | 5 | 0 | — | pending |
 | [`lib/workers/repository/extract/supersedes.spec.ts`](../../lib/workers/repository/extract/supersedes.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/managers.rs:2175`](../../../../../crates/renovate-core/src/managers.rs#L2175) | ported |
 | [`lib/workers/repository/finalize/prune.spec.ts`](../../lib/workers/repository/finalize/prune.spec.ts.md) | 18 | 0 | 18 | 0 | — | pending |

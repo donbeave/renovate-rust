@@ -201,10 +201,7 @@ pub async fn exec(
                     .await
                     {
                         return Err(ExecError::new(
-                            format!(
-                                "Error: \"{}\" - Original Error: \"{}\"",
-                                remove_err, err
-                            ),
+                            format!("Error: \"{}\" - Original Error: \"{}\"", remove_err, err),
                             "docker-remove-wrap",
                         ));
                     }
@@ -523,6 +520,23 @@ mod tests {
         assert!(result.is_err());
     }
 
+    // Ported: "rejects and throws if an error is thrown, even if we specify ignoreFailure=true" — lib/util/exec/index.spec.ts line 995
+    #[tokio::test]
+    async fn exec_rejects_even_with_ignore_failure_true() {
+        // ignoreFailure=true on the command item (or opts) does not prevent the inner error from being thrown
+        // to the caller; the flag only affects side effects like the || true in docker sidecar command line or
+        // pre-command handling. The main exec still rejects on failure.
+        // This exercises the ignore_failure path + error propagation (even when true).
+        let process_env: HashMap<String, String> = std::env::vars().collect();
+        let config = ExecConfig::default();
+        let opts = ExecOptions {
+            ignore_failure: true,
+            ..Default::default()
+        };
+        let result = exec(&["exit 1".to_owned()], &opts, &config, &process_env).await;
+        assert!(result.is_err(), "ignore_failure=true does not swallow; still rejects on inner error");
+    }
+
     // Ported: "wraps error if removeDockerContainer throws an error" — lib/util/exec/index.spec.ts line 1127
     #[tokio::test]
     async fn exec_wraps_error_if_remove_docker_container_throws() {
@@ -532,12 +546,12 @@ mod tests {
         let process_env: HashMap<String, String> = std::env::vars().collect();
         let config = ExecConfig {
             binary_source: BinarySource::Docker,
-            docker_sidecar_image: Some("side".to_owned()),
-            docker_child_prefix: Some("renovate_".to_owned()),
+            docker_sidecar_image: "side".to_owned(),
+            docker_child_prefix: "renovate_".to_owned(),
             ..Default::default()
         };
         let opts = ExecOptions {
-            docker: Some(DockerOptions::default()),
+            docker: Some(crate::exec::DockerOptions::default()),
             ..Default::default()
         };
         // Force a failure path under docker (the prepare/exec will hit Err, then the if is_docker remove + wrap).
