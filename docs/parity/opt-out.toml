@@ -612,6 +612,11 @@ test   = "returns empty of manager is not enabled"
 reason = "the enabledManagers list filter (when the list is set in config, a manager not present in it returns empty even if its local .enabled=true and fileList non-empty) is decided when building the list of ManagerFile entries in the extract orchestrator (getEnabledManagersList, skips_non_enabled_managers test in managers.rs, and the loop in workers/repository/extract); this unit's get_manager_package_files only sees the effective per-ManagerFile .enabled (already ported as 'returns empty of manager is disabled'); the list interaction test in this spec has no additional unique business logic in the isolated fn to port beyond the caller coverage."
 
 [[test]]
+spec   = "lib/workers/repository/extract/index.spec.ts"
+test   = "checks custom managers"
+reason = "sets config.customManagers (with customType 'regex', managerFilePatterns for README, matchStrings), mocks getManagerPackageFiles, calls extractAllDependencies, asserts 'regex' key in packageFiles result. Per @parity comment in managers.rs, 'customManagers array + mergeChildConfig + isCustomManager full path pending' in the extractAllDependencies orchestrator (get_enabled_managers_list, get_patterns_for_manager, extract_list synthesis do not yet handle custom config to produce custom manager entries like 'regex'). Basic manager matching/accumulation exercised by ported 'runs' and 'skips non-enabled'. Opt as the customManagers support in this extract unit is pending implementation work."
+
+[[test]]
 spec   = "lib/workers/repository/init/index.spec.ts"
 test   = "warns on unsupported options"
 reason = "asserts exact logger.logger.warn spy call (with { platform: 'github' } and the message naming 'filterUnavailableUsers' / 'expandCodeOwnersGroups' as not supported on the platform) after initRepo with those in the repo config result; core init continues (options ignored for platform); no direct Rust equivalent for the spy assertion or the exact unsupported-options-for-platform message shape (tracing in init or config layer may log but without this test's spy harness). Opt as pure TS logger spy + platform-specific unsupported message."
