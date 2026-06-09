@@ -2,14 +2,14 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**2/18 in-scope tests ported** (16 pending, 0 opt-out) · status: partial
+**3/18 in-scope tests ported** (15 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 24 | returns if no branchlist | ported | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:108`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L108) |
 | 30 | ignores reconfigure branch | pending | — |
 | 36 | returns if no defaultbranch | pending | — |
-| 43 | returns if no renovate branches | pending | — |
+| 43 | returns if no renovate branches | ported | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:118`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L118) |
 | 51 | returns if no remaining branches | ported | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:97`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L97) |
 | 59 | renames deletes remaining branch | pending | — |
 | 71 | skips rename but still deletes branch | pending | — |

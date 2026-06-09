@@ -82,6 +82,7 @@ pub async fn fetch_versions(
             let tag_name = name.strip_prefix("refs/heads/tags/").unwrap_or(&name);
             Some(Release {
                 version: tag_name.to_owned(),
+                git_ref: Some(tag_name.to_owned()),
                 ..Default::default()
             })
         })
@@ -97,6 +98,8 @@ pub async fn fetch_versions(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use wiremock::matchers::{method, path};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
 
     #[test]
     fn datasource_id_is_correct() {
@@ -119,5 +122,82 @@ mod tests {
     fn get_cache_key_combines_parts() {
         let key = get_cache_key("https://dev.azure.com/org/project", "repo", "tags");
         assert_eq!(key, "https://dev.azure.com/org/project:repo:tags");
+    }
+
+    // Ported: "returns tags from azure devops" — lib/modules/datasource/azure-tags/index.spec.ts line 20
+    #[tokio::test]
+    async fn returns_tags_from_azure_devops() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/_apis/git/repositories/repo/refs"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "value": [
+                    { "name": "refs/heads/tags/tag1" },
+                    { "name": "refs/heads/tags/tag2" }
+                ]
+            })))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let config = AzureTagsConfig {
+            registry_url: format!("{}/", server.uri()),
+            repo: "repo".to_string(),
+        };
+        let result = fetch_versions(&http, &config).await.unwrap();
+        let expected_source = format!("{}/_git/repo", server.uri().trim_end_matches('/'));
+        assert_eq!(result.source_url.as_deref(), Some(expected_source.as_str()));
+        assert_eq!(result.releases.len(), 2);
+        assert_eq!(result.releases[0].version, "tag1");
+        assert_eq!(result.releases[0].git_ref.as_deref(), Some("tag1"));
+        assert_eq!(result.releases[1].version, "tag2");
+        assert_eq!(result.releases[1].git_ref.as_deref(), Some("tag2"));
+    }
+
+    // Ported: "filters out undefined names" — lib/modules/datasource/azure-tags/index.spec.ts line 47
+    #[tokio::test]
+    async fn filters_out_undefined_names() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/_apis/git/repositories/repo/refs"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+                "value": [
+                    { "name": "refs/heads/tags/tag1" },
+                    { "name": null },
+                    { "name": "refs/heads/tags/tag2" },
+                    {}
+                ]
+            })))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let config = AzureTagsConfig {
+            registry_url: format!("{}/", server.uri()),
+            repo: "repo".to_string(),
+        };
+        let result = fetch_versions(&http, &config).await.unwrap();
+        assert_eq!(result.releases.len(), 2);
+        assert_eq!(result.releases[0].version, "tag1");
+        assert_eq!(result.releases[1].version, "tag2");
+    }
+
+    // Ported: "handles api errors" — lib/modules/datasource/azure-tags/index.spec.ts line 70
+    #[tokio::test]
+    async fn handles_api_errors() {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/_apis/git/repositories/repo/refs"))
+            .respond_with(ResponseTemplate::new(500))
+            .mount(&server)
+            .await;
+
+        let http = HttpClient::new().unwrap();
+        let config = AzureTagsConfig {
+            registry_url: format!("{}/", server.uri()),
+            repo: "repo".to_string(),
+        };
+        let result = fetch_versions(&http, &config).await;
+        assert!(result.is_err());
     }
 }

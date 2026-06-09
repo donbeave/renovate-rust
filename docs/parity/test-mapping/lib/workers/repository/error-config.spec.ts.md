@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../_by-module/worker/repository.md) · [all modules](../../../README.md)
 
-**3/6 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
+**4/6 in-scope tests ported** (2 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -11,5 +11,5 @@
 | 71 | creates issues (dryrun) | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:213`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L213) |
 | 88 | handles onboarding | pending | — |
 | 107 | handles onboarding (dryrun) | pending | — |
-| 127 | disable issue creation on config failure | pending | — |
+| 127 | disable issue creation on config failure | ported | [`crates/renovate-core/src/workers/repository/error_config.rs:275`](../../../../../../crates/renovate-core/src/workers/repository/error_config.rs#L275) |
 

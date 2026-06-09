@@ -2,12 +2,12 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/12 in-scope tests ported** (12 pending, 0 opt-out) · status: pending
+**2/12 in-scope tests ported** (10 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 27 | applies the default commit message | pending | — |
-| 45 | applies supplied commit message | pending | — |
+| 27 | applies the default commit message | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/create.rs:103`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/create.rs#L103) |
+| 45 | applies supplied commit message | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/commit_message.rs:46`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/commit_message.rs#L46) |
 | 74 | to the default commit message | pending | — |
 | 95 | to the supplied commit message | pending | — |
 | 128 | to the default commit message | pending | — |

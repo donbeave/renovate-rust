@@ -2,11 +2,11 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/11 in-scope tests ported** (11 pending, 0 opt-out) · status: pending
+**1/11 in-scope tests ported** (10 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 31 | returns true if in silent mode | pending | — |
+| 31 | returns true if in silent mode | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/check.rs:89`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/check.rs#L89) |
 | 36 | skips normal onboarding check if onboardingcache is valid | pending | — |
 | 56 | continues with normal logic if onboardingcache is invalid | pending | — |
 | 72 | continues with normal logic if closedpr exists - adds closing comment | pending | — |

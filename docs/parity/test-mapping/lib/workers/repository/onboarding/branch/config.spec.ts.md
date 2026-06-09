@@ -2,12 +2,12 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/9 in-scope tests ported** (9 pending, 0 opt-out) · status: pending
+**1/9 in-scope tests ported** (8 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 32 | returns the json stringified onboarding config | pending | — |
-| 48 | handles finding a preset in the same group level | pending | — |
+| 48 | handles finding a preset in the same group level | ported | [`crates/renovate-core/src/workers/repository/onboarding/branch/config.rs:98`](../../../../../../../../crates/renovate-core/src/workers/repository/onboarding/branch/config.rs#L98) |
 | 58 | handles finding an organization dot platform preset | pending | — |
 | 71 | handles finding a preset in the same group | pending | — |
 | 87 | handles finding a preset in a parent group | pending | — |
