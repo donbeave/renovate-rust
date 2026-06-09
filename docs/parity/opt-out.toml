@@ -441,6 +441,11 @@ all    = true
 reason = "the remaining pending are it.each templates (L198/L215 etc.) over vulnerability data/aliases; the core ecosystem matching, getVulnerability, isVulnerable etc. are covered by the fully ported ecosystem.spec (12/12) and other vulnerability ports; pure data template tests."
 
 [[test]]
+spec   = "lib/modules/manager/fingerprint.spec.ts"
+test   = "validate manager hash"
+reason = "loops allManagersList and asserts every entry in the precomputed hashMap has a valid 64-hex SHA256 string; this is a data integrity check on a build-time/generated map of manager -> hash (likely of the manager's code/defaultConfig or for change detection). Rust has static manager registry (no equivalent hashMap of hex strings per manager name); the general fingerprint_json util is ported separately. Pure TS build/data validation test with no core manager extraction logic."
+
+[[test]]
 spec   = "lib/modules/versioning/distro.spec.ts"
 all    = true
 reason = "entire spec is it.each templates over distro data (ubuntu, debian, etc. release schedules); the underlying distro versioning logic is covered by the fully ported distro versioning spec (15/15); these are data-driven template tests with no additional business logic."
