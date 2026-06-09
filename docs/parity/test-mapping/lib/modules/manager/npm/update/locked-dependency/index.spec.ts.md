@@ -6,24 +6,24 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 45 | validates filename | ported | [`crates/renovate-core/src/extractors/npm.rs:5550`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5550) |
-| 54 | validates versions | ported | [`crates/renovate-core/src/extractors/npm.rs:5565`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5565) |
-| 63 | returns null for unparseable files | ported | [`crates/renovate-core/src/extractors/npm.rs:5580`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5580) |
-| 72 | rejects lockfileversion 2 | ported | [`crates/renovate-core/src/extractors/npm.rs:5588`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5588) |
-| 81 | returns null if no locked deps | ported | [`crates/renovate-core/src/extractors/npm.rs:5596`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5596) |
-| 85 | rejects null if no constraint found | ported | [`crates/renovate-core/src/extractors/npm.rs:5647`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5647) |
-| 97 | remediates in-range | ported | [`crates/renovate-core/src/extractors/npm.rs:5662`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5662) |
-| 109 | rejects in-range remediation if lockfile v2+ | ported | [`crates/renovate-core/src/extractors/npm.rs:5610`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5610) |
-| 120 | fails to remediate if parent dep cannot support | ported | [`crates/renovate-core/src/extractors/npm.rs:5676`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5676) |
-| 140 | remediates express | ported | [`crates/renovate-core/src/extractors/npm.rs:5691`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5691) |
-| 150 | remediates lock file v2 express | ported | [`crates/renovate-core/src/extractors/npm.rs:5705`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5705) |
-| 161 | returns already-updated if already remediated exactly | ported | [`crates/renovate-core/src/extractors/npm.rs:5619`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5619) |
-| 169 | returns already-updated if already v2 remediated exactly | ported | [`crates/renovate-core/src/extractors/npm.rs:5719`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5719) |
-| 178 | returns already-updated if already remediated higher | ported | [`crates/renovate-core/src/extractors/npm.rs:5728`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5728) |
-| 187 | returns already-updated if not found | ported | [`crates/renovate-core/src/extractors/npm.rs:5628`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5628) |
-| 196 | returns update-failed if other, lower version found | ported | [`crates/renovate-core/src/extractors/npm.rs:5736`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5736) |
-| 205 | remediates mime | ported | [`crates/renovate-core/src/extractors/npm.rs:5745`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5745) |
-| 222 | fails remediation if cannot update parent | ported | [`crates/renovate-core/src/extractors/npm.rs:5753`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5753) |
-| 231 | fails remediation if bundled | ported | [`crates/renovate-core/src/extractors/npm.rs:5762`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5762) |
-| 241 | rejects in-range remediation if pnpm | ported | [`crates/renovate-core/src/extractors/npm.rs:5777`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5777) |
+| 45 | validates filename | ported | [`crates/renovate-core/src/extractors/npm.rs:5539`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5539) |
+| 54 | validates versions | ported | [`crates/renovate-core/src/extractors/npm.rs:5554`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5554) |
+| 63 | returns null for unparseable files | ported | [`crates/renovate-core/src/extractors/npm.rs:5569`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5569) |
+| 72 | rejects lockfileversion 2 | ported | [`crates/renovate-core/src/extractors/npm.rs:5577`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5577) |
+| 81 | returns null if no locked deps | ported | [`crates/renovate-core/src/extractors/npm.rs:5585`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5585) |
+| 85 | rejects null if no constraint found | ported | [`crates/renovate-core/src/extractors/npm.rs:5636`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5636) |
+| 97 | remediates in-range | ported | [`crates/renovate-core/src/extractors/npm.rs:5651`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5651) |
+| 109 | rejects in-range remediation if lockfile v2+ | ported | [`crates/renovate-core/src/extractors/npm.rs:5599`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5599) |
+| 120 | fails to remediate if parent dep cannot support | ported | [`crates/renovate-core/src/extractors/npm.rs:5665`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5665) |
+| 140 | remediates express | ported | [`crates/renovate-core/src/extractors/npm.rs:5680`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5680) |
+| 150 | remediates lock file v2 express | ported | [`crates/renovate-core/src/extractors/npm.rs:5694`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5694) |
+| 161 | returns already-updated if already remediated exactly | ported | [`crates/renovate-core/src/extractors/npm.rs:5608`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5608) |
+| 169 | returns already-updated if already v2 remediated exactly | ported | [`crates/renovate-core/src/extractors/npm.rs:5708`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5708) |
+| 178 | returns already-updated if already remediated higher | ported | [`crates/renovate-core/src/extractors/npm.rs:5717`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5717) |
+| 187 | returns already-updated if not found | ported | [`crates/renovate-core/src/extractors/npm.rs:5617`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5617) |
+| 196 | returns update-failed if other, lower version found | ported | [`crates/renovate-core/src/extractors/npm.rs:5725`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5725) |
+| 205 | remediates mime | ported | [`crates/renovate-core/src/extractors/npm.rs:5734`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5734) |
+| 222 | fails remediation if cannot update parent | ported | [`crates/renovate-core/src/extractors/npm.rs:5742`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5742) |
+| 231 | fails remediation if bundled | ported | [`crates/renovate-core/src/extractors/npm.rs:5751`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5751) |
+| 241 | rejects in-range remediation if pnpm | ported | [`crates/renovate-core/src/extractors/npm.rs:5766`](../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5766) |
 

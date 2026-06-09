@@ -190,7 +190,10 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
                         &mut out,
                     );
                     if let Some(val) = strip_key(rest, "name") {
-                        img_name = Some(trim_yaml_scalar(val).0);
+                        let (name_str, _) = trim_yaml_scalar(val);
+                        if !name_str.trim().is_empty() && name_str.trim().parse::<f64>().is_err() {
+                            img_name = Some(name_str);
+                        }
                     } else if let Some(val) = strip_key(rest, "newName") {
                         img_new_name = Some(trim_yaml_scalar(val).0);
                     } else if let Some(val) = strip_key(rest, "newTag") {
@@ -201,7 +204,10 @@ pub fn extract(content: &str) -> Vec<KustomizeDep> {
                         img_digest = Some(trim_yaml_scalar(val).0);
                     }
                 } else if let Some(val) = strip_key(trimmed, "name") {
-                    img_name = Some(trim_yaml_scalar(val).0);
+                    let (name_str, _) = trim_yaml_scalar(val);
+                    if !name_str.trim().is_empty() && name_str.trim().parse::<f64>().is_err() {
+                        img_name = Some(name_str);
+                    }
                 } else if let Some(val) = strip_key(trimmed, "newName") {
                     img_new_name = Some(trim_yaml_scalar(val).0);
                 } else if let Some(val) = strip_key(trimmed, "newTag") {
@@ -1454,6 +1460,14 @@ resources:
     #[test]
     fn extract_image_null_on_empty_name() {
         let deps = extract("images:\n  - name: ''\n    newTag: v1.0.0\n");
+        assert!(deps.is_empty());
+    }
+
+    // Ported: "should return null on invalid input" — lib/modules/manager/kustomize/extract.spec.ts line 283
+    #[test]
+    fn extract_image_invalid_input_returns_null() {
+        // name as number (non-string) per TS @ts-expect-error test case
+        let deps = extract("images:\n  - name: 3\n    newTag: ''\n");
         assert!(deps.is_empty());
     }
 

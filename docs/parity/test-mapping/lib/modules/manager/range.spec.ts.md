@@ -6,9 +6,9 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | returns same if not auto | ported | [`crates/renovate-core/src/util.rs:9592`](../../../../../../crates/renovate-core/src/util.rs#L9592) |
-| 13 | returns manager strategy | ported | [`crates/renovate-core/src/util.rs:9598`](../../../../../../crates/renovate-core/src/util.rs#L9598) |
-| 22 | defaults to update-lockfile if updatelockeddependency() is supported | ported | [`crates/renovate-core/src/util.rs:9607`](../../../../../../crates/renovate-core/src/util.rs#L9607) |
-| 30 | defaults to replace | ported | [`crates/renovate-core/src/util.rs:9616`](../../../../../../crates/renovate-core/src/util.rs#L9616) |
-| 38 | returns rangestrategy if not auto | ported | [`crates/renovate-core/src/util.rs:9622`](../../../../../../crates/renovate-core/src/util.rs#L9622) |
+| 5 | returns same if not auto | ported | [`crates/renovate-core/src/util.rs:9593`](../../../../../../crates/renovate-core/src/util.rs#L9593) |
+| 13 | returns manager strategy | ported | [`crates/renovate-core/src/util.rs:9599`](../../../../../../crates/renovate-core/src/util.rs#L9599) |
+| 22 | defaults to update-lockfile if updatelockeddependency() is supported | ported | [`crates/renovate-core/src/util.rs:9608`](../../../../../../crates/renovate-core/src/util.rs#L9608) |
+| 30 | defaults to replace | ported | [`crates/renovate-core/src/util.rs:9617`](../../../../../../crates/renovate-core/src/util.rs#L9617) |
+| 38 | returns rangestrategy if not auto | ported | [`crates/renovate-core/src/util.rs:9623`](../../../../../../crates/renovate-core/src/util.rs#L9623) |
 

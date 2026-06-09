@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | sorts based on updatetype and prtitle | ported | [`crates/renovate-core/src/branch.rs:2333`](../../../../../../../crates/renovate-core/src/branch.rs#L2333) |
-| 49 | sorts based on prpriority | ported | [`crates/renovate-core/src/branch.rs:2364`](../../../../../../../crates/renovate-core/src/branch.rs#L2364) |
-| 86 | sorts based on isvulnerabilityalert | ported | [`crates/renovate-core/src/branch.rs:2395`](../../../../../../../crates/renovate-core/src/branch.rs#L2395) |
-| 124 | sorts based on isvulnerabilityalert symmetric | ported | [`crates/renovate-core/src/branch.rs:2411`](../../../../../../../crates/renovate-core/src/branch.rs#L2411) |
+| 6 | sorts based on updatetype and prtitle | ported | [`crates/renovate-core/src/branch.rs:2347`](../../../../../../../crates/renovate-core/src/branch.rs#L2347) |
+| 49 | sorts based on prpriority | ported | [`crates/renovate-core/src/branch.rs:2378`](../../../../../../../crates/renovate-core/src/branch.rs#L2378) |
+| 86 | sorts based on isvulnerabilityalert | ported | [`crates/renovate-core/src/branch.rs:2409`](../../../../../../../crates/renovate-core/src/branch.rs#L2409) |
+| 124 | sorts based on isvulnerabilityalert symmetric | ported | [`crates/renovate-core/src/branch.rs:2425`](../../../../../../../crates/renovate-core/src/branch.rs#L2425) |
 

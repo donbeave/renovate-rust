@@ -2,12 +2,12 @@
 
 [← `worker/repository`](../../../../../_by-module/worker/repository.md) · [all modules](../../../../../README.md)
 
-**0/12 in-scope tests ported** (12 pending, 0 opt-out) · status: pending
+**1/12 in-scope tests ported** (11 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 31 | does nothing when migration disabled and checkbox unchecked | pending | — |
-| 50 | creates migration branch when migration disabled but checkbox checked | pending | — |
+| 50 | creates migration branch when migration disabled but checkbox checked | ported | [`crates/renovate-core/src/branch.rs:2719`](../../../../../../../../crates/renovate-core/src/branch.rs#L2719) |
 | 71 | does not create a branch if migration branch is modified | pending | — |
 | 102 | updates migration branch & refreshes pr when migration disabled but open pr exists | pending | — |
 | 134 | creates migration branch when migration enabled but no pr exists | pending | — |

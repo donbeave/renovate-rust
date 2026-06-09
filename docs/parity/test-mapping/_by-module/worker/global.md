@@ -14,7 +14,7 @@
 | [`lib/workers/global/config/parse/host-rules-from-env.spec.ts`](../../lib/workers/global/config/parse/host-rules-from-env.spec.ts.md) | 12 | 12 | 0 | 0 | [`crates/renovate-core/src/config/host_rules_from_env.rs:262`](../../../../../crates/renovate-core/src/config/host_rules_from_env.rs#L262) | ported |
 | [`lib/workers/global/config/parse/index.spec.ts`](../../lib/workers/global/config/parse/index.spec.ts.md) | 35 | 0 | 35 | 0 | — | pending |
 | [`lib/workers/global/config/parse/util.spec.ts`](../../lib/workers/global/config/parse/util.spec.ts.md) | 1 | 1 | 0 | 0 | [`crates/renovate-core/src/config/migrate_validate.rs:4933`](../../../../../crates/renovate-core/src/config/migrate_validate.rs#L4933) | ported |
-| [`lib/workers/global/index.spec.ts`](../../lib/workers/global/index.spec.ts.md) | 15 | 2 | 13 | 0 | [`crates/renovate-core/src/util.rs:11743`](../../../../../crates/renovate-core/src/util.rs#L11743) | partial |
+| [`lib/workers/global/index.spec.ts`](../../lib/workers/global/index.spec.ts.md) | 15 | 2 | 13 | 0 | [`crates/renovate-core/src/util.rs:11744`](../../../../../crates/renovate-core/src/util.rs#L11744) | partial |
 | [`lib/workers/global/initialize.spec.ts`](../../lib/workers/global/initialize.spec.ts.md) | 7 | 0 | 7 | 0 | — | pending |
 | [`lib/workers/global/limits.spec.ts`](../../lib/workers/global/limits.spec.ts.md) | 19 | 19 | 0 | 0 | [`crates/renovate-core/src/limits.rs:237`](../../../../../crates/renovate-core/src/limits.rs#L237) | ported |
 
