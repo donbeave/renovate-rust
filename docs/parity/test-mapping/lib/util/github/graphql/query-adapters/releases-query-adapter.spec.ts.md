@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 17 | transforms items | ported | [`crates/renovate-core/src/util.rs:13424`](../../../../../../../../crates/renovate-core/src/util.rs#L13424) |
-| 28 | filters out drafts | ported | [`crates/renovate-core/src/util.rs:13448`](../../../../../../../../crates/renovate-core/src/util.rs#L13448) |
-| 32 | handles invalid items | ported | [`crates/renovate-core/src/util.rs:13464`](../../../../../../../../crates/renovate-core/src/util.rs#L13464) |
-| 36 | marks prereleases as unstable | ported | [`crates/renovate-core/src/util.rs:13472`](../../../../../../../../crates/renovate-core/src/util.rs#L13472) |
+| 17 | transforms items | ported | [`crates/renovate-core/src/util.rs:13425`](../../../../../../../../crates/renovate-core/src/util.rs#L13425) |
+| 28 | filters out drafts | ported | [`crates/renovate-core/src/util.rs:13449`](../../../../../../../../crates/renovate-core/src/util.rs#L13449) |
+| 32 | handles invalid items | ported | [`crates/renovate-core/src/util.rs:13465`](../../../../../../../../crates/renovate-core/src/util.rs#L13465) |
+| 36 | marks prereleases as unstable | ported | [`crates/renovate-core/src/util.rs:13473`](../../../../../../../../crates/renovate-core/src/util.rs#L13473) |
 

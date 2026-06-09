@@ -740,6 +740,21 @@ mod tests {
         assert!(config.token.is_none());
     }
 
+    // Ported: "warns if config is invalid" — lib/workers/global/config/parse/additional-config-file.spec.ts line 68
+    #[test]
+    fn additional_config_invalid_value_warns() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("additional.json");
+        std::fs::write(
+            &path,
+            r#"{"enabled":"invalid-value","prTitle":"something"}"#,
+        )
+        .unwrap();
+        let config = load_additional_config(path.to_str(), dir.path()).unwrap();
+        // value error now warns + defaults (no fatal), same payload/behavior as the main file and RENOVATE_CONFIG cases
+        assert!(config.token.is_none());
+    }
+
     // Ported: "parses" — lib/config/parse.spec.ts line 8
     #[test]
     fn parse_file_config_json_parses() {

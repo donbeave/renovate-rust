@@ -6,7 +6,7 @@
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/util/git/auth.spec.ts`](../../lib/util/git/auth.spec.ts.md) | 30 | 30 | 0 | 0 | [`crates/renovate-core/src/util.rs:8720`](../../../../../crates/renovate-core/src/util.rs#L8720) | ported |
+| [`lib/util/git/auth.spec.ts`](../../lib/util/git/auth.spec.ts.md) | 30 | 30 | 0 | 0 | [`crates/renovate-core/src/util.rs:8721`](../../../../../crates/renovate-core/src/util.rs#L8721) | ported |
 | [`lib/util/git/author.spec.ts`](../../lib/util/git/author.spec.ts.md) | 8 | 8 | 0 | 0 | [`crates/renovate-core/src/git/author.rs:116`](../../../../../crates/renovate-core/src/git/author.rs#L116) | ported |
 | [`lib/util/git/behind-base-branch-cache.spec.ts`](../../lib/util/git/behind-base-branch-cache.spec.ts.md) | 12 | 0 | 12 | 0 | — | pending |
 | [`lib/util/git/config.spec.ts`](../../lib/util/git/config.spec.ts.md) | 3 | 3 | 0 | 0 | [`crates/renovate-core/src/git.rs:82`](../../../../../crates/renovate-core/src/git.rs#L82) | ported |
@@ -20,5 +20,5 @@
 | [`lib/util/git/set-branch-commit.spec.ts`](../../lib/util/git/set-branch-commit.spec.ts.md) | 3 | 0 | 3 | 0 | — | pending |
 | [`lib/util/git/span-processor.spec.ts`](../../lib/util/git/span-processor.spec.ts.md) | 1 | 0 | 1 | 0 | — | pending |
 | [`lib/util/git/update-date-cache.spec.ts`](../../lib/util/git/update-date-cache.spec.ts.md) | 10 | 0 | 10 | 0 | — | pending |
-| [`lib/util/git/url.spec.ts`](../../lib/util/git/url.spec.ts.md) | 23 | 23 | 0 | 0 | [`crates/renovate-core/src/util.rs:8343`](../../../../../crates/renovate-core/src/util.rs#L8343) | ported |
+| [`lib/util/git/url.spec.ts`](../../lib/util/git/url.spec.ts.md) | 23 | 23 | 0 | 0 | [`crates/renovate-core/src/util.rs:8344`](../../../../../crates/renovate-core/src/util.rs#L8344) | ported |
 

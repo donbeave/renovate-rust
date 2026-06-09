@@ -10,5 +10,5 @@
 | 26 | handles error while reading reconfigure config file | pending | — |
 | 36 | handles invalid reconfigure config | pending | — |
 | 51 | return config | pending | — |
-| 64 | returns reconfigure branch name | ported | [`crates/renovate-core/src/util.rs:10019`](../../../../../../../crates/renovate-core/src/util.rs#L10019) |
+| 64 | returns reconfigure branch name | ported | [`crates/renovate-core/src/util.rs:10020`](../../../../../../../crates/renovate-core/src/util.rs#L10020) |
 

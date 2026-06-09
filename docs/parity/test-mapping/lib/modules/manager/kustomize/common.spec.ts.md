@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 19 | generates envs for specific helm version not requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9548`](../../../../../../../crates/renovate-core/src/util.rs#L9548) |
-| 34 | generates envs for helm version range not requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9562`](../../../../../../../crates/renovate-core/src/util.rs#L9562) |
-| 49 | generates envs for specific helm version requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9572`](../../../../../../../crates/renovate-core/src/util.rs#L9572) |
-| 66 | generates envs for helm range version requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9579`](../../../../../../../crates/renovate-core/src/util.rs#L9579) |
+| 19 | generates envs for specific helm version not requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9549`](../../../../../../../crates/renovate-core/src/util.rs#L9549) |
+| 34 | generates envs for helm version range not requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9563`](../../../../../../../crates/renovate-core/src/util.rs#L9563) |
+| 49 | generates envs for specific helm version requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9573`](../../../../../../../crates/renovate-core/src/util.rs#L9573) |
+| 66 | generates envs for helm range version requiring helm_experimental_oci | ported | [`crates/renovate-core/src/util.rs:9580`](../../../../../../../crates/renovate-core/src/util.rs#L9580) |
 

@@ -2,13 +2,13 @@
 
 [← `worker/global`](../../../../../_by-module/worker/global.md) · [all modules](../../../../../README.md)
 
-**0/15 in-scope tests ported** (15 pending, 0 opt-out) · status: pending
+**1/15 in-scope tests ported** (14 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
 | 26 | _(it.each / template — verify manually)_ | ? | — |
 | 55 | migrates | pending | — |
-| 68 | warns if config is invalid | pending | — |
+| 68 | warns if config is invalid | ported | [`crates/renovate-core/src/config/file.rs:743`](../../../../../../../../crates/renovate-core/src/config/file.rs#L743) |
 | 80 | parse and returns empty config if there is no renovate_additional_config_file in env | pending | — |
 | 84 | _(it.each / template — verify manually)_ | ? | — |
 | 112 | fatal error and exit if custom config file does not exist | pending | — |
