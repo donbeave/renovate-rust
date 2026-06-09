@@ -4503,19 +4503,11 @@ pub fn get_query_string(params: &[(&str, QueryValue)]) -> String {
     for (key, value) in params {
         match value {
             QueryValue::String(value) => {
-                pieces.push(format!(
-                    "{}={}",
-                    percent_encode(key),
-                    percent_encode(value),
-                ));
+                pieces.push(format!("{}={}", percent_encode(key), percent_encode(value),));
             }
             QueryValue::Strings(values) => {
                 for value in values {
-                    pieces.push(format!(
-                        "{}={}",
-                        percent_encode(key),
-                        percent_encode(value),
-                    ));
+                    pieces.push(format!("{}={}", percent_encode(key), percent_encode(value),));
                 }
             }
         }
@@ -4606,13 +4598,13 @@ pub fn replace_at(content: &str, index: usize, old_string: &str, new_string: &st
 
 /// Convert UTF-8 input text into a base64-encoded string.
 pub fn to_base64(input: &str) -> String {
-    use base64::{engine::general_purpose::STANDARD, Engine};
+    use base64::{Engine, engine::general_purpose::STANDARD};
     STANDARD.encode(input)
 }
 
 /// Decode a base64-encoded UTF-8 string.
 pub fn from_base64(input: &str) -> String {
-    use base64::{engine::general_purpose::STANDARD, Engine as _};
+    use base64::{Engine as _, engine::general_purpose::STANDARD};
     STANDARD
         .decode(input)
         .ok()
@@ -10949,7 +10941,7 @@ mod tests {
     // Ported: "handles Readables" — lib/util/streams.spec.ts line 8
     #[tokio::test]
     async fn test_stream_to_string() {
-        use tokio::io::{duplex, AsyncWriteExt};
+        use tokio::io::{AsyncWriteExt, duplex};
 
         let (mut tx, rx) = duplex(64);
         tx.write_all(b"abczxc").await.unwrap();

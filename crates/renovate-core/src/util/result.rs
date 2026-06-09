@@ -606,6 +606,11 @@ mod tests {
     // Ported: "transforms Result to AsyncResult" — lib/util/result.spec.ts line 71
     async fn transforms_result_to_async_result() {
         let res = Result::ok("foo").transform_async(|value| AsyncResult::ok(value.to_uppercase()));
-        assert_eq!(res.unwrap().await, Res::Ok { val: "FOO".to_owned() });
+        assert_eq!(
+            res.unwrap().await,
+            Res::Ok {
+                val: "FOO".to_owned()
+            }
+        );
     }
 }

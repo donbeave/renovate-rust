@@ -21,8 +21,8 @@
 //! Otherwise no global config file is loaded; Renovate's JS default of
 //! `config.js` is intentionally not searched (CD-0003).
 
-use std::path::{Path, PathBuf};
 use std::env;
+use std::path::{Path, PathBuf};
 
 use super::GlobalConfig;
 
@@ -126,7 +126,10 @@ pub fn delete_non_default_config(config_file_env: Option<&str>, delete_config_fi
 /// - fail when the path is missing/invalid
 /// - apply process environment variable overrides from `processEnv`
 /// - merge into the already-loaded base config with file-style precedence
-pub fn load_additional_config(config_file_env: Option<&str>, cwd: &Path) -> Result<GlobalConfig, ConfigFileError> {
+pub fn load_additional_config(
+    config_file_env: Option<&str>,
+    cwd: &Path,
+) -> Result<GlobalConfig, ConfigFileError> {
     let Some(config_file) = resolve_config_path(config_file_env, cwd)? else {
         return Ok(GlobalConfig::default());
     };
@@ -142,7 +145,9 @@ pub fn load_additional_config(config_file_env: Option<&str>, cwd: &Path) -> Resu
 
     let parsed = parse_file_config(file_name, &contents);
     let mut parsed_contents = match parsed {
-        ParsedFileConfig::Success { parsed_contents, .. } => parsed_contents,
+        ParsedFileConfig::Success {
+            parsed_contents, ..
+        } => parsed_contents,
         ParsedFileConfig::Error {
             validation_message, ..
         } => {
