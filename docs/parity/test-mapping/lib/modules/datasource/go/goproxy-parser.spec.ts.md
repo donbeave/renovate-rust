@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 10 | parses single url | ported | [`crates/renovate-core/src/util.rs:13037`](../../../../../../../crates/renovate-core/src/util.rs#L13037) |
-| 15 | parses multiple urls | ported | [`crates/renovate-core/src/util.rs:13046`](../../../../../../../crates/renovate-core/src/util.rs#L13046) |
-| 25 | ignores everything starting from "direct" and "off" keywords | ported | [`crates/renovate-core/src/util.rs:13081`](../../../../../../../crates/renovate-core/src/util.rs#L13081) |
+| 10 | parses single url | ported | [`crates/renovate-core/src/util.rs:13038`](../../../../../../../crates/renovate-core/src/util.rs#L13038) |
+| 15 | parses multiple urls | ported | [`crates/renovate-core/src/util.rs:13047`](../../../../../../../crates/renovate-core/src/util.rs#L13047) |
+| 25 | ignores everything starting from "direct" and "off" keywords | ported | [`crates/renovate-core/src/util.rs:13082`](../../../../../../../crates/renovate-core/src/util.rs#L13082) |
 | 43 | caches results | pending | — |
-| 49 | produces regex | ported | [`crates/renovate-core/src/util.rs:13097`](../../../../../../../crates/renovate-core/src/util.rs#L13097) |
-| 68 | matches on real package prefixes | ported | [`crates/renovate-core/src/util.rs:13122`](../../../../../../../crates/renovate-core/src/util.rs#L13122) |
-| 100 | matches on wildcards | ported | [`crates/renovate-core/src/util.rs:13157`](../../../../../../../crates/renovate-core/src/util.rs#L13157) |
-| 126 | matches on character ranges | ported | [`crates/renovate-core/src/util.rs:13175`](../../../../../../../crates/renovate-core/src/util.rs#L13175) |
+| 49 | produces regex | ported | [`crates/renovate-core/src/util.rs:13098`](../../../../../../../crates/renovate-core/src/util.rs#L13098) |
+| 68 | matches on real package prefixes | ported | [`crates/renovate-core/src/util.rs:13123`](../../../../../../../crates/renovate-core/src/util.rs#L13123) |
+| 100 | matches on wildcards | ported | [`crates/renovate-core/src/util.rs:13158`](../../../../../../../crates/renovate-core/src/util.rs#L13158) |
+| 126 | matches on character ranges | ported | [`crates/renovate-core/src/util.rs:13176`](../../../../../../../crates/renovate-core/src/util.rs#L13176) |
 | 131 | caches results | pending | — |
 
