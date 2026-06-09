@@ -1,3 +1,5 @@
+//! @parity `lib/workers/repository/init/inherited.ts` partial — mergeInheritedConfig (early returns for !inheritConfig, invalid repo/file, fetch via platform.getRawFile, parseFileConfig, validateConfig('inherit'), removeGlobalConfig + decrypt + secrets + applyHostRules + InheritConfig.set + mergeChildConfig or resolveConfigPresets path, setUserConfigFileNames); single test ported. Full async platform, preset resolve network, decrypt, host rules apply (in merge), template, logger, error constants, and wiring from getRepoConfig live in pending units or core config layer.
+//!
 //! Inherited config.
 //!
 //! Mirrors `lib/workers/repository/init/inherited.ts`.
