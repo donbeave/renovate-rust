@@ -309,7 +309,7 @@ Rust tests whose upstream identity is gone. Kept for review; never auto-removed.
 
 | Rust test | Upstream ref | Reason |
 |---|---|---|
-| [`crates/renovate-cli/src/config_env.rs:1865`](../../../crates/renovate-cli/src/config_env.rs#L1865) "" | `(unparseable)` | spec file removed/moved |
+| [`crates/renovate-cli/src/config_env.rs:1872`](../../../crates/renovate-cli/src/config_env.rs#L1872) "" | `(unparseable)` | spec file removed/moved |
 | [`crates/renovate-cli/src/migrate.rs:329`](../../../crates/renovate-cli/src/migrate.rs#L329) "" | `(unparseable)` | spec file removed/moved |
 | [`crates/renovate-core/src/cache/package.rs:606`](../../../crates/renovate-core/src/cache/package.rs#L606) "returns undefined for expired entry" | `lib/util/cache/package/impl/file.spec.ts` | test removed/renamed |
 | [`crates/renovate-core/src/config/migrate_validate.rs:7107`](../../../crates/renovate-core/src/config/migrate_validate.rs#L7107) "" | `(unparseable)` | spec file removed/moved |

@@ -1196,6 +1196,7 @@ mod tests {
         );
     }
 
+    // Ported: "cli dryRun = true replaced to full" — lib/workers/global/config/parse/index.spec.ts line 197
     // Ported: "dryRun boolean true" — lib/workers/global/config/parse/cli.spec.ts line 175
     #[test]
     fn dry_run_legacy_true_maps_to_full() {
