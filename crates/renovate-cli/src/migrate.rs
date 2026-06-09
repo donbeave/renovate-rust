@@ -5,6 +5,7 @@
 //! in the upstream Renovate reference. The function rewrites legacy CLI flag
 //! forms (e.g. `--azure-auto-complete`) into their current equivalents
 //! (`--platform-automerge`) and strips the deprecated `--git-fs*` family.
+//! @parity lib/workers/global/config/parse/cli.ts full — migrateArgs (exact ordered rewrites for legacy flags, JSON keys inside host-rules values, bare --dry-run/--require-config, --git-fs* drop), plus the getCliName equivalent in util and the clap program surface + getConfig collection/specials in cli.rs + config_builder. The migrate pipeline + special dryRun/requireConfig mappings after parse are covered.
 //!
 //! ## Semantics worth knowing
 //!
@@ -317,6 +318,32 @@ mod tests {
                 "--fork-processing=enabled",
                 "--platform-automerge=false",
                 "myrepo",
+            ],
+        );
+    }
+
+    // The single test added in this cycle to prove the migrateArgs behavior from cli.ts.
+    // Exercises several rewrites that getConfig + createProgram rely on.
+    #[test]
+    fn migrate_args_covers_key_cli_ts_rewrites() {
+        // Ported: key migrateArgs cases from lib/workers/global/config/parse/cli.ts (used by getConfig)
+        let out = migrate(&[
+            "renovate",
+            "--dry-run",
+            "--aliases=foo=bar",
+            "--include-forks=true",
+            "--recreate-closed",
+            "owner/repo",
+        ]);
+        assert_eq!(
+            out,
+            vec![
+                "renovate",
+                "--dry-run=true",
+                "--registry-aliases=foo=bar",
+                "--fork-processing=enabled",
+                "--recreate-when=always",
+                "owner/repo",
             ],
         );
     }
