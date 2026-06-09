@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 9 | returns null if failed to parse | ported | [`crates/renovate-core/src/extractors/npm.rs:3458`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3458) |
-| 15 | extracts | ported | [`crates/renovate-core/src/extractors/npm.rs:3465`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3465) |
-| 33 | extracts npm 7 lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3497`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3497) |
-| 51 | extracts npm 9 lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3524`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3524) |
-| 69 | returns null if no deps | ported | [`crates/renovate-core/src/extractors/npm.rs:3556`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3556) |
-| 75 | returns null on read error | ported | [`crates/renovate-core/src/extractors/npm.rs:3563`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3563) |
+| 9 | returns null if failed to parse | ported | [`crates/renovate-core/src/extractors/npm.rs:3474`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3474) |
+| 15 | extracts | ported | [`crates/renovate-core/src/extractors/npm.rs:3481`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3481) |
+| 33 | extracts npm 7 lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3513`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3513) |
+| 51 | extracts npm 9 lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3540`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3540) |
+| 69 | returns null if no deps | ported | [`crates/renovate-core/src/extractors/npm.rs:3572`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3572) |
+| 75 | returns null on read error | ported | [`crates/renovate-core/src/extractors/npm.rs:3579`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3579) |
 

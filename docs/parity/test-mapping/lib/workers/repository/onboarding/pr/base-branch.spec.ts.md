@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 13 | returns empty if no basebranch | ported | [`crates/renovate-core/src/branch.rs:2252`](../../../../../../../../crates/renovate-core/src/branch.rs#L2252) |
-| 18 | describes basebranch | ported | [`crates/renovate-core/src/branch.rs:2258`](../../../../../../../../crates/renovate-core/src/branch.rs#L2258) |
-| 26 | describes basebranchpatterns | ported | [`crates/renovate-core/src/branch.rs:2268`](../../../../../../../../crates/renovate-core/src/branch.rs#L2268) |
+| 13 | returns empty if no basebranch | ported | [`crates/renovate-core/src/branch.rs:2271`](../../../../../../../../crates/renovate-core/src/branch.rs#L2271) |
+| 18 | describes basebranch | ported | [`crates/renovate-core/src/branch.rs:2277`](../../../../../../../../crates/renovate-core/src/branch.rs#L2277) |
+| 26 | describes basebranchpatterns | ported | [`crates/renovate-core/src/branch.rs:2287`](../../../../../../../../crates/renovate-core/src/branch.rs#L2287) |
 

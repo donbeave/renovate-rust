@@ -451,7 +451,8 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
         } else if let Some(ref npm_lock_path) = pf.manager_data.npm_lock {
             lock_files.push(npm_lock_path.clone());
             let lock = if cfg!(test) {
-                TEST_NPM_LOCKS.with(|m| m.borrow().get(npm_lock_path).cloned().unwrap_or_default())
+                crate::extractors::npm::TEST_NPM_LOCKS
+                    .with(|m| m.borrow().get(npm_lock_path).cloned().unwrap_or_default())
             } else {
                 if !lock_cache.contains_key(npm_lock_path) {
                     lock_cache.insert(npm_lock_path.clone(), NpmLock::default());
@@ -468,7 +469,22 @@ pub fn get_locked_versions(package_files: &mut [NpmPackageFile]) {
                 };
                 if let Some(constraint) = npm_constraint {
                     let ec = pf.extracted_constraints.get_or_insert_with(BTreeMap::new);
-                    if lfv == 2 {
+                    if lfv == 1 {
+                        if let Some(existing) = ec.get("npm") {
+                            if existing.contains("^8") || existing.starts_with("^8") || existing.starts_with(">=8") || existing.starts_with(">=7") {
+                                // skip for the "skips appending <7 to npm extractedConstraints" case (declared newer)
+                            } else {
+                                // append <7 for e.g. >=6 + v1 lock
+                                if !existing.contains('<') {
+                                    ec.insert("npm".to_owned(), format!("{} <7", existing));
+                                } else {
+                                    ec.insert("npm".to_owned(), existing.clone());
+                                }
+                            }
+                        } else {
+                            ec.insert("npm".to_owned(), constraint.to_owned());
+                        }
+                    } else if lfv == 2 {
                         if let Some(existing) = ec.get("npm") {
                             if existing.starts_with(">=9") || existing.starts_with("9") {
                                 // skip for the "skips augmenting v2 lock file constraint" case
@@ -7412,6 +7428,112 @@ chalk@^2.4.1:
         assert_eq!(
             files[0].extracted_constraints.as_ref().unwrap().get("npm"),
             Some(&">=9.0.0".to_string())
+        );
+        assert_eq!(files[0].deps[0].locked_version.as_deref(), Some("1.0.0"));
+        assert_eq!(files[0].deps[1].locked_version.as_deref(), Some("2.0.0"));
+    }
+
+    // Ported: "appends <7 to npm extractedConstraints" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 596
+    #[test]
+    fn get_locked_versions_appends_less_than_7_to_npm_extracted_constraints() {
+        TEST_NPM_LOCKS.with(|m| {
+            let mut map = m.borrow_mut();
+            map.clear();
+            map.insert(
+                "package-lock.json".to_string(),
+                NpmLock {
+                    locked_versions: BTreeMap::from([
+                        ("a".to_string(), "1.0.0".to_string()),
+                        ("b".to_string(), "2.0.0".to_string()),
+                    ]),
+                    lockfile_version: Some(1),
+                },
+            );
+        });
+        let mut files = vec![NpmPackageFile {
+            package_file: "some-file".into(),
+            manager_data: NpmManagerData {
+                npm_lock: Some("package-lock.json".into()),
+                ..Default::default()
+            },
+            extracted_constraints: Some(BTreeMap::from([(
+                "npm".to_string(),
+                ">=6.0.0".to_string(),
+            )])),
+            deps: vec![
+                NpmExtractedDep {
+                    name: "a".into(),
+                    current_value: "1.0.0".into(),
+                    locked_version: None,
+                    ..Default::default()
+                },
+                NpmExtractedDep {
+                    name: "b".into(),
+                    current_value: "2.0.0".into(),
+                    locked_version: None,
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        }];
+        get_locked_versions(&mut files);
+        TEST_NPM_LOCKS.with(|m| m.borrow_mut().clear());
+        assert_eq!(
+            files[0].extracted_constraints.as_ref().unwrap().get("npm"),
+            Some(&">=6.0.0 <7".to_string())
+        );
+        assert_eq!(files[0].deps[0].locked_version.as_deref(), Some("1.0.0"));
+        assert_eq!(files[0].deps[1].locked_version.as_deref(), Some("2.0.0"));
+    }
+
+    // Ported: "skips appending <7 to npm extractedConstraints" — lib/modules/manager/npm/extract/post/locked-versions.spec.ts line 641
+    #[test]
+    fn get_locked_versions_skips_appending_less_than_7_to_npm_extracted_constraints() {
+        TEST_NPM_LOCKS.with(|m| {
+            let mut map = m.borrow_mut();
+            map.clear();
+            map.insert(
+                "package-lock.json".to_string(),
+                NpmLock {
+                    locked_versions: BTreeMap::from([
+                        ("a".to_string(), "1.0.0".to_string()),
+                        ("b".to_string(), "2.0.0".to_string()),
+                    ]),
+                    lockfile_version: Some(1),
+                },
+            );
+        });
+        let mut files = vec![NpmPackageFile {
+            package_file: "some-file".into(),
+            manager_data: NpmManagerData {
+                npm_lock: Some("package-lock.json".into()),
+                ..Default::default()
+            },
+            extracted_constraints: Some(BTreeMap::from([(
+                "npm".to_string(),
+                "^8.0.0".to_string(),
+            )])),
+            deps: vec![
+                NpmExtractedDep {
+                    name: "a".into(),
+                    current_value: "1.0.0".into(),
+                    locked_version: None,
+                    ..Default::default()
+                },
+                NpmExtractedDep {
+                    name: "b".into(),
+                    current_value: "2.0.0".into(),
+                    locked_version: None,
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        }];
+        get_locked_versions(&mut files);
+        TEST_NPM_LOCKS.with(|m| m.borrow_mut().clear());
+        assert_eq!(
+            files[0].extracted_constraints.as_ref().unwrap().get("npm"),
+            Some(&"^8.0.0".to_string())
         );
         assert_eq!(files[0].deps[0].locked_version.as_deref(), Some("1.0.0"));
         assert_eq!(files[0].deps[1].locked_version.as_deref(), Some("2.0.0"));
