@@ -658,6 +658,7 @@ mod tests {
         );
     }
 
+    // Ported: "supports token in cli options" — lib/workers/global/config/parse/index.spec.ts line 51
     // Ported: "supports string" — lib/workers/global/config/parse/cli.spec.ts line 84
     #[test]
     fn token_is_set() {
