@@ -6,7 +6,7 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | works | ported | [`crates/renovate-core/src/util.rs:11126`](../../../../../crates/renovate-core/src/util.rs#L11126) |
-| 24 | handles invalid toml | ported | [`crates/renovate-core/src/util.rs:11145`](../../../../../crates/renovate-core/src/util.rs#L11145) |
-| 32 | handles templates | ported | [`crates/renovate-core/src/util.rs:11152`](../../../../../crates/renovate-core/src/util.rs#L11152) |
+| 5 | works | ported | [`crates/renovate-core/src/util.rs:11139`](../../../../../crates/renovate-core/src/util.rs#L11139) |
+| 24 | handles invalid toml | ported | [`crates/renovate-core/src/util.rs:11158`](../../../../../crates/renovate-core/src/util.rs#L11158) |
+| 32 | handles templates | ported | [`crates/renovate-core/src/util.rs:11165`](../../../../../crates/renovate-core/src/util.rs#L11165) |
 

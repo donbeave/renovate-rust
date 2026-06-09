@@ -6,8 +6,8 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 16 | sets new cache | ported | [`crates/renovate-core/src/util.rs:10092`](../../../../../../../crates/renovate-core/src/util.rs#L10092) |
-| 28 | updates old cache | ported | [`crates/renovate-core/src/util.rs:10104`](../../../../../../../crates/renovate-core/src/util.rs#L10104) |
-| 45 | updates extractresult old cache | ported | [`crates/renovate-core/src/util.rs:10121`](../../../../../../../crates/renovate-core/src/util.rs#L10121) |
-| 69 | deletes cache | ported | [`crates/renovate-core/src/util.rs:10141`](../../../../../../../crates/renovate-core/src/util.rs#L10141) |
+| 16 | sets new cache | ported | [`crates/renovate-core/src/util.rs:10105`](../../../../../../../crates/renovate-core/src/util.rs#L10105) |
+| 28 | updates old cache | ported | [`crates/renovate-core/src/util.rs:10117`](../../../../../../../crates/renovate-core/src/util.rs#L10117) |
+| 45 | updates extractresult old cache | ported | [`crates/renovate-core/src/util.rs:10134`](../../../../../../../crates/renovate-core/src/util.rs#L10134) |
+| 69 | deletes cache | ported | [`crates/renovate-core/src/util.rs:10154`](../../../../../../../crates/renovate-core/src/util.rs#L10154) |
 
