@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 5 | default config file pattern | ported | [`crates/renovate-core/src/managers.rs:1824`](../../../../../../../crates/renovate-core/src/managers.rs#L1824) |
+| 5 | default config file pattern | ported | [`crates/renovate-core/src/managers.rs:1829`](../../../../../../../crates/renovate-core/src/managers.rs#L1829) |
 

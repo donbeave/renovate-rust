@@ -6,6 +6,6 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 4 | getcustommanagerlist | ported | [`crates/renovate-core/src/managers.rs:2128`](../../../../../../../crates/renovate-core/src/managers.rs#L2128) |
-| 9 | works | ported | [`crates/renovate-core/src/managers.rs:2135`](../../../../../../../crates/renovate-core/src/managers.rs#L2135) |
+| 4 | getcustommanagerlist | ported | [`crates/renovate-core/src/managers.rs:2133`](../../../../../../../crates/renovate-core/src/managers.rs#L2133) |
+| 9 | works | ported | [`crates/renovate-core/src/managers.rs:2140`](../../../../../../../crates/renovate-core/src/managers.rs#L2140) |
 

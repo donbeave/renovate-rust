@@ -6,5 +6,5 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 6 | managerfilepatterns regex is correct | ported | [`crates/renovate-core/src/managers.rs:1982`](../../../../../../../crates/renovate-core/src/managers.rs#L1982) |
+| 6 | managerfilepatterns regex is correct | ported | [`crates/renovate-core/src/managers.rs:1987`](../../../../../../../crates/renovate-core/src/managers.rs#L1987) |
 
