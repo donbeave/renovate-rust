@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 68/150 in-scope files mapped (full=19 partial=49 stub=0 pending=82 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 69/150 in-scope files mapped (full=19 partial=50 stub=0 pending=81 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -153,7 +153,7 @@
 | `lib/workers/repository/onboarding/branch/rebase.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/branch/rebase.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/branch/rebase.rs) | rebaseOnboardingBranch (platform support check for github/gitea/gitlab, get contents and hash, skip if same as previous or dryRun, use OnboardingCommitMessageFactory for message, prTitle, scm.commitAndPush); single test ported. Uses siblings for contents/factory; full scm/platform execution and higher caller (index) pending other units. |
 | `lib/workers/repository/onboarding/common.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/common.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/common.rs) | getSemanticCommitPrTitle, getDefaultConfigFileName, OnboardingState (prUpdateRequested/onboardingCacheValid statics), get_onboarding_pr_title/get_onboarding_pr_body; single test ported. Callers (rebase, pr, init/apis) and full memCache integration pending. |
 | `lib/workers/repository/onboarding/pr/base-branch.ts` | full | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | getBaseBranchDesc (0/1/>1 baseBranchPatterns description strings for onboarding PR body; strings + logic match the TS exactly; all covering it() ported in this file's tests). |
-| `lib/workers/repository/onboarding/pr/config-description.ts` | pending | — | — |
+| `lib/workers/repository/onboarding/pr/config-description.ts` | partial | [`crates/renovate-core/src/workers/repository/onboarding/pr/config_description.rs`](../../../crates/renovate-core/src/workers/repository/onboarding/pr/config_description.rs) | getConfigDesc + getScheduleDesc (description array + schedule handling for onboarding PR body summary); single test ported. (logger calls omitted as they do not affect observable return value; _packageFiles param kept for signature parity but unused per upstream TODO). |
 | `lib/workers/repository/onboarding/pr/index.ts` | pending | — | — |
 | `lib/workers/repository/onboarding/pr/pr-list.ts` | pending | — | — |
 | `lib/workers/repository/package-files.ts` | pending | — | — |
