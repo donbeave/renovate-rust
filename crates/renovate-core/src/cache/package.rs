@@ -613,6 +613,8 @@ mod tests {
         assert_eq!(result, Some("hello-raw".to_owned()));
     }
 
+    // Ported: "returns undefined for expired entry" — lib/util/cache/package/impl/file.spec.ts line 53
+    // Ported: "expires cached entries" — lib/util/cache/package/impl/file.spec.ts line 53
     #[tokio::test]
     async fn file_cache_returns_none_for_expired_entry() {
         let dir = TempDir::new().unwrap();
