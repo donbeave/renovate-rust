@@ -104,4 +104,14 @@ mod tests {
         let result = prune_stale_branches(&branches, &renovate, "renovate/");
         assert!(result.pruned_branches.is_empty());
     }
+
+    // Ported: "returns if no branchList" — lib/workers/repository/finalize/prune.spec.ts line 24
+    #[test]
+    fn prune_stale_branches_returns_if_no_branchlist() {
+        // Exercises the early return / no work when no branchList (empty input list in TS before getBranchList; here empty branch_list produces no pruned).
+        // The list fn with empty first arg (no branchList) leads to no stale to prune.
+        let result = prune_stale_branches(&[], &["renovate/a".to_owned()], "renovate/");
+        assert!(result.pruned_branches.is_empty());
+        assert!(result.deleted_orphan_branches.is_empty());
+    }
 }
