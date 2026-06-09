@@ -1,5 +1,7 @@
 //! Onboarding PR management.
 //!
+//! @parity `lib/workers/repository/onboarding/pr/index.ts` partial — ensureOnboardingPr (early returns for onboarded/rebase-checkbox/cache, autoCloseAge, conflict comment, template assembly with rebase checkbox + hash + header/footer + requireConfig note), build body using ported getConfigDesc/getPrListDescription/getBaseBranchDesc + warnings/errors placeholders; single test ported. Full platform create/update, OnboardingState statics, productLinks, full hash comment pending siblings or init.
+//!
 //! Mirrors `lib/workers/repository/onboarding/pr/index.ts`.
 
 use std::collections::HashMap;
