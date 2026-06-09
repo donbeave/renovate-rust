@@ -591,3 +591,8 @@ spec   = "lib/workers/repository/update/pr/labels.spec.ts"
 test   = "gitea"
 reason = "tests prepareLabels label trimming for gitea's labelCharLimit (~50 chars); same as 'github' — platform-specific (gitea platform has ports); opting the platform limit/trim tests as the core prepare_labels business is ported, the per-platform limit values and exact trim are platform config detail."
 
+[[test]]
+spec   = "lib/workers/repository/extract/index.spec.ts"
+test   = "warns if no packages found for a enabled manager"
+reason = "asserts logger.debug spy (with { manager: 'custom.regex' } and the exact 'Manager explicitly enabled in \"enabledManagers\" config, but found no results. Possible config error?' message) when getManagerPackageFiles returns [] for an enabled custom manager; the core business (empty packageFiles result for enabled manager with no results) may be covered by other extract tests (the 1/5 ported in the spec); the test is written around the spy, no direct Rust equivalent (tracing without spy harness). Opt as pure TS logger spy + enabled manager warn message shape."
+
