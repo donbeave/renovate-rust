@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 13 | returns empty if exception parsing | ported | [`crates/renovate-core/src/extractors/npm.rs:3592`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3592) |
-| 20 | extracts yarn 1 | ported | [`crates/renovate-core/src/extractors/npm.rs:3601`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3601) |
-| 30 | extracts yarn 2 | ported | [`crates/renovate-core/src/extractors/npm.rs:3639`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3639) |
-| 40 | extracts yarn 2 cache version | ported | [`crates/renovate-core/src/extractors/npm.rs:3680`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3680) |
-| 50 | ignores individual invalid entries | ported | [`crates/renovate-core/src/extractors/npm.rs:3722`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3722) |
-| 63 | getyarnversionfromlock | ported | [`crates/renovate-core/src/extractors/npm.rs:3746`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3746) |
-| 83 | handles empty catalog entries | ported | [`crates/renovate-core/src/extractors/npm.rs:3799`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3799) |
-| 91 | parses valid .yarnrc.yml file | ported | [`crates/renovate-core/src/extractors/npm.rs:3806`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3806) |
-| 133 | finds relevant lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3837`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3837) |
+| 13 | returns empty if exception parsing | ported | [`crates/renovate-core/src/extractors/npm.rs:3586`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3586) |
+| 20 | extracts yarn 1 | ported | [`crates/renovate-core/src/extractors/npm.rs:3595`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3595) |
+| 30 | extracts yarn 2 | ported | [`crates/renovate-core/src/extractors/npm.rs:3633`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3633) |
+| 40 | extracts yarn 2 cache version | ported | [`crates/renovate-core/src/extractors/npm.rs:3674`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3674) |
+| 50 | ignores individual invalid entries | ported | [`crates/renovate-core/src/extractors/npm.rs:3716`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3716) |
+| 63 | getyarnversionfromlock | ported | [`crates/renovate-core/src/extractors/npm.rs:3740`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3740) |
+| 83 | handles empty catalog entries | ported | [`crates/renovate-core/src/extractors/npm.rs:3793`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3793) |
+| 91 | parses valid .yarnrc.yml file | ported | [`crates/renovate-core/src/extractors/npm.rs:3800`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3800) |
+| 133 | finds relevant lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3831`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3831) |
 

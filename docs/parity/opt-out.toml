@@ -343,3 +343,43 @@ reason = "Node.js Readable stream conversion to string (using 'stream' module) f
 spec   = "lib/modules/platform/azure/util.spec.ts"
 test   = "handles error"
 reason = "Node.js Readable stream error handling via .destroy(err) and promise rejection for azure body stream; same TS runtime stream detail with no Rust equivalent (error is surfaced via http client Result/Err paths)."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "has valid supporteddatasources for ${m}"
+reason = "parametrized registry data check (loop over getManagerList, assert supportedDatasources non-empty and all known); TS runtime iteration over manager metadata. Rust static MANAGER_DEFS + list fns (core already ported in other tests); this exact form is TS-specific registry validation."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "has lockfilenames for ${name}"
+reason = "parametrized check for lock-supporting managers (filter supportsLockFileMaintenance, assert lockFileNames non-empty); similar TS registry data loop. Equivalent data in Rust artifact/locked paths (covered elsewhere); the loop in this spec is runtime validation detail."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "validates"
+reason = "dynamic loadModules (TS require + dir scan of managers/custom) + custom validate fn (defaultConfig, extract* or updateDependency, no undefined exports) + key cross-match vs getManagers. Pure TS runtime module loading + reflection with no Rust static equivalent (Rust is compile-time registry; core get/exists behaviors ported)."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "returns null"
+reason = "multiple (extractAll, extractPackageFile, getRangeStrategy) using managers map monkey-patch with 'dummy' (no fn) then assert index facade returns null for unknown/missing-fn. TS mutable registry + injection for dispatch guard tests; no direct Rust (static); core unknown guard via manager_exists + per-manager none already exercised."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "returns non-null"
+reason = "sibling dummy-injection tests asserting non-null when dummy has the fn. Same TS facade mutation pattern for dispatch; core for known managers covered by existing ports."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "handles custom managers"
+reason = "customManager.getCustomManagers().set + index extractPackageFile assert non-null. Tests custom delegation via runtime map. Rust custom (regex etc.) via is_custom_manager + static wiring; behavior covered in other tests."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "returns update-lockfile for in-range-only"
+reason = "getRangeStrategy dummy test for in-range-only input yielding 'update-lockfile' (and when manager proposes it). The special case is in util::get_range_strategy (unconditional, prior ports); this is the TS index facade version using map mutation."
+
+[[test]]
+spec   = "lib/modules/manager/index.spec.ts"
+test   = "returns update-lockfile for in-range-only if it is proposed my manager"
+reason = "paired in-range-only facade test. Same util logic already marked/port covered; exact it() here is the wrapper test."

@@ -8,8 +8,8 @@
 |--:|---|---|---|
 | 175 | command exits with code 0 | ported | [`crates/renovate-core/src/exec/raw.rs:145`](../../../../../../crates/renovate-core/src/exec/raw.rs#L145) |
 | 194 | never extends the process environment | ported | [`crates/renovate-core/src/exec/raw.rs:166`](../../../../../../crates/renovate-core/src/exec/raw.rs#L166) |
-| 214 | throws if an error occurs, when using commandwithoptions | ported | [`crates/renovate-core/src/exec/error.rs:126`](../../../../../../crates/renovate-core/src/exec/error.rs#L126) |
-| 241 | throws if an error occurs | ported | [`crates/renovate-core/src/exec/error.rs:118`](../../../../../../crates/renovate-core/src/exec/error.rs#L118) |
+| 214 | throws if an error occurs, when using commandwithoptions | ported | [`crates/renovate-core/src/exec/error.rs:123`](../../../../../../crates/renovate-core/src/exec/error.rs#L123) |
+| 241 | throws if an error occurs | ported | [`crates/renovate-core/src/exec/error.rs:115`](../../../../../../crates/renovate-core/src/exec/error.rs#L115) |
 | 265 | throws if an error occurs, and we specify ignorefailure=false | ported | [`crates/renovate-core/src/exec/orchestrator.rs:423`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L423) |
 | 292 | does not throw if an error occurs, but we specify ignorefailure=true | ported | [`crates/renovate-core/src/exec/orchestrator.rs:396`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L396) |
 | 320 | can specify a shell | ported | [`crates/renovate-core/src/exec/raw.rs:182`](../../../../../../crates/renovate-core/src/exec/raw.rs#L182) |
@@ -25,7 +25,7 @@
 | 538 | can specify shell=false | ported | [`crates/renovate-core/src/exec/orchestrator.rs:372`](../../../../../../crates/renovate-core/src/exec/orchestrator.rs#L372) |
 | 561 | should invoke the output listeners | opt-out | asserts registration of outputListeners (stdout/stderr DataListener callbacks) and that they are invoked with the exact data chunks during execution (via the child process events in the execa stub); the Rust exec/raw currently captures full stdout/stderr into ExecResult after process completion (piped output().await + from_utf8); there is no equivalent streaming listener registration API in ExecOptions or result delivery yet (full capture behavior is covered by other ported exec tests that assert result.stdout/stderr); this is a TypeScript/child_process-specific runtime delivery mechanism with no direct 1:1 in the current Rust surface. |
 | 602 | command exits with code 1 | ported | [`crates/renovate-core/src/exec/raw.rs:155`](../../../../../../crates/renovate-core/src/exec/raw.rs#L155) |
-| 618 | process terminated with sigterm | ported | [`crates/renovate-core/src/exec/error.rs:139`](../../../../../../crates/renovate-core/src/exec/error.rs#L139) |
+| 618 | process terminated with sigterm | ported | [`crates/renovate-core/src/exec/error.rs:136`](../../../../../../crates/renovate-core/src/exec/error.rs#L136) |
 | 632 | process does nothing when signaled with sigstop and eventually times out | ported | [`crates/renovate-core/src/exec/raw.rs:194`](../../../../../../crates/renovate-core/src/exec/raw.rs#L194) |
 | 644 | process exits due to error | ported | [`crates/renovate-core/src/exec/raw.rs:219`](../../../../../../crates/renovate-core/src/exec/raw.rs#L219) |
 | 659 | process exits with error due to exceeded stdout maxbuffer | opt-out | asserts specific ExecError for stdout exceeding maxBuffer option in the TS execa wrapper; Rust exec has timeout and error on failure but the exact 'exceeded stdout maxbuffer' error + option is from the TS layer (output capture size limit); core failure/error paths covered by other ports. |
