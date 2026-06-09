@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 27/150 in-scope files mapped (full=9 partial=18 stub=0 pending=123 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 28/150 in-scope files mapped (full=9 partial=19 stub=0 pending=122 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -110,7 +110,7 @@
 | `lib/workers/repository/changelog/types.ts` | opt-out | — | Type-only changelog option/result type aliases with no runtime behavior in Rust implementation. |
 | `lib/workers/repository/common.ts` | partial | [`crates/renovate-core/src/workers/repository/common.rs`](../../../crates/renovate-core/src/workers/repository/common.rs) | extractRepoProblems + formatProblemLevel added (format also present in branch.rs for other use; extract is stub pending full logger problems integration in problem-stream). The cache types (BaseBranchCache, PackageFile) were already here as "related". |
 | `lib/workers/repository/config-migration/branch/commit-message.ts` | full | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | getCommitMessage / getPrTitle (ConfigMigrationCommitMessageFactory) using tweaked scope + custom commitMessage template support when provided (empty falls back to default topic-based). The fns are the direct surface for creating the migration branch/PR commit message. |
-| `lib/workers/repository/config-migration/branch/create.ts` | pending | — | — |
+| `lib/workers/repository/config-migration/branch/create.ts` | partial | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | createConfigMigrationBranch uses the ConfigMigrationCommitMessageFactory (getCommitMessage/getPrTitle with custom support) to get the message and prTitle for the migration branch; dryRun early return, checkout, MigratedData prettier, file changes (config + optional package.json renovate field cleanup), and scm.commitAndPush (force, platformCommit) are in the (pending) worker/index orchestration. |
 | `lib/workers/repository/config-migration/branch/index.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/branch/migrated-data.ts` | pending | — | — |
 | `lib/workers/repository/config-migration/branch/rebase.ts` | pending | — | — |

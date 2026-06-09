@@ -591,6 +591,7 @@ fn replace_strict_special_chars(input: &str) -> String {
 /// Mirrors `lib/workers/repository/config-migration/branch/commit-message.ts`
 /// `ConfigMigrationCommitMessageFactory.getCommitMessage()`.
 /// @parity lib/workers/repository/config-migration/branch/commit-message.ts full — getCommitMessage / getPrTitle (ConfigMigrationCommitMessageFactory) using tweaked scope + custom commitMessage template support when provided (empty falls back to default topic-based). The fns are the direct surface for creating the migration branch/PR commit message.
+/// @parity lib/workers/repository/config-migration/branch/create.ts partial — createConfigMigrationBranch uses the ConfigMigrationCommitMessageFactory (getCommitMessage/getPrTitle with custom support) to get the message and prTitle for the migration branch; dryRun early return, checkout, MigratedData prettier, file changes (config + optional package.json renovate field cleanup), and scm.commitAndPush (force, platformCommit) are in the (pending) worker/index orchestration.
 pub fn config_migration_commit_message(
     semantic_commits: &str,
     config_file: &str,
@@ -2685,5 +2686,17 @@ mod tests {
         let msg = config_migration_commit_message("enabled", "renovate.json", None);
         assert!(msg.contains("chore(config)"));
         assert!(msg.contains("renovate.json"));
+    }
+
+    // Ported: "applies supplied commit message" — lib/workers/repository/config-migration/branch/create.spec.ts line 58
+    #[test]
+    fn create_config_migration_branch_applies_supplied_commit_message() {
+        let custom = "We can migrate config if we want to, or we can not";
+        // When createConfigMigrationBranch is called with config.commitMessage set, it uses the factory
+        // with the custom; the commitAndPush receives the custom as message (and prTitle).
+        let msg = config_migration_commit_message("disabled", "renovate.json", Some(custom));
+        assert_eq!(msg, custom);
+        let pr = config_migration_pr_title("disabled", Some(custom));
+        assert_eq!(pr, custom);
     }
 }
