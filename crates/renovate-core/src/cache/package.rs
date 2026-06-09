@@ -1165,6 +1165,37 @@ mod tests {
         assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 2);
     }
 
+    // Ported: "does not cache values rejected by cacheResult predicate" — lib/util/cache/package/with-cache.spec.ts line 140
+    #[tokio::test]
+    async fn with_cache_does_not_cache_values_rejected_by_predicate() {
+        let dir = TempDir::new().unwrap();
+        let cache = make_cache(&dir);
+        let cfg = default_config();
+        let opts = WithCacheOptions::new("_test-namespace", "key");
+        let call_count = std::sync::Arc::new(std::sync::atomic::AtomicU32::new(0));
+        let predicate: fn(&Value) -> bool = |v| v != &Value::Null;
+
+        // All calls return null (rejected by predicate) => never cached, fn runs every time
+        for _ in 0..3 {
+            let cc = call_count.clone();
+            let r: Option<String> = with_cache(
+                &cache,
+                &cfg,
+                opts.clone(),
+                Some(predicate),
+                move || {
+                    cc.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                    async { Ok::<_, anyhow::Error>(None) }
+                },
+            )
+            .await
+            .unwrap();
+            assert_eq!(r, None);
+        }
+
+        assert_eq!(call_count.load(std::sync::atomic::Ordering::SeqCst), 3);
+    }
+
     // Ported: "uses custom ttlMinutes" — lib/util/cache/package/with-cache.spec.ts line 232
     #[tokio::test]
     async fn with_cache_uses_custom_ttl_minutes() {
