@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 49/150 in-scope files mapped (full=18 partial=31 stub=0 pending=101 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 50/150 in-scope files mapped (full=18 partial=32 stub=0 pending=100 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -134,7 +134,7 @@
 | `lib/workers/repository/index.ts` | partial | [`crates/renovate-core/src/workers/repository/index.rs`](../../../crates/renovate-core/src/workers/repository/index.rs) | renovateRepository/process_repository skeleton (disabled early return via configured check; wiring to finalize + result; divergence note for full init/extract/update/onboarding/configMigration/ensureDashboard/handleError/prune/splits/instrument/queue + recursive automerge; the single proving test ported). Full flow pending other units. |
 | `lib/workers/repository/init/apis.ts` | partial | [`crates/renovate-core/src/workers/repository/init/apis.rs`](../../../crates/renovate-core/src/workers/repository/init/apis.rs) | initApis + getPlatformConfig (platform.initRepo) + validateOptimizeForDisabled (optimizeForDisabled + getJsonFile default config + :disableRenovate re-enable logic) + validateIncludeForks (forkProcessing/includeForks + repo config checks, getJsonFile failure ignore) + getDefaultConfigFileName + onboardingConfigFileName handling. Single test ported. Full platform result merge + async wiring pending in init/index + worker. |
 | `lib/workers/repository/init/cache.ts` | pending | — | — |
-| `lib/workers/repository/init/config.ts` | pending | — | — |
+| `lib/workers/repository/init/config.ts` | partial | [`crates/renovate-core/src/workers/repository/init/config.rs`](../../../crates/renovate-core/src/workers/repository/init/config.rs) | getRepoConfig (baseBranch = defaultBranch + calls to mergeInheritedConfig / checkOnboardingBranch / mergeRenovateConfig); single test ported from the covering spec. Full sibling surfaces + wiring in pending init/inherited/merge/onboarding units. |
 | `lib/workers/repository/init/index.ts` | pending | — | — |
 | `lib/workers/repository/init/inherited.ts` | pending | — | — |
 | `lib/workers/repository/init/merge.ts` | pending | — | — |
