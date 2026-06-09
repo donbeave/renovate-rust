@@ -1,5 +1,7 @@
 //! Package file collection.
 //!
+//! @parity `lib/workers/repository/package-files.ts` partial — PackageFiles (add/clear/getDashboardMarkdown(maxLength, setHeader) with truncation/pop/note/emojify, internal build with <details> branches/managers/files/deps + updates/version@digest/lock + skip filter); single test ported ("does not truncates as there is enough space to fit"). Full integration with dashboard callers pending.
+//!
 //! Mirrors `lib/workers/repository/package-files.ts`.
 
 use std::collections::HashMap;
