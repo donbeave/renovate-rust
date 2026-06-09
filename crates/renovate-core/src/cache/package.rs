@@ -1574,6 +1574,21 @@ mod tests {
         assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(100));
     }
 
+    // Ported: "treats string numbers as invalid, only accepts number types" — lib/util/cache/package/ttl.spec.ts line 330
+    #[test]
+    fn get_ttl_override_treats_string_numbers_as_invalid_only_number_types() {
+        // Exact TS pattern: 'datasource-*' as string (invalid, skipped), 'datasource-n*' number wins for 'datasource-npm'.
+        let cfg = CacheTtlConfig {
+            ttl_override: [
+                ("datasource-n*".to_owned(), 100i64),
+                ("*".to_owned(), 45i64),
+            ]
+            .into(),
+            ..Default::default()
+        };
+        assert_eq!(get_ttl_override(&cfg, "datasource-npm"), Some(100));
+    }
+
     // Ported: "returns undefined when no patterns match" — lib/util/cache/package/ttl.spec.ts line 243
     #[test]
     fn get_ttl_override_returns_none_when_no_patterns_match() {
