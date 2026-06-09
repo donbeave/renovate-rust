@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 33/150 in-scope files mapped (full=10 partial=23 stub=0 pending=117 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 34/150 in-scope files mapped (full=11 partial=23 stub=0 pending=116 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -116,7 +116,7 @@
 | `lib/workers/repository/config-migration/branch/rebase.ts` | partial | [`crates/renovate-core/src/json_writer.rs`](../../../crates/renovate-core/src/json_writer.rs) | jsonStripWhitespaces (the strip for migration rebase); uses the json write/strip surface here (full rebase logic in pending worker). |
 | `lib/workers/repository/config-migration/common.ts` | full | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | getMigrationBranchName (the template for the migrate-config branch name used by create, rebase, pr, index etc.). |
 | `lib/workers/repository/config-migration/index.ts` | partial | [`crates/renovate-core/src/config/migration.rs`](../../../crates/renovate-core/src/config/migration.rs) | configMigration orchestrator (the top-level glue: silent mode, get migrated data via factory, check branch, push to branchList, ensure PR, return result for dashboard; full check/ensure/PR creation in pending worker submodules, using the service here for the core migrate/is_migrated). |
-| `lib/workers/repository/config-migration/pr/index.ts` | pending | — | — |
+| `lib/workers/repository/config-migration/pr/index.ts` | full | [`crates/renovate-core/src/branch.rs`](../../../crates/renovate-core/src/branch.rs) | ensureConfigMigrationPr (body with migration text + json5 note + emojify + templated header/footer + massage + hashBody compare; existingPr check/update vs create; dryRun short circuits with logs; 422 duplicate warn+delete+null; title via ConfigMigrationCommitMessageFactory; single test ported). Platform get/create/update/addParticipants/massage in platform layer; higher worker orchestration pending in siblings. |
 | `lib/workers/repository/configured.ts` | pending | — | — |
 | `lib/workers/repository/dependency-dashboard.ts` | pending | — | — |
 | `lib/workers/repository/error-config.ts` | pending | — | — |

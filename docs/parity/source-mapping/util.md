@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 41/172 in-scope files mapped (full=41 partial=0 stub=0 pending=131 out-of-scope=0 opt-out=3) across 13 modules.
+**Coverage:** 40/172 in-scope files mapped (full=39 partial=1 stub=0 pending=132 out-of-scope=0 opt-out=3) across 13 modules.
 
 ### `util/_root`
 
@@ -25,7 +25,7 @@
 | `lib/util/html.ts` | opt-out | — | Thin wrapper around node-html-parser specific to TypeScript runtime APIs; no Rust equivalent in the current implementation set. |
 | `lib/util/ignore.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/interpolator.ts` | full | [`crates/renovate-core/src/config/secrets.rs`](../../../crates/renovate-core/src/config/secrets.rs)<br>[`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
-| `lib/util/jsonata.ts` | full | [`crates/renovate-core/src/util/jsonata.rs`](../../../crates/renovate-core/src/util/jsonata.rs) | — |
+| `lib/util/jsonata.ts` | pending | — | — |
 | `lib/util/lazy.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/markdown.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/mask.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
@@ -39,7 +39,7 @@
 | `lib/util/promises.ts` | full | [`crates/renovate-core/src/util/promises.rs`](../../../crates/renovate-core/src/util/promises.rs) | — |
 | `lib/util/range.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/regex.ts` | full | [`crates/renovate-core/src/util/regex.rs`](../../../crates/renovate-core/src/util/regex.rs) | — |
-| `lib/util/result.ts` | full | [`crates/renovate-core/src/util/result.rs`](../../../crates/renovate-core/src/util/result.rs) | — |
+| `lib/util/result.ts` | partial | [`crates/renovate-core/src/util/result.rs`](../../../crates/renovate-core/src/util/result.rs) | async chaining helpers added; transform/catch |
 | `lib/util/s3.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sample.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
 | `lib/util/sanitize.ts` | full | [`crates/renovate-core/src/util.rs`](../../../crates/renovate-core/src/util.rs) | — |
