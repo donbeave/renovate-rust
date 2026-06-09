@@ -377,4 +377,28 @@ mod tests {
         let b = map_from_value(json!({"a": 1}));
         assert!(!MigrationService::is_migrated(&a, &b));
     }
+
+    // Ported: "migrates dryRun" — lib/config/migration.spec.ts line 820
+    #[test]
+    fn migrates_dry_run() {
+        // Exercises the migration for the deprecated "dryRun" boolean field.
+        // The service/rules should treat presence of the old key as requiring migration.
+        let original_true = map_from_value(json!({"dryRun": true}));
+        let service = MigrationService::new();
+        let migrated_true = service.run(&original_true);
+        assert!(MigrationService::is_migrated(
+            &original_true,
+            &migrated_true
+        ));
+        // Old key should be migrated away.
+        assert!(migrated_true.get("dryRun").is_none());
+
+        let original_false = map_from_value(json!({"dryRun": false}));
+        let migrated_false = service.run(&original_false);
+        assert!(MigrationService::is_migrated(
+            &original_false,
+            &migrated_false
+        ));
+        assert!(migrated_false.get("dryRun").is_none());
+    }
 }
