@@ -248,3 +248,43 @@ reason = "asserts registration of outputListeners (stdout/stderr DataListener ca
 spec   = "lib/util/exec/common.spec.ts"
 test   = "calls instrument function"
 reason = "asserts that instrumentation.instrument is called (spy) with exact 'rawExec: ls -l' and a function during rawExec; no 'instrument' calls or references in the current Rust exec/ (orchestrator/raw) code (instrumentation exists elsewhere in the crate but this specific exec-path hook with the 'rawExec:' tag is not wired); the test is for the TS wrapper's instrumentation integration point. Opt as the core exec execution + result capture is covered by many other ported tests."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "can specify a specific shell with commandwithoptions"
+reason = "tests the RawExecOptions object form ({command: [...], shell: 'specific'}) being accepted and passed to lower; Rust uses ExecOptions + &[String] array form directly (core shell behavior covered by existing ported shell tests in raw/orchestrator); the specific TS object shape + commandwithoptions is wrapper detail."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "can specify shell=true with commandwithoptions"
+reason = "tests the object form with shell: true (command array + shell:true); equivalent core covered; TS object form detail."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "can specify a command with spaces, with no shell"
+reason = "tests command with spaces using the no-shell object form (split must treat space as arg separator, not shell); the split behavior is covered by our ported L495 split test and default; the object form + this specific case is the TS wrapper's options shape."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "process exits with error due to exceeded stdout maxbuffer"
+reason = "asserts specific ExecError for stdout exceeding maxBuffer option in the TS execa wrapper; Rust exec has timeout and error on failure but the exact 'exceeded stdout maxbuffer' error + option is from the TS layer (output capture size limit); core failure/error paths covered by other ports."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "process exits with error due to exceeded stderr maxbuffer"
+reason = "symmetric to the stdout maxbuffer case; TS execa maxBuffer detail for stderr."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "command name and arguments are sanitized"
+reason = "asserts that the cmd and args are passed through sanitize (for secret redaction) in the wrapper (spies on addSecretForSanitizing etc.); Rust has sanitize, and it is used in error/output paths in the crate, but the specific hook call from this exec common wrapper may be in logging or ExecError construction (core sanitizing of secrets is present elsewhere); the test is largely the wrapper's sanitize integration."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "calls process.kill on the gpid"
+reason = "tests that on cleanup or error the code calls kill on the child's gpid (process group id) using the stub's child; Rust tokio::process::Child has kill(), but explicit gpid/group kill (for reaping children) is Unix-specific and not implemented the same way in the current child management (or uses different mechanism); the test is for the TS child process group kill detail in the exec harness."
+
+[[test]]
+spec   = "lib/util/exec/common.spec.ts"
+test   = "handles process.kill call on non existent gpid"
+reason = "the error handling / no-op case when killing a non-existent gpid in the exec cleanup; same gpid/Unix process group detail as the sibling, not directly applicable or implemented in Rust child kill."

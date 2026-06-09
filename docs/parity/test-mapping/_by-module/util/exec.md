@@ -2,11 +2,11 @@
 
 [← all modules](../../README.md)
 
-**Coverage:** 74/136 in-scope tests ported (opt-out=2) across 7 spec files.
+**Coverage:** 75/136 in-scope tests ported (opt-out=2) across 7 spec files.
 
 | Spec file | it() | ported | pending | opt-out | Rust test file(s) | Status |
 |---|--:|--:|--:|--:|---|---|
-| [`lib/util/exec/common.spec.ts`](../../lib/util/exec/common.spec.ts.md) | 30 | 17 | 11 | 2 | [`crates/renovate-core/src/exec/error.rs:115`](../../../../../crates/renovate-core/src/exec/error.rs#L115)<br>[`crates/renovate-core/src/exec/orchestrator.rs:314`](../../../../../crates/renovate-core/src/exec/orchestrator.rs#L314)<br>[`crates/renovate-core/src/exec/raw.rs:145`](../../../../../crates/renovate-core/src/exec/raw.rs#L145) | partial |
+| [`lib/util/exec/common.spec.ts`](../../lib/util/exec/common.spec.ts.md) | 30 | 18 | 10 | 2 | [`crates/renovate-core/src/exec/error.rs:118`](../../../../../crates/renovate-core/src/exec/error.rs#L118)<br>[`crates/renovate-core/src/exec/orchestrator.rs:314`](../../../../../crates/renovate-core/src/exec/orchestrator.rs#L314)<br>[`crates/renovate-core/src/exec/raw.rs:145`](../../../../../crates/renovate-core/src/exec/raw.rs#L145) | partial |
 | [`lib/util/exec/containerbase.spec.ts`](../../lib/util/exec/containerbase.spec.ts.md) | 20 | 9 | 11 | 0 | [`crates/renovate-core/src/exec/containerbase.rs:291`](../../../../../crates/renovate-core/src/exec/containerbase.rs#L291) | partial |
 | [`lib/util/exec/docker/index.spec.ts`](../../lib/util/exec/docker/index.spec.ts.md) | 19 | 11 | 8 | 0 | [`crates/renovate-core/src/exec/docker.rs:118`](../../../../../crates/renovate-core/src/exec/docker.rs#L118) | partial |
 | [`lib/util/exec/env.spec.ts`](../../lib/util/exec/env.spec.ts.md) | 4 | 4 | 0 | 0 | [`crates/renovate-core/src/exec/env.rs:83`](../../../../../crates/renovate-core/src/exec/env.rs#L83)<br>[`crates/renovate-core/src/util.rs:13731`](../../../../../crates/renovate-core/src/util.rs#L13731) | ported |
