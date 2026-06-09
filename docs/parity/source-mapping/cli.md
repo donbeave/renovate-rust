@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 48/150 in-scope files mapped (full=18 partial=30 stub=0 pending=102 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 49/150 in-scope files mapped (full=18 partial=31 stub=0 pending=101 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -132,7 +132,7 @@
 | `lib/workers/repository/finalize/prune.ts` | partial | [`crates/renovate-core/src/workers/repository/finalize/prune.rs`](../../../crates/renovate-core/src/workers/repository/finalize/prune.rs) | pruneStaleBranches (computes remaining renovate branches after prefix/lock/reconfigure exclusions, returns pruned list in PruneResult; full cleanUpBranches with platform.findPr, scm.isBranchModified/isBranchModified, updatePr for '- autoclosed'/' - abandoned', ensureComment, scm.deleteBranch, dryRun, multi-base baseBranchRe, error handling, GlobalConfig, logger is in platform/git layers or finalize caller). The pure list-diff helper here is used by finalize/index; side effects and full orchestration pending. Single test ported. |
 | `lib/workers/repository/finalize/repository-statistics.ts` | partial | [`crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs`](../../../crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs) | runRenovateRepoStats + runBranchSummary (collect_pr_stats/collect_statistics core for PR totals/merged etc; cache scan for baseBranches/inactiveBranches, logger.debug with specific shape, platform.getPrList in caller). Stubs for full cache/platform; the collect fns + run surfaces added for finalize wiring. Single test ported. |
 | `lib/workers/repository/index.ts` | partial | [`crates/renovate-core/src/workers/repository/index.rs`](../../../crates/renovate-core/src/workers/repository/index.rs) | renovateRepository/process_repository skeleton (disabled early return via configured check; wiring to finalize + result; divergence note for full init/extract/update/onboarding/configMigration/ensureDashboard/handleError/prune/splits/instrument/queue + recursive automerge; the single proving test ported). Full flow pending other units. |
-| `lib/workers/repository/init/apis.ts` | pending | — | — |
+| `lib/workers/repository/init/apis.ts` | partial | [`crates/renovate-core/src/workers/repository/init/apis.rs`](../../../crates/renovate-core/src/workers/repository/init/apis.rs) | initApis + getPlatformConfig (platform.initRepo) + validateOptimizeForDisabled (optimizeForDisabled + getJsonFile default config + :disableRenovate re-enable logic) + validateIncludeForks (forkProcessing/includeForks + repo config checks, getJsonFile failure ignore) + getDefaultConfigFileName + onboardingConfigFileName handling. Single test ported. Full platform result merge + async wiring pending in init/index + worker. |
 | `lib/workers/repository/init/cache.ts` | pending | — | — |
 | `lib/workers/repository/init/config.ts` | pending | — | — |
 | `lib/workers/repository/init/index.ts` | pending | — | — |
