@@ -1209,6 +1209,27 @@ mod tests {
         );
     }
 
+    // Ported: "cli dryRun replaced to full" — lib/workers/global/config/parse/index.spec.ts line 247
+    #[test]
+    fn cli_dry_run_bare_replaced_to_full() {
+        // Bare `--dry-run` (no value) is the classic CLI form; migrate_args rewrites it
+        // to LegacyTrue (simulating the TS migrate), which then maps to Full via map_dry_run.
+        // This exercises the exact replacement path the pending TS test covers.
+        let mut cli = Cli::try_parse_from(["renovate", "--dry-run"]).expect("bare --dry-run parses");
+        migrate_args(&mut cli);
+        let cfg = build(&cli, GlobalConfig::default());
+        assert_eq!(cfg.dry_run, Some(DryRun::Full));
+    }
+
+    // Ported: "cli dryRun = false replaced to null" — lib/workers/global/config/parse/index.spec.ts line 264
+    #[test]
+    fn cli_dry_run_false_replaced_to_null() {
+        let mut cli = Cli::try_parse_from(["renovate", "--dry-run=false"]).expect("parses");
+        migrate_args(&mut cli);
+        let cfg = build(&cli, GlobalConfig::default());
+        assert_eq!(cfg.dry_run, None);
+    }
+
     // Ported: "dryRun boolean false" — lib/workers/global/config/parse/cli.spec.ts line 185
     #[test]
     fn dry_run_legacy_false_disables_dry_run() {
