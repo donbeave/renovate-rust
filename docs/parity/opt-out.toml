@@ -333,3 +333,13 @@ reason = "tests that on cleanup or error the code calls kill on the child's gpid
 spec   = "lib/util/exec/common.spec.ts"
 test   = "handles process.kill call on non existent gpid"
 reason = "the error handling / no-op case when killing a non-existent gpid in the exec cleanup; same gpid/Unix process group detail as the sibling, not directly applicable or implemented in Rust child kill."
+
+[[test]]
+spec   = "lib/modules/platform/azure/util.spec.ts"
+test   = "converts Readable stream to string"
+reason = "Node.js Readable stream conversion to string (using 'stream' module) for azure SDK response bodies; Rust platform/azure uses the shared HttpClient which provides .text() / bytes directly on responses with no separate streamToString helper or node stream runtime plumbing."
+
+[[test]]
+spec   = "lib/modules/platform/azure/util.spec.ts"
+test   = "handles error"
+reason = "Node.js Readable stream error handling via .destroy(err) and promise rejection for azure body stream; same TS runtime stream detail with no Rust equivalent (error is surfaced via http client Result/Err paths)."

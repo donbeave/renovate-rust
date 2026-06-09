@@ -2,7 +2,7 @@
 
 [← `platform/azure`](../../../../_by-module/platform/azure.md) · [all modules](../../../../README.md)
 
-**26/29 in-scope tests ported** (3 pending, 0 opt-out) · status: partial
+**26/27 in-scope tests ported** (1 pending, 2 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -19,8 +19,8 @@
 | 91 | should be formated (closed) | ported | [`crates/renovate-core/src/platform/azure_utils.rs:177`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L177) |
 | 96 | should be formated (closed v2) | ported | [`crates/renovate-core/src/platform/azure_utils.rs:183`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L183) |
 | 101 | should be formated (not closed) | ported | [`crates/renovate-core/src/platform/azure_utils.rs:189`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L189) |
-| 108 | converts readable stream to string | pending | — |
-| 113 | handles error | pending | — |
+| 108 | converts readable stream to string | opt-out | Node.js Readable stream conversion to string (using 'stream' module) for azure SDK response bodies; Rust platform/azure uses the shared HttpClient which provides .text() / bytes directly on responses with no separate streamToString helper or node stream runtime plumbing. |
+| 113 | handles error | opt-out | Node.js Readable stream error handling via .destroy(err) and promise rejection for azure body stream; same TS runtime stream detail with no Rust equivalent (error is surfaced via http client Result/Err paths). |
 | 122 | should configure basic auth | ported | [`crates/renovate-core/src/platform/azure_utils.rs:413`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L413) |
 | 130 | should configure personal access token | ported | [`crates/renovate-core/src/platform/azure_utils.rs:424`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L424) |
 | 137 | should configure bearer token | ported | [`crates/renovate-core/src/platform/azure_utils.rs:437`](../../../../../../../crates/renovate-core/src/platform/azure_utils.rs#L437) |

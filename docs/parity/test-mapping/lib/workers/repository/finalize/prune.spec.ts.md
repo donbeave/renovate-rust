@@ -2,7 +2,7 @@
 
 [← `worker/repository`](../../../../_by-module/worker/repository.md) · [all modules](../../../../README.md)
 
-**0/18 in-scope tests ported** (18 pending, 0 opt-out) · status: pending
+**1/18 in-scope tests ported** (17 pending, 0 opt-out) · status: partial
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
@@ -10,7 +10,7 @@
 | 30 | ignores reconfigure branch | pending | — |
 | 36 | returns if no defaultbranch | pending | — |
 | 43 | returns if no renovate branches | pending | — |
-| 51 | returns if no remaining branches | pending | — |
+| 51 | returns if no remaining branches | ported | [`crates/renovate-core/src/workers/repository/finalize/prune.rs:97`](../../../../../../../crates/renovate-core/src/workers/repository/finalize/prune.rs#L97) |
 | 59 | renames deletes remaining branch | pending | — |
 | 71 | skips rename but still deletes branch | pending | — |
 | 87 | deletes with base branches | pending | — |

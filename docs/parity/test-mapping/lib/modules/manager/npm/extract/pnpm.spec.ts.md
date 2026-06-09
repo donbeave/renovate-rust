@@ -17,9 +17,9 @@
 | 272 | extracts version from monorepo | pending | — |
 | 279 | extracts version from normal repo | pending | — |
 | 289 | extracts version from catalogs | pending | — |
-| 341 | returns empty if no deps | ported | [`crates/renovate-core/src/extractors/npm.rs:3847`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3847) |
-| 349 | handles empty catalog entries | ported | [`crates/renovate-core/src/extractors/npm.rs:3855`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3855) |
-| 360 | parses valid pnpm-workspace.yaml file | ported | [`crates/renovate-core/src/extractors/npm.rs:3863`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3863) |
-| 395 | parses overrides in pnpm-workspace.yaml file | ported | [`crates/renovate-core/src/extractors/npm.rs:3911`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3911) |
-| 466 | finds relevant lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3947`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3947) |
+| 341 | returns empty if no deps | ported | [`crates/renovate-core/src/extractors/npm.rs:3842`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3842) |
+| 349 | handles empty catalog entries | ported | [`crates/renovate-core/src/extractors/npm.rs:3850`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3850) |
+| 360 | parses valid pnpm-workspace.yaml file | ported | [`crates/renovate-core/src/extractors/npm.rs:3858`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3858) |
+| 395 | parses overrides in pnpm-workspace.yaml file | ported | [`crates/renovate-core/src/extractors/npm.rs:3906`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3906) |
+| 466 | finds relevant lockfile | ported | [`crates/renovate-core/src/extractors/npm.rs:3942`](../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L3942) |
 

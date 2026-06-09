@@ -6,13 +6,13 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 19 | returns undefined if no .npmrc exists and no config.npmrc | ported | [`crates/renovate-core/src/extractors/npm.rs:8800`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8800) |
-| 24 | uses config.npmrc if no .npmrc is found | ported | [`crates/renovate-core/src/extractors/npm.rs:8809`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8809) |
-| 31 | finds and filters .npmrc | ported | [`crates/renovate-core/src/extractors/npm.rs:8817`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8817) |
-| 53 | uses config.npmrc if .npmrc does exist but npmrcmerge=false | ported | [`crates/renovate-core/src/extractors/npm.rs:8840`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8840) |
-| 81 | uses config.npmrc if no .npmrc file is found | ported | [`crates/renovate-core/src/extractors/npm.rs:8854`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8854) |
-| 98 | merges config.npmrc and repo .npmrc when npmrcmerge=true | ported | [`crates/renovate-core/src/extractors/npm.rs:8862`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8862) |
-| 123 | does not add a newline between config.npmrc and repo .npmrc when npmrcmerge is true, if a newline already exists | ported | [`crates/renovate-core/src/extractors/npm.rs:8876`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8876) |
-| 156 | finds and filters .npmrc with variables | ported | [`crates/renovate-core/src/extractors/npm.rs:8893`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8893) |
-| 180 | keeps variables when exposeallenv is true | ported | [`crates/renovate-core/src/extractors/npm.rs:8911`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8911) |
+| 19 | returns undefined if no .npmrc exists and no config.npmrc | ported | [`crates/renovate-core/src/extractors/npm.rs:8795`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8795) |
+| 24 | uses config.npmrc if no .npmrc is found | ported | [`crates/renovate-core/src/extractors/npm.rs:8804`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8804) |
+| 31 | finds and filters .npmrc | ported | [`crates/renovate-core/src/extractors/npm.rs:8812`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8812) |
+| 53 | uses config.npmrc if .npmrc does exist but npmrcmerge=false | ported | [`crates/renovate-core/src/extractors/npm.rs:8835`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8835) |
+| 81 | uses config.npmrc if no .npmrc file is found | ported | [`crates/renovate-core/src/extractors/npm.rs:8849`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8849) |
+| 98 | merges config.npmrc and repo .npmrc when npmrcmerge=true | ported | [`crates/renovate-core/src/extractors/npm.rs:8857`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8857) |
+| 123 | does not add a newline between config.npmrc and repo .npmrc when npmrcmerge is true, if a newline already exists | ported | [`crates/renovate-core/src/extractors/npm.rs:8871`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8871) |
+| 156 | finds and filters .npmrc with variables | ported | [`crates/renovate-core/src/extractors/npm.rs:8888`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8888) |
+| 180 | keeps variables when exposeallenv is true | ported | [`crates/renovate-core/src/extractors/npm.rs:8906`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8906) |
 
