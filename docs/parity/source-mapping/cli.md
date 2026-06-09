@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 16/150 in-scope files mapped (full=3 partial=13 stub=0 pending=134 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 17/150 in-scope files mapped (full=4 partial=13 stub=0 pending=133 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -91,7 +91,7 @@
 | `lib/workers/global/config/parse/cli.ts` | pending | — | — |
 | `lib/workers/global/config/parse/codespaces.ts` | full | [`crates/renovate-cli/src/config_codespaces.rs`](../../../crates/renovate-cli/src/config_codespaces.rs) | in GitHub Codespaces, infer token from `GITHUB_TOKEN` and prompt for repository when none are configured. |
 | `lib/workers/global/config/parse/coersions.ts` | pending | — | — |
-| `lib/workers/global/config/parse/env.ts` | pending | — | — |
+| `lib/workers/global/config/parse/env.ts` | full | [`crates/renovate-cli/src/config_env.rs`](../../../crates/renovate-cli/src/config_env.rs) | env prefix normalization, key renaming (legacy + migrated), experimental X_ var massaging to current names, RENOVATE_CONFIG merge, per-option coercion via env, special boolean mappings for dryRun/requireConfig/platformCommit, GITHUB_COM_TOKEN -> hostRule, deletion of unsupported legacy env names. Matches the prepareEnv + getConfig surface for self-hosted runs. |
 | `lib/workers/global/config/parse/file.ts` | partial | [`crates/renovate-core/src/config/file.rs`](../../../crates/renovate-core/src/config/file.rs) | JSON/JSON5 parser and non-default file cleanup are implemented; CLI/global env integration and some migrate/validation flows are staged elsewhere. |
 | `lib/workers/global/config/parse/host-rules-from-env.ts` | pending | — | — |
 | `lib/workers/global/config/parse/index.ts` | pending | — | — |

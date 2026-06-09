@@ -1,6 +1,7 @@
 //! Renovate-compatible global config parsing from environment variables.
 //!
 //! Renovate reference: `lib/workers/global/config/parse/env.ts` `getConfig`.
+//! @parity lib/workers/global/config/parse/env.ts full — env prefix normalization, key renaming (legacy + migrated), experimental X_ var massaging to current names, RENOVATE_CONFIG merge, per-option coercion via env, special boolean mappings for dryRun/requireConfig/platformCommit, GITHUB_COM_TOKEN -> hostRule, deletion of unsupported legacy env names. Matches the prepareEnv + getConfig surface for self-hosted runs.
 
 use std::collections::BTreeMap;
 
