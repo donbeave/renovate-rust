@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 46/150 in-scope files mapped (full=18 partial=28 stub=0 pending=104 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 47/150 in-scope files mapped (full=18 partial=29 stub=0 pending=103 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -130,7 +130,7 @@
 | `lib/workers/repository/extract/types.ts` | opt-out | — | Type-only interface used for TypeScript compile-time typing in worker extraction output. |
 | `lib/workers/repository/finalize/index.ts` | partial | [`crates/renovate-core/src/workers/repository/finalize/index.rs`](../../../crates/renovate-core/src/workers/repository/finalize/index.rs) | finalizeRepo (wires pruneStaleBranches + runRenovateRepoStats + result; stubs for checkReconfigureBranch, repositoryCache, ensureIssuesClosing, clearRenovateRefs, PackageFiles.clear, platform.getPrList for repoIsActivated, runBranchSummary). Prune/stats are simplified (full in their pending .ts + platform); no direct it() for the glue found (sub specs cover called fns). Single test ported for stats call wiring. |
 | `lib/workers/repository/finalize/prune.ts` | partial | [`crates/renovate-core/src/workers/repository/finalize/prune.rs`](../../../crates/renovate-core/src/workers/repository/finalize/prune.rs) | pruneStaleBranches (computes remaining renovate branches after prefix/lock/reconfigure exclusions, returns pruned list in PruneResult; full cleanUpBranches with platform.findPr, scm.isBranchModified/isBranchModified, updatePr for '- autoclosed'/' - abandoned', ensureComment, scm.deleteBranch, dryRun, multi-base baseBranchRe, error handling, GlobalConfig, logger is in platform/git layers or finalize caller). The pure list-diff helper here is used by finalize/index; side effects and full orchestration pending. Single test ported. |
-| `lib/workers/repository/finalize/repository-statistics.ts` | pending | — | — |
+| `lib/workers/repository/finalize/repository-statistics.ts` | partial | [`crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs`](../../../crates/renovate-core/src/workers/repository/finalize/repository_statistics.rs) | runRenovateRepoStats + runBranchSummary (collect_pr_stats/collect_statistics core for PR totals/merged etc; cache scan for baseBranches/inactiveBranches, logger.debug with specific shape, platform.getPrList in caller). Stubs for full cache/platform; the collect fns + run surfaces added for finalize wiring. Single test ported. |
 | `lib/workers/repository/index.ts` | pending | — | — |
 | `lib/workers/repository/init/apis.ts` | pending | — | — |
 | `lib/workers/repository/init/cache.ts` | pending | — | — |
