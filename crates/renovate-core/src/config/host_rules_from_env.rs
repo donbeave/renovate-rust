@@ -1,6 +1,7 @@
 //! Parse environment variables into Renovate host rules.
 //!
 //! Ports `lib/workers/global/config/parse/host-rules-from-env.ts`.
+//! @parity lib/workers/global/config/parse/host-rules-from-env.ts full — parsing of RENOVATE_<HOST>[_PARTS]_[TOKEN|USERNAME|PASSWORD|https*] env vars into hostRules (with __ -> - , hosttype validation, https field restore), including precedence for GITHUB_COM_TOKEN. Matches hostRulesFromEnv surface.
 //!
 //! # Environment variable format
 //!
