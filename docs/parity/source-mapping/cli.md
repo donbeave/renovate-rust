@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 51/150 in-scope files mapped (full=18 partial=33 stub=0 pending=99 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 52/150 in-scope files mapped (full=18 partial=34 stub=0 pending=98 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -135,7 +135,7 @@
 | `lib/workers/repository/init/apis.ts` | partial | [`crates/renovate-core/src/workers/repository/init/apis.rs`](../../../crates/renovate-core/src/workers/repository/init/apis.rs) | initApis + getPlatformConfig (platform.initRepo) + validateOptimizeForDisabled (optimizeForDisabled + getJsonFile default config + :disableRenovate re-enable logic) + validateIncludeForks (forkProcessing/includeForks + repo config checks, getJsonFile failure ignore) + getDefaultConfigFileName + onboardingConfigFileName handling. Single test ported. Full platform result merge + async wiring pending in init/index + worker. |
 | `lib/workers/repository/init/cache.ts` | partial | [`crates/renovate-core/src/workers/repository/init/cache.rs`](../../../crates/renovate-core/src/workers/repository/init/cache.rs) | resetCaches (mem + repo cache reset + fs.remove(privateCacheDir)) + initializeCaches (initRepoCache + ensure private dir + npm setNpmrc clear then set from config.npmrc); single test ported. Full mem/repo singletons, initRepoCache details (CacheFactory/load), memCache.init() post-reset, and wiring from init/index live in pending units (index.ts, global, util/cache/repository). |
 | `lib/workers/repository/init/config.ts` | partial | [`crates/renovate-core/src/workers/repository/init/config.rs`](../../../crates/renovate-core/src/workers/repository/init/config.rs) | getRepoConfig (baseBranch = defaultBranch + calls to mergeInheritedConfig / checkOnboardingBranch / mergeRenovateConfig); single test ported from the covering spec. Full sibling surfaces + wiring in pending init/inherited/merge/onboarding units. |
-| `lib/workers/repository/init/index.ts` | pending | — | — |
+| `lib/workers/repository/init/index.ts` | partial | [`crates/renovate-core/src/workers/repository/init/index.rs`](../../../crates/renovate-core/src/workers/repository/init/index.rs) | initRepo orchestrator (initializeConfig + PackageFiles.clear + resetCaches + memCache.init + initMutexes + initApis + initializeCaches + getRepoConfig + setRepositoryLogLevelRemaps + silent mode log + checkIfConfigured + warnOnUnsupportedOptions + applySecretsAndVariablesToConfig + setUserRepoConfig + detectVulnerabilityAlerts + printConfig log + cloneSubmodules); single test ported. Full async/platform enrichment in init/apis + git clone/user config + mutex/mem global + logger remap + vulnerability + main worker/repository wiring pending in other units. |
 | `lib/workers/repository/init/inherited.ts` | pending | — | — |
 | `lib/workers/repository/init/merge.ts` | pending | — | — |
 | `lib/workers/repository/init/types.ts` | opt-out | — | Type-only repository initialization interfaces used only for TypeScript compile-time handoff typing. |

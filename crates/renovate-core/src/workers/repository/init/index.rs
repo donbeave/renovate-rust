@@ -1,6 +1,7 @@
 //! Repository initialization.
 //!
 //! Mirrors `lib/workers/repository/init/index.ts`.
+//! @parity `lib/workers/repository/init/index.ts` partial — initRepo orchestrator (initializeConfig + PackageFiles.clear + resetCaches + memCache.init + initMutexes + initApis + initializeCaches + getRepoConfig + setRepositoryLogLevelRemaps + silent mode log + checkIfConfigured + warnOnUnsupportedOptions + applySecretsAndVariablesToConfig + setUserRepoConfig + detectVulnerabilityAlerts + printConfig log + cloneSubmodules); single test ported. Full async/platform enrichment in init/apis + git clone/user config + mutex/mem global + logger remap + vulnerability + main worker/repository wiring pending in other units.
 
 use serde::{Deserialize, Serialize};
 
