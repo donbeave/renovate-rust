@@ -228,3 +228,13 @@ reason = "asserts conditional export from processEnv (only string values; non-st
 spec   = "lib/workers/global/config/parse/file.spec.ts"
 test   = "fatal error and exit if config.js contains unresolved env var"
 reason = "depends on .js config file execution (out of scope per docs in crates/renovate-core/src/config/file.rs and CD-0003; no JS runtime/require in Rust) that triggers unresolved env var ref during load; asserts exact logger.fatal message + process.exit(1); the non-.js 'fatal error and exit if custom config file does not exist' and resolve missing path cases are already ported; pure TS .js + spy + exit behavior with no Rust equivalent."
+
+[[test]]
+spec   = "lib/modules/datasource/maven/index.spec.ts"
+test   = "supports artifactregistry urls with auth"
+reason = "tests special Google Artifact Registry (artifactregistry) URL support and oauth2accesstoken basic auth (the token is obtained via google-auth-library / gcloud; the header is the specific base64 for 'oauth2accesstoken:some-token'); the Rust maven datasource implements generic hostRule basic auth + redirect stripping (covered by the ported 'removes authentication header after redirect'), but the AR-specific token acquisition and .maven artifactregistry endpoint handling is not yet implemented."
+
+[[test]]
+spec   = "lib/modules/datasource/maven/index.spec.ts"
+test   = "supports artifactregistry urls without auth"
+reason = "tests artifactregistry urls without requiring the special AR token (googleAuth mock still involved in the test setup); same reason as the sibling 'supports artifactregistry urls with auth' — AR token machinery not implemented in Rust maven auth layer."
