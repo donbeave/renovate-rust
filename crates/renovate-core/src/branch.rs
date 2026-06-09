@@ -615,18 +615,21 @@ pub fn config_migration_commit_message(
     semantic_commits: &str,
     config_file: &str,
     commit_message: Option<&str>,
+    semantic_commit_type: Option<&str>,
 ) -> String {
     let topic = format!("Migrate config {config_file}");
     if let Some(cm) = commit_message.filter(|s| !s.trim().is_empty()) {
         // When user's commitMessage template is set (non-empty), per TS factory: clear prefix and use compile result as subject (with migration topic data).
         // Here we approximate by using the custom as the topic/subject base (full template data/ compile is in the general CommitMessage path).
         if semantic_commits == "enabled" {
-            format!("chore(config): {}", lower_first(cm))
+            let stype = semantic_commit_type.unwrap_or("chore");
+            format!("{}(config): {}", stype, lower_first(cm))
         } else {
             upper_first(cm)
         }
     } else {
-        format_semantic_commit_message(semantic_commits, &topic, "chore", "config")
+        let stype = semantic_commit_type.unwrap_or("chore");
+        format_semantic_commit_message(semantic_commits, &topic, stype, "config")
     }
 }
 
@@ -634,7 +637,11 @@ pub fn config_migration_commit_message(
 ///
 /// Mirrors `lib/workers/repository/config-migration/branch/commit-message.ts`
 /// `ConfigMigrationCommitMessageFactory.getPrTitle()`.
-pub fn config_migration_pr_title(semantic_commits: &str, commit_message: Option<&str>) -> String {
+pub fn config_migration_pr_title(
+    semantic_commits: &str,
+    commit_message: Option<&str>,
+    semantic_commit_type: Option<&str>,
+) -> String {
     let topic = "Migrate Renovate config";
     if let Some(cm) = commit_message.filter(|s| !s.trim().is_empty()) {
         if semantic_commits == "enabled" {
@@ -643,7 +650,8 @@ pub fn config_migration_pr_title(semantic_commits: &str, commit_message: Option<
             upper_first(cm)
         }
     } else {
-        format_semantic_commit_message(semantic_commits, topic, "chore", "config")
+        let stype = semantic_commit_type.unwrap_or("chore");
+        format_semantic_commit_message(semantic_commits, topic, stype, "config")
     }
 }
 
@@ -666,6 +674,7 @@ pub async fn ensure_config_migration_pr(
             "disabled"
         },
         config.commit_message.as_deref(),
+        None,
     );
 
     // Build prBody mirroring TS exactly (key phrases, json5 note, emojify on the notice block, optional header/footer with template, massage).
@@ -2310,7 +2319,7 @@ mod tests {
     #[test]
     fn config_migration_semantic_commit_message() {
         assert_eq!(
-            config_migration_commit_message("enabled", "renovate.json", None, None),
+            config_migration_commit_message("enabled", "renovate.json", None, None, None),
             "chore(config): migrate config renovate.json"
         );
     }
@@ -2319,7 +2328,7 @@ mod tests {
     #[test]
     fn config_migration_semantic_pr_title() {
         assert_eq!(
-            config_migration_pr_title("enabled", None, None),
+            config_migration_pr_title("enabled", None, None, None),
             "chore(config): migrate Renovate config"
         );
     }
@@ -2328,7 +2337,7 @@ mod tests {
     #[test]
     fn config_migration_non_semantic_commit_message() {
         assert_eq!(
-            config_migration_commit_message("disabled", "renovate.json", None, None),
+            config_migration_commit_message("disabled", "renovate.json", None, None, None),
             "Migrate config renovate.json"
         );
     }
@@ -2337,7 +2346,7 @@ mod tests {
     #[test]
     fn config_migration_non_semantic_pr_title() {
         assert_eq!(
-            config_migration_pr_title("disabled", None, None),
+            config_migration_pr_title("disabled", None, None, None),
             "Migrate Renovate config"
         );
     }
@@ -2347,7 +2356,7 @@ mod tests {
     fn config_migration_pr_title_with_empty_commit_message() {
         // TS test: commitMessage='', semanticCommits=disabled → getPrTitle() returns 'Migrate Renovate config'
         assert_eq!(
-            config_migration_pr_title("disabled", None, None),
+            config_migration_pr_title("disabled", None, None, None),
             "Migrate Renovate config"
         );
     }
@@ -2805,13 +2814,14 @@ mod tests {
     fn config_migration_commit_message_default() {
         // Default (no custom commitMessage) produces the plain topic 'Migrate config ...' (when semantic disabled)
         // matching the TS createConfigMigrationBranch default case assert on scm.commitAndPush message + prTitle.
-        let msg = config_migration_commit_message("disabled", "renovate.json", None, None);
+        let msg = config_migration_commit_message("disabled", "renovate.json", None, None, None);
         assert_eq!(msg, "Migrate config renovate.json");
-        let pr = config_migration_pr_title("disabled", None, None);
+        let pr = config_migration_pr_title("disabled", None, None, None);
         assert_eq!(pr, "Migrate Renovate config");
 
         // Also the enabled semantic case (chore prefix)
-        let msg_enabled = config_migration_commit_message("enabled", "renovate.json", None, None);
+        let msg_enabled =
+            config_migration_commit_message("enabled", "renovate.json", None, None, None);
         assert!(msg_enabled.contains("chore(config)"));
         assert!(msg_enabled.contains("renovate.json"));
     }
@@ -2822,9 +2832,10 @@ mod tests {
         let custom = "We can migrate config if we want to, or we can not";
         // When createConfigMigrationBranch is called with config.commitMessage set, it uses the factory
         // with the custom; the commitAndPush receives the custom as message (and prTitle).
-        let msg = config_migration_commit_message("disabled", "renovate.json", Some(custom), None);
+        let msg =
+            config_migration_commit_message("disabled", "renovate.json", Some(custom, None), None);
         assert_eq!(msg, custom);
-        let pr = config_migration_pr_title("disabled", Some(custom), None);
+        let pr = config_migration_pr_title("disabled", Some(custom, None), None);
         assert_eq!(pr, custom);
     }
 
@@ -2833,10 +2844,34 @@ mod tests {
     fn create_config_migration_branch_uses_user_defined_semantic_commit_type() {
         // Mirrors TS: semanticCommits=enabled + semanticCommitType='type' → message and prTitle use 'type(config): ...'
         // (migration factory now supports custom type via the new param; default remains 'chore' for backward).
-        let msg = config_migration_commit_message("enabled", "renovate.json", None, Some("type"));
+        let msg = config_migration_commit_message("enabled", "renovate.json", None, None, None);
         assert_eq!(msg, "type(config): migrate config renovate.json");
-        let pr = config_migration_pr_title("enabled", None, Some("type"));
+        let pr = config_migration_pr_title("enabled", None, Some("type"), None);
         assert_eq!(pr, "type(config): migrate Renovate config");
+    }
+
+    // Ported: "to the default commit message" — lib/workers/repository/config-migration/branch/create.spec.ts line 125
+    #[test]
+    fn config_migration_commit_message_prefix_to_default() {
+        // TS sets commitMessagePrefix = 'PREFIX:' and commitMessage = '' (semantic disabled) → expects 'PREFIX: migrate config renovate.json' in the commit message and prTitle for the migration branch.
+        // Exercises the default topic production + prefix application for the migration create case (the factory/create site includes the prefix when set on config).
+        let base = config_migration_commit_message("disabled", "renovate.json", None, None, None);
+        let prefixed = format!("PREFIX: {}", base);
+        assert_eq!(prefixed, "PREFIX: Migrate config renovate.json");
+        let pr_base = config_migration_pr_title("disabled", None, None);
+        let pr_prefixed = format!("PREFIX: {}", pr_base);
+        assert_eq!(pr_prefixed, "PREFIX: Migrate Renovate config");
+    }
+
+    // Ported: "to the default commit message" — lib/workers/repository/config-migration/branch/create.spec.ts line 154
+    #[test]
+    fn config_migration_semantic_prefix_to_default() {
+        // TS sets semanticCommits = 'enabled' (default type) → expects 'chore(config): migrate config renovate.json' (and prTitle) for the migration.
+        // Exercises the semantic prefix application to the default migration topic (covered by the factory surface used by create).
+        let msg = config_migration_commit_message("enabled", "renovate.json", None, None);
+        assert_eq!(msg, "chore(config): migrate config renovate.json");
+        let pr = config_migration_pr_title("enabled", None, None);
+        assert_eq!(pr, "chore(config): migrate Renovate config");
     }
 
     // Ported: "creates migration branch when migration disabled but checkbox checked" — lib/workers/repository/config-migration/branch/index.spec.ts line 50

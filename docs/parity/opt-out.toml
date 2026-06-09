@@ -617,6 +617,11 @@ test   = "checks custom managers"
 reason = "sets config.customManagers (with customType 'regex', managerFilePatterns for README, matchStrings), mocks getManagerPackageFiles, calls extractAllDependencies, asserts 'regex' key in packageFiles result. Per @parity comment in managers.rs, 'customManagers array + mergeChildConfig + isCustomManager full path pending' in the extractAllDependencies orchestrator (get_enabled_managers_list, get_patterns_for_manager, extract_list synthesis do not yet handle custom config to produce custom manager entries like 'regex'). Basic manager matching/accumulation exercised by ported 'runs' and 'skips non-enabled'. Opt as the customManagers support in this extract unit is pending implementation work."
 
 [[test]]
+spec   = "lib/workers/repository/config-migration/branch/create.spec.ts"
+test   = "migrates renovate config in package.json"
+reason = "the special case for when the migrated config is embedded in package.json 'renovate' field (read the package, extract the renovate config to a new renovate.json, strip the 'renovate' key from package.json in the commit files, and the specific files array in commitAndPush) is in the pending worker/index orchestration for createConfigMigrationBranch (per @parity comment in branch.rs; the file changes/stripping logic not yet in the Rust create surface). The message production for migration is covered by the other ported tests in the spec and the config_migration_* helpers. Opt as the package.json cleanup behavior requires the pending orchestration wiring."
+
+[[test]]
 spec   = "lib/workers/repository/finalize/repository-statistics.spec.ts"
 test   = "processes cache with baseBranches and branches"
 reason = "sets up baseCache/branchCaches with sha/baseBranch etc, RepoCacheData with scan+branches, spies getCache/isCacheModified, calls runBranchSummary, asserts exact logger.debug call with processed {baseBranches, branches (with meta), cacheModified, defaultBranch, inactiveBranches} + 'Branch summary'. Spy-heavy (getCacheSpy, isCacheModifiedSpy, logger.debug exact payload); core cache/branch processing may exist in repository_statistics but test is written around the spies and summary object shape. Opt as pure TS logger spy + cache summary debug (no direct Rust equivalent for the spy asserts)."
