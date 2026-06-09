@@ -1125,6 +1125,7 @@ mod tests {
         assert_eq!(config.password.as_deref(), Some("app-password"));
     }
 
+    // Ported: "supports bitbucket username/password" — lib/workers/global/config/parse/index.spec.ts line 145
     // Ported: "supports Bitbucket username/password" — lib/workers/global/config/parse/env.spec.ts line 283
     #[test]
     fn bitbucket_username_password_config_is_parsed() {
