@@ -6,10 +6,10 @@
 
 | Line | Test | Status | Rust destination / opt-out reason |
 |--:|---|---|---|
-| 11 | handles error | ported | [`crates/renovate-core/src/extractors/npm.rs:5447`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5447) |
-| 17 | returns empty if failed to parse | ported | [`crates/renovate-core/src/extractors/npm.rs:5459`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5459) |
-| 21 | finds direct dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5471`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5471) |
-| 32 | finds indirect dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5486`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5486) |
-| 43 | finds any version | ported | [`crates/renovate-core/src/extractors/npm.rs:5495`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5495) |
-| 49 | finds bundled dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5503`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5503) |
+| 11 | handles error | ported | [`crates/renovate-core/src/extractors/npm.rs:5445`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5445) |
+| 17 | returns empty if failed to parse | ported | [`crates/renovate-core/src/extractors/npm.rs:5457`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5457) |
+| 21 | finds direct dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5469`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5469) |
+| 32 | finds indirect dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5484`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5484) |
+| 43 | finds any version | ported | [`crates/renovate-core/src/extractors/npm.rs:5493`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5493) |
+| 49 | finds bundled dependency | ported | [`crates/renovate-core/src/extractors/npm.rs:5501`](../../../../../../../../../../crates/renovate-core/src/extractors/npm.rs#L5501) |
 

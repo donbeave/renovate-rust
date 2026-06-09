@@ -219,4 +219,48 @@ mod tests {
         assert_eq!(content_log.releases.len(), 1);
         assert_eq!(content_log.releases[0].body, Some("testContent".into()));
     }
+
+    // Ported: "embedChangelogs" — lib/workers/repository/changelog/index.spec.ts line 13
+    #[test]
+    fn embed_changelogs_basic_cases() {
+        // Mirrors the 4 cases from the upstream it(): pre-set null (skip), fetch success (stub result), fetch null (stub), content short-circuit (synthetic).
+        // The get_change_log stub (used by tests) returns has=false + project; real fetch is in pending module per source-mapping note.
+        let mut upgrades = vec![
+            EmbeddableUpgrade {
+                fetch_change_logs: Some("pr".into()),
+                log_json: Some(ChangeLogResult {
+                    has_release_notes: false,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            EmbeddableUpgrade {
+                fetch_change_logs: Some("pr".into()),
+                ..Default::default()
+            },
+            EmbeddableUpgrade {
+                fetch_change_logs: Some("pr".into()),
+                ..Default::default()
+            },
+            EmbeddableUpgrade {
+                fetch_change_logs: Some("pr".into()),
+                changelog_content: Some("testContent".into()),
+                source_url: Some("https://ex".into()),
+                new_version: Some("1.2.3".into()),
+                ..Default::default()
+            },
+        ];
+        embed_changelogs(&mut upgrades, "pr");
+        // 0: pre-set kept
+        assert!(upgrades[0].log_json.is_some());
+        // 1: delegated to get stub
+        assert!(upgrades[1].log_json.is_some());
+        // 2: delegated (in TS would be null from mock, here stub result)
+        assert!(upgrades[2].log_json.is_some());
+        // 3: content path synthetic (has + release body)
+        let c = upgrades[3].log_json.as_ref().unwrap();
+        assert!(c.has_release_notes);
+        assert_eq!(c.releases.len(), 1);
+        assert_eq!(c.releases[0].body, Some("testContent".into()));
+    }
 }

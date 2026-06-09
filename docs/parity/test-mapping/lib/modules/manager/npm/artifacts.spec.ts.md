@@ -15,7 +15,7 @@
 | 180 | supports install mode | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:185`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L185) |
 | 221 | catches errors | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:369`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L369) |
 | 243 | returns null if no security updates are found | ported | [`crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs:428`](../../../../../../../crates/renovate-core/src/extractors/npm_post_update/artifact_runner.rs#L428) |
-| 254 | returns null if pnpm workspace file does not exist | ported | [`crates/renovate-core/src/extractors/npm.rs:8398`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8398) |
+| 254 | returns null if pnpm workspace file does not exist | ported | [`crates/renovate-core/src/extractors/npm.rs:8396`](../../../../../../../crates/renovate-core/src/extractors/npm.rs#L8396) |
 | 274 | returns null if the pnpmshrinkwrap file is not found | pending | — |
 | 305 | returns null if no minimumreleaseage setting found | pending | — |
 | 326 | returns null if minimumreleaseageexclude excludes all versions of updated dep | pending | — |
