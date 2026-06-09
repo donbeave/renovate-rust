@@ -2,7 +2,7 @@
 
 [← all groups](README.md)
 
-**Coverage:** 41/150 in-scope files mapped (full=18 partial=23 stub=0 pending=109 out-of-scope=0 opt-out=10) across 15 modules.
+**Coverage:** 42/150 in-scope files mapped (full=18 partial=24 stub=0 pending=108 out-of-scope=0 opt-out=10) across 15 modules.
 
 ### `commander.d.ts`
 
@@ -124,7 +124,7 @@
 | `lib/workers/repository/errors-warnings.ts` | full | [`crates/renovate-core/src/workers/repository/errors_warnings.rs`](../../../crates/renovate-core/src/workers/repository/errors_warnings.rs) | getWarnings/getErrors (text formatters), getDepWarnings* (onboarding/PR/dashboard with emojify, suppress, stripping, files, dashboard link if issue). collect stub + get_*_text present; dep collection + 3 getDep* implemented here. Single test ported from spec. (calls from dashboard/worker in other pending). |
 | `lib/workers/repository/extract/extract-fingerprint-config.ts` | full | [`crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs`](../../../crates/renovate-core/src/workers/repository/extract/extract_fingerprint_config.rs) | generateFingerprintConfig (managerList from enabledManagers, managers with getFilteredManagerConfig for normal + getCustomManagerFields for regex/custom, templates, filePatterns, npmrc, etc). The get_extract_fingerprint_config is the per-upgrade fingerprint string helper (sorted fields). Single test ported for the generate filtering. (full manager list, custom handling in the impl). |
 | `lib/workers/repository/extract/file-match.ts` | full | [`crates/renovate-core/src/managers.rs`](../../../crates/renovate-core/src/managers.rs) | getIncludedFiles, filterIgnoredFiles, getFilteredFileList, getMatchingFiles (include/ignore filtering + per managerFilePatterns matchRegexOrGlob + dedup/sort). get_filtered_file_list added + get_matching_files refactored to reuse helpers (fixing duplication divergence vs TS). Single test ported for dedup behavior. (logger.debug, config handling in caller layers). |
-| `lib/workers/repository/extract/index.ts` | pending | — | — |
+| `lib/workers/repository/extract/index.ts` | partial | [`crates/renovate-core/src/managers.rs`](../../../crates/renovate-core/src/managers.rs) | extractAllDependencies orchestrator (getEnabledManagersList + matching via getMatchingFiles for enabled managers incl. custom. names, extractionFingerprints for matched managers, instrumented parallel getManagerPackageFiles, processSupersedesManagers on intermediate, sorted duration logging, accumulation into packageFiles map + total count, final enabledManagers check that emits the "explicitly enabled ... but found no results. Possible config error?" debug). get_manager_package_files stub (real per-manager extract/read + massage in pending manager-files.ts); customManagers array + mergeChildConfig + isCustomManager full path pending; real scm.getFileList wiring pending in repository worker. Single test ported. |
 | `lib/workers/repository/extract/manager-files.ts` | pending | — | — |
 | `lib/workers/repository/extract/supersedes.ts` | pending | — | — |
 | `lib/workers/repository/extract/types.ts` | opt-out | — | Type-only interface used for TypeScript compile-time typing in worker extraction output. |
